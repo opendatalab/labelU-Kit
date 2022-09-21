@@ -1,0 +1,176 @@
+---
+title: Video
+description: 视频查看
+---
+
+用于视频和标注（预）信息的查看。
+
+## 用法
+
+```jsx
+import { Video } from '@lab-sinan/react-ui';
+
+function App() {
+  return (
+    <Video
+      size={{
+        width: 180,
+        height: 180,
+      }}
+      fileInfo={{}}
+      result={{}}
+      annotations={[]}
+    />
+  );
+}
+```
+
+## Examples
+
+### Basic
+
+```jsx live=true
+function App() {
+  const size = {
+    width: 320,
+    height: 240,
+  };
+  const file = {
+    id: 1,
+    createdAt: 1650272115,
+    fileType: 1,
+    url: 'https://www.skateboard.one/heros.mp4',
+    filename: '01.3gp',
+    size: 6290434,
+    hasPreResult: false,
+    preResult: '{"height":0,"rotate":0,"valid":true,"width":0}',
+    meta: { videoDuration: 94.362, videoHeight: 270, videoWidth: 480, md5: 'c1edf8222114da11366b803b75d0e4f7' },
+  };
+
+  return (
+    <Video
+      isPreview
+      size={size}
+      fileInfo={file}
+      result={jsonParser(file.preResult)}
+      onClick={() => {
+        console.log('Aha');
+      }}
+    />
+  );
+}
+
+render(App);
+```
+
+### 弹框内分页
+
+```tsx live=true
+function App() {
+  const size = {
+    width: 240,
+    height: 160,
+  };
+  const files = [
+    {
+      id: 1,
+      createdAt: 1650272115,
+      fileType: 1,
+      url: 'https://www.skateboard.one/heros.mp4',
+      filename: '01.3gp',
+      size: 6290434,
+      hasPreResult: false,
+      preResult: '{"height":0,"rotate":0,"valid":true,"width":0}',
+      meta: { videoDuration: 94.362, videoHeight: 270, videoWidth: 480, md5: 'c1edf8222114da11366b803b75d0e4f7' },
+    },
+    {
+      id: 2,
+      createdAt: 1650272117,
+      fileType: 1,
+      url: 'https://vjs.zencdn.net/v/oceans.mp4',
+      filename: '01.asf',
+      size: 481980,
+      hasPreResult: false,
+      preResult: '{"height":0,"rotate":0,"valid":true,"width":0}',
+      meta: { videoDuration: 10.125, videoHeight: 270, videoWidth: 480, md5: 'b4bbdfeaaa99218121a5ad9d4601ce92' },
+    },
+  ];
+
+  const [visible, toggleVisible] = React.useState(false);
+  const [current, updateCurrent] = React.useState(1);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const handlePageChange = React.useCallback(
+    (pageNum) => {
+      updateCurrent(() => {
+        return pageNum;
+      });
+      setActiveIndex(pageNum - 1);
+    },
+    [setActiveIndex],
+  );
+
+  const pagination = React.useMemo(
+    () => ({
+      pageSize: 1,
+      current,
+      onChange: handlePageChange,
+      total: 10,
+    }),
+    [current, handlePageChange],
+  );
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      {files.map((item, index) => {
+        return (
+          <Video
+            style={{
+              flexBasis: '45%',
+            }}
+            key={item.id}
+            isPreview={false}
+            result={jsonParser(item.preResult)}
+            size={size}
+            fileInfo={item}
+            onClick={() => {
+              setActiveIndex(index);
+              updateCurrent(index + 1);
+              toggleVisible(true);
+            }}
+          />
+        );
+      })}
+      <PreviewVideo
+        visible={visible}
+        fileInfo={files[activeIndex]}
+        result={jsonParser(files[activeIndex].preResult)}
+        onCancel={() => toggleVisible(false)}
+        pagination={pagination}
+        tags={['tag1', 'tag2']}
+      />
+    </div>
+  );
+}
+
+render(App);
+```
+
+## API
+
+### VideoProps
+
+| Name          | Type                                          | Default   | Description                              |
+| ------------- | --------------------------------------------- | --------- | ---------------------------------------- |
+| size          | ISize                                         | undefined | 卡片尺寸                                 |
+| isPreview     | boolean                                       | false     | 是否支持预览                             |
+| interactive   | boolean                                       | false     | 是否可交互，如鼠标滚轮缩放，鼠标右键拖放 |
+| title         | React.ReactNode                               | null      | 卡片下方标题                             |
+| status        | React.ReactNode                               | null      | 卡片左上角状态文本                       |
+| fileInfo      | IImgFile                                      | undefined | 文件信息，从服务端获取的文件信息         |
+| result        | IResult                                       | undefined | （预）标注信息                           |
+| annotations   | IAnnotationData[]                             | undefined | 格式化后的（预）标注信息（LabelBee）     |
+| pagination    | IPagination                                   | undefined | 分页信息                                 |
+| onClick       | (e: React.MouseEvent) => void                 | undefined | 卡片点击事件                             |
+| renderPreview | (props: PreviewImageProps) => React.ReactNode | undefined | 自定义预览                               |
+| className     | string                                        | undefined | 自定义类名                               |
+| style         | React.CSSProperties                           | {}        | 自定义样式                               |

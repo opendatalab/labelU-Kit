@@ -1,0 +1,36 @@
+{
+  "name": "docs",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "dependencies": {
+    "@lab-sinan/react-ui": "1.0.0-alpha.16",
+    "@label-u/lb-components": "^0.0.2",
+    "@rocketseat/gatsby-theme-docs": "^3.1.0",
+    "gatsby": "^4.2.0",
+    "gatsby-plugin-canonical-urls": "^4.2.0",
+    "gatsby-plugin-google-analytics": "^4.2.0",
+    "gatsby-plugin-manifest": "^4.2.0",
+    "gatsby-plugin-offline": "^5.2.0",
+    "gatsby-plugin-remove-trailing-slashes": "^4.2.0",
+    "gatsby-plugin-sharp": "^4.21.0",
+    "gatsby-plugin-sitemap": "^5.2.0",
+    "gatsby-transformer-sharp": "^4.21.0",
+    "postcss": "^8.4.14",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "styled-components": "^5.3.5"
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-starter"
+  ],
+  "scripts": {
+    "build": "gatsby build --prefix-paths",
+    "start": "gatsby develop",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean"
+  }
+}

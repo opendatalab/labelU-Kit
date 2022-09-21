@@ -1,0 +1,41 @@
+{
+  "name": "label-u",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "version": "1.7.0",
+  "scripts": {
+    "start": "lerna run build:type && lerna run --parallel --stream start",
+    "dev": "npm run start",
+    "bootstrap": "lerna bootstrap --no-ci",
+    "build": "lerna run build",
+    "build:type": "lerna run build:type",
+    "lint": "lerna run --parallel --stream lint",
+    "clean": "lerna clean && rimraf ./packages/**/package-lock.json && rimraf ./node_modules",
+    "version": "lerna version --conventional-graduate --yes",
+    "publish": "lerna publish from-package --yes",
+    "commit": "cz",
+    "release": "standard-version"
+  },
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@commitlint/cli": "8.3.5",
+    "@commitlint/config-conventional": "8.3.4",
+    "commitizen": "^4.2.4",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^4.0.3",
+    "lerna": "^4.0.0",
+    "standard-version": "^9.3.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "dependencies": {
+    "gauge": "^2.7.4",
+    "react-ace": "^10.1.0"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "fileInfo": {
+    "type": "img",
+    "list": [
+      {
+        "id": 1,
+        "url": "http://localhost:3000/src/img/example/bear2.webp",
+        "result": "[]"
+      },
+      {
+        "id": 2,
+        "url": "http://localhost:3000/src/img/example/bear3.webp",
+        "result": "[]"
+      }
+    ]
+  },
+  "attribute": [
+    {
+      "key": "PPPP",
+      "value": "PPPP"
+    }
+  ],
+  "tools": [
+    {
+      "tool": "pointTool",
+      "config": {
+        "isShowCursor": false,
+        "isShowOrder": false,
+        "attributeConfigurable": true,
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": "",
+        "attributeList": [{ "key": "pointTool", "value": "pointTool" }]
+      }
+    }
+  ]
+}

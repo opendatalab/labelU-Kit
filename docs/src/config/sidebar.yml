@@ -1,0 +1,25 @@
+# Sidebar navigation
+
+- label: '简介'
+  link: '/'
+- label: '开始'
+  link: '/getting-started'
+- label: components
+  items:
+    - label: 'AnnotationOperation'
+      link: '/components/annotationOperation'
+- label: theming
+  items:
+    - label: 如何定制主题？
+      link: /theming/how-to
+- label: Types
+  items:
+    - label: 所有类型
+      link: /types/all
+
+- label: Utilities
+  items:
+    - label: FAQ
+      link: /faq
+    - label: 'Gitlab'
+      link: https://gitlab.shlab.tech/wuhui/lb-smart

@@ -1,0 +1,73 @@
+{
+  "fileInfo": {
+    "type": "img",
+    "list": [
+      {
+        "id": 1,
+        "url": "http://localhost:3000/src/img/example/bear5.webp",
+        "result": "[]"
+      },
+      {
+        "id": 2,
+        "url": "http://localhost:3000/src/img/example/bear6.webp",
+        "result": "[]"
+      }
+    ]
+  },
+  "tagList": [
+    {
+      "key": "类别1",
+      "value": "class1",
+      "isMulti": true,
+      "subSelected": [
+        {
+          "key": "选项1",
+          "value": "option1",
+          "isDefault": true
+        },
+        {
+          "key": "选项2",
+          "value": "option2",
+          "isDefault": false
+        }
+      ]
+    },
+    {
+      "key": "类别2",
+      "value": "class2",
+      "isMulti": true,
+      "subSelected": [
+        {
+          "key": "a选项1",
+          "value": "aoption1",
+          "isDefault": true
+        },
+        {
+          "key": "a选项2",
+          "value": "aoption2",
+          "isDefault": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "tool": "lineTool",
+      "config": {
+        "isShowCursor": false,
+        "lineType": 0,
+        "lineColor": 1,
+        "edgeAdsorption": true,
+        "outOfTarget": true,
+        "isShowOrder": false,
+        "attributeConfigurable": true,
+        "textConfigurable": true,
+        "textCheckType": 4,
+        "customFormat": "^[\\s\\S]{1,3}$",
+        "lowerLimitPointNum": 4,
+        "upperLimitPointNum": "",
+        "attributeList": [{ "key": "lineTool", "value": "lineTool" }]
+      }
+    }
+  ]
+}
