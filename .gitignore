@@ -37,4 +37,4 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-/packages/lb-server/public
+/packages/server/public

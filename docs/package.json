@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "@lab-sinan/react-ui": "1.0.0-alpha.16",
-    "@label-u/lb-components": "^0.0.2",
+    "@label-u/components": "^0.0.2",
     "@rocketseat/gatsby-theme-docs": "^3.1.0",
     "gatsby": "^4.2.0",
     "gatsby-plugin-canonical-urls": "^4.2.0",

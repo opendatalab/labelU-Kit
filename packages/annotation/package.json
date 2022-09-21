@@ -1,0 +1,100 @@
+{
+  "name": "@label-u/annotation",
+  "version": "1.8.0",
+  "description": "Annotation tool collection",
+  "keywords": [
+    "annotation",
+    "canvas"
+  ],
+  "homepage": "https://github.com/opendatalab/labelU/tree/main/packages/lb-annotation",
+  "repository": {
+    "type": "https",
+    "url": "https://github.com/opendatalab/labelU.git"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist",
+    "es"
+  ],
+  "main": "./dist/index.js",
+  "module": "./es/index.js",
+  "types": "./es/types/index.d.ts",
+  "author": "wuhui",
+  "email": "751569801@qq.com",
+  "contributors": [
+    "lijingchi",
+    "tanjunbao",
+    "chenlu",
+    "lihuaqi",
+    "wuhui"
+  ],
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
+    "start": "npm run dev",
+    "build:type": "tsc --emitDeclarationOnly",
+    "build": "rimraf -rf dist && rimraf -rf es && cross-env NODE_ENV=production rollup -c rollup.config.js",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx  --fix --format=pretty ./src && npm run lint:prettier && npm run build:type",
+    "lint:prettier": "npm run prettier && prettier --version && prettier --check \"src/**/*.{js,jsx,ts,tsx,less,md,json}\" --end-of-line auto",
+    "prettier": "prettier --write \"**/**.{js,jsx,tsx,ts,less,md,json}\"",
+    "prepublishOnly": "npm run build"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint",
+      "pretty-quick - staged",
+      "git add"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@commitlint/cli": "8.3.5",
+    "@commitlint/config-conventional": "8.3.4",
+    "@rollup/plugin-alias": "^3.1.2",
+    "@rollup/plugin-image": "^2.0.6",
+    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@types/jest": "^24.0.19",
+    "@types/lodash": "^4.14.165",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.11.0",
+    "eslint": "^7.27.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-formatter-pretty": "^4.0.0",
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "eslint-plugin-babel": "^5.3.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-markdown": "^2.0.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-unicorn": "^29.0.0",
+    "husky": "^6.0.0",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0",
+    "rollup": "^2.43.1",
+    "rollup-plugin-dts": "^4.2.2",
+    "rollup-plugin-esbuild": "^3.0.2",
+    "rollup-plugin-svg": "^2.0.0",
+    "rollup-plugin-typescript2": "^0.32.1",
+    "tslib": "^1.10.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@label-u/utils": "^1.2.0",
+    "@turf/turf": "5.1.6",
+    "color-rgba": "^2.3.0",
+    "localforage": "^1.10.0",
+    "lodash": "^4.17.20",
+    "rimraf": "^3.0.2",
+    "shx": "^0.3.4"
+  }
+}
