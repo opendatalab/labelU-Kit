@@ -12,7 +12,7 @@
 
   - 📝@lebel-u/annotation作为工具层，主要实现标注能力的封装，此外提供AnnotationEngine用于调用标注能力。
 
-  - 📝@label-u/components实现标注能力集成，作为直接暴露在外的标注组件，使用者通过对AnnotationOperation的配置即可实现标注界面。（目前主要是针对图片标注，视频，音频，文本和点云也在开发当中）
+  - 📝@label-u/components实现标注能力集成，作为直接暴露在外的标注组件，使用者通过对AnnotationOperation的配置即可实现标注界面,支持多工具标注，支持标注结果可视化（目前主要是针对图片标注，视频，音频，文本和点云也在开发当中）
 
   - 📝@label-u/web提供一个开箱即用的标注服务，基于@label-u/components暴露组件实现，支持对工具的yaml 和 可视化配置，并提供模板供用户参考和标注界面预览。
 
