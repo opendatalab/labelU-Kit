@@ -36,6 +36,3 @@ yarn add @label-u/components
 
 详细文档尽请期待。
 
-## 致谢
-
-我们在使用此款智能标注工具时，参考了以来了labelbee 项目，在此对labelbee的作者表示感谢。

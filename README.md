@@ -35,4 +35,4 @@ npm run start
 
 ## 致谢
 
-我们在使用此款智能标注工具时，参考了以来了labelbee 项目，在此对labelbee的作者表示感谢。
+我们在开发此款智能标注工具时，参考了labelbee 项目，在此对labelbee的作者表示感谢。
