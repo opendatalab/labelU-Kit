@@ -9,8 +9,11 @@
 ## 特性
 
 -标注工具web 界面，作为一个开箱即用的web服务供用户使用。
+
 -支持对工具的yaml配置，支持标注面板预览。
+
 -支持标注结果本地持久化存储，单机版根据本地磁盘大小，使用谷歌浏览器情况下不少于50%硬盘的本地化存储。
+
 -支持标注文件上传，标注结果导出。
 
 
@@ -19,10 +22,12 @@
 ```bash
 # npm
 npm install @label-u/lb-annotation
+
 npm install @label-u/lb-components
 
 # yarn
 yarn add @label-u/lb-annotation
+
 yarn add @label-u/lb-components
 ```
 
@@ -33,4 +38,4 @@ yarn add @label-u/lb-components
 
 ## 致谢
 
-我们在使用此款智能标注工具时，参考了以来了labelee 项目，在此对labelbee的作者表示感谢。
+我们在使用此款智能标注工具时，参考了以来了labelbee 项目，在此对labelbee的作者表示感谢。
