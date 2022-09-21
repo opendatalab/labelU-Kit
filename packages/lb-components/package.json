@@ -19,12 +19,13 @@
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
     "commitmsg": "commitlint -e $GIT_PARAMS"
   },
-  "author": "laoluo",
+  "author": "wuhui",
   "contributors": [
     "lijingchi",
     "tanjunbao",
     "chenlu",
-    "lihuaqi"
+    "lihuaqi",
+    "luoluo"
   ],
   "keywords": [
     "annotation",
@@ -32,10 +33,10 @@
     "react"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://gitlab.shlab.tech/wuhui/lb-smart/-/tree/v1.0.0/packages/lb-components",
+  "homepage": "https://github.com/opendatalab/labelU/tree/main/packages/lb-components",
   "bugs": {
-    "url": "https://gitlab.shlab.tech/wuhui/lb-smart.gits",
-    "email": "brady_luo.sz@foxmail.com"
+    "url": "https://github.com/opendatalab/labelU.git",
+    "email": "751569801@qq.com"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",

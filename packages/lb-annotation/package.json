@@ -6,14 +6,10 @@
     "annotation",
     "canvas"
   ],
-  "homepage": "https://gitlab.shlab.tech/wuhui/lb-smart/-/tree/v1.0.0/packages/lb-annotation",
-  "bugs": {
-    "url": "https://gitlab.shlab.tech/wuhui/lb-smart",
-    "email": "wuhui@pjlab.org.cn"
-  },
+  "homepage": "https://github.com/opendatalab/labelU/tree/main/packages/lb-annotation",
   "repository": {
-    "type": "git",
-    "url": "git@gitlab.shlab.tech:wuhui/lb-smart.git"
+    "type": "https",
+    "url": "https://github.com/opendatalab/labelU.git"
   },
   "license": "Apache-2.0",
   "files": [
@@ -23,13 +19,14 @@
   "main": "./dist/index.js",
   "module": "./es/index.js",
   "types": "./es/types/index.d.ts",
-  "author": "laoluo",
-  "email": "brady_luo.sz@foxmail.com",
+  "author": "wuhui",
+  "email": "751569801@qq.com",
   "contributors": [
     "lijingchi",
     "tanjunbao",
     "chenlu",
-    "lihuaqi"
+    "lihuaqi",
+    "wuhui"
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",

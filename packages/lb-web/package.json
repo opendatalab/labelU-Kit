@@ -55,6 +55,24 @@
     "build": "cross-env REACT_APP_ENV=production craco build",
     "test": "craco test"
   },
+  "author": "wuhui",
+  "contributors": [
+    "lijingchi",
+    "tanjunbao",
+    "chenlu",
+    "lihuaqi",
+    "luoluo"
+  ],
+  "keywords": [
+    "annotation",
+    "canvas",
+    "react"
+  ],
+  "homepage": "https://github.com/opendatalab/labelU.git",
+  "bugs": {
+    "url": "https://github.com/opendatalab/labelU.git",
+    "email": "751569801@qq.com"
+  },
   "browserslist": {
     "production": [
       ">0.2%",

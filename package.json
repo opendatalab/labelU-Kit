@@ -18,6 +18,24 @@
     "commit": "cz",
     "release": "standard-version"
   },
+  "author": "wuhui",
+  "contributors": [
+    "lijingchi",
+    "tanjunbao",
+    "chenlu",
+    "lihuaqi",
+    "luoluo"
+  ],
+  "keywords": [
+    "annotation",
+    "canvas",
+    "react"
+  ],
+  "homepage": "https://github.com/opendatalab/labelU.git",
+  "bugs": {
+    "url": "https://github.com/opendatalab/labelU.git",
+    "email": "751569801@qq.com"
+  },
   "main": "index.js",
   "license": "Apache-2.0",
   "devDependencies": {
