@@ -32,7 +32,9 @@ import DblClickEventListener from './utils/tool/DblClickEventListener'; // æš‚æ—
 
 import AnnotationEngine from './core/index';
 
-export { EToolName } from './constant/tool';
+export { EToolName, TOOL_NAME } from './constant/tool';
+
+export { COLORS_ARRAY } from './constant/style';
 
 const toolUtils = CommonToolUtils;
 

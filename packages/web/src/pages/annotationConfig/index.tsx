@@ -2,12 +2,13 @@ import { FC, useEffect, useState } from 'react';
 import Annotation from '../../components/business/annotation';
 import './index.less';
 // import { fileList as mockFileList, videoList } from '../../mock/annotationMock';
-import LeftSider from './leftSider';
+import YamlConfig from './yamlConfig';
 import { shallowEqual, useSelector } from 'react-redux';
 import { ToolsConfigState } from 'interface/toolConfig';
 import { Button, Steps, Tabs } from 'antd';
 import EmptyConfigImg from '../../img/annotationCommon/emptyConfig.png';
 import ConfigTemplate from './configTemplate/index';
+import FormConfig from './formConfig';
 const { Step } = Steps;
 interface OneFile {
   id: number;
@@ -91,12 +92,12 @@ const AnnotationConfig: FC = () => {
           <Tabs defaultActiveKey="1" tabBarExtraContent={extraContent} type="card">
             <Tabs.TabPane tab="YAML" key="1">
               <div className="leftPane">
-                <LeftSider toolsConfigState={confitState} doSetImg={doSetImage} />
+                <YamlConfig toolsConfigState={confitState} doSetImg={doSetImage} />
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="可视化" key="2">
               <div className="leftPane">
-                <LeftSider toolsConfigState={confitState} doSetImg={doSetImage} />
+                <FormConfig />
               </div>
             </Tabs.TabPane>
           </Tabs>

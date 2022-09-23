@@ -22,12 +22,12 @@ import {
 } from '../../stores/toolConfig.store';
 import { compare } from '../../utils';
 
-interface LeftSiderProps {
+interface YamlConfigProps {
   toolsConfigState: ToolsConfigState;
   doSetImg: (img: any) => void;
 }
 
-const LeftSider: FC<LeftSiderProps> = props => {
+const YamlConfig: FC<YamlConfigProps> = props => {
   const [xmlValue, setXmlValue] = useState<string>('');
   const dispatch = useDispatch();
   const { tools, tagList, attribute, textConfig } = useSelector(state => state.toolsConfig);
@@ -136,4 +136,4 @@ const LeftSider: FC<LeftSiderProps> = props => {
   );
 };
 
-export default LeftSider;
+export default YamlConfig;

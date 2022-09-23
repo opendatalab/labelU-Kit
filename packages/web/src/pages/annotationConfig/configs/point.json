@@ -24,6 +24,7 @@
     {
       "tool": "pointTool",
       "config": {
+        "upperLimit":10,
         "isShowCursor": false,
         "isShowOrder": false,
         "attributeConfigurable": true,
