@@ -10,11 +10,27 @@ export const defaultValue = {
   maxLength: 1000
 };
 const TextConfigForm: FC<BasicConfig> = () => {
-
-
+  const formItemLayout = {
+    labelCol: {
+      xs: {
+        span: 24
+      },
+      sm: {
+        span: 4
+      }
+    },
+    wrapperCol: {
+      xs: {
+        span: 24
+      },
+      sm: {
+        span: 16
+      }
+    }
+  };
   return (
-    <div>
-      <div className="selectedMain">
+    <div className="selectedMain">
+      <Form {...formItemLayout}>
         <Form.Item
           label={<span className="formTitle">文本列表</span>}
           name="configList"
@@ -22,7 +38,7 @@ const TextConfigForm: FC<BasicConfig> = () => {
         >
           <TextList />
         </Form.Item>
-      </div>
+      </Form>
     </div>
   );
 };

@@ -1,12 +1,20 @@
 import { BasicConfig } from '@label-u/components';
-import React, { FC } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Col, Row, Switch, Input as SenseInput, Form, FormInstance, Select } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
 // import DownWardIcon from '../../../../img/common/downWardIcon.svg';
 // import UpperIcon from '../../../../img/common/upperIcon.svg';
 import SvgIcon from '../../../../components/basic/svgIcon';
+import { AttributeItem } from './rectConfigForm';
 const { Option } = Select;
-const lineConfigForm: FC<BasicConfig> = () => {
+interface FormLineConfig {
+  lineType: number;
+  lowerLimitPointNum: number;
+  upperLimitPointNum: number;
+  attributeList: AttributeItem[];
+}
+
+const LineConfigForm: FC<BasicConfig> = props => {
   const minWidth = 1,
     minHeight = 1;
   const isAllReadOnly = false;
@@ -29,6 +37,32 @@ const lineConfigForm: FC<BasicConfig> = () => {
     }
   };
 
+  const [initVal, setInitVal] = useState<FormLineConfig>({} as FormLineConfig);
+
+  useMemo(() => {
+    console.log(props);
+    let initV = {
+      // @ts-ignore
+      lineType: props.config.lineType ? props.config.lineType : 1,
+      // @ts-ignore
+      lowerLimitPointNum: props.config.lowerLimitPointNum ? props.config.lowerLimitPointNum : 10,
+      // @ts-ignore
+      upperLimitPointNum: props.config.upperLimitPointNum ? props.config.upperLimitPointNum : 100,
+      // @ts-ignore
+      attributeList: props.config.attributeList
+        ? // @ts-ignore
+          props.config.attributeList
+        : [
+            {
+              key: 'tag1',
+              label: 'tag1'
+            }
+          ]
+    };
+
+    setInitVal(initV);
+  }, []);
+
   return (
     <div>
       <div className="selectedMain">
@@ -42,6 +76,7 @@ const lineConfigForm: FC<BasicConfig> = () => {
                 message: 'Please select lineType!'
               }
             ]}
+            initialValue={initVal.lineType}
           >
             <Select placeholder="请选择线类型">
               <Option value="0">直线</Option>
@@ -54,13 +89,13 @@ const lineConfigForm: FC<BasicConfig> = () => {
               <div className="selectedName">闭点个数</div>
             </Col>
             <Col span={8}>
-              <Form.Item name="lowerLimitPointNum" initialValue={minWidth}>
+              <Form.Item name="lowerLimitPointNum" initialValue={initVal.lowerLimitPointNum}>
                 <SenseInput type="text" suffix={<SvgIcon name="common-downWardIcon" />} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
             <Col span={1} />
             <Col span={8}>
-              <Form.Item name="upperLimitPointNum" initialValue={minHeight}>
+              <Form.Item name="upperLimitPointNum" initialValue={initVal.upperLimitPointNum}>
                 <SenseInput type="text" suffix={<SvgIcon name="common-upperIcon" />} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
@@ -75,46 +110,13 @@ const lineConfigForm: FC<BasicConfig> = () => {
             <Switch disabled={isAllReadOnly} />
           </Form.Item>
 
-          <Form.Item
-            label="标签配置"
-            name="attributeList"
-            initialValue={[
-              {
-                key: '类别1',
-                value: '类别1'
-              }
-            ]}
-          >
+          <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
             <MapStateJSONTab isAttributeList={true} readonly={isAllReadOnly} />
           </Form.Item>
-          {/* <Form.Item
-            valuePropName="checked"
-            label={<span className="formTitle">目标外标注</span>}
-            name="attributeConfigurable"
-            initialValue={false}
-          >
-            <Switch disabled={isAllReadOnly} />
-          </Form.Item>
-          <Form.Item
-            valuePropName="checked"
-            label={<span className="formTitle">属性配置</span>}
-            name="attributeConfigurable"
-            initialValue={false}
-          >
-            <Switch disabled={isAllReadOnly} />
-          </Form.Item>
-          <Form.Item
-            valuePropName="checked"
-            label={<span className="formTitle">通用标签</span>}
-            name="attributeConfigurable"
-            initialValue={false}
-          >
-            <Switch disabled={isAllReadOnly} />
-          </Form.Item> */}
         </Form>
       </div>
     </div>
   );
 };
 
-export default lineConfigForm;
+export default LineConfigForm;

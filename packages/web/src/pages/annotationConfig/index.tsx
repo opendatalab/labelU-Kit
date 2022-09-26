@@ -26,7 +26,7 @@ const AnnotationConfig: FC = () => {
     attribute: attribute,
     textConfig: textConfig
   });
-
+  const [force, forceSet] = useState(0);
   const [fileList, setFileList] = useState<OneFile[]>([]);
   // const currentIsVideo = false;
   useEffect(() => {
@@ -89,15 +89,22 @@ const AnnotationConfig: FC = () => {
       </div>
       <div className="configBox">
         <div className="leftSider" id="lefeSiderId">
-          <Tabs defaultActiveKey="1" tabBarExtraContent={extraContent} type="card">
+          <Tabs
+            defaultActiveKey="1"
+            tabBarExtraContent={extraContent}
+            type="card"
+            onChange={e => {
+              forceSet(new Date().getTime())
+            }}
+          >
             <Tabs.TabPane tab="YAML" key="1">
               <div className="leftPane">
                 <YamlConfig toolsConfigState={confitState} doSetImg={doSetImage} />
               </div>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="可视化" key="2">
+            <Tabs.TabPane tab="可视化" key="2" forceRender={true}>
               <div className="leftPane">
-                <FormConfig />
+                <FormConfig key={force} />
               </div>
             </Tabs.TabPane>
           </Tabs>

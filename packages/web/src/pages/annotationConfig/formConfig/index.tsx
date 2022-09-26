@@ -1,18 +1,20 @@
-import { Attribute, OneTag } from '@label-u/annotation';
+import { Attribute, EToolName, OneTag } from '@label-u/annotation';
 import { BasicConfig, TextConfig } from '@label-u/components';
-import { Button, Dropdown, Menu, Select, Tabs } from 'antd';
+import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import '../index.less';
-import { toolnames, types } from './constants';
+import { toolnames, types, toolnameT } from './constants';
 import FormEngine from './formEngine';
-// import { useSelector } from 'react-redux';
+import CommonFormItem from '../components/commonFormItems';
+import { useSelector } from 'react-redux';
 const { Option } = Select;
 
 const FormConfig: FC = props => {
-    const [tools, setTools] = useState<BasicConfig[]>([]);
+  // const [tools, setTools] = useState<BasicConfig[]>([]);
   //   const [tagList, setTagList] = useState<OneTag[]>([]);
   //   const [attribute, setAttribute] = useState<Attribute[]>([]);
   //   const [textConfig, setTextConfig] = useState<TextConfig>([]);
+  const { tools, tagList, attribute, textConfig } = useSelector(state => state.toolsConfig);
   const children = [];
   const [media, setMedia] = useState<string>();
   const [selectTools, setSelectTools] = useState<string[]>([]);
@@ -27,11 +29,11 @@ const FormConfig: FC = props => {
     for (let i = 0; i < toolnames.length; i++) {
       if (selectTools.indexOf(toolnames[i]) < 0) {
         items.push({
-          key: toolnames[i],
+          key: toolnameT[toolnames[i]],
           label: (
             <div
               onClick={e => {
-                updateSelectTools(toolnames[i]);
+                updateSelectTools(toolnameT[toolnames[i]]);
                 e.stopPropagation();
               }}
               style={{ paddingTop: 5, paddingBottom: 5, paddingLeft: 12 }}
@@ -44,6 +46,19 @@ const FormConfig: FC = props => {
     }
     return items;
   }, [curentTool]);
+
+  useEffect(() => {
+    let toolArr = [];
+    if (tools.length > 0) {
+      for (let i = 0; i < tools.length; i++) {
+        if (selectTools.indexOf(tools[i].tool) < 0) {
+          toolArr.push(tools[i].tool);
+        }
+      }
+      setSelectTools(toolArr);
+      setCurrentTool(toolArr[toolArr.length - 1]);
+    }
+  }, [tools]);
 
   const updateSelectTools = (toolname: string) => {
     let tmp = selectTools;
@@ -65,7 +80,6 @@ const FormConfig: FC = props => {
   }, []);
 
   const handleChange = (e: React.SetStateAction<string | undefined>) => {
-    debugger;
     setMedia(e);
     console.log(e);
   };
@@ -93,12 +107,30 @@ const FormConfig: FC = props => {
             type="card"
             items={selectTools.map((_, i) => {
               const id = String(i + 1);
+              // 配置初始化
+              let initC = {} as BasicConfig;
+              let configArr = [];
+              configArr = tools.filter(item => {
+                return item.tool === _;
+              });
+              initC = configArr[0];
+
               return {
                 label: `${_}`,
                 key: id,
                 children: (
                   <div className="toolConfigPane">
-                    <FormEngine toolname={_} config={tools[0]} />
+                    <Form.Provider
+                      onFormChange={(name, info) => {
+                        // todo 统一处理表单 和  标注工具之间联动
+                        console.log(name);
+                        console.log(info.forms[name].getFieldsValue());
+                        console.log(_);
+                      }}
+                    >
+                      {<FormEngine toolname={_} config={initC} />}
+                      <CommonFormItem />
+                    </Form.Provider>
                   </div>
                 )
               };

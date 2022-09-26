@@ -100,7 +100,7 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
   return (
     <div
       className={classnames({
-        selectedMain: true,
+        // selectedMain: true,
         sensebeeInputWrap: true
       })}
     >

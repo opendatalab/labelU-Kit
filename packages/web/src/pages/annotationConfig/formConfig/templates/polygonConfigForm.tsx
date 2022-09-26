@@ -1,12 +1,19 @@
 import { BasicConfig } from '@label-u/components';
-import React, { FC } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Col, Row, Switch, Input as SenseInput, Form, FormInstance, Select } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
 import SvgIcon from '../../../../components/basic/svgIcon';
+import { AttributeItem } from './rectConfigForm';
 const { Option } = Select;
-const RectConfigForm: FC<BasicConfig> = () => {
-  const minWidth = 1,
-    minHeight = 1;
+
+interface FormPolygonConfig {
+  lineType: number;
+  lowerLimitPointNum: number;
+  upperLimitPointNum: number;
+  attributeList: AttributeItem[];
+}
+
+const RectConfigForm: FC<BasicConfig> = props => {
   const isAllReadOnly = false;
   const formItemLayout = {
     labelCol: {
@@ -27,6 +34,32 @@ const RectConfigForm: FC<BasicConfig> = () => {
     }
   };
 
+  const [initVal, setInitVal] = useState<FormPolygonConfig>({} as FormPolygonConfig);
+
+  useMemo(() => {
+    console.log(props);
+    let initV = {
+      // @ts-ignore
+      lineType: props.config.lineType ? props.config.lineType : 1,
+      // @ts-ignore
+      lowerLimitPointNum: props.config.lowerLimitPointNum ? props.config.lowerLimitPointNum : 10,
+      // @ts-ignore
+      upperLimitPointNum: props.config.upperLimitPointNum ? props.config.upperLimitPointNum : 100,
+      // @ts-ignore
+      attributeList: props.config.attributeList
+        ? // @ts-ignore
+          props.config.attributeList
+        : [
+            {
+              key: 'tag1',
+              label: 'tag1'
+            }
+          ]
+    };
+
+    setInitVal(initV);
+  }, []);
+
   return (
     <div>
       <div className="selectedMain">
@@ -34,6 +67,7 @@ const RectConfigForm: FC<BasicConfig> = () => {
           <Form.Item
             name="lineType"
             label="线条类型"
+            initialValue={initVal.lineType}
             rules={[
               {
                 required: true,
@@ -52,53 +86,20 @@ const RectConfigForm: FC<BasicConfig> = () => {
               <div className="selectedName">闭点个数</div>
             </Col>
             <Col span={8}>
-              <Form.Item name="lowerLimitPointNum" initialValue={minWidth}>
+              <Form.Item name="lowerLimitPointNum" initialValue={initVal.lowerLimitPointNum}>
                 <SenseInput type="text" suffix={<SvgIcon name="common-downWardIcon" />} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
             <Col span={1} />
             <Col span={8}>
-              <Form.Item name="upperLimitPointNum" initialValue={minHeight}>
+              <Form.Item name="upperLimitPointNum" initialValue={initVal.upperLimitPointNum}>
                 <SenseInput type="text" suffix={<SvgIcon name="common-upperIcon" />} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item
-            label="标签配置"
-            name="attributeList"
-            initialValue={[
-              {
-                key: '类别1',
-                value: '类别1'
-              }
-            ]}
-          >
+          <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
             <MapStateJSONTab isAttributeList={true} readonly={isAllReadOnly} />
           </Form.Item>
-          {/* <Form.Item
-            valuePropName="checked"
-            label={<span className="formTitle">目标外标注</span>}
-            name="attributeConfigurable"
-            initialValue={false}
-          >
-            <Switch disabled={isAllReadOnly} />
-          </Form.Item>
-          <Form.Item
-            valuePropName="checked"
-            label={<span className="formTitle">属性配置</span>}
-            name="attributeConfigurable"
-            initialValue={false}
-          >
-            <Switch disabled={isAllReadOnly} />
-          </Form.Item>
-          <Form.Item
-            valuePropName="checked"
-            label={<span className="formTitle">通用标签</span>}
-            name="attributeConfigurable"
-            initialValue={false}
-          >
-            <Switch disabled={isAllReadOnly} />
-          </Form.Item> */}
         </Form>
       </div>
     </div>
