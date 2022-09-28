@@ -94,7 +94,7 @@ const AnnotationConfig: FC = () => {
             tabBarExtraContent={extraContent}
             type="card"
             onChange={e => {
-              forceSet(new Date().getTime())
+              forceSet(new Date().getTime());
             }}
           >
             <Tabs.TabPane tab="YAML" key="1">

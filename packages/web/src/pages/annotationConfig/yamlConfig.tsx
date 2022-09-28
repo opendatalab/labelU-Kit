@@ -61,7 +61,7 @@ const YamlConfig: FC<YamlConfigProps> = props => {
     let leftSiderDom = document.getElementById('lefeSiderId');
     let height = leftSiderDom?.getBoundingClientRect().height as number;
     let width = leftSiderDom?.getBoundingClientRect().width as number;
-    setAceHeight(height - 78);
+    setAceHeight(height - 85);
     setAceWidth(width - 50);
   }, []);
 

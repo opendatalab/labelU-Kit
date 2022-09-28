@@ -1,24 +1,32 @@
-import { Attribute, EToolName, OneTag } from '@label-u/annotation';
-import { BasicConfig, TextConfig } from '@label-u/components';
+import { OneTag } from '@label-u/annotation';
+import { BasicConfig } from '@label-u/components';
 import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import '../index.less';
-import { toolnames, types, toolnameT } from './constants';
+import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
 import CommonFormItem from '../components/commonFormItems';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { LoadInitConfig } from '../configTemplate/config';
+import {
+  updateAllAttributeConfigList,
+  updateFileInfo,
+  updateTagConfigList,
+  updateTextConfig,
+  updateToolsConfig
+} from '../../../stores/toolConfig.store';
+import '../index.less';
 const { Option } = Select;
 
+const noCommonConfigTools = ['tagTool', 'textTool'];
+const nodrawOutsideTargetTools = ['lineTool'];
+
 const FormConfig: FC = props => {
-  // const [tools, setTools] = useState<BasicConfig[]>([]);
-  //   const [tagList, setTagList] = useState<OneTag[]>([]);
-  //   const [attribute, setAttribute] = useState<Attribute[]>([]);
-  //   const [textConfig, setTextConfig] = useState<TextConfig>([]);
   const { tools, tagList, attribute, textConfig } = useSelector(state => state.toolsConfig);
+  const dispatch = useDispatch();
   const children = [];
-  const [media, setMedia] = useState<string>();
+  const [media, setMedia] = useState<string>('图片');
   const [selectTools, setSelectTools] = useState<string[]>([]);
-  const [curentTool, setCurrentTool] = useState<string>();
+  // const [curentTool, setCurrentTool] = useState<string>();
 
   for (let i = 0; i < types.length; i++) {
     children.push(<Option key={types[i]}>{types[i]}</Option>);
@@ -27,13 +35,14 @@ const FormConfig: FC = props => {
   const items = useMemo(() => {
     let items = [];
     for (let i = 0; i < toolnames.length; i++) {
-      if (selectTools.indexOf(toolnames[i]) < 0) {
+      if (selectTools.indexOf(toolnameT[toolnames[i]]) < 0) {
         items.push({
           key: toolnameT[toolnames[i]],
           label: (
             <div
               onClick={e => {
                 updateSelectTools(toolnameT[toolnames[i]]);
+                loadInitConfig(toolnameT[toolnames[i]], tools);
                 e.stopPropagation();
               }}
               style={{ paddingTop: 5, paddingBottom: 5, paddingLeft: 12 }}
@@ -45,7 +54,31 @@ const FormConfig: FC = props => {
       }
     }
     return items;
-  }, [curentTool]);
+  }, [tools]);
+
+  const loadInitConfig = async (toolname: string, tools: BasicConfig[]) => {
+    new Promise(async (resolve, reject) => {
+      if (toolname) {
+        const config = await LoadInitConfig(toolname);
+        const keys = Object.keys(config);
+        for (let key of keys) {
+          if (key === 'attribute' && attribute.length === 0) {
+            dispatch(updateAllAttributeConfigList(config[key]));
+          } else if (key === 'tagList' && tagList.length === 0) {
+            dispatch(updateTagConfigList(config[key]));
+          } else if (key === 'textConfig' && textConfig.length === 0) {
+            dispatch(updateTextConfig(config[key]));
+          } else if (key === 'tools') {
+            let newTools = [...tools].concat(config[key]);
+            dispatch(updateToolsConfig(newTools));
+          } else if (key === 'fileInfo') {
+            dispatch(updateFileInfo(config[key]));
+          }
+        }
+        resolve(config);
+      }
+    });
+  };
 
   useEffect(() => {
     let toolArr = [];
@@ -55,8 +88,9 @@ const FormConfig: FC = props => {
           toolArr.push(tools[i].tool);
         }
       }
-      setSelectTools(toolArr);
-      setCurrentTool(toolArr[toolArr.length - 1]);
+      let newTools = [...selectTools].concat(toolArr);
+      setSelectTools(newTools);
+      // setCurrentTool(newTools[newTools.length - 1]);
     }
   }, [tools]);
 
@@ -66,7 +100,7 @@ const FormConfig: FC = props => {
       tmp.splice(tmp.indexOf(toolname), 1);
     } else {
       tmp.push(toolname);
-      setCurrentTool(toolname);
+      // setCurrentTool(toolname);
     }
     setSelectTools(tmp);
   };
@@ -79,9 +113,51 @@ const FormConfig: FC = props => {
     setHeight(height - 78);
   }, []);
 
-  const handleChange = (e: React.SetStateAction<string | undefined>) => {
+  const handleChange = (e: React.SetStateAction<string>) => {
     setMedia(e);
-    console.log(e);
+  };
+
+  const updateCombineToolsConfig = (tools: BasicConfig[], config: object, toolname: string) => {
+    let newTools = tools.reduce((res, item) => {
+      if (item.tool === toolname) {
+        let copyItem = { ...item };
+        let newConfig = {
+          ...copyItem.config,
+          ...config
+        };
+        copyItem.config = newConfig;
+        res.push(copyItem);
+      } else {
+        res.push(item);
+      }
+      return res;
+    }, [] as BasicConfig[]);
+    dispatch(updateToolsConfig(newTools));
+  };
+
+  const actUpdateToolsConfig = (name: string, info: any) => {
+    if (name && Object.keys(toolnameC).indexOf(name) >= 0) {
+      if (name === 'tagTool') {
+        dispatch(updateTagConfigList(info.values.tagList as OneTag[]));
+      } else if (name === 'textTool') {
+        dispatch(updateTextConfig(info.values.textConfig));
+      } else {
+        updateCombineToolsConfig(tools, info.values, name);
+      }
+    }
+    if (name === 'commonForm') {
+      if (info.values.attribute) {
+        dispatch(updateAllAttributeConfigList(info.values.attribute));
+      }
+      let commonToolConfig = {};
+      if (info.values.drawOutsideTarget) {
+        commonToolConfig = Object.assign(commonToolConfig, { drawOutsideTarget: info.values.drawOutsideTarget });
+      }
+      if (info.values.textConfigurableContext) {
+        commonToolConfig = Object.assign(commonToolConfig, info.values.textConfigurableContext);
+      }
+      updateCombineToolsConfig(tools, commonToolConfig, name);
+    }
   };
 
   return (
@@ -110,26 +186,62 @@ const FormConfig: FC = props => {
               // 配置初始化
               let initC = {} as BasicConfig;
               let configArr = [];
+              let isShow = true;
               configArr = tools.filter(item => {
                 return item.tool === _;
               });
               initC = configArr[0];
+              // 公共配置
+              let commonConfig = {
+                drawOutsideTarget: false,
+                textCheckType: 1,
+                customFormat: '',
+                textConfigurable: true
+              };
+
+              if (noCommonConfigTools.indexOf(_) >= 0) {
+                //@ts-ignore
+                isShow = false;
+              } else {
+                if (initC) {
+                  commonConfig = {
+                    //@ts-ignore
+                    drawOutsideTarget: initC.config.drawOutsideTarget,
+                    //@ts-ignore
+                    textCheckType: initC.config.textCheckType,
+                    //@ts-ignore
+                    customFormat: initC.config.customFormat,
+                    //@ts-ignore
+                    textConfigurable: initC.config.textConfigurable
+                  };
+                  if (nodrawOutsideTargetTools.indexOf(_) >= 0) {
+                    //@ts-ignore
+                    delete commonConfig['drawOutsideTarget'];
+                  }
+                }
+              }
 
               return {
-                label: `${_}`,
+                //@ts-ignore
+                label: `${toolnameC[_]}`,
                 key: id,
                 children: (
                   <div className="toolConfigPane">
                     <Form.Provider
-                      onFormChange={(name, info) => {
+                      onFormFinish={(name, info) => {
                         // todo 统一处理表单 和  标注工具之间联动
-                        console.log(name);
-                        console.log(info.forms[name].getFieldsValue());
-                        console.log(_);
+                        actUpdateToolsConfig(name, info);
                       }}
                     >
                       {<FormEngine toolname={_} config={initC} />}
-                      <CommonFormItem />
+
+                      <CommonFormItem
+                        attribute={attribute}
+                        {...commonConfig}
+                        name="commonForm"
+                        toolName={_}
+                        isShow={isShow}
+                      />
                     </Form.Provider>
                   </div>
                 )

@@ -21,7 +21,7 @@ export const addInputList = (
     isMulti?: boolean;
     isDefault?: boolean;
     lang: 'cn' | 'en';
-  },
+  }
 ) => {
   inputList = cloneDeep(inputList);
   let baseClassName = '类别';
@@ -44,19 +44,17 @@ export const addInputList = (
       inputList[i].subSelected.push({
         key: `${baseOptionName}${i + 1}-${len}`,
         value: `option${i + 1}-${len}`,
-        isDefault: false,
+        isDefault: false
       });
     } else {
-      inputList[i].subSelected = [
-        { key: `${baseOptionName}${i + 1}-1`, value: `option${i + 1}-1`, isDefault: false },
-      ];
+      inputList[i].subSelected = [{ key: `${baseOptionName}${i + 1}-1`, value: `option${i + 1}-1`, isDefault: false }];
     }
   } else {
     const len = inputList.length + 1;
     const id = uuid(2, 62);
     const newData = {
       key: `${baseClassName}${id}`,
-      value: `class-${id}`,
+      value: `class-${id}`
     };
 
     if (specialState?.isMulti === true) {
@@ -69,14 +67,11 @@ export const addInputList = (
 
     if (isInitSubSelected) {
       Object.assign(newData, {
-        subSelected: [
-          { key: `${baseOptionName}${len}-1`, value: `option${len}-1`, isMulti: false },
-        ],
+        subSelected: [{ key: `${baseOptionName}${len}-1`, value: `option${len}-1`, isMulti: false }]
       });
     }
     inputList.push(newData);
   }
-
   return inputList;
 };
 
@@ -97,7 +92,7 @@ export function clearTagDefault(inputList: any[], index: number) {
 
   inputList[index].subSelected = inputList[index].subSelected?.map((v: any) => ({
     ...v,
-    isDefault: false,
+    isDefault: false
   }));
 
   return inputList;
@@ -109,7 +104,7 @@ export const changeInputList = (
   target: 'key' | 'value' | 'isMulti' | 'isDefault',
   inputList: any[],
   index: number,
-  subIndex?: number,
+  subIndex?: number
 ) => {
   inputList = cloneDeep(inputList);
   switch (target) {
@@ -154,7 +149,7 @@ export const changeInputList = (
         const newIsDefault = !inputList[index].isDefault;
 
         // 顶层更新数据更新
-        inputList = inputList.map((v) => ({ ...v, isDefault: false }));
+        inputList = inputList.map(v => ({ ...v, isDefault: false }));
         inputList[index].isDefault = newIsDefault;
       }
       break;
@@ -172,7 +167,7 @@ export const deleteInputList = (inputList: any[], i: number, subIndex?: number) 
 
     inputList[i].subSelected = [
       ...inputList[i].subSelected.slice(0, subIndex),
-      ...inputList[i].subSelected.slice(subIndex + 1, inputList[i].subSelected.length),
+      ...inputList[i].subSelected.slice(subIndex + 1, inputList[i].subSelected.length)
     ];
   } else {
     inputList = [...inputList.slice(0, i), ...inputList.slice(i + 1, inputList.length)];

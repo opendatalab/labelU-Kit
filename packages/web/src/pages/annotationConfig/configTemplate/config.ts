@@ -1,3 +1,4 @@
+import { ToolsConfigState } from 'interface/toolConfig';
 import { Item } from './tmplateBox';
 // import RectImg from '../../../img/annotationCommon/configNotMatch.png';
 interface configItem {
@@ -10,32 +11,32 @@ export const imgLebalConfig: Item[] = [
   {
     label: '目标检测（矩形框）',
     img: 'rectImg',
-    tmplateName: 'rect.json'
+    tmplateName: 'rectTool.json'
   },
   {
     label: '语义分割(多边形)',
     img: 'polygonImg',
-    tmplateName: 'polygon.json'
+    tmplateName: 'polygonTool.json'
   },
   {
     label: '线标注',
     img: 'lineImg',
-    tmplateName: 'line.json'
+    tmplateName: 'lineTool.json'
   },
   {
     label: '点标注',
     img: 'pointImg',
-    tmplateName: 'point.json'
+    tmplateName: 'pointTool.json'
   },
   {
     label: '目标分类(标签分类)',
     img: 'tagImg',
-    tmplateName: 'tag.json'
+    tmplateName: 'tagTool.json'
   },
   {
     label: '文本描述',
     img: 'textImg',
-    tmplateName: 'text.json'
+    tmplateName: 'textTool.json'
   }
 ];
 
@@ -54,5 +55,19 @@ export const getLabelConfig: (imgLebalConfig: Item[]) => Promise<configItem[]> =
       }
     }
     resolve(reuslt);
+  });
+};
+
+// 加载初始化配置
+export const LoadInitConfig: (toolName: string) => Promise<ToolsConfigState> = async (toolName: string) => {
+  return new Promise(async (resolve, reject) => {
+    console.log(`../configs/${toolName}`);
+    let { default: tmpl } = await import(`../configs/${toolName}.json`);
+    if (tmpl) {
+      //@ts-ignore
+      resolve(tmpl);
+    } else {
+      reject('err');
+    }
   });
 };

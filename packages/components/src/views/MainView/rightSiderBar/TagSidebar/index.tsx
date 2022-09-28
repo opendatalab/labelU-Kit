@@ -311,7 +311,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
       {tagConfigList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div className='main' style={{ height }}>
+        <div style={{ height }}>
           {labelPanel(tagConfigList)}
         </div>
       )}

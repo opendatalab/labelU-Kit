@@ -122,7 +122,6 @@ export default class AnnotationDataUtils {
     stepList: IStepInfo[],
   ) {
     try {
-      debugger;
       // 将当前步骤替换为当前工具
       // const curStep = StepUtils.getStepInfo(step, stepList);
       // const stepKey = `step_${curStep.step}`;

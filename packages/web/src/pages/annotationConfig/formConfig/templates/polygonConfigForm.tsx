@@ -1,9 +1,10 @@
 import { BasicConfig } from '@label-u/components';
 import React, { FC, useMemo, useState } from 'react';
-import { Col, Row, Switch, Input as SenseInput, Form, FormInstance, Select } from 'antd';
+import { Col, Row, Input as SenseInput, Form, Select } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
 import SvgIcon from '../../../../components/basic/svgIcon';
 import { AttributeItem } from './rectConfigForm';
+import { useForm } from 'antd/es/form/Form';
 const { Option } = Select;
 
 interface FormPolygonConfig {
@@ -13,8 +14,9 @@ interface FormPolygonConfig {
   attributeList: AttributeItem[];
 }
 
-const RectConfigForm: FC<BasicConfig> = props => {
+const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
   const isAllReadOnly = false;
+  const [form] = useForm();
   const formItemLayout = {
     labelCol: {
       xs: {
@@ -34,40 +36,59 @@ const RectConfigForm: FC<BasicConfig> = props => {
     }
   };
 
-  const [initVal, setInitVal] = useState<FormPolygonConfig>({} as FormPolygonConfig);
+  const [initVal, setInitVal] = useState<FormPolygonConfig>({
+    lineType: 0,
+    lowerLimitPointNum: 10,
+    upperLimitPointNum: 100,
+    attributeList: [
+      {
+        key: 'tag1',
+        value: 'tag1'
+      }
+    ]
+  } as FormPolygonConfig);
 
   useMemo(() => {
-    console.log(props);
-    let initV = {
-      // @ts-ignore
-      lineType: props.config.lineType ? props.config.lineType : 1,
-      // @ts-ignore
-      lowerLimitPointNum: props.config.lowerLimitPointNum ? props.config.lowerLimitPointNum : 10,
-      // @ts-ignore
-      upperLimitPointNum: props.config.upperLimitPointNum ? props.config.upperLimitPointNum : 100,
-      // @ts-ignore
-      attributeList: props.config.attributeList
-        ? // @ts-ignore
-          props.config.attributeList
-        : [
-            {
-              key: 'tag1',
-              label: 'tag1'
-            }
-          ]
-    };
+    if (props.config) {
+      let initV = {
+        // @ts-ignore
+        lineType: props.config.lineType ? props.config.lineType : 0,
+        // @ts-ignore
+        lowerLimitPointNum: props.config.lowerLimitPointNum ? props.config.lowerLimitPointNum : 10,
+        // @ts-ignore
+        upperLimitPointNum: props.config.upperLimitPointNum ? props.config.upperLimitPointNum : 100,
+        // @ts-ignore
+        attributeList: props.config.attributeList
+          ? // @ts-ignore
+            props.config.attributeList
+          : [
+              {
+                key: 'tag1',
+                value: 'tag1'
+              }
+            ]
+      };
 
-    setInitVal(initV);
+      setInitVal(initV);
+    }
   }, []);
 
   return (
     <div>
       <div className="selectedMain">
-        <Form {...formItemLayout}>
+        <Form
+          {...formItemLayout}
+          name={props.name}
+          form={form}
+          onChange={e => {
+            e.stopPropagation();
+            form.submit();
+          }}
+        >
           <Form.Item
             name="lineType"
             label="线条类型"
-            initialValue={initVal.lineType}
+            initialValue={initVal.lineType + ''}
             rules={[
               {
                 required: true,
@@ -75,9 +96,14 @@ const RectConfigForm: FC<BasicConfig> = props => {
               }
             ]}
           >
-            <Select placeholder="请选择线类型">
+            <Select
+              placeholder="请选择线类型"
+              onChange={e => {
+                form.submit();
+              }}
+            >
               <Option value="0">直线</Option>
-              <Option value="1">贝塞尔曲线</Option>
+              <Option value="2">贝塞尔曲线</Option>
             </Select>
           </Form.Item>
 
@@ -98,7 +124,13 @@ const RectConfigForm: FC<BasicConfig> = props => {
             </Col>
           </Row>
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
-            <MapStateJSONTab isAttributeList={true} readonly={isAllReadOnly} />
+            <MapStateJSONTab
+              onChange={e => {
+                form.submit();
+              }}
+              isAttributeList={true}
+              readonly={isAllReadOnly}
+            />
           </Form.Item>
         </Form>
       </div>

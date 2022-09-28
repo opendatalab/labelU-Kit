@@ -1,19 +1,19 @@
 import { BasicConfig } from '@label-u/components';
 import React, { FC, useMemo, useState } from 'react';
-import { Form, FormInstance, Select, Input } from 'antd';
+import { Form, Input } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
-import SvgIcon from '../../../../components/basic/svgIcon';
+// import SvgIcon from '../../../../components/basic/svgIcon';
 import { AttributeItem } from './rectConfigForm';
-const { Option } = Select;
+import { useForm } from 'antd/es/form/Form';
+// const { Option } = Select;
 
 interface FormPointConfig {
   upperLimit: number;
   attributeList: AttributeItem[];
 }
 
-const PointConfigForm: FC<BasicConfig> = props => {
-  // const minWidth = 1,
-  //   minHeight = 1;
+const PointConfigForm: FC<BasicConfig & { name: string }> = props => {
+  const [form] = useForm();
   const isAllReadOnly = false;
   const formItemLayout = {
     labelCol: {
@@ -33,48 +33,61 @@ const PointConfigForm: FC<BasicConfig> = props => {
       }
     }
   };
-  const [initVal, setInitVal] = useState<FormPointConfig>({} as FormPointConfig);
+  const [initVal, setInitVal] = useState<FormPointConfig>({
+    upperLimit: 10,
+    attributeList: [
+      {
+        key: 'tag1',
+        value: 'tag1'
+      }
+    ]
+  } as FormPointConfig);
 
   useMemo(() => {
-    console.log(props);
-    let initV = {
-      // @ts-ignore
-      upperLimit: props.config.upperLimit ? props.config.upperLimit : 10,
-      // @ts-ignore
-      attributeList: props.config.attributeList
-        ? // @ts-ignore
-          props.config.attributeList
-        : [
-            {
-              key: 'tag1',
-              label: 'tag1'
-            }
-          ]
-    };
+    if (props.config) {
+      let initV = {
+        // @ts-ignore
+        upperLimit: props.config.upperLimit ? props.config.upperLimit : 10,
+        // @ts-ignore
+        attributeList: props.config.attributeList
+          ? // @ts-ignore
+            props.config.attributeList
+          : [
+              {
+                key: 'tag1',
+                value: 'tag1'
+              }
+            ]
+      };
 
-    setInitVal(initV);
+      setInitVal(initV);
+    }
   }, []);
 
   return (
     <div>
       <div className="selectedMain">
-        <Form {...formItemLayout}>
-          <Form.Item
-            name="upperLimit"
-            label="上限点数"
-            rules={[
-              {
-                required: true,
-                message: 'Please select lineType!'
-              }
-            ]}
-            initialValue={initVal.upperLimit}
-          >
+        <Form
+          {...formItemLayout}
+          name={props.name}
+          form={form}
+          onChange={e => {
+            e.stopPropagation();
+            form.submit();
+          }}
+        >
+          <Form.Item name="upperLimit" label="上限点数" initialValue={initVal.upperLimit}>
             <Input />
           </Form.Item>
 
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
-            <MapStateJSONTab isAttributeList={true} readonly={isAllReadOnly} />
+            <MapStateJSONTab
+              onChange={e => {
+                form.submit();
+              }}
+              isAttributeList={true}
+              readonly={isAllReadOnly}
+            />
           </Form.Item>
         </Form>
       </div>

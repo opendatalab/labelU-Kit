@@ -4,7 +4,7 @@ import sPointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
 import sIconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
 import sIconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern_a.svg';
 
-import icon_tag from '@/assets/annotation/icon_tag.svg'
+import icon_tag from '@/assets/annotation/icon_tag.svg';
 import lineASvg from '@/assets/annotation/lineTool/icon_line.svg';
 import pointASvg from '@/assets/annotation/pointTool/icon_point.svg';
 import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon.svg';
@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ImageStyle from '../ImageStyle';
 import { AppState } from '@/store';
 import { Popover } from 'antd';
-import {useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next';
 import { EToolName } from '@/data/enums/ToolType';
 
 interface IProps {
@@ -54,10 +54,11 @@ export const toolList = [
   },
 ];
 
+const notShowIconTool = [EToolName.Tag, EToolName.Text];
 
 const ToolOperation: React.FC<IProps> = (props) => {
   const dispatch = useDispatch();
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const currentToolName = useSelector((state: AppState) => state.annotation.currentToolName);
   const { toolsBasicConfig } = props;
   return (
@@ -66,27 +67,31 @@ const ToolOperation: React.FC<IProps> = (props) => {
         toolsBasicConfig.length > 0 &&
         toolsBasicConfig.map((item: BasicConfig) => {
           const renderTool = toolList?.find((tItem) => tItem?.toolName === item.tool);
-          return (
-            <Popover key={item.tool} content={t(item.tool)} trigger='hover'>
-              <a
-                onClick={(e) => {
-                  // 切换工具保存标注结果
-                  dispatch(ChangeSave);
-                  // 切换工具更新工具名称
-                  dispatch(ChangeCurrentTool(item.tool));
-                  e.stopPropagation();
-                }}
-              >
-                <img
-                  title={item.tool}
-                  className='lb-left-item'
-                  src={
-                    item.tool === currentToolName ? renderTool?.selectedSvg : renderTool?.commonSvg
-                  }
-                />
-              </a>
-            </Popover>
-          );
+          if (notShowIconTool.indexOf(item.tool as EToolName) < 0) {
+            return (
+              <Popover key={item.tool} content={t(item.tool)} trigger='hover'>
+                <a
+                  onClick={(e) => {
+                    // 切换工具保存标注结果
+                    dispatch(ChangeSave);
+                    // 切换工具更新工具名称
+                    dispatch(ChangeCurrentTool(item.tool));
+                    e.stopPropagation();
+                  }}
+                >
+                  <img
+                    title={item.tool}
+                    className='lb-left-item'
+                    src={
+                      item.tool === currentToolName
+                        ? renderTool?.selectedSvg
+                        : renderTool?.commonSvg
+                    }
+                  />
+                </a>
+              </Popover>
+            );
+          }
         })}
       <ImageStyle />
     </div>

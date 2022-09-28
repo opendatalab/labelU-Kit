@@ -1,16 +1,12 @@
 import { BasicConfig } from '@label-u/components';
-import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Col, Row, Switch, Input as SenseInput, Form, FormInstance } from 'antd';
+import React, { FC, useMemo, useState } from 'react';
+import { Col, Row, Input as SenseInput, Form } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
-
-interface CommonFormItems {
-  CommonFormItems: React.ReactNode;
-  name: string;
-}
+import { useForm } from 'antd/es/form/Form';
 
 export interface AttributeItem {
   key: string;
-  label: string;
+  value: string;
 }
 interface FormRectConfig {
   minWidth: number;
@@ -18,8 +14,9 @@ interface FormRectConfig {
   attributeList: AttributeItem[];
 }
 
-const RectConfigForm: FC<BasicConfig & CommonFormItems> = props => {
+const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
   const isAllReadOnly = false;
+  const [form] = useForm();
   const formItemLayout = {
     labelCol: {
       xs: {
@@ -38,32 +35,51 @@ const RectConfigForm: FC<BasicConfig & CommonFormItems> = props => {
       }
     }
   };
-  const [initVal, setInitVal] = useState<FormRectConfig>({} as FormRectConfig);
+  const [initVal, setInitVal] = useState<FormRectConfig>({
+    minWidth: 10,
+    minHeight: 10,
+    attributeList: [
+      {
+        key: 'tag1',
+        value: 'tag1'
+      }
+    ]
+  } as FormRectConfig);
 
   useMemo(() => {
-    let initV = {
-      // @ts-ignore
-      minWidth: props.config.minWidth ? props.config.minWidth : 10,
-      // @ts-ignore
-      minHeight: props.config.minHeight ? props.config.minHeight : 10,
-      // @ts-ignore
-      attributeList: props.config.attributeList
-        ? // @ts-ignore
-          props.config.attributeList
-        : [
-            {
-              key: 'tag1',
-              label: 'tag1'
-            }
-          ]
-    };
-    setInitVal(initV);
+    if (props.config) {
+      let initV = {
+        // @ts-ignore
+        minWidth: props.config.minWidth ? props.config.minWidth : 10,
+        // @ts-ignore
+        minHeight: props.config.minHeight ? props.config.minHeight : 10,
+        // @ts-ignore
+        attributeList: props.config.attributeList
+          ? // @ts-ignore
+            props.config.attributeList
+          : [
+              {
+                key: 'tag1',
+                value: 'tag1'
+              }
+            ]
+      };
+      setInitVal(initV);
+    }
   }, []);
 
   return (
     <div>
       <div className="selectedMain">
-        <Form {...formItemLayout} name={props.name}>
+        <Form
+          {...formItemLayout}
+          name={props.name}
+          form={form}
+          onChange={e => {
+            e.stopPropagation();
+            form.submit();
+          }}
+        >
           <Row>
             <Col span={4}>
               <div className="selectedName">最小尺寸</div>
@@ -81,7 +97,13 @@ const RectConfigForm: FC<BasicConfig & CommonFormItems> = props => {
             </Col>
           </Row>
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
-            <MapStateJSONTab isAttributeList={true} readonly={isAllReadOnly} />
+            <MapStateJSONTab
+              onChange={e => {
+                form.submit();
+              }}
+              isAttributeList={true}
+              readonly={isAllReadOnly}
+            />
           </Form.Item>
         </Form>
       </div>

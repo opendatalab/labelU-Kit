@@ -6,18 +6,18 @@ import PointConfigForm from './templates/pointConfigForm';
 import TagConfigForm from './templates/tagConfigForm';
 import TextConfigForm from './templates/textConfigForm';
 import PolygonConfigForm from './templates/polygonConfigForm';
-import CommonFormItem from '../components/commonFormItems';
 import './formEngine.less';
 // import { toolnames, types,toolnameT } from './constants';
 import { EToolName } from '@label-u/annotation';
+import { useSelector } from 'react-redux';
+// import Dynamic from 'components/basic/dynamic';
 interface FormEngineProps {
   toolname: string;
   config: BasicConfig;
 }
 
 const FormEngine: FC<FormEngineProps> = props => {
-  const FormItem = <CommonFormItem />;
-
+  const { tagList, textConfig } = useSelector(state => state.toolsConfig);
   const ConfigTool = useMemo(() => {
     if (props.toolname) {
       if (props.toolname === EToolName.Rect) {
@@ -25,8 +25,9 @@ const FormEngine: FC<FormEngineProps> = props => {
         //   const { default: graph } = await import('./templates/rectConfigForm');
         //   resolve(graph);
         // });
-        // debugger;
         // return result;
+        // return Dynamic(() => import('./templates/rectConfigForm'));
+
         return RectConfigForm;
       }
       if (props.toolname === EToolName.Point) {
@@ -47,7 +48,10 @@ const FormEngine: FC<FormEngineProps> = props => {
     }
     return null;
   }, [props.toolname]);
-
-  return <div>{ConfigTool && <ConfigTool name={props.toolname} {...props.config} CommonFormItems={FormItem} />}</div>;
+  return (
+    <div>
+      {ConfigTool && <ConfigTool tagList={tagList} textConfig={textConfig} name={props.toolname} {...props.config} />}
+    </div>
+  );
 };
 export default FormEngine;
