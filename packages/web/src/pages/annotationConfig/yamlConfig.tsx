@@ -12,7 +12,7 @@ import { message } from 'antd';
 import jsonToyam from '../../utils/jsonToyml';
 import { useDispatch, useSelector } from 'react-redux';
 import ConfigNotMatchImg from '../../img/annotationCommon/configNotMatch.png';
-// import YAML from 'yaml';
+
 import {
   updateAllAttributeConfigList,
   updateFileInfo,

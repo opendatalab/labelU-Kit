@@ -2,7 +2,9 @@ import { BasicConfig } from '@label-u/components';
 import React, { FC, useMemo, useState } from 'react';
 import { Col, Row, Input as SenseInput, Form, Select } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
-import SvgIcon from '../../../../components/basic/svgIcon';
+// import SvgIcon from '../../../../components/basic/svgIcon';
+import DownWardIcon from '../../../../img/common/downWardIcon.svg';
+import UpperIcon from '../../../../img/common/upperIcon.svg';
 import { AttributeItem } from './rectConfigForm';
 import { useForm } from 'antd/es/form/Form';
 const { Option } = Select;
@@ -113,13 +115,13 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
             </Col>
             <Col span={8}>
               <Form.Item name="lowerLimitPointNum" initialValue={initVal.lowerLimitPointNum}>
-                <SenseInput type="text" suffix={<SvgIcon name="common-downWardIcon" />} disabled={isAllReadOnly} />
+                <SenseInput type="text" suffix={<img alt="downIcon" src={DownWardIcon} />} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
             <Col span={1} />
             <Col span={8}>
               <Form.Item name="upperLimitPointNum" initialValue={initVal.upperLimitPointNum}>
-                <SenseInput type="text" suffix={<SvgIcon name="common-upperIcon" />} disabled={isAllReadOnly} />
+                <SenseInput type="text" suffix={<img alt="upIcon" src={UpperIcon} />} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
           </Row>

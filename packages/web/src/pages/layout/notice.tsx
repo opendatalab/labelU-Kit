@@ -1,7 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { Tabs, Dropdown, Badge, Spin, List, Avatar, Tag } from 'antd';
-// import NoticeSvg from '../../assets/header/notice.svg';
-import SvgIcon from '../../components/basic/svgIcon';
+import NoticeSvg from '../../img/header/notice.svg';
+// import SvgIcon from '../../components/basic/svgIcon';
 import { LoadingOutlined } from '@ant-design/icons';
 import { getNoticeList } from '../../api/layout.api';
 import { Notice, EventStatus } from '../../interface/layout/notice.interface';
@@ -111,7 +111,8 @@ const HeaderNoticeComponent: FC = () => {
     >
       <Badge count={noticeCount} overflowCount={999}>
         <span className="notice" id="notice-center">
-          <SvgIcon className="anticon" name="notice" />
+          {/* <SvgIcon className="anticon" name="notice" /> */}
+          <img src={NoticeSvg} alt="" />
         </span>
       </Badge>
     </Dropdown>

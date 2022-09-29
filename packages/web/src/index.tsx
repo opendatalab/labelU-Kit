@@ -7,7 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import store from './stores';
 import './styles/index.less';
 import './mock';
-import 'virtual:svg-icons-register';
+// import 'virtual:svg-icons-register';
 
 ReactDOM.render(
   <Provider store={store}>

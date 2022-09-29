@@ -1,10 +1,10 @@
 import { FC } from 'react';
-// import GuideSvg from '../../assets/menu/guide.svg';
-// import PermissionSvg from '../../assets/menu/permission.svg';
-// import DashboardSvg from '../../assets/menu/dashboard.svg';
-// import AccountSvg from '../../assets/menu/account.svg';
-// import DocumentationSvg from '../../assets/menu/documentation.svg';
-import SvgIcon from '../../components/basic/svgIcon';
+import GuideSvg from '../../img/menu/guide.svg';
+import PermissionSvg from '../../img/menu/permission.svg';
+import DashboardSvg from '../../img/menu/dashboard.svg';
+import AccountSvg from '../../img/menu/account.svg';
+import DocumentationSvg from '../../img/menu/documentation.svg';
+// import SvgIcon from '../../components/basic/svgIcon';
 
 interface CustomIconProps {
   type: string;
@@ -12,20 +12,20 @@ interface CustomIconProps {
 
 export const CustomIcon: FC<CustomIconProps> = props => {
   const { type } = props;
-  let com = <SvgIcon name="menu-guide" />;
+  let com = <img alt="menu-guide" src={GuideSvg} />;
 
   if (type === 'guide') {
-    com = <SvgIcon name="menu-guide" style={{ with: 20 }} />;
+    com = <img src={GuideSvg} alt="menu-guide" style={{ width: 20 }} />;
   } else if (type === 'permission') {
-    com = <SvgIcon name="menu-permission" />;
+    com = <img alt="menu-permission" src={PermissionSvg} />;
   } else if (type === 'dashboard') {
-    com = <SvgIcon name="menu-dashboard" />;
+    com = <img alt="menu-dashboard" src={DashboardSvg} />;
   } else if (type === 'account') {
-    com = <SvgIcon name="menu-account" />;
+    com = <img alt="menu-account" src={AccountSvg} />;
   } else if (type === 'documentation') {
-    com = <SvgIcon name="menu-documentation" />;
+    com = <img alt="menu-documentation" src={DocumentationSvg} />;
   } else {
-    com = <SvgIcon name="menu-guide" />;
+    com = <img alt="menu-guide" src={GuideSvg} />;
   }
   return <span className="anticon">{com}</span>;
 };

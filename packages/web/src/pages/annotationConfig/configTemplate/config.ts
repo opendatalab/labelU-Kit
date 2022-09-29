@@ -45,7 +45,7 @@ export const getLabelConfig: (imgLebalConfig: Item[]) => Promise<configItem[]> =
     const reuslt: configItem[] = [];
     if (imgLebalConfig.length > 0) {
       for (let item of imgLebalConfig) {
-        let { default: imgSrc } = await import(`../avatorImg/${item.img}.png`);
+        let { default: imgSrc } = await import(`../avatorImg/${item.img}.svg`);
         let { default: tmpl } = await import(`../configs/${item.tmplateName}`);
         reuslt.push({
           label: item.label,
@@ -61,11 +61,23 @@ export const getLabelConfig: (imgLebalConfig: Item[]) => Promise<configItem[]> =
 // 加载初始化配置
 export const LoadInitConfig: (toolName: string) => Promise<ToolsConfigState> = async (toolName: string) => {
   return new Promise(async (resolve, reject) => {
-    console.log(`../configs/${toolName}`);
     let { default: tmpl } = await import(`../configs/${toolName}.json`);
     if (tmpl) {
       //@ts-ignore
       resolve(tmpl);
+    } else {
+      reject('err');
+    }
+  });
+};
+
+// 加载图片
+export const loadImg: (path: string) => Promise<any> = async (path: string) => {
+  return new Promise(async (resolve, reject) => {
+    const basePath = '../../../img/';
+    let { default: imgSrc } = await import(basePath + path);
+    if (imgSrc) {
+      resolve(imgSrc);
     } else {
       reject('err');
     }

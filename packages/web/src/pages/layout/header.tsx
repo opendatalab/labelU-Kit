@@ -4,15 +4,15 @@ import { Layout, Dropdown, Menu } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import HeaderNoticeComponent from './notice';
 import Avator from '../../img/header/avator.jpeg';
-// import LanguageSvg from '../../assets/header/language.svg';
-// import ZhCnSvg from '../../assets/header/zh_CN.svg';
-// import EnUsSvg from '../../assets/header/en_US.svg';
+// import LanguageSvg from '../../img/header/language.svg';
+// import ZhCnSvg from '../../img/header/zh_CN.svg';
+// import EnUsSvg from '../../img/header/en_US.svg';
 import { LocaleFormatter, useLocale } from '../../locales';
-// import ReactSvg from '../../assets/logo/react.svg';
-// import AntdSvg from '../../assets/logo/antd.svg';
+import LogoIcon from '../../img/logo/logo.svg';
+// import AntdSvg from '../../img/logo/antd.svg';
 import { logoutAsync, setUserItem } from '../../stores/user.store';
 import { useDispatch, useSelector } from 'react-redux';
-import SvgIcon from '../../components/basic/svgIcon';
+// import SvgIcon from '../../components/basic/svgIcon';
 
 const { Header } = Layout;
 
@@ -76,9 +76,10 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
       {device !== 'MOBILE' && (
         <div className="logo" style={{ width: collapsed ? 80 : 200 }}>
           {/* <SvgIcon name="logo-react" style={{ marginRight: collapsed ? '2px' : '20px' }} /> */}
-          {/* <img src={ReactSvg} alt="" style={{ marginRight: collapsed ? '2px' : '20px' }} /> */}
+          <img src={LogoIcon} alt="" style={{ width: 160, height: 32 }} />
           {/* <img src={AntdSvg} alt="" /> */}
-          <SvgIcon name="logo-logo" style={{ width: 80 }} />
+
+          {/* <SvgIcon name="logo-logo" width={160} height={32}/> */}
         </div>
       )}
       <div className="layout-page-header-main">
@@ -87,17 +88,17 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
         </div>
         <div className="actions">
           <HeaderNoticeComponent />
-          <Dropdown
+          {/* <Dropdown
             trigger={['click']}
             overlay={
               <Menu onClick={selectLocale}>
                 <Menu.Item style={{ textAlign: 'left' }} disabled={locale === 'zh_CN'} key="zh_CN">
-                  {/* <ZhCnSvg />  */}
+                  <ZhCnSvg />
                   <SvgIcon name="header-zh_CN" />
                   简体中文
                 </Menu.Item>
                 <Menu.Item style={{ textAlign: 'left' }} disabled={locale === 'en_US'} key="en_US">
-                  {/* <EnUsSvg />  */}
+                  <EnUsSvg />
                   <SvgIcon name="header-en_US" />
                   English
                 </Menu.Item>
@@ -107,9 +108,9 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
             <span>
               <SvgIcon name="header-language" />
 
-              {/* <LanguageSvg id="language-change" /> */}
+              <LanguageSvg />
             </span>
-          </Dropdown>
+          </Dropdown> */}
           {logged ? (
             <Dropdown overlay={menu} trigger={['click']}>
               <span className="user-action">
