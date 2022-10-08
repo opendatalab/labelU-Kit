@@ -44,8 +44,8 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
     upperLimitPointNum: 100,
     attributeList: [
       {
-        key: 'tag1',
-        value: 'tag1'
+        key: 'polygonTool',
+        value: 'polygonTool'
       }
     ]
   } as FormPolygonConfig);
@@ -65,8 +65,8 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
             props.config.attributeList
           : [
               {
-                key: 'tag1',
-                value: 'tag1'
+                key: 'polygonTool',
+                value: 'polygonTool'
               }
             ]
       };

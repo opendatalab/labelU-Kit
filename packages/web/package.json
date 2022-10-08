@@ -60,13 +60,6 @@
     "test": "craco test"
   },
   "author": "wuhui",
-  "contributors": [
-    "lijingchi",
-    "tanjunbao",
-    "chenlu",
-    "lihuaqi",
-    "luoluo"
-  ],
   "keywords": [
     "annotation",
     "canvas",

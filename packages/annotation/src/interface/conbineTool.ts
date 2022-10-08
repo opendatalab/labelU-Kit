@@ -18,14 +18,14 @@ export interface IMeasureToolConfig extends CommonConfig {
 export interface OneTag {
   key: string;
   value: string;
-  isMulti?: boolean;
-  subSelected?: SubSelected[];
+  isMulti: boolean;
+  subSelected: SubSelected[];
 }
 
 export interface SubSelected {
   key: string;
   value: string;
-  isDefault?: boolean;
+  isDefault: boolean;
 }
 
 export interface RectConfig extends CommonConfig {

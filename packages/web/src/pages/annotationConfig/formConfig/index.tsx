@@ -27,11 +27,11 @@ const FormConfig: FC = props => {
   const [media, setMedia] = useState<string>('图片');
   const [selectTools, setSelectTools] = useState<string[]>([]);
   // const [curentTool, setCurrentTool] = useState<string>();
-
+  const [isConfigLoad, setIsConfigLoad] = useState<boolean>(true);
   for (let i = 0; i < types.length; i++) {
     children.push(<Option key={types[i]}>{types[i]}</Option>);
   }
-
+  const [force, forceSet] = useState(0);
   const items = useMemo(() => {
     let items = [];
     for (let i = 0; i < toolnames.length; i++) {
@@ -54,10 +54,11 @@ const FormConfig: FC = props => {
       }
     }
     return items;
-  }, [tools]);
+  }, [selectTools, tools]);
 
   const loadInitConfig = async (toolname: string, tools: BasicConfig[]) => {
-    new Promise(async (resolve, reject) => {
+    setIsConfigLoad(false);
+    await new Promise(async (resolve, reject) => {
       if (toolname) {
         const config = await LoadInitConfig(toolname);
         const keys = Object.keys(config);
@@ -78,6 +79,7 @@ const FormConfig: FC = props => {
         resolve(config);
       }
     });
+    setIsConfigLoad(true);
   };
 
   useEffect(() => {
@@ -181,6 +183,9 @@ const FormConfig: FC = props => {
           <Tabs
             // onChange={onChange}
             type="card"
+            onChange={e => {
+              forceSet(new Date().getTime());
+            }}
             items={selectTools.map((_, i) => {
               const id = String(i + 1);
               // 配置初始化
@@ -235,13 +240,17 @@ const FormConfig: FC = props => {
                     >
                       {<FormEngine toolname={_} config={initC} />}
 
-                      <CommonFormItem
-                        attribute={attribute}
-                        {...commonConfig}
-                        name="commonForm"
-                        toolName={_}
-                        isShow={isShow}
-                      />
+                      {isConfigLoad && (
+                        <CommonFormItem
+                          key={force}
+                          commonAttributeConfigurable={attribute.length > 0}
+                          attribute={attribute}
+                          {...commonConfig}
+                          name="commonForm"
+                          toolName={_}
+                          isShow={isShow}
+                        />
+                      )}
                     </Form.Provider>
                   </div>
                 )

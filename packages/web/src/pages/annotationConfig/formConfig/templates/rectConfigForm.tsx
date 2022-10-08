@@ -40,8 +40,8 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
     minHeight: 10,
     attributeList: [
       {
-        key: 'tag1',
-        value: 'tag1'
+        key: 'rectTool',
+        value: 'rectTool'
       }
     ]
   } as FormRectConfig);
@@ -59,8 +59,8 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
             props.config.attributeList
           : [
               {
-                key: 'tag1',
-                value: 'tag1'
+                key: 'rectTool',
+                value: 'rectTool'
               }
             ]
       };

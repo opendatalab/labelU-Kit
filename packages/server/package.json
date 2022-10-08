@@ -3,9 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "pkg":"pkg -t win package.json",
+    "pkgl":"pkg -t linux package.json"
   },
+
+   "bin": "./bin/www",
+   "pkg": {
+       "assets": [
+           "public/**/*",
+           "views/**/*"
+       ]
+   },
   "dependencies": {
+    "connect-history-api-fallback": "^2.0.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",

@@ -37,7 +37,10 @@ const AnnotationConfig: FC = () => {
       attribute: attribute,
       textConfig: textConfig
     });
+    // 配置更新表单刷新
+    forceSet(new Date().getTime());
   }, [attribute, tagList, textConfig, tools, fileInfo]);
+
   // 加载工具配置信息 和 文件信息
   useEffect(() => {
     if (fileInfo.list && fileInfo.list.length > 0) {
@@ -99,7 +102,7 @@ const AnnotationConfig: FC = () => {
           >
             <Tabs.TabPane tab="YAML" key="1">
               <div className="leftPane">
-                <YamlConfig toolsConfigState={confitState} doSetImg={doSetImage} />
+                <YamlConfig toolsConfigState={confitState} doSetImg={doSetImage} key={force} />
               </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="可视化" key="2" forceRender={true}>

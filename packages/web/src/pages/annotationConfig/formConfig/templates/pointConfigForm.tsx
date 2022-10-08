@@ -37,8 +37,8 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = props => {
     upperLimit: 10,
     attributeList: [
       {
-        key: 'tag1',
-        value: 'tag1'
+        key: 'pointTool',
+        value: 'pointTool'
       }
     ]
   } as FormPointConfig);
@@ -54,8 +54,8 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = props => {
             props.config.attributeList
           : [
               {
-                key: 'tag1',
-                value: 'tag1'
+                key: 'pointTool',
+                value: 'pointTool'
               }
             ]
       };
