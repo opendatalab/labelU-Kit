@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import path from 'path';
-import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
+// import path from 'path';
+// import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 // const pathResolve = (dir) => {
 //   return resolve(__dirname, '.', dir);
 // };
@@ -20,25 +20,25 @@ export default defineConfig({
   //   }
   // },
   plugins: [
-    react(),
-    createSvgIconsPlugin({
-      // 指定需要缓存的图标文件夹
-      iconDirs: [path.resolve(process.cwd(), 'src/img')],
-      // Specify symbolId format
-      symbolId: 'icon-[dir]-[name]',
+    react()
+    // createSvgIconsPlugin({
+    //   // 指定需要缓存的图标文件夹
+    //   iconDirs: [path.resolve(process.cwd(), 'src/img')],
+    //   // Specify symbolId format
+    //   symbolId: 'icon-[dir]-[name]',
 
-      /**
-       * custom insert position
-       * @default: body-last
-       */
-      inject: 'body-last' | 'body-first',
+    //   /**
+    //    * custom insert position
+    //    * @default: body-last
+    //    */
+    //   inject: 'body-last' | 'body-first',
 
-      /**
-       * custom dom id
-       * @default: __svg__icons__dom__
-       */
-      customDomId: '__svg__icons__dom__'
-    })
+    //   /**
+    //    * custom dom id
+    //    * @default: __svg__icons__dom__
+    //    */
+    //   customDomId: '__svg__icons__dom__'
+    // })
   ],
   // resolve: {
   //   alias: [

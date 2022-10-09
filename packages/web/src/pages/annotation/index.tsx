@@ -37,7 +37,6 @@ const AnnotationPage: FC = () => {
   const goBack = (data: any) => {
     console.log('goBack', data);
   };
-
   return (
     <>
       {fileList && fileList.length > 0 && tools && tools.length > 0 && (

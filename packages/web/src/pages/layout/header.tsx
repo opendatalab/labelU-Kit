@@ -76,7 +76,7 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
       {device !== 'MOBILE' && (
         <div className="logo" style={{ width: collapsed ? 80 : 200 }}>
           {/* <SvgIcon name="logo-react" style={{ marginRight: collapsed ? '2px' : '20px' }} /> */}
-          <img src={LogoIcon} alt="" style={{ width: 160, height: 32 }} />
+          <img src={LogoIcon} alt="" style={{ width: 80, height: 22 }} />
           {/* <img src={AntdSvg} alt="" /> */}
 
           {/* <SvgIcon name="logo-logo" width={160} height={32}/> */}
@@ -87,7 +87,7 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
           <span id="sidebar-trigger">{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}</span>
         </div>
         <div className="actions">
-          <HeaderNoticeComponent />
+          {/* <HeaderNoticeComponent /> */}
           {/* <Dropdown
             trigger={['click']}
             overlay={
@@ -112,13 +112,14 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
             </span>
           </Dropdown> */}
           {logged ? (
-            <Dropdown overlay={menu} trigger={['click']}>
-              <span className="user-action">
-                {/* <SvgIcon name='header-avator' /> */}
-                <img src={Avator} className="user-avator" alt="avator" />
-              </span>
-            </Dropdown>
+            <></>
           ) : (
+            // <Dropdown overlay={menu} trigger={['click']}>
+            //   <span className="user-action">
+            //     {/* <SvgIcon name='header-avator' /> */}
+            //     <img src={Avator} className="user-avator" alt="avator" />
+            //   </span>
+            // </Dropdown>
             <span style={{ cursor: 'pointer' }} onClick={toLogin}>
               {formatMessage({ id: 'gloabal.tips.login' })}
             </span>
