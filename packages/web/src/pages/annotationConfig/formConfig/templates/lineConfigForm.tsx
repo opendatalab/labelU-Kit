@@ -94,7 +94,7 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
                 message: 'Please select lineType!'
               }
             ]}
-            initialValue={initVal.lineType + ''}
+            initialValue={initVal.lineType}
           >
             <Select
               placeholder="请选择线类型"
@@ -102,8 +102,8 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
                 form.submit();
               }}
             >
-              <Option value="0">直线</Option>
-              <Option value="2">贝塞尔曲线</Option>
+              <Option value={0}>直线</Option>
+              <Option value={1}>贝塞尔曲线</Option>
             </Select>
           </Form.Item>
 

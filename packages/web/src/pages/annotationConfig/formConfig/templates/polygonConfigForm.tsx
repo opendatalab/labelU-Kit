@@ -90,7 +90,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
           <Form.Item
             name="lineType"
             label="线条类型"
-            initialValue={initVal.lineType + ''}
+            initialValue={initVal.lineType}
             rules={[
               {
                 required: true,
@@ -104,8 +104,8 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
                 form.submit();
               }}
             >
-              <Option value="0">直线</Option>
-              <Option value="2">贝塞尔曲线</Option>
+              <Option value={0}>直线</Option>
+              <Option value={1}>贝塞尔曲线</Option>
             </Select>
           </Form.Item>
 

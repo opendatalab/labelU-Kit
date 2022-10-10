@@ -17,22 +17,22 @@ module.exports = {
       return webpackConfig;
     },
     plugins: [
-      new SimpleProgressWebpackPlugin()
-      // new TerserPlugin({
-      //   terserOptions: {
-      //     ecma: undefined,
-      //     parse: {},
-      //     sourceMap: true,
-      //     warnings: false,
-      //     compress: {
-      //       toplevel: true,
-      //       drop_console: true,
-      //       drop_debugger: false,
-      //       pure_funcs: ['console.log']
-      //       // pure_funcs:['console.log']
-      //     }
-      //   }
-      // })
+      new SimpleProgressWebpackPlugin(),
+      new TerserPlugin({
+        terserOptions: {
+          ecma: undefined,
+          parse: {},
+          sourceMap: true,
+          warnings: false,
+          compress: {
+            toplevel: true,
+            drop_console: true,
+            drop_debugger: false,
+            pure_funcs: ['console.log']
+            // pure_funcs:['console.log']
+          }
+        }
+      })
     ]
   },
 

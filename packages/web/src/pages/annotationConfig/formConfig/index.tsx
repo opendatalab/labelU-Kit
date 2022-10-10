@@ -121,7 +121,7 @@ const FormConfig: FC = props => {
 
   const updateCombineToolsConfig = (tools: BasicConfig[], config: object, toolname: string) => {
     let newTools = tools.reduce((res, item) => {
-      if (item.tool === toolname) {
+      if (item.tool === toolname || toolname === 'commonForm') {
         let copyItem = { ...item };
         let newConfig = {
           ...copyItem.config,
@@ -148,20 +148,19 @@ const FormConfig: FC = props => {
       }
     }
     if (name === 'commonForm') {
-      if (info.values.attribute) {
+      if (info.values.attribute !== undefined) {
         dispatch(updateAllAttributeConfigList(info.values.attribute));
       }
       let commonToolConfig = {};
-      if (info.values.drawOutsideTarget) {
+      if (info.values.drawOutsideTarget !== undefined) {
         commonToolConfig = Object.assign(commonToolConfig, { drawOutsideTarget: info.values.drawOutsideTarget });
       }
-      if (info.values.textConfigurableContext) {
+      if (info.values.textConfigurableContext !== undefined) {
         commonToolConfig = Object.assign(commonToolConfig, info.values.textConfigurableContext);
       }
       updateCombineToolsConfig(tools, commonToolConfig, name);
     }
   };
-
   return (
     <div className="formConfig" style={{ height: height }}>
       <div className="oneRow">
@@ -183,7 +182,10 @@ const FormConfig: FC = props => {
           <Tabs
             // onChange={onChange}
             type="card"
+            activeKey={localStorage.getItem('activeTabKeys') || '0'}
             onChange={e => {
+              debugger;
+              localStorage.setItem('activeTabKeys', e);
               forceSet(new Date().getTime());
             }}
             items={selectTools.map((_, i) => {

@@ -45,7 +45,7 @@ export const getLabelConfig: (imgLebalConfig: Item[]) => Promise<configItem[]> =
     const reuslt: configItem[] = [];
     if (imgLebalConfig.length > 0) {
       for (let item of imgLebalConfig) {
-        let { default: imgSrc } = await import(`../avatorImg/${item.img}.png`);
+        let { default: imgSrc } = await import(`../frontCoverImg/${item.img}.png`);
         let { default: tmpl } = await import(`../configs/${item.tmplateName}`);
         reuslt.push({
           label: item.label,
