@@ -6,11 +6,15 @@ import DownWardIcon from '../../../../img/common/downWardIcon.svg';
 import UpperIcon from '../../../../img/common/upperIcon.svg';
 import { AttributeItem } from './rectConfigForm';
 import { useForm } from 'antd/es/form/Form';
+import _ from 'lodash';
+import { delayTime } from '../constants';
 const { Option } = Select;
+
 interface FormLineConfig {
   lineType: number;
   lowerLimitPointNum: number;
   upperLimitPointNum: number;
+  edgeAdsorption: boolean;
   attributeList: AttributeItem[];
 }
 
@@ -52,6 +56,8 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
     if (props.config) {
       let initV = {
         // @ts-ignore
+        edgeAdsorption: props.config.edgeAdsorption ? props.config.edgeAdsorption : false,
+        // @ts-ignore
         lineType: props.config.lineType ? props.config.lineType : 0,
         // @ts-ignore
         lowerLimitPointNum: props.config.lowerLimitPointNum ? props.config.lowerLimitPointNum : 10,
@@ -73,27 +79,24 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
     }
   }, []);
 
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
+    form.submit();
+  }, delayTime);
+
   return (
     <div>
       <div className="selectedMain">
-        <Form
-          {...formItemLayout}
-          name={props.name}
-          form={form}
-          onChange={e => {
-            e.stopPropagation();
-            form.submit();
-          }}
-        >
+        <Form {...formItemLayout} name={props.name} form={form} onChange={formSubmitThrottle}>
           <Form.Item
             name="lineType"
             label="线条类型"
-            rules={[
-              {
-                required: true,
-                message: 'Please select lineType!'
-              }
-            ]}
+            // rules={[
+            //   {
+            //     required: true,
+            //     message: 'Please select lineType!'
+            //   }
+            // ]}
             initialValue={initVal.lineType}
           >
             <Select
@@ -127,8 +130,8 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
           <Form.Item
             valuePropName="checked"
             label={<span className="formTitle">边缘吸附</span>}
-            name="attributeConfigurable"
-            initialValue={false}
+            name="edgeAdsorption"
+            initialValue={initVal.edgeAdsorption}
           >
             <Switch
               disabled={isAllReadOnly}
@@ -140,7 +143,7 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
 
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
             <MapStateJSONTab
-              onChange={e => {
+              onSubmitAction={() => {
                 form.submit();
               }}
               isAttributeList={true}

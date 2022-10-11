@@ -2,8 +2,8 @@
 import { COLORS_ARRAY } from '@label-u/annotation';
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 import { CloseCircleFilled } from '@ant-design/icons';
-import { Button, Tabs, Input as SenseInput, message as SenseMessage } from 'antd';
-import React, { useEffect, useRef, useState } from 'react';
+import { Button, Input as SenseInput } from 'antd';
+import React, { useRef } from 'react';
 // import MonacoEditor from 'react-monaco-editor';
 // import styles from '../../index.module.scss';
 import './index.less';
@@ -14,11 +14,12 @@ interface IJsonTabProps {
   value?: any[];
   readonly: boolean;
   onChange?: (value: any[]) => void;
+  // 提交
+  onSubmitAction?: () => void;
   /** 是否为属性列表 */
   isAttributeList: boolean;
 }
 const EDIT_SUBSELECTED = false;
-const { TabPane } = Tabs;
 
 export const ColorTag = ({ color, style }: any) => {
   return (
@@ -47,6 +48,7 @@ const JSONTab = (props: IJsonTabProps) => {
     ],
     readonly,
     onChange,
+    onSubmitAction,
     isAttributeList
   } = props;
 
@@ -63,6 +65,7 @@ const JSONTab = (props: IJsonTabProps) => {
 
   const addInputInfo = () => {
     onChange?.(addInputList(value, EDIT_SUBSELECTED));
+    onSubmitAction?.();
   };
 
   // const changeTagType = (v: any) => {};
@@ -75,11 +78,11 @@ const JSONTab = (props: IJsonTabProps) => {
   // 删除对应输入
   const deleteInputInfo = (i: number) => {
     onChange?.(deleteInputList(value, i));
+    // 删除行提交
+    onSubmitAction?.();
   };
 
   return (
-    // <Tabs onChange={changeTagType}>
-    //   <TabPane tab={t('Form')} key="1">
     <div>
       {value?.map((info, i) => (
         <div className="sensebee-input-wrap" key={`inputList_${i}`}>

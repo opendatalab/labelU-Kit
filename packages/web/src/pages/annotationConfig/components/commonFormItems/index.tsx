@@ -1,5 +1,6 @@
 import { Attribute } from '@label-u/annotation';
 import { Form, Switch } from 'antd';
+import { delayTime } from '../../formConfig/constants';
 import React, { FC, useMemo, useState } from 'react';
 import { MapStateJSONTab } from '../AttributeConfig';
 import TextConfigurable from '../TextConfigurable';
@@ -51,20 +52,18 @@ const CommonFormItem: FC<CommonFormConf & { name: string; toolName: string; isSh
     }
   }, [props]);
 
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
+    form.submit();
+  }, delayTime);
+
   if (!props.isShow) {
     return <></>;
   }
   return (
     <div style={{ marginTop: 10 }}>
       {initVal && (
-        <Form
-          {...formItemLayout}
-          onChange={e => {
-            form.submit();
-          }}
-          form={form}
-          name={props.name}
-        >
+        <Form {...formItemLayout} onChange={formSubmitThrottle} form={form} name={props.name}>
           {props.toolName !== 'lineTool' && (
             <Form.Item
               valuePropName="checked"
@@ -96,9 +95,12 @@ const CommonFormItem: FC<CommonFormConf & { name: string; toolName: string; isSh
                 form?.getFieldValue('commonAttributeConfigurable') && (
                   <Form.Item label=" " name="attribute" initialValue={initVal.attribute}>
                     <MapStateJSONTab
-                      onChange={e => {
+                      onSubmitAction={() => {
                         form.submit();
                       }}
+                      // onChange={e => {
+                      //   form.submit();
+                      // }}
                       isAttributeList={true}
                       readonly={isAllReadOnly}
                     />

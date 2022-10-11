@@ -453,7 +453,6 @@ export const annotationReducer = (
         toolInstance?.setResult(resultForBasicIndex);
         toolInstance?.history.initRecord(result, true);
       }
-
       return {
         ...state,
         imgIndex: nextIndex,

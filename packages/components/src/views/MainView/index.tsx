@@ -67,16 +67,17 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
         <Layout className={`${layoutCls} ${props.className}`} style={props.style?.layout}>
           <header className={`${layoutCls}__header`} style={props.style?.header}>
             <ToolHeader
+              isPreview={props?.isPreview}
               header={props?.header}
               headerName={props.headerName}
               goBack={props.goBack}
               exportData={props.exportData}
             />
           </header>
+          <AttributeOperation />
           <Layout>
             {props.leftSider ? props.leftSider : <LeftSider {...props} />}
             <Content className={`${layoutCls}__content`}>
-              <AttributeOperation />
               <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
             <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>

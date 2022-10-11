@@ -3,7 +3,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { Col, Row, Input as SenseInput, Form } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
 import { useForm } from 'antd/es/form/Form';
-
+import { delayTime } from '../constants';
 export interface AttributeItem {
   key: string;
   value: string;
@@ -68,18 +68,15 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
     }
   }, []);
 
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
+    form.submit();
+  }, delayTime);
+
   return (
     <div>
       <div className="selectedMain">
-        <Form
-          {...formItemLayout}
-          name={props.name}
-          form={form}
-          onChange={e => {
-            e.stopPropagation();
-            form.submit();
-          }}
-        >
+        <Form {...formItemLayout} name={props.name} form={form} onChange={formSubmitThrottle}>
           <Row>
             <Col span={4}>
               <div className="selectedName">最小尺寸</div>
@@ -98,7 +95,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
           </Row>
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
             <MapStateJSONTab
-              onChange={e => {
+              onSubmitAction={() => {
                 form.submit();
               }}
               isAttributeList={true}

@@ -184,7 +184,6 @@ const FormConfig: FC = props => {
             type="card"
             activeKey={localStorage.getItem('activeTabKeys') || '0'}
             onChange={e => {
-              debugger;
               localStorage.setItem('activeTabKeys', e);
               forceSet(new Date().getTime());
             }}
@@ -236,8 +235,10 @@ const FormConfig: FC = props => {
                   <div className="toolConfigPane">
                     <Form.Provider
                       onFormFinish={(name, info) => {
-                        // todo 统一处理表单 和  标注工具之间联动
-                        actUpdateToolsConfig(name, info);
+                        if (Object.keys(info.forms).length > 0) {
+                          // todo 统一处理表单 和  标注工具之间联动
+                          actUpdateToolsConfig(name, info);
+                        }
                       }}
                     >
                       {<FormEngine toolname={_} config={initC} />}

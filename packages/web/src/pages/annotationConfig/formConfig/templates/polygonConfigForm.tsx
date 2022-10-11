@@ -7,6 +7,7 @@ import DownWardIcon from '../../../../img/common/downWardIcon.svg';
 import UpperIcon from '../../../../img/common/upperIcon.svg';
 import { AttributeItem } from './rectConfigForm';
 import { useForm } from 'antd/es/form/Form';
+import { delayTime } from '../constants';
 const { Option } = Select;
 
 interface FormPolygonConfig {
@@ -75,28 +76,24 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
     }
   }, []);
 
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
+    form.submit();
+  }, delayTime);
   return (
     <div>
       <div className="selectedMain">
-        <Form
-          {...formItemLayout}
-          name={props.name}
-          form={form}
-          onChange={e => {
-            e.stopPropagation();
-            form.submit();
-          }}
-        >
+        <Form {...formItemLayout} name={props.name} form={form} onChange={formSubmitThrottle}>
           <Form.Item
             name="lineType"
             label="线条类型"
             initialValue={initVal.lineType}
-            rules={[
-              {
-                required: true,
-                message: 'Please select lineType!'
-              }
-            ]}
+            // rules={[
+            //   {
+            //     required: true,
+            //     message: 'Please select lineType!'
+            //   }
+            // ]}
           >
             <Select
               placeholder="请选择线类型"
@@ -127,7 +124,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
           </Row>
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
             <MapStateJSONTab
-              onChange={e => {
+              onSubmitAction={() => {
                 form.submit();
               }}
               isAttributeList={true}

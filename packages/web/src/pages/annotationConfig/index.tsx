@@ -28,6 +28,25 @@ const AnnotationConfig: FC = () => {
   });
   const [force, forceSet] = useState(0);
   const [fileList, setFileList] = useState<OneFile[]>([]);
+
+  useEffect(() => {
+    // 初始化配置防抖方法
+    const throttle = (fun: () => void, time: number) => {
+      let timmer: any;
+      let returnFunction = () => {
+        if (timmer) {
+          clearTimeout(timmer);
+        }
+        timmer = setTimeout(() => {
+          fun();
+        }, time);
+      };
+      return returnFunction;
+    };
+    // @ts-ignore
+    window.throttle = throttle;
+  }, []);
+
   // const currentIsVideo = false;
   useEffect(() => {
     setConfigState({
@@ -117,11 +136,12 @@ const AnnotationConfig: FC = () => {
             <>
               <div className="rightHeader">
                 <span className="leftSpan">标注预览</span>
-                <a className="rightSpan" href="./">
+                {/* <a className="rightSpan" href="./">
                   刷新
-                </a>
+                </a> */}
               </div>
               <Annotation
+                isPreview={true}
                 attribute={attribute}
                 tagList={tagList}
                 fileList={fileList}

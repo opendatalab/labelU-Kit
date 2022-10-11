@@ -89,6 +89,7 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList, imgList }
 };
 
 interface IToolHeaderProps {
+  isPreview?:boolean;
   goBack?: (imgList?: IFileItem[]) => void;
   exportData?: (data: any[]) => void;
   header?: Header;
@@ -105,6 +106,7 @@ interface IToolHeaderProps {
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
   goBack,
+  isPreview,
   // exportData,
   header,
   headerName,
@@ -206,8 +208,6 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
     }
   }
 
-
-
   return (
     <div className={classNames(`${prefix}-header`)} ref={ref}>
       <div className={`${prefix}-header__title`}>
@@ -222,7 +222,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         {/* <div className={`${prefix}-header__titlePlacement`} /> */}
         {/* {langNode} */}
         <ActionOption />
-        {NextImageOption}
+        {!isPreview&&NextImageOption}
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import TagInput from '../../components/TagInput';
 import { OneTag } from '../../../../interface/toolConfig';
 import { useForm } from 'antd/es/form/Form';
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
-
+import { delayTime } from '../constants';
 export interface AttributeItem {
   key: string;
   value: string;
@@ -81,7 +81,6 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
     if (e?.target?.value?.indexOf('@') > -1 && !['isMulti', 'isDefault'].includes(target)) {
       return;
     }
-    console.log(form.getFieldsValue());
     const tagList = form?.getFieldValue('tagList');
     const newTagList = changeInputList(e, target, tagList, index, subIndex);
     form?.setFieldsValue({ tagList: newTagList });
@@ -91,8 +90,6 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
   };
   // add inputList
   const addInputInfo = (i?: number) => {
-    console.log(form.getFieldValue('tagList'));
-    console.log(initVal);
     const tagList = form?.getFieldValue('tagList');
     form?.setFieldsValue({
       tagList: addInputList(tagList, EDIT_SUBSELECTED, i, {
@@ -113,9 +110,14 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
     form?.setFieldsValue({ tagList: deleteInputList(tagList, i, subIndex) });
   };
 
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
+    form.submit();
+  }, delayTime);
+
   // 表单提交处理
   useEffect(() => {
-    form.submit();
+    formSubmitThrottle();
   }, [initVal]);
 
   return (

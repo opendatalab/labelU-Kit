@@ -14,8 +14,9 @@ const Annotation = (props: {
   tagList: OneTag[];
   attribute: Attribute[];
   textConfig: TextConfig;
+  isPreview?: boolean;
 }) => {
-  const { fileList, goBack, tools, tagList, attribute, textConfig } = props;
+  const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview } = props;
   const exportData = (data: any) => {
     console.log('exportData', data);
   };
@@ -29,6 +30,7 @@ const Annotation = (props: {
   return (
     <div>
       <AnnotationOperation
+        isPreview={isPreview}
         // ref={annotationRef}
         exportData={exportData}
         // headerName="测试各类工具"

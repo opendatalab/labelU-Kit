@@ -3,6 +3,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { Form } from 'antd';
 import TextList from '../../components/TextList';
 import { useForm } from 'antd/lib/form/Form';
+import { delayTime } from '../constants';
 
 interface TextConfigProp {
   textConfig: TextConfig;
@@ -39,11 +40,10 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
     }
   ]);
 
-  // 表单提交处理
-  const finish = (value: any) => {
-    form.setFieldsValue({ textConfig: value });
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
     form.submit();
-  };
+  }, delayTime);
 
   useMemo(() => {
     if (props) {
@@ -69,7 +69,12 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
     <div className="selectedMain">
       <Form {...formItemLayout} name={props.name} form={form}>
         <Form.Item label={<span className="formTitle">文本列表</span>} name="textConfig" initialValue={initVal}>
-          <TextList onChange={finish} />
+          <TextList
+            onChange={e => {
+              form.setFieldsValue({ textConfig: e });
+              formSubmitThrottle();
+            }}
+          />
         </Form.Item>
       </Form>
     </div>

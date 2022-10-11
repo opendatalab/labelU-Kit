@@ -6,7 +6,7 @@ import { MapStateJSONTab } from '../../components/AttributeConfig';
 import { AttributeItem } from './rectConfigForm';
 import { useForm } from 'antd/es/form/Form';
 // const { Option } = Select;
-
+import { delayTime } from '../constants';
 interface FormPointConfig {
   upperLimit: number;
   attributeList: AttributeItem[];
@@ -64,25 +64,22 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = props => {
     }
   }, []);
 
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
+    form.submit();
+  }, delayTime);
+
   return (
     <div>
       <div className="selectedMain">
-        <Form
-          {...formItemLayout}
-          name={props.name}
-          form={form}
-          onChange={e => {
-            e.stopPropagation();
-            form.submit();
-          }}
-        >
+        <Form {...formItemLayout} name={props.name} form={form} onChange={formSubmitThrottle}>
           <Form.Item name="upperLimit" label="上限点数" initialValue={initVal.upperLimit}>
             <Input />
           </Form.Item>
 
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
             <MapStateJSONTab
-              onChange={e => {
+              onSubmitAction={() => {
                 form.submit();
               }}
               isAttributeList={true}

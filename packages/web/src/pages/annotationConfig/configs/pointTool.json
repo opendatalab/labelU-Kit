@@ -6,11 +6,6 @@
         "id": 1,
         "url": "http://localhost:3000/src/img/example/bear2.webp",
         "result": "[]"
-      },
-      {
-        "id": 2,
-        "url": "http://localhost:3000/src/img/example/bear3.webp",
-        "result": "[]"
       }
     ]
   },

@@ -26,6 +26,10 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
     const pageJump = (page: number) => {
       dispatch(PageJump(page));
     };
+
+    if(imgList.length === 1){
+      return <div />
+    }
   
     return (
       <div className='sliderBox' id='sliderBoxId'>

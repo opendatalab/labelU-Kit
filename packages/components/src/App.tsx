@@ -36,6 +36,7 @@ export interface AppProps {
   config?: string;
   stepList?: IStepInfo[];
   step?: number;
+  isPreview?:boolean; // if preview
   onSubmit?: OnSubmit;
   onSave?: OnSave;
   onPageChange?: OnPageChange;

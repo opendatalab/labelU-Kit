@@ -23,7 +23,9 @@ export const toolnameC = {
   [EToolName.Polygon]: TOOL_NAME[EToolName.Polygon],
   [EToolName.Line]: TOOL_NAME[EToolName.Line],
   [EToolName.Tag]: TOOL_NAME[EToolName.Tag],
-  [EToolName.Text]: TOOL_NAME[EToolName.Text],
-}
+  [EToolName.Text]: TOOL_NAME[EToolName.Text]
+};
 
 export const types = ['图片'];
+
+export const delayTime = 300;
