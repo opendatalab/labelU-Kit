@@ -1,7 +1,7 @@
 import MainView from '@/views/MainView';
 import { i18n } from '@label-u/utils';
 import React, { useEffect } from 'react';
-import { connect,useDispatch } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
@@ -20,7 +20,7 @@ import {
 import { Footer, Header, Sider } from './types/main';
 import { IStepInfo } from './types/step';
 import loacalforage from 'localforage';
-import { BasicConfig,Attribute,OneTag, TextConfig } from '@/interface/toolConfig';
+import { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
 
 interface IAnnotationStyle {
   strokeColor: string;
@@ -31,12 +31,12 @@ interface IAnnotationStyle {
 
 export interface AppProps {
   exportData?: (data: any[]) => void;
-  goBack?: (data:any) => void;
+  goBack?: (data: any) => void;
   imgList?: IFileItem[];
   config?: string;
   stepList?: IStepInfo[];
   step?: number;
-  isPreview?:boolean; // if preview
+  isPreview?: boolean; // if preview
   onSubmit?: OnSubmit;
   onSave?: OnSave;
   onPageChange?: OnPageChange;
@@ -48,7 +48,7 @@ export interface AppProps {
   initialIndex?: number;
   className?: string;
   toolInstance?: ToolInstance;
-  currentToolName?:string; // redux
+  currentToolName?: string; // redux
   header?: Header;
   footer?: Footer;
   sider?: Sider;
@@ -66,7 +66,7 @@ export interface AppProps {
   tagConfigList?: OneTag[]; // 配置tag 信息，工具共享一套tag
   attributeList?: Attribute[]; // 标签配置选项，工具共享一套标签
   toolsBasicConfig: BasicConfig[]; // 多工具配置
-  textConfig:TextConfig;
+  textConfig: TextConfig;
   // 标注信息扩展的功能
   dataInjectionAtCreation?: (annotationData: any) => {};
   // 渲染增强
@@ -100,9 +100,8 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn',
   } = props;
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   // const [currentTool, setCurrentTool] = useState<string>('rectTool');
-
 
   useEffect(() => {
     if (
@@ -110,11 +109,11 @@ const App: React.FC<AppProps> = (props) => {
       (props.toolsBasicConfig && props.toolsBasicConfig.length > 0)
     ) {
       let initToolName = currentToolName;
-      let findToolConfigByToolName =  toolsBasicConfig.filter((item)=>{
-        return item.tool === currentToolName
-      })
+      let findToolConfigByToolName = toolsBasicConfig.filter((item) => {
+        return item.tool === currentToolName;
+      });
       // 当工具配置中不包含currentToolName时，重置currentToolName
-      if(findToolConfigByToolName.length === 0){
+      if (findToolConfigByToolName && findToolConfigByToolName.length === 0) {
         initToolName = toolsBasicConfig[0].tool;
         dispatch(ChangeCurrentTool(initToolName));
       }
@@ -136,12 +135,17 @@ const App: React.FC<AppProps> = (props) => {
           onStepChange,
         }),
       );
-
       initImgList();
       // 初始化国际化语言
       i18n.changeLanguage(defaultLang);
     }
-  }, [props.toolsBasicConfig,props.attributeList,props.textConfig,props.tagConfigList, currentToolName]);
+  }, [
+    props.toolsBasicConfig,
+    props.attributeList,
+    props.textConfig,
+    props.tagConfigList,
+    currentToolName,
+  ]);
 
   useEffect(() => {
     if (toolInstance) {
@@ -166,7 +170,7 @@ const App: React.FC<AppProps> = (props) => {
       });
       // 页数持久化
       loacalforage.getItem('nextIndex', (error, value) => {
-        if (value) {
+        if (value && value < imgList.length) {
           store.dispatch(LoadFileAndFileData(value as number));
         } else {
           store.dispatch(LoadFileAndFileData(initialIndex));
@@ -184,7 +188,7 @@ const App: React.FC<AppProps> = (props) => {
 
 const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
-  currentToolName:state.annotation.currentToolName
+  currentToolName: state.annotation.currentToolName,
 });
 
 export default connect(mapStateToProps)(App);

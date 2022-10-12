@@ -81,7 +81,7 @@ const AttributeRusult: FC<IProps> = ({
   };
 
   useEffect(() => {
-    if (imgList && imgList.length > 0) {
+    if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
       let resultKeys = Object.keys(currentImgResult);
       let tmpAttributeResult: AttributeResult[] = [];
@@ -120,9 +120,9 @@ const AttributeRusult: FC<IProps> = ({
       for (let key of attributeMap.keys()) {
         let toolInfo = attributeMap.get(key);
         let isVisible = true;
-        if(toolInfo.length>0){
-          for(let tool of toolInfo){
-            if(!tool.isVisible){
+        if (toolInfo&&toolInfo.length > 0) {
+          for (let tool of toolInfo) {
+            if (!tool.isVisible) {
               isVisible = false;
               break;
             }
@@ -140,29 +140,31 @@ const AttributeRusult: FC<IProps> = ({
 
   // 修改标注描述信息 || 修改是否可以显示
   const updateLabelResult = (toolInfo: ToolInfo) => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    // 更新结果
-    if (
-      oldImgResult[toolInfo.toolName].result &&
-      oldImgResult[toolInfo.toolName].result.length > 0
-    ) {
-      let newToolLabelItems = oldImgResult[toolInfo.toolName].result.map(
-        (item: { order: number; isVisible: boolean }) => {
-          if (item.order === toolInfo.order) {
-            return {
-              ...item,
-              isVisible: toolInfo.isVisible,
-              textAttribute: toolInfo.textAttribute,
-            };
-          }
-          return item;
-        },
-      );
-      oldImgResult[toolInfo.toolName].result = newToolLabelItems;
+    if (imgList && imgList.length > 0 &&imgList.length > imgIndex) {
+      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      // 更新结果
+      if (
+        oldImgResult[toolInfo.toolName].result &&
+        oldImgResult[toolInfo.toolName].result.length > 0
+      ) {
+        let newToolLabelItems = oldImgResult[toolInfo.toolName].result.map(
+          (item: { order: number; isVisible: boolean }) => {
+            if (item.order === toolInfo.order) {
+              return {
+                ...item,
+                isVisible: toolInfo.isVisible,
+                textAttribute: toolInfo.textAttribute,
+              };
+            }
+            return item;
+          },
+        );
+        oldImgResult[toolInfo.toolName].result = newToolLabelItems;
+      }
+      imgList[imgIndex].result = JSON.stringify(oldImgResult);
+      dispatch(UpdateImgList(imgList));
+      updateCanvasView(oldImgResult);
     }
-    imgList[imgIndex].result = JSON.stringify(oldImgResult);
-    dispatch(UpdateImgList(imgList));
-    updateCanvasView(oldImgResult);
   };
 
   // 批量修改是否可以显示
@@ -335,7 +337,7 @@ const AttributeRusult: FC<IProps> = ({
   };
 
   useEffect(() => {
-    if (imgList && basicResultList) {
+    if (imgList && basicResultList && imgList.length > imgIndex) {
       const toolInfoStr = localStorage.getItem('toolInfo');
       // 获取basicReuslt 有哪几种标注结果
       const basicResultTools = basicResultList.reduce((res, item: { toolName: string }) => {

@@ -756,7 +756,7 @@ class PolygonOperation extends BasicToolOperation {
 
       default: {
         if (this.config.attributeConfigurable) {
-          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
+          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config?.attributeList);
 
           if (keyCode2Attribute !== undefined) {
             this.setDefaultAttribute(keyCode2Attribute);
@@ -1339,7 +1339,7 @@ class PolygonOperation extends BasicToolOperation {
   public getTextIconSvg(attribute = '') {
     return AttributeUtils.getTextIconSvg(
       attribute,
-      this.config.attributeList,
+      this.config?.attributeList,
       this.config.attributeConfigurable,
       this.baseIcon,
     );
@@ -1444,7 +1444,7 @@ class PolygonOperation extends BasicToolOperation {
             lineType: this.config?.lineType,
           });
 
-          let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config.attributeList) ?? ''}`;
+          let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config?.attributeList) ?? ''}`;
           if (this.config?.isShowOrder && polygon?.order > 0) {
             showText = `${polygon.order} ${showText}`;
           }
@@ -1516,7 +1516,7 @@ class PolygonOperation extends BasicToolOperation {
         );
 
         let showText = `${
-          AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config.attributeList) ?? ''
+          AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config?.attributeList) ?? ''
         }`;
         if (this.config?.isShowOrder && selectdPolygon?.order > 0) {
           showText = `${selectdPolygon.order} ${showText}`;

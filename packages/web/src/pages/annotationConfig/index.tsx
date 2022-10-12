@@ -19,6 +19,7 @@ interface OneFile {
 const AnnotationConfig: FC = () => {
   const { tools, tagList, attribute, textConfig, fileInfo } = useSelector(state => state.toolsConfig, shallowEqual);
   const [rightImg, setRightImg] = useState<any>();
+  const [isConfigError, setIsConfigError] = useState<boolean>(false);
   const [confitState, setConfigState] = useState<ToolsConfigState>({
     fileInfo: fileInfo,
     tools: tools,
@@ -45,6 +46,7 @@ const AnnotationConfig: FC = () => {
     };
     // @ts-ignore
     window.throttle = throttle;
+    setRightImg(EmptyConfigImg);
   }, []);
 
   // const currentIsVideo = false;
@@ -71,22 +73,21 @@ const AnnotationConfig: FC = () => {
       }));
       setFileList(fList);
     }
-    setRightImg(EmptyConfigImg);
   }, [fileInfo]);
 
   const goBack = (data: any) => {
     console.log('goBack', data);
   };
 
-  const doSetImage = (img: any) => {
+  const doSetImage = (img: any, isError: boolean) => {
     setRightImg(img);
+    setIsConfigError(isError);
   };
 
   const extraContent = {
     left: <span className="leftTabContent">标注配置</span>,
     right: <ConfigTemplate />
   };
-
   return (
     <div className="container">
       <div className="headerBox">
@@ -132,13 +133,10 @@ const AnnotationConfig: FC = () => {
           </Tabs>
         </div>
         <div className="rightSider">
-          {fileList && fileList.length > 0 && tools && tools.length > 0 ? (
+          {((fileList && fileList.length > 0 && tools && tools.length > 0) || !rightImg) && !isConfigError ? (
             <>
               <div className="rightHeader">
                 <span className="leftSpan">标注预览</span>
-                {/* <a className="rightSpan" href="./">
-                  刷新
-                </a> */}
               </div>
               <Annotation
                 isPreview={true}

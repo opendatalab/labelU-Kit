@@ -1,4 +1,6 @@
+import { BasicConfig } from 'interface/toolConfig';
 import { isObject } from 'lodash';
+import { toolnameC } from '../../pages/annotationConfig/formConfig/constants';
 import { ReactNode } from 'react';
 
 export function checkNumber(v: string) {
@@ -18,7 +20,7 @@ export function formatDate(date: Date, fmt: string) {
     'd+': date.getDate(),
     'h+': date.getHours(),
     'm+': date.getMinutes(),
-    's+': date.getSeconds(),
+    's+': date.getSeconds()
   };
   for (let k in o) {
     // @ts-ignore
@@ -61,7 +63,7 @@ export const copyText = (text: string, element: 'input' | 'textarea' = 'input') 
     'style',
     `
       display: 'none'
-    `,
+    `
   );
 
   document.body.appendChild(copyInput);
@@ -81,4 +83,17 @@ export const getBaseName = (path: string) => {
   const separator = /^Win/.test(navigator.platform) ? '\\' : '/';
   const splitPath = path.split(separator);
   return splitPath[splitPath.length - 1];
+};
+
+export const validateTools = (tools: BasicConfig[]) => {
+  if (tools && tools.length > 0) {
+    for (let i = 0; i < tools.length; i++) {
+      if (Object.keys(toolnameC).indexOf(tools[i].tool) < 0) {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+  return true;
 };

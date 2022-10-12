@@ -75,7 +75,8 @@ export default class AnnotationEngine {
         props.toolName === 'pointTool' ||
         props.toolName === 'lineTool' ||
         props.toolName === 'polygonTool') &&
-      props.config !== undefined &&
+      props.config &&
+      typeof props.config === 'object' &&
       Object.keys(props.config).indexOf('attributeList') >= 0
     ) {
       // @ts-ignore

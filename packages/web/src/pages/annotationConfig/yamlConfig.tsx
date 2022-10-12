@@ -21,10 +21,11 @@ import {
   updateToolsConfig
 } from '../../stores/toolConfig.store';
 import { compare } from '../../utils';
+import { validateTools } from '../../utils/tool/common';
 
 interface YamlConfigProps {
   toolsConfigState: ToolsConfigState;
-  doSetImg: (img: any) => void;
+  doSetImg: (img: any, isError: boolean) => void;
 }
 
 const YamlConfig: FC<YamlConfigProps> = props => {
@@ -41,9 +42,15 @@ const YamlConfig: FC<YamlConfigProps> = props => {
     for (let i = 0; i < keys.length; i++) {
       if (
         // @ts-ignore
-        (Array.isArray(props.toolsConfigState[keys[i]]) && props.toolsConfigState[keys[i]].length > 0) ||
+        props.toolsConfigState[keys[i]] &&
         // @ts-ignore
-        (!Array.isArray(props.toolsConfigState[keys[i]]) && Object.keys(props.toolsConfigState[keys[i]]).length > 0)
+        ((Array.isArray(props.toolsConfigState[keys[i]]) && props.toolsConfigState[keys[i]].length > 0) ||
+          // @ts-ignore
+          (!Array.isArray(props.toolsConfigState[keys[i]]) &&
+            // @ts-ignore
+            Object.keys(props.toolsConfigState[keys[i]]) &&
+            // @ts-ignore
+            Object.keys(props.toolsConfigState[keys[i]]).length > 0))
       ) {
         // @ts-ignore
         tmpStepConfig = { ...tmpStepConfig, [keys[i]]: props.toolsConfigState[keys[i]] };
@@ -91,16 +98,21 @@ const YamlConfig: FC<YamlConfigProps> = props => {
         } else if (key === 'textConfig' && !compare(configs[key], textConfig)) {
           dispatch(updateTextConfig(configs[key]));
         } else if (key === 'tools' && !compare(configs[key], tools)) {
+          if (!validateTools(configs[key])) {
+            props.doSetImg(ConfigNotMatchImg, true);
+          } else {
+            props.doSetImg(ConfigNotMatchImg, false);
+          }
           dispatch(updateToolsConfig(configs[key]));
         } else if (key === 'fileInfo') {
           dispatch(updateFileInfo(configs[key]));
         }
       }
     } catch (error) {
-      props.doSetImg(ConfigNotMatchImg);
-      message.error('输入格式有误，请重新输入');
+      props.doSetImg(ConfigNotMatchImg, true);
     }
   };
+
   const onChnageAce = _.debounce((e: any) => {
     setXmlValue(e);
   }, 10);

@@ -267,7 +267,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get attributeList() {
-    return this.config.attributeList;
+    return this.config?.attributeList;
   }
 
   get lowerLimitPointNum() {
@@ -1577,7 +1577,7 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.config.attributeConfigurable) {
-      const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(e.keyCode, this.config.attributeList);
+      const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(e.keyCode, this.config?.attributeList);
 
       if (keyCode2Attribute !== undefined) {
         this.setDefaultAttribute(keyCode2Attribute);

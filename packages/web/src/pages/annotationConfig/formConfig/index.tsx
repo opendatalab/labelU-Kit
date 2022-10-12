@@ -15,6 +15,7 @@ import {
   updateToolsConfig
 } from '../../../stores/toolConfig.store';
 import '../index.less';
+import { validateTools } from '../../../utils/tool/common';
 const { Option } = Select;
 
 const noCommonConfigTools = ['tagTool', 'textTool'];
@@ -84,7 +85,7 @@ const FormConfig: FC = props => {
 
   useEffect(() => {
     let toolArr = [];
-    if (tools.length > 0) {
+    if (tools && tools.length > 0) {
       for (let i = 0; i < tools.length; i++) {
         if (selectTools.indexOf(tools[i].tool) < 0 && toolArr.indexOf(tools[i].tool) < 0) {
           toolArr.push(tools[i].tool);
@@ -101,7 +102,6 @@ const FormConfig: FC = props => {
           return tool !== EToolName.Text;
         });
       }
-      debugger;
       setSelectTools(newTools);
       // setCurrentTool(newTools[newTools.length - 1]);
     }
@@ -115,7 +115,6 @@ const FormConfig: FC = props => {
       tmp.push(toolname);
       // setCurrentTool(toolname);
     }
-    debugger;
     setSelectTools(tmp);
   };
 
@@ -189,7 +188,7 @@ const FormConfig: FC = props => {
           </Button>
         </Dropdown>
       </div>
-      {selectTools && selectTools.length > 0 && (
+      {selectTools && selectTools.length > 0 && validateTools(tools) && (
         <div className="formTabBox">
           <Tabs
             // onChange={onChange}
@@ -227,7 +226,7 @@ const FormConfig: FC = props => {
                 //@ts-ignore
                 isShow = false;
               } else {
-                if (initC) {
+                if (initC && initC.config) {
                   commonConfig = {
                     //@ts-ignore
                     drawOutsideTarget: initC.config.drawOutsideTarget,

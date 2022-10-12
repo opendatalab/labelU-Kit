@@ -241,7 +241,7 @@ class PointOperation extends BasicToolOperation {
   public getTextIconSvg(attribute = '') {
     return AttributeUtils.getTextIconSvg(
       attribute,
-      this.config.attributeList,
+      this.config?.attributeList,
       this.config.attributeConfigurable,
       this.baseIcon,
     );
@@ -379,7 +379,7 @@ class PointOperation extends BasicToolOperation {
         break;
       default: {
         if (this.config.attributeConfigurable) {
-          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
+          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config?.attributeList);
 
           if (keyCode2Attribute !== undefined) {
             this.setDefaultAttribute(keyCode2Attribute);
