@@ -28,4 +28,4 @@ export const toolnameC = {
 
 export const types = ['图片'];
 
-export const delayTime = 300;
+export const delayTime = 3000;

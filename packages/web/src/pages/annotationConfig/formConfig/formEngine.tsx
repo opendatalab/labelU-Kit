@@ -1,5 +1,5 @@
 import { BasicConfig } from '@label-u/components';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import RectConfigForm from './templates/rectConfigForm';
 import LineConfigForm from './templates/lineConfigForm';
 import PointConfigForm from './templates/pointConfigForm';
@@ -11,6 +11,7 @@ import './formEngine.less';
 import { EToolName } from '@label-u/annotation';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateTagConfigList, updateTextConfig, updateToolsConfig } from '../../../stores/toolConfig.store';
+import { Popconfirm } from 'antd';
 // import Dynamic from 'components/basic/dynamic';
 interface FormEngineProps {
   toolname: string;
@@ -20,6 +21,8 @@ interface FormEngineProps {
 const FormEngine: FC<FormEngineProps> = props => {
   const { tagList, textConfig, tools } = useSelector(state => state.toolsConfig);
   const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const ConfigTool = useMemo(() => {
     if (props.toolname) {
       if (props.toolname === EToolName.Rect) {
@@ -64,19 +67,39 @@ const FormEngine: FC<FormEngineProps> = props => {
     dispatch(updateToolsConfig(newTools));
   };
 
+  const showPopconfirm = () => {
+    setOpen(true);
+  };
+  const handleOk = () => {
+    setConfirmLoading(true);
+    setTimeout(() => {
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 2000);
+    deleteTool(props.toolname);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+  };
+
   return (
     <div>
       {ConfigTool && (
         <ConfigTool tagList={tagList} textConfig={textConfig} name={props.toolname} {...props.config}>
-          <span
-            onClick={e => {
-              e.stopPropagation();
-              deleteTool(props.toolname);
-            }}
-            className="deleteTab"
+          <Popconfirm
+            title="您确定要删除该工具吗？"
+            open={open}
+            okText="确认"
+            cancelText="取消"
+            onConfirm={handleOk}
+            okButtonProps={{ loading: confirmLoading }}
+            onCancel={handleCancel}
           >
-            删除工具
-          </span>
+            <span onClick={showPopconfirm} className="deleteTab">
+              删除工具
+            </span>
+          </Popconfirm>
         </ConfigTool>
       )}
     </div>
