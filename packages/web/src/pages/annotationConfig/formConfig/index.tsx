@@ -1,4 +1,4 @@
-import { OneTag } from '@label-u/annotation';
+import { EToolName, OneTag } from '@label-u/annotation';
 import { BasicConfig } from '@label-u/components';
 import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
 import React, { FC, useEffect, useMemo, useState } from 'react';
@@ -86,15 +86,26 @@ const FormConfig: FC = props => {
     let toolArr = [];
     if (tools.length > 0) {
       for (let i = 0; i < tools.length; i++) {
-        if (selectTools.indexOf(tools[i].tool) < 0) {
+        if (selectTools.indexOf(tools[i].tool) < 0 && toolArr.indexOf(tools[i].tool) < 0) {
           toolArr.push(tools[i].tool);
         }
       }
       let newTools = [...selectTools].concat(toolArr);
+      if (tagList.length === 0) {
+        newTools = newTools.filter(tool => {
+          return tool !== EToolName.Tag;
+        });
+      }
+      if (textConfig.length === 0) {
+        newTools = newTools.filter(tool => {
+          return tool !== EToolName.Text;
+        });
+      }
+      debugger;
       setSelectTools(newTools);
       // setCurrentTool(newTools[newTools.length - 1]);
     }
-  }, [tools]);
+  }, [tools, tagList, textConfig]);
 
   const updateSelectTools = (toolname: string) => {
     let tmp = selectTools;
@@ -104,6 +115,7 @@ const FormConfig: FC = props => {
       tmp.push(toolname);
       // setCurrentTool(toolname);
     }
+    debugger;
     setSelectTools(tmp);
   };
 
@@ -182,7 +194,13 @@ const FormConfig: FC = props => {
           <Tabs
             // onChange={onChange}
             type="card"
-            activeKey={localStorage.getItem('activeTabKeys') || '0'}
+            activeKey={
+              // fix: 未初始化tab切换页面
+              (localStorage.getItem('activeTabKeys') &&
+              Number(localStorage.getItem('activeTabKeys')) <= selectTools.length
+                ? localStorage.getItem('activeTabKeys')
+                : selectTools.length + '') as string
+            }
             onChange={e => {
               localStorage.setItem('activeTabKeys', e);
               forceSet(new Date().getTime());

@@ -34,57 +34,5 @@
         "attributeList": [{ "key": "rectTool", "value": "rectTool" }]
       }
     }
-  ],
-  "tagList": [
-    {
-      "key": "类别1",
-      "value": "class1",
-      "isMulti": true,
-      "subSelected": [
-        {
-          "key": "选项1",
-          "value": "option1",
-          "isDefault": true
-        },
-        {
-          "key": "选项2",
-          "value": "option2",
-          "isDefault": false
-        }
-      ]
-    },
-    {
-      "key": "类别2",
-      "value": "class2",
-      "isMulti": true,
-      "subSelected": [
-        {
-          "key": "a选项1",
-          "value": "aoption1",
-          "isDefault": true
-        },
-        {
-          "key": "a选项2",
-          "value": "aoption2",
-          "isDefault": false
-        }
-      ]
-    }
-  ],
-  "textConfig": [
-    {
-      "label": "我的描述",
-      "key": "描述的关键",
-      "required": true,
-      "default": "",
-      "maxLength": 200
-    },
-    {
-      "label": "我的描述1",
-      "key": "描述的关键1",
-      "required": true,
-      "default": "",
-      "maxLength": 200
-    }
   ]
 }

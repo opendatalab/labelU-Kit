@@ -51,6 +51,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
     ]
   } as FormPolygonConfig);
 
+  const { children } = props;
   useMemo(() => {
     if (props.config) {
       let initV = {
@@ -132,6 +133,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
             />
           </Form.Item>
         </Form>
+        {children}
       </div>
     </div>
   );

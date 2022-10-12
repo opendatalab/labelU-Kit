@@ -52,6 +52,8 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
     ]
   } as FormLineConfig);
 
+  const { children } = props;
+
   useMemo(() => {
     if (props.config) {
       let initV = {
@@ -151,6 +153,7 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = props => {
             />
           </Form.Item>
         </Form>
+        {children}
       </div>
     </div>
   );

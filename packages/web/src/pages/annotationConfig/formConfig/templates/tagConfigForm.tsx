@@ -119,6 +119,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
   useEffect(() => {
     formSubmitThrottle();
   }, [initVal]);
+  const { children } = props;
 
   return (
     <div className="selectedMain">
@@ -141,6 +142,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
           </Button>
         </Form.Item>
       </Form>
+      {children}
     </div>
   );
 };

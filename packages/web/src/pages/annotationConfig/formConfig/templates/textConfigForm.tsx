@@ -64,6 +64,7 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
       setInitVal(initV);
     }
   }, []);
+  const { children } = props;
 
   return (
     <div className="selectedMain">
@@ -77,6 +78,7 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
           />
         </Form.Item>
       </Form>
+      {children}
     </div>
   );
 };

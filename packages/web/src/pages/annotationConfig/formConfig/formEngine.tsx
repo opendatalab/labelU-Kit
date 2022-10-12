@@ -9,7 +9,8 @@ import PolygonConfigForm from './templates/polygonConfigForm';
 import './formEngine.less';
 // import { toolnames, types,toolnameT } from './constants';
 import { EToolName } from '@label-u/annotation';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateTagConfigList, updateTextConfig, updateToolsConfig } from '../../../stores/toolConfig.store';
 // import Dynamic from 'components/basic/dynamic';
 interface FormEngineProps {
   toolname: string;
@@ -17,7 +18,8 @@ interface FormEngineProps {
 }
 
 const FormEngine: FC<FormEngineProps> = props => {
-  const { tagList, textConfig } = useSelector(state => state.toolsConfig);
+  const { tagList, textConfig, tools } = useSelector(state => state.toolsConfig);
+  const dispatch = useDispatch();
   const ConfigTool = useMemo(() => {
     if (props.toolname) {
       if (props.toolname === EToolName.Rect) {
@@ -48,9 +50,35 @@ const FormEngine: FC<FormEngineProps> = props => {
     }
     return null;
   }, [props.toolname]);
+
+  // 删除工具
+  const deleteTool = (toolName: string) => {
+    if (toolName === EToolName.Text) {
+      dispatch(updateTextConfig([]));
+    } else if (toolName === EToolName.Tag) {
+      dispatch(updateTagConfigList([]));
+    }
+    const newTools = tools.filter(tool => {
+      return tool.tool !== toolName;
+    });
+    dispatch(updateToolsConfig(newTools));
+  };
+
   return (
     <div>
-      {ConfigTool && <ConfigTool tagList={tagList} textConfig={textConfig} name={props.toolname} {...props.config} />}
+      {ConfigTool && (
+        <ConfigTool tagList={tagList} textConfig={textConfig} name={props.toolname} {...props.config}>
+          <span
+            onClick={e => {
+              e.stopPropagation();
+              deleteTool(props.toolname);
+            }}
+            className="deleteTab"
+          >
+            删除工具
+          </span>
+        </ConfigTool>
+      )}
     </div>
   );
 };

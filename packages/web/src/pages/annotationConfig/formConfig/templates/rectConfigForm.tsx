@@ -67,6 +67,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
       setInitVal(initV);
     }
   }, []);
+  const { children } = props;
 
   // @ts-ignore
   const formSubmitThrottle = window.throttle(() => {
@@ -103,6 +104,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
             />
           </Form.Item>
         </Form>
+        {children}
       </div>
     </div>
   );

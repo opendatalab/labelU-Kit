@@ -33,6 +33,7 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = props => {
       }
     }
   };
+  const { children } = props;
   const [initVal, setInitVal] = useState<FormPointConfig>({
     upperLimit: 10,
     attributeList: [
@@ -87,6 +88,7 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = props => {
             />
           </Form.Item>
         </Form>
+        {children}
       </div>
     </div>
   );
