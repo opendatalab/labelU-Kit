@@ -468,6 +468,14 @@ body {
   user-select: none;
   text-align: left;
 
+  .clrearResult {
+    position: absolute;
+    height: 17px;
+    bottom: 16px;
+    transform: translate(-50%, -50%);
+    left: 50%;
+  }
+
   .ant-tabs {
     font-family: 'PingFang SC';
     font-style: normal;
@@ -505,7 +513,7 @@ body {
   }
   .ant-collapse {
     border: 0px;
-    .ant-collapse-header-text{
+    .ant-collapse-header-text {
       .attributeResultLi {
         display: flex;
         .attributeResultRightImgBox {
@@ -534,7 +542,6 @@ body {
         }
       }
     }
-
 
     .ant-collapse-item {
       border: 0px;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Col, Popconfirm } from 'antd/es';
-import clearResultSvg from '../../../../assets/annotation/common/icon_clear.svg';
-import clearResultASvg from '../../../../assets/annotation/common/icon_clear_a.svg';
+import { Popconfirm } from 'antd/es';
+// import clearResultSvg from '../../../../assets/annotation/common/icon_clear.svg';
+// import clearResultASvg from '../../../../assets/annotation/common/icon_clear_a.svg';
 import copyBackStepSvg from '../../../../assets/annotation/common/icon_invalid.svg';
 import copyBackStepASvg from '../../../../assets/annotation/common/icon_invalid_a.svg';
 import { StopOutlined } from '@ant-design/icons';
@@ -39,15 +39,15 @@ const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
   const [isHover, setHover] = useState<string | null>(null);
   const { t } = useTranslation();
   const allOperation = [
-    {
-      name: t('ClearLabel'),
-      key: 'sureClear',
-      imgSvg: clearResultSvg,
-      hoverSvg: clearResultASvg,
-      onClick: () => {
-        toolInstance?.clearResult();
-      },
-    },
+    // {
+    //   name: t('ClearLabel'),
+    //   key: 'sureClear',
+    //   imgSvg: clearResultSvg,
+    //   hoverSvg: clearResultASvg,
+    //   onClick: () => {
+    //     toolInstance?.clearResult();
+    //   },
+    // },
   ];
 
   // const config = jsonParser(stepInfo?.config);
