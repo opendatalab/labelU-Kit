@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "build": "gatsby build --prefix-paths",
-    "start": "gatsby develop",
+    "start": "gatsby develop -H 0.0.0.0",
     "serve": "gatsby serve",
     "clean": "gatsby clean"
   }

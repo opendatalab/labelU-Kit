@@ -64,8 +64,8 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const drowpDownIcon = <img src={DropdowmIcon} />;
 
   const attributeMenue = useCallback(() => {
-    if (attributeList.length > shwoAttributeCount) {
-      let items = attributeList.slice(shwoAttributeCount - 1).map((item, index) => {
+    if (currentAttributeList.length >= shwoAttributeCount) {
+      let items = currentAttributeList.slice(shwoAttributeCount - 1).map((item, index) => {
         return {
           label: (
             <a
@@ -98,7 +98,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     } else {
       return <div />;
     }
-  }, [shwoAttributeCount, attributeList, toolInstance]);
+  }, [shwoAttributeCount, currentAttributeList, toolInstance]);
 
   // 根据工具名称的修改情况获取最新的attributeList
   useEffect(() => {
