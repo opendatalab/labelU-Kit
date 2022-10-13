@@ -23,6 +23,7 @@
         "isShowCursor": false,
         "isShowOrder": false,
         "attributeConfigurable": true,
+        "copyBackwardResult": true,
         "textConfigurable": true,
         "textCheckType": 0,
         "customFormat": "",

@@ -582,7 +582,7 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT: {
-      const { toolInstance, imgIndex, imgList, step } = state;
+      const { toolInstance, imgIndex, imgList, step,currentToolName } = state;
       if (!toolInstance) {
         return state;
       }
@@ -605,9 +605,18 @@ export const annotationReducer = (
 
       // 更新当前的结果
       const fileResult = jsonParser(newResult);
-      const stepResult = fileResult[`step_${step}`];
+      const basicResultList = Object.keys(fileResult).reduce((res, key) => {
+        if (key.indexOf('Tool') > 0 && key !== currentToolName) {
+          // @ts-ignore
+          res.push(fileResult[key]);
+        }
+        return res;
+      }, []);
+
+      const stepResult = fileResult[currentToolName];
       const result = stepResult?.result || [];
       toolInstance?.setResult(result);
+      toolInstance?.setPrevResultList(basicResultList);
       toolInstance?.history.pushHistory(result);
 
       return {

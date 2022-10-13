@@ -25,6 +25,7 @@
         "drawOutsideTarget": false,
         "edgeAdsorption": true,
         "isShowOrder": false,
+        "copyBackwardResult": true,
         "attributeConfigurable": true,
         "textConfigurable": true,
         "textCheckType": 0,
