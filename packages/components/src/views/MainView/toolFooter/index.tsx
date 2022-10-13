@@ -145,7 +145,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   }
 
   return (
-    <div className={`${footerCls}`} style={props.style}>
+    <div className={`${footerCls}`} style={{...props.style,paddingRight:20}}>
       {footerTips}
       <div style={{ flex: 1 }} />
       {/* {hiddenTips} */}
@@ -158,8 +158,8 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
           {curItems}
         </>
       )}
-      {footerDivider}
-      {zoomController}
+      {/* {footerDivider} */}
+      {/* {zoomController} */}
     </div>
   );
 };

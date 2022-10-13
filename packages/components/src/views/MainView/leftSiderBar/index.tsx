@@ -8,6 +8,7 @@ import { connect, useDispatch } from 'react-redux';
 import { prefix } from '../../../constant';
 import { IFileItem } from '../../../types/data';
 import { AppState } from '../../../store';
+import localforage from "localforage";
 const layoutCls = `${prefix}-layout`;
 
 interface LeftSiderProps {
@@ -42,9 +43,13 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
                 <div key={item.id} className='item'>
                   <div
                     className={classnames({ imgItem: true, chooseImg: index === Number(imgIndex) })}
-                    onClick={(e) => {
+                    onClick={async (e) => {
+
                       e.stopPropagation();
+                      await localforage.removeItem('zoom')
+                      await localforage.removeItem('coordinate')
                       pageJump(index);
+
                     }}
                   >
                     <img
