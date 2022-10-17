@@ -41,6 +41,7 @@ interface IBasicToolOperationProps {
   showDefaultCursor?: boolean; // 默认会展示为 none
 
   forbidBasicResultRender?: boolean;
+  isShowOrder:boolean;
 }
 
 /**
@@ -89,6 +90,8 @@ class BasicToolOperation extends EventListener {
   public forbidOperation: boolean; // 禁止操作
 
   public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
+
+  public isShowOrder:boolean; //是否显示标注顺序
 
   // public style: {
   //   strokeColor: string;
@@ -200,6 +203,7 @@ class BasicToolOperation extends EventListener {
       y: 0,
     };
     this.isShowCursor = false;
+    this.isShowOrder = false;
     this.style = {
       strokeColor: COLORS_ARRAY[4],
       fillColor: COLORS_ARRAY[4],
@@ -233,6 +237,8 @@ class BasicToolOperation extends EventListener {
     this.coordUtils = new CoordinateUtils(this);
     this.coordUtils.setBasicImgInfo(this.basicImgInfo);
   }
+
+
 
   public onContextmenu(e: MouseEvent) {
     e.preventDefault();
@@ -485,7 +491,7 @@ class BasicToolOperation extends EventListener {
    * @param isShowOrder
    */
   public setIsShowOrder(isShowOrder: boolean) {
-    this.config.isShowOrder = isShowOrder;
+    this.isShowOrder = isShowOrder;
     this.render();
   }
 
@@ -1137,6 +1143,7 @@ class BasicToolOperation extends EventListener {
     //   return;
     // }
     // console.log(this.prevResultList);
+    debugger;
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentReulst = this.prevResultList[i];
@@ -1152,6 +1159,8 @@ class BasicToolOperation extends EventListener {
                     // @ts-ignore
                     AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos),
                     {
+                      isShowOrder:this.isShowOrder,
+                      order:item.order,
                       color,
                       thickness,
                     },
@@ -1180,7 +1189,12 @@ class BasicToolOperation extends EventListener {
                     thickness,
                   },
                 );
-                DrawUtils.drawText(this.canvas, transformPointList[0], item.attribute, {
+                let showText = item.attribute;
+                if(this.isShowOrder){
+                  showText = `${item.order} ${showText}`;
+                }
+
+                DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
                   color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
@@ -1208,7 +1222,11 @@ class BasicToolOperation extends EventListener {
                     thickness,
                   },
                 );
-                DrawUtils.drawText(this.canvas, transformPointList[0], item.attribute, {
+                let showText = item.attribute;
+                if(this.isShowOrder){
+                  showText = `${item.order} ${showText}`;
+                }
+                DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
                   color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
@@ -1232,10 +1250,14 @@ class BasicToolOperation extends EventListener {
                     color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                     fill: 'transparent',
                   });
+                  let showText = item.attribute;
+                  if(this.isShowOrder){
+                    showText = `${item.order} ${showText}`;
+                  }
                   DrawUtils.drawText(
                     this.canvas,
                     { x: transformPoint.x + width / 2 + 4, y: transformPoint.y - width - 4 },
-                    item.attribute,
+                    showText,
                     {
                       textAlign: 'center',
                       color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,

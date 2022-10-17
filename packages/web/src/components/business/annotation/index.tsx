@@ -12,11 +12,12 @@ const Annotation = (props: {
   goBack: (data: any) => void;
   tools: BasicConfig[];
   tagList: OneTag[];
+  isShowOrder:boolean;
   attribute: Attribute[];
   textConfig: TextConfig;
   isPreview?: boolean;
 }) => {
-  const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview } = props;
+  const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview,isShowOrder=false } = props;
   const exportData = (data: any) => {
     console.log('exportData', data);
   };
@@ -31,27 +32,16 @@ const Annotation = (props: {
     <div>
       <AnnotationOperation
         isPreview={isPreview}
-        // ref={annotationRef}
+        isShowOrder={isShowOrder}
         exportData={exportData}
-        // headerName="测试各类工具"
         onSubmit={onSubmit}
         imgList={fileList}
-        // pageSize={10}
-        // leftSider={LeftSider}
         attributeList={attribute}
         tagConfigList={tagList}
         toolsBasicConfig={tools}
         textConfig={textConfig}
-        // header={header}
-        // showTips={true}
-        // loadFileList={loadFileList}
         goBack={goBack}
-        // stepList={stepList}
-        // step={step}
         onSave={onSave}
-        // dataInjectionAtCreation={dataInjectionAtCreation}
-        // defaultLang={'cn'}
-        // currentToolName={''} // renderEnhance={renderEnhance}
       />
     </div>
   );

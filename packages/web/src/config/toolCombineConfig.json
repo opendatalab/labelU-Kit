@@ -164,6 +164,7 @@
       ]
     }
   ],
+  "isShowOrder": true,
   "tools": [
     {
       "tool": "lineTool",
@@ -173,7 +174,6 @@
         "lineColor": 1,
         "edgeAdsorption": true,
         "outOfTarget": true,
-        "isShowOrder": false,
         "copyBackwardResult": true,
         "attributeConfigurable": true,
         "textConfigurable": true,
@@ -188,7 +188,6 @@
       "tool": "pointTool",
       "config": {
         "isShowCursor": false,
-        "isShowOrder": false,
         "attributeConfigurable": true,
         "copyBackwardResult": true,
         "textConfigurable": true,
@@ -206,7 +205,6 @@
         "drawOutsideTarget": false,
         "edgeAdsorption": true,
         "copyBackwardResult": true,
-        "isShowOrder": false,
         "attributeConfigurable": true,
         "textConfigurable": true,
         "textCheckType": 0,
@@ -224,7 +222,6 @@
         "copyBackwardResult": true,
         "minWidth": 1,
         "minHeight": 1,
-        "isShowOrder": false,
         "attributeConfigurable": true,
         "textConfigurable": true,
         "textCheckType": 4,

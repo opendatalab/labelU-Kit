@@ -6,13 +6,14 @@ import {
   updateToolsConfig,
   updateTagConfigList,
   updateAllAttributeConfigList,
-  updateTextConfig
+  updateTextConfig,
+  updateIsShowOrder
 } from '../../stores/toolConfig.store';
 
 import toolCombineConfig from '../../config/toolCombineConfig.json';
 const AnnotationPage: FC = () => {
   const dispatch = useDispatch();
-  const { tools, tagList, attribute, textConfig } = useSelector(state => state.toolsConfig);
+  const { tools, tagList, attribute, textConfig,isShowOrder } = useSelector(state => state.toolsConfig);
   // const currentIsVideo = StepUtils.currentToolIsVideo(1, stepConfig);
   const currentIsVideo = false;
   const [fileList, setFileList] = useState<any[]>([]);
@@ -23,6 +24,7 @@ const AnnotationPage: FC = () => {
     dispatch(updateToolsConfig(toolCombineConfig.tools));
     dispatch(updateTagConfigList(toolCombineConfig.tagList));
     dispatch(updateAllAttributeConfigList(toolCombineConfig.attribute));
+    dispatch(updateIsShowOrder(toolCombineConfig.isShowOrder));
     // @ts-ignore
     dispatch(updateTextConfig(toolCombineConfig.textConfig));
     // 配置标注文件 todo=》补充文件拉取接口
@@ -41,6 +43,7 @@ const AnnotationPage: FC = () => {
     <>
       {fileList && fileList.length > 0 && tools && tools.length > 0 && (
         <Annotation
+        isShowOrder={isShowOrder}
           attribute={attribute}
           tagList={tagList}
           fileList={fileList}

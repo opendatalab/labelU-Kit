@@ -484,9 +484,10 @@ class PointOperation extends BasicToolOperation {
       sourceID: basicSourceID,
       textAttribute: '',
       order:
-        CommonToolUtils.getMaxOrder(
-          this.pointList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
-        ) + 1,
+        // CommonToolUtils.getMaxOrder(
+        //   this.pointList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+        // ) + 1,
+        CommonToolUtils.getAllToolsMaxOrder(this.pointList, this.prevResultList) + 1,
     } as IPointUnit;
 
     // 文本注入
@@ -774,14 +775,15 @@ class PointOperation extends BasicToolOperation {
 
     let showText = '';
 
-    const isShowOrder = this.config?.isShowOrder || this.config?.showOrder; // 兼容 SenseBee 旧配置
+    const isShowOrder = this.isShowOrder 
 
     if (isShowOrder && point.order && point?.order > 0) {
       showText = `${point.order}`;
     }
 
     if (point.label && this.hasMarkerConfig) {
-      const order = CommonToolUtils.getCurrentMarkerIndex(point.label, this.config.markerList) + 1;
+      // const order = CommonToolUtils.getCurrentMarkerIndex(point.label, this.config.markerList) + 1;
+      const order = CommonToolUtils.getAllToolsMaxOrder(this.pointList, this.prevResultList) + 1;
 
       showText = `${order}_${MarkerUtils.getMarkerShowText(point.label, this.config.markerList)}`;
     }

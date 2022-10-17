@@ -79,6 +79,20 @@ export default class CommonToolUtils {
     return order;
   }
 
+
+  public static getAllToolsMaxOrder(result:any[],preveResultList:any[]|undefined){
+    let order =0;
+    if(result){
+      order += result.length
+    }
+    if(preveResultList){
+      for(let toolResult of preveResultList){
+        order += toolResult.result.length;
+      }
+    }
+    return order;
+  }
+
   /**
    * 表单控件控件判断 返回 Boolean
    * hotkey is effective only whene filter return true

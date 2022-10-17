@@ -924,9 +924,10 @@ class RectOperation extends BasicToolOperation {
     // 标注序号添加
     Object.assign(this.drawingRect, {
       order:
-        CommonToolUtils.getMaxOrder(
-          this.rectList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
-        ) + 1,
+        // CommonToolUtils.getMaxOrder(
+        //   this.rectList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+        // ) + 1,
+        CommonToolUtils.getAllToolsMaxOrder( this.rectList,this.prevResultList) +1
     });
 
     this.firstClickCoord = {
@@ -1422,13 +1423,13 @@ class RectOperation extends BasicToolOperation {
 
       ctx.font = 'lighter 14px Arial';
       let showText = '';
-      if (this.config?.isShowOrder && rect.order && rect?.order > 0) {
+      if (this.isShowOrder && rect.order && rect?.order > 0) {
         showText = `${rect.order}`;
       }
 
       if (rect.label && this.hasMarkerConfig) {
-        const order = CommonToolUtils.getCurrentMarkerIndex(rect.label, this.config.markerList) + 1;
-
+        // const order = CommonToolUtils.getCurrentMarkerIndex(rect.label, this.config.markerList) + 1;
+        const order = CommonToolUtils.getAllToolsMaxOrder(this.rectList,this.prevResultList)
         showText = `${order}_${MarkerUtils.getMarkerShowText(rect.label, this.config.markerList)}`;
       }
 

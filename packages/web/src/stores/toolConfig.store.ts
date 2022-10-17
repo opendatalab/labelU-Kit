@@ -7,7 +7,8 @@ const initialState: ToolsConfigState = {
   tagList: [],
   attribute: [],
   textConfig: [],
-  fileInfo: {} as FileInfo
+  fileInfo: {} as FileInfo,
+  isShowOrder:false,
 };
 
 const toolsConfigSlice = createSlice({
@@ -41,6 +42,11 @@ const toolsConfigSlice = createSlice({
     // 更新文件信息
     updateFileInfo(state, action: PayloadAction<FileInfo>) {
       state.fileInfo = action.payload;
+    },
+
+    // 更新isShowOrder
+    updateIsShowOrder(state, action: PayloadAction<boolean>) {
+      state.isShowOrder = action.payload;
     },
 
     // 配置文本组建
@@ -79,7 +85,8 @@ export const {
   updateAllAttributeConfigList,
   updateTextConfig,
   clearConfig,
-  updateAllConfig
+  updateAllConfig,
+  updateIsShowOrder
 } = toolsConfigSlice.actions;
 
 export default toolsConfigSlice.reducer;

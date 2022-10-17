@@ -199,13 +199,22 @@ export function CopyBackWordResult(): AnnotationActionTypes {
   };
 }
 
-export function UpdateTextConfig(textConfig:TextConfig){
+export function UpdateTextConfig(textConfig: TextConfig) {
   return {
     type: ANNOTATION_ACTIONS.UPDATE_TEXT_CONFIG,
     payload: {
       textConfig,
     },
-  }
+  };
+}
+
+export function UpdateIsShowOrder(isShowOrder: boolean) {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ORDER,
+    payload: {
+      isShowOrder,
+    },
+  };
 }
 
 /**
@@ -213,6 +222,7 @@ export function UpdateTextConfig(textConfig:TextConfig){
  * @param param0
  */
 export function InitTaskData({
+  isShowOrder,
   onSubmit,
   onSave,
   initToolName,
@@ -237,15 +247,17 @@ export function InitTaskData({
           return item.tool === initToolName;
         })
       : [toolsBasicConfig[0]];
-    const stepConfig = { step: 1,...tmpStep[0]};
+    const stepConfig = { step: 1, ...tmpStep[0] };
     const stepConfigList = [stepConfig];
     // @ts-ignore
     tasks.push(SetTaskConfig({ stepList: stepConfigList, step }));
   } else {
     tasks.push(SetTaskConfig({ stepList, step }));
   }
+  debugger;
+  tasks.push(UpdateIsShowOrder(isShowOrder));
 
-  if(textConfig){
+  if (textConfig) {
     tasks.push(UpdateTextConfig(textConfig));
   }
 

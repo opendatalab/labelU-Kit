@@ -69,6 +69,8 @@ export interface AppProps {
   textConfig: TextConfig;
   // 标注信息扩展的功能
   dataInjectionAtCreation?: (annotationData: any) => {};
+  // 是否显示标注顺序
+  isShowOrder:boolean;
   // 渲染增强
   renderEnhance?: {
     staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
@@ -96,6 +98,7 @@ const App: React.FC<AppProps> = (props) => {
     setToolInstance,
     getFileData,
     pageSize = 10,
+    isShowOrder = false,
     loadFileList,
     defaultLang = 'cn',
   } = props;
@@ -119,6 +122,7 @@ const App: React.FC<AppProps> = (props) => {
       }
       store.dispatch(
         InitTaskData({
+          isShowOrder,
           initToolName,
           onSubmit,
           stepList,

@@ -64,13 +64,13 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     const isActiveLineValid = this.isActiveLineValid();
-
     let order;
     const existLine = this.selectedID ? this.lineList.find((i) => i.id === this.selectedID) : undefined;
     if (existLine) {
       order = existLine.order;
     } else {
-      order = this.nextOrder();
+      // order = this.nextOrder();
+      order = CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList)
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
     activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
@@ -681,8 +681,8 @@ class LineToolOperation extends BasicToolOperation {
     attribute?: string,
     valid: boolean = true,
   ) {
-    if ((this.showOrder || this.attributeConfigurable) && this.ctx) {
-      let text = this.showOrder ? order.toString() : `${label}`;
+    if ((this.isShowOrder || this.attributeConfigurable) && this.ctx) {
+      let text = this.isShowOrder ? order.toString() : `${label}`;
 
       if (this.attributeConfigurable) {
         const keyForAttribute = attribute
@@ -1424,7 +1424,8 @@ class LineToolOperation extends BasicToolOperation {
       pointList: _.cloneDeep(this.activeLine),
       id,
       valid: this.isLineValid,
-      order: this.nextOrder(),
+      // order: this.nextOrder(),
+      order :CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList),
       isVisible: true,
     };
     newLine.attribute = this.defaultAttribute;

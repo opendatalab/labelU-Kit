@@ -71,6 +71,7 @@ const AnnotationView = (props: IProps, ref: any) => {
   useEffect(() => {
     if (annotationRef.current) {
       viewOperation.current = new ViewOperation({
+        isShowOrder:false,
         container: annotationRef.current,
         size,
         style,

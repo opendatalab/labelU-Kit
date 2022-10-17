@@ -484,11 +484,11 @@ class PolygonOperation extends BasicToolOperation {
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
         order:
-          CommonToolUtils.getMaxOrder(
-            polygonList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+          CommonToolUtils.getAllToolsMaxOrder( 
+            this.polygonList,
+               this.prevResultList
           ) + 1,
       };
-
       if (this.config.textConfigurable) {
         let textAttribute = '';
         textAttribute = AttributeUtils.getTextAttribute(
@@ -977,7 +977,8 @@ class PolygonOperation extends BasicToolOperation {
             pointList: v,
             valid,
             isVisible: true,
-            order: CommonToolUtils.getMaxOrder(this.currentShowList) + 1 + i,
+            order: 
+            CommonToolUtils.getAllToolsMaxOrder( this.polygonList,this.prevResultList) + 1 + i,
             attribute: defaultAttribute,
             textAttribute,
           });
@@ -1445,7 +1446,7 @@ class PolygonOperation extends BasicToolOperation {
           });
 
           let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config?.attributeList) ?? ''}`;
-          if (this.config?.isShowOrder && polygon?.order > 0) {
+          if (this.isShowOrder && polygon?.order > 0) {
             showText = `${polygon.order} ${showText}`;
           }
 
@@ -1518,7 +1519,7 @@ class PolygonOperation extends BasicToolOperation {
         let showText = `${
           AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config?.attributeList) ?? ''
         }`;
-        if (this.config?.isShowOrder && selectdPolygon?.order > 0) {
+        if (this.isShowOrder && selectdPolygon?.order > 0) {
           showText = `${selectdPolygon.order} ${showText}`;
         }
 

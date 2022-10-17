@@ -19,6 +19,7 @@ export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
+  isShowOrder:false,
   currentToolName:'',
   annotationEngine: null,
   toolInstance: null,
@@ -66,7 +67,7 @@ const calcStepProgress = (fileList: any[], step: number) =>
   }, 0) / fileList.length;
 
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
-  const { step, stepList, attributeList, tagConfigList, toolInstance } = annotation;
+  const { step, stepList, attributeList, tagConfigList, toolInstance,isShowOrder } = annotation;
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   // const stepConfig = stepList[0]; // 修改为无步骤，因此无需通过步骤来选定工具
   // 此前工具绑定时间清空
@@ -90,6 +91,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
   const annotationEngine = new AnnotationEngine({
     container,
+    isShowOrder:isShowOrder,
     toolName: stepConfig.tool as EToolName,
     size: canvasSize,
     imgNode,
@@ -98,7 +100,6 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     tagConfigList,
     attributeList,
   });
-
   // annotationEngine.toolInstance.setResult()
 
   return { toolInstance: annotationEngine?.toolInstance, annotationEngine };
@@ -221,6 +222,12 @@ export const annotationReducer = (
       return {
         ...state,
         currentToolName:action.payload.toolName
+      }
+    }
+    case ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ORDER:{
+      return {
+        ...state,
+        isShowOrder: action.payload.isShowOrder
       }
     }
 

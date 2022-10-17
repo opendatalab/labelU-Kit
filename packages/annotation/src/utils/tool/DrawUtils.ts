@@ -95,12 +95,14 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
+      isShowOrder?:boolean;
+      order?:number;
       hiddenText: boolean;
       lineDash: number[];
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false, lineDash } = options;
+    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false, lineDash,isShowOrder,order } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
@@ -116,6 +118,9 @@ export default class DrawUtils {
       let showText = '';
       if (rect.attribute) {
         showText = `${showText}  ${rect.attribute}`;
+      }
+      if(isShowOrder){
+        showText = `${order} ${showText}`
       }
       this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
       if (rect.textAttribute) {

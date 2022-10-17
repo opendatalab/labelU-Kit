@@ -1,4 +1,4 @@
-import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Collapse, Form, Input, Select } from 'antd';
 import { AppState } from '../../../../store';
 import { connect, useDispatch } from 'react-redux';
@@ -120,7 +120,7 @@ const AttributeRusult: FC<IProps> = ({
       for (let key of attributeMap.keys()) {
         let toolInfo = attributeMap.get(key);
         let isVisible = true;
-        if (toolInfo&&toolInfo.length > 0) {
+        if (toolInfo && toolInfo.length > 0) {
           for (let tool of toolInfo) {
             if (!tool.isVisible) {
               isVisible = false;
@@ -140,7 +140,7 @@ const AttributeRusult: FC<IProps> = ({
 
   // 修改标注描述信息 || 修改是否可以显示
   const updateLabelResult = (toolInfo: ToolInfo) => {
-    if (imgList && imgList.length > 0 &&imgList.length > imgIndex) {
+    if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
       let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
       // 更新结果
       if (
@@ -387,6 +387,13 @@ const AttributeRusult: FC<IProps> = ({
     }
   }, [toolInstance, basicResultList, chooseToolInfo]);
 
+  const defaultKeys = useMemo(() => {
+    let keys = attributeResultList.map((attribute, index) => {
+      return index;
+    });
+    return keys;
+  }, [attributeResultList]);
+
   const generateContent = (toolInfo: ToolInfo, attributeResult: AttributeResult) => {
     let children = [];
     for (let item of attributeList) {
@@ -461,7 +468,7 @@ const AttributeRusult: FC<IProps> = ({
         cancelWord='取消'
         content={content}
       />
-      <Collapse defaultActiveKey={['1']}>
+      <Collapse defaultActiveKey={defaultKeys}>
         {attributeResultList &&
           attributeResultList.length > 0 &&
           attributeResultList.map((item, index) => {
@@ -522,7 +529,8 @@ const AttributeRusult: FC<IProps> = ({
                   item.toolInfo.map((tItem, tIndex) => {
                     return (
                       <div
-                        key={tItem.toolName + tItem.order}
+                        key={index}
+                        // key={tItem.toolName + tItem.order}
                         className='attributeResultLi'
                         onClick={(e) => {
                           e.stopPropagation();
