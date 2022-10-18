@@ -5,8 +5,7 @@
   "description": "",
   "license": "MIT",
   "dependencies": {
-    "@lab-sinan/react-ui": "1.0.0-alpha.16",
-    "@label-u/components": "^0.0.2",
+    "@label-u/components": "^0.0.1",
     "@rocketseat/gatsby-theme-docs": "^3.1.0",
     "antd": "^4.23.4",
     "gatsby": "^4.2.0",

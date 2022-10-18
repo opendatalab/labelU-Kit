@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-
 export default function Logo() {
-  return '@label-u/components';
+  return "@label-u/components";
 }
