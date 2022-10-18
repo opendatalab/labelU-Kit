@@ -24,7 +24,6 @@
         "lineColor": 0,
         "drawOutsideTarget": false,
         "edgeAdsorption": true,
-        "isShowOrder": false,
         "copyBackwardResult": true,
         "attributeConfigurable": true,
         "textConfigurable": true,

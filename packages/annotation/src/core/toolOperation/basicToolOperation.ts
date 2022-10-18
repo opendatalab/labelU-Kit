@@ -1143,7 +1143,6 @@ class BasicToolOperation extends EventListener {
     //   return;
     // }
     // console.log(this.prevResultList);
-    debugger;
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentReulst = this.prevResultList[i];
@@ -1252,11 +1251,12 @@ class BasicToolOperation extends EventListener {
                   });
                   let showText = item.attribute;
                   if(this.isShowOrder){
-                    showText = `${item.order} ${showText}`;
+                    showText = `${item.order}  ${showText}`;
                   }
+                  
                   DrawUtils.drawText(
                     this.canvas,
-                    { x: transformPoint.x + width / 2 + 4, y: transformPoint.y - width - 4 },
+                    { x: transformPoint.x + width / 2 , y: transformPoint.y - width - 4 },
                     showText,
                     {
                       textAlign: 'center',

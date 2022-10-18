@@ -192,7 +192,6 @@ body {
   .sliderBox {
     position: relative;
     animation: fadein 0.1s;
-
     .itemOpIcon {
       position: absolute;
       top: 50%;
@@ -203,6 +202,22 @@ body {
       &:hover {
         cursor: pointer;
       }
+    }
+  }
+}
+
+
+.#{$prefix}-sidebar{
+  .rightTab{
+    font-size: 16px;
+    margin-top: 10px;
+    text-align: center;
+    .innerWord{
+      position: absolute;
+      top: 77%;
+      transform: translate(-50%, -50%);
+      left: 50%;
+      font-size: 12px;
     }
   }
 }
@@ -455,7 +470,7 @@ body {
 
 .#{$prefix}-sidebar {
   height: 100%;
-  width: 240px;
+  width: 280px;
   // box-shadow: 0px 2px 14px 0px rgba(204, 204, 204, 0.5);
   background: #ffffff;
   overflow: hidden;
@@ -484,13 +499,14 @@ body {
     line-height: 20px;
 
     .ant-tabs-nav {
-      padding: 0px 24px;
+      padding: 0px 12px;
       margin: 0px;
     }
 
     .containerBox {
       width: 100%;
-      height: calc(100vh - 93px);
+      height: calc(100vh - 200px);
+      overflow: scroll;
       .emptyAttributeImg {
         left: 50%;
         top: 50%;
@@ -499,12 +515,14 @@ body {
         vertical-align: middle;
         border-style: none;
         transform: translate(-50%, -50%);
+        color: rgba(0, 0, 0, 0.85) !important;
       }
     }
 
     .ant-tabs-nav-list {
+      height: 64px !important;
       align-items: center;
-      width: 300px !important;
+      width: 260px !important;
       position: relative;
       display: flex;
       transition: transform 0.3s;

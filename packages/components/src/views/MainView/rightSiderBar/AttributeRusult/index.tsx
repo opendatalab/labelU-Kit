@@ -389,7 +389,7 @@ const AttributeRusult: FC<IProps> = ({
 
   const defaultKeys = useMemo(() => {
     let keys = attributeResultList.map((attribute, index) => {
-      return index;
+      return attribute.attributeName;
     });
     return keys;
   }, [attributeResultList]);
@@ -468,14 +468,14 @@ const AttributeRusult: FC<IProps> = ({
         cancelWord='取消'
         content={content}
       />
-      <Collapse defaultActiveKey={defaultKeys}>
+      <Collapse key={defaultKeys.join('')} defaultActiveKey={defaultKeys}>
         {attributeResultList &&
           attributeResultList.length > 0 &&
           attributeResultList.map((item, index) => {
             return (
               <Panel
                 header={
-                  <div className='attributeResultLi' key={item.attributeName + item.isVisible}>
+                  <div className='attributeResultLi'>
                     <span>{item.attributeName}</span>{' '}
                     <div className='attributeResultRightImgBox'>
                       {item.isVisible ? (
@@ -519,25 +519,25 @@ const AttributeRusult: FC<IProps> = ({
                           deleteLabelByAttribute(item);
                         }}
                       />
-                    </div>{' '}
+                    </div>
                   </div>
                 }
-                key={index}
+                key={item.attributeName}
               >
                 {item.toolInfo &&
                   item.toolInfo.length > 0 &&
                   item.toolInfo.map((tItem, tIndex) => {
                     return (
                       <div
-                        key={index}
-                        // key={tItem.toolName + tItem.order}
+                        // key={item.attributeName}
+                        key={tItem.toolName + tItem.order}
                         className='attributeResultLi'
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedLabel(tItem);
                         }}
                       >
-                        <span>{tIndex}.</span>
+                        <span>{tItem.order}.</span>
                         <img src={tItem.icon} style={{ marginLeft: '5px', marginRight: '5px' }} />
                         <span
                           title={item.attributeName}

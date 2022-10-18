@@ -12,12 +12,11 @@ const Annotation = (props: {
   goBack: (data: any) => void;
   tools: BasicConfig[];
   tagList: OneTag[];
-  isShowOrder:boolean;
   attribute: Attribute[];
   textConfig: TextConfig;
   isPreview?: boolean;
 }) => {
-  const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview,isShowOrder=false } = props;
+  const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview } = props;
   const exportData = (data: any) => {
     console.log('exportData', data);
   };
@@ -32,7 +31,6 @@ const Annotation = (props: {
     <div>
       <AnnotationOperation
         isPreview={isPreview}
-        isShowOrder={isShowOrder}
         exportData={exportData}
         onSubmit={onSubmit}
         imgList={fileList}

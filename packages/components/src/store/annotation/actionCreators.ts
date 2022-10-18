@@ -254,8 +254,7 @@ export function InitTaskData({
   } else {
     tasks.push(SetTaskConfig({ stepList, step }));
   }
-  debugger;
-  tasks.push(UpdateIsShowOrder(isShowOrder));
+  // tasks.push(UpdateIsShowOrder(isShowOrder));
 
   if (textConfig) {
     tasks.push(UpdateTextConfig(textConfig));

@@ -1,7 +1,7 @@
 import MainView from '@/views/MainView';
 import { i18n } from '@label-u/utils';
 import React, { useEffect } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
@@ -98,13 +98,14 @@ const App: React.FC<AppProps> = (props) => {
     setToolInstance,
     getFileData,
     pageSize = 10,
-    isShowOrder = false,
     loadFileList,
     defaultLang = 'cn',
   } = props;
 
   const dispatch = useDispatch();
-  // const [currentTool, setCurrentTool] = useState<string>('rectTool');
+
+
+  const {isShowOrder} = useSelector((state:AppState)=>state.annotation)
 
   useEffect(() => {
     if (
@@ -122,7 +123,6 @@ const App: React.FC<AppProps> = (props) => {
       }
       store.dispatch(
         InitTaskData({
-          isShowOrder,
           initToolName,
           onSubmit,
           stepList,
@@ -149,6 +149,7 @@ const App: React.FC<AppProps> = (props) => {
     props.textConfig,
     props.tagConfigList,
     currentToolName,
+    isShowOrder
   ]);
 
   useEffect(() => {

@@ -178,7 +178,7 @@ export default class AnnotationEngine {
     // 实时同步语言
     this.setLang(this.i18nLanguage);
     this.toolInstance.init();
-    // 设置是否显示孙旭
+    // 设置是否显示顺序
     this.toolInstance.setIsShowOrder(this.isShowOrder);
   }
 

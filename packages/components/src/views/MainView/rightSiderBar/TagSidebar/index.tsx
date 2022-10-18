@@ -40,7 +40,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
   // const [, forceRender] = useState<number>(0);
   const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
   const { t } = useTranslation();
-  const height = window?.innerHeight - 61 - 80;
+  const height = window?.innerHeight - 61 - 200;
 
   const dispatch = useDispatch();
 

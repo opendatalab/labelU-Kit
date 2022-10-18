@@ -8,7 +8,6 @@ const rectToolConfig = {
   copyBackwardResult: true, // 无效配置
   minWidth: 1, // 拉框最小宽度
   minHeight: 1, // 拉框最小高度
-  isShowOrder: true, //是否显示拉框序号
   filterData: ['valid', 'invalid'],
   attributeConfigurable: true, //是否显示拉框标签配置选项
   attributeList: [
@@ -74,7 +73,6 @@ const lineToolConfig = {
   edgeAdsorption: true, //多线条情况下是否支持 点吸附
   outOfTarget: true,
   copyBackwardResult: true, //无效配置
-  isShowOrder: true, //是否显示划线序号
   attributeConfigurable: true, //是否显示划线标签配置选项
   attributeList: [
     { key: '类别1', value: '类别1' },
@@ -117,7 +115,6 @@ const polygonConfig = {
   edgeAdsorption: true, //多线条情况下是否支持 点吸附
   drawOutsideTarget: false, // 无效配置
   copyBackwardResult: false, //无效配置
-  isShowOrder: true, //是否显示分割序号
   attributeConfigurable: true, //是否显示分割标签配置选项
   attributeList: [
     { key: '玩偶', value: 'doll' },

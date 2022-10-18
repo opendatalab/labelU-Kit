@@ -120,18 +120,18 @@ export default class DrawUtils {
         showText = `${showText}  ${rect.attribute}`;
       }
       if(isShowOrder){
-        showText = `${order} ${showText}`
+        showText = `${order}${showText}`
       }
       this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
-      if (rect.textAttribute) {
-        const text = `${~~rect.width} * ${~~rect.height}`;
-        const textSizeWidth = text.length * 7;
-        const marginTop = 0;
-        const textWidth = Math.max(20, rect.width - textSizeWidth);
-        this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
-          textMaxWidth: textWidth,
-        });
-      }
+      // if (rect.textAttribute) {
+      //   const text = `${~~rect.width} * ${~~rect.height}`;
+      //   const textSizeWidth = text.length * 7;
+      //   const marginTop = 0;
+      //   const textWidth = Math.max(20, rect.width - textSizeWidth);
+      //   this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
+      //     textMaxWidth: textWidth,
+      //   });
+      // }
     }
     ctx.restore();
   }

@@ -26,7 +26,6 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   const [, forceRender] = useState<number>(0);
   const dispatch = useDispatch();
   const {
-    isShowOrder,
     toolName,
     imgAttribute,
     toolStyle,

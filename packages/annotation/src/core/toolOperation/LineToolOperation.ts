@@ -70,7 +70,7 @@ class LineToolOperation extends BasicToolOperation {
       order = existLine.order;
     } else {
       // order = this.nextOrder();
-      order = CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList)
+      order = CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList) +1
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
     activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
@@ -689,7 +689,7 @@ class LineToolOperation extends BasicToolOperation {
           ? this.attributeList?.find((i: any) => i.value === attribute)?.key ?? attribute
           : '';
 
-        text = [text, `${!valid && keyForAttribute ? '无效' : ''}${keyForAttribute}`].filter((i) => i).join('_');
+        text = [text, `${!valid && keyForAttribute ? '无效' : ''}${keyForAttribute}`].filter((i) => i).join(' ');
       }
 
       this.drawText(coord, text, color);
@@ -1425,7 +1425,7 @@ class LineToolOperation extends BasicToolOperation {
       id,
       valid: this.isLineValid,
       // order: this.nextOrder(),
-      order :CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList),
+      order :CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList) +1,
       isVisible: true,
     };
     newLine.attribute = this.defaultAttribute;

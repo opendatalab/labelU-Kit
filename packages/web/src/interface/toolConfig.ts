@@ -18,5 +18,4 @@ export interface ToolsConfigState {
   tagList: OneTag[];
   attribute: Attribute[];
   textConfig: TextConfig;
-  isShowOrder:boolean;
 }

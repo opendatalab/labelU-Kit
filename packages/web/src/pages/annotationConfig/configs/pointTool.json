@@ -19,9 +19,8 @@
     {
       "tool": "pointTool",
       "config": {
-        "upperLimit":10,
+        "upperLimit": 10,
         "isShowCursor": false,
-        "isShowOrder": false,
         "attributeConfigurable": true,
         "copyBackwardResult": true,
         "textConfigurable": true,

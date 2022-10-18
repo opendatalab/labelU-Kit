@@ -84,7 +84,6 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   }
 
   const container = document.getElementById('toolContainer');
-
   if (!container) {
     throw `Not exist dom named id-toolContainer`;
   }
