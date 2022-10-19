@@ -105,7 +105,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       );
       }
 
-      // 设置标签件数
+      // 设置标注件数
       let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
       let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
       let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];

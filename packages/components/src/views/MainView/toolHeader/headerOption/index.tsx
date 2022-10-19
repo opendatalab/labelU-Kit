@@ -14,8 +14,10 @@ import { EToolName } from '@/data/enums/ToolType';
 // import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
 import { useTranslation } from 'react-i18next';
-import { cTool } from '@label-u/annotation';
+import { cTool, PrevResult } from '@label-u/annotation';
 import { Popover } from 'antd';
+import { UpdateImgList } from '@/store/annotation/actionCreators';
+import { toolList } from '../ToolOperation';
 const { EVideoToolName } = cTool;
 
 interface IProps {
@@ -28,12 +30,14 @@ enum EColor {
   Normal = '#cccccc',
 }
 
+const labelTool = [EToolName.Rect,EToolName.Point,EToolName.Line,EToolName.Polygon];
+
 const HeaderOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');
   const { stepInfo } = props;
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const {
-    annotation: { toolInstance, onSave },
+    annotation: { toolInstance, onSave,imgList,imgIndex,currentToolName }
   } = useSelector((state: AppState) => ({
     annotation: state.annotation,
     imgAttribute: state.imgAttribute,
@@ -57,13 +61,79 @@ const HeaderOption: React.FC<IProps> = (props) => {
   //   toolInstance?.updateRotate();
   // };
 
-  const revocation = useCallback(() => {
-    toolInstance?.undo();
-  }, [toolInstance]);
+  // const revocation = useCallback(() => {
+  //   toolInstance?.undo();
+  // }, [toolInstance]);
 
-  const restore = useCallback(() => {
-    toolInstance?.redo();
-  }, [toolInstance]);
+
+
+
+  // 更新pre 标注结果
+  const updateCanvasView = (newLabelResult: any) => {
+    const prevResult: PrevResult[] = [];
+    for (let oneTool of toolList) {
+      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
+        let onePrevResult = {
+          toolName: oneTool.toolName,
+          result: newLabelResult[oneTool.toolName].result,
+        };
+        prevResult.push(onePrevResult);
+      }
+      if (oneTool.toolName === currentToolName) {
+        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
+      }
+    }
+    toolInstance.setPrevResultList(prevResult);
+    toolInstance.render();
+  };
+
+  // 统一处理撤回
+  const revocation = ()=>{
+    if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
+      let count = 0;
+      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      for(let tool of labelTool){
+        if(oldImgResult[tool]?.result){
+          count += oldImgResult[tool]?.result.length;
+        }
+      }
+      for(let tool of labelTool){
+        let tmpResult = oldImgResult[tool]?.result;
+        if(tmpResult&&tmpResult.length>0){
+           let newTmpResult = tmpResult.reduce((res: any[], item: { order: number; })=>{
+            if(item.order !== count){
+              res.push(item);
+            }
+            return res;
+           },[] as any[])
+           oldImgResult[tool].result = newTmpResult;
+        }
+      }
+      imgList[imgIndex].result = JSON.stringify(oldImgResult);
+      dispatch(UpdateImgList(imgList));
+      updateCanvasView(oldImgResult);
+    }
+  }
+
+  // 统一处理重做
+  const restore = ()=>{
+    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    for(let tool of labelTool){
+      let tmpResult = oldImgResult[tool]?.result;
+      if(tmpResult&&tmpResult.length>0){
+         oldImgResult[tool].result = [];
+      }
+    }
+    imgList[imgIndex].result = JSON.stringify(oldImgResult);
+    dispatch(UpdateImgList(imgList));
+    updateCanvasView(oldImgResult);
+
+  }
+
+
+  // const restore = useCallback(() => {
+  //   toolInstance?.redo();
+  // }, [toolInstance]);
 
   const commonOptionList: any = [
     // {
