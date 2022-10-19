@@ -87,7 +87,9 @@ export default class CommonToolUtils {
     }
     if(preveResultList){
       for(let toolResult of preveResultList){
-        order += toolResult.result.length;
+        if(toolResult.toolName && toolResult.toolName !== 'tagTool'){
+          order += toolResult.result.length;
+        }
       }
     }
     return order;

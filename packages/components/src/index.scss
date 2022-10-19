@@ -220,6 +220,14 @@ body {
       font-size: 12px;
     }
   }
+  .ant-tabs-content{
+    margin-top: 15px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: calc(100vh - 250px);
+    position: relative;
+    width: 100%;
+  }
 }
 
 .#{$prefix}-footer {

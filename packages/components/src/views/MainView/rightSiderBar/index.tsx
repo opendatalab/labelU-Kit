@@ -29,7 +29,13 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [textTab, setTextTab] = useState<any>();
   const [tabIndex, setTabIndex] = useState<string>('1');
-  const [tagTab, setTagTab] = useState<any>();
+  const [tagTab, setTagTab] = useState<any>(
+    <div className='rightTab'>
+    <p>分类</p>
+    <span className='innerWord'>未完成
+    </span>
+  </div>
+  );
   const [attributeTab, setAttributeTab] = useState<any>();
 
   const stepInfo = useSelector((state: AppState) =>
@@ -63,7 +69,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   };
 
   useEffect(() => {
-    debugger;
     if (imgList && imgList.length > 0) {
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
       let textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool : [];
@@ -81,8 +86,10 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         </div>,
       );
       // 设置分类结果
-      let tagResultKeys = currentImgResult?.tagTool
-        ? Object.keys(currentImgResult?.tagTool[0]?.result)
+      if(currentImgResult?.tagTool?.toolName){
+
+        let tagResultKeys = currentImgResult?.tagTool
+        ? Object.keys(currentImgResult?.tagTool.result[0]?.result)
         : [];
       setTagTab(
         <div className='rightTab'>
@@ -96,8 +103,9 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           </span>
         </div>,
       );
+      }
+
       // 设置标签件数
-      debugger;
       let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
       let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
       let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];

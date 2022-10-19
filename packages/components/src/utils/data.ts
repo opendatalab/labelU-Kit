@@ -28,13 +28,19 @@ export const composeResult = (
 ) => {
   const { step, stepList } = pos;
   const { rect, basicRectID } = newData;
-
   try {
     const data = jsonParser(result);
     const currentStepInfo = StepUtils.getCurrentStepInfo(step, stepList);
     const { dataSourceStep } = currentStepInfo;
     // 将步骤替换为工具
     const stepName = stepList[0]['tool'];
+    
+    if(data.tagTool&&!data.tagTool.toolName){
+      data.tagTool = {
+        toolName: 'tagTool',
+        result:[...data.tagTool]
+      }
+    }
 
     if (data[stepName]) {
       const info = data[stepName];

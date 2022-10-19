@@ -87,7 +87,7 @@ const AttributeRusult: FC<IProps> = ({
       let tmpAttributeResult: AttributeResult[] = [];
       let attributeMap = new Map();
       for (let item of toolList) {
-        if (resultKeys.indexOf(item.toolName) >= 0) {
+        if (resultKeys.indexOf(item.toolName) >= 0 && item.toolName !== 'tagTool') {
           let result = currentImgResult[item.toolName].result;
           if (result && Array.isArray(result)) {
             for (let oneLabel of result) {
