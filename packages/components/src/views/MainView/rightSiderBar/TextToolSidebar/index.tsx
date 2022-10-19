@@ -244,7 +244,6 @@ const TextToolSidebar: React.FC<IProps> = ({
   }, [textConfig, imgList, imgIndex]);
 
   const updateText = (v: string, k: string, index: number) => {
-    console.log(result);
     result[index].value[k] = v;
     let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
     let currentImgResult = { ...oldImgResult, textTool: result };

@@ -1,11 +1,11 @@
 import { Slider } from 'antd/es';
-import React from 'react';
+import React, { useEffect } from 'react';
 import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
 import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
-
-import { connect } from 'react-redux';
+import styleString from '@/constant/styleString';
+import { connect, useDispatch } from 'react-redux';
 import { UpdateToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { store } from '@/index';
 import { AppState } from '@/store';
@@ -133,6 +133,14 @@ const ToolStyle = (props: IProps) => {
     fillOpacity,
   };
   const { t } = useTranslation();
+
+  const dispatch = useDispatch();
+
+  // 初始化工具样式配置
+  useEffect(() => {
+    const toolStyles = JSON.parse(styleString);
+    dispatch(UpdateToolStyleConfig(toolStyles))
+  }, []);
 
   // TODO - 样式标准的定义
   const annotationConfig: any = props.config;

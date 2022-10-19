@@ -18,19 +18,15 @@ const Annotation = (props: {
 }) => {
   const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview } = props;
   const exportData = (data: any) => {
-    console.log('exportData', data);
+    // console.log('exportData', data);
   };
   const onSubmit = (data: any) => {
     // 翻页时触发当前页面数据的输出
-    console.log('submitData', data);
-  };
-  const onSave = (data: any, imgList: any, index: any) => {
-    console.log('save', data, imgList, index);
+    // console.log('submitData', data);
   };
   return (
     <div>
       <AnnotationOperation
-        isPreview={isPreview}
         exportData={exportData}
         onSubmit={onSubmit}
         imgList={fileList}
@@ -38,8 +34,7 @@ const Annotation = (props: {
         tagConfigList={tagList}
         toolsBasicConfig={tools}
         textConfig={textConfig}
-        goBack={goBack}
-        onSave={onSave}
+        isShowOrder={false}
       />
     </div>
   );

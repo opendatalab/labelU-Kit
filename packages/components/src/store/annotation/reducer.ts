@@ -1,5 +1,4 @@
 import { getFormatSize } from '@/components/customResizeHook';
-import styleString from '@/constant/styleString';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { jsonParser } from '@/utils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
@@ -11,6 +10,7 @@ import { EToolName } from '@label-u/annotation/es/types/constant/tool';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
 import _ from 'lodash';
+import { ToolStyleState } from '../toolStyle/types';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
 const { EVideoToolName } = cTool;
@@ -19,15 +19,15 @@ export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
-  isShowOrder:false,
-  currentToolName:'',
+  isShowOrder: false,
+  currentToolName: '',
   annotationEngine: null,
   toolInstance: null,
   imgList: [],
   tagConfigList: [],
   attributeList: [],
   toolsBasicConfig: [],
-  textConfig:[],
+  textConfig: [],
   config: '{}',
   imgIndex: 0,
   basicIndex: 0,
@@ -42,7 +42,7 @@ const initialState: AnnotationState = {
   loading: false,
   triggerEventAfterIndexChanged: false,
 };
-if(typeof Image !== 'undefined'){
+if (typeof Image !== 'undefined') {
   initialState.imgNode = new Image();
 }
 /**
@@ -66,8 +66,12 @@ const calcStepProgress = (fileList: any[], step: number) =>
     return pre;
   }, 0) / fileList.length;
 
-const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement) => {
-  const { step, stepList, attributeList, tagConfigList, toolInstance,isShowOrder } = annotation;
+const updateToolInstance = (
+  annotation: AnnotationState,
+  imgNode: HTMLImageElement,
+  toolStyle: ToolStyleState,
+) => {
+  const { step, stepList, attributeList, tagConfigList, toolInstance, isShowOrder } = annotation;
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   // const stepConfig = stepList[0]; // 修改为无步骤，因此无需通过步骤来选定工具
   // 此前工具绑定时间清空
@@ -90,12 +94,12 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
   const annotationEngine = new AnnotationEngine({
     container,
-    isShowOrder:isShowOrder,
+    isShowOrder: isShowOrder,
     toolName: stepConfig.tool as EToolName,
     size: canvasSize,
     imgNode,
     config,
-    style: JSON.parse(styleString),
+    style: toolStyle,
     tagConfigList,
     attributeList,
   });
@@ -197,7 +201,7 @@ export const annotationReducer = (
       };
     }
 
-    case ANNOTATION_ACTIONS.UPDATE_TEXT_CONFIG:{
+    case ANNOTATION_ACTIONS.UPDATE_TEXT_CONFIG: {
       return {
         ...state,
         textConfig: action.payload.textConfig,
@@ -217,17 +221,17 @@ export const annotationReducer = (
         toolsBasicConfig: action.payload.toolsBasicConfig,
       };
     }
-    case ANNOTATION_ACTIONS.UPDATE_CURRENT_TOOLNAME:{
+    case ANNOTATION_ACTIONS.UPDATE_CURRENT_TOOLNAME: {
       return {
         ...state,
-        currentToolName:action.payload.toolName
-      }
+        currentToolName: action.payload.toolName,
+      };
     }
-    case ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ORDER:{
+    case ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ORDER: {
       return {
         ...state,
-        isShowOrder: action.payload.isShowOrder
-      }
+        isShowOrder: action.payload.isShowOrder,
+      };
     }
 
     case ANNOTATION_ACTIONS.UPDATE_TAG_LIST: {
@@ -277,7 +281,6 @@ export const annotationReducer = (
       if (onSubmit) {
         onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
       }
-      console.log(imgList);
 
       const stepProgress = calcStepProgress(imgList, step);
       return {
@@ -429,7 +432,7 @@ export const annotationReducer = (
       // 将此前绘制信息导入 wh
       if (stepBasicResultList && stepBasicResultList.length > 0) {
         annotationEngine?.setPrevResultList(stepBasicResultList);
-      }else{
+      } else {
         // 将此前信息清空
         annotationEngine?.setPrevResultList([]);
       }
@@ -454,8 +457,6 @@ export const annotationReducer = (
               CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
             )
           : result;
-        console.log(resultForBasicIndex);
-        console.log('**********');
         toolInstance?.setResult(resultForBasicIndex);
         toolInstance?.history.initRecord(result, true);
       }
@@ -485,8 +486,9 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.INIT_TOOL: {
+      const { toolStyle } = action.payload;
       const { imgNode } = state;
-      const instance = updateToolInstance(state, imgNode);
+      const instance = updateToolInstance(state, imgNode, toolStyle);
       if (instance) {
         const { toolInstance, annotationEngine } = instance;
         return {
@@ -588,7 +590,7 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.COPY_BACKWARD_RESULT: {
-      const { toolInstance, imgIndex, imgList, step,currentToolName } = state;
+      const { toolInstance, imgIndex, imgList, step, currentToolName } = state;
       if (!toolInstance) {
         return state;
       }

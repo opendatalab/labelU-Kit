@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Popover } from 'antd/es';
 import ToolStyle from './ToolStyle';
 import { prefix } from '@/constant';
@@ -6,13 +6,7 @@ import { prefix } from '@/constant';
 const ImageStyle: FC = () => {
   const toolStyle = <ToolStyle />;
 
-  
-  const content = (
-    <div className={`${prefix}-sidebar`}>
-      {toolStyle}
-
-    </div>
-  );
+  const content = useMemo(() => <div className={`${prefix}-sidebar`}>{toolStyle}</div>, []);
   return (
     <Popover
       placement='topLeft'

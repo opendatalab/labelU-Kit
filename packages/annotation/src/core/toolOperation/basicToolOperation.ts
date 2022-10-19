@@ -1256,7 +1256,7 @@ class BasicToolOperation extends EventListener {
                   
                   DrawUtils.drawText(
                     this.canvas,
-                    { x: transformPoint.x + width / 2 , y: transformPoint.y - width - 4 },
+                    { x: transformPoint.x + width / 2 + 4 , y: transformPoint.y - width - 4 },
                     showText,
                     {
                       textAlign: 'center',

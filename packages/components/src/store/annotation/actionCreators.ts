@@ -18,6 +18,7 @@ import { jsonParser } from '@/utils';
 import localforage from 'localforage';
 import { BasicConfig } from '@/types/tool';
 import { Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
+import { ToolStyleState } from '../toolStyle/types';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
 
@@ -156,7 +157,6 @@ export function UpdateGetFileList(loadFileList: LoadFileList): AnnotationActionT
 }
 // 更新attribute信息
 export function UpdateAttributeList(attributeList: Attribute[]) {
-  console.log(attributeList);
   return {
     type: ANNOTATION_ACTIONS.UPDATE_ATTRIBUTE_LIST,
     payload: {
@@ -217,12 +217,21 @@ export function UpdateIsShowOrder(isShowOrder: boolean) {
   };
 }
 
+export function InitToolWithStyle(toolStyle: ToolStyleState) {
+  return {
+    type: ANNOTATION_ACTIONS.INIT_TOOL,
+    payload: {
+      toolStyle,
+    },
+  };
+}
+
 /**
  * 初始化任务数据
  * @param param0
  */
 export function InitTaskData({
-  isShowOrder,
+  toolStyle,
   onSubmit,
   onSave,
   initToolName,
@@ -297,9 +306,12 @@ export function InitTaskData({
     type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS,
   });
 
-  tasks.push({
-    type: ANNOTATION_ACTIONS.INIT_TOOL,
-  });
+  // tasks.push({
+  //   type: ANNOTATION_ACTIONS.INIT_TOOL,
+  // });
+
+  tasks.push(InitToolWithStyle(toolStyle))
+
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }
 

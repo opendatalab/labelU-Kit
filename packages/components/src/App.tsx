@@ -30,6 +30,7 @@ interface IAnnotationStyle {
 }
 
 export interface AppProps {
+  toolStyle?: IAnnotationStyle;
   exportData?: (data: any[]) => void;
   goBack?: (data: any) => void;
   imgList?: IFileItem[];
@@ -86,6 +87,7 @@ const App: React.FC<AppProps> = (props) => {
     stepList = [],
     onSubmit,
     onSave,
+    toolStyle,
     currentToolName,
     onPageChange,
     onStepChange,
@@ -103,7 +105,6 @@ const App: React.FC<AppProps> = (props) => {
   } = props;
 
   const dispatch = useDispatch();
-
 
   const {isShowOrder} = useSelector((state:AppState)=>state.annotation)
 
@@ -123,6 +124,7 @@ const App: React.FC<AppProps> = (props) => {
       }
       store.dispatch(
         InitTaskData({
+          toolStyle,
           initToolName,
           onSubmit,
           stepList,
@@ -144,6 +146,7 @@ const App: React.FC<AppProps> = (props) => {
       i18n.changeLanguage(defaultLang);
     }
   }, [
+    props.toolStyle,
     props.toolsBasicConfig,
     props.attributeList,
     props.textConfig,
@@ -194,6 +197,7 @@ const App: React.FC<AppProps> = (props) => {
 const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
   currentToolName: state.annotation.currentToolName,
+  toolStyle: state.toolStyle
 });
 
 export default connect(mapStateToProps)(App);
