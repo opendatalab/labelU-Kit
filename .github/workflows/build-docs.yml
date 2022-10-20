@@ -20,20 +20,6 @@ jobs:
       - name: Switch directory
         run: cd ./docs
         
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - name: Get npm cache
-        uses: actions/cache@v3
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-        
       - name: Install lerna
         run: npm install lerna -g
       
