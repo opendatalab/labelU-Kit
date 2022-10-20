@@ -1,5 +1,5 @@
 module.exports = {
-  pathPrefix: `/lablelzoom/docs/`,
+  pathPrefix: `/labelU/`,
   siteMetadata: {
     siteTitle: `lblab Component Docs`,
     defaultTitle: `lblab React Component Docs`,
