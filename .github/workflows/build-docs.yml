@@ -34,12 +34,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
         
-      - name: Setup npm registry
-        run: npm config set registry https://npm.shlab.tech/
-        
       - name: Install lerna
         run: npm install lerna -g
       
+      - name: Setup npm registry
+        run: npm config set registry https://npm.shlab.tech/
+        
       - name: Install dependencies
         run: npm install
         
