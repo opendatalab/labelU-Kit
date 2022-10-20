@@ -83,12 +83,20 @@ export default class CommonToolUtils {
   public static getAllToolsMaxOrder(result:any[],preveResultList:any[]|undefined){
     let order =0;
     if(result){
-      order += result.length
+      for(let item of result){
+        if(item.order > order){
+          order = item.order;
+        }
+      }
     }
     if(preveResultList){
       for(let toolResult of preveResultList){
         if(toolResult.toolName && toolResult.toolName !== 'tagTool'){
-          order += toolResult.result.length;
+          for(let item of toolResult.result){
+            if(item.order > order){
+              order = item.order;
+            }
+          }
         }
       }
     }

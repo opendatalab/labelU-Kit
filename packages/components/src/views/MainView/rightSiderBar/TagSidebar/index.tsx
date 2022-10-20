@@ -68,7 +68,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
   useEffect(()=>{
     if(imgList&&imgList.length>0){
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let tagResult = currentImgResult?.tagTool?currentImgResult?.tagTool:[];
+      let tagResult = currentImgResult?.tagTool?currentImgResult?.tagTool?.result:[];
       setTagResult(tagResult);
     }
 

@@ -393,9 +393,9 @@ body {
     color: #333;
   }
 
-  // &__operationNode {
-  //   position: absolute;
-  // }
+  &__operationNode {
+    border-left: 1px solid #ddd;
+  }
 
   &__titlePlacement {
     flex: 1;
@@ -1765,8 +1765,7 @@ $hotkey-container-padding: 7px;
   display: flex;
   justify-content: space-around;
   border-radius: 4px;
-  // box-shadow: $boxShadow;
-  // border-left: 1px solid #ddd;
+  border-left: 1px solid #ddd;
   // border-right: 1px solid #ddd;
   text-align: center;
 

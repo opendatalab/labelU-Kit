@@ -60,15 +60,15 @@ const ImgAttributeInfo = (props: IProps) => {
       value: brightness,
       svg: brightnessSvg,
     },
-    {
-      name: 'ScreenRatio',
-      min: 0.1,
-      max: 10,
-      step: 0.1,
-      onChange: (v: number) => imgAttributeChange({ zoomRatio: v }),
-      value: zoomRatio,
-      svg: ZoomUpSvg,
-    },
+    // {
+    //   name: 'ScreenRatio',
+    //   min: 0.1,
+    //   max: 10,
+    //   step: 0.1,
+    //   onChange: (v: number) => imgAttributeChange({ zoomRatio: v }),
+    //   value: zoomRatio,
+    //   svg: ZoomUpSvg,
+    // },
   ];
 
   useEffect(() => {
@@ -115,7 +115,7 @@ const ImgAttributeInfo = (props: IProps) => {
           </Row>
         </div>
       ))}
-      <div className='imgAttributeController'>
+      {/* <div className='imgAttributeController'>
         <Row className='tools' style={{ padding: '10px 0' }}>
           <Col span={18}>
             <span className='singleTool'>
@@ -130,7 +130,7 @@ const ImgAttributeInfo = (props: IProps) => {
             />
           </Col>
         </Row>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -2,11 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppState } from '@/store';
 // import rotateSvg from '@/assets/annotation/common/icon_r.svg';
-import restoreSvg from '@/assets/annotation/common/icon_next.svg';
-import revocationSvg from '@/assets/annotation/common/icon_back.svg';
+import revocationSvg from '@/assets/annotation/common/icon_next.svg';
+import restoreSvg from '@/assets/annotation/common/icon_back.svg';
 // import rotateHighlightSvg from '@/assets/annotation/common/icon_rA.svg';
-import restoreHighlightSvg from '@/assets/annotation/common/icon_nextA.svg';
-import revocationHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
+import revocationHighlightSvg  from '@/assets/annotation/common/icon_nextA.svg';
+import restoreHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
 // import saveSvg from '@/assets/annotation/common/icon_save.svg';
 // import saveLightSvg from '@/assets/annotation/common/icon_saveA.svg';
 import { prefix } from '@/constant';
@@ -29,8 +29,8 @@ enum EColor {
   Hover = '#666fff',
   Normal = '#cccccc',
 }
-
-const labelTool = [EToolName.Rect,EToolName.Point,EToolName.Line,EToolName.Polygon];
+  
+export const labelTool = [EToolName.Rect,EToolName.Point,EToolName.Line,EToolName.Polygon];
 
 const HeaderOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');
@@ -151,25 +151,6 @@ const HeaderOption: React.FC<IProps> = (props) => {
     //   },
     // },
     {
-      toolName: 'revocation',
-      // title: 'Undo',
-      show: true,
-      commonSvg: revocationSvg,
-      selectedSvg: revocationHighlightSvg,
-      click: () => {
-        if (isTagTool) {
-          return;
-        }
-
-        revocation();
-      },
-      style: {
-        opacity: isBegin === true ? 0.4 : 1,
-        fontSize: '12px',
-        color: !isBegin && toolHover === 'revocation' ? EColor.Hover : EColor.Normal,
-      },
-    },
-    {
       toolName: 'restore',
       // title: 'Redo',
       show: true,
@@ -188,6 +169,26 @@ const HeaderOption: React.FC<IProps> = (props) => {
         color: !isBegin && toolHover === 'restore' ? EColor.Hover : EColor.Normal,
       },
     },
+    {
+      toolName: 'revocation',
+      // title: 'Undo',
+      show: true,
+      commonSvg: revocationSvg,
+      selectedSvg: revocationHighlightSvg,
+      click: () => {
+        if (isTagTool) {
+          return;
+        }
+
+        revocation();
+      },
+      style: {
+        opacity: isBegin === true ? 0.4 : 1,
+        fontSize: '12px',
+        color: !isBegin && toolHover === 'revocation' ? EColor.Hover : EColor.Normal,
+      },
+    },
+
     // {
     //   toolName: 'rotate',
     //   title: 'Rotate',

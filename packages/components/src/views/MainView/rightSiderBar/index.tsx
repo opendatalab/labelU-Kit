@@ -5,12 +5,16 @@ import { Sider } from '../../../types/main';
 import StepUtils from '../../../utils/StepUtils';
 import React, { useEffect, useState } from 'react';
 import { Popconfirm, Tabs } from 'antd';
-import { connect, useSelector } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import TextToolSidebar from './TextToolSidebar';
 import TagSidebar from './TagSidebar';
 import AttributeRusult from './AttributeRusult';
 import ClearResultIcon from '../../../assets/annotation/common/clear_result.svg';
 import { IFileItem } from '@/types/data';
+import { labelTool } from '../toolHeader/headerOption';
+import { UpdateImgList } from '@/store/annotation/actionCreators';
+import { PrevResult } from '@label-u/annotation';
+import { toolList } from '../toolHeader/ToolOperation';
 
 interface IProps {
   toolName?: EToolName;
@@ -25,6 +29,7 @@ const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar: React.FC<IProps> = (props) => {
   const { imgList, imgIndex, currentToolName } = props;
 
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [textTab, setTextTab] = useState<any>();
@@ -47,14 +52,49 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const toolName = stepInfo?.tool;
 
   // 删除标注结果
-  const doClearAllResult = () => {
-    toolInstance?.clearResult();
-    toolInstance?.setPrevResultList([]);
-  };
+  // const doClearAllResult = () => {
+  //   toolInstance?.clearResult();
+  //   toolInstance?.setPrevResultList([]);
+  // };
 
   const showPopconfirm = () => {
     setOpen(true);
   };
+
+  // 更新pre 标注结果
+  const updateCanvasView = (newLabelResult: any) => {
+    const prevResult: PrevResult[] = [];
+    for (let oneTool of toolList) {
+      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
+        let onePrevResult = {
+          toolName: oneTool.toolName,
+          result: newLabelResult[oneTool.toolName].result,
+        };
+        prevResult.push(onePrevResult);
+      }
+      if (oneTool.toolName === currentToolName) {
+        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
+      }
+    }
+    toolInstance.setPrevResultList(prevResult);
+    toolInstance.render();
+  };
+
+  // 删除标注结果
+  const doClearAllResult = ()=>{
+    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    for(let tool of labelTool){
+      let tmpResult = oldImgResult[tool]?.result;
+      if(tmpResult&&tmpResult.length>0){
+         oldImgResult[tool].result = [];
+      }
+    }
+    imgList[imgIndex].result = JSON.stringify(oldImgResult);
+    dispatch(UpdateImgList(imgList));
+    updateCanvasView(oldImgResult);
+
+  }
+
   const handleOk = () => {
     setConfirmLoading(true);
     setTimeout(() => {

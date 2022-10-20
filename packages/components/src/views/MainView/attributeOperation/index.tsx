@@ -14,16 +14,36 @@ interface AttributeOperationProps {
   toolsBasicConfig: BasicConfig[];
   currentToolName: string;
   toolInstance: any;
+  copytoolInstance: any;
   imgListCollapse: boolean;
 }
 
 const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [_, forceRender] = useState(0);
-  const { t } = useTranslation();
-  const { attributeList, toolsBasicConfig, currentToolName, toolInstance } = props;
+  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance } =
+    props;
   const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
+  const [chooseAttribute, setChoseAttribute] = useState<string>();
+
+  useEffect(() => {
+    if (copytoolInstance && copytoolInstance?.defaultAttribute) {
+      setChoseAttribute(copytoolInstance?.defaultAttribute);
+    }
+  }, [copytoolInstance]);
+
+  // useEffect(() => {
+  //   if (toolInstance) {
+  //     toolInstance.singleOn('changeAttributeSidebar', (index: number) => {
+  //       forceRender((s) => s + 1);
+
+  //     });
+  //   }
+  //   return () => {
+  //     toolInstance.unbindAll('changeAttributeSidebar');
+  //   };
+  // }, [toolInstance]);
 
   // 计算attribute栏目 宽度
   useEffect(() => {
@@ -46,11 +66,13 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       let totalWidth = 0;
       let count = 0;
       for (let i = 0; i < currentAttributeList.length; i++) {
-        count ++;
+        count++;
         if (totalWidth + 200 < attributeBoxLength) {
           let textMeasure = ctx?.measureText(currentAttributeList[i].key + ' ' + i + 1);
-          if(currentAttributeList[i].key.length>6){
-            textMeasure = ctx?.measureText(currentAttributeList[i].key.substring(0,6) + '... '+ i +1)
+          if (currentAttributeList[i].key.length > 6) {
+            textMeasure = ctx?.measureText(
+              currentAttributeList[i].key.substring(0, 6) + '... ' + i + 1,
+            );
           }
           totalWidth += Number(textMeasure?.width) * 1.38 + 26 + 8 + 5;
         } else {
@@ -59,7 +81,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       }
       setShwoAttributeCount(count);
     }
-  }, [attributeBoxLength,currentAttributeList]);
+  }, [attributeBoxLength, currentAttributeList]);
 
   const drowpDownIcon = <img src={DropdowmIcon} />;
 
@@ -70,7 +92,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
           label: (
             <a
               className={classNames({
-                chooseAttribute: item.key === toolInstance?.defaultAttribute,
+                chooseAttribute: item.key === copytoolInstance?.defaultAttribute,
               })}
               onClick={(e) => {
                 e.stopPropagation();
@@ -86,9 +108,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                   marginRight: 5,
                 }}
               />
-              <span className='attributeName'>
-                {item.value + ' ' + Number(shwoAttributeCount + index + 1)}
-              </span>
+              <span className='attributeName'>{item.value}</span>
             </a>
           ),
           key: item.key,
@@ -118,12 +138,12 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     } else {
       tmpCurrentAttributeList = attributeList;
     }
-    tmpCurrentAttributeList.unshift({ key: t('NoAttribute'), value: '' });
+    // tmpCurrentAttributeList.unshift({ key: t('NoAttribute'), value: '' });
     setCurrentAttributeList(tmpCurrentAttributeList);
   }, [attributeList, toolsBasicConfig, currentToolName]);
 
   return (
-    <div className='attributeBox' key={toolInstance?.defaultAttribute}>
+    <div className='attributeBox' key={chooseAttribute}>
       {currentAttributeList &&
         currentAttributeList.length > 0 &&
         currentAttributeList.map((attribute, index) => {
@@ -131,12 +151,13 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
+                setChoseAttribute(attribute.key);
                 toolInstance.setDefaultAttribute(attribute.key);
                 forceRender((s) => s + 1);
                 // alert(attribute.key)
               }}
               className={classNames({
-                chooseAttribute: attribute.key === toolInstance?.defaultAttribute,
+                chooseAttribute: attribute.key === chooseAttribute,
               })}
               style={{
                 border: '0px',
@@ -151,11 +172,13 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className='circle'
                 style={{
-                  backgroundColor: COLORS_ARRAY[(index - 1) % COLORS_ARRAY.length],
+                  backgroundColor: COLORS_ARRAY[index % COLORS_ARRAY.length],
                   marginRight: 5,
                 }}
               />
-              <span title={attribute.key} className='attributeName'>{`${attribute.key} ${index + 1}`}</span>
+              <span title={attribute.key} className='attributeName'>{`${attribute.key} ${
+                index <= 8 ? index + 1 : ''
+              }`}</span>
             </Button>
           );
           if (index < shwoAttributeCount) {
@@ -163,13 +186,12 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
           }
           return <div key={index} />;
         })}
-      {
-      shwoAttributeCount < currentAttributeList.length && (
+      {shwoAttributeCount < currentAttributeList.length && (
         <Dropdown overlay={attributeMenue()} trigger={['click']}>
           <a onClick={(e) => e.preventDefault()}>
             <Space style={{ marginLeft: '10px' }}>
               更多
-              {currentAttributeList.length}
+              {/* {currentAttributeList.length} */}
               {drowpDownIcon}
               {/* <DownOutlined /> */}
             </Space>
@@ -181,6 +203,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
 };
 
 const mapStateToProps = (appState: AppState) => ({
+  copytoolInstance: { ...appState.annotation.toolInstance },
   toolInstance: appState.annotation.toolInstance,
   attributeList: appState.annotation.attributeList,
   toolsBasicConfig: appState.annotation.toolsBasicConfig,

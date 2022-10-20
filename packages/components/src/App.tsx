@@ -71,7 +71,7 @@ export interface AppProps {
   // 标注信息扩展的功能
   dataInjectionAtCreation?: (annotationData: any) => {};
   // 是否显示标注顺序
-  isShowOrder:boolean;
+  isShowOrder?: boolean;
   // 渲染增强
   renderEnhance?: {
     staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
@@ -106,7 +106,7 @@ const App: React.FC<AppProps> = (props) => {
 
   const dispatch = useDispatch();
 
-  const {isShowOrder} = useSelector((state:AppState)=>state.annotation)
+  const { isShowOrder } = useSelector((state: AppState) => state.annotation);
 
   useEffect(() => {
     if (
@@ -152,7 +152,7 @@ const App: React.FC<AppProps> = (props) => {
     props.textConfig,
     props.tagConfigList,
     currentToolName,
-    isShowOrder
+    isShowOrder,
   ]);
 
   useEffect(() => {
@@ -197,7 +197,7 @@ const App: React.FC<AppProps> = (props) => {
 const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
   currentToolName: state.annotation.currentToolName,
-  toolStyle: state.toolStyle
+  toolStyle: state.toolStyle,
 });
 
 export default connect(mapStateToProps)(App);

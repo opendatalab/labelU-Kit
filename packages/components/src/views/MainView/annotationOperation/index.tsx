@@ -129,9 +129,28 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   // 定义全局保存标注结果事件监听
   useEffect(() => {
-    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', (e) => {
+    // 初始化配置防抖方法
+    const throttle = (fun: () => void, time: number) => {
+      let timmer: any;
+      let returnFunction = () => {
+        if (timmer) {
+          clearTimeout(timmer);
+        }
+        timmer = setTimeout(() => {
+          fun();
+        }, time);
+      };
+      return returnFunction;
+    };
+    // @ts-ignore
+    window.Cthrottle = throttle;
+    // @ts-ignore 添加防抖提升性能
+    const throtthleSave = window.Cthrottle(() => {
       // 切换工具保存标注结果
       dispatch(ChangeSave);
+    }, 300);
+    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', (e) => {
+      throtthleSave();
     });
   }, []);
 
