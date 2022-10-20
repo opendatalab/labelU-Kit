@@ -131,7 +131,7 @@ class ToolStyleConverter {
 
       let color = colorList[attributeIndex % colorList.length];
 
-      // 找不到则开启为无属性
+      // 找不到则开启为无标签
       if (attributeIndex === -1) {
         color = NULL_COLOR;
       }

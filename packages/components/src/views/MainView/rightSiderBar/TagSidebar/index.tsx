@@ -92,7 +92,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {
         return `${acc}${cur.keyName}: ${cur.value.join(` 、 `)}\n`;
       }, '') ?? '';
-
+      
     dom.setAttribute('id', 'tagToolTag');
     dom.setAttribute(
       'style',
@@ -112,7 +112,11 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
         clear: both;
       `,
     );
-    parentNode?.appendChild(dom);
+    const preTagToolTag = document.getElementById('tagToolTag');
+    if(!parentNode?.contains(preTagToolTag)) {
+      parentNode?.appendChild(dom);
+    }
+
   };
 
   const getTagResultByCode = (num1: number, num2?: number) => {

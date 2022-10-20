@@ -216,7 +216,7 @@ class BasicToolOperation extends EventListener {
     this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
-    this.defaultAttribute = props?.defaultAttribute ?? '无属性';
+    this.defaultAttribute = props?.defaultAttribute ?? '无标签';
     this.forbidCursorLine = !!props.forbidCursorLine;
     this.lang = ELang.Zh;
 
@@ -1301,7 +1301,10 @@ class BasicToolOperation extends EventListener {
                   clear: both;
                 `,
               );
-              this.canvas?.parentNode?.appendChild(dom);
+              let preTagDom = document.getElementById('tagToolTag');
+              if(!this.canvas?.parentNode?.contains(preTagDom)) {
+                this.canvas?.parentNode?.appendChild(dom);
+              }
             }
             break;
           }
