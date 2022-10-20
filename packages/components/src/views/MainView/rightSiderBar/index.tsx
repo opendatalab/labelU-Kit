@@ -36,16 +36,15 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const [tabIndex, setTabIndex] = useState<string>('1');
   const [tagTab, setTagTab] = useState<any>(
     <div className='rightTab'>
-    <p>分类</p>
-    <span className='innerWord'>未完成
-    </span>
-  </div>
+      <p>分类</p>
+      <span className='innerWord'>未完成</span>
+    </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
-
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
+  const [isShowClear, setIsShowClear] = useState(false);
   const tagConfigList = useSelector((state: AppState) => state.annotation.tagConfigList);
   const textConfig = useSelector((state: AppState) => state.annotation.textConfig);
   const toolInstance = useSelector((state: AppState) => state.annotation.toolInstance);
@@ -81,19 +80,18 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   };
 
   // 删除标注结果
-  const doClearAllResult = ()=>{
+  const doClearAllResult = () => {
     let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    for(let tool of labelTool){
+    for (let tool of labelTool) {
       let tmpResult = oldImgResult[tool]?.result;
-      if(tmpResult&&tmpResult.length>0){
-         oldImgResult[tool].result = [];
+      if (tmpResult && tmpResult.length > 0) {
+        oldImgResult[tool].result = [];
       }
     }
     imgList[imgIndex].result = JSON.stringify(oldImgResult);
     dispatch(UpdateImgList(imgList));
     updateCanvasView(oldImgResult);
-
-  }
+  };
 
   const handleOk = () => {
     setConfirmLoading(true);
@@ -126,23 +124,22 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         </div>,
       );
       // 设置分类结果
-      if(currentImgResult?.tagTool?.toolName){
-
+      if (currentImgResult?.tagTool?.toolName) {
         let tagResultKeys = currentImgResult?.tagTool
-        ? Object.keys(currentImgResult?.tagTool.result[0]?.result)
-        : [];
-      setTagTab(
-        <div className='rightTab'>
-          <p>分类</p>
-          <span className='innerWord'>
-            {tagResultKeys &&
-            tagResultKeys.length > 0 &&
-            tagResultKeys.length === tagConfigList.length
-              ? '已完成'
-              : '未完成'}
-          </span>
-        </div>,
-      );
+          ? Object.keys(currentImgResult?.tagTool.result[0]?.result)
+          : [];
+        setTagTab(
+          <div className='rightTab'>
+            <p>分类</p>
+            <span className='innerWord'>
+              {tagResultKeys &&
+              tagResultKeys.length > 0 &&
+              tagResultKeys.length === tagConfigList.length
+                ? '已完成'
+                : '未完成'}
+            </span>
+          </div>,
+        );
       }
 
       // 设置标注件数
@@ -157,6 +154,11 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           <span className='innerWord'>{count}件</span>
         </div>,
       );
+      if (count > 0) {
+        setIsShowClear(true);
+      } else {
+        setIsShowClear(false);
+      }
     }
   }, [currentToolName, tabIndex, imgList, imgIndex]);
 
@@ -182,6 +184,19 @@ const RightSiderbar: React.FC<IProps> = (props) => {
 
         <Tabs.TabPane tab={attributeTab} key='2'>
           <AttributeRusult />
+          {isShowClear && (
+            <Popconfirm
+              title='确认清空标注？'
+              open={open}
+              okText='确认'
+              cancelText='取消'
+              onConfirm={handleOk}
+              okButtonProps={{ loading: confirmLoading }}
+              onCancel={handleCancel}
+            >
+              <img onClick={showPopconfirm} className='clrearResult' src={ClearResultIcon} />
+            </Popconfirm>
+          )}
         </Tabs.TabPane>
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane tab={textTab} key='3'>
@@ -191,17 +206,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           </Tabs.TabPane>
         )}
       </Tabs>
-      <Popconfirm
-        title='确认清空标注？'
-        open={open}
-        okText='确认'
-        cancelText='取消'
-        onConfirm={handleOk}
-        okButtonProps={{ loading: confirmLoading }}
-        onCancel={handleCancel}
-      >
-        <img onClick={showPopconfirm} className='clrearResult' src={ClearResultIcon} />
-      </Popconfirm>
     </div>
   );
 };
