@@ -7,6 +7,7 @@ on:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: docs
@@ -19,9 +20,20 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
-        
-      - name: Install lerna
-        run: npm install lerna -g
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Get npm cache
+        uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       
       - name: Setup npm registry
         run: npm config set registry https://npm.shlab.tech/
