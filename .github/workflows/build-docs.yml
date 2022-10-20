@@ -11,14 +11,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          path: docs
       
-      - name: Setup Node 
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 14
-          
-      - name: Switch directory
-        run: cd ./docs
         
       - name: Install lerna
         run: npm install lerna -g
