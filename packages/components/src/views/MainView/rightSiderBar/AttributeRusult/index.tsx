@@ -15,6 +15,7 @@ import { ChangeCurrentTool, UpdateImgList } from '@/store/annotation/actionCreat
 import { ToolInstance } from '@/store/annotation/types';
 import { PrevResult, Attribute, EToolName } from '@label-u/annotation';
 import DrageModel from '@/components/dragModal';
+import classNames from 'classnames';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -38,6 +39,7 @@ interface IProps {
   imgIndex: number;
   imgList: IFileItem[];
   toolInstance: ToolInstance;
+  copyToolInstance: ToolInstance;
   currentToolName: string;
   basicResultList: [];
 }
@@ -47,6 +49,7 @@ const AttributeRusult: FC<IProps> = ({
   imgList,
   toolInstance,
   currentToolName,
+  copyToolInstance,
   attributeList,
   basicResultList,
 }) => {
@@ -55,6 +58,8 @@ const AttributeRusult: FC<IProps> = ({
   const dispatch = useDispatch();
   // 将标注结果转换为attributeResultList 格式
   const [content, setContent] = useState<ReactElement>(<div />);
+  // 当前选中标签
+  const [activeOrder, setActiveOrder] = useState<number>();
   // const [result,setResult] = useState();
   const [chooseToolInfo, setChooseToolInfo] = useState<ToolInfo>({
     toolName: '',
@@ -79,6 +84,32 @@ const AttributeRusult: FC<IProps> = ({
     });
     localStorage.setItem('toolInfo', initStr);
   };
+
+  // 工具选中后联动标注结果选中项
+  useEffect(() => {
+    const activeId =
+      currentToolName === EToolName.Rect
+        ? // @ts-ignore
+          copyToolInstance?.selectedRectID
+        : // @ts-ignore
+          copyToolInstance?.selectedID;
+    //@ts-ignore
+    const activeArea = copyToolInstance?.activeArea;
+    if (activeId && imgList && imgList.length > imgIndex) {
+      const toolInfoStr = localStorage.getItem('toolInfo');
+      if (toolInfoStr && toolInfoStr.length > 0) {
+        let imgResult = JSON.parse(imgList[imgIndex].result as string);
+        for (let item of imgResult[currentToolName]?.result) {
+          if (item.id === activeId) {
+            setActiveOrder(item.order);
+          }
+        }
+      }
+    }else{
+      setActiveOrder(0);
+    }
+    // @ts-ignore
+  }, [copyToolInstance, currentToolName]);
 
   useEffect(() => {
     if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
@@ -531,7 +562,10 @@ const AttributeRusult: FC<IProps> = ({
                       <div
                         // key={item.attributeName}
                         key={tItem.toolName + tItem.order}
-                        className='attributeResultLi'
+                        className={classNames({
+                          attributeResultLi: true,
+                          attributeResultLiActive: tItem.order === activeOrder,
+                        })}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedLabel(tItem);
@@ -637,6 +671,7 @@ const getStateMap = (state: AppState) => {
     imgList: [...state.annotation.imgList],
     imgIndex: state.annotation.imgIndex,
     toolInstance: state.annotation.toolInstance,
+    copyToolInstance: { ...state.annotation.toolInstance },
     currentToolName: state.annotation.currentToolName,
     attributeList: state.annotation.attributeList,
     basicResultList: state.annotation.basicResultList,

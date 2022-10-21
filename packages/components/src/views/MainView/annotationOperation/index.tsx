@@ -148,7 +148,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     const throtthleSave = window.Cthrottle(() => {
       // 切换工具保存标注结果
       dispatch(ChangeSave);
-    }, 300);
+    }, 100);
     document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', (e) => {
       throtthleSave();
     });
