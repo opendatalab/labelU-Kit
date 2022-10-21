@@ -517,7 +517,7 @@ const AttributeRusult: FC<IProps> = ({
   }
 
   return (
-    <div>
+    <div className='attributeResult'>
       <DrageModel
         title='详细信息'
         ref={dragModalRef}

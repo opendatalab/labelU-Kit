@@ -494,9 +494,16 @@ body {
   .clrearResult {
     position: absolute;
     height: 17px;
-    bottom: 16px;
+    bottom: 5px;
     transform: translate(-50%, -50%);
     left: 50%;
+  }
+
+  .attributeResult{
+    width: 100%;
+    height: calc(100vh - 220px);
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
 
   .ant-tabs {
