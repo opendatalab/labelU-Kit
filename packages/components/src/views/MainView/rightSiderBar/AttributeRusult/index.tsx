@@ -245,41 +245,46 @@ const AttributeRusult: FC<IProps> = ({
 
   // 批量删除标注
   const deleteLabelByAttribute = (attributeResult: AttributeResult) => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    const newAttributeResultList = attributeResultList.reduce((res, item) => {
-      if (item.attributeName !== attributeResult.attributeName) {
-        res.push(item);
+    if(attributeResult&&attributeResult.toolInfo&&attributeResult.toolInfo.length>0){
+      for(let i=0; i<attributeResult.toolInfo.length;i++){
+        delelteLabel(attributeResult.toolInfo[i]);
       }
-      return res;
-    }, [] as AttributeResult[]);
-    setAttributeResultList(newAttributeResultList);
-
-    // 更新删除后显示结果
-    if (attributeResult.toolInfo && attributeResult.toolInfo.length > 0) {
-      for (let oneTool of attributeResult.toolInfo) {
-        if (
-          oldImgResult[oneTool.toolName].result &&
-          oldImgResult[oneTool.toolName].result.length > 0
-        ) {
-          let newToolLabelItems = oldImgResult[oneTool.toolName].result.reduce(
-            (
-              res: { order: number; isVisible: boolean }[],
-              item: { order: number; isVisible: boolean },
-            ) => {
-              if (item.order !== oneTool.order) {
-                res.push(item);
-              }
-              return res;
-            },
-            [],
-          );
-          oldImgResult[oneTool.toolName].result = newToolLabelItems;
-        }
-      }
-      imgList[imgIndex].result = JSON.stringify(oldImgResult);
-      dispatch(UpdateImgList(imgList));
-      updateCanvasView(oldImgResult);
     }
+    // let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    // const newAttributeResultList = attributeResultList.reduce((res, item) => {
+    //   if (item.attributeName !== attributeResult.attributeName) {
+    //     res.push(item);
+    //   }
+    //   return res;
+    // }, [] as AttributeResult[]);
+    // setAttributeResultList(newAttributeResultList);
+
+    // // 更新删除后显示结果
+    // if (attributeResult.toolInfo && attributeResult.toolInfo.length > 0) {
+    //   for (let oneTool of attributeResult.toolInfo) {
+    //     if (
+    //       oldImgResult[oneTool.toolName].result &&
+    //       oldImgResult[oneTool.toolName].result.length > 0
+    //     ) {
+    //       let newToolLabelItems = oldImgResult[oneTool.toolName].result.reduce(
+    //         (
+    //           res: { order: number; isVisible: boolean }[],
+    //           item: { order: number; isVisible: boolean },
+    //         ) => {
+    //           if (item.order !== oneTool.order) {
+    //             res.push(item);
+    //           }
+    //           return res;
+    //         },
+    //         [],
+    //       );
+    //       oldImgResult[oneTool.toolName].result = newToolLabelItems;
+    //     }
+    //   }
+    //   imgList[imgIndex].result = JSON.stringify(oldImgResult);
+    //   dispatch(UpdateImgList(imgList));
+    //   updateCanvasView(oldImgResult);
+    // }
   };
 
   // 删除标注
@@ -296,6 +301,9 @@ const AttributeRusult: FC<IProps> = ({
           item: { order: number; isVisible: boolean },
         ) => {
           if (item.order !== toolInfo.order) {
+            if(item.order > toolInfo.order){
+              item.order = item.order - 1;
+            }
             res.push(item);
           }
           return res;
