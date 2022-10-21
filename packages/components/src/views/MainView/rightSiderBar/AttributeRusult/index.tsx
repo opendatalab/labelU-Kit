@@ -20,6 +20,8 @@ import classNames from 'classnames';
 const { Panel } = Collapse;
 const { Option } = Select;
 
+const LableTools = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];
+
 interface AttributeResult {
   isVisible: boolean;
   attributeName: string;
@@ -105,7 +107,7 @@ const AttributeRusult: FC<IProps> = ({
           }
         }
       }
-    }else{
+    } else {
       setActiveOrder(0);
     }
     // @ts-ignore
@@ -245,76 +247,93 @@ const AttributeRusult: FC<IProps> = ({
 
   // 批量删除标注
   const deleteLabelByAttribute = (attributeResult: AttributeResult) => {
-    if(attributeResult&&attributeResult.toolInfo&&attributeResult.toolInfo.length>0){
-      for(let i=0; i<attributeResult.toolInfo.length;i++){
-        delelteLabel(attributeResult.toolInfo[i]);
+    const getPositionIndexInArr = (arr: number[], value: number) => {
+      let p = 0;
+      if (arr?.length > 0) {
+        while (p < arr.length) {
+          if (value >= arr[p]) {
+            p++;
+          } else {
+            break;
+          }
+        }
       }
-    }
-    // let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    // const newAttributeResultList = attributeResultList.reduce((res, item) => {
-    //   if (item.attributeName !== attributeResult.attributeName) {
-    //     res.push(item);
-    //   }
-    //   return res;
-    // }, [] as AttributeResult[]);
-    // setAttributeResultList(newAttributeResultList);
+      return p;
+    };
 
-    // // 更新删除后显示结果
-    // if (attributeResult.toolInfo && attributeResult.toolInfo.length > 0) {
-    //   for (let oneTool of attributeResult.toolInfo) {
-    //     if (
-    //       oldImgResult[oneTool.toolName].result &&
-    //       oldImgResult[oneTool.toolName].result.length > 0
-    //     ) {
-    //       let newToolLabelItems = oldImgResult[oneTool.toolName].result.reduce(
-    //         (
-    //           res: { order: number; isVisible: boolean }[],
-    //           item: { order: number; isVisible: boolean },
-    //         ) => {
-    //           if (item.order !== oneTool.order) {
-    //             res.push(item);
-    //           }
-    //           return res;
-    //         },
-    //         [],
-    //       );
-    //       oldImgResult[oneTool.toolName].result = newToolLabelItems;
-    //     }
-    //   }
-    //   imgList[imgIndex].result = JSON.stringify(oldImgResult);
-    //   dispatch(UpdateImgList(imgList));
-    //   updateCanvasView(oldImgResult);
-    // }
+    if (attributeResult && attributeResult.toolInfo && attributeResult.toolInfo.length > 0) {
+      // 获取删除标注结果order 数组
+      const deleteResult = attributeResult.toolInfo
+        .map((item) => {
+          return item.order;
+        })
+        .sort((a, b) => a - b);
+
+      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      let newImgResult = { ...oldImgResult };
+      // 获取已用工具列表
+      let keys = Object.keys(oldImgResult);
+      let toolList = keys.filter((item) => {
+        return LableTools.indexOf(item as EToolName) >= 0;
+      });
+
+      for (let i = 0; i < toolList.length; i++) {
+        newImgResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
+          (
+            res: { order: number; isVisible: boolean }[],
+            item: { order: number; isVisible: boolean },
+          ) => {
+            if (deleteResult.indexOf(item.order) < 0) {
+              item.order = item.order - getPositionIndexInArr(deleteResult, item.order);
+              res.push(item);
+            }
+            return res;
+          },
+          [],
+        );
+      }
+      imgList[imgIndex].result = JSON.stringify(newImgResult);
+      dispatch(UpdateImgList(imgList));
+      updateCanvasView(newImgResult);
+    }
   };
 
   // 删除标注
   const delelteLabel = (toolInfo: ToolInfo) => {
     let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    let newImageResult = { ...oldImgResult };
     // 更新结果
     if (
       oldImgResult[toolInfo.toolName].result &&
       oldImgResult[toolInfo.toolName].result.length > 0
     ) {
-      let newToolLabelItems = oldImgResult[toolInfo.toolName].result.reduce(
-        (
-          res: { order: number; isVisible: boolean }[],
-          item: { order: number; isVisible: boolean },
-        ) => {
-          if (item.order !== toolInfo.order) {
-            if(item.order > toolInfo.order){
-              item.order = item.order - 1;
+      // 获取已用工具列表
+      let keys = Object.keys(oldImgResult);
+      let toolList = keys.filter((item) => {
+        return LableTools.indexOf(item as EToolName) >= 0;
+      });
+
+      for (let i = 0; i < toolList.length; i++) {
+        newImageResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
+          (
+            res: { order: number; isVisible: boolean }[],
+            item: { order: number; isVisible: boolean },
+          ) => {
+            if (item.order !== toolInfo.order) {
+              if (item.order > toolInfo.order) {
+                item.order = item.order - 1;
+              }
+              res.push(item);
             }
-            res.push(item);
-          }
-          return res;
-        },
-        [],
-      );
-      oldImgResult[toolInfo.toolName].result = newToolLabelItems;
+            return res;
+          },
+          [],
+        );
+      }
     }
-    imgList[imgIndex].result = JSON.stringify(oldImgResult);
+    imgList[imgIndex].result = JSON.stringify(newImageResult);
     dispatch(UpdateImgList(imgList));
-    updateCanvasView(oldImgResult);
+    updateCanvasView(newImageResult);
   };
 
   // 更新pre 标注结果
