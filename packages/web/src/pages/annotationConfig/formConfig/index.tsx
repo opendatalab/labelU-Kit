@@ -123,7 +123,7 @@ const FormConfig: FC = props => {
   useEffect(() => {
     let leftSiderDom = document.getElementById('lefeSiderId');
     let height = leftSiderDom?.getBoundingClientRect().height as number;
-    setHeight(height - 78);
+    setHeight(height - 178);
   }, []);
 
   const handleChange = (e: React.SetStateAction<string>) => {
