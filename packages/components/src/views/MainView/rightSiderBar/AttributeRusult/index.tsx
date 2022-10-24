@@ -16,6 +16,7 @@ import { ToolInstance } from '@/store/annotation/types';
 import { PrevResult, Attribute, EToolName } from '@label-u/annotation';
 import DrageModel from '@/components/dragModal';
 import classNames from 'classnames';
+import { expandIconFuc } from '../TagSidebar';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -526,7 +527,11 @@ const AttributeRusult: FC<IProps> = ({
         cancelWord='取消'
         content={content}
       />
-      <Collapse key={defaultKeys.join('')} defaultActiveKey={defaultKeys}>
+      <Collapse
+        key={defaultKeys.join('')}
+        defaultActiveKey={defaultKeys}
+        expandIcon={expandIconFuc}
+      >
         {attributeResultList &&
           attributeResultList.length > 0 &&
           attributeResultList.map((item, index) => {
@@ -534,7 +539,18 @@ const AttributeRusult: FC<IProps> = ({
               <Panel
                 header={
                   <div className='attributeResultLi'>
-                    <span>{item.attributeName}</span>{' '}
+                    <span
+                      title={item.attributeName}
+                      style={{
+                        marginRight: '36px',
+                        width: '84px',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {item.attributeName}
+                    </span>{' '}
                     <div className='attributeResultRightImgBox'>
                       {item.isVisible ? (
                         <img
@@ -604,7 +620,7 @@ const AttributeRusult: FC<IProps> = ({
                           title={item.attributeName}
                           style={{
                             marginRight: '36px',
-                            width: '83px',
+                            width: '84px',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
@@ -622,7 +638,7 @@ const AttributeRusult: FC<IProps> = ({
                                 .getElementById(`${tItem.toolName + tItem.order} + edit`)
                                 .getBoundingClientRect();
                               const tmpBounds = {
-                                left: boundingClientRect.left,
+                                left: boundingClientRect.left - 50,
                                 top: boundingClientRect.top,
                               };
 

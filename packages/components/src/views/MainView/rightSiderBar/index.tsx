@@ -9,6 +9,7 @@ import { connect, useDispatch, useSelector } from 'react-redux';
 import TextToolSidebar from './TextToolSidebar';
 import TagSidebar from './TagSidebar';
 import AttributeRusult from './AttributeRusult';
+import ClearResultIconHover from '../../../assets/annotation/common/clear_result_hover.svg';
 import ClearResultIcon from '../../../assets/annotation/common/clear_result.svg';
 import { IFileItem } from '@/types/data';
 import { labelTool } from '../toolHeader/headerOption';
@@ -41,6 +42,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
+  const [isClearnHover,setIsClearHover] = useState<boolean>(false);
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -194,7 +196,17 @@ const RightSiderbar: React.FC<IProps> = (props) => {
               okButtonProps={{ loading: confirmLoading }}
               onCancel={handleCancel}
             >
-              <img onClick={showPopconfirm} className='clrearResult' src={ClearResultIcon} />
+              <img onMouseEnter={e=>{
+                e.stopPropagation();
+                setIsClearHover(true)
+              }} 
+               onMouseLeave={
+                e=>{
+                  e.stopPropagation();
+                  setIsClearHover(false);
+                }
+               }
+              onClick={showPopconfirm} className='clrearResult' src={isClearnHover?ClearResultIconHover:ClearResultIcon} />
             </Popconfirm>
           )}
         </Tabs.TabPane>

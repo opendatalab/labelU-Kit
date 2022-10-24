@@ -30,7 +30,7 @@ declare interface ITagResult {
 const { Panel } = Collapse;
 
 export const expandIconFuc = ({ isActive }: any) => (
-  <CaretRightOutlined rotate={isActive ? 90 : 0} />
+  <CaretRightOutlined rotate={isActive ? 90 : 0} style={{color:"rgba(0, 0, 0, 0.36)"}} />
 );
 
 const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
