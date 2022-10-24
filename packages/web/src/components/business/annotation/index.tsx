@@ -27,6 +27,7 @@ const Annotation = (props: {
   return (
     <div>
       <AnnotationOperation
+        isPreview = {isPreview}
         exportData={exportData}
         onSubmit={onSubmit}
         imgList={fileList}
