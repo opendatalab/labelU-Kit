@@ -24,9 +24,12 @@ body {
     padding-left: 14px;
   }
   .circle {
-    width: 8px;
-    height: 8px;
-    border-radius: 16px;
+    width: 3px;
+    height: 13px;
+  }
+  .ant-space-item{
+    display: flex;
+    align-items: center;
   }
   .attributeName {
     max-width: 120px;
@@ -169,9 +172,8 @@ body {
     justify-content: flex-start;
     height: 50px;
     .circle {
-      width: 8px;
-      height: 8px;
-      border-radius: 16px;
+      width: 3px;
+      height: 13px;
     }
     .attributeName {
       max-width: 120px;
@@ -186,6 +188,12 @@ body {
     }
     a {
       text-decoration: none;
+    }
+    .dropdowm-a{
+      color: rgba(0, 0, 0, 0.6);
+      &:hover{
+        color:#1B67FF
+      }
     }
   }
 
@@ -231,7 +239,7 @@ body {
 }
 
 .#{$prefix}-footer {
-  height: 32px;
+  height: 44px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -377,7 +385,7 @@ body {
     padding: 0 10px;
     background: #ffffff;
     border-bottom: 1px solid rgba(223, 223, 223, 1);
-    box-shadow: 0px 2px 14px rgba(204, 204, 204, 0.5);
+    // box-shadow: 0px 2px 14px rgba(204, 204, 204, 0.5);
   }
 
   &__icon {

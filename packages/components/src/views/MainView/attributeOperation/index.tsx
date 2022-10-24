@@ -8,6 +8,7 @@ import { COLORS_ARRAY } from '@/data/Style';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
+import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -26,6 +27,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
+  const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
 
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
@@ -83,7 +85,12 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     }
   }, [attributeBoxLength, currentAttributeList]);
 
-  const drowpDownIcon = <img src={DropdowmIcon} />;
+  const drowpDownIcon = (
+    <img style={{ width: 10, marginLeft: -4, marginBottom: 3 }} src={DropdowmIcon} />
+  );
+  const drowpUpIconA = (
+    <img style={{ width: 10, marginLeft: -4, marginBottom: 3 }} src={DropdowmIconA} />
+  );
 
   const attributeMenue = useCallback(() => {
     if (currentAttributeList.length >= shwoAttributeCount) {
@@ -188,11 +195,22 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
         })}
       {shwoAttributeCount < currentAttributeList.length && (
         <Dropdown overlay={attributeMenue()} trigger={['click']}>
-          <a onClick={(e) => e.preventDefault()}>
-            <Space style={{ marginLeft: '10px' }}>
+          <a
+            onMouseEnter={(e) => {
+              e.preventDefault();
+              setIsHoverDropdown(true);
+            }}
+            onMouseLeave={(e) => {
+              e.preventDefault();
+              setIsHoverDropdown(false);
+            }}
+            onClick={(e) => e.preventDefault()}
+            className='dropdowm-a'
+          >
+            <Space style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
               更多
               {/* {currentAttributeList.length} */}
-              {drowpDownIcon}
+              {isHoverDropdown ? drowpUpIconA : drowpDownIcon}
               {/* <DownOutlined /> */}
             </Space>
           </a>
