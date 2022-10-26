@@ -1,4 +1,5 @@
-[文件：labelU logo.svg]
+![labelU logo](https://user-images.githubusercontent.com/25022954/197937696-d55e1e42-93f2-4a96-9742-fb87e4785913.svg)
+
 ## 特性
 
 - 📝本项目包含@label-u/annotation、@label-u/components、@label-u/utils及@label-u/web等4个工程。
