@@ -30,10 +30,10 @@ declare interface ITagResult {
 const { Panel } = Collapse;
 
 export const expandIconFuc = ({ isActive }: any) => (
-  <CaretRightOutlined rotate={isActive ? 90 : 0} style={{color:"rgba(0, 0, 0, 0.36)"}} />
+  <CaretRightOutlined rotate={isActive ? 90 : 0} style={{ color: 'rgba(0, 0, 0, 0.36)' }} />
 );
 
-const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
+const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex }) => {
   const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
   const [tagResult, setTagResult] = useState<ITagResult[]>([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -65,15 +65,13 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
     }
   };
 
-  useEffect(()=>{
-    if(imgList&&imgList.length>0){
+  useEffect(() => {
+    if (imgList && imgList.length > 0) {
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let tagResult = currentImgResult?.tagTool?currentImgResult?.tagTool?.result:[];
+      let tagResult = currentImgResult?.tagTool ? currentImgResult?.tagTool?.result : [];
       setTagResult(tagResult);
     }
-
-
-  },[imgIndex,imgList])
+  }, [imgIndex, imgList]);
 
   useEffect(() => {
     renderTag();
@@ -92,7 +90,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {
         return `${acc}${cur.keyName}: ${cur.value.join(` 、 `)}\n`;
       }, '') ?? '';
-      
+
     dom.setAttribute('id', 'tagToolTag');
     dom.setAttribute(
       'style',
@@ -113,10 +111,9 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
       `,
     );
     const preTagToolTag = document.getElementById('tagToolTag');
-    if(!parentNode?.contains(preTagToolTag)) {
+    if (!parentNode?.contains(preTagToolTag)) {
       parentNode?.appendChild(dom);
     }
-
   };
 
   const getTagResultByCode = (num1: number, num2?: number) => {
@@ -154,9 +151,15 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
         },
       ];
       let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let currentImgResult = {...oldImgResult,tagTool:result};
-      imgList[imgIndex].result = JSON.stringify(currentImgResult); 
-      dispatch(UpdateImgList(imgList))
+      let currentImgResult = {
+        ...oldImgResult,
+        tagTool: {
+          toolName: 'tagTool',
+          result: [...result],
+        },
+      };
+      imgList[imgIndex].result = JSON.stringify(currentImgResult);
+      dispatch(UpdateImgList(imgList));
       setTagResult(result as ITagResult[]);
     }
   };
@@ -315,9 +318,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList,imgIndex }) => {
       {tagConfigList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div style={{ height }}>
-          {labelPanel(tagConfigList)}
-        </div>
+        <div style={{ height }}>{labelPanel(tagConfigList)}</div>
       )}
     </div>
   );

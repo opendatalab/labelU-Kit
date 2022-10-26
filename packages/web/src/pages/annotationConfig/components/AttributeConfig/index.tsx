@@ -3,7 +3,7 @@ import { COLORS_ARRAY } from '@label-u/annotation';
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 import { CloseCircleFilled } from '@ant-design/icons';
 import { Button, Input as SenseInput } from 'antd';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 // import MonacoEditor from 'react-monaco-editor';
 // import styles from '../../index.module.scss';
 import './index.less';
@@ -38,6 +38,8 @@ export const ColorTag = ({ color, style }: any) => {
 
 const JSONTab = (props: IJsonTabProps) => {
   const attributeListDom = useRef(null);
+  const [isHover, setIsHover] = useState<string>();
+
   const { t } = useTranslation();
   const {
     value = [
@@ -84,36 +86,48 @@ const JSONTab = (props: IJsonTabProps) => {
 
   return (
     <div>
-      {value?.map((info, i) => (
-        <div className="sensebee-input-wrap" key={`inputList_${i}`}>
-          <div className="select">
-            <span className="inputSeria">{i + 1}</span>
-            <SenseInput
-              className={`sensebee-input`}
-              value={info.key}
-              placeholder={t('Type')}
-              onChange={(e: any) => changeInputInfo(e, 'key', i)}
-              disabled={readonly}
-              addonBefore={isAttributeList && <ColorTag color={COLORS_ARRAY[i % 8]} />}
-            />
-            <SenseInput
-              className={'sensebee-input'}
-              value={info.value}
-              placeholder={t('Value')}
-              onChange={(e: any) => changeInputInfo(e, 'value', i)}
-              disabled={readonly}
-            />
+      {value &&
+        value.length > 0 &&
+        value?.map((info, i) => (
+          <div
+            className="sensebee-input-wrap"
+            key={`inputList_${i}`}
+            onMouseOver={e => {
+              e.stopPropagation();
+              setIsHover(info.key + i);
+            }}
+
+            onMouseLeave={e=>{
+              e.stopPropagation();
+              setIsHover('');
+            }}
+          >
+            <div className="select">
+              <span className="inputSeria">{i + 1}</span>
+              <SenseInput
+                className={`sensebee-input`}
+                value={info.key}
+                placeholder={t('Type')}
+                onChange={(e: any) => changeInputInfo(e, 'key', i)}
+                disabled={readonly}
+                addonBefore={isAttributeList && <ColorTag color={COLORS_ARRAY[i % 8]} />}
+              />
+              <SenseInput
+                className={'sensebee-input'}
+                value={info.value}
+                placeholder={t('Value')}
+                onChange={(e: any) => changeInputInfo(e, 'value', i)}
+                disabled={readonly}
+              />
+            </div>
+            {i > 0 && !readonly && isHover === info?.key + i && (
+              <CloseCircleFilled className="deleteIcon" onClick={() => deleteInputInfo(i)} />
+            )}
           </div>
-          {i > 0 && !readonly && (
-            <a className="deleteIcon" onClick={() => deleteInputInfo(i)}>
-              <CloseCircleFilled />
-            </a>
-          )}
-        </div>
-      ))}
+        ))}
 
       {!readonly && (
-        <Button className="addButton" onClick={() => addInputInfo()} ref={attributeListDom}>
+        <Button type='primary' className="addButton" onClick={() => addInputInfo()} ref={attributeListDom} ghost>
           新建
         </Button>
       )}

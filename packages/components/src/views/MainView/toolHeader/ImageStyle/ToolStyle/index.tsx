@@ -160,7 +160,7 @@ const ToolStyle = (props: IProps) => {
         return (
           <div id={`style-${key}`} className='styleSlider' key={key}>
             <span className='title'>
-              <img src={getImage(key)} className='icon' />
+              <img src={getImage(key)} className='icon' style={{width:16,marginRight:10}} />
               {t(getTitle(key))}
             </span>
             <span className='slider'>

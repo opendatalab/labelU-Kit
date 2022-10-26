@@ -74,9 +74,9 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
   return (
     <Header className="layout-page-header">
       {device !== 'MOBILE' && (
-        <div className="logo" style={{ width: collapsed ? 80 : 200 }}>
+        <div className="logo" style={{ width: collapsed ? 90 : 200 }}>
           {/* <SvgIcon name="logo-react" style={{ marginRight: collapsed ? '2px' : '20px' }} /> */}
-          <img src={LogoIcon} alt="" style={{ width: 80, height: 22 }} />
+          <img src={LogoIcon} alt="" style={{ width: 90 }} />
           {/* <img src={AntdSvg} alt="" /> */}
 
           {/* <SvgIcon name="logo-logo" width={160} height={32}/> */}

@@ -16,6 +16,9 @@
     color: rgba(0, 0, 0, 0.36);
     border-right: 3px solid rgba(0, 0, 0, 0.03);
   }
+  .ace_comment {
+    color: rgba(0, 0, 0, 0.36);
+  }
 }
 
 .container {
@@ -62,10 +65,12 @@
         height: 100%;
         // background-color: #ddd;
         position: relative;
+        overflow-x: hidden;
+        overflow-y: scroll;
         // overflow: hidden;
       }
       .ant-tabs-nav {
-        margin: 0px 0px 16px 0px;
+        margin: 0px 0px 24px 0px;
         height: 32px;
 
         .ant-tabs-nav-list {
@@ -165,7 +170,7 @@
         align-items: center;
         justify-content: center;
         img {
-          width: 266px;
+          width: 119px;
         }
       }
     }
@@ -181,7 +186,7 @@
         gap: 16px;
         width: 350px;
         height: 32px;
-        margin-top: 24px;
+        margin-bottom: 24px;
         label {
           height: 22px;
           font-family: 'PingFang SC';

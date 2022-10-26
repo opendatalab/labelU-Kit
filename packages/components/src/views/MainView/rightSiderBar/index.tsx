@@ -16,6 +16,7 @@ import { labelTool } from '../toolHeader/headerOption';
 import { UpdateImgList } from '@/store/annotation/actionCreators';
 import { PrevResult } from '@label-u/annotation';
 import { toolList } from '../toolHeader/ToolOperation';
+import classNames from 'classnames';
 
 interface IProps {
   toolName?: EToolName;
@@ -116,7 +117,13 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       setTextTab(
         <div className='rightTab'>
           <p>文本描述</p>
-          <span className='innerWord'>
+          <span className={classNames({
+              'innerWord':true,
+              'finish': textResultKeys &&
+              textResultKeys.length > 0 &&
+              textResultKeys.length === textConfig.length
+
+            })}>
             {textResultKeys &&
             textResultKeys.length > 0 &&
             textResultKeys.length === textConfig.length
@@ -133,7 +140,13 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         setTagTab(
           <div className='rightTab'>
             <p>分类</p>
-            <span className='innerWord'>
+            <span className={classNames({
+              'innerWord':true,
+              'finish': tagResultKeys &&
+              tagResultKeys.length > 0 &&
+              tagResultKeys.length === tagConfigList.length
+
+            })}>
               {tagResultKeys &&
               tagResultKeys.length > 0 &&
               tagResultKeys.length === tagConfigList.length
@@ -183,7 +196,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
             </div>
           </Tabs.TabPane>
         )}
-
         <Tabs.TabPane tab={attributeTab} key='2'>
           <AttributeRusult />
           {isShowClear && (

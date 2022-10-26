@@ -19,6 +19,9 @@ export default defineConfig({
   //     changeOrigin: true
   //   }
   // },
+  server: {
+    host: '0.0.0.0'
+  },
   plugins: [
     react()
     // createSvgIconsPlugin({

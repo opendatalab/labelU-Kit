@@ -78,17 +78,16 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
     <div>
       <div className="selectedMain">
         <Form {...formItemLayout} name={props.name} form={form} onChange={formSubmitThrottle}>
-          <Row>
+          <Row className='double-input'>
             <Col span={4}>
               <div className="selectedName">最小尺寸</div>
             </Col>
-            <Col span={8}>
-              <Form.Item name="minWidth" initialValue={initVal.minWidth}>
+            <Col span={9}>
+              <Form.Item label="" name="minWidth" initialValue={initVal.minWidth}>
                 <SenseInput type="text" suffix={<div>W</div>} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
-            <Col span={1} />
-            <Col span={8}>
+            <Col span={11}>
               <Form.Item name="minHeight" initialValue={initVal.minHeight}>
                 <SenseInput type="text" suffix={<div>H</div>} disabled={isAllReadOnly} />
               </Form.Item>

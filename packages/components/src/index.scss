@@ -1,4 +1,6 @@
 @import './components/dragModal/index.scss';
+@import './styles/reset-antd.scss';
+
 
 $headerHeight: 60px;
 $menuWidth: 240px;
@@ -7,24 +9,21 @@ $sidebarFooterHeight: 80px;
 $prefix: lab;
 $boxShadow: 1px 1px 4px rgb(204 204 204 / 50%);
 
-
 ::-webkit-scrollbar {
   width: 3px !important;
-  height: 10px !important;  
+  height: 10px !important;
 }
- 
+
 /*定义滚动条轨道 内阴影+圆角*/
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 0px rgba(180, 180, 180, .5);
+  box-shadow: inset 0 0 0px rgba(180, 180, 180, 0.5);
   border-radius: 10px;
-  
 }
- 
+
 /*定义滑块 内阴影+圆角*/
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  box-shadow: inset 0 0 0px rgba(180, 180, 180, .5);
-  
+  box-shadow: inset 0 0 0px rgba(180, 180, 180, 0.5);
 }
 
 body {
@@ -47,7 +46,7 @@ body {
     width: 3px;
     height: 13px;
   }
-  .ant-space-item{
+  .ant-space-item {
     display: flex;
     align-items: center;
   }
@@ -111,11 +110,12 @@ body {
   &__left_sider {
     // max-width: 232px;
     background: #eeeeee;
-    overflow: hidden;
+    overflow-y: scroll;
+    overflow-x: hidden;
     position: relative;
     z-index: 10;
     border-top: 1px solid #e2e2e2;
-    height: 100%;
+    height: calc(100vh - 220px);
     padding: 16px 0px;
 
     .item {
@@ -126,6 +126,7 @@ body {
       height: 165px;
       position: relative;
       .imgItem {
+        border-radius: 4px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -209,10 +210,10 @@ body {
     a {
       text-decoration: none;
     }
-    .dropdowm-a{
+    .dropdowm-a {
       color: rgba(0, 0, 0, 0.6);
-      &:hover{
-        color:#1B67FF
+      &:hover {
+        color: #1b67ff;
       }
     }
   }
@@ -234,13 +235,13 @@ body {
   }
 }
 
-
-.#{$prefix}-sidebar{
-  .rightTab{
+.#{$prefix}-sidebar {
+  .rightTab {
     font-size: 16px;
     margin-top: 10px;
     text-align: center;
-    .innerWord{
+    .innerWord {
+      color: rgba(0, 0, 0, 0.6);
       position: absolute;
       top: 77%;
       transform: translate(-50%, -50%);
@@ -248,13 +249,25 @@ body {
       font-size: 12px;
     }
   }
-  .ant-tabs-content{
+  .finish {
+    color: rgba(0, 0, 0, 0.87) !important;
+  }
+  .ant-tabs-content {
     margin-top: 15px;
     overflow-y: scroll;
     overflow-x: hidden;
     height: calc(100vh - 180px);
     position: relative;
     width: 100%;
+  }
+  .singleTool {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    .toolName {
+      margin-left: 10px;
+    }
   }
 }
 
@@ -423,6 +436,8 @@ body {
 
   &__operationNode {
     border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-left: 1px solid #ddd;
   }
 
   &__titlePlacement {
@@ -527,8 +542,8 @@ body {
     left: 50%;
   }
 
-  .attributeResult{
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);;
+  .attributeResult {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     width: 100%;
     height: calc(100vh - 220px);
     overflow-y: scroll;
@@ -545,7 +560,7 @@ body {
     .ant-tabs-nav {
       // padding: 0px 12px;
       margin: 0px;
-      .ant-tabs-nav-wrap{
+      .ant-tabs-nav-wrap {
         display: flex;
         justify-content: space-around;
       }
@@ -558,7 +573,7 @@ body {
       .emptyAttributeImg {
         left: 50%;
         top: 50%;
-        width: 110px;
+        width: 119px;
         position: absolute;
         vertical-align: middle;
         border-style: none;
@@ -568,7 +583,7 @@ body {
     }
 
     .ant-tabs-nav-list {
-      border-bottom:1px solid rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       height: 64px !important;
       align-items: center;
       // width: 260px !important;
@@ -588,7 +603,7 @@ body {
           display: flex;
           width: 40px;
           justify-content: space-between;
-          margin-left: 80px;
+          margin-left: 60px;
           .hoverShow {
             display: none;
           }
@@ -652,7 +667,7 @@ body {
               width: 16px;
             }
           }
-          .attributeResultLiActive{
+          .attributeResultLiActive {
             background-color: #f7f7f7;
           }
         }
@@ -1153,8 +1168,10 @@ $hotkey-container-padding: 7px;
   width: 100%;
   display: flex;
   flex-direction: column;
+  padding-top: 12px;
 
   .styleSlider {
+    margin-bottom: 12px;
     .title {
       min-width: 60px;
       margin-right: 10px;
@@ -1810,14 +1827,13 @@ $hotkey-container-padding: 7px;
   display: flex;
   justify-content: space-around;
   border-radius: 4px;
-  border-left: 1px solid #ddd;
+  // border-left: 1px solid #ddd;
   // border-right: 1px solid #ddd;
   text-align: center;
 
   .lb-left-item {
     max-width: 20px;
     max-height: 20px;
-    margin: 10px 10px;
   }
 
   a,

@@ -84,7 +84,7 @@ const ImgAttributeInfo = (props: IProps) => {
           <Row className='tools' style={{ padding: '0px 0' }}>
             <Col span={24}>
               <span className='singleTool'>
-                <img width={12} height={12} src={info.svg} />
+                <img width={16} height={16} src={info.svg} />
                 <span className='toolName'>{t(info.name)}</span>
               </span>
             </Col>

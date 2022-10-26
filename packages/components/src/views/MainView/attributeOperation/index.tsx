@@ -94,12 +94,12 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
 
   const attributeMenue = useCallback(() => {
     if (currentAttributeList.length >= shwoAttributeCount) {
-      let items = currentAttributeList.slice(shwoAttributeCount - 1).map((item, index) => {
+      let items = currentAttributeList.slice(shwoAttributeCount).map((item, index) => {
         return {
           label: (
             <a
               className={classNames({
-                chooseAttribute: item.key === copytoolInstance?.defaultAttribute,
+                chooseAttribute: item.key === chooseAttribute,
               })}
               onClick={(e) => {
                 e.stopPropagation();
@@ -111,7 +111,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 className='circle'
                 style={{
                   backgroundColor:
-                    COLORS_ARRAY[(index - 1 + shwoAttributeCount) % COLORS_ARRAY.length],
+                    COLORS_ARRAY[(index + shwoAttributeCount) % COLORS_ARRAY.length],
                   marginRight: 5,
                 }}
               />
@@ -125,7 +125,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     } else {
       return <div />;
     }
-  }, [shwoAttributeCount, currentAttributeList, toolInstance]);
+  }, [shwoAttributeCount, currentAttributeList, toolInstance,chooseAttribute]);
 
   // 根据工具名称的修改情况获取最新的attributeList
   useEffect(() => {

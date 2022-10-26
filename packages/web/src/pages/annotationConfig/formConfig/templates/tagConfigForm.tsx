@@ -122,9 +122,9 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
   const { children } = props;
 
   return (
-    <div className="selectedMain">
+    <div className="selectedMain" style={{paddingLeft:24}}>
       <Form name={props.name} form={form}>
-        <Form.Item label="标签配置" name="tagList" shouldUpdate initialValue={initVal.tagList}>
+        <Form.Item label="" name="tagList" shouldUpdate initialValue={initVal.tagList}>
           {initVal.tagList?.map((info, i) => (
             <TagInput
               inputInfo={info}
@@ -137,7 +137,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
             />
           ))}
 
-          <Button style={{ marginTop: 10 }} onClick={() => addInputInfo()}>
+          <Button type='primary' style={{ marginTop: 10 }} onClick={() => addInputInfo()} ghost>
             新增
           </Button>
         </Form.Item>

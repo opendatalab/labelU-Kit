@@ -7,6 +7,8 @@ const ImageStyle: FC = () => {
   const toolStyle = <ToolStyle />;
 
   const content = useMemo(() => <div className={`${prefix}-sidebar`}>{toolStyle}</div>, []);
+
+
   return (
     <Popover
       placement='topLeft'

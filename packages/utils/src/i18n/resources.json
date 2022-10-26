@@ -126,6 +126,11 @@
     "TextCheckCustomFormat": "Please enter data in custom format"
   },
   "cn": {
+    "MoreSettings": "更多设置",
+    "TextSettings": "文本设置",
+    "Name": "名字",
+    "Maximum Text Input": "最大字数",
+    "DefaultText": "默认文本",
     "TextInput": "文本输入",
     "NoAttribute": "无标签",
     "Save": "保存",

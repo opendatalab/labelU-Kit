@@ -79,14 +79,14 @@ export type ToolName = EToolName | EVideoToolName | EPointCloudName;
 
 export const TOOL_NAME: { [a: string]: string } = {
   [EToolName.Rect]: '拉框',
-  [EToolName.Tag]: '标签',
+  [EToolName.Tag]: '标签分类',
   [EToolName.Point]: '标点',
   [EToolName.PointMarker]: '列表标点',
   [EToolName.Segmentation]: '前景分割',
   [EToolName.Filter]: '筛选',
-  [EToolName.Text]: '文本',
+  [EToolName.Text]: '文本描述',
   [EToolName.Polygon]: '多边形',
-  [EToolName.Line]: '线条',
+  [EToolName.Line]: '标线',
   [EToolName.LineMarker]: '列表线条',
   [EToolName.FolderTag]: '文件夹标签',
   [EToolName.RectTrack]: '拉框跟踪',

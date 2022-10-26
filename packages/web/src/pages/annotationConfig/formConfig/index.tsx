@@ -184,7 +184,7 @@ const FormConfig: FC = props => {
         <label>标注工具</label>
         <Dropdown overlay={<Menu items={items}></Menu>} placement="bottomLeft" trigger={['click']}>
           <Button type="primary" ghost>
-            新增标注工具 +
+          + 新增标注工具
           </Button>
         </Dropdown>
       </div>

@@ -55,7 +55,7 @@
   },
   "scripts": {
     "start": "vite",
-    "buildv":"vite build",
+    "buildv": "vite build",
     "build": "cross-env REACT_APP_ENV=production craco build",
     "test": "craco test"
   },

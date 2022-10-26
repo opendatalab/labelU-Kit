@@ -8,7 +8,7 @@ import { getGlobalState } from '../utils/getGloabal';
 const initialState: UserState = {
   ...getGlobalState(),
   noticeCount: 0,
-  locale: (localStorage.getItem('locale')! || 'en_US') as Locale,
+  locale: (localStorage.getItem('locale')! || 'zh_CN') as Locale,
   newUser: JSON.parse(localStorage.getItem('newUser')!) ?? true,
   logged: localStorage.getItem('t') ? true : false,
   menuList: [],

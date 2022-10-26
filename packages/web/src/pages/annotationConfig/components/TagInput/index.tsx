@@ -63,7 +63,7 @@ const TagInput = (props: IProps) => {
             />
           </InputGroup>
         </Col>
-        <Col span={7}>
+        <Col span={3}>
           <div className="headerOption">
             <Tooltip placement="right" title={t('MultiSelect')}>
               <Checkbox
@@ -80,7 +80,12 @@ const TagInput = (props: IProps) => {
             )}
             {inputIndex > 0 && !isAllReadOnly && (
               // eslint-disable-next-line jsx-a11y/anchor-is-valid
-              <a className="deleteIcon" onClick={() => deleteInputInfo(inputIndex)}>
+              <a
+                className="deleteIcon"
+                onClick={() => {
+                  deleteInputInfo(inputIndex);
+                }}
+              >
                 <CloseCircleFilled />
               </a>
             )}
@@ -131,7 +136,9 @@ const TagInput = (props: IProps) => {
                     style={{
                       color: '#CCCCCC'
                     }}
-                    onClick={() => deleteInputInfo(inputIndex, j)}
+                    onClick={() => {
+                      deleteInputInfo(inputIndex, j);
+                    }}
                   >
                     <CloseCircleFilled />
                   </a>

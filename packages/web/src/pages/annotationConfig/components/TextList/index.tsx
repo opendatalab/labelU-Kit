@@ -165,7 +165,7 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
           </div>
         </div>
       ))}
-      <Button style={{ marginTop: 10 }} onClick={addTextConfigItem}>
+      <Button type='primary' style={{ marginTop: 10 }} onClick={addTextConfigItem} ghost>
         新建
       </Button>
     </div>

@@ -67,9 +67,9 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
   const { children } = props;
 
   return (
-    <div className="selectedMain">
+    <div className="selectedMain" style={{paddingLeft:24}}>
       <Form {...formItemLayout} name={props.name} form={form}>
-        <Form.Item label={<span className="formTitle">文本列表</span>} name="textConfig" initialValue={initVal}>
+        <Form.Item name="textConfig" initialValue={initVal}>
           <TextList
             onChange={e => {
               form.setFieldsValue({ textConfig: e });

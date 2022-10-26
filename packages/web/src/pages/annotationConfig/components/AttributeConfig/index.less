@@ -11,14 +11,14 @@
   margin-bottom: 14px;
   display: flex;
   align-items: center;
-  .ant-input,
-  .ant-input-group-addon :extend(.clearInput) {
-    &:focus,
-    &:hover {
-      // border-bottom: @input-border_activated;
-      border: @input-border_activated;
-    }
-  }
+  // .ant-input,
+  // .ant-input-group-addon :extend(.clearInput) {
+  //   &:focus,
+  //   &:hover {
+  //     // border-bottom: @input-border_activated;
+  //     border: @input-border_activated;
+  //   }
+  // }
 
   .ant-input-group-wrapper {
     width: auto;
@@ -33,11 +33,12 @@
   // }
 
   .ant-input-group-addon {
+    border: 0;
     background-color: transparent;
   }
 
-  .deleteIcon{
-    margin-left: 10px;
+  .deleteIcon {
+    margin-left: 1px;
   }
   .ant-input {
     border: 0px;
@@ -49,6 +50,6 @@
   }
 }
 
-.ant-form-item-label > label::after{
-  content:""
+.ant-form-item-label > label::after {
+  content: '';
 }

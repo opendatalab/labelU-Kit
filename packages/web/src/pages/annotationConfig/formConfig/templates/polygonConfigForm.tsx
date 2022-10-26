@@ -107,17 +107,16 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
             </Select>
           </Form.Item>
 
-          <Row>
+          <Row className='double-input'>
             <Col span={4}>
               <div className="selectedName">闭点个数</div>
             </Col>
-            <Col span={8}>
+            <Col span={9}>
               <Form.Item name="lowerLimitPointNum" initialValue={initVal.lowerLimitPointNum}>
                 <SenseInput type="text" suffix={<img alt="downIcon" src={DownWardIcon} />} disabled={isAllReadOnly} />
               </Form.Item>
             </Col>
-            <Col span={1} />
-            <Col span={8}>
+            <Col span={11}>
               <Form.Item name="upperLimitPointNum" initialValue={initVal.upperLimitPointNum}>
                 <SenseInput type="text" suffix={<img alt="upIcon" src={UpperIcon} />} disabled={isAllReadOnly} />
               </Form.Item>

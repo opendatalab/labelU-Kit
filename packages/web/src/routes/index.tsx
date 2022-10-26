@@ -15,11 +15,11 @@ const routeList: RouteObject[] = [
   },
   {
     path: '/annotation',
-    element: <WrapperRouteComponent element={<AnnotationPage />} titleId="" />
+    element: <WrapperRouteComponent element={<AnnotationPage />} titleId="title.annotation" />
   },
   {
     path: '/annotationConfig',
-    element: <WrapperRouteComponent element={<AnnotationConfig />} titleId="" />
+    element: <WrapperRouteComponent element={<AnnotationConfig />} titleId="title.annotationConfig" />
   },
   {
     path: '/',
