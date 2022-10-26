@@ -1,3 +1,4 @@
+[文件：labelU logo.svg]
 ## 特性
 
 - 📝本项目包含@label-u/annotation、@label-u/components、@label-u/utils及@label-u/web等4个工程。
