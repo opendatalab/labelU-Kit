@@ -1,4 +1,5 @@
-![labelU logo](https://user-images.githubusercontent.com/25022954/197937696-d55e1e42-93f2-4a96-9742-fb87e4785913.svg)
+![labelU logo更新字体](https://user-images.githubusercontent.com/25022954/197970103-a2879f7f-3e92-424d-8eff-9a5e29bf6a77.svg)
+
 
 ## 特性
 
