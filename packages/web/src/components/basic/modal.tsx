@@ -14,7 +14,6 @@ interface Iprops {
 
 const DrageModel = (props: Iprops, ref: any) => {
   const { title, content } = props;
-  debugger;
   const [isVisble, setIsVisible] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
