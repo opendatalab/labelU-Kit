@@ -59,6 +59,7 @@
   },
   "peerDependencies": {
     "antd": ">=4.15.0",
+    "@ant-design/icons": "^4.7.0",
     "react": ">=16.9.0"
   },
   "devDependencies": {

@@ -61,7 +61,7 @@ const CommonFormItem: FC<CommonFormConf & { name: string; toolName: string; isSh
     return <></>;
   }
   return (
-    <div style={{ marginTop: 10 }}>
+    <div style={{ marginTop: 24 }}>
       {initVal && (
         <Form {...formItemLayout} onChange={formSubmitThrottle} form={form} name={props.name}>
           {props.toolName !== 'lineTool' && (

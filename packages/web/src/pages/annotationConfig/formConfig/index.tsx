@@ -123,7 +123,7 @@ const FormConfig: FC = props => {
   useEffect(() => {
     let leftSiderDom = document.getElementById('lefeSiderId');
     let height = leftSiderDom?.getBoundingClientRect().height as number;
-    setHeight(height - 178);
+    setHeight(height - 128);
   }, []);
 
   const handleChange = (e: React.SetStateAction<string>) => {
@@ -184,7 +184,7 @@ const FormConfig: FC = props => {
         <label>标注工具</label>
         <Dropdown overlay={<Menu items={items}></Menu>} placement="bottomLeft" trigger={['click']}>
           <Button type="primary" ghost>
-          + 新增标注工具
+          <span style={{fontSize:22,marginTop:-7}}>+ </span> 新增工具
           </Button>
         </Dropdown>
       </div>

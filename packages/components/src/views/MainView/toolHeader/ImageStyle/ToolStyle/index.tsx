@@ -139,7 +139,7 @@ const ToolStyle = (props: IProps) => {
   // 初始化工具样式配置
   useEffect(() => {
     const toolStyles = JSON.parse(styleString);
-    dispatch(UpdateToolStyleConfig(toolStyles))
+    dispatch(UpdateToolStyleConfig(toolStyles));
   }, []);
 
   // TODO - 样式标准的定义
@@ -159,8 +159,8 @@ const ToolStyle = (props: IProps) => {
         }
         return (
           <div id={`style-${key}`} className='styleSlider' key={key}>
-            <span className='title'>
-              <img src={getImage(key)} className='icon' style={{width:16,marginRight:10}} />
+            <span className='title' style={{ fontSize: 16 }}>
+              <img src={getImage(key)} className='icon' style={{ width: 16, marginRight: 10 }} />
               {t(getTitle(key))}
             </span>
             <span className='slider'>

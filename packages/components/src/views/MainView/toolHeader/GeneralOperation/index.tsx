@@ -110,7 +110,7 @@ const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
               {/* <div className='icon'>
                 {renderImg(info.key === isHover ? info.hoverSvg : info.imgSvg)}
               </div> */}
-              <div className='toolName' style={{ color: info.key === isHover ? '#666fff' : '' }}>
+              <div className='toolName' style={{ color: info.key === isHover ? '#1B67FF' : '' }}>
                 {info.name}
               </div>
             </Popconfirm>

@@ -137,8 +137,8 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
             />
           ))}
 
-          <Button type='primary' style={{ marginTop: 10 }} onClick={() => addInputInfo()} ghost>
-            新增
+          <Button type='primary' style={{ marginTop: 16,borderRadius:4 }} onClick={() => addInputInfo()} ghost>
+            新建
           </Button>
         </Form.Item>
       </Form>

@@ -65,8 +65,8 @@
         height: 100%;
         // background-color: #ddd;
         position: relative;
-        overflow-x: hidden;
-        overflow-y: scroll;
+        // overflow-x: hidden;
+        // overflow-y: scroll;
         // overflow: hidden;
       }
       .ant-tabs-nav {
@@ -100,6 +100,9 @@
           .ant-tabs-tab-active {
             background: #ffffff;
             border-radius: 4px;
+          }
+          .ant-tabs-tab {
+            border: 0px;
           }
         }
         .leftTabContent {
@@ -215,11 +218,12 @@
         button {
           box-sizing: border-box;
           display: flex;
-          flex-direction: column;
+          // flex-direction: column;
           align-items: flex-start;
-          padding: 5px 10px;
-          gap: 10px;
-          width: 107.8px;
+          justify-content: center;
+          // padding: 5px 10px;
+          gap: 4px;
+          width: 102px;
           height: 32px;
           border: 1px solid #1b67ff;
           border-radius: 4px;
@@ -227,10 +231,8 @@
             font-family: 'PingFang SC';
             font-style: normal;
             font-weight: 400;
-            font-size: 13px;
-            line-height: 22px;
+            font-size: 14px;
             color: #1b67ff;
-            height: 22px;
           }
         }
         .ant-switch {

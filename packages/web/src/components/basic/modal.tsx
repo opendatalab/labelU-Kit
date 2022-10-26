@@ -14,7 +14,7 @@ interface Iprops {
 
 const DrageModel = (props: Iprops, ref: any) => {
   const { title, content } = props;
-
+  debugger;
   const [isVisble, setIsVisible] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
@@ -34,6 +34,7 @@ const DrageModel = (props: Iprops, ref: any) => {
 
   return (
     <Modal
+      className="Lmodal"
       footer={null}
       width={props.width}
       title={

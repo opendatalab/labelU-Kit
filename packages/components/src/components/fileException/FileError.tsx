@@ -51,7 +51,7 @@ const FileError = (props: IFileErrorProps) => {
 
   const buttonStyle: React.CSSProperties = {
     position: 'absolute',
-    top: '30%',
+    top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
   };

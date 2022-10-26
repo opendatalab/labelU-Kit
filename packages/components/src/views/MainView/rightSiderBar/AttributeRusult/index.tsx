@@ -10,7 +10,7 @@ import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';
 import AttributeUnionIcon from '@/assets/cssIcon/attribute_union.svg';
 import emptyAttributeImg from '@/assets/common/emptyAttribute.png';
 import AttributeHideIcon from '@/assets/common/attribute_hide.svg';
-import AttributeShowHoverIcon from '@/assets/common/attribute_show_hover.svg';
+// import AttributeShowHoverIcon from '@/assets/common/attribute_show_hover.svg';
 import { ChangeCurrentTool, UpdateImgList } from '@/store/annotation/actionCreators';
 import { ToolInstance } from '@/store/annotation/types';
 import { PrevResult, Attribute, EToolName } from '@label-u/annotation';
@@ -660,13 +660,13 @@ const AttributeRusult: FC<IProps> = ({
                                 // updateLabelVisible(tItem, false);
                                 updateLabelResult(newTItem);
                               }}
-                              onMouseEnter={(e) => {
-                                e.stopPropagation();
-                                document
-                                  .getElementById(`${tItem.toolName + tItem.order}`)
-                                  ?.setAttribute('src', AttributeShowHoverIcon);
-                                // attributeShowRef.current?.setAttribute('src', AttributeShowHoverIcon);
-                              }}
+                              // onMouseEnter={(e) => {
+                              //   e.stopPropagation();
+                              //   document
+                              //     .getElementById(`${tItem.toolName + tItem.order}`)
+                              //     ?.setAttribute('src', AttributeShowHoverIcon);
+            
+                              // }}
                               onMouseLeave={(e) => {
                                 e.stopPropagation();
                                 // attributeShowRef.current?.setAttribute('src', AttributeShowIcon);

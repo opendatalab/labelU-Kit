@@ -55,10 +55,7 @@ const FooterOption: React.FC<IProps> = (props) => {
     toolInstance?.updateRotate();
   };
 
-
   const commonOptionList: any = [
-
-
     {
       toolName: 'OriginalScaleSet',
       title: 'OriginalScaleSet',
@@ -70,11 +67,11 @@ const FooterOption: React.FC<IProps> = (props) => {
           // VideoTool don't need to rotate
           return;
         }
-        const payload = {isOriginalSize:true}
+        const payload = { isOriginalSize: true };
         store.dispatch(ImgAttribute.UpdateImgAttribute(payload as ImgAttributeState));
       },
       style: {
-        marginRight:'4px',
+        marginRight: '4px',
         opacity: isVideo === true ? 0.4 : 1,
         fontSize: '14px',
         color: !isBegin && toolHover === 'OriginalScaleSet' ? EColor.Hover : EColor.Normal,
@@ -94,7 +91,7 @@ const FooterOption: React.FC<IProps> = (props) => {
         updateRotate();
       },
       style: {
-        marginRight:'4px',
+        marginRight: '4px',
         opacity: isVideo === true ? 0.4 : 1,
         fontSize: '14px',
         color: !isBegin && toolHover === 'rotate' ? EColor.Hover : EColor.Normal,
@@ -109,14 +106,20 @@ const FooterOption: React.FC<IProps> = (props) => {
             <div
               key={info.toolName}
               className='oneOption'
-              onMouseEnter={(e) => {setToolHover(info.toolName);e.stopPropagation()}}
-              onMouseLeave={(e) => {e.stopPropagation();setToolHover('')}}
+              onMouseEnter={(e) => {
+                setToolHover(info.toolName);
+                e.stopPropagation();
+              }}
+              onMouseLeave={(e) => {
+                e.stopPropagation();
+                setToolHover('');
+              }}
             >
               <a className='item' onClick={info.click}>
                 <img
                   className='singleTool'
                   src={toolHover === info.toolName ? info.selectedSvg : info.commonSvg}
-                  style={info.style}
+                  style={{ ...info.style, width: 16 }}
                 />
                 <div style={info.style}>{t(info.title)}</div>
               </a>

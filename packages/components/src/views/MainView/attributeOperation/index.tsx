@@ -86,10 +86,10 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   }, [attributeBoxLength, currentAttributeList]);
 
   const drowpDownIcon = (
-    <img style={{ width: 10, marginLeft: -4, marginBottom: 3 }} src={DropdowmIcon} />
+    <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIcon} />
   );
   const drowpUpIconA = (
-    <img style={{ width: 10, marginLeft: -4, marginBottom: 3 }} src={DropdowmIconA} />
+    <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIconA} />
   );
 
   const attributeMenue = useCallback(() => {
@@ -163,14 +163,14 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 forceRender((s) => s + 1);
                 // alert(attribute.key)
               }}
-              className={classNames({
-                chooseAttribute: attribute.key === chooseAttribute,
-              })}
+              // className={classNames({
+              //   chooseAttribute: attribute.key === chooseAttribute,
+              // })}
               style={{
                 border: '0px',
                 borderRadius: '4px',
                 padding: '1px 8px',
-                backgroundColor: '#FFFFFF',
+                backgroundColor:  attribute.key === chooseAttribute? COLORS_ARRAY[index % COLORS_ARRAY.length]:'#FFFFFF',
                 // color: COLORS_ARRAY[(index - 1) % COLORS_ARRAY.length],
                 // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
               }}

@@ -21,7 +21,7 @@ const FooterTips: FC = () => {
         }}
         className='imgTipsBar'
       >
-        <img src={toolHover === 'imageAdjst' ? ImageAdjustA : ImageAdjust} />
+        <img style={{width:16}} src={toolHover === 'imageAdjst' ? ImageAdjustA : ImageAdjust} />
         图片调整
       </div>
     </Popover>

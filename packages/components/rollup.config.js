@@ -81,7 +81,7 @@ export default () => {
         preserveModulesRoot: 'src',
       },
       plugins: [...commonPlugin, dts()],
-      external: ['react', 'antd'],
+      external: ['react', 'antd', '@ant-design/icons'],
     },
   ];
 };

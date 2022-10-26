@@ -10,7 +10,7 @@ $prefix: lab;
 $boxShadow: 1px 1px 4px rgb(204 204 204 / 50%);
 
 ::-webkit-scrollbar {
-  width: 3px !important;
+  width: 6px !important;
   height: 10px !important;
 }
 
@@ -87,7 +87,7 @@ body {
     overflow: hidden;
     position: relative;
     z-index: 10;
-    border-top: 1px solid #e2e2e2;
+    // border-top: 1px solid #e2e2e2;
 
     .ant-collapse-borderless > .ant-collapse-item {
       border-bottom: 1px solid #eee;
@@ -115,7 +115,7 @@ body {
     position: relative;
     z-index: 10;
     border-top: 1px solid #e2e2e2;
-    height: calc(100vh - 220px);
+    height: calc(100vh - 99px);
     padding: 16px 0px;
 
     .item {
@@ -253,7 +253,7 @@ body {
     color: rgba(0, 0, 0, 0.87) !important;
   }
   .ant-tabs-content {
-    margin-top: 15px;
+    margin-top: 16px;
     overflow-y: scroll;
     overflow-x: hidden;
     height: calc(100vh - 180px);
@@ -417,7 +417,7 @@ body {
     width: 100%;
     padding: 0 10px;
     background: #ffffff;
-    border-bottom: 1px solid rgba(223, 223, 223, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     // box-shadow: 0px 2px 14px rgba(204, 204, 204, 0.5);
   }
 
@@ -435,6 +435,8 @@ body {
   }
 
   &__operationNode {
+    margin-right: 24px;
+    margin-left: 24px;
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
     border-left: 1px solid #ddd;
@@ -537,15 +539,15 @@ body {
   .clrearResult {
     position: absolute;
     height: 20px;
-    bottom: 0px;
-    transform: translate(-50%, -50%);
+    bottom: 16px;
+    transform: translate(-50%, 0%);
     left: 50%;
   }
 
   .attributeResult {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     width: 100%;
-    height: calc(100vh - 220px);
+    height: calc(100vh - 230px);
     overflow-y: scroll;
     overflow-x: hidden;
   }
@@ -583,6 +585,7 @@ body {
     }
 
     .ant-tabs-nav-list {
+      border-top:1px solid rgba(0, 0, 0, 0.1);
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       height: 64px !important;
       align-items: center;
@@ -1454,7 +1457,7 @@ $hotkey-container-padding: 7px;
 }
 
 .textToolOperationMenu {
-  padding: 20px;
+  padding: 0px 20px;
   height: 100%;
   overflow-y: scroll;
 }
@@ -1819,25 +1822,25 @@ $hotkey-container-padding: 7px;
 
 .lbc-left-sider {
   background-color: white;
-  min-width: 360px;
+  // min-width: 360px;
   z-index: 1000;
   left: 0;
   height: 36px;
   line-height: 36px;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   border-radius: 4px;
   // border-left: 1px solid #ddd;
   // border-right: 1px solid #ddd;
   text-align: center;
 
   .lb-left-item {
-    max-width: 20px;
-    max-height: 20px;
+    width: 24px;
   }
 
   a,
   .item {
+    min-width: 60px;
     font-family: 'PingFang SC';
     font-style: normal;
     font-weight: 400;

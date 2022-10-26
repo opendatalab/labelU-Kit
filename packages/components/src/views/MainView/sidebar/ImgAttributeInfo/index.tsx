@@ -97,7 +97,7 @@ const ImgAttributeInfo = (props: IProps) => {
                 step={info.step}
                 value={info.value}
                 onChange={info.onChange}
-                trackStyle={{ background: '#666fff' }}
+                trackStyle={{ background: '#1B67FF' }}
               />
             </Col>
             <Col span={4}>
