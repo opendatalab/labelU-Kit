@@ -11,9 +11,11 @@ description: 图片查看
 
 ### 仅显示图片
 
-范例展现，多个工具同时标注一张图片时参数，也可以按需传入所需工具配置。
+范例展现，多个工具同时标注一张图片时参数，也可以按需传入所需工具配置（如单一工具）,使用标注组件时需引入样式。
 
 ```jsx live=true
+// import AnnotationOperation, { BasicConfig } from "@label-u/components";
+// import "@label-u/components/dist/index.css";
 function App() {
   const exportData = function (data) {
     console.log("exportData", data);
