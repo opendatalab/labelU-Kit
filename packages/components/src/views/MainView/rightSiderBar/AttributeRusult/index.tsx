@@ -153,11 +153,11 @@ const AttributeRusult: FC<IProps> = ({
       // 初始化attributeResultList
       for (let key of attributeMap.keys()) {
         let toolInfo = attributeMap.get(key);
-        let isVisible = true;
+        let isVisible = false;
         if (toolInfo && toolInfo.length > 0) {
           for (let tool of toolInfo) {
-            if (!tool.isVisible) {
-              isVisible = false;
+            if (tool.isVisible) {
+              isVisible = true;
               break;
             }
           }
@@ -648,7 +648,7 @@ const AttributeRusult: FC<IProps> = ({
                             }}
                             src={AttributeEditorIcon}
                             className='hoverShow'
-                            style={{ marginRight: '10px' }}
+                            style={{ left: 10, position: 'absolute' }}
                           />
                           {tItem.isVisible ? (
                             <img
@@ -665,7 +665,7 @@ const AttributeRusult: FC<IProps> = ({
                               //   document
                               //     .getElementById(`${tItem.toolName + tItem.order}`)
                               //     ?.setAttribute('src', AttributeShowHoverIcon);
-            
+
                               // }}
                               onMouseLeave={(e) => {
                                 e.stopPropagation();
@@ -675,7 +675,7 @@ const AttributeRusult: FC<IProps> = ({
                                   ?.setAttribute('src', AttributeShowIcon);
                               }}
                               src={AttributeShowIcon}
-                              style={{ marginRight: '10px' }}
+                              style={{ left: 30, position: 'absolute' }}
                             />
                           ) : (
                             <img
@@ -686,10 +686,11 @@ const AttributeRusult: FC<IProps> = ({
                                 updateLabelResult(newTItem);
                               }}
                               src={AttributeHideIcon}
-                              style={{ marginRight: '10px' }}
+                              style={{ left: 30, position: 'absolute' }}
                             />
                           )}
                           <img
+                           style={{ left: 50, position: 'absolute' }}
                             src={AttributeUnionIcon}
                             className='hoverShow'
                             onClick={(e) => {

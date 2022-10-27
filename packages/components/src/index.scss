@@ -1,5 +1,6 @@
 @import './components/dragModal/index.scss';
 @import './styles/reset-antd.scss';
+@import 'antd/dist/antd.min.css';
 
 
 $headerHeight: 60px;
@@ -605,6 +606,7 @@ body {
         .attributeResultRightImgBox {
           display: flex;
           width: 40px;
+          position: relative;
           justify-content: space-between;
           margin-left: 60px;
           .hoverShow {
@@ -645,9 +647,11 @@ body {
           .attributeResultLi {
             display: flex;
             .attributeResultRightImgBox {
-              display: flex;
+              // display: flex;
               width: 60px;
-              justify-content: space-between;
+              height: 16px;
+              position: relative;
+              // justify-content: space-between;
               .hoverShow {
                 display: none;
               }

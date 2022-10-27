@@ -24,8 +24,8 @@ const ActionOption: FC = () => {
       <a>
         显示顺序 <Switch style={{marginLeft:"10px"}} checked={defaultChecked} onChange={onChange} />
       </a>
-      <HeaderTips />
       <GeneralOperation />
+      <HeaderTips />
     </div>
   );
 };

@@ -171,7 +171,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 borderRadius: '4px',
                 padding: '1px 8px',
                 backgroundColor:  attribute.key === chooseAttribute? COLORS_ARRAY[index % COLORS_ARRAY.length]:'#FFFFFF',
-                // color: COLORS_ARRAY[(index - 1) % COLORS_ARRAY.length],
+                color: attribute.key === chooseAttribute ? '#ffffff':'',
                 // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
               }}
               key={attribute.key}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppState } from '@/store';
 // import rotateSvg from '@/assets/annotation/common/icon_r.svg';
@@ -34,10 +34,11 @@ export const labelTool = [EToolName.Rect,EToolName.Point,EToolName.Line,EToolNam
 
 const HeaderOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');
+  const [historyRevocation,setHistoryRevocation] = useState<any>([]);
   const { stepInfo } = props;
   const dispatch = useDispatch();
   const {
-    annotation: { toolInstance, onSave,imgList,imgIndex,currentToolName }
+    annotation: { toolInstance,imgList,imgIndex,currentToolName }
   } = useSelector((state: AppState) => ({
     annotation: state.annotation,
     imgAttribute: state.imgAttribute,
@@ -103,6 +104,9 @@ const HeaderOption: React.FC<IProps> = (props) => {
            let newTmpResult = tmpResult.reduce((res: any[], item: { order: number; })=>{
             if(item.order !== count){
               res.push(item);
+            }else{
+              historyRevocation.push({...item,toolName:tool});
+              setHistoryRevocation(historyRevocation);
             }
             return res;
            },[] as any[])
@@ -118,10 +122,32 @@ const HeaderOption: React.FC<IProps> = (props) => {
   // 统一处理重做
   const restore = ()=>{
     let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    for(let tool of labelTool){
+    let lastRestore = historyRevocation.pop();
+    if(!lastRestore){
+      setHistoryRevocation([]);
+      return;
+    }
+    // 获取最大序号
+    let maxOrder = 0;
+    for(let tool of labelTool){ 
       let tmpResult = oldImgResult[tool]?.result;
       if(tmpResult&&tmpResult.length>0){
-         oldImgResult[tool].result = [];
+        maxOrder += tmpResult.length;
+      }
+    }
+
+    lastRestore.order = maxOrder + 1;
+    for(let tool of labelTool){
+      let tmpResult = oldImgResult[tool]?.result;
+
+      if(lastRestore.toolName === tool){
+         delete lastRestore['toolName']
+         if(tmpResult && tmpResult.length>0){
+          tmpResult = [...tmpResult,lastRestore]
+        }else{
+          tmpResult = [lastRestore]
+        }
+         oldImgResult[tool].result = tmpResult;
       }
     }
     imgList[imgIndex].result = JSON.stringify(oldImgResult);
