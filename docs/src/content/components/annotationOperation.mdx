@@ -7,166 +7,6 @@ description: 图片查看
 
 ## 用法
 
-```jsx
-function App() {
-  const exportData = function (data) {
-    console.log("exportData", data);
-  };
-
-  const onSave = function (data, imgList, index) {
-    console.log("save", data, imgList, index);
-  };
-
-  const fileList = [
-    {
-      id: 1,
-      url: "https://images.unsplash.com/photo-1653122952207-f20ba3c64f35?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
-      result: JSON.stringify([]),
-    },
-  ];
-
-  const attribute = [
-    {
-      key: "玩偶发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的",
-      value:
-        "玩偶发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的",
-    },
-    {
-      key: "玩偶2",
-      value: "玩偶2",
-    },
-    {
-      key: "玩偶3",
-      value: "玩偶3",
-    },
-  ];
-
-  const attributeList = [
-    {
-      key: "dog",
-      value: "dog",
-    },
-  ];
-
-  const tagList = [
-    {
-      key: "类别1",
-      value: "class1",
-      isMulti: true,
-      subSelected: [
-        {
-          key: "选项1",
-          value: "option1",
-          isDefault: true,
-        },
-        {
-          key: "选项2",
-          value: "option2",
-          isDefault: false,
-        },
-      ],
-    },
-  ];
-
-  const tools = [
-    {
-      tool: "lineTool",
-      config: {
-        isShowCursor: false,
-        lineType: 0,
-        lineColor: 1,
-        edgeAdsorption: true,
-        outOfTarget: true,
-        isShowOrder: false,
-        attributeConfigurable: true,
-        textConfigurable: true,
-        textCheckType: 4,
-        customFormat: "^[\\s\\S]{1,3}$",
-        lowerLimitPointNum: 4,
-        upperLimitPointNum: "",
-        attributeList: [{ key: "lineTool", value: "lineTool" }],
-      },
-    },
-    {
-      tool: "pointTool",
-      config: {
-        isShowCursor: false,
-        isShowOrder: false,
-        attributeConfigurable: true,
-        textConfigurable: true,
-        textCheckType: 0,
-        customFormat: "",
-        attributeList: [{ key: "pointTool", value: "pointTool" }],
-      },
-    },
-    {
-      tool: "polygonTool",
-      config: {
-        isShowCursor: false,
-        lineType: 0,
-        lineColor: 0,
-        drawOutsideTarget: false,
-        edgeAdsorption: true,
-        isShowOrder: false,
-        attributeConfigurable: true,
-        textConfigurable: true,
-        textCheckType: 0,
-        customFormat: "",
-        attributeList: [{ key: "polygonTool", value: "polygonTool" }],
-      },
-    },
-    {
-      tool: "rectTool",
-      config: {
-        isShowCursor: false,
-        showConfirm: false,
-        skipWhileNoDependencies: false,
-        drawOutsideTarget: false,
-        copyBackwardResult: true,
-        minWidth: 1,
-        minHeight: 1,
-        isShowOrder: false,
-        attributeConfigurable: true,
-        textConfigurable: true,
-        textCheckType: 4,
-        customFormat: "",
-        attributeList: [{ key: "rectTool", value: "rectTool" }],
-      },
-    },
-  ];
-
-  const textConfig = [
-    {
-      label: "我的描述",
-      key: "描述的关键",
-      required: true,
-      default: "",
-      maxLength: 200,
-    },
-    {
-      label: "我的描述1",
-      key: "描述的关键1",
-      required: true,
-      default: "",
-      maxLength: 200,
-    },
-  ];
-
-  return (
-    <AnnotationOperation
-      exportData={exportData} // 导出标注结果回调接口
-      imgList={fileList} // 标注文件及预标注结果
-      attributeList={attribute} // 公共标签配置（可选）
-      tagConfigList={tagList} // 分类配置（可选）
-      toolsBasicConfig={tools} // 标注工具配置
-      textConfig={textConfig} // 文本描述配置（可选）
-      onSave={onSave} // 标注结果保存回调（可选）
-    />
-  );
-}
-render(App);
-```
-
 ## Examples
 
 ### 仅显示图片
@@ -178,19 +18,9 @@ function App() {
   const exportData = function (data) {
     console.log("exportData", data);
   };
-  const onSubmit = function (data) {
-    // 翻页时触发当前页面数据的输出
-    console.log("submitData", data);
-  };
 
   const onSave = function (data, imgList, index) {
     console.log("save", data, imgList, index);
-  };
-
-  const dataInjectionAtCreation = function (data) {
-    return {
-      testDataInjection: 1,
-    };
   };
 
   const fileList = [
@@ -215,44 +45,6 @@ function App() {
       key: "玩偶3",
       value: "玩偶3",
     },
-    {
-      key: "玩偶4",
-      value: "玩偶4",
-    },
-    {
-      key: "玩偶5",
-      value: "玩偶5",
-    },
-    {
-      key: "玩偶6",
-      value: "玩偶6",
-    },
-    {
-      key: "玩偶7",
-      value: "玩偶7",
-    },
-    {
-      key: "玩偶8",
-      value: "玩偶8",
-    },
-    {
-      key: "玩偶9",
-      value: "玩偶9",
-    },
-    {
-      key: "玩偶10",
-      value: "玩偶10",
-    },
-  ];
-
-  const goBack = function (data) {
-    console.log(data);
-  };
-  const attributeList = [
-    {
-      key: "dog",
-      value: "dog",
-    },
   ];
 
   const tagList = [
@@ -269,23 +61,6 @@ function App() {
         {
           key: "选项2",
           value: "option2",
-          isDefault: false,
-        },
-      ],
-    },
-    {
-      key: "类别2",
-      value: "class2",
-      isMulti: true,
-      subSelected: [
-        {
-          key: "a选项1",
-          value: "aoption1",
-          isDefault: true,
-        },
-        {
-          key: "a选项2",
-          value: "aoption2",
           isDefault: false,
         },
       ],
@@ -377,17 +152,17 @@ function App() {
   ];
 
   return (
-    <AnnotationOperation
-      exportData={exportData}
-      onSubmit={onSubmit}
-      imgList={fileList}
-      attributeList={attribute}
-      tagConfigList={tagList}
-      toolsBasicConfig={tools}
-      textConfig={textConfig}
-      goBack={goBack}
-      onSave={onSave}
-    />
+    <div className="App">
+      <AnnotationOperation
+        exportData={exportData} // 导出标注结果回调接口
+        imgList={fileList} // 标注文件及预标注结果
+        attributeList={attribute} // 公共标签配置（可选）
+        tagConfigList={tagList} // 分类配置（可选）
+        toolsBasicConfig={tools}
+        textConfig={textConfig} // 文本描述配置（可选）
+        onSubmit={onSave}
+      />
+    </div>
   );
 }
 render(App);
@@ -397,20 +172,12 @@ render(App);
 
 ### ImageProps
 
-| Name             | Type                                          | Default   | Description      |
-| ---------------- | --------------------------------------------- | --------- | ---------------- |
-| exportData       | (data: any[]) => void                         | undefined | 导出标注结果回调 |
-| goBack           | (data: any[]) => void                         | false     | 返回上一步回调   |
-| imgList          | IFileItem[]                                   | false     | 文件列表         |
-| onSubmit         | (data: any[]) => void                         | null      | 保存标注结果回调 |
-| onSave           | (data: any[]) => void                         | null      | 保存缓存回调     |
-| onPageChang      | (data: any[]) => void                         | undefined | 翻页回调         |
-| pageSize         | number                                        | undefined | 设置分页大小     |
-| headerName       | string                                        | undefined | 标题             |
-| header           | (props: PreviewImageProps) => React.ReactNode | undefined | 头部定制化       |
-| footer           | (props: PreviewImageProps) => React.ReactNode | undefined | 底部定制化       |
-| sider            | (props: PreviewImageProps) => React.ReactNode | undefined | 右侧边栏定制化   |
-| showTips         | boolean                                       | undefined | 是否显示 tips    |
-| leftSider        | React.ReactNode                               | {}        | 左边栏定制化     |
-| toolsBasicConfig | BasicConfig[]                                 | {}        | 多组件配置       |
-| attributeList    | {key:string;value:string}[]                   | {}        | 公共属性配置     |
+| Name             | Type                        | Default   | Description      |
+| ---------------- | --------------------------- | --------- | ---------------- |
+| exportData       | (data: any[]) => void       | undefined | 导出标注结果回调 |
+| imgList          | IFileItem[]                 | false     | 文件列表         |
+| onSubmit         | (data: any[]) => void       | null      | 保存标注结果回调 |
+| toolsBasicConfig | BasicConfig[]               | {}        | 多组件配置       |
+| attributeList    | {key:string;value:string}[] | {}        | 公共属性配置     |
+| tagConfigList    | []                          | {}        | 分类配置         |
+| textConfig       | object[]                    | {}        | 文本描述         |
