@@ -36,7 +36,7 @@ npm run start
 
 ## 使用
 
-详细文档尽请期待。
+[详细文档](https://opendatalab.github.io/labelU)。
 
 ## 致谢
 
