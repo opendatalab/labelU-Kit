@@ -1,8 +1,6 @@
 ![labelU logo更新字体](https://user-images.githubusercontent.com/25022954/197970103-a2879f7f-3e92-424d-8eff-9a5e29bf6a77.svg) 
 
 
- https://opendatalab.github.io/labelU/
-
 ## 特性
 
 - 📝本项目包含@label-u/annotation、@label-u/components、@label-u/utils及@label-u/web等4个工程。
