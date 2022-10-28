@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTheme, Global, css } from '@emotion/react';
+import React from "react";
+import { useTheme, Global, css } from "@emotion/react";
 
 export default function GlobalStyle() {
   const theme = useTheme();
@@ -71,12 +71,13 @@ export default function GlobalStyle() {
           color: rgba(248, 248, 242);
           font-size: 14px;
           font-family: ${theme.fonts.pre};
-          font-variant: no-common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual;
+          font-variant: no-common-ligatures no-discretionary-ligatures
+            no-historical-ligatures no-contextual;
           line-height: 1;
           vertical-align: middle;
           background-color: #44475a;
           border-radius: 3px;
-          font-feature-settings: 'clig' 0, 'calt' 0;
+          font-feature-settings: "clig" 0, "calt" 0;
         }
 
         h1 code.inline-code,
@@ -187,22 +188,23 @@ export default function GlobalStyle() {
           margin: 0 0 16px 0;
           overflow: auto;
           font-family: ${theme.fonts.pre} !important;
-          font-variant: no-common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual;
+          font-variant: no-common-ligatures no-discretionary-ligatures
+            no-historical-ligatures no-contextual;
 
           .token {
             font-style: normal !important;
           }
         }
 
-        div[class$='StyledEditor'] {
+        div[class$="StyledEditor"] {
           font-family: ${theme.fonts.pre} !important;
         }
 
-        pre[class*='language-'] code {
+        pre[class*="language-"] code {
           font-family: inherit;
         }
 
-        pre[class*='language-']::before {
+        pre[class*="language-"]::before {
           position: absolute;
           top: 0;
           left: 1rem;
@@ -218,95 +220,95 @@ export default function GlobalStyle() {
           border-radius: 0 0 4px 4px;
         }
 
-        pre[class~='language-js']::before,
-        pre[class~='language-javascript']::before {
+        pre[class~="language-js"]::before,
+        pre[class~="language-javascript"]::before {
           background: #f7df1e;
-          content: 'js';
+          content: "js";
         }
 
-        pre[class~='language-jsx']::before {
+        pre[class~="language-jsx"]::before {
           background: #61dafb;
-          content: 'jsx';
+          content: "jsx";
         }
 
-        pre[class~='language-typescript']::before,
-        pre[class~='language-ts']::before {
+        pre[class~="language-typescript"]::before,
+        pre[class~="language-ts"]::before {
           color: #fff;
           background: #294e80;
-          content: 'ts';
+          content: "ts";
         }
 
-        pre[class~='language-tsx']::before {
+        pre[class~="language-tsx"]::before {
           color: #fff;
           background: #294e80;
-          content: 'tsx';
+          content: "tsx";
         }
 
-        pre[class~='language-graphql']::before {
+        pre[class~="language-graphql"]::before {
           color: #fff;
           background: #e10098;
-          content: 'GraphQL';
+          content: "GraphQL";
         }
 
-        pre[class~='language-html']::before {
+        pre[class~="language-html"]::before {
           color: #fff;
           background: #005a9c;
-          content: 'html';
+          content: "html";
         }
 
-        pre[class~='language-css']::before {
+        pre[class~="language-css"]::before {
           color: #fff;
           background: #ff9800;
-          content: 'css';
+          content: "css";
         }
 
-        pre[class~='language-mdx']::before {
+        pre[class~="language-mdx"]::before {
           color: #fff;
           background: #f9ac00;
-          content: 'mdx';
+          content: "mdx";
         }
 
-        pre[class~='language-shell']::before {
-          content: 'shell';
+        pre[class~="language-shell"]::before {
+          content: "shell";
         }
 
-        pre[class~='language-sh']::before {
-          content: 'sh';
+        pre[class~="language-sh"]::before {
+          content: "sh";
         }
 
-        pre[class~='language-bash']::before {
-          content: 'bash';
+        pre[class~="language-bash"]::before {
+          content: "bash";
         }
 
-        pre[class~='language-yaml']::before,
-        pre[class~='language-yml']::before {
+        pre[class~="language-yaml"]::before,
+        pre[class~="language-yml"]::before {
           background: #ffa8df;
-          content: 'yaml';
+          content: "yaml";
         }
 
-        pre[class~='language-markdown']::before {
-          content: 'md';
+        pre[class~="language-markdown"]::before {
+          content: "md";
         }
 
-        pre[class~='language-json']::before,
-        pre[class~='language-json5']::before {
+        pre[class~="language-json"]::before,
+        pre[class~="language-json5"]::before {
           background: linen;
-          content: 'json';
+          content: "json";
         }
 
-        pre[class~='language-diff']::before {
+        pre[class~="language-diff"]::before {
           background: #e6ffed;
-          content: 'diff';
+          content: "diff";
         }
 
-        pre[class~='language-text']::before {
+        pre[class~="language-text"]::before {
           background: #fff;
-          content: 'text';
+          content: "text";
         }
 
-        pre[class~='language-flow']::before {
+        pre[class~="language-flow"]::before {
           background: #e8bd36;
-          content: 'flow';
+          content: "flow";
         }
       `}
     />

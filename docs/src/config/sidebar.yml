@@ -4,20 +4,20 @@
   link: '/'
 - label: '开始'
   link: '/getting-started'
-- label: components
+- label: 组件清单
   items:
     - label: 'AnnotationOperation'
       link: '/components/annotationOperation'
-- label: theming
+- label: 主题
   items:
     - label: 如何定制主题？
       link: /theming/how-to
-- label: Types
+- label: 配置补充说明
   items:
     - label: 所有类型
       link: /types/all
 
-- label: Utilities
+- label: 更多
   items:
     - label: FAQ
       link: /faq

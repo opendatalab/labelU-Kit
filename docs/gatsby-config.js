@@ -1,5 +1,5 @@
 module.exports = {
-  pathPrefix: `/labelU/`,
+  pathPrefix: `/labelU-kit/`,
   siteMetadata: {
     siteTitle: `lblab Component Docs`,
     defaultTitle: `lblab React Component Docs`,
