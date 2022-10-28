@@ -1,6 +1,12 @@
-![labelU logo更新字体](https://user-images.githubusercontent.com/25022954/197970103-a2879f7f-3e92-424d-8eff-9a5e29bf6a77.svg) 
+<div align="center">
+  <article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <p align="center"><img width="300" src=".images/labelU-logo.svg" /></p>
+      <h1 style="width: 100%; text-align: center;">LabelBee</h1>
+      <p>LabelU前端标注组件库，支持图片2D框、点、线、多边形及混合标注工具，可用于标注平台开发集成，开箱即用。</p>
+  </article>
+  <a href="./README_en-US.md">English</a> | 简体中文
 
-
+</div>
 ## 特性
 
 - 📝本项目包含@label-u/annotation、@label-u/components、@label-u/utils及@label-u/web等4个工程。
