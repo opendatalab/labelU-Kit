@@ -45,7 +45,7 @@ npm run start
 ## 致谢
 
 
-我们在开发此款标注工具时，参考并依赖了[labelbee](https://github.com/open-mmlab/labelbee)项目，在此对labelbee的作者表示感谢。
+本项目参考并依赖了[labelbee](https://github.com/open-mmlab/labelbee)项目，在此对labelbee的作者表示感谢。
 
 ## 许可证
 
