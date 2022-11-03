@@ -13,6 +13,7 @@ import FileError from '@/components/fileException/FileError';
 import { i18n } from '@label-u/utils';
 import { AppProps } from '@/App';
 import { ChangeSave } from '@/store/annotation/actionCreators';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;
@@ -188,4 +189,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(AnnotationOperation);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(AnnotationOperation);

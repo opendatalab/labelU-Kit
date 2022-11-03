@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 // import rotateSvg from '@/assets/annotation/common/icon_r.svg';
 import revocationSvg from '@/assets/annotation/common/icon_next.svg';

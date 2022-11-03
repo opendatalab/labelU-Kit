@@ -7,6 +7,7 @@ import StepUtils from '@/utils/StepUtils';
 import { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
 import { useTranslation } from 'react-i18next';
+import {LabelBeeContext} from '@/store/ctx';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -79,4 +80,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(SwitchAttributeList);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(SwitchAttributeList);

@@ -7,6 +7,7 @@ import PolygonOperation from './core/toolOperation/polygonOperation';
 import MeasureOperation from './core/toolOperation/measureOperation';
 import { BasicToolOperation } from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
+import ScribbleTool from './core/toolOperation/ScribbleTool';
 
 // Constant
 import * as cAnnotation from './constant/annotation';
@@ -31,6 +32,10 @@ import MathUtils from './utils/MathUtils';
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
 
 import AnnotationEngine from './core/index';
+import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
+import { PointCloudAnnotation } from './core/pointCloud/annotation';
+import { PointCloud } from './core/pointCloud';
+import UnitUtils from './utils/tool/UnitUtils';
 
 export { EToolName, TOOL_NAME } from './constant/tool';
 
@@ -52,6 +57,8 @@ export {
   BasicToolOperation,
   MeasureOperation,
   ViewOperation,
+  PointCloud2dOperation,
+  PointCloudAnnotation,
   // 固定操作
   cAnnotation,
   cAnnotationTask,
@@ -71,4 +78,7 @@ export {
   ImgUtils,
   MathUtils,
   AnnotationEngine,
+  ScribbleTool,
+  PointCloud,
+  UnitUtils,
 };

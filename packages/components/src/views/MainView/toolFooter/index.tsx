@@ -14,6 +14,7 @@ import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
 import { Pagination } from './Pagination';
 import FooterOption from './FooterOption'
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IPageProps {
   jumpSkip: Function;
@@ -173,4 +174,4 @@ const mapStateToProps = (state: AppState) => ({
   basicResultList: state.annotation.basicResultList,
 });
 
-export default connect(mapStateToProps)(ToolFooter);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ToolFooter);

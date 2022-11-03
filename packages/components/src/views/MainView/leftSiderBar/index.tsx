@@ -9,6 +9,7 @@ import { prefix } from '../../../constant';
 import { IFileItem } from '../../../types/data';
 import { AppState } from '../../../store';
 import localforage from "localforage";
+import { LabelBeeContext } from "@/store/ctx";
 const layoutCls = `${prefix}-layout`;
 
 interface LeftSiderProps {
@@ -94,4 +95,4 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
     };
   };
   
-  export default connect(mapStateToProps)(LeftSider);
+  export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(LeftSider);

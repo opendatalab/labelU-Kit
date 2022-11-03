@@ -1,0 +1,28 @@
+{
+  "tools": [
+    {
+      "tool": "pointCloudTool",
+      "config": {
+        "lowerLimitPointsNumInBox": 5
+      }
+    }
+  ],
+  "attribute": [
+    {
+      "key": "玩偶a",
+      "value": "玩偶a"
+    },
+    {
+      "key": "玩偶b",
+      "value": "玩偶b"
+    },
+    {
+      "key": "玩偶的风格的",
+      "value": "玩偶的风格的"
+    },
+    {
+      "key": "玩偶d",
+      "value": "玩偶d"
+    }
+  ]
+}

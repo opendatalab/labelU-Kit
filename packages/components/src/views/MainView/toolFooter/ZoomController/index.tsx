@@ -10,6 +10,7 @@ import { ToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
 import ZoomLevel from './ZoomLevel';
 import { footerCls } from '../index';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolInstance: ToolInstance
@@ -53,4 +54,4 @@ const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
 });
 
-export default connect(mapStateToProps)(ZoomController);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ZoomController);

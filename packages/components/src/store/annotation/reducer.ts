@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { ToolStyleState } from '../toolStyle/types';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
-const { EVideoToolName } = cTool;
+import ToolUtils from '@/utils/ToolUtils';
 
 export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
@@ -83,7 +83,12 @@ const updateToolInstance = (
   // const config = ConfigUtils.jsonParser(stepConfig.config);
   const config = stepConfig.config;
   // 视频工具不支持实例化
-  if ((Object.values(EVideoToolName) as string[]).includes(stepConfig.tool)) {
+  if (ToolUtils.isVideoTool(stepConfig?.tool)) {
+    return;
+  }
+
+  // TODO: 点云实例化对接
+  if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
     return;
   }
 

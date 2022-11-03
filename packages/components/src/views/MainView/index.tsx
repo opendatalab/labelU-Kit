@@ -20,6 +20,8 @@ import { connect } from 'react-redux';
 import AttributeOperation from './attributeOperation';
 import { IFileItem } from '@/types/data';
 import LeftSider from './leftSiderBar'
+import PointCloudView from '@/components/pointCloudView';
+import { LabelBeeContext } from '@/store/ctx';
 
 
 const { EVideoToolName } = cTool;
@@ -47,13 +49,32 @@ const ImageAnnotate: React.FC<AppProps & IProps> = (props) => {
   );
 };
 
+const PointCloudAnnotate: React.FC<AppProps & IProps> = (props) => {
+  return (
+    <>
+      <PointCloudView />
+      <ToolFooter style={props.style?.footer} mode={props.mode} footer={props?.footer} />
+    </>
+  );
+};
+
 const AnnotatedArea: React.FC<AppProps & IProps & { currentToolName: string }> = (props) => {
   const { currentToolName } = props;
   // @ts-ignore
   const isVideoTool = Object.values(EVideoToolName).includes(currentToolName);
+
+  const isPointCloudTool = currentToolName === 'pointCloudTool'
+
+
   if (isVideoTool) {
     return <VideoAnnotate {...props} />;
   }
+
+  if (isPointCloudTool) {
+
+    return <PointCloudAnnotate {...props} />;
+  }
+
   return <ImageAnnotate {...props} />;
 };
 
@@ -104,4 +125,5 @@ const mapStateToProps = ({ annotation, toolStyle }: AppState) => {
   };
 };
 
-export default connect(mapStateToProps)(MainView);
+
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(MainView);

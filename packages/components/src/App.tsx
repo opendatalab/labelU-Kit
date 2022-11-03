@@ -1,11 +1,13 @@
 import MainView from '@/views/MainView';
 import { i18n } from '@label-u/utils';
 import React, { useEffect } from 'react';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { connect } from 'react-redux';
+import { useDispatch, useSelector } from '@/store/ctx';
 import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
 import { ChangeCurrentTool, InitTaskData, loadImgList } from './store/annotation/actionCreators';
+import { LabelBeeContext } from '@/store/ctx';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
@@ -103,7 +105,6 @@ const App: React.FC<AppProps> = (props) => {
     loadFileList,
     defaultLang = 'cn',
   } = props;
-
   const dispatch = useDispatch();
 
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
@@ -189,7 +190,7 @@ const App: React.FC<AppProps> = (props) => {
 
   return (
     <div>
-      <MainView {...props} currentToolName={currentToolName as string} />
+      {currentToolName && <MainView {...props} currentToolName={currentToolName as string} />}
     </div>
   );
 };
@@ -200,4 +201,4 @@ const mapStateToProps = (state: AppState) => ({
   toolStyle: state.toolStyle,
 });
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(App);

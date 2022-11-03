@@ -9,5 +9,6 @@ export const zhCN_title = {
   'title.account': '个人设置',
   'title.notFount': '404',
   'title.annotation':"标注",
-  'title.annotationConfig':"标注配置"
+  'title.annotationConfig':"标注配置",
+  'title.pointCloud':"点云标注"
 };

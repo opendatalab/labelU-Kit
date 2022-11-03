@@ -28,7 +28,7 @@ import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
-interface IPolygonOperationProps extends IBasicToolOperationProps {}
+export interface IPolygonOperationProps extends IBasicToolOperationProps {}
 
 class PolygonOperation extends BasicToolOperation {
   public config: IPolygonConfig;
@@ -184,6 +184,18 @@ class PolygonOperation extends BasicToolOperation {
       [],
     );
     return showingPolygon;
+  }
+
+  /**
+   *  Just Update Data. Not Clear Status
+   * @param polygonList
+   */
+  public setResultAndSelectedID(polygonList: IPolygonData[], selectedID: string) {
+    this.setPolygonList(polygonList);
+    if (selectedID) {
+      this.selectedID = selectedID;
+    }
+    this.render();
   }
 
   public setResult(polygonList: IPolygonData[]) {
@@ -483,11 +495,7 @@ class PolygonOperation extends BasicToolOperation {
         textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
-        order:
-          CommonToolUtils.getAllToolsMaxOrder( 
-            this.polygonList,
-               this.prevResultList
-          ) + 1,
+        order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1,
       };
       if (this.config.textConfigurable) {
         let textAttribute = '';
@@ -790,7 +798,7 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public rightMouseUp() {
+  public rightMouseUp(e: MouseEvent) {
     // 标注中的数据结束
     if (this.drawingPointList.length > 0) {
       this.addDrawingPointToPolygonList();
@@ -977,8 +985,7 @@ class PolygonOperation extends BasicToolOperation {
             pointList: v,
             valid,
             isVisible: true,
-            order: 
-            CommonToolUtils.getAllToolsMaxOrder( this.polygonList,this.prevResultList) + 1 + i,
+            order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1 + i,
             attribute: defaultAttribute,
             textAttribute,
           });
@@ -1308,7 +1315,7 @@ class PolygonOperation extends BasicToolOperation {
       }
 
       case 2: {
-        this.rightMouseUp();
+        this.rightMouseUp(e);
 
         break;
       }
@@ -1711,6 +1718,10 @@ class PolygonOperation extends BasicToolOperation {
       this.setPolygonList(polygonList);
       this.render();
     }
+  }
+
+  public deleteSelectedID() {
+    this.setSelectedID('');
   }
 }
 

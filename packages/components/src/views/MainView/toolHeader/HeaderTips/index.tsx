@@ -1,6 +1,6 @@
 import React from 'react';
 import ToolHotKey from './ToolHotKey';
-import { useSelector } from 'react-redux';
+import { useSelector } from '@/store/ctx';
 import StepUtils from '../../../../utils/StepUtils';
 import { prefix } from '@/constant';
 

@@ -42,6 +42,13 @@ interface IBasicToolOperationProps {
 
   forbidBasicResultRender?: boolean;
   isShowOrder:boolean;
+
+  isAppend?: boolean; // 用于 canvas 层次的关闭
+  hiddenImg?: boolean; // 隐藏图片渲染
+
+
+
+
 }
 
 /**
@@ -167,7 +174,7 @@ class BasicToolOperation extends EventListener {
 
   constructor(props: IBasicToolOperationProps) {
     super();
-
+    debugger;
     this.saveDataEvent = new CustomEvent('saveLabelResultToImg', {});
     this.renderReady = false;
     this.container = props.container;
@@ -238,8 +245,6 @@ class BasicToolOperation extends EventListener {
     this.coordUtils.setBasicImgInfo(this.basicImgInfo);
   }
 
-
-
   public onContextmenu(e: MouseEvent) {
     e.preventDefault();
   }
@@ -265,8 +270,19 @@ class BasicToolOperation extends EventListener {
     return BASE_ICON[this.style.color];
   }
 
-  get defaultCursor() {
+  get defaultCursor(): string {
     return this.showDefaultCursor ? 'default' : 'none';
+  }
+
+  get isShowDefaultCursor() {
+    return this.showDefaultCursor;
+  }
+
+  get innerPosAndZoom() {
+    return {
+      innerZoom: this.innerZoom,
+      currentPosStorage: this.currentPosStorage,
+    };
   }
 
   /** 数据列表，根据其判断是否可以旋转 */
@@ -302,6 +318,15 @@ class BasicToolOperation extends EventListener {
     this.referenceData = referenceData;
   }
 
+  public setImgInfo(size: ISize) {
+    this.imgInfo = size;
+  }
+
+  public setCurrentPosStorage(currentPosStorage: ICoordinate) {
+    this.currentPosStorage = currentPosStorage;
+  }
+
+
   /**
    * 外界直接更改当前渲染位置
    * @param zoom
@@ -326,6 +351,10 @@ class BasicToolOperation extends EventListener {
   public setShowDefaultCursor(showDefaultCursor: boolean) {
     this.showDefaultCursor = showDefaultCursor;
     this.container.style.cursor = this.defaultCursor;
+  }
+
+  public setCustomCursor(cursor: string) {
+    this.container.style.cursor = cursor;
   }
 
   // 是否限制鼠标操作
@@ -512,6 +541,44 @@ class BasicToolOperation extends EventListener {
       y: e.clientY - bounding.top - this.currentPos.y,
     };
   }
+
+  /**
+   * Get the coordinate based on zoom and rotate
+   *
+   *
+   * @param e
+   * @returns
+   */
+   public getCoordinateUnderZoomByRotate(e: MouseEvent) {
+    const { x, y } = this.getCoordinateUnderZoom(e);
+
+    if (this.basicImgInfo.rotate === 90) {
+      return {
+        x: y,
+        y: this.basicImgInfo.height * this.zoom - x,
+      };
+    }
+
+    if (this.basicImgInfo.rotate === 180) {
+      return {
+        x: this.basicImgInfo.width * this.zoom - x,
+        y: this.basicImgInfo.height * this.zoom - y,
+      };
+    }
+
+    if (this.basicImgInfo.rotate === 270) {
+      return {
+        x: this.basicImgInfo.width * this.zoom - y,
+        y: x,
+      };
+    }
+
+    return {
+      x,
+      y,
+    };
+  }
+
 
   public getGetCenterCoordinate() {
     return {
@@ -965,6 +1032,19 @@ class BasicToolOperation extends EventListener {
     this.render();
     this.renderBasicCanvas();
   };
+
+
+  /**
+   *  Update by center.
+   *
+   * @param newZoom
+   */
+   public zoomChangeOnCenter = (newZoom: number) => {
+    this.wheelChangePos(this.getGetCenterCoordinate(), 0, newZoom);
+    this.render();
+    this.renderBasicCanvas();
+  };
+
 
   public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
     if (!this.ctx || this.forbidCursorLine) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from '@/store/ctx';
 import { AppState } from '../../../../store';
 import rotateSvg from '../../../../assets/annotation/common/icon_r.svg';
 

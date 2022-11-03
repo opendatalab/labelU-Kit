@@ -5,10 +5,11 @@ import { AppState } from '../../../store';
 import { BasicConfig } from '../../../interface/toolConfig';
 import { Button, Dropdown, Space, Menu } from 'antd';
 import { COLORS_ARRAY } from '@/data/Style';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -53,8 +54,8 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       // const leftSliderDomWidth = document.getElementById('sliderBoxId')?.offsetWidth as number;
       // const rightSliderDomWidth = 240;
       // const attributeBoxLength = window.innerWidth - leftSliderDomWidth - rightSliderDomWidth;
-      const toolContainerWidth = document.getElementById('toolContainer')?.offsetWidth as number;
-      setAttributeBoxLength(toolContainerWidth - 30);
+      const toolContainerWidth = window.innerWidth as number;
+      setAttributeBoxLength(toolContainerWidth - 190);
     }
   }, [attributeList, props.imgListCollapse]);
 
@@ -229,4 +230,4 @@ const mapStateToProps = (appState: AppState) => ({
   imgListCollapse: appState.toolStyle.imgListCollapse,
 });
 
-export default connect(mapStateToProps)(AttributeOperation);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(AttributeOperation);

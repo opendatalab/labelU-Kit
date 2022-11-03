@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { Switch } from 'antd';
 import HeaderTips from '../HeaderTips'
 import GeneralOperation from '../GeneralOperation'
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from '@/store/ctx';
 import { UpdateIsShowOrder } from '@/store/annotation/actionCreators';
 import { AppState } from '@/store';
 

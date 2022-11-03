@@ -23,6 +23,7 @@ import ActionOption from './ActionOption';
 // import { BasicConfig } from '@/types/tool';
 import ToolOperation from './ToolOperation';
 import { BasicConfig } from '@/types/tool';
+import { LabelBeeContext } from '@/store/ctx';
 interface INextStep {
   stepProgress: number;
   stepList: IStepInfo[];
@@ -239,4 +240,4 @@ const mapStateToProps = (state: AppState) => ({
   toolsBasicConfig: state.annotation.toolsBasicConfig,
 });
 
-export default connect(mapStateToProps)(ToolHeader);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ToolHeader);

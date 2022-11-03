@@ -17,6 +17,7 @@ import { PrevResult, Attribute, EToolName } from '@label-u/annotation';
 import DrageModel from '@/components/dragModal';
 import classNames from 'classnames';
 import { expandIconFuc } from '../TagSidebar';
+import { LabelBeeContext } from '@/store/ctx';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -722,4 +723,4 @@ const getStateMap = (state: AppState) => {
   };
 };
 
-export default connect(getStateMap)(AttributeRusult);
+export default connect(getStateMap, null, null, { context: LabelBeeContext })(AttributeRusult);

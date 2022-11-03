@@ -10,6 +10,7 @@ import svg from 'rollup-plugin-svg';
 import alias from '@rollup/plugin-alias';
 import pkg from './package.json';
 // import typescript from 'rollup-plugin-typescript2'
+import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 
 const projectRootDir = path.resolve(__dirname);
 const customResolver = resolve({
@@ -49,6 +50,7 @@ const esbuildPlugin = () =>
   });
 
 const commonPlugin = [
+  webWorkerLoader(),
   alias({
     entries: [{ find: '@', replacement: path.resolve(projectRootDir, './src') }],
     customResolver,

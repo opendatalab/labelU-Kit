@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { ObjectString } from '@/components/videoPlayer/types';
 import { IFileItem } from '@/types/data';
 import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   imgIndex: number;
@@ -332,4 +333,4 @@ function mapStateToProps(state: AppState) {
   };
 }
 
-export default connect(mapStateToProps)(TagSidebar);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(TagSidebar);

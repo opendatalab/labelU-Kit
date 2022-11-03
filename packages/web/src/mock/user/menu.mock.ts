@@ -15,12 +15,22 @@ const mockMenuList: MenuList = [
   {
     name: 'annotation',
     label: {
-      zh_CN: '智能标注工具',
+      zh_CN: '图像标注工具',
       en_US: 'annotation'
     },
     icon: 'annotation',
     key: '0',
     path: '/annotation'
+  },
+  {
+    name: 'pointCloud',
+    label: {
+      zh_CN: '点云标注工具',
+      en_US: 'pointCloud'
+    },
+    icon: 'permission',
+    key: '0',
+    path: '/pointCloud'
   }
 ];
 

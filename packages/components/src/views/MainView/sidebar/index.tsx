@@ -17,7 +17,7 @@ import StepUtils from '@/utils/StepUtils';
 import { Collapse, Row } from 'antd/es';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useSelector } from '@/store/ctx';
 import AnnotationText from './AnnotationText';
 import ClearIcon from './ClearIcon';
 import GeneralOperation from './GeneralOperation';

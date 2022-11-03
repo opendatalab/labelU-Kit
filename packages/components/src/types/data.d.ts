@@ -1,11 +1,20 @@
 import { ESubmitType } from '@/constant';
 
+export interface IMappingImg {
+  url: string;
+  calib: ICalib;
+}
+
 /** 标注文件对象 */
 export interface IFileItem {
   id: number;
   url?: string;
   result?: string;
+  mappingImgList?: IMappingImg[];
 }
+
+
+
 export type AnnotationFileList = IFileItem[];
 export interface KVObject {
   [key: string]: any;

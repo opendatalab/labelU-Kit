@@ -11,7 +11,7 @@ import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon
 import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
 import { BasicConfig } from '../../../../types/tool';
 import { ChangeSave, ChangeCurrentTool } from '../../../../store/annotation/actionCreators';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from '@/store/ctx';
 import ImageStyle from '../ImageStyle';
 import { AppState } from '@/store';
 import { Popover } from 'antd';

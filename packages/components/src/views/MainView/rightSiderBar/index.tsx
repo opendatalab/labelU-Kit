@@ -5,7 +5,8 @@ import { Sider } from '../../../types/main';
 import StepUtils from '../../../utils/StepUtils';
 import React, { useEffect, useState } from 'react';
 import { Popconfirm, Tabs } from 'antd';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { connect } from 'react-redux';
+import { useDispatch, useSelector } from '@/store/ctx';
 import TextToolSidebar from './TextToolSidebar';
 import TagSidebar from './TagSidebar';
 import AttributeRusult from './AttributeRusult';
@@ -17,6 +18,7 @@ import { UpdateImgList } from '@/store/annotation/actionCreators';
 import { PrevResult } from '@label-u/annotation';
 import { toolList } from '../toolHeader/ToolOperation';
 import classNames from 'classnames';
+import { LabelBeeContext } from '@/store/ctx';
 
 interface IProps {
   toolName?: EToolName;
@@ -245,4 +247,4 @@ function mapStateToProps(state: AppState) {
   };
 }
 
-export default connect(mapStateToProps)(RightSiderbar);
+export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(RightSiderbar);

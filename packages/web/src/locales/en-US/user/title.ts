@@ -9,5 +9,6 @@ export const enUS_title = {
   'title.account': 'Account',
   'title.notFount': '404',
   'title.annotation':"annotation",
-  'title.annotationConfig':"annotation config"
+  'title.annotationConfig':"annotation config",
+  'title.pointCloud':"title.pointCloud"
 };
