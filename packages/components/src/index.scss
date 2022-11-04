@@ -9,6 +9,8 @@ $sidebarHeaderHeight: 75px;
 $sidebarFooterHeight: 80px;
 $prefix: lab;
 $boxShadow: 1px 1px 4px rgb(204 204 204 / 50%);
+$pointCloudBg: #4c4c4c;
+$ptPrefix: #{$prefix}-point-cloud;
 
 ::-webkit-scrollbar {
   width: 6px !important;
@@ -1863,9 +1865,6 @@ $hotkey-container-padding: 7px;
 
 
 /** PointCloud样式 start */
-$pointCloudBg: #4c4c4c;
-$ptPrefix: #{$prefix}-point-cloud;
-$headerHeight: 40px;
 
 @mixin icon($size: 36px) {
   display: inline-block;
@@ -2092,7 +2091,7 @@ $headerHeight: 40px;
         flex-direction: column;
         font-size: 16px;
         z-index: 20;
-        height: calc(100% - $headerHeight);
+        height: calc(100% -  #{$headerHeight});
         width: 100%;
         .#{$ptPrefix}-container__empty-page__text {
           margin-top: 13px;

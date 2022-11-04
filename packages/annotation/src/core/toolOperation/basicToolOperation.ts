@@ -174,7 +174,6 @@ class BasicToolOperation extends EventListener {
 
   constructor(props: IBasicToolOperationProps) {
     super();
-    debugger;
     this.saveDataEvent = new CustomEvent('saveLabelResultToImg', {});
     this.renderReady = false;
     this.container = props.container;

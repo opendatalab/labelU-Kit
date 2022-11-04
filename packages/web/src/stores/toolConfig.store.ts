@@ -20,6 +20,7 @@ const toolsConfigSlice = createSlice({
     },
     // 更新工具配置
     updateToolsConfig(state, action: PayloadAction<BasicConfig[]>) {
+      debugger;
       state.tools = action.payload;
     },
     // 清空统一的attribute
@@ -28,6 +29,7 @@ const toolsConfigSlice = createSlice({
     },
     // 更新
     updateTagConfigList(state, action: PayloadAction<OneTag[]>) {
+      debugger;
       state.tagList = action.payload;
     },
     // 清空统一的tag
@@ -36,10 +38,12 @@ const toolsConfigSlice = createSlice({
     },
     // 更新
     updateAllAttributeConfigList(state, action: PayloadAction<Attribute[]>) {
+      debugger;
       state.attribute = action.payload;
     },
     // 更新文件信息
     updateFileInfo(state, action: PayloadAction<FileInfo>) {
+      debugger;
       state.fileInfo = action.payload;
     },
 
@@ -50,6 +54,7 @@ const toolsConfigSlice = createSlice({
 
     // 配置文本组建
     updateTextConfig(state, action: PayloadAction<TextConfig>) {
+      debugger;
       state.textConfig = action.payload;
     },
     // 清空所有配置

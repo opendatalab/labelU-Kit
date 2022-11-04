@@ -5,7 +5,8 @@
 import { Dropdown } from 'antd/es';
 import { CaretDownOutlined, OrderedListOutlined } from '@ant-design/icons';
 import React from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
+import { useDispatch } from '@/store/ctx';
 import { AppState } from '@/store';
 import IconWithText from '@/components/customAntd/IconWithText';
 import { prefix } from '@/constant';

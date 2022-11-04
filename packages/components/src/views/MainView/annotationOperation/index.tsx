@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { message } from 'antd/es';
 import { AppState } from 'src/store';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
+import { useDispatch } from '@/store/ctx';
 import { ImgAttributeState } from 'src/store/imgAttribute/types';
 import _ from 'lodash';
 import { store } from '@/index';

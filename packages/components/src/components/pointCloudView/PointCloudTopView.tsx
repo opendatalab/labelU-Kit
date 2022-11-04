@@ -150,7 +150,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
       };
-      debugger;
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         size,

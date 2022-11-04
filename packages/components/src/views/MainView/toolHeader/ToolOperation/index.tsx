@@ -9,6 +9,8 @@ import lineASvg from '@/assets/annotation/lineTool/icon_line.svg';
 import pointASvg from '@/assets/annotation/pointTool/icon_point.svg';
 import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon.svg';
 import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
+import icon_pointCloudSvg from '@/assets/annotation/pointCloudTool/icon_pointCloud.svg';
+import icon_pointCloudSvgA from '@/assets/annotation/pointCloudTool/icon_pointCloudA.svg';
 import { BasicConfig } from '../../../../types/tool';
 import { ChangeSave, ChangeCurrentTool } from '../../../../store/annotation/actionCreators';
 import { useDispatch, useSelector } from '@/store/ctx';
@@ -23,6 +25,11 @@ interface IProps {
 }
 
 export const toolList = [
+  {
+    toolName: EToolName.PointCloud,
+    commonSvg: icon_pointCloudSvg,
+    selectedSvg: icon_pointCloudSvgA,
+  },
   {
     toolName: EToolName.Rect,
     commonSvg: iconRectPatternSvg,

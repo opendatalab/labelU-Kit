@@ -32,8 +32,8 @@ const PointCloudView: React.FC<IProps> = ({ imgList }) => {
           <div className={getClassName('point-cloud-container', 'right')}>
             <PointCloudTopView />
             <div className={getClassName('point-cloud-container', 'right-bottom')}>
-              {/* <PointCloudSideView />
-              <PointCloudBackView /> */}
+              <PointCloudSideView />
+              <PointCloudBackView />
             </div>
           </div>
         </div>

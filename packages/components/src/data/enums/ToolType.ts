@@ -10,6 +10,8 @@ export enum ETextType {
 export const TEXT_ATTRIBUTE_MAX_LENGTH = 1000;
 
 export enum EToolName {
+  /**点云 */
+  PointCloud = 'pointCloudTool',
   /** 拉框工具 */
   Rect = 'rectTool',
   /** 标签工具 */

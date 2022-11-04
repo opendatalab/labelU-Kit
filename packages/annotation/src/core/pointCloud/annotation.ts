@@ -46,7 +46,6 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     const image = new Image();
     image.src = imgSrc;
     const canvasScheduler = new CanvasScheduler({ container });
-    debugger;
     // 1. PointCloud initialization
     const pointCloud = new PointCloud({
       container,

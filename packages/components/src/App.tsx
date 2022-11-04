@@ -109,6 +109,7 @@ const App: React.FC<AppProps> = (props) => {
 
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
 
+
   useEffect(() => {
     if (
       (props.stepList && props.stepList.length > 0) ||
@@ -121,8 +122,10 @@ const App: React.FC<AppProps> = (props) => {
       // 当工具配置中不包含currentToolName时，重置currentToolName
       if (findToolConfigByToolName && findToolConfigByToolName.length === 0) {
         initToolName = toolsBasicConfig[0].tool;
+
         dispatch(ChangeCurrentTool(initToolName));
       }
+      debugger;
       store.dispatch(
         InitTaskData({
           toolStyle,
@@ -161,6 +164,7 @@ const App: React.FC<AppProps> = (props) => {
       setToolInstance?.(toolInstance);
     }
   }, [toolInstance]);
+  
 
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = () => {
@@ -187,10 +191,10 @@ const App: React.FC<AppProps> = (props) => {
       });
     }
   };
-
+  debugger;
   return (
     <div>
-      {currentToolName && <MainView {...props} currentToolName={currentToolName as string} />}
+      <MainView {...props} currentToolName={currentToolName as string} />
     </div>
   );
 };

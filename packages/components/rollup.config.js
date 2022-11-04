@@ -4,6 +4,26 @@ import alias from '@rollup/plugin-alias';
 import resolve from '@rollup/plugin-node-resolve';
 import dts from 'rollup-plugin-dts';
 import path from 'path';
+// import postcss from 'rollup-plugin-postcss';
+// import sass from 'sass';
+// import url from 'postcss-url';
+
+// const sassLoader = (context) => {
+//   return new Promise((resolve, reject) => {
+//     sass.render(
+//       {
+//         file: context,
+//       },
+//       (err, result) => {
+//         if (!err) {
+//           resolve(result.css);
+//         } else {
+//           reject(err);
+//         }
+//       },
+//     );
+//   });
+// };
 
 const customResolver = resolve({
   extensions: ['.tsx', '.ts', 'scss'],
@@ -46,6 +66,19 @@ const commonPlugin = [
     customResolver,
   }),
   image(),
+  // postcss({
+  //   extract: true,
+  //   assetsPath: './assets',
+  //   extensions: ['scss'],
+  //   plugins: [
+  //     url({
+  //       url: 'copy',
+  //       assetsPath: path.resolve('./dist/assets/icons'),
+  //       useHash: true,
+  //     }),
+  //   ],
+  //   process: sassLoader,
+  // }),
 ];
 
 export default () => {

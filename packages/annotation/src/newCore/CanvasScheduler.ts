@@ -25,7 +25,6 @@ class CanvasScheduler implements ICanvasBasicOperation {
   public createCanvas(id: string | HTMLCanvasElement, options?: { size?: { width: number; height: number } }) {
     // Add Directly
     if (id&&typeof id !== 'string') {
-      debugger;
       this.container.appendChild(id);
       id.style.position = 'absolute';
       id.style.left = '0';

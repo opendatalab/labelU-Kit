@@ -11,7 +11,7 @@
     "dev": "npm run build && cross-env NODE_ENV=developemnt rollup -m -c rollup.config.js -w",
     "start": "npm run dev",
     "dev:style": "dart-sass --watch src/index.scss dist/index.css ",
-    "build:style": "dart-sass src/index.scss dist/index.css && shx cp -R ./src/assets/cssIcon/.  ./dist/assets/cssIcon",
+    "build:style": "dart-sass src/index.scss dist/index.css && shx cp -R ./src/assets/.  ./dist/assets/",
     "build": "rimraf dist && rimraf es && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:style",
     "build:type": "tsc --emitDeclarationOnly",
     "commit": "git-cz",
@@ -93,6 +93,8 @@
     "rollup": "^2.43.1",
     "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-esbuild": "^3.0.2",
+    "rollup-plugin-postcss": "^4.0.2",
+    "postcss-url": "^10.1.3",
     "shx": "^0.3.4",
     "typescript": "^4.2.3"
   },

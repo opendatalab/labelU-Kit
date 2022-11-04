@@ -1,7 +1,8 @@
 import React, { FC, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Collapse, Form, Input, Select } from 'antd';
 import { AppState } from '../../../../store';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
+import { useDispatch } from '@/store/ctx';
 import { IFileItem } from '@/types/data';
 import _ from 'lodash';
 import { toolList } from '../../toolHeader/ToolOperation';

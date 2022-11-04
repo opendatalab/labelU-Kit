@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import Annotation from '../../components/business/annotation';
 import { fileList as mockFileList, videoList } from '../../mock/annotationMock';
-import { useSelector, useDispatch } from 'react-redux';
+import {  useDispatch,connect } from 'react-redux';
 import {
   updateToolsConfig,
   updateTagConfigList,
@@ -10,14 +10,26 @@ import {
 } from '../../stores/toolConfig.store';
 
 import toolCombineConfig from '../../config/toolCombineConfig.json';
-const AnnotationPage: FC = () => {
+import { AppState } from 'stores';
+
+interface Iprops{
+  tools: any[],
+  tagList: any[],
+  attribute: any[],
+  textConfig: any[]
+}
+
+const AnnotationPage: FC<Iprops> = (props) => {
+  const {tools, tagList, attribute,textConfig} = props;
   const dispatch = useDispatch();
-  const { tools, tagList, attribute, textConfig } = useSelector(state => state.toolsConfig);
+  debugger;
   // const currentIsVideo = StepUtils.currentToolIsVideo(1, stepConfig);
   const currentIsVideo = false;
   const [fileList, setFileList] = useState<any[]>([]);
   // 加载工具配置信息 和 文件信息
   useEffect(() => {
+
+    debugger;
     // 工具配置 todo=》补充配置拉取接口
     // @ts-ignore
     dispatch(updateToolsConfig(toolCombineConfig.tools));
@@ -53,4 +65,13 @@ const AnnotationPage: FC = () => {
   );
 };
 
-export default AnnotationPage;
+
+const mapStateToProps = (state:AppState) => ({
+  tools: state.toolsConfig.tools,
+  tagList: state.toolsConfig.tagList,
+  attribute: state.toolsConfig.attribute,
+  textConfig: state.toolsConfig.textConfig
+});
+
+
+export default connect(mapStateToProps)(AnnotationPage);
