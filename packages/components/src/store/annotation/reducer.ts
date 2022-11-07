@@ -91,7 +91,6 @@ const updateToolInstance = (
   if (ToolUtils.isPointCloudTool(stepConfig?.tool)) {
     return;
   }
-debugger;
   const container = document.getElementById('toolContainer');
   if (!container) {
     throw `Not exist dom named id-toolContainer`;

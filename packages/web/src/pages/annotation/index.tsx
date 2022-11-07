@@ -22,14 +22,11 @@ interface Iprops{
 const AnnotationPage: FC<Iprops> = (props) => {
   const {tools, tagList, attribute,textConfig} = props;
   const dispatch = useDispatch();
-  debugger;
   // const currentIsVideo = StepUtils.currentToolIsVideo(1, stepConfig);
   const currentIsVideo = false;
   const [fileList, setFileList] = useState<any[]>([]);
   // 加载工具配置信息 和 文件信息
   useEffect(() => {
-
-    debugger;
     // 工具配置 todo=》补充配置拉取接口
     // @ts-ignore
     dispatch(updateToolsConfig(toolCombineConfig.tools));

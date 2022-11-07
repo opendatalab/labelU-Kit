@@ -115,7 +115,6 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
           backgroundColor: '#4c4c4c',
         });
       }
-
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
 

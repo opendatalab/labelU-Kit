@@ -2,6 +2,7 @@ import { getClassName } from '@/utils/dom';
 import classNames from 'classnames';
 import React from 'react';
 
+// 2,3D 外框
 export const PointCloudContainer: React.FC<{
   title: string;
   toolbar?: React.ReactElement;

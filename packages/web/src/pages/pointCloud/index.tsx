@@ -11,15 +11,12 @@ import {
 
 import cloudToolConfig from '../../config/cloudPointConfig.json';
 const AnnotationPage: FC = () => {
-  debugger;
   const dispatch = useDispatch();
   const { tools, attribute } = useSelector(state => state.toolsConfig);
   // const currentIsVideo = StepUtils.currentToolIsVideo(1, stepConfig);
   const [fileList, setFileList] = useState<any[]>([]);
   // 加载工具配置信息 和 文件信息
   useEffect(() => {
-
-    debugger;
     // 工具配置 todo=》补充配置拉取接口
     // @ts-ignore
     dispatch(updateToolsConfig(cloudToolConfig.tools));

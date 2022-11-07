@@ -125,7 +125,6 @@ const App: React.FC<AppProps> = (props) => {
 
         dispatch(ChangeCurrentTool(initToolName));
       }
-      debugger;
       store.dispatch(
         InitTaskData({
           toolStyle,
@@ -191,7 +190,6 @@ const App: React.FC<AppProps> = (props) => {
       });
     }
   };
-  debugger;
   return (
     <div>
       <MainView {...props} currentToolName={currentToolName as string} />

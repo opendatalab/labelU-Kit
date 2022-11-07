@@ -236,7 +236,7 @@ export const synchronizeBackView = (
     pointCloud2dOperation: backPointCloudPolygonOperation,
     pointCloudInstance: backPointCloud,
   } = BackViewInstance;
-
+  debugger;
   // Create PointCloud
   backPointCloud.loadPCDFileByBox(url, boxParams, { height: DEFAULT_SCOPE, depth: DEFAULT_SCOPE });
   const { cameraPositionVector } = backPointCloud.updateOrthoCamera(
@@ -548,7 +548,7 @@ export const usePointCloudViews = () => {
     if (!currentData?.url || !mainViewInstance) {
       return;
     }
-
+    debugger;
     SetPointCloudLoading(dispatch, true);
     await mainViewInstance.loadPCDFile(currentData.url, config?.radius ?? DEFAULT_RADIUS);
 

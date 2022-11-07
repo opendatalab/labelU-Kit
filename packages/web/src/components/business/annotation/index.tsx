@@ -27,7 +27,6 @@ const Annotation = (props: {
     // 翻页时触发当前页面数据的输出
     // console.log('submitData', data);
   };
-  debugger;
   return (
     <div>
       <AnnotationOperation

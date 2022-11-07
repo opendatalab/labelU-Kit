@@ -47,6 +47,8 @@ interface IAnnotationDataTemporarily {
   annotation: any;
 }
 
+// 3d 框映射到 2D图显示组件
+
 const PointCloud2DView = ({ imgInfo }: IProps) => {
   const [annotations2d, setAnnotations2d] = useState<IAnnotationDataTemporarily[]>([]);
   const { pointCloudBoxList, topViewInstance } = useContext(PointCloudContext);
