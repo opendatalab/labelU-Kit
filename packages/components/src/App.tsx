@@ -7,7 +7,7 @@ import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
 import { ChangeCurrentTool, InitTaskData, loadImgList } from './store/annotation/actionCreators';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 import { LoadFileAndFileData } from './store/annotation/reducer';
 import { ToolInstance } from './store/annotation/types';
 import {
@@ -203,4 +203,4 @@ const mapStateToProps = (state: AppState) => ({
   toolStyle: state.toolStyle,
 });
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(App);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(App);

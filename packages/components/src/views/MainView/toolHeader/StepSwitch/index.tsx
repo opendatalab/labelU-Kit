@@ -14,7 +14,7 @@ import AnnotationStepPopover from '@/components/annotationStepPopover';
 import { IStepInfo } from '@/types/step';
 import { UpdateProcessingStep } from '@/store/annotation/actionCreators';
 import { useTranslation } from 'react-i18next';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 interface IProps {
   stepProgress: number;
@@ -51,4 +51,4 @@ const mapStateToProps = (state: AppState) => ({
   step: state.annotation.step,
 });
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(StepSwitch);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(StepSwitch);

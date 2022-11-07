@@ -9,7 +9,7 @@ import { COLORS_ARRAY } from '@/data/Style';
 import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -230,4 +230,4 @@ const mapStateToProps = (appState: AppState) => ({
   imgListCollapse: appState.toolStyle.imgListCollapse,
 });
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(AttributeOperation);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(AttributeOperation);

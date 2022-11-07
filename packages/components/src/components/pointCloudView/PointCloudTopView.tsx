@@ -18,7 +18,7 @@ import { connect } from 'react-redux';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 const { EPolygonPattern } = cTool;
 
@@ -130,6 +130,7 @@ const ZAxisSlider = ({
 
 const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const polygonRef = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
   const { setZoom } = useZoom();
@@ -264,16 +265,17 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       toolbar={<TopViewToolbar currentData={currentData} />}
     >
       <div style={{ position: 'relative', flex: 1 }}>
-        <div style={{ width: '100%', height: '100%' }} ref={ref} />
-
+        <div style={{ position: 'absolute',width: '100%', height: '100%' }} ref={ref} />
+        <div style={{ position: 'absolute', width: '100%', height: '100%' }} ref={polygonRef}></div>
         <BoxInfos />
         <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
         <PointCloudValidity />
       </div>
+
     </PointCloudContainer>
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(aMapStateToProps, null, null, { context: LabelUContext })(
   PointCloudTopView,
 );

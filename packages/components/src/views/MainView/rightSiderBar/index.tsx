@@ -18,7 +18,7 @@ import { UpdateImgList } from '@/store/annotation/actionCreators';
 import { PrevResult } from '@label-u/annotation';
 import { toolList } from '../toolHeader/ToolOperation';
 import classNames from 'classnames';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 interface IProps {
   toolName?: EToolName;
@@ -247,4 +247,4 @@ function mapStateToProps(state: AppState) {
   };
 }
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(RightSiderbar);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(RightSiderbar);

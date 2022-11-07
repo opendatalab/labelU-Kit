@@ -21,7 +21,7 @@ import AttributeOperation from './attributeOperation';
 import { IFileItem } from '@/types/data';
 import LeftSider from './leftSiderBar'
 import PointCloudView from '@/components/pointCloudView';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 
 const { EVideoToolName } = cTool;
@@ -126,4 +126,4 @@ const mapStateToProps = ({ annotation, toolStyle }: AppState) => {
 };
 
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(MainView);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(MainView);

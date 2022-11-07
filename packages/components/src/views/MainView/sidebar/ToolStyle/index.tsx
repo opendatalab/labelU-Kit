@@ -11,7 +11,7 @@ import { store } from '@/index';
 import { AppState } from '@/store';
 import { ToolStyleState } from '@/store/toolStyle/types';
 import { useTranslation } from 'react-i18next';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 interface IProps {
   toolStyle: ToolStyleState;
@@ -177,4 +177,4 @@ const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({
   toolStyle,
   config: annotation.toolInstance.config,
 });
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(ToolStyle);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(ToolStyle);

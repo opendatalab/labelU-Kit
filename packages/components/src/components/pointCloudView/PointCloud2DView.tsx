@@ -11,7 +11,7 @@ import useSize from '@/hooks/useSize';
 import { useSingleBox } from './hooks/useSingleBox';
 import { ViewOperation } from '@label-u/annotation';
 import { useTranslation } from 'react-i18next';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 interface IProps {
   imgInfo: IFileItem;
@@ -175,4 +175,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(PointCloud2DView);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(PointCloud2DView);

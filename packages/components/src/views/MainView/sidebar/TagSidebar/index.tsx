@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { IInputList } from '@/types/main';
 import { useTranslation } from 'react-i18next';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 interface IProps {
   imgIndex: number;
@@ -230,4 +230,4 @@ function mapStateToProps(state: AppState) {
   return { toolInstance: state.annotation.toolInstance, imgIndex: state.annotation.imgIndex };
 }
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(TagSidebar);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(TagSidebar);

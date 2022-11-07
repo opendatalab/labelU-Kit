@@ -9,7 +9,7 @@ import configureStore from './configureStore';
 import { ChangeSave, PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
 import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 import { PointCloudProvider } from './components/pointCloudView/PointCloudContext';
 
 export const store = configureStore();
@@ -37,7 +37,7 @@ const OutputApp = (props: AppProps, ref: any) => {
   );
 
   return (
-    <Provider store={store} context={LabelBeeContext}>
+    <Provider store={store} context={LabelUContext}>
       <I18nextProvider i18n={i18n}>
         <PointCloudProvider>
           <App {...props} setToolInstance={setToolInstance} />

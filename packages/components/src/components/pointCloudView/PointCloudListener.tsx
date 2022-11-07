@@ -11,7 +11,7 @@ import { useCustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
 import { jsonParser } from '@/utils';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 const { EPolygonPattern } = cTool;
 
@@ -204,6 +204,6 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   return null;
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelBeeContext })(
+export default connect(aMapStateToProps, null, null, { context: LabelUContext })(
   PointCloudListener,
 );

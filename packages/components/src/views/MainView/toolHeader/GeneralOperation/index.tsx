@@ -16,7 +16,7 @@ import { IStepInfo } from '../../../../types/step';
 import { AnnotationFileList } from '../../../../types/data';
 import { CopyBackWordResult } from '../../../../store/annotation/actionCreators';
 import { useTranslation } from 'react-i18next';
-import { LabelBeeContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 
 const makeSure = (info: string, key: string, t: any) => {
   return <div key={key}>{`${t('ConfirmTo')}${info.slice(0)}？`}</div>;
@@ -132,4 +132,4 @@ const mapStateToProps = (state: AppState) => {
   };
 };
 
-export default connect(mapStateToProps, null, null, { context: LabelBeeContext })(GeneralOperation);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(GeneralOperation);

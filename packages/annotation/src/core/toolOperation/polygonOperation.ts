@@ -361,6 +361,11 @@ class PolygonOperation extends BasicToolOperation {
     this.setSelectedID(undefined);
   }
 
+
+  public clearDrawingStatus() {
+    this.drawingPointList = [];
+  }
+
   // SET DATA
   public setPolygonList(polygonList: IPolygonData[]) {
     const oldLen = this.polygonList.length;
