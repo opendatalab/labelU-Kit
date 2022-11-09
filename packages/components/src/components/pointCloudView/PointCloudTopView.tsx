@@ -130,7 +130,7 @@ const ZAxisSlider = ({
 
 const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const polygonRef = useRef<HTMLDivElement>(null);
+  // const polygonRef = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
   const { setZoom } = useZoom();
@@ -147,12 +147,14 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     }
 
     if (ref.current && currentData?.url && currentData?.result) {
+      debugger;
       const size = {
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
       };
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
+        // polygonContainer: polygonRef.current,
         size,
         pcdPath: currentData.url,
       });
@@ -176,7 +178,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       pointCloudViews.topViewAddBox(polygon, size);
     });
 
-    TopView2dOperation.singleOn('deletedObject', ({ id }:{id:string}) => {
+    TopView2dOperation.singleOn('deletedObject', ({ id }: { id: string }) => {
       deletePointCloudBox(id);
       deletePolygon(id);
     });
@@ -227,6 +229,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
      * Change Orthographic Camera size
      */
     polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
+      debugger;
       const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
       pointCloud.camera.zoom = zoom;
       if (currentPos) {
@@ -241,13 +244,17 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     });
 
     // Synchronized 3d point cloud view displacement operations
-    polygonOperation.singleOn('dragMove', ({ currentPos, zoom }:{currentPos:{x:number,y:number},zoom?:number}) => {
-      const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
-      pointCloud.camera.zoom = zoom;
-      const { x, y, z } = pointCloud.initCameraPosition;
-      pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
-      pointCloud.render();
-    });
+    polygonOperation.singleOn(
+      'dragMove',
+      ({ currentPos, zoom }: { currentPos: { x: number; y: number }; zoom?: number }) => {
+        debugger;
+        const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
+        pointCloud.camera.zoom = zoom;
+        const { x, y, z } = pointCloud.initCameraPosition;
+        pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
+        pointCloud.render();
+      },
+    );
   }, [size, ptCtx.topViewInstance]);
 
   useEffect(() => {
@@ -259,23 +266,21 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   }, [ptCtx.selectedIDs]);
 
   return (
-    <PointCloudContainer
-      className={getClassName('point-cloud-container', 'top-view')}
-      title={t('TopView')}
-      toolbar={<TopViewToolbar currentData={currentData} />}
-    >
-      <div style={{ position: 'relative', flex: 1 }}>
-        <div style={{ position: 'absolute',width: '100%', height: '100%' }} ref={ref} />
-        <div style={{ position: 'absolute', width: '100%', height: '100%' }} ref={polygonRef}></div>
-        <BoxInfos />
-        <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
-        <PointCloudValidity />
-      </div>
-
-    </PointCloudContainer>
+    currentData && (
+      <PointCloudContainer
+        className={getClassName('point-cloud-container', 'top-view')}
+        title={t('TopView')}
+        toolbar={<TopViewToolbar currentData={currentData} />}
+      >
+        <div style={{ position: 'relative', flex: 1 }}>
+          <div id='mytool' style={{ width: '100%', height: '100%' }} ref={ref} />
+          <BoxInfos />
+          <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+          <PointCloudValidity />
+        </div>
+      </PointCloudContainer>
+    )
   );
 };
 
-export default connect(aMapStateToProps, null, null, { context: LabelUContext })(
-  PointCloudTopView,
-);
+export default connect(aMapStateToProps, null, null, { context: LabelUContext })(PointCloudTopView);

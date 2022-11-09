@@ -12,6 +12,7 @@ interface IPointCloudAnnotationOperation {
 
 interface IPointCloudAnnotationProps {
   container: HTMLElement;
+  // polygonContainer:HTMLElement;
   size: ISize;
 
   pcdPath?: string;
@@ -63,6 +64,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     const defaultPolygonProps = {
       container,
       size,
+      // size:{width:1368,height:417},
       config: { "textConfigurable": false } as ToolConfig,
       imgNode: image,
       isAppend: false,

@@ -181,6 +181,7 @@ const AfterImageLoaded =
         });
       })
       .catch(() => {
+        debugger;
         SetAnnotationLoading(dispatch, false);
         toolInstance?.setErrorImg();
         dispatch({

@@ -782,6 +782,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public onKeyUp(e: KeyboardEvent) {
     super.onKeyUp(e);
+    debugger;
 
     switch (e.keyCode) {
       case EKeyCode.Ctrl:

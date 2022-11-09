@@ -99,10 +99,12 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
           <Layout>
             {props.leftSider ? props.leftSider : <LeftSider {...props} />}
             <Content className={`${layoutCls}__content`}>
-              <AnnotatedArea {...props} currentToolName={currentToolName} />
+              {
+                currentToolName&&<AnnotatedArea {...props} currentToolName={currentToolName} />
+              }
+              
             </Content>
             <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
-              {/* <Sidebar sider={props?.sider} /> */}
               <RightSiderbar />
             </Sider>
           </Layout>

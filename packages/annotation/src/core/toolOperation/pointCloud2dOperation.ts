@@ -98,6 +98,7 @@ class PointCloud2dOperation extends PolygonOperation {
    * @override
    * */
   public renderStaticPolygon() {
+    debugger;
     if (this.isHidden === false) {
       this.polygonList?.forEach((polygon) => {
         if ([...this.selectedIDs, this.editPolygonID].includes(polygon.id)) {
@@ -250,7 +251,6 @@ class PointCloud2dOperation extends PolygonOperation {
 
     //   this._textAttributInstance?.changeSelected();
     // }
-
     // if (!newID) {
     //   this._textAttributInstance?.clearTextAttribute();
     // }

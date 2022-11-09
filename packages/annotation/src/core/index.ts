@@ -10,7 +10,7 @@ import { ELang } from '@/constant/annotation';
 import { ToolConfig } from '@/interface/conbineTool';
 
 export interface IProps {
-  isShowOrder:boolean;
+  isShowOrder: boolean;
   container: HTMLElement;
   size: ISize;
   toolName: EToolName;
@@ -47,7 +47,7 @@ export default class AnnotationEngine {
 
   private size: ISize;
 
-  private isShowOrder :boolean;
+  private isShowOrder: boolean;
 
   private config: ToolConfig; // 定义 TODO！！
 
@@ -64,7 +64,7 @@ export default class AnnotationEngine {
 
   private dependToolName?: EToolName;
 
-  constructor(props: IProps) { 
+  constructor(props: IProps) {
     this.isShowOrder = props.isShowOrder;
     this.tagConfigList = props.tagConfigList;
     this.attributeList = props.attributeList;
@@ -173,7 +173,7 @@ export default class AnnotationEngine {
     if (this.imgNode) {
       Object.assign(defaultData, { imgNode: this.imgNode });
     }
-    this.toolInstance = new ToolOperation( defaultData);
+    this.toolInstance = new ToolOperation(defaultData);
 
     // 实时同步语言
     this.setLang(this.i18nLanguage);
@@ -262,5 +262,13 @@ export default class AnnotationEngine {
    */
   public setRenderEnhance(renderEnhance: IRenderEnhance) {
     this.toolInstance.setRenderEnhance(renderEnhance);
+  }
+
+  /**
+   * 自定义样式渲染
+   * @param customRenderStyle
+   */
+  public setCustomRenderStyle(customRenderStyle: (data: IAnnotationStyle) => IAnnotationStyle) {
+    this.toolInstance.setCustomRenderStyle(customRenderStyle);
   }
 }
