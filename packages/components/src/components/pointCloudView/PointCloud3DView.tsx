@@ -116,6 +116,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
         });
       }
       if (currentData.result) {
+
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
 
         // Add Init Box

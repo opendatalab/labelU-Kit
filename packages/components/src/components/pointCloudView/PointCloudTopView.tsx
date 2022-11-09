@@ -145,9 +145,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     if (ptCtx.topViewInstance) {
       return;
     }
-
     if (ref.current && currentData?.url && currentData?.result) {
-      debugger;
       const size = {
         width: ref.current.clientWidth,
         height: ref.current.clientHeight,
@@ -229,7 +227,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
      * Change Orthographic Camera size
      */
     polygonOperation.singleOn('renderZoom', (zoom: number, currentPos: any) => {
-      debugger;
       const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
       pointCloud.camera.zoom = zoom;
       if (currentPos) {
@@ -247,7 +244,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
     polygonOperation.singleOn(
       'dragMove',
       ({ currentPos, zoom }: { currentPos: { x: number; y: number }; zoom?: number }) => {
-        debugger;
         const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
         pointCloud.camera.zoom = zoom;
         const { x, y, z } = pointCloud.initCameraPosition;
@@ -256,6 +252,21 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       },
     );
   }, [size, ptCtx.topViewInstance]);
+
+
+
+  // useEffect(()=>{
+  //   if ( !ptCtx.topViewInstance) {
+  //     return;
+  //   }
+  //   const {
+  //     topViewInstance: { pointCloudInstance: pointCloud }
+  //   } = ptCtx;
+  //   pointCloud.camera.position.set(0, -1, 10);
+  //   pointCloud.camera.updateProjectionMatrix();
+  //   pointCloud.render();
+  //   setZoom(1);
+  // },[size])
 
   useEffect(() => {
     ptCtx.topViewInstance?.pointCloudInstance?.applyZAxisPoints(zAxisLimit);

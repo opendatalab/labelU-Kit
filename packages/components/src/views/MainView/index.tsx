@@ -8,7 +8,7 @@ import React from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 // import Sidebar from './sidebar';
-import RightSiderbar from './rightSiderBar'
+import RightSiderbar from './rightSiderBar';
 import ToolFooter from './toolFooter';
 import ToolHeader from './toolHeader';
 // import { getStepConfig } from '@/store/annotation/reducer';
@@ -19,10 +19,9 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import AttributeOperation from './attributeOperation';
 import { IFileItem } from '@/types/data';
-import LeftSider from './leftSiderBar'
+import LeftSider from './leftSiderBar';
 import PointCloudView from '@/components/pointCloudView';
 import { LabelUContext } from '@/store/ctx';
-
 
 const { EVideoToolName } = cTool;
 
@@ -63,15 +62,13 @@ const AnnotatedArea: React.FC<AppProps & IProps & { currentToolName: string }> =
   // @ts-ignore
   const isVideoTool = Object.values(EVideoToolName).includes(currentToolName);
 
-  const isPointCloudTool = currentToolName === 'pointCloudTool'
-
+  const isPointCloudTool = currentToolName === 'pointCloudTool';
 
   if (isVideoTool) {
     return <VideoAnnotate {...props} />;
   }
 
   if (isPointCloudTool) {
-
     return <PointCloudAnnotate {...props} />;
   }
 
@@ -99,10 +96,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
           <Layout>
             {props.leftSider ? props.leftSider : <LeftSider {...props} />}
             <Content className={`${layoutCls}__content`}>
-              {
-                currentToolName&&<AnnotatedArea {...props} currentToolName={currentToolName} />
-              }
-              
+              <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
             <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
               <RightSiderbar />
@@ -126,6 +120,5 @@ const mapStateToProps = ({ annotation, toolStyle }: AppState) => {
     imgListCollapse,
   };
 };
-
 
 export default connect(mapStateToProps, null, null, { context: LabelUContext })(MainView);

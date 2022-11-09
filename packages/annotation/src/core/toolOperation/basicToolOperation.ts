@@ -393,7 +393,7 @@ class BasicToolOperation extends EventListener {
   public initCanvas(size: ISize) {
     const pixel = this.pixelRatio;
     const childCanvas = this.container.querySelectorAll('canvas');
-    if (childCanvas && childCanvas.length > 1) {
+    if (childCanvas && childCanvas.length > 0) {
       this.canvas = childCanvas[1] as HTMLCanvasElement;
       this.basicCanvas = childCanvas[0] as HTMLCanvasElement;
       // 删除非canvas 的dom
@@ -416,6 +416,7 @@ class BasicToolOperation extends EventListener {
       canvas.style.height = `${size.height}px`;
       canvas.width = size.width * pixel;
       canvas.height = size.height * pixel;
+
       this.canvas = canvas;
       this.basicCanvas = basicCanvas;
       this.container.appendChild(basicCanvas);
@@ -674,7 +675,7 @@ class BasicToolOperation extends EventListener {
       // 初始化图片缩放信息，优先从持久化记录中获取
       statblezoom = (await localforage.getItem('zoom')) as number;
     } else {
-      // await localforage.setItem('zoom', 1, () => {});
+      await localforage.setItem('zoom', 1, () => {});
     }
 
     // this.setCurrentPos(currentPos);

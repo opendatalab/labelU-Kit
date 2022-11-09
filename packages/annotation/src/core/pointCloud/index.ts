@@ -116,7 +116,7 @@ export class PointCloud {
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    // this.scene.add(this.axesHelper);
+    this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
@@ -664,7 +664,7 @@ export class PointCloud {
     this.pointsUuid = points.uuid;
     points.material = pointsMaterial;
     this.filterZAxisPoints(points);
-  
+
     this.scene.add(points);
 
     this.render();

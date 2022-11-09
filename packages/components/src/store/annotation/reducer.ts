@@ -94,6 +94,7 @@ const updateToolInstance = (
   const container = document.getElementById('toolContainer');
   if (!container) {
     throw `Not exist dom named id-toolContainer`;
+    // return;
   }
   const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
   const annotationEngine = new AnnotationEngine({
@@ -181,7 +182,6 @@ const AfterImageLoaded =
         });
       })
       .catch(() => {
-        debugger;
         SetAnnotationLoading(dispatch, false);
         toolInstance?.setErrorImg();
         dispatch({
