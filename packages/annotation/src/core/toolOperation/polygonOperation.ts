@@ -261,7 +261,6 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public addPointInDrawing(e: MouseEvent) {
-    debugger;
     if (!this.imgInfo) {
       return;
     }
@@ -836,7 +835,6 @@ class PolygonOperation extends BasicToolOperation {
   // eslint-disable-next-line no-unused-vars
   public rightMouseUp(e: MouseEvent) {
     // 标注中的数据结束
-    debugger;
     if (this.drawingPointList.length > 0) {
       //
       this.addDrawingPointToPolygonList();
@@ -1308,7 +1306,6 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public leftMouseUp(e: MouseEvent) {
-    debugger;
     const hoverID = this.getHoverID(e);
     if (this.drawingPointList.length === 0 && e.ctrlKey === true && hoverID) {
       // ctrl + 左键 + hover存在，更改框属性
@@ -1383,9 +1380,7 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public exportData() {
-    debugger;
     const { polygonList } = this;
-
     return [polygonList, this.basicImgInfo];
   }
 

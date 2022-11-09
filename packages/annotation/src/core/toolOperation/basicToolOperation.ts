@@ -382,8 +382,8 @@ class BasicToolOperation extends EventListener {
     await this.initPosition();
     this.eventBinding();
     // 多余渲染，影响性能
-    this.render();
-    this.renderBasicCanvas();
+    // this.render();
+    // this.renderBasicCanvas();
   }
 
   public destroy() {
@@ -393,7 +393,7 @@ class BasicToolOperation extends EventListener {
   public initCanvas(size: ISize) {
     const pixel = this.pixelRatio;
     const childCanvas = this.container.querySelectorAll('canvas');
-    if (childCanvas && childCanvas.length > 0) {
+    if (childCanvas && childCanvas.length > 1) {
       this.canvas = childCanvas[1] as HTMLCanvasElement;
       this.basicCanvas = childCanvas[0] as HTMLCanvasElement;
       // 删除非canvas 的dom

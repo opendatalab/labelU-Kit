@@ -6,7 +6,7 @@ import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
 import styleString from '@/constant/styleString';
 import { connect } from 'react-redux';
-import { useDispatch } from '@/store/ctx';
+import { LabelUContext, useDispatch } from '@/store/ctx';
 import { UpdateToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { store } from '@/index';
 import { AppState } from '@/store';
@@ -185,4 +185,4 @@ const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({
   toolStyle,
   config: annotation.toolInstance.config,
 });
-export default connect(mapStateToProps)(ToolStyle);
+export default connect(mapStateToProps,null,null, { context: LabelUContext })(ToolStyle);
