@@ -18,7 +18,7 @@ import { IStepInfo } from '@/types/step';
 // import StepUtils from '@/utils/StepUtils';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 
-interface IProps extends AppState, AppProps {
+export interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;
   imgIndex: number;
   annotationEngine: AnnotationEngine;

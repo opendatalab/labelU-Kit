@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PointCloud3DView from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
 import PointCloudTopView from './PointCloudTopView';
@@ -8,17 +8,28 @@ import PointCloud2DView from './PointCloud2DView';
 import PointCloudListener from './PointCloudListener';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { IFileItem } from '@/types/data';
 import { LabelUContext } from '@/store/ctx';
+import { IProps } from '@/views/MainView/annotationOperation';
 
-interface IProps {
-  imgList: IFileItem[];
-}
 
-const PointCloudView: React.FC<IProps> = ({ imgList }) => {
-  if (imgList.length === 0) {
+
+const PointCloudView: React.FC<IProps> = (props) => {
+  if (props.imgList.length === 0) {
     return null;
   }
+  const pcConfig = useMemo(()=>{
+    let comBineConfig = {...props.toolsBasicConfig[0]};
+    //@ts-ignore
+    let tmpAttribute = [...comBineConfig['config']['attributeList'],...props.attributeList]
+    return {
+      tool:"pointTool",
+      config:{
+        ...comBineConfig.config,
+        attributeList:tmpAttribute
+      }
+    };
+  },[props.toolsBasicConfig,props.attributeList])
+
   return (
     <>
       <PointCloudListener />
@@ -30,7 +41,7 @@ const PointCloudView: React.FC<IProps> = ({ imgList }) => {
           </div>
 
           <div className={getClassName('point-cloud-container', 'right')}>
-            <PointCloudTopView />
+            <PointCloudTopView config={pcConfig} />
             <div className={getClassName('point-cloud-container', 'right-bottom')}>
               <PointCloudSideView />
               <PointCloudBackView />

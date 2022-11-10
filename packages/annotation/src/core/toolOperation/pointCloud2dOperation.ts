@@ -8,6 +8,7 @@
 
 import { ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
+import { ToolConfig } from '@/interface/conbineTool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
@@ -19,6 +20,8 @@ import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
   forbidAddNew?: boolean;
+  isPointCloud2DTool?:boolean;
+  config?:ToolConfig
 }
 
 class PointCloud2dOperation extends PolygonOperation {
@@ -28,9 +31,11 @@ class PointCloud2dOperation extends PolygonOperation {
 
   private selectedIDs: string[] = [];
 
+  public isPointCloud2DTool :boolean;
+
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
-
+    this.isPointCloud2DTool = true;
     this.showDirectionLine = props.showDirectionLine ?? true;
     this.forbidAddNew = props.forbidAddNew ?? false;
   }

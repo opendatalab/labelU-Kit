@@ -255,7 +255,6 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     const rotatePointList = PolygonUtils.updatePolygonByRotate(direction, angle, selectedPolygon?.pointList);
-
     this.setPolygonList(this.setPolygonDataByID({ pointList: rotatePointList }, selectedID));
     this.render();
   }
@@ -1060,7 +1059,6 @@ class PolygonOperation extends BasicToolOperation {
       this.emit('messageInfo', i18n.t('CurveModeDoesNotSupportCutting'));
       return;
     }
-
     const selectedPolygon = this.polygonList.find((v) => v.id === this.selectedID);
     const combinedPolygon = this.currentShowList.find((v) => v.id === hoverID);
     if (!combinedPolygon || !selectedPolygon) {
@@ -1422,7 +1420,6 @@ class PolygonOperation extends BasicToolOperation {
         this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
         textAttribute = '';
       }
-
       this.setPolygonList(AttributeUtils.textChange(textAttribute, this.selectedID, this.polygonList));
       this.emit('updateTextAttribute');
       this.render();
@@ -1436,7 +1433,6 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     const { pointList, attribute, valid, textAttribute } = selectedPolygon;
-
     const { x, y } = pointList[pointList.length - 1];
 
     const newWidth = TEXT_MAX_WIDTH;

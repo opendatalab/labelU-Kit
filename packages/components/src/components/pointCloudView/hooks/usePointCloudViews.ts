@@ -201,7 +201,6 @@ export const synchronizeSideView = (
   // Update PolygonView to default zoom and currentPos.
   pointCloud2dOperation.initPosition();
   pointCloud2dOperation.zoomChangeOnCenter(zoom);
-  
   pointCloud2dOperation.setResultAndSelectedID(
     [
       // @ts-ignore
@@ -211,6 +210,7 @@ export const synchronizeSideView = (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
+        attribute:pointCloud2dOperation.defaultAttribute
       },
     ],
     newPolygon.id,
@@ -252,7 +252,6 @@ export const synchronizeBackView = (
   backPointCloud.camera.zoom = zoom;
   backPointCloud.camera.updateProjectionMatrix();
   backPointCloud.render();
-
   // Update PolygonView to default zoom and currentPos.
   backPointCloudPolygonOperation.initPosition();
   backPointCloudPolygonOperation.zoomChangeOnCenter(zoom);
@@ -285,7 +284,6 @@ export const synchronizeTopView = (
   if (!topViewInstance || !mainViewInstance) {
     return;
   }
-
   // Control the 3D view data to create box
   mainViewInstance.generateBox(newBoxParams, newPolygon.id);
   mainViewInstance.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
@@ -308,6 +306,7 @@ export const synchronizeTopView = (
       textAttribute: '',
       isRect: true,
       valid: newBoxParams.valid ?? true,
+      attribute:pointCloud2dOperation.defaultAttribute
     });
   }
 
@@ -554,7 +553,6 @@ export const usePointCloudViews = () => {
     pointCloudBoxList.forEach((v: { id: any; }) => {
       mainViewInstance?.removeObjectByName(v.id);
     });
-
     if (currentData.result) {
       const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
       const polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);

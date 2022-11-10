@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
 import { LabelUContext } from '@/store/ctx';
+import { UseAttributes } from '@/components/pointCloudView/hooks/useAttribute';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -29,6 +30,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
+  const { updateTopViewAttribute } = UseAttributes();
 
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
@@ -104,15 +106,17 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               })}
               onClick={(e) => {
                 e.stopPropagation();
-                toolInstance.setDefaultAttribute(item.key);
+                if (toolInstance) {
+                  toolInstance.setDefaultAttribute(item.key);
+                } 
+                updateTopViewAttribute(item.key);
                 forceRender((s) => s + 1);
               }}
             >
               <div
                 className='circle'
                 style={{
-                  backgroundColor:
-                    COLORS_ARRAY[(index + shwoAttributeCount) % COLORS_ARRAY.length],
+                  backgroundColor: COLORS_ARRAY[(index + shwoAttributeCount) % COLORS_ARRAY.length],
                   marginRight: 5,
                 }}
               />
@@ -126,7 +130,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     } else {
       return <div />;
     }
-  }, [shwoAttributeCount, currentAttributeList, toolInstance,chooseAttribute]);
+  }, [shwoAttributeCount, currentAttributeList, toolInstance, chooseAttribute]);
 
   // 根据工具名称的修改情况获取最新的attributeList
   useEffect(() => {
@@ -160,7 +164,11 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               onClick={(e) => {
                 e.stopPropagation();
                 setChoseAttribute(attribute.key);
-                toolInstance.setDefaultAttribute(attribute.key);
+                if (toolInstance) {
+                  toolInstance.setDefaultAttribute(attribute.key);
+                }
+                updateTopViewAttribute?.(attribute.key);
+
                 forceRender((s) => s + 1);
                 // alert(attribute.key)
               }}
@@ -171,8 +179,11 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 border: '0px',
                 borderRadius: '4px',
                 padding: '1px 8px',
-                backgroundColor:  attribute.key === chooseAttribute? COLORS_ARRAY[index % COLORS_ARRAY.length]:'#FFFFFF',
-                color: attribute.key === chooseAttribute ? '#ffffff':'',
+                backgroundColor:
+                  attribute.key === chooseAttribute
+                    ? COLORS_ARRAY[index % COLORS_ARRAY.length]
+                    : '#FFFFFF',
+                color: attribute.key === chooseAttribute ? '#ffffff' : '',
                 // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
               }}
               key={attribute.key}

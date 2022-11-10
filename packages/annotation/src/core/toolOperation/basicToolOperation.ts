@@ -31,6 +31,8 @@ interface IBasicToolOperationProps {
   imgNode?: HTMLImageElement; // 展示图片的内容
   style?: any; // 后期一定要补上!!
 
+  isPointCloud2DTool?: boolean;
+
   rotate?: number;
   imgAttribute?: any; // 占个坑，用于全局的一些配置，是否展示原图比例
   forbidOperation?: boolean;
@@ -42,14 +44,10 @@ interface IBasicToolOperationProps {
   showDefaultCursor?: boolean; // 默认会展示为 none
 
   forbidBasicResultRender?: boolean;
-  isShowOrder:boolean;
+  isShowOrder: boolean;
 
   isAppend?: boolean; // 用于 canvas 层次的关闭
   hiddenImg?: boolean; // 隐藏图片渲染
-
-
-
-
 }
 
 /**
@@ -99,7 +97,9 @@ class BasicToolOperation extends EventListener {
 
   public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
 
-  public isShowOrder?:boolean; //是否显示标注顺序
+  public isShowOrder?: boolean; //是否显示标注顺序
+
+  public isPointCloud2DTool?: boolean = false; // 是否为点云标注工具
 
   // public style: {
   //   strokeColor: string;
@@ -427,7 +427,6 @@ class BasicToolOperation extends EventListener {
     this.basicCtx?.scale(pixel, pixel);
   }
 
-  
   public clearExtraDom(container: HTMLElement) {
     const { childNodes } = container;
     if (childNodes && childNodes.length > 0) {
@@ -438,7 +437,6 @@ class BasicToolOperation extends EventListener {
       }
     }
   }
-
 
   public updateCanvasBasicStyle(canvas: HTMLCanvasElement, size: ISize, zIndex: number) {
     const pixel = this.pixelRatio;
@@ -665,24 +663,22 @@ class BasicToolOperation extends EventListener {
       zoomRatio,
       isOriginalSize,
     );
+
     // 初始化图片位置信息时，优先从持久化记录中获取
-    const statbleCoord = (await localforage.getItem('coordinate')) as ICoordinate;
+    const statbleCoord = this.isPointCloud2DTool
+      ? undefined
+      : ((await localforage.getItem('coordinate')) as ICoordinate);
     this.setCurrentPos(statbleCoord || currentPos);
     this.currentPosStorage = statbleCoord || currentPos;
     let statblezoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
       // 初始化图片缩放信息，优先从持久化记录中获取
-      statblezoom = (await localforage.getItem('zoom')) as number;
+      statblezoom = this.isPointCloud2DTool ? 0 : ((await localforage.getItem('zoom')) as number);
     } else {
       await localforage.setItem('zoom', 1, () => {});
     }
 
-    // this.setCurrentPos(currentPos);
-
-    // this.currentPosStorage = currentPos;
-    // this.setImgInfo(imgInfo);
-    // this.setZoom(zoom);
     this.imgInfo = imgInfo;
     this.setZoom(statblezoom || zoom);
 
@@ -811,8 +807,8 @@ class BasicToolOperation extends EventListener {
     document.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('keyup', this.onKeyUp);
     if (typeof window !== 'undefined') {
-    window.parent.document.addEventListener('contextmenu', this.onContextmenu, false);
-  }
+      window.parent.document.addEventListener('contextmenu', this.onContextmenu, false);
+    }
   }
 
   public eventUnbinding() {
@@ -825,7 +821,7 @@ class BasicToolOperation extends EventListener {
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('keyup', this.onKeyUp);
     if (typeof window !== 'undefined') {
-    window.parent.document.removeEventListener('contextmenu', this.onContextmenu, false);
+      window.parent.document.removeEventListener('contextmenu', this.onContextmenu, false);
     }
     this.dblClickListener.removeEvent();
   }
@@ -1317,29 +1313,29 @@ class BasicToolOperation extends EventListener {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentReulst = this.prevResultList[i];
         switch (currentReulst.toolName) {
-        case EToolName.Rect: {
+          case EToolName.Rect: {
             if (currentReulst.result && currentReulst.result.length > 0) {
               currentReulst.result.forEach((item) => {
                 if (item.isVisible) {
                   const toolColor = this.getColor(item.attribute);
                   const color = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-          DrawUtils.drawRect(
+                  DrawUtils.drawRect(
                     this.canvas,
                     // @ts-ignore
                     AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos),
-            {
-                      isShowOrder:this.isShowOrder,
-                      order:item.order,
+                    {
+                      isShowOrder: this.isShowOrder,
+                      order: item.order,
                       color,
-              thickness,
-            },
-          );
+                      thickness,
+                    },
+                  );
                 }
               });
             }
-          break;
-        }
-        case EToolName.Polygon: {
+            break;
+          }
+          case EToolName.Polygon: {
             currentReulst.result.forEach((item) => {
               if (item.isVisible) {
                 const toolColor = this.getColor(item.attribute);
@@ -1348,18 +1344,18 @@ class BasicToolOperation extends EventListener {
                   this.zoom,
                   this.currentPos,
                 );
-          DrawUtils.drawPolygonWithFillAndLine(
+                DrawUtils.drawPolygonWithFillAndLine(
                   this.canvas,
                   AxisUtils.changePointListByZoom(item.pointList, this.zoom, this.currentPos),
-            {
+                  {
                     fillColor: item.valid ? toolColor?.valid.fill : toolColor?.invalid.fill,
                     strokeColor: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
-              isClose: true,
-              thickness,
-            },
-          );
+                    isClose: true,
+                    thickness,
+                  },
+                );
                 let showText = item.attribute;
-                if(this.isShowOrder){
+                if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
 
@@ -1369,9 +1365,9 @@ class BasicToolOperation extends EventListener {
                 });
               }
             });
-          break;
-        }
-        case EToolName.Line: {
+            break;
+          }
+          case EToolName.Line: {
             // @ts-ignore
             currentReulst.result.forEach((item) => {
               if (item.isVisible) {
@@ -1382,17 +1378,17 @@ class BasicToolOperation extends EventListener {
                   this.zoom,
                   this.currentPos,
                 );
-          DrawUtils.drawLineWithPointList(
+                DrawUtils.drawLineWithPointList(
                   this.canvas,
                   // @ts-ignore
                   AxisUtils.changePointListByZoom(item.pointList, this.zoom, this.currentPos),
-            {
+                  {
                     color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
-              thickness,
-            },
-          );
+                    thickness,
+                  },
+                );
                 let showText = item.attribute;
-                if(this.isShowOrder){
+                if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
                 DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
@@ -1401,8 +1397,8 @@ class BasicToolOperation extends EventListener {
                 });
               }
             });
-          break;
-        }
+            break;
+          }
           case EToolName.Point: {
             // @ts-ignore
             if (currentReulst.result && currentReulst.result.length > 0) {
@@ -1420,13 +1416,13 @@ class BasicToolOperation extends EventListener {
                     fill: 'transparent',
                   });
                   let showText = item.attribute;
-                  if(this.isShowOrder){
+                  if (this.isShowOrder) {
                     showText = `${item.order}  ${showText}`;
                   }
 
                   DrawUtils.drawText(
                     this.canvas,
-                    { x: transformPoint.x + width / 2 + 4 , y: transformPoint.y - width - 4 },
+                    { x: transformPoint.x + width / 2 + 4, y: transformPoint.y - width - 4 },
                     showText,
                     {
                       textAlign: 'center',
@@ -1472,16 +1468,16 @@ class BasicToolOperation extends EventListener {
                 `,
               );
               let preTagDom = document.getElementById('tagToolTag');
-              if(!this.canvas?.parentNode?.contains(preTagDom)) {
+              if (!this.canvas?.parentNode?.contains(preTagDom)) {
                 this.canvas?.parentNode?.appendChild(dom);
               }
             }
             break;
           }
-        default: {
+          default: {
             console.log(currentReulst.toolName);
             console.log(currentReulst);
-          //
+            //
           }
         }
       }

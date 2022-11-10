@@ -35,7 +35,7 @@ export interface AppProps {
   toolStyle?: IAnnotationStyle;
   exportData?: (data: any[]) => void;
   goBack?: (data: any) => void;
-  imgList?: IFileItem[];
+  imgList: IFileItem[];
   config?: string;
   stepList?: IStepInfo[];
   step?: number;

@@ -2,7 +2,7 @@ import { getClassName } from '@/utils/dom';
 // import { FooterDivider } from '@/views/MainView/toolFooter';
 // import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import { cTool, PointCloudAnnotation } from '@label-u/annotation';
+import { cTool, PointCloudAnnotation, ToolConfig } from '@label-u/annotation';
 import { IPolygonData } from '@label-u/utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
@@ -15,10 +15,13 @@ import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
+import {useSelector} from '@/store/ctx'
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
 import { LabelUContext } from '@/store/ctx';
+import { AppState } from '@/store';
+import { BasicConfig } from '@/interface/toolConfig';
 
 const { EPolygonPattern } = cTool;
 
@@ -128,7 +131,7 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> = ({ currentData,config }) => {
   const ref = useRef<HTMLDivElement>(null);
   // const polygonRef = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
@@ -140,6 +143,10 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
   const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
+  const toolStyle = useSelector((state: AppState) => {
+    return { ...state.toolStyle };
+  });
+
 
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
@@ -152,6 +159,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       };
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
+        config:config.config as ToolConfig,
         // polygonContainer: polygonRef.current,
         size,
         pcdPath: currentData.url,
@@ -245,15 +253,15 @@ const PointCloudTopView: React.FC<IAnnotationStateProps> = ({ currentData }) => 
       'dragMove',
       ({ currentPos, zoom }: { currentPos: { x: number; y: number }; zoom?: number }) => {
         const { offsetX, offsetY } = TransferCanvas2WorldOffset(currentPos, size, zoom);
-        pointCloud.camera.zoom = zoom;
+        pointCloud.camera.zoom = zoom as number;
         const { x, y, z } = pointCloud.initCameraPosition;
         pointCloud.camera.position.set(x + offsetY, y - offsetX, z);
         pointCloud.render();
       },
     );
+    ptCtx.topViewInstance.pointCloud2dOperation.setStyle(toolStyle)
+
   }, [size, ptCtx.topViewInstance]);
-
-
 
   // useEffect(()=>{
   //   if ( !ptCtx.topViewInstance) {

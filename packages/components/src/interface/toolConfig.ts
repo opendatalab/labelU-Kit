@@ -21,8 +21,8 @@ export interface StepConfigState {
 }
 
 export interface BasicConfig {
-  step: number;
-  dataSourceStep: number;
+  step?: number;
+  dataSourceStep?: number;
   tool: string;
   config: ToolConfig;
 }

@@ -14,7 +14,7 @@ interface IPointCloudAnnotationProps {
   container: HTMLElement;
   // polygonContainer:HTMLElement;
   size: ISize;
-
+  config?:ToolConfig;
   pcdPath?: string;
   polygonOperationProps?: IPointCloud2dOperationProps;
 }
@@ -39,7 +39,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public canvasScheduler: CanvasScheduler;
 
-  constructor({ size, container, pcdPath, polygonOperationProps }: IPointCloudAnnotationProps) {
+  constructor({ size, container, pcdPath, polygonOperationProps,config }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
@@ -65,7 +65,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
       container,
       size,
       // size:{width:1368,height:417},
-      config: { "textConfigurable": false } as ToolConfig,
+      config: config as ToolConfig,
       imgNode: image,
       isAppend: false,
       isShowOrder:false,
