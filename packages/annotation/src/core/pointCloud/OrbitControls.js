@@ -209,7 +209,6 @@ class OrbitControls extends EventDispatcher {
         offset.applyQuaternion(quatInverse);
 
         position.copy(scope.target).add(offset);
-
         scope.object.lookAt(scope.target);
 
         if (scope.enableDamping === true) {
@@ -659,7 +658,6 @@ class OrbitControls extends EventDispatcher {
 
     function onPointerMove(event) {
       if (scope.enabled === false) return;
-
       if (event.pointerType === 'touch') {
         onTouchMove(event);
       } else {

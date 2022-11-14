@@ -166,7 +166,8 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
       toolbar={PointCloud3DTitle}
       style={{
         height:
-          currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
+          // currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
+          '100%'
       }}
     >
       <div className={getClassName('point-cloud-3d-content')}>

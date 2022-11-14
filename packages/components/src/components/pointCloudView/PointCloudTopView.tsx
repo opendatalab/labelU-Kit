@@ -177,6 +177,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> 
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
+
         addPolygon(polygon);
         return;
       }
@@ -263,6 +264,9 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> 
 
   }, [size, ptCtx.topViewInstance]);
 
+
+ 
+
   // useEffect(()=>{
   //   if ( !ptCtx.topViewInstance) {
   //     return;
@@ -283,6 +287,18 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> 
   useEffect(() => {
     pointCloudViews.topViewSelectedChanged();
   }, [ptCtx.selectedIDs]);
+
+
+  // const moveCp = ()=>{
+  //   if(ptCtx&&ptCtx.topViewInstance){
+  //     const pointCloud = ptCtx?.topViewInstance.pointCloudInstance
+
+  //     const { x, y, z } = pointCloud.initCameraPosition;
+  //     pointCloud.camera.position.set(x + 100, y - 100, z);
+  //     pointCloud.render();
+  //   }
+
+  // }
 
   return (
     currentData && (

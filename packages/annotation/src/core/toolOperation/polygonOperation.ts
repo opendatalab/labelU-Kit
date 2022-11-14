@@ -1579,8 +1579,9 @@ class PolygonOperation extends BasicToolOperation {
             ...DEFAULT_TEXT_OFFSET,
           },
         );
-
-        this.renderTextAttribute();
+        if(!this.isPointCloud2DTool){
+          this.renderTextAttribute();
+        }  
       }
     }
 

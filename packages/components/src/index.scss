@@ -1893,7 +1893,8 @@ $hotkey-container-padding: 7px;
   flex: 1;
 
   .#{$ptPrefix}-container {
-    position: relative;
+    // position: relative;
+    flex-grow: 1;
 
     &__header {
       background-color: #444;
@@ -1951,7 +1952,7 @@ $hotkey-container-padding: 7px;
     }
   }
   .#{$ptPrefix}-container__left {
-    width: 40%;
+    width: 80%;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #fff;
@@ -2062,60 +2063,36 @@ $hotkey-container-padding: 7px;
   }
 
   .#{$ptPrefix}-container__right {
-    flex: 1;
+    width: 20%;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
 
     .#{$ptPrefix}-container__top-view {
-      height: 62.5%;
+      // flex: 1 1 0%;
+      height: calc(100% / 3);
       border-bottom: 1px solid #fff;
-      overflow: hidden;
+      // overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    .#{$ptPrefix}-container__right-bottom {
-      flex: 1;
+
+    .#{$ptPrefix}-container__side-view,
+    .#{$ptPrefix}-container__back-view {
+      position: relative;
+      // flex: 1 1 0%;
+      height: calc(100% / 3);
       display: flex;
-      overflow: hidden;
-      .#{$ptPrefix}-container__empty-page {
-        position: absolute;
-        left: 0;
-        top: $headerHeight;
-        flex: 1;
-        background: black;
-        color: #666666;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        font-size: 16px;
-        z-index: 20;
-        height: calc(100% -  #{$headerHeight});
-        width: 100%;
-        .#{$ptPrefix}-container__empty-page__text {
-          margin-top: 13px;
-        }
-      }
-
-      .#{$ptPrefix}-container__side-view {
-        border-right: 1px solid white;
-      }
-
-      .#{$ptPrefix}-container__side-view,
-      .#{$ptPrefix}-container__back-view {
-        position: relative;
-        flex: 1;
-        display: flex;
-        background: black;
-        flex-direction: column;
-        .#{$ptPrefix}-container__bottom-view-content {
-          flex: 1;
-          .#{$ptPrefix}-container__core-instance {
-            position: relative;
-            width: 100%;
-            height: 100%;
-          }
+      background: black;
+      flex-direction: column;
+      .#{$ptPrefix}-container__bottom-view-content {
+        height: 100%;
+        .#{$ptPrefix}-container__core-instance {
+          position: relative;
+          width: 100%;
+          height: 100%;
         }
       }
     }
