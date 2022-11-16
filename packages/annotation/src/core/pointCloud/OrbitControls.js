@@ -724,9 +724,9 @@ class OrbitControls extends EventDispatcher {
           } else {
             if (scope.enableRotate === false) return;
 
-            handleMouseDownRotate(event);
+            // handleMouseDownRotate(event);
 
-            state = STATE.ROTATE;
+            // state = STATE.ROTATE;
           }
 
           break;
@@ -741,9 +741,9 @@ class OrbitControls extends EventDispatcher {
           } else {
             if (scope.enablePan === false) return;
 
-            handleMouseDownPan(event);
+            // handleMouseDownPan(event);
 
-            state = STATE.PAN;
+            // state = STATE.PAN;
           }
 
           break;
@@ -759,28 +759,29 @@ class OrbitControls extends EventDispatcher {
 
     function onMouseMove(event) {
       if (scope.enabled === false) return;
+      if (event.ctrlKey || event.metaKey || event.shiftKey) {
+        switch (state) {
+          case STATE.ROTATE:
+            if (scope.enableRotate === false) return;
 
-      switch (state) {
-        case STATE.ROTATE:
-          if (scope.enableRotate === false) return;
+            handleMouseMoveRotate(event);
 
-          handleMouseMoveRotate(event);
+            break;
 
-          break;
+          case STATE.DOLLY:
+            if (scope.enableZoom === false) return;
 
-        case STATE.DOLLY:
-          if (scope.enableZoom === false) return;
+            handleMouseMoveDolly(event);
 
-          handleMouseMoveDolly(event);
+            break;
 
-          break;
+          case STATE.PAN:
+            if (scope.enablePan === false) return;
 
-        case STATE.PAN:
-          if (scope.enablePan === false) return;
+            handleMouseMovePan(event);
 
-          handleMouseMovePan(event);
-
-          break;
+            break;
+        }
       }
     }
 

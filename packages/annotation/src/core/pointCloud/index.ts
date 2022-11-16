@@ -1,11 +1,6 @@
-/**
- * @file POINTCLOUD - ALPHA - DEMO
- * @createdate 2022-07-11
- * @author Ron <ron.f.luo@gmail.com>
- */
-
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
+import utils from './uitils';
 import {
   PerspectiveShiftUtils,
   TMatrix4Tuple,
@@ -18,7 +13,7 @@ import {
   TMatrix14Tuple,
   TMatrix13Tuple,
 } from '@label-u/utils';
-import { PointsMaterial, Shader } from 'three';
+import { MOUSE, PointsMaterial, Shader, Vector3 } from 'three';
 import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
@@ -27,6 +22,7 @@ import uuid from '@/utils/uuid';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
+import MathUtils from '@/utils/MathUtils';
 
 interface IOrthographicCamera {
   left: number;
@@ -62,6 +58,9 @@ export class PointCloud {
 
   public pcdLoader: PCDLoader;
 
+  public startPoint: Vector3 | undefined;
+
+  public endPoint: Vector3 | undefined;
   /**
    * zAxis Limit for filter point over a value
    */
@@ -104,7 +103,7 @@ export class PointCloud {
         orthographicParams.far,
       );
     } else {
-      this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 1000);
+      this.camera = new THREE.PerspectiveCamera(30, this.containerWidth / this.containerHeight, 1, 10000);
     }
     // this.camera = new THREE.OrthographicCamera(-500, 500, 500, -500, 100, -100);
     this.initCamera();
@@ -114,6 +113,7 @@ export class PointCloud {
     this.pcdLoader = new PCDLoader();
 
     this.axesHelper = new THREE.AxesHelper(1000);
+
 
     // For Developer
     this.scene.add(this.axesHelper);
@@ -143,6 +143,156 @@ export class PointCloud {
 
   public setInitCameraPosition(vector: THREE.Vector3) {
     this.initCameraPosition = vector;
+  }
+
+  public initGroundMesh() {
+    let groundGeometry = new THREE.PlaneGeometry(this.containerWidth, this.containerHeight);
+    let groundMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      wireframe: true,
+    });
+    let groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+    groundMesh.name = 'ground';
+    // groundMesh.rotateY(0.5*Math.PI)
+    this.scene.add(groundMesh);
+  }
+
+
+  public initChooseEvent() {
+    let self = this;
+    let points: Vector3[] = [] as unknown as THREE.Vector3[];
+    let firstlineName = '';
+    let secondlineName = '';
+    let raycaster = new THREE.Raycaster();
+
+    function getWebglPositionFromEvent(event: THREE.Event) {
+      let mouseWord: {
+        x: number;
+        y: number;
+      } = { x: 0, y: 0 };
+      mouseWord.x = ((event.clientX - self.container.getBoundingClientRect().left) / self.containerWidth) * 2 - 1;
+      mouseWord.y = -((event.clientY - self.container.getBoundingClientRect().top) / self.containerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouseWord, self.camera);
+      let groundMesh = self.scene.getObjectByName('ground') as THREE.Object3D<THREE.Event>;
+      //得到点击的几何体
+      var raycasters = raycaster.intersectObject(groundMesh);
+      return raycasters[0].point;
+    }
+
+    function getFooterRect(points: THREE.Vector3[], clickPoint: ICoordinate) {
+      const rect = MathUtils.getRectangleByRightAngle({ x: clickPoint.x, y: clickPoint.y }, [
+        {
+          x: points[0].x,
+          y: points[0].y,
+        },
+        {
+          x: points[points.length - 1].x,
+          y: points[points.length - 1].y,
+        },
+      ]);
+
+      let dynamicRect = rect.map((item) => {
+        return {
+          0: item.x,
+          1: item.y,
+        };
+      });
+
+      return dynamicRect;
+    }
+
+    // 拉线出框方案
+    this.container.addEventListener('click', function (event) {
+      if (event.button === MOUSE.LEFT) {
+        // 鼠标移动事件
+        self.container.addEventListener('pointermove', handleMouseMove);
+
+        let clickPoint = getWebglPositionFromEvent(event);
+        points = [...points,clickPoint]
+        if (points.length === 3) {
+          // 绘制立体框
+          // let width = points[1].x - points[0].x;
+          // let length = points[2].y - points[1].y;
+          // let height = 10;
+          // let center = {
+          //   x: (points[2].x + points[0].x) / 2,
+          //   y: (points[2].y + points[0].y) / 2,
+          //   z: 0,
+          // };
+          // // 计算旋转角度
+          // let angle = Math.atan2(points[1].x - points[0].x, points[1].y - points[0].y);
+          // console.log(angle);
+          // // debugger;
+          // let boxGeometry = new THREE.BoxGeometry(width, length, height);
+          // let boxMaterial = new THREE.MeshBasicMaterial({
+          //   color: 0xffffff,
+          //   transparent: true,
+          //   opacity: 0.1,
+          // });
+          // let boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+          // boxMesh.position.set(center.x, center.y, 5);
+          // self.scene.add(boxMesh);
+          let rect = getFooterRect(points.slice(0,2), clickPoint);
+
+          let sharp = utils.makeShape([...rect,rect[0]]);
+
+          let sharpGeometry = utils.makeExtrudeGeometry(sharp, 10, false);
+          let boxMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.1,
+          });
+          let boxMesh = new THREE.Mesh(sharpGeometry, boxMaterial);
+          self.scene.add(boxMesh);
+          // 清除点数据
+          points = [];
+        }
+
+        self.render();
+      }
+    });
+
+    function handleMouseMove(event: THREE.Event) {
+      let clickPoint = getWebglPositionFromEvent(event);
+      if (points.length === 1) {
+        let tmpPoint = [...points, clickPoint];
+        if (!firstlineName) {
+          firstlineName = new Date().getTime() + 'firstLine';
+        }
+        if (self.scene.getObjectByName(firstlineName)) {
+          let lineInScene = self.scene.getObjectByName(firstlineName);
+          self.scene.remove(lineInScene as THREE.Object3D);
+        }
+
+        let meshLine = utils.getMeshLine(tmpPoint, 10);
+        // meshLine.position.set((points[0].x + points[1].x)/2,(points[0].y + points[1].y)/2,0)
+        meshLine.name = firstlineName;
+        self.scene.add(meshLine);
+      }
+
+      if (points.length === 2) {
+        if (!secondlineName) {
+          secondlineName = new Date().getTime() + 'secondLine';
+        }
+        if (self.scene.getObjectByName(secondlineName)) {
+          let lineInScene = self.scene.getObjectByName(secondlineName);
+          self.scene.remove(lineInScene as THREE.Object3D);
+        }
+
+        let rect = getFooterRect(points, clickPoint);
+        debugger;
+        let reactanglePoint = { x: rect[2][0], y: rect[2][1], z: 0 };
+
+        let tmpPoint = [points[1], reactanglePoint];
+
+        let meshLine = utils.getMeshLine(tmpPoint, 10);
+        // meshLine.position.set((points[0].x + points[1].x)/2,(points[0].y + points[1].y)/2,0)
+        meshLine.name = secondlineName;
+        self.scene.add(meshLine);
+      }
+      self.render();
+    }
   }
 
   /**
@@ -177,7 +327,7 @@ export class PointCloud {
     this.camera.fov = 30;
     this.camera.aspect = this.containerWidth / this.containerHeight;
     this.camera.near = 1;
-    this.camera.far = 1000;
+    this.camera.far = 10000;
     this.camera.updateProjectionMatrix();
   }
 
@@ -193,6 +343,21 @@ export class PointCloud {
       camera.position.set(-1, 0, 500);
     }
     camera.up.set(0, 0, 1);
+  }
+
+  public initLight() {
+    this.scene.add(new THREE.AmbientLight(0x505050));
+
+    const light = new THREE.SpotLight(0xffffff, 1.5);
+    light.position.set(0, 500, 2000);
+    light.angle = Math.PI / 9;
+
+    light.castShadow = true;
+    light.shadow.camera.near = 1000;
+    light.shadow.camera.far = 4000;
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
+    this.scene.add(light);
   }
 
   public initControls() {
@@ -224,9 +389,11 @@ export class PointCloud {
     const { scene } = this;
     // Background
     scene.background = new THREE.Color(this.backgroundColor);
-
+    this.initGroundMesh();
     this.initControls();
     this.initRenderer();
+    this.initChooseEvent();
+    this.initLight();
   }
 
   public removeObjectByName(name: string) {

@@ -113,6 +113,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
         pointCloud = new PointCloud({
           container: ref.current,
           backgroundColor: '#4c4c4c',
+          isOrthographicCamera: true
         });
       }
       if (currentData.result) {

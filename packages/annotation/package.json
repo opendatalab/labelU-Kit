@@ -98,6 +98,7 @@
     "color-rgba": "^2.3.0",
     "localforage": "^1.10.0",
     "lodash": "^4.17.20",
-    "three": "^0.141.0"
+    "three": "^0.141.0",
+    "three.meshline": "^1.4.0"
   }
 }

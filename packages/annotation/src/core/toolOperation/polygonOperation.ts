@@ -1146,7 +1146,6 @@ class PolygonOperation extends BasicToolOperation {
     if (!this.dragInfo || !this.selectedID) {
       return;
     }
-
     const { selectedPolygon } = this;
     let selectedPointList: IPolygonPoint[] | undefined = selectedPolygon?.pointList;
     if (!selectedPointList) {
