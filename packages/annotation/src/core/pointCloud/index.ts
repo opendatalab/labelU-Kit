@@ -1,6 +1,5 @@
 /*eslint import/no-unresolved: 0*/
 import * as THREE from 'three';
-import utils from './uitils';
 import {
   PerspectiveShiftUtils,
   TMatrix4Tuple,
@@ -33,7 +32,7 @@ interface IOrthographicCamera {
   far: number;
 }
 
-interface IProps {
+export interface PointCloudIProps {
   container: HTMLElement;
   noAppend?: boolean; // temporary;
   isOrthographicCamera?: boolean;
@@ -68,7 +67,7 @@ export class PointCloud {
 
   public initCameraPosition = this.DEFAULT_INIT_CAMERA_POSITION; // It will init when the camera position be set
 
-  private container: HTMLElement;
+  protected container: HTMLElement;
 
   private isOrthographicCamera = false;
 
@@ -86,7 +85,7 @@ export class PointCloud {
 
   private showDirection: boolean = true; // Whether to display the direction of box
 
-  constructor({ container, noAppend, isOrthographicCamera, orthographicParams, backgroundColor = 'black' }: IProps) {
+  constructor({ container, noAppend, isOrthographicCamera, orthographicParams, backgroundColor = 'black' }: PointCloudIProps) {
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
@@ -157,143 +156,6 @@ export class PointCloud {
     this.scene.add(groundMesh);
   }
 
-
-  public initChooseEvent() {
-    let self = this;
-    let points: Vector3[] = [] as unknown as THREE.Vector3[];
-    let firstlineName = '';
-    let secondlineName = '';
-    let raycaster = new THREE.Raycaster();
-
-    function getWebglPositionFromEvent(event: THREE.Event) {
-      let mouseWord: {
-        x: number;
-        y: number;
-      } = { x: 0, y: 0 };
-      mouseWord.x = ((event.clientX - self.container.getBoundingClientRect().left) / self.containerWidth) * 2 - 1;
-      mouseWord.y = -((event.clientY - self.container.getBoundingClientRect().top) / self.containerHeight) * 2 + 1;
-
-      raycaster.setFromCamera(mouseWord, self.camera);
-      let groundMesh = self.scene.getObjectByName('ground') as THREE.Object3D<THREE.Event>;
-      //得到点击的几何体
-      var raycasters = raycaster.intersectObject(groundMesh);
-      return raycasters[0].point;
-    }
-
-    function getFooterRect(points: THREE.Vector3[], clickPoint: ICoordinate) {
-      const rect = MathUtils.getRectangleByRightAngle({ x: clickPoint.x, y: clickPoint.y }, [
-        {
-          x: points[0].x,
-          y: points[0].y,
-        },
-        {
-          x: points[points.length - 1].x,
-          y: points[points.length - 1].y,
-        },
-      ]);
-
-      let dynamicRect = rect.map((item) => {
-        return {
-          0: item.x,
-          1: item.y,
-        };
-      });
-
-      return dynamicRect;
-    }
-
-    // 拉线出框方案
-    this.container.addEventListener('click', function (event) {
-      if (event.button === MOUSE.LEFT) {
-        // 鼠标移动事件
-        self.container.addEventListener('pointermove', handleMouseMove);
-
-        let clickPoint = getWebglPositionFromEvent(event);
-        points = [...points,clickPoint]
-        if (points.length === 3) {
-          // 绘制立体框
-          // let width = points[1].x - points[0].x;
-          // let length = points[2].y - points[1].y;
-          // let height = 10;
-          // let center = {
-          //   x: (points[2].x + points[0].x) / 2,
-          //   y: (points[2].y + points[0].y) / 2,
-          //   z: 0,
-          // };
-          // // 计算旋转角度
-          // let angle = Math.atan2(points[1].x - points[0].x, points[1].y - points[0].y);
-          // console.log(angle);
-          // // debugger;
-          // let boxGeometry = new THREE.BoxGeometry(width, length, height);
-          // let boxMaterial = new THREE.MeshBasicMaterial({
-          //   color: 0xffffff,
-          //   transparent: true,
-          //   opacity: 0.1,
-          // });
-          // let boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-          // boxMesh.position.set(center.x, center.y, 5);
-          // self.scene.add(boxMesh);
-          let rect = getFooterRect(points.slice(0,2), clickPoint);
-
-          let sharp = utils.makeShape([...rect,rect[0]]);
-
-          let sharpGeometry = utils.makeExtrudeGeometry(sharp, 10, false);
-          let boxMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.1,
-          });
-          let boxMesh = new THREE.Mesh(sharpGeometry, boxMaterial);
-          self.scene.add(boxMesh);
-          // 清除点数据
-          points = [];
-        }
-
-        self.render();
-      }
-    });
-
-    function handleMouseMove(event: THREE.Event) {
-      let clickPoint = getWebglPositionFromEvent(event);
-      if (points.length === 1) {
-        let tmpPoint = [...points, clickPoint];
-        if (!firstlineName) {
-          firstlineName = new Date().getTime() + 'firstLine';
-        }
-        if (self.scene.getObjectByName(firstlineName)) {
-          let lineInScene = self.scene.getObjectByName(firstlineName);
-          self.scene.remove(lineInScene as THREE.Object3D);
-        }
-
-        let meshLine = utils.getMeshLine(tmpPoint, 10);
-        // meshLine.position.set((points[0].x + points[1].x)/2,(points[0].y + points[1].y)/2,0)
-        meshLine.name = firstlineName;
-        self.scene.add(meshLine);
-      }
-
-      if (points.length === 2) {
-        if (!secondlineName) {
-          secondlineName = new Date().getTime() + 'secondLine';
-        }
-        if (self.scene.getObjectByName(secondlineName)) {
-          let lineInScene = self.scene.getObjectByName(secondlineName);
-          self.scene.remove(lineInScene as THREE.Object3D);
-        }
-
-        let rect = getFooterRect(points, clickPoint);
-        debugger;
-        let reactanglePoint = { x: rect[2][0], y: rect[2][1], z: 0 };
-
-        let tmpPoint = [points[1], reactanglePoint];
-
-        let meshLine = utils.getMeshLine(tmpPoint, 10);
-        // meshLine.position.set((points[0].x + points[1].x)/2,(points[0].y + points[1].y)/2,0)
-        meshLine.name = secondlineName;
-        self.scene.add(meshLine);
-      }
-      self.render();
-    }
-  }
 
   /**
    * Init OrthographicCamera to default config by size
@@ -389,11 +251,9 @@ export class PointCloud {
     const { scene } = this;
     // Background
     scene.background = new THREE.Color(this.backgroundColor);
-    this.initGroundMesh();
     this.initControls();
     this.initRenderer();
-    this.initChooseEvent();
-    this.initLight();
+
   }
 
   public removeObjectByName(name: string) {

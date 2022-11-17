@@ -923,7 +923,7 @@ class BasicToolOperation extends EventListener {
     if (this.startTime !== 0 && this._firstClickCoordinate) {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
-      // 拖拽时，更新持久化图片位置信息
+      // 拖拽时，更新持久化图片位置信息 
       localforage.setItem('coordinate', this.getCurrentPos(currentCoord), () => {});
       /**
        * 图片拖拽判断

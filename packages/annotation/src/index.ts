@@ -36,6 +36,7 @@ import PointCloud2dOperation from './core/toolOperation/pointCloud2dOperation';
 import { PointCloudAnnotation } from './core/pointCloud/annotation';
 import { PointCloud } from './core/pointCloud';
 import UnitUtils from './utils/tool/UnitUtils';
+import PointCloudOperation from './core/toolOperation/pointCloudOperation';
 
 export { EToolName, TOOL_NAME } from './constant/tool';
 
@@ -59,6 +60,7 @@ export {
   ViewOperation,
   PointCloud2dOperation,
   PointCloudAnnotation,
+  PointCloudOperation,
   // 固定操作
   cAnnotation,
   cAnnotationTask,

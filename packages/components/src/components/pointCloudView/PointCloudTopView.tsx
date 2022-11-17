@@ -59,7 +59,6 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
   // const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
   const { selectNextBox, selectPrevBox } = useSingleBox();
   const { updateRotate } = useRotate({ currentData });
-
   const ratio = 2;
 
   const clockwiseRotate = () => {

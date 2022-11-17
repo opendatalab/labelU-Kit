@@ -1,12 +1,5 @@
-/*
- * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-13 19:31:36
- * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-06-27 19:43:25
- */
-
 import { getClassName } from '@/utils/dom';
-import { PointCloud } from '@label-u/annotation';
+import { PointCloudOperation } from '@label-u/annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@label-u/utils';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -110,7 +103,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
       if (!pointCloud) {
-        pointCloud = new PointCloud({
+        pointCloud = new PointCloudOperation({
           container: ref.current,
           backgroundColor: '#4c4c4c',
           isOrthographicCamera: true
