@@ -1,13 +1,39 @@
 import { PointCloud, PointCloudIProps } from '../pointCloud';
 import * as THREE from 'three';
 import utils from '../pointCloud/uitils';
-import { MOUSE, Vector2, Vector3 } from 'three';
+import { MOUSE, Vector3 } from 'three';
 import MathUtils from '@/utils/MathUtils';
+import { IPointCloudBox } from '@label-u/utils';
+import uuid from '@/utils/uuid';
+// import {message} from 'antd';
+
+
+interface PointCloudOperationProps {
+  BoxList?:IPointCloudBox[];
+  attribute:string;
+}
 
 class PointCloudOperation extends PointCloud {
-  constructor(props: PointCloudIProps) {
+
+  public boxList!: IPointCloudBox[];
+  public attribute:string;
+  public backgroundColorOp:number = 0x000000
+
+  constructor(props: PointCloudIProps & PointCloudOperationProps) {
     super(props);
+    if(props.BoxList&&props.BoxList.length>0){
+      this.boxList = props.BoxList;
+    }
+    this.attribute = props.attribute;
     this.initPointCloudOperation();
+  }
+
+  public setAttribute(attribute:string){
+    this.attribute = attribute;
+  }
+
+  public setBoxList(boxList:IPointCloudBox[]){
+    this.boxList = boxList;
   }
 
   public initPointCloudOperation() {
@@ -19,7 +45,7 @@ class PointCloudOperation extends PointCloud {
   public initGroundMesh() {
     let groundGeometry = new THREE.PlaneGeometry(this.containerWidth, this.containerHeight);
     let groundMaterial = new THREE.MeshBasicMaterial({
-      color: 0x000000,
+      color: this.backgroundColorOp,
       wireframe: true,
       transparent:true,
       opacity: 0,
@@ -31,6 +57,14 @@ class PointCloudOperation extends PointCloud {
   }
 
 
+
+  public renderBoxList(){
+    if(!this.boxList){
+      return;
+    }
+
+
+  }
 
   public darwBoxArrowByRectAndZinfo(
     rect: ICoordinate[],
@@ -95,9 +129,11 @@ class PointCloudOperation extends PointCloud {
     triangleMesh.translateY(arrowVector.y);
     triangleMesh.position.z = centerPoint.z;
 
-    let meshLine = utils.getMeshLine(points, color, 20);
+    let meshLine = utils.getMeshLine(points, color, 10);
+
     object3d.add(meshLine);
     object3d.add(triangleMesh);
+    // object3d.lookAt(this.camera.position)
     this.scene.add(object3d);
   }
 
@@ -128,6 +164,31 @@ class PointCloudOperation extends PointCloud {
     this.scene.add(boxMesh);
     this.scene.add(boxEdgeMesh);
   }
+
+
+  // get BoxFormmat from points and zinfo
+  public getBoxFormmat(points: [ICoordinate, ICoordinate, ICoordinate, ICoordinate], zInfo: {
+    maxZ: number;
+    minZ: number;
+  }):IPointCloudBox{
+    let id = uuid(8, 62);
+    // const centerPoint = MathUtils.getLineCenterPoint([points[0], points[2]]);
+    const height = MathUtils.getLineLength(points[0], points[1]);
+    const width = MathUtils.getLineLength(points[1], points[2]);
+    const rotation = MathUtils.getRadiusFromQuadrangle(points);
+
+    return {
+      attribute: this.attribute,
+      center: {x:(points[0].x + points[2].x)/2,y:(points[0].y + points[2].y)/2,z:(zInfo.maxZ + zInfo.minZ)/2},
+      id: id,
+      rotation: rotation,
+      valid: true,
+      width: width,
+      height: height,
+      depth:zInfo.maxZ - zInfo.minZ
+    }
+  }
+
 
   // get webgl coordinates by screen event 
   public getWebglPositionFromEvent(container:HTMLElement,camera:THREE.Camera,scene:THREE.Scene,event: THREE.Event) {
@@ -188,8 +249,20 @@ class PointCloudOperation extends PointCloud {
         if (points.length === 3) {
           let { sharpRect, rect } = getFooterRect(points.slice(0, 2), clickPoint);
           let zInfo = self.getSensesPointZAxisInPolygon(rect);
-          self.drawBox(sharpRect, zInfo, 0xffffff);
-          self.darwBoxArrowByRectAndZinfo(rect, zInfo, 0xffffff);
+          if(zInfo.zCount>0){
+            self.drawBox(sharpRect, zInfo, 0xffffff);
+            self.darwBoxArrowByRectAndZinfo(rect, zInfo, 0xffffff);
+            let box = self.getBoxFormmat(rect as [ICoordinate,ICoordinate,ICoordinate,ICoordinate],zInfo)
+            let newBoxList = [box]
+            if(self.boxList){
+              newBoxList = newBoxList.concat(self.boxList)
+            }
+            self.setBoxList(newBoxList);
+            console.log(self.boxList)
+  
+            self.emit('boxAdded',rect,box.attribute,box.id );
+            
+          }
           // 清除点数据
           points = [];
           // 清除辅助线

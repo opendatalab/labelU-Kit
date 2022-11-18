@@ -1,10 +1,5 @@
 import { PointCloudAnnotation, PointCloud, MathUtils } from '@label-u/annotation';
-import {
-  IPointCloudBox,
-  EPerspectiveView,
-  PointCloudUtils,
-  IPolygonPoint,
-} from '@label-u/utils';
+import { IPointCloudBox, EPerspectiveView, PointCloudUtils, IPolygonPoint } from '@label-u/utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
@@ -42,6 +37,20 @@ export const transferCanvas2World = (
   return {
     x: -y + h / 2,
     y: -(x - w / 2),
+  };
+};
+
+
+
+export const transerWord2Canvas = (
+  wordProps: { x: number; y: number },
+  size: { width: number; height: number },
+) => {
+  const { width: w, height: h } = size;
+  const { x, y } = wordProps;
+  return {
+    x: w / 2 - y,
+    y: h / 2 - x,
   };
 };
 
@@ -210,7 +219,7 @@ export const synchronizeSideView = (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
-        attribute:pointCloud2dOperation.defaultAttribute
+        attribute: pointCloud2dOperation.defaultAttribute,
       },
     ],
     newPolygon.id,
@@ -301,13 +310,14 @@ export const synchronizeTopView = (
     newPolygonList.push(
       // @ts-ignore
       {
-      id: newPolygon.id,
-      pointList: polygon2d,
-      textAttribute: '',
-      isRect: true,
-      valid: newBoxParams.valid ?? true,
-      attribute:pointCloud2dOperation.defaultAttribute
-    });
+        id: newPolygon.id,
+        pointList: polygon2d,
+        textAttribute: '',
+        isRect: true,
+        valid: newBoxParams.valid ?? true,
+        // attribute:pointCloud2dOperation.defaultAttribute
+      },
+    );
   }
 
   pointCloud2dOperation.setResultAndSelectedID(newPolygonList, newPolygon.id);
@@ -518,7 +528,7 @@ export const usePointCloudViews = () => {
 
   const clearAllResult = () => {
     // Clear All PointView Data
-    pointCloudBoxList.forEach((v: { id: any; }) => {
+    pointCloudBoxList.forEach((v: { id: any }) => {
       mainViewInstance?.removeObjectByName(v.id);
     });
     mainViewInstance?.render();
@@ -550,7 +560,7 @@ export const usePointCloudViews = () => {
     await mainViewInstance.loadPCDFile(currentData.url, config?.radius ?? DEFAULT_RADIUS);
 
     // Clear All Data
-    pointCloudBoxList.forEach((v: { id: any; }) => {
+    pointCloudBoxList.forEach((v: { id: any }) => {
       mainViewInstance?.removeObjectByName(v.id);
     });
     if (currentData.result) {

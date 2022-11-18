@@ -11,7 +11,6 @@ let utils = {
   makeShape: function (pointList: Point[]) {
     let shape;
     if (pointList.length) {
-      debugger;
       let arry = pointList;
       shape = new THREE.Shape();
       shape.moveTo(arry[0][0], arry[0][1]);
@@ -91,7 +90,6 @@ let utils = {
     const geometry = new THREE.BufferGeometry().setFromPoints(vectors);
     const line = new MeshLine();
     line.setGeometry(geometry);
-
     var material = new MeshLineMaterial({
       useMap: false,
       color: new THREE.Color(color),
@@ -101,6 +99,7 @@ let utils = {
       lineWidth: lineWidth,
     });
     var mesh = new THREE.Mesh(line, material);
+    mesh.raycast = MeshLineRaycast;
 
     return mesh;
   },

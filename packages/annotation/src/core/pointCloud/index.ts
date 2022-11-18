@@ -21,7 +21,7 @@ import uuid from '@/utils/uuid';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
-import MathUtils from '@/utils/MathUtils';
+import EventListener from '../toolOperation/eventListener';
 
 interface IOrthographicCamera {
   left: number;
@@ -43,7 +43,7 @@ export interface PointCloudIProps {
 const DEFAULT_DISTANCE = 30;
 const highlightWorker = new HighlightWorker();
 
-export class PointCloud {
+export class PointCloud extends EventListener  {
   public renderer: THREE.WebGLRenderer;
 
   public scene: THREE.Scene;
@@ -86,6 +86,7 @@ export class PointCloud {
   private showDirection: boolean = true; // Whether to display the direction of box
 
   constructor({ container, noAppend, isOrthographicCamera, orthographicParams, backgroundColor = 'black' }: PointCloudIProps) {
+    super();
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.backgroundColor = backgroundColor;
@@ -142,18 +143,6 @@ export class PointCloud {
 
   public setInitCameraPosition(vector: THREE.Vector3) {
     this.initCameraPosition = vector;
-  }
-
-  public initGroundMesh() {
-    let groundGeometry = new THREE.PlaneGeometry(this.containerWidth, this.containerHeight);
-    let groundMaterial = new THREE.MeshBasicMaterial({
-      color: 0x000000,
-      wireframe: true,
-    });
-    let groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
-    groundMesh.name = 'ground';
-    // groundMesh.rotateY(0.5*Math.PI)
-    this.scene.add(groundMesh);
   }
 
 
@@ -253,7 +242,6 @@ export class PointCloud {
     scene.background = new THREE.Color(this.backgroundColor);
     this.initControls();
     this.initRenderer();
-
   }
 
   public removeObjectByName(name: string) {

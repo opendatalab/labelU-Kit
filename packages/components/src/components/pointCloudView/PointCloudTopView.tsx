@@ -15,7 +15,7 @@ import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import {useSelector} from '@/store/ctx'
+import { useSelector } from '@/store/ctx';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
@@ -130,7 +130,10 @@ const ZAxisSlider = ({
   );
 };
 
-const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> = ({ currentData,config }) => {
+const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
+  currentData,
+  config,
+}) => {
   const ref = useRef<HTMLDivElement>(null);
   // const polygonRef = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
@@ -146,7 +149,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> 
     return { ...state.toolStyle };
   });
 
-
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
       return;
@@ -158,7 +160,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> 
       };
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
-        config:config.config as ToolConfig,
+        config: config.config as ToolConfig,
         // polygonContainer: polygonRef.current,
         size,
         pcdPath: currentData.url,
@@ -259,12 +261,8 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & {config:BasicConfig}> 
         pointCloud.render();
       },
     );
-    ptCtx.topViewInstance.pointCloud2dOperation.setStyle(toolStyle)
-
+    ptCtx.topViewInstance.pointCloud2dOperation.setStyle(toolStyle);
   }, [size, ptCtx.topViewInstance]);
-
-
- 
 
   // useEffect(()=>{
   //   if ( !ptCtx.topViewInstance) {

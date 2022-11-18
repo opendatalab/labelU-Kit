@@ -109,3 +109,8 @@ export interface StepConfig {
 export interface StepConfigState {
   stepConfig: StepConfig[];
 }
+
+export interface ICoordinate {
+  x: number;
+  y: number;
+}

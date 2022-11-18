@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import { PointCloudOperation } from '@label-u/annotation';
+import { ICoordinate, PointCloudOperation } from '@label-u/annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@label-u/utils';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -11,7 +11,7 @@ import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
 import { Switch } from 'antd';
 import useSize from '@/hooks/useSize';
-import { usePointCloudViews } from './hooks/usePointCloudViews';
+import { transerWord2Canvas, usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
 import { LabelUContext } from '@/store/ctx';
 
@@ -78,7 +78,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
   const { t } = useTranslation();
-
+  const pointCloudViews = usePointCloudViews();
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
       return;
@@ -106,11 +106,11 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
         pointCloud = new PointCloudOperation({
           container: ref.current,
           backgroundColor: '#4c4c4c',
-          isOrthographicCamera: true
+          isOrthographicCamera: true,
+          attribute: '',
         });
       }
       if (currentData.result) {
-
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
 
         // Add Init Box
@@ -125,6 +125,49 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
       ptCtx.setMainViewInstance(pointCloud);
     }
   }, [currentData]);
+
+  useEffect(() => {
+    if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance || !ptCtx.mainViewInstance) {
+      return;
+    }
+
+    const { pointCloud2dOperation: TopView2dOperation } = ptCtx.topViewInstance;
+    const mainViewInstance = ptCtx.mainViewInstance;
+    let sizeTop = {
+      width: TopView2dOperation.container.getBoundingClientRect().width,
+      height: TopView2dOperation.container.getBoundingClientRect().height,
+    };
+    mainViewInstance.singleOn(
+      'boxAdded',
+      (pointList: ICoordinate[], attribute: string, id: string) => {
+        const currentPolygonList = TopView2dOperation.polygonList;
+        const cavasPointList = pointList.map((point) => {
+          return transerWord2Canvas(point, sizeTop);
+        });
+        let newPolygonList = [
+          ...currentPolygonList,
+          {
+            id: id,
+            sourceID: '',
+            valid: true,
+            textAttribute: '',
+            pointList: cavasPointList,
+            attribute: attribute,
+            order: currentPolygonList.length + 1,
+            isVisible: true,
+            isRect: true,
+          },
+        ];
+        console.log(newPolygonList);
+        console.log("newPolygonList:")
+        TopView2dOperation.setPolygonList(newPolygonList);
+        TopView2dOperation.render();
+      },
+    );
+    // return () => {
+    //   TopView2dOperation.unbind('validUpdate', validUpdate);
+    // };
+  }, [ptCtx, size, currentData, pointCloudViews]);
 
   /**
    *  Observe selectedID and reset camera to target top-view
@@ -161,7 +204,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
       style={{
         height:
           // currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
-          '100%'
+          '100%',
       }}
     >
       <div className={getClassName('point-cloud-3d-content')}>
