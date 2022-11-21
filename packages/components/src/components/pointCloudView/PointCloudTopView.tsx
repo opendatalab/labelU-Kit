@@ -306,7 +306,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
       >
         <div style={{ position: 'relative', flex: 1 }}>
           <div id='mytool' style={{ width: '100%', height: '100%' }} ref={ref} />
-          <BoxInfos />
+          {/* <BoxInfos /> */}
           <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
           <PointCloudValidity />
         </div>

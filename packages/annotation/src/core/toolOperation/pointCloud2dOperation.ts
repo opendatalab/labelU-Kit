@@ -6,10 +6,11 @@
  * @author Ron <ron.f.luo@gmail.com>
  */
 
-import { ESortDirection } from '@/constant/annotation';
+import { DEFAULT_TEXT_OFFSET, ESortDirection } from '@/constant/annotation';
 import { EPolygonPattern } from '@/constant/tool';
 import { ToolConfig } from '@/interface/conbineTool';
 import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
+import AttributeUtils from '@/utils/tool/AttributeUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
@@ -20,8 +21,8 @@ import PolygonOperation, { IPolygonOperationProps } from './polygonOperation';
 interface IPointCloud2dOperationProps {
   showDirectionLine?: boolean;
   forbidAddNew?: boolean;
-  isPointCloud2DTool?:boolean;
-  config?:ToolConfig
+  isPointCloud2DTool?: boolean;
+  config?: ToolConfig;
 }
 
 class PointCloud2dOperation extends PolygonOperation {
@@ -31,7 +32,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
   private selectedIDs: string[] = [];
 
-  public isPointCloud2DTool :boolean;
+  public isPointCloud2DTool: boolean;
 
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
@@ -98,38 +99,60 @@ class PointCloud2dOperation extends PolygonOperation {
     return 'rgba(0, 255, 255, 0.5)';
   }
 
+
   /**
-   * Add direction
-   * @override
-   * */
-  public renderStaticPolygon() {
-    if (this.isHidden === false) {
-      this.polygonList?.forEach((polygon) => {
-        if ([...this.selectedIDs, this.editPolygonID].includes(polygon.id)) {
-          return;
-        }
-        const { attribute } = polygon;
-        const toolColor = this.getColor(attribute);
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
-        const transformPointList = AxisUtils.changePointListByZoom(polygon.pointList || [], this.zoom, this.currentPos);
+   * render selected polygon only when add a box in point cloud scene
+   */
+  public renderPolygon() {
+    if (this.selectedID) {
+      const selectdPolygon = this.selectedPolygon;
 
-        DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
-          fillColor: 'transparent',
-          strokeColor: toolData.stroke,
-          pointColor: 'white',
-          thickness: this.style?.width ?? 2,
-          lineCap: 'round',
-          isClose: true,
-          lineType: this.config?.lineType,
-        });
+      if (selectdPolygon) {
+        const toolColor = this.getColor(selectdPolygon.attribute);
+        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
 
-        // Only the rectangle shows the direction.
-        if (polygon.isRect === true && this.showDirectionLine === true) {
-          this.renderRectPolygonDirection(transformPointList);
+        DrawUtils.drawSelectedPolygonWithFillAndLine(
+          this.canvas,
+          AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
+          {
+            fillColor: toolData.fill,
+            strokeColor: toolData.stroke,
+            pointColor: 'white',
+            thickness: 2,
+            lineCap: 'round',
+            isClose: true,
+            lineType: this.config?.lineType,
+          },
+        );
+
+        let showText = `${
+          AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config?.attributeList) ?? ''
+        }`;
+        if (this.isShowOrder && selectdPolygon?.order > 0) {
+          showText = `${selectdPolygon.order} ${showText}`;
         }
-      });
+
+        DrawUtils.drawText(
+          this.canvas,
+          AxisUtils.changePointByZoom(selectdPolygon.pointList[0], this.zoom, this.currentPos),
+          showText,
+          {
+            color: toolData.stroke,
+            ...DEFAULT_TEXT_OFFSET,
+          },
+        );
+        if (!this.isPointCloud2DTool) {
+          this.renderTextAttribute();
+        }
+      }
     }
   }
+
+
+  
+
+
+
 
   /**
    * Update the show

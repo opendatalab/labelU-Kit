@@ -14,6 +14,7 @@ import useSize from '@/hooks/useSize';
 import { transerWord2Canvas, usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
 import { LabelUContext } from '@/store/ctx';
+import { BoxInfos } from './PointCloudInfos';
 
 const pointCloudID = 'LABELBEE-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -140,27 +141,12 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
     mainViewInstance.singleOn(
       'boxAdded',
       (pointList: ICoordinate[], attribute: string, id: string) => {
-        const currentPolygonList = TopView2dOperation.polygonList;
+        // const currentPolygonList = TopView2dOperation.polygonList;
         const cavasPointList = pointList.map((point) => {
           return transerWord2Canvas(point, sizeTop);
         });
-        let newPolygonList = [
-          ...currentPolygonList,
-          {
-            id: id,
-            sourceID: '',
-            valid: true,
-            textAttribute: '',
-            pointList: cavasPointList,
-            attribute: attribute,
-            order: currentPolygonList.length + 1,
-            isVisible: true,
-            isRect: true,
-          },
-        ];
-        console.log(newPolygonList);
-        console.log("newPolygonList:")
-        TopView2dOperation.setPolygonList(newPolygonList);
+        TopView2dOperation.drawingPointList = cavasPointList
+        TopView2dOperation.addDrawingPointToPolygonList(true);
         TopView2dOperation.render();
       },
     );
@@ -172,11 +158,13 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   /**
    *  Observe selectedID and reset camera to target top-view
    */
-  useEffect(() => {
-    if (selectedBox) {
-      setTarget3DView(EPerspectiveView.Top);
-    }
-  }, [selectedBox]);
+
+  // do not change 3D view when add a box in point cloud scene
+  // useEffect(() => {
+  //   if (selectedBox) {
+  //     setTarget3DView(EPerspectiveView.Top);
+  //   }
+  // }, [selectedBox]);
 
   const ptCloud3DCtx = useMemo(() => {
     return { reset3DView, setTarget3DView, isActive: !!selectedBox };
@@ -207,12 +195,14 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
           '100%',
       }}
     >
-      <div className={getClassName('point-cloud-3d-content')}>
+      <div className={getClassName('point-cloud-3d-content')} style={{position:"relative"}}>
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>
           <PointCloud3DSideBar />
         </PointCloud3DContext.Provider>
+        <BoxInfos />
         <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />
       </div>
+ 
     </PointCloudContainer>
   );
 };
