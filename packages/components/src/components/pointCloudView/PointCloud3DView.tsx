@@ -142,12 +142,17 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
       'boxAdded',
       (pointList: ICoordinate[], attribute: string, id: string) => {
         // const currentPolygonList = TopView2dOperation.polygonList;
+
         const cavasPointList = pointList.map((point) => {
           return transerWord2Canvas(point, sizeTop);
         });
+        // bacause top view should only show the selected box so we should clear the previous polygon list
+        TopView2dOperation.setPolygonList([]);
         TopView2dOperation.drawingPointList = cavasPointList
-        TopView2dOperation.addDrawingPointToPolygonList(true);
+        TopView2dOperation.addDrawingPointToPolygonList(true,id);
+        TopView2dOperation.setSelectedIDs([id])
         TopView2dOperation.render();
+        ptCtx.setSelectedIDs([id]);
       },
     );
     // return () => {

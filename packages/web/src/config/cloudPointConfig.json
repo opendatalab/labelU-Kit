@@ -3,7 +3,6 @@
     {
       "tool": "pointCloudTool",
       "config": {
-        "attributeConfigurable": true,
         "lowerLimitPointsNumInBox": 5,
         "attributeList": [{ "key": "pcTool", "value": "pcTool" }]
       }

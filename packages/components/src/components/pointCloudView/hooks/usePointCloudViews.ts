@@ -1,5 +1,16 @@
-import { PointCloudAnnotation, PointCloud, MathUtils } from '@label-u/annotation';
-import { IPointCloudBox, EPerspectiveView, PointCloudUtils, IPolygonPoint } from '@label-u/utils';
+import {
+  PointCloudAnnotation,
+  PointCloud,
+  PointCloudOperation,
+  MathUtils,
+} from '@label-u/annotation';
+import {
+  IPointCloudBox,
+  EPerspectiveView,
+  PointCloudUtils,
+  IPolygonPoint,
+  IPolygonData,
+} from '@label-u/utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
@@ -39,8 +50,6 @@ export const transferCanvas2World = (
     y: -(x - w / 2),
   };
 };
-
-
 
 export const transerWord2Canvas = (
   wordProps: { x: number; y: number },
@@ -175,7 +184,7 @@ const sideViewPolygon2PointCloud = (
  * @param boxParams
  * @param newPolygon TODO！ Need to add type
  */
-export const synchronizeSideView = (
+export const synchronizeSideView = async (
   boxParams: IPointCloudBox,
   newPolygon: any,
   sideViewInstance: PointCloudAnnotation | undefined,
@@ -184,9 +193,7 @@ export const synchronizeSideView = (
   if (!sideViewInstance) {
     return;
   }
-
   const { pointCloud2dOperation, pointCloudInstance } = sideViewInstance;
-
   // Create PointCloud
   pointCloudInstance.loadPCDFileByBox(url, boxParams, {
     width: DEFAULT_SCOPE,
@@ -208,7 +215,7 @@ export const synchronizeSideView = (
   pointCloudInstance.render();
 
   // Update PolygonView to default zoom and currentPos.
-  pointCloud2dOperation.initPosition();
+  // await pointCloud2dOperation.initPosition();
   pointCloud2dOperation.zoomChangeOnCenter(zoom);
   pointCloud2dOperation.setResultAndSelectedID(
     [
@@ -219,7 +226,7 @@ export const synchronizeSideView = (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
-        attribute: pointCloud2dOperation.defaultAttribute,
+        // attribute: pointCloud2dOperation.defaultAttribute,
       },
     ],
     newPolygon.id,
@@ -231,7 +238,7 @@ export const synchronizeSideView = (
  * @param boxParams
  * @param newPolygon TODO！ Need to add type
  */
-export const synchronizeBackView = (
+export const synchronizeBackView = async (
   boxParams: IPointCloudBox,
   newPolygon: any,
   BackViewInstance: PointCloudAnnotation,
@@ -240,7 +247,6 @@ export const synchronizeBackView = (
   if (!BackViewInstance) {
     return;
   }
-
   const {
     pointCloud2dOperation: backPointCloudPolygonOperation,
     pointCloudInstance: backPointCloud,
@@ -262,7 +268,7 @@ export const synchronizeBackView = (
   backPointCloud.camera.updateProjectionMatrix();
   backPointCloud.render();
   // Update PolygonView to default zoom and currentPos.
-  backPointCloudPolygonOperation.initPosition();
+  // await backPointCloudPolygonOperation.initPosition();
   backPointCloudPolygonOperation.zoomChangeOnCenter(zoom);
   backPointCloudPolygonOperation.setResultAndSelectedID(
     [
@@ -288,7 +294,7 @@ export const synchronizeTopView = (
   newBoxParams: IPointCloudBox,
   newPolygon: any,
   topViewInstance?: PointCloudAnnotation,
-  mainViewInstance?: PointCloud,
+  mainViewInstance?: PointCloudOperation,
 ) => {
   if (!topViewInstance || !mainViewInstance) {
     return;
@@ -371,10 +377,15 @@ export const usePointCloudViews = () => {
   //   return 1;
   // };
 
-  const mainViewGenBox = (boxParams: IPointCloudBox) => {
-    mainViewInstance?.generateBox(boxParams);
-    mainViewInstance?.controls.update();
-    mainViewInstance?.render();
+  const updateMainViewGenBox = (polygon: IPolygonData) => {
+    if (polygon.id) {
+      let zInfo = mainViewInstance?.getSensesPointZAxisInPolygon(polygon.pointList);
+      if (zInfo) {
+        mainViewInstance?.addBoxInScene(polygon.pointList, zInfo, 0xffffff, polygon.id);
+        mainViewInstance?.controls.update();
+        mainViewInstance?.render();
+      }
+    }
   };
 
   /** Top-view create box from 2D */
@@ -497,7 +508,6 @@ export const usePointCloudViews = () => {
    */
   const syncPointCloudViews = (omitView: string, polygon: any, boxParams: IPointCloudBox) => {
     const dataUrl = currentData?.url;
-
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
         synchronizeSideView(boxParams, polygon, sideViewInstance, dataUrl);
@@ -511,13 +521,12 @@ export const usePointCloudViews = () => {
         synchronizeTopView(boxParams, polygon, topViewInstance, mainViewInstance);
       },
     };
-
     Object.keys(viewToBeUpdated).forEach((key) => {
       if (key !== omitView) {
         viewToBeUpdated[key]();
       }
     });
-    mainViewGenBox(boxParams);
+    updateMainViewGenBox(polygon);
     mainViewInstance?.highlightOriginPointCloud(boxParams);
   };
 

@@ -52,7 +52,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public isCombined: boolean; // 是否开启合并操作
 
-  private dragInfo?: {
+  public dragInfo?: {
     dragStartCoord: ICoordinate;
     initPointList: IPolygonPoint[];
     changePointIndex?: number[]; // 用于存储拖拽点 / 边的下标
@@ -476,7 +476,7 @@ class PolygonOperation extends BasicToolOperation {
    * 初始化的添加的数据
    * @returns
    */
-  public addDrawingPointToPolygonList(isRect?: boolean) {
+  public addDrawingPointToPolygonList(isRect?: boolean, paramId?: string) {
     let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
@@ -504,7 +504,7 @@ class PolygonOperation extends BasicToolOperation {
       samePolygon.pointList = this.drawingPointList;
       this.editPolygonID = '';
     } else {
-      const id = uuid(8, 62);
+      const id = paramId ? paramId : uuid(8, 62);
       let newPolygon: IPolygonData = {
         id,
         sourceID: basicSourceID,
@@ -512,10 +512,11 @@ class PolygonOperation extends BasicToolOperation {
         textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
-        order: CommonToolUtils.getMaxOrder(
-          polygonList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID))
-        ) + 1,
-        isVisible: true
+        order:
+          CommonToolUtils.getMaxOrder(
+            polygonList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+          ) + 1,
+        isVisible: true,
       };
 
       if (this.config.textConfigurable) {
@@ -1023,7 +1024,7 @@ class PolygonOperation extends BasicToolOperation {
             order: CommonToolUtils.getMaxOrder(this.currentShowList) + 1 + i,
             attribute: defaultAttribute,
             textAttribute,
-            isVisible: true
+            isVisible: true,
           });
         });
       }
@@ -1472,46 +1473,45 @@ class PolygonOperation extends BasicToolOperation {
           return;
         }
         if (polygon.isVisible) {
-        const { textAttribute, attribute } = polygon;
-        const toolColor = this.getColor(attribute);
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
+          const { textAttribute, attribute } = polygon;
+          const toolColor = this.getColor(attribute);
+          const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
           const transformPointList = AxisUtils.changePointListByZoom(
             polygon.pointList || [],
             this.zoom,
             this.currentPos,
           );
 
-        DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
-          fillColor: toolData.fill,
-          strokeColor: toolData.stroke,
-          pointColor: 'white',
-          thickness: this.style?.width ?? 2,
-          lineCap: 'round',
-          isClose: true,
-          lineType: this.config?.lineType,
-        });
-
+          DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
+            fillColor: toolData.fill,
+            strokeColor: toolData.stroke,
+            pointColor: 'white',
+            thickness: this.style?.width ?? 2,
+            lineCap: 'round',
+            isClose: true,
+            lineType: this.config?.lineType,
+          });
           let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config?.attributeList) ?? ''}`;
           if (this.isShowOrder && polygon?.order > 0) {
-          showText = `${polygon.order} ${showText}`;
-        }
+            showText = `${polygon.order} ${showText}`;
+          }
 
-        DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
-          color: toolData.stroke,
-          ...DEFAULT_TEXT_OFFSET,
-        });
-
-        const endPoint = transformPointList[transformPointList.length - 1];
-          if (endPoint && endPoint.x) {
-        DrawUtils.drawText(
-          this.canvas,
-          { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
-          textAttribute,
-          {
+          DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
             color: toolData.stroke,
             ...DEFAULT_TEXT_OFFSET,
-          },
-        );
+          });
+
+          const endPoint = transformPointList[transformPointList.length - 1];
+          if (endPoint && endPoint.x) {
+            DrawUtils.drawText(
+              this.canvas,
+              { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+              textAttribute,
+              {
+                color: toolData.stroke,
+                ...DEFAULT_TEXT_OFFSET,
+              },
+            );
           }
         }
       });
@@ -1538,7 +1538,7 @@ class PolygonOperation extends BasicToolOperation {
           },
         );
       }
-  }
+    }
 
     // 3. 选中多边形的渲染
     if (this.selectedID) {
@@ -1561,7 +1561,6 @@ class PolygonOperation extends BasicToolOperation {
             lineType: this.config?.lineType,
           },
         );
-
         let showText = `${
           AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config?.attributeList) ?? ''
         }`;
@@ -1578,9 +1577,8 @@ class PolygonOperation extends BasicToolOperation {
             ...DEFAULT_TEXT_OFFSET,
           },
         );
-        if(!this.isPointCloud2DTool){
-          this.renderTextAttribute();
-        }  
+
+        this.renderTextAttribute();
       }
     }
 

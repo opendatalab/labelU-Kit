@@ -663,7 +663,7 @@ class BasicToolOperation extends EventListener {
       zoomRatio,
       isOriginalSize,
     );
-
+    
     // 初始化图片位置信息时，优先从持久化记录中获取
     const statbleCoord = this.isPointCloud2DTool
       ? undefined
@@ -687,9 +687,8 @@ class BasicToolOperation extends EventListener {
     this.render();
     this.renderBasicCanvas();
 
-    this.emit('dependRender');
-
-    this.emit('renderZoom', zoom, currentPos, imgInfo);
+      this.emit('dependRender');
+      this.emit('renderZoom', zoom, currentPos, imgInfo);
   };
 
   /**

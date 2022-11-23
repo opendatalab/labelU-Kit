@@ -1,38 +1,38 @@
 import { PointCloud, PointCloudIProps } from '../pointCloud';
 import * as THREE from 'three';
 import utils from '../pointCloud/uitils';
-import { MOUSE, Vector3 } from 'three';
+import { MOUSE, Scene, ShapeUtils, Vector3 } from 'three';
 import MathUtils from '@/utils/MathUtils';
 import { IPointCloudBox } from '@label-u/utils';
 import uuid from '@/utils/uuid';
 // import {message} from 'antd';
 
-
 interface PointCloudOperationProps {
-  BoxList?:IPointCloudBox[];
-  attribute:string;
+  BoxList?: IPointCloudBox[];
+  attribute: string;
 }
 
 class PointCloudOperation extends PointCloud {
-
   public boxList!: IPointCloudBox[];
-  public attribute:string;
-  public backgroundColorOp:number = 0x000000
+  public attribute: string;
+  public backgroundColorOp: number = 0x000000;
 
   constructor(props: PointCloudIProps & PointCloudOperationProps) {
     super(props);
-    if(props.BoxList&&props.BoxList.length>0){
+    if (props.BoxList && props.BoxList.length > 0) {
       this.boxList = props.BoxList;
+    }else{
+      this.boxList  = []
     }
     this.attribute = props.attribute;
     this.initPointCloudOperation();
   }
 
-  public setAttribute(attribute:string){
+  public setAttribute(attribute: string) {
     this.attribute = attribute;
   }
 
-  public setBoxList(boxList:IPointCloudBox[]){
+  public setBoxList(boxList: IPointCloudBox[]) {
     this.boxList = boxList;
   }
 
@@ -47,7 +47,7 @@ class PointCloudOperation extends PointCloud {
     let groundMaterial = new THREE.MeshBasicMaterial({
       color: this.backgroundColorOp,
       wireframe: true,
-      transparent:true,
+      transparent: true,
       opacity: 0,
       depthTest: false,
     });
@@ -56,23 +56,21 @@ class PointCloudOperation extends PointCloud {
     this.scene.add(groundMesh);
   }
 
-
-
-  public renderBoxList(){
-    if(!this.boxList){
+  public renderBoxList() {
+    if (!this.boxList) {
       return;
     }
 
-
+    console.log(this.boxList);
   }
 
-  public darwBoxArrowByRectAndZinfo(
+  public getBoxArrowByRectAndZinfo(
     rect: ICoordinate[],
     zInfo: {
       maxZ: number;
       minZ: number;
     },
-    color: number,
+    color: number = 0xffffff,
   ) {
     let triangleWidthRite = 0.3;
     let triangleHeightRite = 0.3;
@@ -134,16 +132,19 @@ class PointCloudOperation extends PointCloud {
     object3d.add(meshLine);
     object3d.add(triangleMesh);
     // object3d.lookAt(this.camera.position)
-    this.scene.add(object3d);
+    return object3d;
   }
 
-
-  // draw cubebox by four points and zinfo 
-  public drawBox(sharpRect:{0:number,1:number}[], zInfo: {
-    maxZ: number;
-    minZ: number;
-  },
-  color: number = 0xffffff){
+  // draw cubebox by four points and zinfo
+  public getBox(
+    sharpRect: { 0: number; 1: number }[],
+    zInfo: {
+      maxZ: number;
+      minZ: number;
+    },
+    color: number = 0xffffff,
+  ) {
+    let object3d = new THREE.Object3D();
     let deep = zInfo.maxZ - zInfo.minZ;
     let zMiddle = (zInfo.maxZ + zInfo.minZ) / 2;
     let sharp = utils.makeShape([...sharpRect, sharpRect[0]]);
@@ -161,16 +162,19 @@ class PointCloudOperation extends PointCloud {
 
     let boxMesh = new THREE.Mesh(sharpGeometry, boxMaterial);
     boxMesh.translateZ(zMiddle - deep / 2);
-    this.scene.add(boxMesh);
-    this.scene.add(boxEdgeMesh);
+    object3d.add(boxMesh);
+    object3d.add(boxEdgeMesh);
+    return object3d;
   }
 
-
   // get BoxFormmat from points and zinfo
-  public getBoxFormmat(points: [ICoordinate, ICoordinate, ICoordinate, ICoordinate], zInfo: {
-    maxZ: number;
-    minZ: number;
-  }):IPointCloudBox{
+  public getBoxFormmat(
+    points: [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+    zInfo: {
+      maxZ: number;
+      minZ: number;
+    },
+  ): IPointCloudBox {
     let id = uuid(8, 62);
     // const centerPoint = MathUtils.getLineCenterPoint([points[0], points[2]]);
     const height = MathUtils.getLineLength(points[0], points[1]);
@@ -179,25 +183,73 @@ class PointCloudOperation extends PointCloud {
 
     return {
       attribute: this.attribute,
-      center: {x:(points[0].x + points[2].x)/2,y:(points[0].y + points[2].y)/2,z:(zInfo.maxZ + zInfo.minZ)/2},
+      center: {
+        x: (points[0].x + points[2].x) / 2,
+        y: (points[0].y + points[2].y) / 2,
+        z: (zInfo.maxZ + zInfo.minZ) / 2,
+      },
       id: id,
       rotation: rotation,
       valid: true,
       width: width,
       height: height,
-      depth:zInfo.maxZ - zInfo.minZ
-    }
+      depth: zInfo.maxZ - zInfo.minZ,
+    };
   }
 
+  public addBoxInScene = (
+    rectPoints: ICoordinate[],
+    zInfo: { maxZ: number; minZ: number },
+    color: number = 0xffffff,
+    paramId?: string,
+  ) => {
+    // delete prevOne
+    let boxList:IPointCloudBox[]= this.boxList;
+    if(paramId){
+      let boxName =  paramId + 'box';
+      let boxArrName = paramId + 'boxArrow';
+      this.removeObjectByName(boxName);
+      this.removeObjectByName(boxArrName);
+      boxList = this.boxList.filter((item)=>{
+        return item.id!== paramId;
+      })
+    }
+    // add new one
+    let boxInfo = this.getBoxFormmat(rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate], zInfo);
 
-  // get webgl coordinates by screen event 
-  public getWebglPositionFromEvent(container:HTMLElement,camera:THREE.Camera,scene:THREE.Scene,event: THREE.Event) {
+    this.setBoxList([...boxList,boxInfo])
+
+    if (rectPoints.length > 0) {
+      let sharpRect = rectPoints.map((item) => {
+        return {
+          0: item.x,
+          1: item.y,
+        };
+      });
+
+      let boxMesh = this.getBox(sharpRect, zInfo, color);
+      boxMesh.name =boxInfo.id + "box"
+      let boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
+      boxArrowMesh.name = boxInfo.id +"boxArrow";
+      this.scene.add(boxMesh);
+      this.scene.add(boxArrowMesh);
+    }
+    return boxInfo;
+  };
+
+  // get webgl coordinates by screen event
+  public getWebglPositionFromEvent(
+    container: HTMLElement,
+    camera: THREE.Camera,
+    scene: THREE.Scene,
+    event: THREE.Event,
+  ) {
     let mouseWord: {
       x: number;
       y: number;
     } = { x: 0, y: 0 };
     let raycaster = new THREE.Raycaster();
-    let containerInfo =  container.getBoundingClientRect();
+    let containerInfo = container.getBoundingClientRect();
     let containerWidth = container.offsetWidth;
     let containerHeight = container.offsetHeight;
 
@@ -244,32 +296,20 @@ class PointCloudOperation extends PointCloud {
       if (event.button === MOUSE.LEFT) {
         // 鼠标移动事件
         self.container.addEventListener('pointermove', handleMouseMove);
-        let clickPoint = self.getWebglPositionFromEvent(self.container,self.camera,self.scene,event);
+        let clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
         points = [...points, clickPoint];
         if (points.length === 3) {
-          let { sharpRect, rect } = getFooterRect(points.slice(0, 2), clickPoint);
+          let { rect } = getFooterRect(points.slice(0, 2), clickPoint);
           let zInfo = self.getSensesPointZAxisInPolygon(rect);
-          if(zInfo.zCount>0){
-            self.drawBox(sharpRect, zInfo, 0xffffff);
-            self.darwBoxArrowByRectAndZinfo(rect, zInfo, 0xffffff);
-            let box = self.getBoxFormmat(rect as [ICoordinate,ICoordinate,ICoordinate,ICoordinate],zInfo)
-            let newBoxList = [box]
-            if(self.boxList){
-              newBoxList = newBoxList.concat(self.boxList)
-            }
-            self.setBoxList(newBoxList);
-            console.log(self.boxList)
-  
-            self.emit('boxAdded',rect,box.attribute,box.id );
-            
+          if (zInfo.zCount > 0) {
+            let box = self.addBoxInScene(rect,zInfo,0xffffff)
+            self.emit('boxAdded', rect, box.attribute, box.id);
           }
           // 清除点数据
           points = [];
           // 清除辅助线
-          let secondMeshLine = self.scene.getObjectByName(secondlineName) as unknown as THREE.Object3D;
-          let firstMeshLine = self.scene.getObjectByName(firstlineName) as unknown as THREE.Object3D;
-          self.scene.remove(secondMeshLine);
-          self.scene.remove(firstMeshLine);
+          self.removeObjectByName(secondlineName);
+          self.removeObjectByName(firstlineName);
           self.container.removeEventListener('pointermove', handleMouseMove);
         }
         self.render();
@@ -278,7 +318,7 @@ class PointCloudOperation extends PointCloud {
 
     // draw a line bye moving the mouse
     function handleMouseMove(event: THREE.Event) {
-      let clickPoint = self.getWebglPositionFromEvent(self.container,self.camera,self.scene,event);
+      let clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
       if (points.length === 1) {
         let tmpPoint = [...points, clickPoint];
         if (!firstlineName) {
@@ -311,7 +351,6 @@ class PointCloudOperation extends PointCloud {
       }
       self.render();
     }
-
   }
 }
 

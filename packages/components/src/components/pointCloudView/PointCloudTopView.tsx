@@ -182,7 +182,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
         addPolygon(polygon);
         return;
       }
-
       pointCloudViews.topViewAddBox(polygon, size);
     });
 

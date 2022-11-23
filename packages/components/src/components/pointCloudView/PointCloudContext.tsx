@@ -1,16 +1,16 @@
 import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@label-u/utils';
-import { PointCloud, PointCloudAnnotation } from '@label-u/annotation';
+import { PointCloudAnnotation, PointCloudOperation } from '@label-u/annotation';
 import React, { useMemo, useState } from 'react';
 
 interface IPointCloudContextInstances {
   topViewInstance?: PointCloudAnnotation;
   sideViewInstance?: PointCloudAnnotation;
   backViewInstance?: PointCloudAnnotation;
-  mainViewInstance?: PointCloud;
+  mainViewInstance?: PointCloudOperation;
   setTopViewInstance: (instance: PointCloudAnnotation) => void;
   setSideViewInstance: (instance: PointCloudAnnotation) => void;
   setBackViewInstance: (instance: PointCloudAnnotation) => void;
-  setMainViewInstance: (instance: PointCloud) => void;
+  setMainViewInstance: (instance: PointCloudOperation) => void;
 }
 
 export interface IPointCloudContext extends IPointCloudContextInstances {
@@ -64,7 +64,7 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [topViewInstance, setTopViewInstance] = useState<PointCloudAnnotation>();
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
-  const [mainViewInstance, setMainViewInstance] = useState<PointCloud>();
+  const [mainViewInstance, setMainViewInstance] = useState<PointCloudOperation>();
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';

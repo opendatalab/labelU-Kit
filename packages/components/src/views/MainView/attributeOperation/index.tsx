@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
 import { LabelUContext } from '@/store/ctx';
-import { UseAttributes } from '@/components/pointCloudView/hooks/useAttribute';
+// import { UseAttributes } from '@/components/pointCloudView/hooks/useAttribute';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -30,7 +30,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
-  const { updateTopViewAttribute } = UseAttributes();
+  // const { updateTopViewAttribute } = UseAttributes();
 
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
@@ -109,7 +109,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 if (toolInstance) {
                   toolInstance.setDefaultAttribute(item.key);
                 } 
-                updateTopViewAttribute(item.key);
+                // updateTopViewAttribute(item.key);
                 forceRender((s) => s + 1);
               }}
             >
@@ -167,7 +167,8 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 if (toolInstance) {
                   toolInstance.setDefaultAttribute(attribute.key);
                 }
-                updateTopViewAttribute?.(attribute.key);
+                // top view don't need attribute
+                // updateTopViewAttribute?.(attribute.key);
 
                 forceRender((s) => s + 1);
                 // alert(attribute.key)
