@@ -34,34 +34,7 @@ const PointCloudView = {
   Back: 'Back',
 };
 
-/**
- * Get the coordinate from canvas2d-coordinate to world coordinate
- */
-export const transferCanvas2World = (
-  currentPos: { x: number; y: number },
-  size: { width: number; height: number },
-) => {
-  const { width: w, height: h } = size;
-  const { x, y } = currentPos;
 
-  // x-Axis is the Positive Direction, so the x-coordinates need to be swapped with the y-coordinates
-  return {
-    x: -y + h / 2,
-    y: -(x - w / 2),
-  };
-};
-
-export const transerWord2Canvas = (
-  wordProps: { x: number; y: number },
-  size: { width: number; height: number },
-) => {
-  const { width: w, height: h } = size;
-  const { x, y } = wordProps;
-  return {
-    x: w / 2 - y,
-    y: h / 2 - x,
-  };
-};
 
 export const topViewPolygon2PointCloud = (
   newPolygon: any,
@@ -71,7 +44,7 @@ export const topViewPolygon2PointCloud = (
   defaultValue?: { [v: string]: any },
 ) => {
   const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
-    transferCanvas2World(v, size),
+  MathUtils.transferCanvas2World(v, size),
   );
 
   const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
@@ -301,6 +274,8 @@ export const synchronizeTopView = (
   }
   // Control the 3D view data to create box
   mainViewInstance.generateBox(newBoxParams, newPolygon.id);
+  // let zInfo = mainViewInstance?.getSensesPointZAxisInPolygon(newPolygon.pointList);
+  // mainViewInstance.updateBoxInSene(newPolygon.pointList,zInfo,0xffffff,newPolygon.id);
   mainViewInstance.updateCameraByBox(newBoxParams, EPerspectiveView.Top);
   mainViewInstance.render();
 
@@ -377,11 +352,17 @@ export const usePointCloudViews = () => {
   //   return 1;
   // };
 
+  // const mainViewGenBox = (newBoxParams: IPointCloudBox) => {
+  //   mainViewInstance?.generateBox(newBoxParams);
+  //   mainViewInstance?.controls.update();
+  //   mainViewInstance?.render();
+  // };
+
   const updateMainViewGenBox = (polygon: IPolygonData) => {
     if (polygon.id) {
       let zInfo = mainViewInstance?.getSensesPointZAxisInPolygon(polygon.pointList);
       if (zInfo) {
-        mainViewInstance?.addBoxInScene(polygon.pointList, zInfo, 0xffffff, polygon.id);
+        mainViewInstance?.updateBoxInSene(polygon.pointList, zInfo, 0xffffff, polygon.id);
         mainViewInstance?.controls.update();
         mainViewInstance?.render();
       }
@@ -414,7 +395,7 @@ export const usePointCloudViews = () => {
 
     polygonOperation.setSelectedIDs([newPolygon.id]);
     setSelectedIDs(boxParams.id);
-    syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams);
+    syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams,true);
     addPointCloudBox(boxParams);
   };
 
@@ -427,7 +408,6 @@ export const usePointCloudViews = () => {
     if (!boxParams || !polygonOperation) {
       return;
     }
-
     const polygon = polygonOperation.selectedPolygon;
     syncPointCloudViews(PointCloudView.Top, polygon, boxParams);
   };
@@ -506,7 +486,7 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param boxParams
    */
-  const syncPointCloudViews = (omitView: string, polygon: any, boxParams: IPointCloudBox) => {
+  const syncPointCloudViews = (omitView: string, polygon: any, boxParams: IPointCloudBox,is3DToOther?:boolean) => {
     const dataUrl = currentData?.url;
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -526,8 +506,25 @@ export const usePointCloudViews = () => {
         viewToBeUpdated[key]();
       }
     });
-    updateMainViewGenBox(polygon);
-    mainViewInstance?.highlightOriginPointCloud(boxParams);
+    // is add box from point Cloud
+    if(!is3DToOther){
+      let wordPolygonPointList = polygon.pointList.map((point: { x: number; y: number }) => {
+        const size = {
+          width: topViewInstance?.pointCloud2dOperation.container.offsetWidth as number,
+          height: topViewInstance?.pointCloud2dOperation.container.offsetHeight as number,
+        };
+        return MathUtils.transferCanvas2World(point, size);
+      });
+  
+      let wordPolygon = {
+        ...polygon,
+        pointList:wordPolygonPointList
+      }
+      updateMainViewGenBox(wordPolygon);
+      // mainViewGenBox(boxParams);
+      mainViewInstance?.highlightOriginPointCloud(boxParams);
+    }
+
   };
 
   const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {

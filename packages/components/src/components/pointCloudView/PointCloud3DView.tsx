@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import { ICoordinate, PointCloudOperation } from '@label-u/annotation';
+import { ICoordinate, MathUtils, PointCloudOperation } from '@label-u/annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@label-u/utils';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -11,12 +11,14 @@ import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
 import { Switch } from 'antd';
 import useSize from '@/hooks/useSize';
-import { transerWord2Canvas, usePointCloudViews } from './hooks/usePointCloudViews';
+import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { useTranslation } from 'react-i18next';
-import { LabelUContext } from '@/store/ctx';
+import { LabelUContext, useSelector } from '@/store/ctx';
 import { BoxInfos } from './PointCloudInfos';
+import { BasicConfig } from '@/interface/toolConfig';
+import { AppState } from '@/store';
 
-const pointCloudID = 'LABELBEE-POINTCLOUD';
+const pointCloudID = 'LABELU-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
   isActive: boolean;
   setTarget3DView: (perspectiveView: EPerspectiveView) => void;
@@ -72,7 +74,7 @@ const PointCloud3DSideBar = () => {
   );
 };
 
-const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({ currentData,config }) => {
   const ptCtx = useContext(PointCloudContext);
   const [showDirection, setShowDirection] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
@@ -80,6 +82,10 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
   const size = useSize(ref);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
+  const toolStyle = useSelector((state: AppState) => {
+    return { ...state.toolStyle };
+  });
+
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
       return;
@@ -109,6 +115,8 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
           backgroundColor: '#4c4c4c',
           isOrthographicCamera: true,
           attribute: '',
+          // @ts-ignore
+          config:config.config,
         });
       }
       if (currentData.result) {
@@ -144,17 +152,19 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
         // const currentPolygonList = TopView2dOperation.polygonList;
 
         const cavasPointList = pointList.map((point) => {
-          return transerWord2Canvas(point, sizeTop);
+          return MathUtils.transerWord2Canvas(point, sizeTop);
         });
         // bacause top view should only show the selected box so we should clear the previous polygon list
         TopView2dOperation.setPolygonList([]);
-        TopView2dOperation.drawingPointList = cavasPointList
-        TopView2dOperation.addDrawingPointToPolygonList(true,id);
-        TopView2dOperation.setSelectedIDs([id])
+        TopView2dOperation.drawingPointList = cavasPointList;
+        TopView2dOperation.addDrawingPointToPolygonList(true, id);
+        TopView2dOperation.setSelectedIDs([id]);
         TopView2dOperation.render();
         ptCtx.setSelectedIDs([id]);
       },
     );
+
+    mainViewInstance.setStyle(toolStyle);
     // return () => {
     //   TopView2dOperation.unbind('validUpdate', validUpdate);
     // };
@@ -200,14 +210,13 @@ const PointCloud3D: React.FC<IAnnotationStateProps> = ({ currentData }) => {
           '100%',
       }}
     >
-      <div className={getClassName('point-cloud-3d-content')} style={{position:"relative"}}>
+      <div className={getClassName('point-cloud-3d-content')} style={{ position: 'relative' }}>
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>
           <PointCloud3DSideBar />
         </PointCloud3DContext.Provider>
         <BoxInfos />
         <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />
       </div>
- 
     </PointCloudContainer>
   );
 };
