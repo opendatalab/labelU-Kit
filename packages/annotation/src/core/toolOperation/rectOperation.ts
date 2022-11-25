@@ -1156,10 +1156,10 @@ class RectOperation extends BasicToolOperation {
 
         break;
 
-      case EKeyCode.Z:
-        this.setIsHidden(!this.isHidden);
-        this.render();
-        break;
+      // case EKeyCode.Z:
+      //   this.setIsHidden(!this.isHidden);
+      //   this.render();
+      //   break;
 
       case EKeyCode.Delete:
         this.deleteRect(this.selectedRectID);

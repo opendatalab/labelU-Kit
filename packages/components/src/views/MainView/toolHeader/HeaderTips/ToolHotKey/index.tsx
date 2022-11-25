@@ -2,8 +2,8 @@ import { Popover } from 'antd/es';
 import _ from 'lodash';
 import React, { useState } from 'react';
 
-import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj1.svg';
-import hotKeyHoverSvg from '@/assets/annotation/toolHotKeyIcon/icon_kj_h.svg';
+// import hotKeySvg from '@/assets/annotation/toolHotKeyIcon/icon_kj1.svg';
+// import hotKeyHoverSvg from '@/assets/annotation/toolHotKeyIcon/icon_kj_h.svg';
 import { EToolName } from '@/data/enums/ToolType';
 import rectToolShortcutTable from './rectToolShortCutTable';
 import pointToolShortcutTable from './point';

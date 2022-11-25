@@ -373,10 +373,10 @@ class PointOperation extends BasicToolOperation {
         this.onTabKeyDown(e);
         break;
       }
-      case EKeyCode.Z:
-        this.setIsHidden(!this.isHidden);
-        this.render();
-        break;
+      // case EKeyCode.Z:
+      //   this.setIsHidden(!this.isHidden);
+      //   this.render();
+      //   break;
       default: {
         if (this.config.attributeConfigurable) {
           const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config?.attributeList);

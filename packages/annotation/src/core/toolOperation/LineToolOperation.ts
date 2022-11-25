@@ -1558,9 +1558,9 @@ class LineToolOperation extends BasicToolOperation {
 
     this.setKeyDownStatus(e);
 
-    if (e.keyCode === EKeyCode.Z && !e.ctrlKey) {
-      this.toggleIsHide();
-    }
+    // if (e.keyCode === EKeyCode.Z && !e.ctrlKey) {
+    //   this.toggleIsHide();
+    // }
 
     /** 绘制水平/垂直线 */
     if (e.keyCode === EKeyCode.Shift) {

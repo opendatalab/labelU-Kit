@@ -840,17 +840,21 @@ class BasicToolOperation extends EventListener {
         this.isSpaceKey = true;
         break;
 
-      case EKeyCode.Z:
-        if (e.ctrlKey) {
-          if (e.shiftKey) {
-            this.redo();
-          } else {
-            this.undo();
-          }
+      // case EKeyCode.Z:
+      //   if (e.ctrlKey) {
+      //     console.log(this)
+      //     console.log(this.prevResultList);
+      //     console.log(this.basicResult);
+      //     debugger;
+      //     if (e.shiftKey) {
+      //       this.redo();
+      //     } else {
+      //       this.undo();
+      //     }
 
-          return false;
-        }
-        break;
+      //     return false;
+      //   }
+      //   break;
 
       default: {
         break;

@@ -714,15 +714,15 @@ class PolygonOperation extends BasicToolOperation {
 
         break;
 
-      case EKeyCode.Z:
-        if (e.altKey) {
-          this.onCombinedExecute();
-          return;
-        }
+      // case EKeyCode.Z:
+      //   if (e.altKey) {
+      //     this.onCombinedExecute();
+      //     return;
+      //   }
 
-        this.setIsHidden(!this.isHidden);
-        this.render();
-        break;
+      //   this.setIsHidden(!this.isHidden);
+      //   this.render();
+      //   break;
 
       case EKeyCode.Delete:
         this.deletePolygon(this.selectedID);

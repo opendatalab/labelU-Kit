@@ -36,6 +36,8 @@ export { EToolName, TOOL_NAME } from './constant/tool';
 
 export { COLORS_ARRAY } from './constant/style';
 
+import EKeyCode from './constant/keyCode';
+
 const toolUtils = CommonToolUtils;
 
 // 工具对外暴露配置统一定义
@@ -71,4 +73,6 @@ export {
   ImgUtils,
   MathUtils,
   AnnotationEngine,
+  // constants
+  EKeyCode
 };
