@@ -67,6 +67,11 @@ body {
   color: #ffffff !important;
 }
 
+
+.#{$prefix}-layout-preview {
+  height: 89vh !important;
+}
+
 .#{$prefix}-layout {
   position: relative;
   overflow: hidden;
@@ -257,7 +262,7 @@ body {
     margin-top: 16px;
     overflow-y: scroll;
     overflow-x: hidden;
-    height: calc(100vh - 180px);
+    height: calc(100% - 10px);
     position: relative;
     width: 100%;
   }
@@ -543,6 +548,9 @@ body {
     bottom: 16px;
     transform: translate(-50%, 0%);
     left: 50%;
+  }
+  .attributeResultPreview{
+    height: calc(89vh - 180px) !important;
   }
 
   .attributeResult {

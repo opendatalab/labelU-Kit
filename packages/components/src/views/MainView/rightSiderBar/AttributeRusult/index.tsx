@@ -38,6 +38,7 @@ interface ToolInfo {
 }
 
 interface IProps {
+  isPreview:boolean;
   attributeList: Attribute[];
   imgIndex: number;
   imgList: IFileItem[];
@@ -48,6 +49,7 @@ interface IProps {
 }
 
 const AttributeRusult: FC<IProps> = ({
+  isPreview,
   imgIndex,
   imgList,
   toolInstance,
@@ -518,7 +520,10 @@ const AttributeRusult: FC<IProps> = ({
   }
 
   return (
-    <div className='attributeResult'>
+    <div className={classNames({
+      "attributeResult":true,
+      "attributeResultPreview":isPreview
+    })}>
       <DrageModel
         title='详细信息'
         ref={dragModalRef}

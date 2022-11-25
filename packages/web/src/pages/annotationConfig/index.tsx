@@ -138,15 +138,17 @@ const AnnotationConfig: FC = () => {
               <div className="rightHeader">
                 <span className="leftSpan">标注预览</span>
               </div>
-              <Annotation
-                isPreview={true}
-                attribute={attribute}
-                tagList={tagList}
-                fileList={fileList}
-                textConfig={textConfig}
-                goBack={goBack}
-                tools={tools}
-              />
+              <div className='rightContent'>
+                <Annotation
+                  isPreview={true}
+                  attribute={attribute}
+                  tagList={tagList}
+                  fileList={fileList}
+                  textConfig={textConfig}
+                  goBack={goBack}
+                  tools={tools}
+                />
+              </div>
             </>
           ) : (
             <div className="notMatchBox">

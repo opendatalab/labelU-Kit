@@ -25,11 +25,12 @@ interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
   currentToolName?: EToolName;
+  isPreview: boolean;
 }
 
 const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar: React.FC<IProps> = (props) => {
-  const { imgList, imgIndex, currentToolName } = props;
+  const { imgList, imgIndex, currentToolName, isPreview } = props;
 
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -43,7 +44,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
-  const [isClearnHover,setIsClearHover] = useState<boolean>(false);
+  const [isClearnHover, setIsClearHover] = useState<boolean>(false);
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -117,13 +118,15 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       setTextTab(
         <div className='rightTab'>
           <p>文本描述</p>
-          <span className={classNames({
-              'innerWord':true,
-              'finish': textResultKeys &&
-              textResultKeys.length > 0 &&
-              textResultKeys.length === textConfig.length
-
-            })}>
+          <span
+            className={classNames({
+              innerWord: true,
+              finish:
+                textResultKeys &&
+                textResultKeys.length > 0 &&
+                textResultKeys.length === textConfig.length,
+            })}
+          >
             {textResultKeys &&
             textResultKeys.length > 0 &&
             textResultKeys.length === textConfig.length
@@ -140,13 +143,15 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         setTagTab(
           <div className='rightTab'>
             <p>分类</p>
-            <span className={classNames({
-              'innerWord':true,
-              'finish': tagResultKeys &&
-              tagResultKeys.length > 0 &&
-              tagResultKeys.length === tagConfigList.length
-
-            })}>
+            <span
+              className={classNames({
+                innerWord: true,
+                finish:
+                  tagResultKeys &&
+                  tagResultKeys.length > 0 &&
+                  tagResultKeys.length === tagConfigList.length,
+              })}
+            >
               {tagResultKeys &&
               tagResultKeys.length > 0 &&
               tagResultKeys.length === tagConfigList.length
@@ -197,7 +202,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           </Tabs.TabPane>
         )}
         <Tabs.TabPane tab={attributeTab} key='2'>
-          <AttributeRusult />
+          <AttributeRusult isPreview={isPreview} />
           {isShowClear && (
             <Popconfirm
               title='确认清空标注？'
@@ -208,17 +213,19 @@ const RightSiderbar: React.FC<IProps> = (props) => {
               okButtonProps={{ loading: confirmLoading }}
               onCancel={handleCancel}
             >
-              <img onMouseEnter={e=>{
-                e.stopPropagation();
-                setIsClearHover(true)
-              }} 
-               onMouseLeave={
-                e=>{
+              <img
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  setIsClearHover(true);
+                }}
+                onMouseLeave={(e) => {
                   e.stopPropagation();
                   setIsClearHover(false);
-                }
-               }
-              onClick={showPopconfirm} className='clrearResult' src={isClearnHover?ClearResultIconHover:ClearResultIcon} />
+                }}
+                onClick={showPopconfirm}
+                className='clrearResult'
+                src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
+              />
             </Popconfirm>
           )}
         </Tabs.TabPane>

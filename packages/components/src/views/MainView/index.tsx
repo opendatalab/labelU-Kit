@@ -8,7 +8,7 @@ import React from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 // import Sidebar from './sidebar';
-import RightSiderbar from './rightSiderBar'
+import RightSiderbar from './rightSiderBar';
 import ToolFooter from './toolFooter';
 import ToolHeader from './toolHeader';
 // import { getStepConfig } from '@/store/annotation/reducer';
@@ -19,8 +19,8 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import AttributeOperation from './attributeOperation';
 import { IFileItem } from '@/types/data';
-import LeftSider from './leftSiderBar'
-
+import LeftSider from './leftSiderBar';
+import classNames from 'classnames';
 
 const { EVideoToolName } = cTool;
 
@@ -64,7 +64,13 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   return (
     <ViewportProvider>
       <Spin spinning={false}>
-        <Layout className={`${layoutCls} ${props.className}`} style={props.style?.layout}>
+        <Layout
+          className={classNames({
+            'lab-layout': true,
+            'lab-layout-preview': props.isPreview,
+          })}
+          style={props.style?.layout}
+        >
           <header className={`${layoutCls}__header`} style={props.style?.header}>
             <ToolHeader
               isPreview={props?.isPreview}
@@ -82,7 +88,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
             </Content>
             <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
               {/* <Sidebar sider={props?.sider} /> */}
-              <RightSiderbar />
+              <RightSiderbar isPreview={props?.isPreview as boolean} />
             </Sider>
           </Layout>
         </Layout>
