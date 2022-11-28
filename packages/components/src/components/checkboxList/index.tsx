@@ -29,7 +29,7 @@ const CheckboxList = (props: IProps) => {
             <span className="sensebee-checkbox-label" title={i.label}>
               {i.label}
             </span>
-            <span className="sensebee-checkbox-num">{props?.num ?? index}</span>
+            {/* <span className="sensebee-checkbox-num">{props?.num ?? index}</span> */}
           </Checkbox>
         ))}
       </Checkbox.Group>
