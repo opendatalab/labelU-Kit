@@ -1,6 +1,6 @@
 import { BasicConfig } from '@label-u/components';
 import React, { FC, useMemo, useState } from 'react';
-import { Col, Row, Input as SenseInput, Form, Select } from 'antd';
+import { Col, Row, Input as SenseInput, Form, Select, Switch } from 'antd';
 import { MapStateJSONTab } from '../../components/AttributeConfig';
 // import SvgIcon from '../../../../components/basic/svgIcon';
 import DownWardIcon from '../../../../img/common/downWardIcon.svg';
@@ -14,6 +14,7 @@ interface FormPolygonConfig {
   lineType: number;
   lowerLimitPointNum: number;
   upperLimitPointNum: number;
+  edgeAdsorption: boolean;
   attributeList: AttributeItem[];
 }
 
@@ -55,6 +56,8 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
   useMemo(() => {
     if (props.config) {
       let initV = {
+        // @ts-ignore
+        edgeAdsorption: props.config.edgeAdsorption ? props.config.edgeAdsorption : false,
         // @ts-ignore
         lineType: props.config.lineType ? props.config.lineType : 0,
         // @ts-ignore
@@ -107,7 +110,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
             </Select>
           </Form.Item>
 
-          <Row className='double-input'>
+          <Row className="double-input">
             <Col span={4}>
               <div className="selectedName">闭点个数</div>
             </Col>
@@ -122,6 +125,19 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = props => {
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item
+            valuePropName="checked"
+            label={<span className="formTitle">边缘吸附</span>}
+            name="edgeAdsorption"
+            initialValue={initVal.edgeAdsorption}
+          >
+            <Switch
+              disabled={isAllReadOnly}
+              onChange={e => {
+                form.submit();
+              }}
+            />
+          </Form.Item>
           <Form.Item label="标签配置" name="attributeList" initialValue={initVal.attributeList}>
             <MapStateJSONTab
               onSubmitAction={() => {
