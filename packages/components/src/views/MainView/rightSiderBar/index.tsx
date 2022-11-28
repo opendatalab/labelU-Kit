@@ -213,6 +213,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
               okButtonProps={{ loading: confirmLoading }}
               onCancel={handleCancel}
             >
+              <div className='leftBarFooter'>
               <img
                 onMouseEnter={(e) => {
                   e.stopPropagation();
@@ -226,6 +227,8 @@ const RightSiderbar: React.FC<IProps> = (props) => {
                 className='clrearResult'
                 src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
               />
+              </div>
+ 
             </Popconfirm>
           )}
         </Tabs.TabPane>

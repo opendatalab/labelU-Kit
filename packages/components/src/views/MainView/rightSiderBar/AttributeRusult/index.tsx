@@ -38,7 +38,7 @@ interface ToolInfo {
 }
 
 interface IProps {
-  isPreview:boolean;
+  isPreview: boolean;
   attributeList: Attribute[];
   imgIndex: number;
   imgList: IFileItem[];
@@ -128,15 +128,26 @@ const AttributeRusult: FC<IProps> = ({
           if (result && Array.isArray(result)) {
             for (let oneLabel of result) {
               // eslint-disable-next-line max-depth
+              let isExistInTmpToolInfo = false;
               if (attributeMap.has(oneLabel.attribute)) {
                 let tmpToolInfo = attributeMap.get(oneLabel.attribute);
-                tmpToolInfo.push({
-                  toolName: item.toolName,
-                  order: oneLabel.order,
-                  icon: item.commonSvg,
-                  isVisible: oneLabel.isVisible,
-                  textAttribute: oneLabel.textAttribute,
-                });
+                // 去重
+                for(let i=0;i<tmpToolInfo.length;i++){
+                  if(tmpToolInfo[i].order === oneLabel.order){
+                    isExistInTmpToolInfo = true;
+                  }
+                }
+
+                if(!isExistInTmpToolInfo){
+                  tmpToolInfo.push({
+                    toolName: item.toolName,
+                    order: oneLabel.order,
+                    icon: item.commonSvg,
+                    isVisible: oneLabel.isVisible,
+                    textAttribute: oneLabel.textAttribute,
+                  });
+                }
+   
               } else {
                 attributeMap.set(oneLabel.attribute, [
                   {
@@ -170,6 +181,10 @@ const AttributeRusult: FC<IProps> = ({
           toolInfo: attributeMap.get(key),
         });
       }
+      console.log("???????????????")
+      console.log(tmpAttributeResult)
+      
+
       setAttributeResultList(tmpAttributeResult);
     }
   }, [imgList, imgIndex]);
@@ -520,10 +535,12 @@ const AttributeRusult: FC<IProps> = ({
   }
 
   return (
-    <div className={classNames({
-      "attributeResult":true,
-      "attributeResultPreview":isPreview
-    })}>
+    <div
+      className={classNames({
+        attributeResult: true,
+        attributeResultPreview: isPreview,
+      })}
+    >
       <DrageModel
         title='详细信息'
         ref={dragModalRef}
@@ -695,7 +712,7 @@ const AttributeRusult: FC<IProps> = ({
                             />
                           )}
                           <img
-                           style={{ left: 50, position: 'absolute' }}
+                            style={{ left: 50, position: 'absolute' }}
                             src={AttributeUnionIcon}
                             className='hoverShow'
                             onClick={(e) => {
