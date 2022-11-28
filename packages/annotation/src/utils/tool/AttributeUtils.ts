@@ -99,7 +99,7 @@ export default class AttributeUtils {
    */
   public static getAttributeIndex(attribute: string | undefined, attributeList: IInputList[]) {
     try {
-      const attributeIndex = attributeList.findIndex((i: any) => i.value === attribute);
+      const attributeIndex = attributeList.findIndex((i: any) => i.key === attribute);
       if (attributeIndex >= 8) {
         // 大于指定颜色范围后需要循环
 

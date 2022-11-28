@@ -10,98 +10,126 @@
       }
     ]
   },
-  "textConfig": [
+
+  "tools": [
     {
-      "label": "我的描述",
-      "key": "描述的关键",
-      "required": true,
-      "default": "",
-      "maxLength": 200
+      "tool": "rectTool",
+      "config": {
+        "isShowCursor": false,
+        "showConfirm": false,
+        "skipWhileNoDependencies": false,
+        "drawOutsideTarget": false,
+        "copyBackwardResult": true,
+        "minWidth": 1,
+        "attributeConfigurable": true,
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": "",
+        "attributeList": [
+          {
+            "key": "rectTool",
+            "value": "rectTool"
+          }
+        ]
+      }
     },
     {
-      "label": "我的描述1",
-      "key": "描述的关键1",
-      "required": true,
-      "default": "",
-      "maxLength": 200
-    }
-  ],
-  "attribute": [
-    {
-      "key": "玩偶发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的",
-      "value": "玩偶发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的发生的"
+      "tool": "polygonTool",
+      "config": {
+        "isShowCursor": false,
+        "lineType": 0,
+        "lineColor": 0,
+        "drawOutsideTarget": false,
+        "edgeAdsorption": true,
+        "copyBackwardResult": true,
+        "attributeConfigurable": true,
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": "",
+        "attributeList": [
+          {
+            "key": "polygonTool",
+            "value": "polygonTool"
+          }
+        ]
+      }
     },
     {
-      "key": "玩偶a",
-      "value": "玩偶a"
+      "tool": "pointTool",
+      "config": {
+        "upperLimit": 10,
+        "isShowCursor": false,
+        "attributeConfigurable": true,
+        "copyBackwardResult": true,
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": "",
+        "attributeList": [
+          {
+            "key": "pointTool",
+            "value": "pointTool"
+          },
+          {
+            "key": "类别hO",
+            "value": "class-hO"
+          },
+          {
+            "key": "类别Uy",
+            "value": "class-Uy"
+          },
+          {
+            "key": "类别Aw",
+            "value": "class-Aw"
+          },
+          {
+            "key": "类别4p",
+            "value": "class-4p"
+          },
+          {
+            "key": "类别Ev",
+            "value": "class-Ev"
+          }
+        ]
+      }
     },
     {
-      "key": "玩偶b",
-      "value": "玩偶b"
+      "tool": "tagTool",
+      "config": {
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": ""
+      }
     },
     {
-      "key": "玩偶的风格的",
-      "value": "玩偶的风格的"
+      "tool": "lineTool",
+      "config": {
+        "isShowCursor": false,
+        "lineType": 0,
+        "lineColor": 1,
+        "edgeAdsorption": true,
+        "outOfTarget": true,
+        "copyBackwardResult": true,
+        "attributeConfigurable": true,
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": "",
+        "lowerLimitPointNum": 4,
+        "upperLimitPointNum": "",
+        "attributeList": [
+          {
+            "key": "lineTool",
+            "value": "lineTool"
+          }
+        ]
+      }
     },
     {
-      "key": "玩偶d",
-      "value": "玩偶d"
-    },
-    {
-      "key": "玩偶e",
-      "value": "玩偶e"
-    },
-    {
-      "key": "玩偶f",
-      "value": "玩偶f"
-    },
-    {
-      "key": "玩偶g",
-      "value": "玩偶g"
-    },
-    {
-      "key": "玩偶h",
-      "value": "玩偶h"
-    },
-    {
-      "key": "玩偶i",
-      "value": "玩偶i"
-    },
-    {
-      "key": "玩偶j",
-      "value": "玩偶j"
-    },
-    {
-      "key": "玩偶k",
-      "value": "玩偶k"
-    },
-    {
-      "key": "玩偶l",
-      "value": "玩偶l"
-    },
-    {
-      "key": "玩偶m",
-      "value": "玩偶m"
-    },
-    {
-      "key": "玩偶n",
-      "value": "玩偶n"
-    },
-    {
-      "key": "玩偶o",
-      "value": "玩偶o"
-    },
-    {
-      "key": "玩偶p",
-      "value": "玩偶p"
-    },
-    {
-      "key": "玩偶q",
-      "value": "玩偶q"
-    },
-    {
-      "key": "玩偶r",
-      "value": "玩偶r"
+      "tool": "textTool",
+      "config": {
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": ""
+      }
     }
   ],
   "tagList": [
@@ -140,69 +168,58 @@
       ]
     }
   ],
-  "tools": [
+  "attribute": [
     {
-      "tool": "lineTool",
-      "config": {
-        "isShowCursor": false,
-        "lineType": 0,
-        "lineColor": 1,
-        "edgeAdsorption": true,
-        "outOfTarget": true,
-        "copyBackwardResult": true,
-        "attributeConfigurable": true,
-        "textConfigurable": true,
-        "textCheckType": 4,
-        "customFormat": "^[\\s\\S]{1,3}$",
-        "lowerLimitPointNum": 4,
-        "upperLimitPointNum": "",
-        "attributeList": [{ "key": "lineTool", "value": "lineTool" }]
-      }
+      "key": "PPPP",
+      "value": "PPPP"
     },
     {
-      "tool": "pointTool",
-      "config": {
-        "isShowCursor": false,
-        "attributeConfigurable": true,
-        "copyBackwardResult": true,
-        "textConfigurable": true,
-        "textCheckType": 0,
-        "customFormat": "",
-        "attributeList": [{ "key": "pointTool", "value": "pointTool" }]
-      }
+      "key": "类别bA",
+      "value": "class-bA"
     },
     {
-      "tool": "polygonTool",
-      "config": {
-        "isShowCursor": false,
-        "lineType": 0,
-        "lineColor": 0,
-        "drawOutsideTarget": false,
-        "edgeAdsorption": true,
-        "copyBackwardResult": true,
-        "attributeConfigurable": true,
-        "textConfigurable": true,
-        "textCheckType": 0,
-        "customFormat": "",
-        "attributeList": [{ "key": "polygonTool", "value": "polygonTool" }]
-      }
+      "key": "类别6O",
+      "value": "class-6O"
     },
     {
-      "tool": "rectTool",
-      "config": {
-        "isShowCursor": false,
-        "showConfirm": false,
-        "skipWhileNoDependencies": false,
-        "drawOutsideTarget": false,
-        "copyBackwardResult": true,
-        "minWidth": 1,
-        "minHeight": 1,
-        "attributeConfigurable": true,
-        "textConfigurable": true,
-        "textCheckType": 4,
-        "customFormat": "",
-        "attributeList": [{ "key": "rectTool", "value": "rectTool" }]
-      }
+      "key": "类别i6",
+      "value": "class-i6"
+    },
+    {
+      "key": "类别ah",
+      "value": "class-ah"
+    },
+    {
+      "key": "类别cy",
+      "value": "class-cy"
+    },
+    {
+      "key": "类别La",
+      "value": "class-La"
+    },
+    {
+      "key": "类别fw",
+      "value": "class-fw"
+    },
+    {
+      "key": "类别Yv",
+      "value": "class-Yv"
+    }
+  ],
+  "textConfig": [
+    {
+      "label": "我的描述",
+      "key": "描述的关键",
+      "required": true,
+      "default": "",
+      "maxLength": 200
+    },
+    {
+      "label": "我的描述1",
+      "key": "描述的关键1",
+      "required": true,
+      "default": "",
+      "maxLength": 200
     }
   ]
 }
