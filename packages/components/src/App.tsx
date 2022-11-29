@@ -63,7 +63,8 @@ export interface AppProps {
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   showTips?: boolean; // 是否展示 tips
   defaultLang?: 'en' | 'cn'; // 国际化设置
-  leftSider?: React.ReactNode | React.ReactNode;
+  leftSiderContent?: React.ReactNode | React.ReactNode; // 左侧图片列表操作空间
+  topActionContent?:React.ReactNode | React.ReactNode; // 顶部操作空间
   tagConfigList?: OneTag[]; // 配置tag 信息，工具共享一套tag
   attributeList?: Attribute[]; // 标签配置选项，工具共享一套标签
   toolsBasicConfig: BasicConfig[]; // 多工具配置

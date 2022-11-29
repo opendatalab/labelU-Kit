@@ -16,6 +16,20 @@ const AnnotationPage: FC = () => {
   // const currentIsVideo = StepUtils.currentToolIsVideo(1, stepConfig);
   const currentIsVideo = false;
   const [fileList, setFileList] = useState<any[]>([]);
+
+
+  const leftSiderContent = ()=>{
+    return (
+      <h1>左边栏预留</h1>
+    )
+  }
+
+  const topActionContent = ()=>{
+    return (
+      <h1>顶部预留</h1>
+    )
+  }
+
   // 加载工具配置信息 和 文件信息
   useEffect(() => {
     // 工具配置 todo=》补充配置拉取接口
@@ -47,6 +61,8 @@ const AnnotationPage: FC = () => {
           textConfig={textConfig}
           goBack={goBack}
           tools={tools}
+          leftSiderContent={leftSiderContent()}
+          topActionContent={topActionContent()}
         />
       )}
     </>

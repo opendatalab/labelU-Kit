@@ -15,8 +15,10 @@ const Annotation = (props: {
   attribute: Attribute[];
   textConfig: TextConfig;
   isPreview?: boolean;
+  leftSiderContent?: React.ReactNode | React.ReactNode;
+  topActionContent?: React.ReactNode | React.ReactNode;
 }) => {
-  const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview } = props;
+  const { fileList, goBack, tools, tagList, attribute, textConfig, isPreview,leftSiderContent,topActionContent } = props;
   const exportData = (data: any) => {
     // console.log('exportData', data);
   };
@@ -24,9 +26,12 @@ const Annotation = (props: {
     // 翻页时触发当前页面数据的输出
     // console.log('submitData', data);
   };
+
   return (
     <div>
       <AnnotationOperation
+        leftSiderContent={leftSiderContent}
+        topActionContent={topActionContent}      
         isPreview = {isPreview}
         exportData={exportData}
         onSubmit={onSubmit}

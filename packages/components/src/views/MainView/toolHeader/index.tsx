@@ -2,7 +2,12 @@ import { ESubmitType, prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 // import useSize from '@/hooks/useSize';
 import { AppState } from '@/store';
-import { loadImgList, PageForward, ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
+import {
+  loadImgList,
+  PageForward,
+  ToNextStep,
+  ToSubmitFileData,
+} from '@/store/annotation/actionCreators';
 import { IFileItem } from '@/types/data';
 import { Header } from '@/types/main';
 import { IStepInfo } from '@/types/step';
@@ -89,7 +94,7 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList, imgList }
 };
 
 interface IToolHeaderProps {
-  isPreview?:boolean;
+  isPreview?: boolean;
   goBack?: (imgList?: IFileItem[]) => void;
   exportData?: (data: any[]) => void;
   header?: Header;
@@ -102,6 +107,7 @@ interface IToolHeaderProps {
   stepList: IStepInfo[];
   step: number;
   toolsBasicConfig: BasicConfig[];
+  topActionContent?: React.ReactNode;
 }
 
 const ToolHeader: React.FC<IToolHeaderProps> = ({
@@ -117,6 +123,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   step,
   annotationEngine,
   toolsBasicConfig,
+  topActionContent,
 }) => {
   const dispatch = useDispatch();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
@@ -180,11 +187,22 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const NextImageOption = (
     <div className='nextImageOption'>
-      <Button>跳过</Button>
-      <Button type='primary' onClick={(e)=>{
-        e.stopPropagation();
-        dispatch(PageForward());
-      }}>下一页</Button>
+      {topActionContent ? (
+        topActionContent
+      ) : (
+        <>
+          <Button>跳过</Button>
+          <Button
+            type='primary'
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(PageForward());
+            }}
+          >
+            下一页
+          </Button>
+        </>
+      )}
     </div>
   );
 
@@ -222,7 +240,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         {/* <div className={`${prefix}-header__titlePlacement`} /> */}
         {/* {langNode} */}
         <ActionOption />
-        {!isPreview&&NextImageOption}
+        {!isPreview && NextImageOption}
       </div>
     </div>
   );

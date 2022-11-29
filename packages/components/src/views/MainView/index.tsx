@@ -78,11 +78,12 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
               headerName={props.headerName}
               goBack={props.goBack}
               exportData={props.exportData}
+              topActionContent={props.topActionContent}
             />
           </header>
           <AttributeOperation />
           <Layout>
-            {props.leftSider ? props.leftSider : <LeftSider {...props} />}
+            {<LeftSider {...props} />}
             <Content className={`${layoutCls}__content`}>
               <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
