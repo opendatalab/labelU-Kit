@@ -25,11 +25,11 @@ const Index: React.FC<IProps & ItextConfig> = ({
       wrapperCol={{ span: 18 }}
       form={form}
     >
-      <Form.Item label={t('Name')}>{label}</Form.Item>
+      <Form.Item label='名称'>{label}</Form.Item>
       <Form.Item
-        label={t('Maximum Text Input')}
+        label="最大字数"
         name='maxLength'
-        rules={[{ required: true, message: t('Reqired') }]}
+        rules={[{ required: true, message: "必填项" }]}
         initialValue={maxLength}
       >
         <InputNumber min={1} max={1000} style={{ width: '100%' }} />
@@ -39,7 +39,7 @@ const Index: React.FC<IProps & ItextConfig> = ({
           const len = form.getFieldValue('maxLength');
           return (
             <Form.Item
-              label={t('DefaultText')}
+              label="默认文本"
               initialValue={defaultValue}
               name='default'
               rules={[{ max: len, message: t('DefaultTextCharactersLimitNotify', { len }) }]}

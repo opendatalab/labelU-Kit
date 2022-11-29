@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Input, Button, Tooltip, Modal, Form } from 'antd';
 import { cloneDeep } from 'lodash';
-import { ExclamationCircleOutlined, SettingOutlined, CloseCircleFilled } from '@ant-design/icons';
+import { SettingOutlined, CloseCircleFilled } from '@ant-design/icons';
 // import { Config, defaultValue } from '../index';
 import TextConfig from './textConfig';
 import classnames from 'classnames';
@@ -64,8 +64,10 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
     triggerChange([...(value || configs), newConfig]);
   };
   const deleteConfig = (index: number) => {
-    (value || configs).splice(index, 1);
-    let list = value || configs;
+    let tmpValue = value || configs;
+    let list = [...tmpValue].filter((item, Tindex) => {
+      return Tindex !== index;
+    });
     if (list.length === 1 && list[0].key !== 'text') {
       list = [{ ...defaultValue }];
     }
@@ -77,7 +79,7 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
 
   function showPromiseConfirm(obj: ItextConfig, index: number) {
     confirm({
-      title: t('TextSettings'),
+      title: '文本设置',
       icon: null,
       width: 600,
       content: <TextConfig form={form} label={obj.label} maxLength={obj.maxLength} default={obj.default} />,
@@ -165,7 +167,7 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
           </div>
         </div>
       ))}
-      <Button type='primary' style={{ marginTop: 16,borderRadius:4 }} onClick={addTextConfigItem} ghost>
+      <Button type="primary" style={{ marginTop: 16, borderRadius: 4 }} onClick={addTextConfigItem} ghost>
         新建
       </Button>
     </div>

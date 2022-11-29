@@ -1,5 +1,5 @@
 import { TextConfig } from '@label-u/components';
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Form } from 'antd';
 import TextList from '../../components/TextList';
 import { useForm } from 'antd/lib/form/Form';
@@ -43,7 +43,7 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
   // @ts-ignore
   const formSubmitThrottle = window.throttle(() => {
     form.submit();
-  }, delayTime);
+  }, 100);
 
   useMemo(() => {
     if (props) {
@@ -66,13 +66,17 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
   }, []);
   const { children } = props;
 
+
+
   return (
-    <div className="selectedMain" style={{paddingLeft:24}}>
+    <div className="selectedMain" style={{ paddingLeft: 24 }}>
       <Form {...formItemLayout} name={props.name} form={form}>
         <Form.Item name="textConfig" initialValue={initVal}>
           <TextList
+            value={[...initVal]}
             onChange={e => {
               form.setFieldsValue({ textConfig: e });
+              setInitVal(e);
               formSubmitThrottle();
             }}
           />

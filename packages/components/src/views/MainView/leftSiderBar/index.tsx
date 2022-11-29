@@ -28,7 +28,7 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
     dispatch(PageJump(page));
   };
 
-  if (imgList.length === 1) {
+  if (imgList.length === 1 && !leftSiderContent) {
     return <div />;
   }
 
