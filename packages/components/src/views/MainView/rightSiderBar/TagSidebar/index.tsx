@@ -12,11 +12,13 @@ import { useTranslation } from 'react-i18next';
 import { ObjectString } from '@/components/videoPlayer/types';
 import { IFileItem } from '@/types/data';
 import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
+import classNames from 'classnames';
 
 interface IProps {
   imgIndex: number;
   tagConfigList: OneTag[];
   imgList: IFileItem[];
+  isPreview: boolean;
 }
 
 declare interface ITagResult {
@@ -33,12 +35,12 @@ export const expandIconFuc = ({ isActive }: any) => (
   <CaretRightOutlined rotate={isActive ? 90 : 0} style={{ color: 'rgba(0, 0, 0, 0.36)' }} />
 );
 
-const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex }) => {
+const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPreview }) => {
   const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
   const [tagResult, setTagResult] = useState<ITagResult[]>([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
   // const [, forceRender] = useState<number>(0);
-  const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
+  // const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
   const { t } = useTranslation();
   const height = window?.innerHeight - 61 - 200;
 
@@ -249,12 +251,12 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex }) => {
                           // toolInstance.clearResult(true, info.value);
                         }}
                         // src={hoverDeleteIndex === index || isResult ? clearSmallA : clearSmall}
-                        onMouseEnter={() => {
-                          setHoverDeleteIndex(index);
-                        }}
-                        onMouseLeave={() => {
-                          setHoverDeleteIndex(-1);
-                        }}
+                        // onMouseEnter={() => {
+                        //   setHoverDeleteIndex(index);
+                        // }}
+                        // onMouseLeave={() => {
+                        //   setHoverDeleteIndex(-1);
+                        // }}
                       />
                     </Tooltip>
                     {/* {isResult && expandKeyList[index] === '' && <Badge color='#87d068' />} */}
@@ -314,7 +316,11 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex }) => {
   };
 
   return (
-    <div className='tagOperationMenu' ref={sidebarRef}>
+    <div className={classNames({
+      "tagOperationMenu":true,
+      "tagOperationMenuPreview":isPreview
+
+    })} ref={sidebarRef}>
       {tagConfigList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (

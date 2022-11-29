@@ -197,7 +197,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         {tagConfigList && tagConfigList.length > 0 && (
           <Tabs.TabPane tab={tagTab} key='1'>
             <div className={`${sidebarCls}`}>
-              <TagSidebar />
+              <TagSidebar isPreview={isPreview} />
             </div>
           </Tabs.TabPane>
         )}
@@ -235,7 +235,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane tab={textTab} key='3'>
             <div className={`${sidebarCls}`}>
-              <TextToolSidebar />
+              <TextToolSidebar isPreview={isPreview} />
             </div>
           </Tabs.TabPane>
         )}

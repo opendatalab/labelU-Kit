@@ -1285,6 +1285,11 @@ $hotkey-container-padding: 7px;
 }
 
 .tagOperationMenu {
+  padding: 0px 20px;
+  height: calc(89vh - 180px);
+  overflow-y: scroll;
+
+
   .main {
     padding: 8px 8px;
     overflow: auto;
@@ -1369,6 +1374,10 @@ $hotkey-container-padding: 7px;
     border-bottom: 0px;
   }
 }
+.tagOperationMenuPreview{
+  height: calc(89vh - 220px) !important;
+}
+
 
 .sensebee-checkbox-group .ant-checkbox-group {
   display: flex;
@@ -1480,8 +1489,12 @@ $hotkey-container-padding: 7px;
 
 .textToolOperationMenu {
   padding: 0px 20px;
-  height: 100%;
+  height: calc(89vh - 180px);
   overflow-y: scroll;
+}
+
+.textToolOperationMenuPreview{
+  height: calc(89vh - 220px) !important;
 }
 
 .textareaContainer {

@@ -33,6 +33,7 @@ interface IProps {
   step: number;
   stepList: IStepInfo[];
   basicResultList: any[];
+  isPreview: boolean;
 }
 
 interface ITextResult {
@@ -193,6 +194,7 @@ const TextToolSidebar: React.FC<IProps> = ({
   textConfig,
   imgIndex,
   dispatch,
+  isPreview,
   // triggerEventAfterIndexChanged,
   step,
   stepList,
@@ -268,7 +270,10 @@ const TextToolSidebar: React.FC<IProps> = ({
   const disabled = stepConfig.dataSourceStep > 0 && basicResultList.length === 0;
 
   return (
-    <div className='textToolOperationMenu'>
+    <div className={classnames({
+      "textToolOperationMenu":true,
+      "textToolOperationMenuPreview":isPreview
+    })}>
       {result &&
         result.length > 0 &&
         textConfig.map((i, index) => (

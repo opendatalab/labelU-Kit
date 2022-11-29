@@ -110,7 +110,7 @@ const JSONTab = (props: IJsonTabProps) => {
                 placeholder={t('Type')}
                 onChange={(e: any) => changeInputInfo(e, 'key', i)}
                 disabled={readonly}
-                addonBefore={isAttributeList && <ColorTag color={COLORS_ARRAY[i % 8]} />}
+                // addonBefore={isAttributeList && <ColorTag color={COLORS_ARRAY[i % 8]} />}
               />
               <SenseInput
                 className={'sensebee-input'}
