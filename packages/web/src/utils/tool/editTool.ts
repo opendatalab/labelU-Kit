@@ -56,16 +56,16 @@ export const addInputList = (
     };
 
     if (specialState?.isMulti === true) {
-      Object.assign(newData, { isMulti: false });
+      Object.assign(newData, { isMulti: true });
     }
 
     if (specialState?.isDefault === true) {
-      Object.assign(newData, { isDefault: false });
+      Object.assign(newData, { isDefault: true });
     }
 
     if (isInitSubSelected) {
       Object.assign(newData, {
-        subSelected: [{ key: `${baseOptionName}${len}-1`, value: `option${len}-1`, isMulti: false }]
+        subSelected: [{ key: `${baseOptionName}${len}-1`, value: `option${len}-1`, isMulti: true }]
       });
     }
     inputList.push(newData);

@@ -50,7 +50,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
                 {
                   key: '类别2',
                   value: 'class2',
-                  isMulti: false,
+                  isMulti: true,
                   subSelected: [
                     {
                       key: '选项2',
@@ -107,7 +107,12 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
   // 删除对应输入
   const deleteInputInfo = (i: number, subIndex?: number) => {
     const tagList = form?.getFieldValue('tagList');
-    form?.setFieldsValue({ tagList: deleteInputList(tagList, i, subIndex) });
+
+    let newTagList = deleteInputList(tagList, i, subIndex);
+    form?.setFieldsValue({ tagList: newTagList });
+    setInitVal({
+      tagList: newTagList
+    });
   };
 
   // @ts-ignore
@@ -122,7 +127,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
   const { children } = props;
 
   return (
-    <div className="selectedMain" style={{paddingLeft:24}}>
+    <div className="selectedMain" style={{ paddingLeft: 24 }}>
       <Form name={props.name} form={form}>
         <Form.Item label="" name="tagList" shouldUpdate initialValue={initVal.tagList}>
           {initVal.tagList?.map((info, i) => (
@@ -133,11 +138,11 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
               addInputInfo={addInputInfo}
               deleteInputInfo={deleteInputInfo}
               inputIndex={i}
-              key={i}
+              key={info.value}
             />
           ))}
 
-          <Button type='primary' style={{ marginTop: 16,borderRadius:4 }} onClick={() => addInputInfo()} ghost>
+          <Button type="primary" style={{ marginTop: 16, borderRadius: 4 }} onClick={() => addInputInfo()} ghost>
             新建
           </Button>
         </Form.Item>
