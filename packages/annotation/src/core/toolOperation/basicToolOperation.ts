@@ -118,6 +118,8 @@ class BasicToolOperation extends EventListener {
 
   public attributeLockList: string[]; // 属性限制列表
 
+  public allAttributes!:Attribute[];// 多工具所有标签集合
+
   public dblClickListener: DblClickEventListener;
 
   public isHidden: boolean;
@@ -280,6 +282,13 @@ class BasicToolOperation extends EventListener {
    */
   public setPrevResultList(prevResultList: PrevResult[]) {
     this.prevResultList = prevResultList;
+  }
+
+  /**
+   * 多工具全量标签设置
+   */
+  public setAllAttributes(allAttributes:Attribute[]){
+    this.allAttributes = allAttributes;
   }
 
   /**
@@ -1113,7 +1122,7 @@ class BasicToolOperation extends EventListener {
   /** 获取当前属性颜色 */
   public getColor(attribute = '', config = this.config) {
     if (config?.attributeConfigurable === true && this.style.attributeColor) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, config?.attributeList ?? []) + 1;
+      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) +1;
       return this.style.attributeColor[attributeIndex];
     }
     const { color, toolColor } = this.style;
@@ -1125,7 +1134,7 @@ class BasicToolOperation extends EventListener {
 
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
+      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) +1;
       return this.style.attributeLineColor ? this.style.attributeLineColor[attributeIndex] : '';
     }
     const { color, lineColor } = this.style;

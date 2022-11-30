@@ -38,6 +38,8 @@ export { COLORS_ARRAY } from './constant/style';
 
 import EKeyCode from './constant/keyCode';
 
+import AttributeUtils from './utils/tool/AttributeUtils';
+
 const toolUtils = CommonToolUtils;
 
 // 工具对外暴露配置统一定义
@@ -62,6 +64,7 @@ export {
   cTool,
   // 工具包
   toolUtils,
+  AttributeUtils,
   uuid,
   DblClickEventListener,
   CommonToolUtils,

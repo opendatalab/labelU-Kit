@@ -1,11 +1,11 @@
-import { Attribute } from '@label-u/annotation';
+import { Attribute,AttributeUtils } from '@label-u/annotation';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '../../../store';
 import { BasicConfig } from '../../../interface/toolConfig';
 import { Button, Dropdown, Space, Menu } from 'antd';
 import { COLORS_ARRAY } from '@/data/Style';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
@@ -17,17 +17,19 @@ interface AttributeOperationProps {
   toolInstance: any;
   copytoolInstance: any;
   imgListCollapse: boolean;
+  toolStyle:any;
 }
 
 const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [_, forceRender] = useState(0);
-  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance } =
+  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance,toolStyle } =
     props;
   const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
+  const [allAttributeList,setAllAttributeList] = useState<Attribute[]>([])
 
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
@@ -149,6 +151,30 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     setCurrentAttributeList(tmpCurrentAttributeList);
   }, [attributeList, toolsBasicConfig, currentToolName]);
 
+
+
+  
+  useEffect(()=>{
+    let tmpAttributesList:Attribute[] = []
+    if(props.attributeList&&props.attributeList.length>0){
+      tmpAttributesList = [...tmpAttributesList,...props.attributeList]
+    }
+    if(props.toolsBasicConfig&&props.toolsBasicConfig.length>0){
+      for(let i=0;i<props.toolsBasicConfig.length;i++){
+        // @ts-ignore
+        if(props.toolsBasicConfig[i].config?.attributeList){
+          // @ts-ignore
+          tmpAttributesList = [...tmpAttributesList,...props.toolsBasicConfig[i].config?.attributeList]
+        }
+      }
+    }
+    toolInstance?.setAllAttributes(allAttributeList)
+    setAllAttributeList(tmpAttributesList);
+  },[copytoolInstance])
+
+
+
+
   return (
     <div className='attributeBox' key={chooseAttribute}>
       {currentAttributeList &&
@@ -170,7 +196,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 border: '0px',
                 borderRadius: '4px',
                 padding: '1px 8px',
-                backgroundColor:  attribute.key === chooseAttribute? COLORS_ARRAY[index % COLORS_ARRAY.length]:'#FFFFFF',
+                backgroundColor:  attribute.key === chooseAttribute? toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? [])+1].valid.stroke :'#FFFFFF',
                 color: attribute.key === chooseAttribute ? '#ffffff':'',
                 // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
               }}
@@ -179,7 +205,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className='circle'
                 style={{
-                  backgroundColor: COLORS_ARRAY[index % COLORS_ARRAY.length],
+                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? [])+1].valid.stroke,
                   marginRight: 5,
                 }}
               />
@@ -227,6 +253,7 @@ const mapStateToProps = (appState: AppState) => ({
   toolsBasicConfig: appState.annotation.toolsBasicConfig,
   currentToolName: appState.annotation.currentToolName,
   imgListCollapse: appState.toolStyle.imgListCollapse,
+  toolStyle: appState.toolStyle,
 });
 
 export default connect(mapStateToProps)(AttributeOperation);
