@@ -476,10 +476,13 @@ const AttributeRusult: FC<IProps> = ({
       // eslint-disable-next-line react/jsx-no-undef
       children.push(<Option key={item.key}>{item.value}</Option>);
     }
+    children.push(<Option key={'无标签'}>无标签</Option>)
+
     return (
       <Form
         name='basic'
         layout='vertical'
+        key={attributeResult.attributeName}
         initialValues={{
           changeAttribute: attributeResult.attributeName,
           description: toolInfo.textAttribute,
@@ -504,6 +507,7 @@ const AttributeRusult: FC<IProps> = ({
           ]}
         >
           <Select
+            value={attributeResult.attributeName}
             style={{
               width: '100%',
             }}
@@ -739,7 +743,7 @@ const getStateMap = (state: AppState) => {
     toolInstance: state.annotation.toolInstance,
     copyToolInstance: { ...state.annotation.toolInstance },
     currentToolName: state.annotation.currentToolName,
-    attributeList: state.annotation.attributeList,
+    attributeList: state.annotation.toolInstance.config.attributeList,
     basicResultList: state.annotation.basicResultList,
   };
 };

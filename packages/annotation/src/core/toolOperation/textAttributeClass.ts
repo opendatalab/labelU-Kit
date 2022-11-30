@@ -80,7 +80,7 @@ export default class TextAttributeClass {
     if (!this._textAttributeDOM || !this._textDOM || !this._iconDOM) {
       return;
     }
-
+    
     this.container.appendChild(this._textAttributeDOM);
     this._textAttributeDOM.appendChild(this._textDOM);
     this._textAttributeDOM.appendChild(this._iconDOM);

@@ -77,7 +77,7 @@ export const SingleTextInput = (props: any) => {
   const [value, setValue] = useState<string>('');
 
   useEffect(() => {
-    if (result && result.length > 0) {
+    if (result && result.length > 0&&result[index]) {
       setValue(result[index]['value'][config.key]);
     }
   }, [result]);
@@ -228,14 +228,13 @@ const TextToolSidebar: React.FC<IProps> = ({
       if (textResult && textResult.length > 0) {
         setResult(textResult);
       }
-
       if (!textResult || textResult.length === 0) {
         if (textConfig && textConfig.length > 0) {
           const res = textConfig.map((item, index) => {
             return {
               id: uuid(),
               sourceID: '',
-              value: { [item.key]: '' },
+              value: { [item.key]: item.default },
             };
           });
           setResult(res);
