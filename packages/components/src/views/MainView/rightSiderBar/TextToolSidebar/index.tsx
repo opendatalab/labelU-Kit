@@ -163,7 +163,7 @@ export const SingleTextInput = (props: any) => {
     <div className='textField'>
       <div className='label'>
         <span className={classnames({ required: config.required })}>{config.label}</span>
-        <i
+        {/* <i
           className={classnames({ clearText: true, disabled: disabled })}
           onClick={() => {
             if (disabled) {
@@ -171,7 +171,7 @@ export const SingleTextInput = (props: any) => {
             }
             updateTextWithKey('');
           }}
-        />
+        /> */}
       </div>
       <div
         className={classnames({
@@ -201,7 +201,7 @@ const TextToolSidebar: React.FC<IProps> = ({
   basicResultList,
 }) => {
   const [focusIndex, setFocusIndex] = useState(0);
-  const [, forceRender] = useState(0);
+  const [forceRender,setForceRender ] = useState(0);
   const [result, setResult] = useState<ITextResult[]>([]);
 
   const switchToNextTextarea = (currentIndex: number) => {
@@ -240,18 +240,24 @@ const TextToolSidebar: React.FC<IProps> = ({
           setResult(res);
         }
       }
-      forceRender((s) => s + 1);
     }
   }, [textConfig, imgList, imgIndex]);
 
   const updateText = (v: string, k: string, index: number) => {
-    result[index].value[k] = v;
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    let currentImgResult = { ...oldImgResult, textTool: result };
-    imgList[imgIndex].result = JSON.stringify(currentImgResult);
-    dispatch(UpdateImgList(imgList));
-    setResult(result);
+    if(v){
+      result[index].value[k] = v;
+      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      let currentImgResult = { ...oldImgResult, textTool: result };
+      imgList[imgIndex].result = JSON.stringify(currentImgResult);
+      dispatch(UpdateImgList(imgList));
+      setResult(result);
+    }
   };
+
+
+  useEffect(()=>{
+    setForceRender(new Date().getTime())
+  },[result])
 
   // useEffect(() => {
   //   if (imgIndex > -1 && triggerEventAfterIndexChanged) {
@@ -278,7 +284,7 @@ const TextToolSidebar: React.FC<IProps> = ({
         textConfig.map((i, index) => (
           <SingleTextInput
             config={i}
-            key={i.key}
+            key={i.key + forceRender}
             index={index}
             result={result}
             updateText={updateText}
