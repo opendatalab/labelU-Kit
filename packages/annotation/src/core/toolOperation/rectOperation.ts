@@ -1402,7 +1402,7 @@ class RectOperation extends BasicToolOperation {
       ctx.restore();
     });
 
-    this.renderTextAttribute();
+    // this.renderTextAttribute();
   }
 
   /**
@@ -1479,9 +1479,8 @@ class RectOperation extends BasicToolOperation {
       //     },
       //   );
       // }
-
-      // 文本的输入
-      if (!hiddenText && rect.textAttribute && rect.id !== this.selectedRectID) {
+      // 文本的输入 
+      if (!hiddenText && rect.textAttribute && rect.id !== this.selectedRectID &&this.isShowAttributeText) {
         const marginTop = 0;
         const textWidth = Math.max(20, transformRect.width - textSizeWidth);
         DrawUtils.drawText(

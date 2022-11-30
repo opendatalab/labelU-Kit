@@ -477,12 +477,11 @@ const AttributeRusult: FC<IProps> = ({
       children.push(<Option key={item.key}>{item.value}</Option>);
     }
     children.push(<Option key={'无标签'}>无标签</Option>)
-
     return (
       <Form
         name='basic'
         layout='vertical'
-        key={attributeResult.attributeName}
+        key={new Date().getTime()}
         initialValues={{
           changeAttribute: attributeResult.attributeName,
           description: toolInfo.textAttribute,
@@ -524,7 +523,7 @@ const AttributeRusult: FC<IProps> = ({
             },
           ]}
         >
-          <Input.TextArea />
+          <Input.TextArea value={toolInfo.textAttribute} />
         </Form.Item>
       </Form>
     );

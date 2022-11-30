@@ -800,10 +800,10 @@ class PointOperation extends BasicToolOperation {
       });
     }
 
-    // 文本
+    // 文本 
     if (selected) {
-      this.renderTextAttribute();
-    } else if (!hiddenText) {
+      // this.renderTextAttribute();
+    } else if (!hiddenText && this.isShowAttributeText) {
       DrawUtils.drawText(
         this.canvas,
         { x: transformPoint.x + width, y: transformPoint.y + width + 24 },

@@ -5,12 +5,12 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
-import { EToolName } from '@/constant/tool';
-import LineToolUtils from '@/utils/tool/LineToolUtils';
+import { DEFAULT_FONT, EToolName } from '@/constant/tool';
+import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import TagUtils from '@/utils/tool/TagUtils';
 import { ToolConfig } from '@/interface/conbineTool';
-import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
+import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
 import ActionsHistory from '../../utils/ActionsHistory';
@@ -41,7 +41,7 @@ interface IBasicToolOperationProps {
   showDefaultCursor?: boolean; // 默认会展示为 none
 
   forbidBasicResultRender?: boolean;
-  isShowOrder:boolean;
+  isShowOrder: boolean;
 }
 
 /**
@@ -91,7 +91,9 @@ class BasicToolOperation extends EventListener {
 
   public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
 
-  public isShowOrder:boolean; //是否显示标注顺序
+  public isShowOrder: boolean; //是否显示标注顺序
+
+  public isShowAttributeText: boolean; //是否显示标签文本
 
   // public style: {
   //   strokeColor: string;
@@ -204,6 +206,7 @@ class BasicToolOperation extends EventListener {
     };
     this.isShowCursor = false;
     this.isShowOrder = false;
+    this.isShowAttributeText = true;
     this.style = {
       strokeColor: COLORS_ARRAY[4],
       fillColor: COLORS_ARRAY[4],
@@ -237,8 +240,6 @@ class BasicToolOperation extends EventListener {
     this.coordUtils = new CoordinateUtils(this);
     this.coordUtils.setBasicImgInfo(this.basicImgInfo);
   }
-
-
 
   public onContextmenu(e: MouseEvent) {
     e.preventDefault();
@@ -493,6 +494,14 @@ class BasicToolOperation extends EventListener {
   public setIsShowOrder(isShowOrder: boolean) {
     this.isShowOrder = isShowOrder;
     this.render();
+  }
+
+  /**
+   * 用于外界控制标签文本是否显示
+   */
+  public setisShowAttributeText(isShowAttributeText: boolean) {
+    this.isShowAttributeText = isShowAttributeText;
+    this.renderBasicCanvas();
   }
 
   /** 获取坐标值 */
@@ -1157,17 +1166,35 @@ class BasicToolOperation extends EventListener {
                 if (item.isVisible) {
                   const toolColor = this.getColor(item.attribute);
                   const color = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  const transformRect = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
+                  let rectSize = `${Math.round(item.width)} * ${Math.round(item.height)}`;
+                  const textSizeWidth = rectSize.length * 7;
                   DrawUtils.drawRect(
                     this.canvas,
                     // @ts-ignore
-                    AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos),
+                    transformRect,
                     {
-                      isShowOrder:this.isShowOrder,
-                      order:item.order,
+                      isShowOrder: this.isShowOrder,
+                      order: item.order,
                       color,
                       thickness,
                     },
                   );
+                  if (this.isShowAttributeText) {
+                    const marginTop = 0;
+                    const textWidth = Math.max(20, transformRect.width - textSizeWidth);
+                    DrawUtils.drawText(
+                      this.canvas,
+                      { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
+                      item.textAttribute,
+                      {
+                        color: color,
+                        // font: 'italic normal 900 14px Arial',
+                        textMaxWidth: textWidth,
+                        // ...DEFAULT_TEXT_SHADOW,
+                      },
+                    );
+                  }
                 }
               });
             }
@@ -1193,7 +1220,7 @@ class BasicToolOperation extends EventListener {
                   },
                 );
                 let showText = item.attribute;
-                if(this.isShowOrder){
+                if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
 
@@ -1201,6 +1228,22 @@ class BasicToolOperation extends EventListener {
                   color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
+                if(this.isShowAttributeText){
+                  const endPoint = transformPointList[transformPointList.length - 1];
+                  if (endPoint && endPoint.x) {
+                    DrawUtils.drawText(
+                      this.canvas,
+                      { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+                      item.textAttribute,
+                      {
+                        color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        ...DEFAULT_TEXT_OFFSET,
+                      },
+                    );
+                  }
+                }
+
+
               }
             });
             break;
@@ -1226,13 +1269,22 @@ class BasicToolOperation extends EventListener {
                   },
                 );
                 let showText = item.attribute;
-                if(this.isShowOrder){
+                if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
                 DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
                   color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
+                if(this.isShowAttributeText){
+                  let ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+                  ctx?.save();
+                  // this.ctx.font = 'italic bold 14px SourceHanSansCN-Regular';
+                  ctx.font = DEFAULT_FONT;
+                  ctx.fillStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  ctx.strokeStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  DrawUtils.wrapText(this.canvas, item.textAttribute, transformPointList[1].x - LINE_ORDER_OFFSET.x, transformPointList[1].y - LINE_ORDER_OFFSET.y, 200);
+                }
               }
             });
             break;
@@ -1254,19 +1306,32 @@ class BasicToolOperation extends EventListener {
                     fill: 'transparent',
                   });
                   let showText = item.attribute;
-                  if(this.isShowOrder){
+                  if (this.isShowOrder) {
                     showText = `${item.order}  ${showText}`;
                   }
-                  
+
                   DrawUtils.drawText(
                     this.canvas,
-                    { x: transformPoint.x + width / 2 + 4 , y: transformPoint.y - width - 4 },
+                    { x: transformPoint.x + width / 2 + 4, y: transformPoint.y - width - 4 },
                     showText,
                     {
                       textAlign: 'center',
                       color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                     },
                   );
+
+                  if(this.isShowAttributeText){
+                    DrawUtils.drawText(
+                      this.canvas,
+                      { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
+                      item.textAttribute,
+                      {
+                        color:item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        ...DEFAULT_TEXT_OFFSET,
+                      },
+                    );
+                  }
+
                 }
               });
             }
@@ -1306,7 +1371,7 @@ class BasicToolOperation extends EventListener {
                 `,
               );
               let preTagDom = document.getElementById('tagToolTag');
-              if(!this.canvas?.parentNode?.contains(preTagDom)) {
+              if (!this.canvas?.parentNode?.contains(preTagDom)) {
                 this.canvas?.parentNode?.appendChild(dom);
               }
             }

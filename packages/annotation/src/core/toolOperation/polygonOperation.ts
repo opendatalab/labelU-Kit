@@ -1455,17 +1455,20 @@ class PolygonOperation extends BasicToolOperation {
             ...DEFAULT_TEXT_OFFSET,
           });
 
-          const endPoint = transformPointList[transformPointList.length - 1];
-          if (endPoint && endPoint.x) {
-            DrawUtils.drawText(
-              this.canvas,
-              { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
-              textAttribute,
-              {
-                color: toolData.stroke,
-                ...DEFAULT_TEXT_OFFSET,
-              },
-            );
+          // 文本输入
+          if(this.isShowAttributeText){
+            const endPoint = transformPointList[transformPointList.length - 1];
+            if (endPoint && endPoint.x) {
+              DrawUtils.drawText(
+                this.canvas,
+                { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+                textAttribute,
+                {
+                  color: toolData.stroke,
+                  ...DEFAULT_TEXT_OFFSET,
+                },
+              );
+            }
           }
         }
       });
@@ -1533,7 +1536,7 @@ class PolygonOperation extends BasicToolOperation {
           },
         );
 
-        this.renderTextAttribute();
+        // this.renderTextAttribute();
       }
     }
 

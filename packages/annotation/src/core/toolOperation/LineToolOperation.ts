@@ -626,7 +626,7 @@ class LineToolOperation extends BasicToolOperation {
 
           this.drawLine(line.pointList, undefined, color, false);
           this.drawLineNumber(line.pointList[0], displayOrder, color, label, line.attribute, line.valid);
-          if (line.id !== this.textEditingID) {
+          if (line.id !== this.textEditingID && this.isShowAttributeText) {
             this.drawLineTextAttribute(line.pointList[1], color, line?.textAttribute);
           }
         }
@@ -648,7 +648,7 @@ class LineToolOperation extends BasicToolOperation {
     super.render();
     this.drawLines();
     this.drawActivatedLine(nextPoint, undefined, true);
-    this.renderTextAttribute();
+    // this.renderTextAttribute();
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   };
 
