@@ -18,11 +18,13 @@ const AnnotationPage: FC = () => {
   const [fileList, setFileList] = useState<any[]>([]);
 
 
-  const leftSiderContent = ()=>{
-    return (
-      <h1>左边栏预留</h1>
-    )
-  }
+  // const leftSiderContent = ()=>{
+  //   return (
+  //     <h1>左边栏预留</h1>
+  //   )
+  // }
+
+  const leftSiderContent = (<div>lefstSider</div>)
 
   const topActionContent = ()=>{
     return (
@@ -61,7 +63,7 @@ const AnnotationPage: FC = () => {
           textConfig={textConfig}
           goBack={goBack}
           tools={tools}
-          leftSiderContent={leftSiderContent()}
+          leftSiderContent={leftSiderContent}
           topActionContent={topActionContent()}
         />
       )}

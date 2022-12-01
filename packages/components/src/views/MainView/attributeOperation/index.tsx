@@ -156,23 +156,23 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   
   useEffect(()=>{
     if(toolInstance){
-      let tmpAttributesList:Attribute[] = []
-      if(props.attributeList&&props.attributeList.length>0){
-        tmpAttributesList = [...tmpAttributesList,...props.attributeList]
-      }
-      if(props.toolsBasicConfig&&props.toolsBasicConfig.length>0){
-        for(let i=0;i<props.toolsBasicConfig.length;i++){
-          // @ts-ignore
-          if(props.toolsBasicConfig[i].config?.attributeList){
+        let tmpAttributesList:Attribute[] = []
+        if(props.attributeList&&props.attributeList.length>0){
+          tmpAttributesList = [...tmpAttributesList,...props.attributeList]
+        }
+        if(props.toolsBasicConfig&&props.toolsBasicConfig.length>0){
+          for(let i=0;i<props.toolsBasicConfig.length;i++){
             // @ts-ignore
-            tmpAttributesList = [...tmpAttributesList,...props.toolsBasicConfig[i].config?.attributeList]
+            if(props.toolsBasicConfig[i].config?.attributeList){
+              // @ts-ignore
+              tmpAttributesList = [...tmpAttributesList,...props.toolsBasicConfig[i].config?.attributeList]
+            }
           }
         }
-      }
-      toolInstance?.setAllAttributes(tmpAttributesList)
-      setAllAttributeList(tmpAttributesList);
+        toolInstance?.setAllAttributes(tmpAttributesList)
+        setAllAttributeList(tmpAttributesList);
     }
-  },[currentToolName])
+  },[currentToolName,toolInstance?.isShowOrder])
 
 
 

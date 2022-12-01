@@ -181,10 +181,8 @@ const AttributeRusult: FC<IProps> = ({
           toolInfo: attributeMap.get(key),
         });
       }
-      console.log("???????????????")
-      console.log(tmpAttributeResult)
-      
-
+      // console.log("???????????????")
+      // console.log(tmpAttributeResult)
       setAttributeResultList(tmpAttributeResult);
     }
   }, [imgList, imgIndex]);

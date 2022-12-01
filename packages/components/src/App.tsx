@@ -153,14 +153,15 @@ const App: React.FC<AppProps> = (props) => {
     props.textConfig,
     props.tagConfigList,
     currentToolName,
-    isShowOrder,
+    // isShowOrder,
   ]);
 
   useEffect(() => {
     if (toolInstance) {
       setToolInstance?.(toolInstance);
+      toolInstance.setIsShowOrder(isShowOrder)
     }
-  }, [toolInstance]);
+  }, [toolInstance,isShowOrder]);
 
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = () => {

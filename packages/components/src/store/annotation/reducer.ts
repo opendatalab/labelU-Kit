@@ -304,8 +304,8 @@ export const annotationReducer = (
         return state;
       }
       const [exportResult] = toolInstance?.exportData() ?? [];
-      console.log("**************************")
-      console.log(exportResult)
+      // console.log("**************************")
+      // console.log(exportResult)
 
       let previousResultList = exportResult;
 
