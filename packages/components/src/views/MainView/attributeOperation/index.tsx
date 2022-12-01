@@ -172,7 +172,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       toolInstance?.setAllAttributes(tmpAttributesList)
       setAllAttributeList(tmpAttributesList);
     }
-  },[toolInstance,currentToolName,toolsBasicConfig])
+  },[currentToolName])
 
 
 
