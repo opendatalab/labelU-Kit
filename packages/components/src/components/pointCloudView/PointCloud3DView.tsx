@@ -155,7 +155,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
           return MathUtils.transerWord2Canvas(point, sizeTop);
         });
         // bacause top view should only show the selected box so we should clear the previous polygon list
-        TopView2dOperation.setPolygonList([]);
+        // TopView2dOperation.setPolygonList([]);
         TopView2dOperation.drawingPointList = cavasPointList;
         TopView2dOperation.addDrawingPointToPolygonList(true, id);
         TopView2dOperation.setSelectedIDs([id]);
@@ -163,6 +163,10 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
         ptCtx.setSelectedIDs([id]);
       },
     );
+
+    mainViewInstance.singleOn('setSelectedIDs', (selectedIDs: string[]) => {
+      ptCtx.setSelectedIDs(selectedIDs);
+    });
 
     mainViewInstance.setStyle(toolStyle);
     // return () => {

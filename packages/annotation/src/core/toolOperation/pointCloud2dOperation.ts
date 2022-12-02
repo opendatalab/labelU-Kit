@@ -68,15 +68,16 @@ class PointCloud2dOperation extends PolygonOperation {
    * @override
    */
   public rightMouseUp = (e: MouseEvent) => {
-    if (this.drawingPointList.length > 0) {
-      this.addDrawingPointToPolygonList();
-      return;
-    }
-    if (e.ctrlKey && this.hoverID) {
-      this.emit('addSelectedIDs', this.hoverID);
-    } else {
-      this.emit('setSelectedIDs', this.hoverID);
-    }
+    return;
+    // if (this.drawingPointList.length > 0) {
+    //   this.addDrawingPointToPolygonList();
+    //   return;
+    // }
+    // if (e.ctrlKey && this.hoverID) {
+    //   this.emit('addSelectedIDs', this.hoverID);
+    // } else {
+    //   this.emit('setSelectedIDs', this.hoverID);
+    // }
   };
 
   public get selectedPolygons() {
@@ -110,57 +111,57 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public renderPolygon() {
     // 1. 静态多边形
-    this.container.dispatchEvent(this.saveDataEvent);
-    if (this.isHidden === false) {
-      this.polygonList?.forEach((polygon) => {
-        if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
-          return;
-        }
-        if (polygon.isVisible) {
-          const { textAttribute, attribute } = polygon;
-          const toolColor = this.getColor(attribute);
-          const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
-          const transformPointList = AxisUtils.changePointListByZoom(
-            polygon.pointList || [],
-            this.zoom,
-            this.currentPos,
-          );
+    // this.container.dispatchEvent(this.saveDataEvent);
+    // if (this.isHidden === false) {
+    //   this.polygonList?.forEach((polygon) => {
+    //     if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
+    //       return;
+    //     }
+    //     if (polygon.isVisible) {
+    //       const { textAttribute, attribute } = polygon;
+    //       const toolColor = this.getColor(attribute);
+    //       const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
+    //       const transformPointList = AxisUtils.changePointListByZoom(
+    //         polygon.pointList || [],
+    //         this.zoom,
+    //         this.currentPos,
+    //       );
 
-          DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
-            fillColor: toolData.fill,
-            strokeColor: toolData.stroke,
-            pointColor: 'white',
-            thickness: this.style?.width ?? 2,
-            lineCap: 'round',
-            isClose: true,
-            lineType: this.config?.lineType,
-          });
-        }
-      });
-    }
+    //       DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
+    //         fillColor: toolData.fill,
+    //         strokeColor: toolData.stroke,
+    //         pointColor: 'white',
+    //         thickness: this.style?.width ?? 2,
+    //         lineCap: 'round',
+    //         isClose: true,
+    //         lineType: this.config?.lineType,
+    //       });
+    //     }
+    //   });
+    // }
 
     // 2. hover 多边形
-    if (this.hoverID && this.hoverID !== this.editPolygonID) {
-      const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
-      if (hoverPolygon) {
-        let color = '';
-        const toolColor = this.getColor(hoverPolygon.attribute);
-        if (hoverPolygon.valid) {
-          color = toolColor.validHover.fill;
-        } else {
-          color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
-        }
+    // if (this.hoverID && this.hoverID !== this.editPolygonID) {
+    //   const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
+    //   if (hoverPolygon) {
+    //     let color = '';
+    //     const toolColor = this.getColor(hoverPolygon.attribute);
+    //     if (hoverPolygon.valid) {
+    //       color = toolColor.validHover.fill;
+    //     } else {
+    //       color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
+    //     }
 
-        DrawUtils.drawPolygonWithFill(
-          this.canvas,
-          AxisUtils.changePointListByZoom(hoverPolygon.pointList, this.zoom, this.currentPos),
-          {
-            color,
-            lineType: this.config?.lineType,
-          },
-        );
-      }
-    }
+    //     DrawUtils.drawPolygonWithFill(
+    //       this.canvas,
+    //       AxisUtils.changePointListByZoom(hoverPolygon.pointList, this.zoom, this.currentPos),
+    //       {
+    //         color,
+    //         lineType: this.config?.lineType,
+    //       },
+    //     );
+    //   }
+    // }
 
     // 3. 选中多边形的渲染
     if (this.selectedID) {
