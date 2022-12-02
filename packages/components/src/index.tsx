@@ -29,6 +29,10 @@ const OutputApp = (props: AppProps, ref: any) => {
         saveData: () => {
           store.dispatch(ChangeSave as unknown as AnyAction);
         },
+        getResult:()=>{
+          // @ts-ignore
+          return store.getState()?.annotation.imgList;
+        }
       };
     },
     [toolInstance],
