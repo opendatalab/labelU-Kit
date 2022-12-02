@@ -1,7 +1,7 @@
 import { PointCloud, PointCloudIProps } from '../pointCloud';
 import * as THREE from 'three';
 import utils from '../pointCloud/uitils';
-import { MOUSE, Scene, ShapeUtils, Vector3 } from 'three';
+import { MOUSE, Object3D, Scene, ShapeUtils, Vector3 } from 'three';
 import MathUtils from '@/utils/MathUtils';
 import { IPointCloudBox, IPolygonData } from '@label-u/utils';
 import uuid from '@/utils/uuid';
@@ -16,6 +16,7 @@ interface PointCloudOperationProps {
   BoxList?: IPointCloudBox[];
   attribute: string;
   config?: ToolConfig;
+
 }
 
 class PointCloudOperation extends PointCloud {
@@ -25,6 +26,7 @@ class PointCloudOperation extends PointCloud {
   public config:any;
   public style:any;
   public color:number;
+  public selectedId?:string;
 
   constructor(props: PointCloudIProps & PointCloudOperationProps) {
     super(props);
@@ -43,6 +45,11 @@ class PointCloudOperation extends PointCloud {
     this.config = props.config;
     this.attribute = props.attribute;
     this.initPointCloudOperation();
+  }
+
+
+  public setSelectedId(selectedId:string){
+    this.selectedId = selectedId;
   }
 
   public setDefaultAttribute(attribute: string) {
@@ -176,6 +183,17 @@ class PointCloudOperation extends PointCloud {
     return object3d;
   }
 
+
+  public setTransparencyByName(name:string){
+    let objectMesh = this.scene.getObjectByName(name) as THREE.Mesh;
+    if(objectMesh){
+      //@ts-ignore
+      objectMesh.children[0].material.opacity = 0;
+    }
+
+  }
+
+
   // draw cubebox by four points and zinfo
   public getBox(
     sharpRect: { 0: number; 1: number }[],
@@ -185,6 +203,7 @@ class PointCloudOperation extends PointCloud {
     },
     color: number = 0xffffff,
   ) {
+
     let object3d = new THREE.Object3D();
     let deep = zInfo.maxZ - zInfo.minZ;
     let zMiddle = (zInfo.maxZ + zInfo.minZ) / 2;
@@ -193,7 +212,7 @@ class PointCloudOperation extends PointCloud {
     let boxMaterial = new THREE.MeshBasicMaterial({
       color: color,
       transparent: true,
-      opacity: 0,
+      opacity: 0.3,
     });
     let boxEdgeGeometry = new THREE.EdgesGeometry(sharpGeometry, 1);
     let boxEdgeMaterial = new THREE.LineBasicMaterial({ color: color });
@@ -282,9 +301,13 @@ class PointCloudOperation extends PointCloud {
           1: item.y,
         };
       });
-
+      if(this.selectedId){
+        this.setTransparencyByName(this.selectedId + 'box')
+      }
       let boxMesh = this.getBox(sharpRect, zInfo, color);
       boxMesh.name = boxInfo.id + 'box';
+      this.setSelectedId(boxInfo.id);
+
       let boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
       boxArrowMesh.name = boxInfo.id + 'boxArrow';
       this.scene.add(boxMesh);

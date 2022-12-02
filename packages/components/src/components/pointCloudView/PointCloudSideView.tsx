@@ -143,7 +143,7 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     <PointCloudContainer
       className={getClassName('point-cloud-container', 'side-view')}
       title={t('SideView')}
-      toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
+      // toolbar={<SizeInfoForView perspectiveView={EPerspectiveView.Left} />}
     >
       <div className={getClassName('point-cloud-container', 'bottom-view-content')}>
         <div className={getClassName('point-cloud-container', 'core-instance')} ref={ref} />

@@ -9,10 +9,10 @@ import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map'
 import { connect } from 'react-redux';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
-import { Switch } from 'antd';
+// import { Switch } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { LabelUContext, useSelector } from '@/store/ctx';
 import { BoxInfos } from './PointCloudInfos';
 import { BasicConfig } from '@/interface/toolConfig';
@@ -76,11 +76,11 @@ const PointCloud3DSideBar = () => {
 
 const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({ currentData,config }) => {
   const ptCtx = useContext(PointCloudContext);
-  const [showDirection, setShowDirection] = useState(true);
+  // const [showDirection, setShowDirection] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
   const toolStyle = useSelector((state: AppState) => {
     return { ...state.toolStyle };
@@ -112,7 +112,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       if (!pointCloud) {
         pointCloud = new PointCloudOperation({
           container: ref.current,
-          backgroundColor: '#4c4c4c',
+          // backgroundColor: '#4c4c4c',
           isOrthographicCamera: true,
           attribute: '',
           // @ts-ignore
@@ -185,25 +185,25 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
     return { reset3DView, setTarget3DView, isActive: !!selectedBox };
   }, [selectedBox]);
 
-  const PointCloud3DTitle = (
-    <div>
-      <span style={{ marginRight: 8 }}>{t('ShowArrows')}</span>
-      <Switch
-        size='small'
-        checked={showDirection}
-        onChange={(showDirection) => {
-          setShowDirection(showDirection);
-          ptCtx.mainViewInstance?.setShowDirection(showDirection);
-        }}
-      />
-    </div>
-  );
+  // const PointCloud3DTitle = (
+  //   <div>
+  //     <span style={{ marginRight: 8 }}>{t('ShowArrows')}</span>
+  //     <Switch
+  //       size='small'
+  //       checked={showDirection}
+  //       onChange={(showDirection) => {
+  //         setShowDirection(showDirection);
+  //         ptCtx.mainViewInstance?.setShowDirection(showDirection);
+  //       }}
+  //     />
+  //   </div>
+  // );
 
   return (
     <PointCloudContainer
       className={getClassName('point-cloud-3d-container')}
-      title={t('3DView')}
-      toolbar={PointCloud3DTitle}
+      // title={t('3DView')}
+      // toolbar={PointCloud3DTitle}
       style={{
         height:
           // currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',

@@ -66,7 +66,7 @@ export default () => {
       input: "src/index.ts",
       output: {
         format: "es",
-        dir: CJS_OUTPUT_DIR,
+        dir: ES_OUTPUT_DIR,
         preserveModules: true,
         preserveModulesRoot: "src",
       },

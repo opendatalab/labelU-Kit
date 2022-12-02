@@ -301,7 +301,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
       <PointCloudContainer
         className={getClassName('point-cloud-container', 'top-view')}
         title={t('TopView')}
-        toolbar={<TopViewToolbar currentData={currentData} />}
+        // toolbar={<TopViewToolbar currentData={currentData} />}
       >
         <div style={{ position: 'relative', flex: 1 }}>
           <div id='mytool' style={{ width: '100%', height: '100%' }} ref={ref} />
