@@ -34,8 +34,6 @@ const PointCloudView = {
   Back: 'Back',
 };
 
-
-
 export const topViewPolygon2PointCloud = (
   newPolygon: any,
   size: ISize,
@@ -44,7 +42,7 @@ export const topViewPolygon2PointCloud = (
   defaultValue?: { [v: string]: any },
 ) => {
   const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
-  MathUtils.transferCanvas2World(v, size),
+    MathUtils.transferCanvas2World(v, size),
   );
 
   const centerPoint = MathUtils.getLineCenterPoint([point1, point3]);
@@ -395,7 +393,7 @@ export const usePointCloudViews = () => {
 
     polygonOperation.setSelectedIDs([newPolygon.id]);
     setSelectedIDs(boxParams.id);
-    syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams,true);
+    syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, true);
     addPointCloudBox(boxParams);
   };
 
@@ -486,7 +484,12 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param boxParams
    */
-  const syncPointCloudViews = (omitView: string, polygon: any, boxParams: IPointCloudBox,is3DToOther?:boolean) => {
+  const syncPointCloudViews = (
+    omitView: string,
+    polygon: any,
+    boxParams: IPointCloudBox,
+    is3DToOther?: boolean,
+  ) => {
     const dataUrl = currentData?.url;
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -507,7 +510,7 @@ export const usePointCloudViews = () => {
       }
     });
     // is add box from point Cloud
-    if(!is3DToOther){
+    if (!is3DToOther) {
       let wordPolygonPointList = polygon.pointList.map((point: { x: number; y: number }) => {
         const size = {
           width: topViewInstance?.pointCloud2dOperation.container.offsetWidth as number,
@@ -515,16 +518,19 @@ export const usePointCloudViews = () => {
         };
         return MathUtils.transferCanvas2World(point, size);
       });
-  
+
       let wordPolygon = {
         ...polygon,
-        pointList:wordPolygonPointList
-      }
+        pointList: wordPolygonPointList,
+      };
       updateMainViewGenBox(wordPolygon);
-      // mainViewGenBox(boxParams);
-      mainViewInstance?.highlightOriginPointCloud(boxParams);
-    }
 
+      let attribute = mainViewInstance?.attribute as string;
+      mainViewInstance?.updatePointCloudAfterDragBox(dataUrl, {
+        ...boxParams,
+        attribute: attribute,
+      });
+    }
   };
 
   const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {

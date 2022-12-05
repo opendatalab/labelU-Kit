@@ -10,6 +10,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { COLORS_ARRAY } from '@/constant/style';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
+import HighlightWorker from 'web-worker:../pointCloud/highlightWorker.js';
 // import {message} from 'antd';
 
 interface PointCloudOperationProps {
@@ -17,6 +18,7 @@ interface PointCloudOperationProps {
   attribute: string;
   config?: ToolConfig;
 }
+
 
 class PointCloudOperation extends PointCloud {
   public boxList!: IPointCloudBox[];
@@ -406,7 +408,9 @@ class PointCloudOperation extends PointCloud {
 
     // add box in scene
     this.container.addEventListener('mousedown', function (event) {
-      debugger;
+      if(!self.attribute){
+        return;
+      }
       if (event.button === MOUSE.LEFT) {
         let color = self.color;
         // 鼠标移动事件
@@ -469,6 +473,107 @@ class PointCloudOperation extends PointCloud {
       self.render();
     }
   }
+
+  /**
+   * It needs to be updated after load PointCLoud's data.
+   * @param boxParams
+   * @returns
+   */
+   public highlightOriginPointCloud(boxParams: IPointCloudBox, points?: THREE.Points):Promise<{ geometry: any; num: number } | undefined>  {
+    if (!points) {
+      const originPoints = this.scene.getObjectByName(this.pointCloudObjectName);
+
+      if (!originPoints) {
+        console.error('There is no corresponding point cloud object');
+        return Promise.resolve(undefined);
+      }
+
+      points = originPoints as THREE.Points;
+    }
+
+    if (window.Worker) {
+      const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
+      const position = points.geometry.attributes.position.array;
+      const color = points.geometry.attributes.color.array;
+      let params = {
+        boxParams,
+        zMin,
+        zMax,
+        polygonPointList,
+        color,
+        position,
+      };
+
+      if(boxParams.attribute){
+        let inColor = new THREE.Color(this.getColor(this.attribute).valid.stroke);
+        let rgbArr = [inColor.r, inColor.g, inColor.b];
+       params = {
+          boxParams,
+          zMin,
+          zMax,
+          polygonPointList,
+          color,
+          position,
+          // @ts-ignore
+          inColorArr :rgbArr
+        };
+      }
+      return new Promise((resolve) => {
+        const highlightWorker = new HighlightWorker();
+        highlightWorker.postMessage(params);
+        highlightWorker.onmessage = (e: any) => {
+          const { color: newColor, points: newPosition, num } = e.data;
+          debugger;
+          const geometry = new THREE.BufferGeometry();
+          geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
+          geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));
+          // geometry.setAttribute('color',0xffffff);
+          geometry.computeBoundingSphere();
+          highlightWorker.terminate();
+          resolve({ geometry, num });
+        };
+      });
+    }
+
+    return Promise.resolve(undefined);
+  }
+
+
+
+
+  /**
+   * Load PCD File by box
+   * @param src
+   * @param boxParams
+   * @param scope
+   */
+   public updatePointCloudAfterDragBox = async (
+    src: string,
+    boxParams: IPointCloudBox,
+  ) => {
+    const cb = async (points: THREE.Points) => {
+      // TODO. Speed can be optimized.
+      const filterData = await this.highlightOriginPointCloud(
+          boxParams,
+        points,
+      );
+      if (!filterData) {
+        console.error('filter Error');
+        return;
+      }
+
+      this.clearPointCloud();
+      const newPoints = new THREE.Points(filterData.geometry, points.material);
+      newPoints.name = this.pointCloudObjectName;
+      this.pointsUuid = newPoints.uuid;
+      this.scene.add(newPoints);
+      this.render();
+    };
+    const points = await this.cacheInstance.loadPCDFile(src);
+    cb(points);
+  };
+
+
 }
 
 export default PointCloudOperation;

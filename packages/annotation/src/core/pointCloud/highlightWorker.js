@@ -64,9 +64,9 @@ export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
 }
 
 onmessage = function onmessage(e) {
-  const { zMin, zMax, polygonPointList, position: points, color } = e.data;
+  const { zMin, zMax, polygonPointList, position: points, color, inColorArr } = e.data;
   let num = 0;
-
+  const [r, g, b] = inColorArr;
   //  Loop to determine if it is in range
   for (let i = 0; i < points.length; i += 3) {
     const x = points[i];
@@ -77,12 +77,6 @@ onmessage = function onmessage(e) {
 
     if (inPolygon && z >= zMin && z <= zMax) {
       num++;
-      color[i] = 0;
-      color[i + 1] = 1;
-      color[i + 2] = 1;
-    } else {
-      // DEFAULT COLOR RENDERc
-      const [r, g, b] = PointCloudUtils.getStandardColorByCoord(x, y, z);
       color[i] = r;
       color[i + 1] = g;
       color[i + 2] = b;

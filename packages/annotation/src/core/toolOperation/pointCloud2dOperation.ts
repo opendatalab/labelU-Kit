@@ -175,7 +175,8 @@ class PointCloud2dOperation extends PolygonOperation {
           this.canvas,
           AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
           {
-            fillColor: toolData.fill,
+            // fillColor: toolData.fill,
+            fillColor:"transparent",
             strokeColor: toolData.stroke,
             pointColor: 'white',
             thickness: 2,

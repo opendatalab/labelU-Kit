@@ -13,7 +13,7 @@ import {
   TMatrix13Tuple,
 } from '@label-u/utils';
 import { MOUSE, PointsMaterial, Shader, Vector3 } from 'three';
-import HighlightWorker from 'web-worker:./highlightWorker.js';
+// import HighlightWorker from 'web-worker:./highlightWorker.js';
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import { IPolygonPoint } from '@/types/tool/polygon';
@@ -41,9 +41,9 @@ export interface PointCloudIProps {
 }
 
 const DEFAULT_DISTANCE = 30;
-const highlightWorker = new HighlightWorker();
+// const highlightWorker = new HighlightWorker();
 
-export class PointCloud extends EventListener  {
+export class PointCloud extends EventListener {
   public renderer: THREE.WebGLRenderer;
 
   public scene: THREE.Scene;
@@ -67,25 +67,32 @@ export class PointCloud extends EventListener  {
 
   public initCameraPosition = this.DEFAULT_INIT_CAMERA_POSITION; // It will init when the camera position be set
 
+  
+  protected pointCloudObjectName = 'pointCloud';
+
   protected container: HTMLElement;
 
   private isOrthographicCamera = false;
 
-  private pointsUuid = '';
+  protected pointsUuid = '';
 
   private sideMatrix?: THREE.Matrix4;
 
   private backgroundColor: string;
 
-  private pointCloudObjectName = 'pointCloud';
-
   private rangeObjectName = 'range';
 
-  private cacheInstance: PointCloudCache; // PointCloud Cache Map
+  protected cacheInstance: PointCloudCache; // PointCloud Cache Map
 
   private showDirection: boolean = true; // Whether to display the direction of box
 
-  constructor({ container, noAppend, isOrthographicCamera, orthographicParams, backgroundColor = 'black' }: PointCloudIProps) {
+  constructor({
+    container,
+    noAppend,
+    isOrthographicCamera,
+    orthographicParams,
+    backgroundColor = 'black',
+  }: PointCloudIProps) {
     super();
     this.container = container;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -113,7 +120,6 @@ export class PointCloud extends EventListener  {
     this.pcdLoader = new PCDLoader();
 
     this.axesHelper = new THREE.AxesHelper(1000);
-
 
     // For Developer
     this.scene.add(this.axesHelper);
@@ -144,7 +150,6 @@ export class PointCloud extends EventListener  {
   public setInitCameraPosition(vector: THREE.Vector3) {
     this.initCameraPosition = vector;
   }
-
 
   /**
    * Init OrthographicCamera to default config by size
@@ -663,7 +668,6 @@ export class PointCloud extends EventListener  {
     // @ts-ignore
     points.material.size = 1;
     points.name = this.pointCloudObjectName;
-
     const pointsMaterial = new THREE.PointsMaterial({
       vertexColors: true,
     });
@@ -707,42 +711,6 @@ export class PointCloud extends EventListener  {
     this.renderPointCloud(points, radius);
   };
 
-  /**
-   * It needs to be updated after load PointCLoud's data.
-   * @param boxParams
-   * @returns
-   */
-  public highlightOriginPointCloud(boxParams: IPointCloudBox) {
-    if (boxParams && highlightWorker) {
-      // Temporarily turn off highlighting
-    }
-
-    // const oldPointCloud: any = this.scene.getObjectByName(this.pointCloudObjectName);
-    // if (!oldPointCloud) {
-    //   return;
-    // }
-
-    // if (window.Worker) {
-    //   const { zMin, zMax, polygonPointList } = this.getCuboidFromPointCloudBox(boxParams);
-
-    //   const params = {
-    //     boxParams,
-    //     zMin,
-    //     zMax,
-    //     polygonPointList,
-    //     position: oldPointCloud.geometry.attributes.position.array,
-    //     color: oldPointCloud.geometry.attributes.color.array,
-    //   };
-
-    //   highlightWorker.postMessage(params);
-    //   highlightWorker.onmessage = (e: any) => {
-    //     const { color } = e.data;
-    //     oldPointCloud.geometry.attributes.color.array = color;
-    //     oldPointCloud.geometry.attributes.color.needsUpdate = true;
-    //     this.render();
-    //   };
-    // }
-  }
 
   /**
    * Load PCD File by box
@@ -772,7 +740,6 @@ export class PointCloud extends EventListener  {
         console.error('filter Error');
         return;
       }
-
       this.clearPointCloud();
       const newPoints = new THREE.Points(filterData.geometry, points.material);
       newPoints.name = this.pointCloudObjectName;
