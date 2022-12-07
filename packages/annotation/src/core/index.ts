@@ -19,6 +19,7 @@ export interface IProps {
   style?: any;
   tagConfigList: OneTag[];
   attributeList: Attribute[];
+  allAttributesList: Attribute[];
 }
 
 const loadImage = (imgSrc: string) => {
@@ -59,6 +60,8 @@ export default class AnnotationEngine {
 
   private imgNode?: HTMLImageElement;
 
+  private allAttributesList:Attribute[];
+
   // 工具内依赖的记录
   private basicResult?: IRect | IPolygonData; // 用于存储当前的标注结果的依赖物体结果状态
 
@@ -68,6 +71,7 @@ export default class AnnotationEngine {
     this.isShowOrder = props.isShowOrder;
     this.tagConfigList = props.tagConfigList;
     this.attributeList = props.attributeList;
+    this.allAttributesList = props.allAttributesList;
     this.container = props.container;
     this.size = props.size;
     this.toolName = props.toolName;
@@ -180,6 +184,12 @@ export default class AnnotationEngine {
     this.toolInstance.init();
     // 设置是否显示顺序
     this.toolInstance.setIsShowOrder(this.isShowOrder);
+    // 设置统一标签
+    if(this.allAttributesList){
+      this.toolInstance?.setAllAttributes(this.allAttributesList)
+    }
+
+    
   }
 
   /**

@@ -5,7 +5,7 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 // import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
-import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@label-u/annotation';
+import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool, Attribute } from '@label-u/annotation';
 import { EToolName } from '@label-u/annotation/es/types/constant/tool';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
@@ -71,7 +71,7 @@ const updateToolInstance = (
   imgNode: HTMLImageElement,
   toolStyle: ToolStyleState,
 ) => {
-  const { step, stepList, attributeList, tagConfigList, toolInstance, isShowOrder } = annotation;
+  const { step, stepList, attributeList, tagConfigList, toolInstance, toolsBasicConfig,isShowOrder } = annotation;
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   // const stepConfig = stepList[0]; // 修改为无步骤，因此无需通过步骤来选定工具
   // 此前工具绑定时间清空
@@ -92,6 +92,22 @@ const updateToolInstance = (
     throw `Not exist dom named id-toolContainer`;
   }
   const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
+
+
+  let allAttributesList:Attribute[] = []
+  if(attributeList&&attributeList.length>0){
+    allAttributesList = [...allAttributesList,...attributeList]
+  }
+  if(toolsBasicConfig&&toolsBasicConfig.length>0){
+    for(let i=0;i<toolsBasicConfig.length;i++){
+      // @ts-ignore
+      if(toolsBasicConfig[i].config?.attributeList){
+        // @ts-ignore
+        allAttributesList = [...allAttributesList,...toolsBasicConfig[i].config?.attributeList]
+      }
+    }
+  }
+  debugger;
   const annotationEngine = new AnnotationEngine({
     container,
     isShowOrder: isShowOrder,
@@ -102,6 +118,7 @@ const updateToolInstance = (
     style: toolStyle,
     tagConfigList,
     attributeList,
+    allAttributesList
   });
   // annotationEngine.toolInstance.setResult()
 
