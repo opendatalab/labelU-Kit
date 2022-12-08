@@ -4,7 +4,7 @@ import { prefix } from '@/constant';
 import { Spin } from 'antd';
 import { Layout } from 'antd/es';
 import _ from 'lodash';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 // import Sidebar from './sidebar';
@@ -60,6 +60,19 @@ const AnnotatedArea: React.FC<AppProps & IProps & { currentToolName: string }> =
 const MainView: React.FC<AppProps & IProps> = (props) => {
   // const dispatch = useDispatch();
   const { currentToolName } = props;
+
+  const [boxHeight,setBoxHeight] = useState<number>();
+  const [boxWidth,setBoxWidth] = useState<number>();
+
+  debugger;
+  useEffect(()=>{
+    let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    setBoxHeight(boxParent.clientHeight);
+    setBoxWidth(boxParent.clientWidth);
+    debugger;
+  })
+
+
   // 取消加载时loading
   return (
     <ViewportProvider>
@@ -84,7 +97,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
           <AttributeOperation />
           <Layout>
             {<LeftSider {...props} />}
-            <Content className={`${layoutCls}__content`}>
+            <Content className={`${layoutCls}__content`} style={{height:boxHeight}}>
               <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
             <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>

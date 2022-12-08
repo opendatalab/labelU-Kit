@@ -1,5 +1,5 @@
 import React, { FC, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
-import { Collapse, Form, Input, Select } from 'antd';
+import { Collapse, Form, Input, Popconfirm, Select } from 'antd';
 import { AppState } from '../../../../store';
 import { connect, useDispatch } from 'react-redux';
 import { IFileItem } from '@/types/data';
@@ -16,7 +16,10 @@ import { ToolInstance } from '@/store/annotation/types';
 import { PrevResult, Attribute, EToolName } from '@label-u/annotation';
 import DrageModel from '@/components/dragModal';
 import classNames from 'classnames';
+import { labelTool } from '../../toolHeader/headerOption';
 import { expandIconFuc } from '../TagSidebar';
+import ClearResultIconHover from '../../../../assets/annotation/common/clear_result_hover.svg';
+import ClearResultIcon from '../../../../assets/annotation/common/clear_result.svg';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -46,6 +49,7 @@ interface IProps {
   copyToolInstance: ToolInstance;
   currentToolName: string;
   basicResultList: [];
+  isShowClear:boolean
 }
 
 const AttributeRusult: FC<IProps> = ({
@@ -57,6 +61,7 @@ const AttributeRusult: FC<IProps> = ({
   copyToolInstance,
   attributeList,
   basicResultList,
+  isShowClear
 }) => {
   const [attributeResultList, setAttributeResultList] = useState<AttributeResult[]>([]);
   // const attributeShowRef = useRef<HTMLImageElement>(null);
@@ -73,11 +78,58 @@ const AttributeRusult: FC<IProps> = ({
     icon: '',
     textAttribute: '',
   });
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [isClearnHover, setIsClearHover] = useState<boolean>(false);
+  // const [isShowClear, setIsShowClear] = useState(false);
+
+  const handleOk = () => {
+    setConfirmLoading(true);
+    setTimeout(() => {
+      doClearAllResult();
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 100);
+  };
+
+  // 删除标注结果
+  const doClearAllResult = () => {
+    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    for (let tool of labelTool) {
+      let tmpResult = oldImgResult[tool]?.result;
+      if (tmpResult && tmpResult.length > 0) {
+        oldImgResult[tool].result = [];
+      }
+    }
+    imgList[imgIndex].result = JSON.stringify(oldImgResult);
+    dispatch(UpdateImgList(imgList));
+    updateCanvasView(oldImgResult);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+  };
 
   const dragModalRef = useRef<any>();
   useEffect(() => {
     initToolInfo();
   }, []);
+
+
+  const showPopconfirm = () => {
+    setOpen(true);
+  };
+
+  const [boxHeight,setBoxHeight] = useState<number>();
+  const [boxWidth,setBoxWidth] = useState<number>();
+
+
+  useEffect(()=>{
+    let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    setBoxHeight(boxParent.clientHeight);
+    setBoxWidth(boxParent.clientWidth);
+  })
+
 
   const initToolInfo = () => {
     const initStr = JSON.stringify({
@@ -528,19 +580,18 @@ const AttributeRusult: FC<IProps> = ({
     );
   };
 
-  if (!attributeResultList || attributeResultList.length === 0) {
+  if (!attributeResultList || attributeResultList.length === 0 || !boxHeight) {
     return (
       <div className='containerBox'>
         <img className='emptyAttributeImg' src={emptyAttributeImg} />
       </div>
     );
   }
-
   return (
     <div
+    style={{height: boxHeight as number - 100}}
       className={classNames({
         attributeResult: true,
-        attributeResultPreview: isPreview,
       })}
     >
       <DrageModel
@@ -726,6 +777,34 @@ const AttributeRusult: FC<IProps> = ({
                       </div>
                     );
                   })}
+        
+                  <Popconfirm
+                    title='确认清空标注？'
+                    open={open}
+                    okText='确认'
+                    cancelText='取消'
+                    onConfirm={handleOk}
+                    okButtonProps={{ loading: confirmLoading }}
+                    onCancel={handleCancel}
+                  >
+                    <div className='rightBarFooter'>
+                    <img
+                      onMouseEnter={(e) => {
+                        e.stopPropagation();
+                        setIsClearHover(true);
+                      }}
+                      onMouseLeave={(e) => {
+                        e.stopPropagation();
+                        setIsClearHover(false);
+                      }}
+                      onClick={showPopconfirm}
+                      className='clrearResult'
+                      src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
+                    />
+                    </div>
+                  </Popconfirm>
+          
+
               </Panel>
             );
           })}

@@ -6,6 +6,7 @@ import { BasicConfig, Attribute, OneTag } from 'interface/toolConfig';
 import { memo, useRef } from 'react';
 // import tagConfigList from '../../../config/tagConfigList.json';
 // import attributeList from '../../../config/attributeList.json';
+import './index.less';
 
 const Annotation = (props: {
   fileList: any;
@@ -35,7 +36,7 @@ const Annotation = (props: {
   // }
 
   return (
-    <div>
+    <div className='annotationBox'>
       <AnnotationOperation
         ref={annotationRef}
         leftSiderContent={leftSiderContent}

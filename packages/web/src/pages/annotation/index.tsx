@@ -54,7 +54,7 @@ const AnnotationPage: FC = () => {
     console.log('goBack', data);
   };
   return (
-    <>
+    <div className='annotationBox'>
       {fileList && fileList.length > 0 && tools && tools.length > 0 && (
         <Annotation
           attribute={attribute}
@@ -67,7 +67,7 @@ const AnnotationPage: FC = () => {
           topActionContent={topActionContent()}
         />
       )}
-    </>
+    </div>
   );
 };
 

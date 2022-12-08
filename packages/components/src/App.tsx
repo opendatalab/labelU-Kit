@@ -102,7 +102,7 @@ const App: React.FC<AppProps> = (props) => {
     getFileData,
     pageSize = 10,
     loadFileList,
-    defaultLang = 'cn',
+    defaultLang = 'cn'
   } = props;
 
   const dispatch = useDispatch();
@@ -142,7 +142,9 @@ const App: React.FC<AppProps> = (props) => {
           onStepChange,
         }),
       );
-      initImgList();
+        initImgList();
+      
+
       // 初始化国际化语言
       i18n.changeLanguage(defaultLang);
     }
@@ -190,7 +192,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   return (
-    <div>
+    <div id='annotationCotentAreaIdtoGetBox'>
       <MainView {...props} currentToolName={currentToolName as string} />
     </div>
   );

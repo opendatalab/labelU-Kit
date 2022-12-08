@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CollapseIcon from '@/assets/cssIcon/collapse.svg';
 import SpreadIcon from '@/assets/cssIcon/spread.svg';
 import classnames from 'classnames';
 import { PageJump } from '../../../store/annotation/actionCreators';
-import { updateCollapseStatus } from '../../../store/toolStyle/actionCreators';
+// import { updateCollapseStatus } from '../../../store/toolStyle/actionCreators';
 import { connect, useDispatch } from 'react-redux';
 import { prefix } from '../../../constant';
 import { IFileItem } from '../../../types/data';
@@ -17,12 +17,13 @@ interface LeftSiderProps {
   imgList: IFileItem[];
   currentToolName: string;
   imgIndex: string;
-  imgListCollapse: boolean;
   leftSiderContent?: React.ReactNode | React.ReactNode;
 }
 
 const LeftSider: React.FC<LeftSiderProps> = (props) => {
-  const { imgList, imgIndex, imgListCollapse, leftSiderContent } = props;
+  const { imgList, imgIndex, leftSiderContent } = props;
+
+  const [imgListCollapse,setImgListCollapse] = useState<boolean>(true);
   const dispatch = useDispatch();
   const pageJump = (page: number) => {
     dispatch(PageJump(page));
@@ -75,7 +76,7 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
         className='itemOpIcon'
         src={imgListCollapse ? SpreadIcon : CollapseIcon}
         onClick={(e) => {
-          dispatch(updateCollapseStatus(!imgListCollapse));
+          setImgListCollapse(!imgListCollapse);
           e.stopPropagation();
         }}
       />
@@ -85,11 +86,10 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
 
 const mapStateToProps = ({ annotation, toolStyle }: AppState) => {
   const { imgList, imgIndex } = annotation;
-  const { imgListCollapse } = toolStyle;
   return {
     imgList,
     imgIndex,
-    imgListCollapse,
+
   };
 };
 

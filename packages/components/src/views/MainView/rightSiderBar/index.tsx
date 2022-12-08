@@ -4,18 +4,18 @@ import { AppState } from '../../../store';
 import { Sider } from '../../../types/main';
 import StepUtils from '../../../utils/StepUtils';
 import React, { useEffect, useState } from 'react';
-import { Popconfirm, Tabs } from 'antd';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { Tabs } from 'antd';
+import { connect, useSelector } from 'react-redux';
 import TextToolSidebar from './TextToolSidebar';
 import TagSidebar from './TagSidebar';
 import AttributeRusult from './AttributeRusult';
-import ClearResultIconHover from '../../../assets/annotation/common/clear_result_hover.svg';
-import ClearResultIcon from '../../../assets/annotation/common/clear_result.svg';
+// import ClearResultIconHover from '../../../assets/annotation/common/clear_result_hover.svg';
+// import ClearResultIcon from '../../../assets/annotation/common/clear_result.svg';
 import { IFileItem } from '@/types/data';
-import { labelTool } from '../toolHeader/headerOption';
-import { UpdateImgList } from '@/store/annotation/actionCreators';
-import { PrevResult } from '@label-u/annotation';
-import { toolList } from '../toolHeader/ToolOperation';
+// import { labelTool } from '../toolHeader/headerOption';
+// import { UpdateImgList } from '@/store/annotation/actionCreators';
+// import { PrevResult } from '@label-u/annotation';
+// import { toolList } from '../toolHeader/ToolOperation';
 import classNames from 'classnames';
 
 interface IProps {
@@ -31,10 +31,6 @@ interface IProps {
 const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar: React.FC<IProps> = (props) => {
   const { imgList, imgIndex, currentToolName, isPreview } = props;
-
-  const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
   const [textTab, setTextTab] = useState<any>();
   const [tabIndex, setTabIndex] = useState<string>('1');
   const [tagTab, setTagTab] = useState<any>(
@@ -44,15 +40,24 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
-  const [isClearnHover, setIsClearHover] = useState<boolean>(false);
+  // const [isClearnHover, setIsClearHover] = useState<boolean>(false);
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
   const [isShowClear, setIsShowClear] = useState(false);
   const tagConfigList = useSelector((state: AppState) => state.annotation.tagConfigList);
   const textConfig = useSelector((state: AppState) => state.annotation.textConfig);
-  const toolInstance = useSelector((state: AppState) => state.annotation.toolInstance);
   const toolName = stepInfo?.tool;
+
+  const [boxHeight,setBoxHeight] = useState<number>();
+  const [boxWidth,setBoxWidth] = useState<number>();
+
+
+  useEffect(()=>{
+    let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    setBoxHeight(boxParent.clientHeight);
+    setBoxWidth(boxParent.clientWidth);
+  })
 
   // 删除标注结果
   // const doClearAllResult = () => {
@@ -60,55 +65,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   //   toolInstance?.setPrevResultList([]);
   // };
 
-  const showPopconfirm = () => {
-    setOpen(true);
-  };
-
-  // 更新pre 标注结果
-  const updateCanvasView = (newLabelResult: any) => {
-    const prevResult: PrevResult[] = [];
-    for (let oneTool of toolList) {
-      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
-        let onePrevResult = {
-          toolName: oneTool.toolName,
-          result: newLabelResult[oneTool.toolName].result,
-        };
-        prevResult.push(onePrevResult);
-      }
-      if (oneTool.toolName === currentToolName) {
-        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
-      }
-    }
-    toolInstance.setPrevResultList(prevResult);
-    toolInstance.render();
-  };
-
-  // 删除标注结果
-  const doClearAllResult = () => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    for (let tool of labelTool) {
-      let tmpResult = oldImgResult[tool]?.result;
-      if (tmpResult && tmpResult.length > 0) {
-        oldImgResult[tool].result = [];
-      }
-    }
-    imgList[imgIndex].result = JSON.stringify(oldImgResult);
-    dispatch(UpdateImgList(imgList));
-    updateCanvasView(oldImgResult);
-  };
-
-  const handleOk = () => {
-    setConfirmLoading(true);
-    setTimeout(() => {
-      doClearAllResult();
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 100);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
 
   useEffect(() => {
     if (imgList && imgList.length > 0) {
@@ -187,7 +143,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   }
 
   return (
-    <div className={`${sidebarCls}`}>
+    <div className={`${sidebarCls}`} style={{height:boxHeight}}>
       <Tabs
         defaultActiveKey='1'
         onChange={(e) => {
@@ -202,8 +158,8 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           </Tabs.TabPane>
         )}
         <Tabs.TabPane tab={attributeTab} key='2'>
-          <AttributeRusult isPreview={isPreview} />
-          {isShowClear && (
+          <AttributeRusult isPreview={isPreview} isShowClear={isShowClear} />
+          {/* {isShowClear && (
             <Popconfirm
               title='确认清空标注？'
               open={open}
@@ -228,9 +184,8 @@ const RightSiderbar: React.FC<IProps> = (props) => {
                 src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
               />
               </div>
- 
             </Popconfirm>
-          )}
+          )} */}
         </Tabs.TabPane>
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane tab={textTab} key='3'>

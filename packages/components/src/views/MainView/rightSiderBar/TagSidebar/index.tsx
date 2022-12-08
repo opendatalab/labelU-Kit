@@ -42,7 +42,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
   // const [, forceRender] = useState<number>(0);
   // const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
   const { t } = useTranslation();
-  const height = window?.innerHeight - 61 - 200;
+  // const height = window?.innerHeight - 61 - 200;
 
   const dispatch = useDispatch();
 
@@ -324,7 +324,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
       {tagConfigList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div style={{ height }}>{labelPanel(tagConfigList)}</div>
+        <div>{labelPanel(tagConfigList)}</div>
       )}
     </div>
   );

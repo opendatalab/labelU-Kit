@@ -107,7 +107,6 @@ const updateToolInstance = (
       }
     }
   }
-  debugger;
   const annotationEngine = new AnnotationEngine({
     container,
     isShowOrder: isShowOrder,

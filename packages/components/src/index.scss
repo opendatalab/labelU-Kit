@@ -528,11 +528,10 @@ body {
 //
 
 .#{$prefix}-sidebar {
-  height: 100%;
   width: 280px;
   // box-shadow: 0px 2px 14px 0px rgba(204, 204, 204, 0.5);
   background: #ffffff;
-  overflow: hidden;
+  overflow: scroll;
   display: flex;
   position: relative;
   flex-direction: column;
@@ -542,7 +541,9 @@ body {
   user-select: none;
   text-align: left;
 
-  .leftBarFooter{
+  .rightBarFooter{
+    position: absolute;
+    bottom: 5px;
     width: 100%;
     height: 40px;
     display: flex;
@@ -558,14 +559,14 @@ body {
     // }
   }
 
-  .attributeResultPreview{
-    height: calc(89vh - 220px) !important;
-  }
+  // .attributeResultPreview{
+  //   height: calc(89vh - 220px) !important;
+  // }
 
   .attributeResult {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     width: 100%;
-    height: calc(100vh - 230px);
+    // height: calc(100vh - 230px);
     overflow-y: scroll;
     overflow-x: hidden;
   }
@@ -1286,7 +1287,7 @@ $hotkey-container-padding: 7px;
 
 .tagOperationMenu {
   padding: 0px 20px;
-  height: calc(89vh - 180px);
+  // height: calc(89vh - 180px);
   overflow-y: scroll;
 
 
@@ -1489,13 +1490,13 @@ $hotkey-container-padding: 7px;
 
 .textToolOperationMenu {
   padding: 0px 20px;
-  height: calc(89vh - 180px);
+  // height: calc(89vh - 180px);
   overflow-y: scroll;
 }
 
-.textToolOperationMenuPreview{
-  height: calc(89vh - 220px) !important;
-}
+// .textToolOperationMenuPreview{
+//   height: calc(89vh - 220px) !important;
+// }
 
 .textareaContainer {
   position: relative;

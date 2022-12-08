@@ -1,6 +1,6 @@
 {
   "name": "@label-u/annotation",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "Annotation tool collection",
   "keywords": [
     "annotation",
@@ -19,7 +19,7 @@
   "main": "./dist/index.js",
   "module": "./es/index.js",
   "types": "./es/types/index.d.ts",
-  "author": "wuhui",
+  "author": "wuhui,luoluo",
   "email": "751569801@qq.com",
   "contributors": [
     "lijingchi",

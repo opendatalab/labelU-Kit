@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import Annotation from '../../components/business/annotation';
+import AnnotationOperation, { TextConfig } from '@label-u/components';
 import './index.less';
 // import { fileList as mockFileList, videoList } from '../../mock/annotationMock';
 import YamlConfig from './yamlConfig';
@@ -139,14 +140,13 @@ const AnnotationConfig: FC = () => {
                 <span className="leftSpan">标注预览</span>
               </div>
               <div className='rightContent'>
-                <Annotation
-                  isPreview={true}
-                  attribute={attribute}
-                  tagList={tagList}
-                  fileList={fileList}
+                <AnnotationOperation
+                  attributeList={attribute}
+                  tagConfigList={tagList}
+                  imgList={fileList}
                   textConfig={textConfig}
                   goBack={goBack}
-                  tools={tools}
+                  toolsBasicConfig={tools}
                 />
               </div>
             </>
