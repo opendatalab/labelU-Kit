@@ -582,14 +582,16 @@ const AttributeRusult: FC<IProps> = ({
 
   if (!attributeResultList || attributeResultList.length === 0 || !boxHeight) {
     return (
-      <div className='containerBox'>
+      <div className='containerBox'
+      style={{height: boxHeight as number - 220}}
+      >
         <img className='emptyAttributeImg' src={emptyAttributeImg} />
       </div>
     );
   }
   return (
     <div
-    style={{height: boxHeight as number - 100}}
+    style={{height: boxHeight as number - 220}}
       className={classNames({
         attributeResult: true,
       })}

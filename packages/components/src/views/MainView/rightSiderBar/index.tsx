@@ -143,7 +143,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   }
 
   return (
-    <div className={`${sidebarCls}`} style={{height:boxHeight}}>
+    <div className={`${sidebarCls}`} style={{height:(boxHeight as number - 111)}}>
       <Tabs
         defaultActiveKey='1'
         onChange={(e) => {

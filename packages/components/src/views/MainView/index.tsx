@@ -63,13 +63,10 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
 
   const [boxHeight,setBoxHeight] = useState<number>();
   const [boxWidth,setBoxWidth] = useState<number>();
-
-  debugger;
   useEffect(()=>{
     let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
     setBoxHeight(boxParent.clientHeight);
     setBoxWidth(boxParent.clientWidth);
-    debugger;
   })
 
 
@@ -97,7 +94,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
           <AttributeOperation />
           <Layout>
             {<LeftSider {...props} />}
-            <Content className={`${layoutCls}__content`} style={{height:boxHeight}}>
+            <Content className={`${layoutCls}__content`} style={{height:(boxHeight as number - 111)}}>
               <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
             <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
