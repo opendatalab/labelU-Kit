@@ -35,6 +35,18 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public isPointCloud2DTool: boolean;
 
+  public isShowArrow: boolean = false;
+
+  public arrowPointList: IPolygonPoint[] | undefined;
+
+  public isArrowHover: boolean = false;
+
+  public firstClickPoint: IPolygonPoint | undefined;
+
+  public rotatePointList: IPolygonPoint[] | undefined;
+
+  public rotation:number = 0;
+
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
     this.isPointCloud2DTool = true;
@@ -44,6 +56,10 @@ class PointCloud2dOperation extends PolygonOperation {
 
   get getSelectedIDs() {
     return this.selectedIDs;
+  }
+
+  public setIsShowArrow(isShow: boolean) {
+    this.isShowArrow = true;
   }
 
   /**
@@ -61,6 +77,75 @@ class PointCloud2dOperation extends PolygonOperation {
     /** ID not existed and empty selectedID */
     this.selectedIDs = [];
     this.emit('deleteSelectedIDs');
+  }
+
+  public setArrowPointList(pointList: IPolygonPoint[]) {
+    this.arrowPointList = pointList;
+  }
+
+  public onMouseMove(event: MouseEvent) {
+    super.onMouseMove(event);
+    if (this.forbidMouseOperation || !this.imgInfo || !this.arrowPointList) {
+      return;
+    }
+    let preisArrowHover = this.isArrowHover;
+    const currentCoord = this.getCoordinateUnderZoom(event);
+    let arrowPointlistByZoom = AxisUtils.changePointListByZoom(this.arrowPointList, this.zoom);
+    let newIsArrowHoverIndex = AxisUtils.returnClosePointIndex(currentCoord, arrowPointlistByZoom);
+    let isArrowHover = newIsArrowHoverIndex != -1;
+
+    if (preisArrowHover !== isArrowHover) {
+      this.isArrowHover = newIsArrowHoverIndex != -1;
+      this.renderPolygon();
+    }
+    if (this.isArrowHover && this.firstClickPoint || this.rotatePointList) {
+      this.getVirtualPolygon(event);
+    }
+  }
+
+  public getVirtualPolygon(event: MouseEvent) {
+    if (this.firstClickPoint) {
+      let selectPolygonPoint = this.selectedPolygon?.pointList as IPolygonPoint[];
+
+      let polygonCenterPoint = {
+        x: (selectPolygonPoint[0].x + selectPolygonPoint[2].x) / 2,
+        y: (selectPolygonPoint[0].y + selectPolygonPoint[2].y) / 2,
+      };
+      // 矩形中心点
+      let centerPointUnderZoomAndPos = AxisUtils.changePointListByZoom(
+        [polygonCenterPoint],
+        this.zoom,
+        this.currentPos,
+      );
+
+      let currentCoord = this.getCoordinate(event);
+
+      let prevVector = {
+        x: this.firstClickPoint.x - centerPointUnderZoomAndPos[0].x,
+        y: this.firstClickPoint.y - centerPointUnderZoomAndPos[0].y,
+      };
+
+      let currentVector = {
+        x: currentCoord.x - centerPointUnderZoomAndPos[0].x,
+        y: currentCoord.y - centerPointUnderZoomAndPos[0].y,
+      };
+      let rotation = MathUtils.getAngle(prevVector, currentVector);
+      // 旋转后的矩形
+      this.rotatePointList = selectPolygonPoint.map((point) => {
+        return AxisUtils.getRotatePoint(polygonCenterPoint, point, rotation);
+      });
+      this.rotation = rotation;
+    }
+  }
+
+  public onMouseDown(e: MouseEvent) {
+    if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
+      return;
+    }
+    if (this.isArrowHover) {
+      this.firstClickPoint = this.getCoordinate(e);
+    }
+    return true;
   }
 
   /**
@@ -102,10 +187,32 @@ class PointCloud2dOperation extends PolygonOperation {
 
   /**
    * do no draw by this tool when left mouse click and move
-   * @param e 
-   * @returns 
+   * @param e
+   * @returns
    */
-  public leftMouseUp(e:MouseEvent){
+  public leftMouseUp(e: MouseEvent) {
+    this.firstClickPoint = undefined;
+    if(this.rotatePointList&&this.rotation &&this.selectedPolygon){
+      const polygonList = [...this.polygonList];
+      let newPolygonList = [];
+      // this.selectedPolygon?.pointList = this.rotatePointList
+      // this.emit('rotate',this.rotation)  
+      let newPolygon = {
+        ...this.selectedPolygon,
+        pointList:[...this.rotatePointList]
+      }
+      for(let i=0;i<polygonList.length;i++){
+        if(polygonList[i].id === this.selectedID){
+          newPolygonList.push(newPolygon)
+        }else{
+          newPolygonList.push(polygonList[i])
+        }
+      }
+      this.polygonList = newPolygonList
+      this.emit('polygonCreated', newPolygon, this.zoom, this.currentPos);
+      this.rotation = 0;
+      // this.rotatePointList = [];
+    }
     return;
   }
 
@@ -163,10 +270,22 @@ class PointCloud2dOperation extends PolygonOperation {
     //   }
     // }
 
+    if (this.rotatePointList&&this.rotation) {
+      DrawUtils.drawSelectedPolygonWithFillAndLine(this.canvas,     AxisUtils.changePointListByZoom(this.rotatePointList, this.zoom,this.currentPos), {
+        // fillColor: toolData.fill,
+        fillColor: 'transparent',
+        strokeColor: 'red',
+        pointColor: 'white',
+        thickness: 2,
+        lineCap: 'round',
+        isClose: true,
+        lineType: this.config?.lineType,
+      });
+    }
+
     // 3. 选中多边形的渲染
     if (this.selectedID) {
       const selectdPolygon = this.selectedPolygon;
-
       if (selectdPolygon) {
         const toolColor = this.getColor(selectdPolygon.attribute);
         const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
@@ -176,7 +295,7 @@ class PointCloud2dOperation extends PolygonOperation {
           AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
           {
             // fillColor: toolData.fill,
-            fillColor:"transparent",
+            fillColor: 'transparent',
             strokeColor: toolData.stroke,
             pointColor: 'white',
             thickness: 2,
@@ -185,6 +304,34 @@ class PointCloud2dOperation extends PolygonOperation {
             lineType: this.config?.lineType,
           },
         );
+
+        if (this.isShowArrow && selectdPolygon.isRect) {
+          let sPoint = {
+            x: (selectdPolygon.pointList[2].x + selectdPolygon.pointList[3].x) / 2,
+            y: (selectdPolygon.pointList[2].y + selectdPolygon.pointList[3].y) / 2,
+          };
+
+          let vectorP = {
+            x: (selectdPolygon.pointList[2].x - selectdPolygon.pointList[1].x) / 2,
+            y: (selectdPolygon.pointList[2].y - selectdPolygon.pointList[1].y) / 2,
+          };
+          let sEnd = {
+            x: sPoint.x + vectorP.x,
+            y: sPoint.y + vectorP.y,
+          };
+          this.setArrowPointList([sPoint, sEnd]);
+          let thickness = this.isArrowHover ? 10 : 3;
+          DrawUtils.drawLineWithPointList(
+            this.canvas,
+            AxisUtils.changePointListByZoom([sPoint, sEnd], this.zoom, this.currentPos),
+            {
+              color: toolData.stroke,
+              thickness: thickness,
+              hoverEdgeIndex: this.hoverEdgeIndex,
+              lineType: this.config?.lineType,
+            },
+          );
+        }
       }
     }
 
@@ -268,8 +415,6 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
- 
-  
   /**
    * Update the show
    * @override
@@ -448,7 +593,6 @@ class PointCloud2dOperation extends PolygonOperation {
       super.setPolygonValidAndRender(id);
       return;
     }
-
     this.emit('validUpdate', id);
   }
 }

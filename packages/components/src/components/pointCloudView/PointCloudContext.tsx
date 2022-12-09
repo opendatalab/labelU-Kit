@@ -74,7 +74,18 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
     const addPointCloudBox = (box: IPointCloudBox) => {
-      setPointCloudResult(pointCloudBoxList.concat(box));
+      if(pointCloudBoxList){
+        let newPointCloudBoxList  = []
+        for(let i = 0; i < pointCloudBoxList.length; i++){
+          if(pointCloudBoxList[i].id !== box.id){
+            newPointCloudBoxList.push(pointCloudBoxList[i])
+          }
+        }
+        setPointCloudResult(newPointCloudBoxList.concat(box));
+      }
+
+
+
     };
 
     const setPointCloudValid = (valid?: boolean) => {

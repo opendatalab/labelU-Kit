@@ -373,7 +373,7 @@ class PointCloudOperation extends PointCloud {
     if(raycasterMeshs[0].object.parent?.name){
       this.setSelectedId(raycasterMeshs[0].object.parent?.name.substring(0,raycasterMeshs[0].object.parent?.name.length - 3));
       this.setTransparencyByName(this.selectedId + 'box',0.3);
-      this.emit('setSelectedIDs', this.selectedId);
+      this.emit('updateSelectedBox', this.selectedId);
     }
   }
 
@@ -523,7 +523,6 @@ class PointCloudOperation extends PointCloud {
         highlightWorker.postMessage(params);
         highlightWorker.onmessage = (e: any) => {
           const { color: newColor, points: newPosition, num } = e.data;
-          debugger;
           const geometry = new THREE.BufferGeometry();
           geometry.setAttribute('position', new THREE.Float32BufferAttribute(newPosition, 3));
           geometry.setAttribute('color', new THREE.Float32BufferAttribute(newColor, 3));

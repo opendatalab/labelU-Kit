@@ -164,8 +164,14 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       },
     );
 
-    mainViewInstance.singleOn('setSelectedIDs', (selectedIDs: string[]) => {
-      ptCtx.setSelectedIDs(selectedIDs);
+    mainViewInstance.singleOn('updateSelectedBox', (selectedIDs: string) => {
+      let size = {
+        width:TopView2dOperation.container.clientWidth,
+        height:TopView2dOperation.container.clientHeight
+      }
+      let [polygon] = TopView2dOperation.polygonList.filter(p => p.id === selectedIDs)
+      pointCloudViews.topViewAddBox(polygon,size)
+      ptCtx.setSelectedIDs([selectedIDs]);
     });
 
     mainViewInstance.setStyle(toolStyle);

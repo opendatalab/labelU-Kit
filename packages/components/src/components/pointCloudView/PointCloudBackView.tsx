@@ -1,17 +1,11 @@
-/*
- * @Author: Laoluo luozefeng@sensetime.com
- * @Date: 2022-06-22 11:08:31
- * @LastEditors: Laoluo luozefeng@sensetime.com
- * @LastEditTime: 2022-07-08 11:08:02
- */
 import { PointCloud, MathUtils, PointCloudAnnotation } from '@label-u/annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useSingleBox } from './hooks/useSingleBox';
-import { EPerspectiveView, IPointCloudBox, IPolygonPoint } from '@label-u/utils';
-import { SizeInfoForView } from './PointCloudInfos';
+import { IPointCloudBox, IPolygonPoint } from '@label-u/utils';
+// import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
@@ -195,7 +189,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
 
   useEffect(() => {
     // Update Size
-    ptCtx?.backViewInstance?.initSize(size);
+   ptCtx?.backViewInstance?.initSize(size);
   }, [size]);
 
   return (

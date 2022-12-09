@@ -147,7 +147,7 @@ class BasicToolOperation extends EventListener {
   ) => IAnnotationStyle;
 
   // 拖拽 - 私有变量
-  private _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
+  protected _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
 
   private innerZoom = 1; // 用于内外 zoom 事件的变量，缓存 zoom 变换前的数据
 

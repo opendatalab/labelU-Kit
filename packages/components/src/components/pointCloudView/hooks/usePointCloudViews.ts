@@ -233,7 +233,6 @@ export const synchronizeBackView = async (
 
   // Create Draw Polygon
   const { polygon2d, zoom } = backPointCloud.getBoxBackPolygon2DCoordinate(boxParams);
-
   // Synchronize SidePointCloud zoom with PointCloud2dOperation
   backPointCloud.camera.zoom = zoom;
   backPointCloud.camera.updateProjectionMatrix();
@@ -372,7 +371,38 @@ export const usePointCloudViews = () => {
     const newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
       attribute: config?.attributeList?.[0]?.value ?? '',
     });
+
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
+    polygonOperation.initImgPos();
+    let centerCoordinate = polygonOperation.getGetCenterCoordinate();
+    // 视图中心点 在 图片中的坐标
+    let centerPositionInImageWithOutZoom = {
+      x: (centerCoordinate.x - polygonOperation.currentPos.x)/polygonOperation.zoom,
+      y: (centerCoordinate.y - polygonOperation.currentPos.y)/polygonOperation.zoom,
+    };
+    let polygonPointList = newPolygon.pointList;
+    // polygon 中心坐标
+    let polygonCenter = {
+      x: (polygonPointList[0].x + polygonPointList[2].x) / 2,
+      y: (polygonPointList[0].y + polygonPointList[2].y) / 2,
+    };
+
+    // 将polygon 中心 移动至屏幕中心
+    let offsetBetweenPolygonCenterAndViewCenter = {
+      x: polygonCenter.x - centerPositionInImageWithOutZoom.x,
+      y: polygonCenter.y - centerPositionInImageWithOutZoom.y,
+    };
+
+    let newCurrentPros = {
+      x:polygonOperation.currentPos.x - offsetBetweenPolygonCenterAndViewCenter.x,
+      y:polygonOperation.currentPos.y - offsetBetweenPolygonCenterAndViewCenter.y
+    }
+    polygonOperation.setCurrentPos(newCurrentPros);
+    const pointCloud = topViewInstance?.pointCloudInstance;
+    const { zoom } = pointCloud.getBoxTopPolygon2DCoordinate(newParams);
+    pointCloud.camera.zoom = zoom;
+    pointCloud.camera.updateProjectionMatrix();
+    pointCloud.render();
 
     // Temporarily hide
     // const boxParams: IPointCloudBox = Object.assign(newParams, {
@@ -390,9 +420,10 @@ export const usePointCloudViews = () => {
       polygonOperation.deletePolygon(newParams.id);
       return;
     }
+    polygonOperation.zoomChangeOnCenter(zoom);
 
-    polygonOperation.setSelectedIDs([newPolygon.id]);
-    setSelectedIDs(boxParams.id);
+    polygonOperation.setSelectedID(newPolygon.id);
+    setSelectedIDs([boxParams.id]);
     syncPointCloudViews(PointCloudView.Top, newPolygon, boxParams, true);
     addPointCloudBox(boxParams);
   };
@@ -597,8 +628,8 @@ export const usePointCloudViews = () => {
     ptCtx.setPointCloudValid(valid);
 
     // Clear other view data during initialization
-    ptCtx.sideViewInstance?.clearAllData();
-    ptCtx.backViewInstance?.clearAllData();
+    ptCtx?.sideViewInstance?.clearAllData();
+    ptCtx?.backViewInstance?.clearAllData();
 
     // TopView Data Update
     /**

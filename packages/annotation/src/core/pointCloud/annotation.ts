@@ -76,6 +76,11 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
 
     const polygonOperation = new PointCloud2dOperation(defaultPolygonProps);
+    
+    if(pcdPath){
+      polygonOperation.setIsShowArrow(true);
+    }
+
 
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);

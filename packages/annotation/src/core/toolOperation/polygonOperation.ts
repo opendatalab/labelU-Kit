@@ -263,7 +263,6 @@ class PolygonOperation extends BasicToolOperation {
     if (!this.imgInfo) {
       return;
     }
-
     if (this.forbidAddNewPolygonFuc && this.forbidAddNewPolygonFuc(e)) {
       return;
     }

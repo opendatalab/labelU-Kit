@@ -107,28 +107,28 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 /**
  * Slider for filtering Z-axis points
  */
-const ZAxisSlider = ({
-  setZAxisLimit,
-  zAxisLimit,
-}: {
-  setZAxisLimit: (value: number) => void;
-  zAxisLimit: number;
-}) => {
-  return (
-    <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
-      <Slider
-        vertical
-        step={0.5}
-        max={10}
-        min={0.5}
-        defaultValue={zAxisLimit}
-        onAfterChange={(v: number) => {
-          setZAxisLimit(v);
-        }}
-      />
-    </div>
-  );
-};
+// const ZAxisSlider = ({
+//   setZAxisLimit,
+//   zAxisLimit,
+// }: {
+//   setZAxisLimit: (value: number) => void;
+//   zAxisLimit: number;
+// }) => {
+//   return (
+//     <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
+//       <Slider
+//         vertical
+//         step={0.5}
+//         max={10}
+//         min={0.5}
+//         defaultValue={zAxisLimit}
+//         onAfterChange={(v: number) => {
+//           setZAxisLimit(v);
+//         }}
+//       />
+//     </div>
+//   );
+// };
 
 const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
   currentData,
@@ -142,13 +142,14 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
 
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
-  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
+  // const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
   const toolStyle = useSelector((state: AppState) => {
     return { ...state.toolStyle };
   });
 
+  const { updateRotate } = useRotate({ currentData });
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
       return;
@@ -189,6 +190,12 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
       deletePointCloudBox(id);
       deletePolygon(id);
     });
+
+    TopView2dOperation.singleOn('rotate',(rotate: number) => {
+
+      updateRotate(rotate)
+
+    })
 
     TopView2dOperation.singleOn('deleteSelectedIDs', () => {
       ptCtx.setSelectedIDs([]);
@@ -276,9 +283,9 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
   //   setZoom(1);
   // },[size])
 
-  useEffect(() => {
-    ptCtx.topViewInstance?.pointCloudInstance?.applyZAxisPoints(zAxisLimit);
-  }, [zAxisLimit]);
+  // useEffect(() => {
+  //   ptCtx.topViewInstance?.pointCloudInstance?.applyZAxisPoints(zAxisLimit);
+  // }, [zAxisLimit]);
 
   useEffect(() => {
     pointCloudViews.topViewSelectedChanged();
@@ -301,12 +308,12 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
       <PointCloudContainer
         className={getClassName('point-cloud-container', 'top-view')}
         title={t('TopView')}
-        // toolbar={<TopViewToolbar currentData={currentData} />}
+        toolbar={<TopViewToolbar currentData={currentData} />}
       >
         <div style={{ position: 'relative', flex: 1 }}>
           <div id='mytool' style={{ width: '100%', height: '100%' }} ref={ref} />
           {/* <BoxInfos /> */}
-          <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
+          {/* <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} /> */}
           <PointCloudValidity />
         </div>
       </PointCloudContainer>

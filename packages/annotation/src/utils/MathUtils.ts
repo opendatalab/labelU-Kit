@@ -528,6 +528,31 @@ export default class MathUtils {
   }
 
   /**
+   * 
+   * @param vector1 
+   * @param vector2 
+   * @returns 
+   */
+
+  public static getAngelByVectors(vector1: ICoordinate, vector2: ICoordinate){
+     let vector1Lenght = this.getLineLength({x:0,y:0},vector1);
+     let vector2Lenght = this.getLineLength({x:0,y:0},vector2);
+     let cosAangle =(vector1.x * vector2.x + vector1.y * vector2.y)/(vector1Lenght*vector2Lenght) 
+     
+    const radius = Math.acos(cosAangle);
+
+    return radius;
+  }
+
+  public static getAngle = (vector1: ICoordinate, vector2: ICoordinate) => {
+    const dot = vector1.x * vector2.x + vector1.y * vector2.y
+    const det = vector1.x * vector2.y - vector1.y * vector2.x
+    return  Math.atan2(det, dot)
+    // const angle = Math.atan2(det, dot) / Math.PI * 180
+    // return (angle + 360) % 360
+}
+
+  /**
    * Get the radius from quadrangle under top-view
    *
    * Return Range  [0 , 2PI]

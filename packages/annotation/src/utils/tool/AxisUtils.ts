@@ -90,6 +90,16 @@ export default class AxisUtils {
     }
   }
 
+  public static getRotatePoint(centerPoint: ICoordinate,rotatePoint:ICoordinate,rotate:number){
+    let x=(rotatePoint.x-centerPoint.x)*Math.cos(rotate)-(rotatePoint.y-centerPoint.y)*Math.sin(rotate)+centerPoint.x
+    let y=(rotatePoint.y-centerPoint.y)*Math.cos(rotate)+(rotatePoint.x-centerPoint.x)*Math.sin(rotate)+centerPoint.y;
+
+    return {
+      x:x,
+      y:y
+    }
+  }
+
   /**
    * 计算点在 zoom 和 currentPos 的转换
    * @param rect
@@ -194,7 +204,6 @@ export default class AxisUtils {
     scope: number = 3,
   ): number {
     let pointIndex = -1;
-
     for (let i = 0; i < polygonPoints.length; i++) {
       const data = polygonPoints[i];
       if (this.getIsInScope(checkPoint, data, scope)) {
