@@ -39,7 +39,7 @@ npm run start
 
 ## Usage
 
-[详细开发文档](https://opendatalab.github.io/labelU-Kit)。
+[Development documents](https://opendatalab.github.io/labelU-Kit)。
 
 ## Thank
 
