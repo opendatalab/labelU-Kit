@@ -3,8 +3,8 @@
       <p align="center"><img width="300" src="./images/labelU-logo.svg" /></p>
       <p>LabelU front-end annotation component library, supporting 2D box、point、line、polygon tools, supporting the combination of multiple tools. It can be used for labeling platform， out of the box</p>
   </article>
+  English | <a href="./README.md">简体中文</a>
   <a href="./README_en-US.md">English</a> | 简体中文
-
 </div>
 
 ## feature
