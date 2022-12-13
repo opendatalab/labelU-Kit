@@ -27,16 +27,17 @@ const Annotation = (props: {
   };
    // 标注页面变动时主动上报当前页面数据的标注结果数据
   const onSubmit = (data: any) => {
-    // console.log('submitData', data);
+    console.log('submitData', data);
   };
   // 被动请求方式
-  // const getLabelResult = ()=>{
-  //   const reulst = annotationRef?.current?.getResult()
-  //   console.log(reulst);
-  // }
+  const getLabelResult = ()=>{
+    const reulst = annotationRef?.current?.getResult()
+    console.log(reulst);
+  }
 
   return (
     <div className='annotationBox'>
+      <button className='btn btn-primary' onClick={getLabelResult}> 获取本张结果</button>
       <AnnotationOperation
         ref={annotationRef}
         leftSiderContent={leftSiderContent}

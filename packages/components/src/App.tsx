@@ -149,6 +149,7 @@ const App: React.FC<AppProps> = (props) => {
       i18n.changeLanguage(defaultLang);
     }
   }, [
+    imgList,
     props.toolStyle,
     props.toolsBasicConfig,
     props.attributeList,
