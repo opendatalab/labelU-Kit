@@ -7,7 +7,8 @@ const initialState: ToolsConfigState = {
   tagList: [],
   attribute: [],
   textConfig: [],
-  fileInfo: {} as FileInfo
+  fileInfo: {} as FileInfo,
+  commonAttributeConfigurable:true,
 };
 
 const toolsConfigSlice = createSlice({
@@ -25,6 +26,11 @@ const toolsConfigSlice = createSlice({
     // 清空统一的attribute
     removeTagConfigList(state) {
       state.attribute = [];
+    },
+
+    // 更新通用标签是否使用开关
+    updatecCommonAttributeConfigurable(state, action: PayloadAction<boolean>){
+      state.commonAttributeConfigurable = action.payload
     },
     // 更新
     updateTagConfigList(state, action: PayloadAction<OneTag[]>) {
@@ -82,6 +88,7 @@ export const {
   updateTagConfigList,
   removeAllTagConfigList,
   updateAllAttributeConfigList,
+  updatecCommonAttributeConfigurable,
   updateTextConfig,
   clearConfig,
   updateAllConfig,

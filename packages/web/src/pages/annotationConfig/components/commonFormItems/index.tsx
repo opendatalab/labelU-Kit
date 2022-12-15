@@ -86,7 +86,9 @@ const CommonFormItem: FC<CommonFormConf & { name: string; toolName: string; isSh
             name="commonAttributeConfigurable"
             initialValue={initVal.commonAttributeConfigurable}
           >
-            <Switch disabled={isAllReadOnly} />
+            <Switch disabled={isAllReadOnly} onChange={e => {
+              form.submit();
+            }} />
           </Form.Item>
 
           <Form.Item noStyle shouldUpdate>

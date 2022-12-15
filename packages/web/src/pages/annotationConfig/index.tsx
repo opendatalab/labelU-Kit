@@ -18,7 +18,7 @@ interface OneFile {
 }
 
 const AnnotationConfig: FC = () => {
-  const { tools, tagList, attribute, textConfig, fileInfo } = useSelector(state => state.toolsConfig, shallowEqual);
+  const { tools, tagList, attribute, textConfig, fileInfo,commonAttributeConfigurable } = useSelector(state => state.toolsConfig, shallowEqual);
   const [rightImg, setRightImg] = useState<any>();
   const [isConfigError, setIsConfigError] = useState<boolean>(false);
   const [confitState, setConfigState] = useState<ToolsConfigState>({
@@ -26,7 +26,8 @@ const AnnotationConfig: FC = () => {
     tools: tools,
     tagList: tagList,
     attribute: attribute,
-    textConfig: textConfig
+    textConfig: textConfig,
+    commonAttributeConfigurable:commonAttributeConfigurable
   });
   const [force, forceSet] = useState(0);
   const [fileList, setFileList] = useState<OneFile[]>([]);
@@ -57,11 +58,12 @@ const AnnotationConfig: FC = () => {
       tools: tools,
       tagList: tagList,
       attribute: attribute,
-      textConfig: textConfig
+      textConfig: textConfig,
+      commonAttributeConfigurable:commonAttributeConfigurable
     });
     // 配置更新表单刷新
     forceSet(new Date().getTime());
-  }, [attribute, tagList, textConfig, tools, fileInfo]);
+  }, [attribute, tagList, textConfig, tools, fileInfo,commonAttributeConfigurable]);
 
   // 加载工具配置信息 和 文件信息
   useEffect(() => {
@@ -141,7 +143,7 @@ const AnnotationConfig: FC = () => {
               </div>
               <div className='rightContent'>
                 <AnnotationOperation
-                  attributeList={attribute}
+                  attributeList={commonAttributeConfigurable?attribute:[]}
                   tagConfigList={tagList}
                   imgList={fileList}
                   textConfig={textConfig}

@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { LoadInitConfig } from '../configTemplate/config';
 import {
   updateAllAttributeConfigList,
+  updatecCommonAttributeConfigurable,
   updateFileInfo,
   updateTagConfigList,
   updateTextConfig,
@@ -22,7 +23,7 @@ const noCommonConfigTools = ['tagTool', 'textTool'];
 const nodrawOutsideTargetTools = ['lineTool'];
 
 const FormConfig: FC = props => {
-  const { tools, tagList, attribute, textConfig } = useSelector(state => state.toolsConfig);
+  const { tools, tagList, attribute, textConfig,commonAttributeConfigurable } = useSelector(state => state.toolsConfig);
   const dispatch = useDispatch();
   const children = [];
   const [media, setMedia] = useState<string>('图片');
@@ -162,6 +163,7 @@ const FormConfig: FC = props => {
       if (info.values.attribute !== undefined) {
         dispatch(updateAllAttributeConfigList(info.values.attribute));
       }
+      dispatch(updatecCommonAttributeConfigurable(info.values.commonAttributeConfigurable))
       let commonToolConfig = {};
       if (info.values.drawOutsideTarget !== undefined) {
         commonToolConfig = Object.assign(commonToolConfig, { drawOutsideTarget: info.values.drawOutsideTarget });
@@ -263,7 +265,7 @@ const FormConfig: FC = props => {
                       {isConfigLoad && (
                         <CommonFormItem
                           key={force}
-                          commonAttributeConfigurable={attribute.length > 0}
+                          commonAttributeConfigurable={commonAttributeConfigurable}
                           attribute={attribute}
                           {...commonConfig}
                           name="commonForm"
