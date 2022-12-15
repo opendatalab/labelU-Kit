@@ -1,7 +1,7 @@
 import { Attribute } from '@label-u/annotation';
 import { Form, Switch } from 'antd';
 import { delayTime } from '../../formConfig/constants';
-import React, { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { MapStateJSONTab } from '../AttributeConfig';
 import TextConfigurable from '../TextConfigurable';
 

@@ -121,14 +121,14 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
   }, delayTime);
 
   // 表单提交处理
-  useEffect(() => {
-    formSubmitThrottle();
-  }, [initVal]);
+  // useEffect(() => {
+  //   formSubmitThrottle();
+  // }, [initVal]);
   const { children } = props;
 
   return (
     <div className="selectedMain" style={{ paddingLeft: 24 }}>
-      <Form name={props.name} form={form}>
+      <Form name={props.name} form={form} onBlur={formSubmitThrottle}>
         <Form.Item label="" name="tagList" shouldUpdate initialValue={initVal.tagList}>
           {initVal.tagList?.map((info, i) => (
             <TagInput
