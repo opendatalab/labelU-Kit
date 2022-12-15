@@ -159,17 +159,18 @@ export const synchronizeSideView = async (
   boxParams: IPointCloudBox,
   newPolygon: any,
   sideViewInstance: PointCloudAnnotation | undefined,
-  url: string,
+  newPoints: THREE.Points,
 ) => {
   if (!sideViewInstance) {
     return;
   }
   const { pointCloud2dOperation, pointCloudInstance } = sideViewInstance;
   // Create PointCloud
-  pointCloudInstance.loadPCDFileByBox(url, boxParams, {
-    width: DEFAULT_SCOPE,
-    depth: DEFAULT_SCOPE,
-  });
+  // await pointCloudInstance.loadPCDFileByBox(url, boxParams, {
+  //   width: DEFAULT_SCOPE,
+  //   depth: DEFAULT_SCOPE,
+  // });
+  pointCloudInstance.scene.add(newPoints);
   const { cameraPositionVector } = pointCloudInstance.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Left,
@@ -213,7 +214,7 @@ export const synchronizeBackView = async (
   boxParams: IPointCloudBox,
   newPolygon: any,
   BackViewInstance: PointCloudAnnotation,
-  url: string,
+  newPoints: THREE.Points,
 ) => {
   if (!BackViewInstance) {
     return;
@@ -223,11 +224,12 @@ export const synchronizeBackView = async (
     pointCloudInstance: backPointCloud,
   } = BackViewInstance;
   // Create PointCloud
-  backPointCloud.loadPCDFileByBox(url, boxParams, { height: DEFAULT_SCOPE, depth: DEFAULT_SCOPE });
+  // backPointCloud.loadPCDFileByBox(url, boxParams, { height: DEFAULT_SCOPE, depth: DEFAULT_SCOPE });
   const { cameraPositionVector } = backPointCloud.updateOrthoCamera(
     boxParams,
     EPerspectiveView.Back,
   );
+  backPointCloud.scene.add(newPoints);
 
   backPointCloud.setInitCameraPosition(cameraPositionVector);
 
@@ -515,20 +517,26 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param boxParams
    */
-  const syncPointCloudViews = (
+  const syncPointCloudViews = async (
     omitView: string,
     polygon: any,
     boxParams: IPointCloudBox,
     is3DToOther?: boolean,
   ) => {
     const dataUrl = currentData?.url;
+
+    const newPoints = await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
+      width: DEFAULT_SCOPE,
+      depth: DEFAULT_SCOPE,
+    }) as unknown as THREE.Points;
+
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
-        synchronizeSideView(boxParams, polygon, sideViewInstance, dataUrl);
+        synchronizeSideView(boxParams, polygon, sideViewInstance, newPoints);
       },
       [PointCloudView.Back]: () => {
         if (backViewInstance) {
-          synchronizeBackView(boxParams, polygon, backViewInstance, dataUrl);
+          synchronizeBackView(boxParams, polygon, backViewInstance, newPoints);
         }
       },
       [PointCloudView.Top]: () => {

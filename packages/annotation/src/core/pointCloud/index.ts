@@ -725,7 +725,6 @@ export class PointCloud extends EventListener {
   ) => {
     const cb = async (points: THREE.Points) => {
       const { width = 0, height = 0, depth = 0 } = scope ?? {};
-
       // TODO. Speed can be optimized.
       const filterData = await this.filterPointsByBox(
         {
@@ -743,11 +742,13 @@ export class PointCloud extends EventListener {
       this.clearPointCloud();
       const newPoints = new THREE.Points(filterData.geometry, points.material);
       newPoints.name = this.pointCloudObjectName;
-      this.scene.add(newPoints);
-      this.render();
+      // this.scene.add(newPoints);
+      // this.render();
+      return newPoints
     };
     const points = await this.cacheInstance.loadPCDFile(src);
-    cb(points);
+    const returnPoints = await cb(points);
+    return returnPoints;
   };
 
   public setShowDirection(showDirection: boolean) {
