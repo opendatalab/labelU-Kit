@@ -159,6 +159,12 @@ const App: React.FC<AppProps> = (props) => {
     // isShowOrder,
   ]);
 
+  useEffect(()=>{
+    console.log("you are using version 20221215",imgList)
+    initImgList();
+  },[])
+
+
   useEffect(() => {
     if (toolInstance) {
       setToolInstance?.(toolInstance);

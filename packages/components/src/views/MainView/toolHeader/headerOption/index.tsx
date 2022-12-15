@@ -208,8 +208,8 @@ const HeaderOption: React.FC<IProps> = (props) => {
         if (isTagTool) {
           return;
         }
-
-        revocation();
+     restore();
+        
       },
       style: {
         opacity: isBegin === true ? 0.4 : 1,
@@ -228,7 +228,8 @@ const HeaderOption: React.FC<IProps> = (props) => {
         if (isTagTool) {
           return;
         }
-        restore();
+        revocation();
+   
       },
       style: {
         opacity: isBegin === true ? 0.4 : 1,
