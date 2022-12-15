@@ -65,13 +65,13 @@ const TagInput = (props: IProps) => {
         </Col>
         <Col span={3}>
           <div className="headerOption">
-            <Tooltip placement="right" title={t('MultiSelect')}>
+            {/* <Tooltip placement="right" title={t('MultiSelect')}>
               <Checkbox
                 className={`${inputInfo.isMulti === true ? 'checkboxSelected' : 'checkboxUnselected'} $"icon}`}
                 checked={true}
                 onChange={e => !isAllReadOnly && changeInputInfo(e, 'isMulti', inputIndex)}
               />
-            </Tooltip>
+            </Tooltip> */}
             {!isAllReadOnly && (
               // eslint-disable-next-line jsx-a11y/anchor-is-valid
               <a className="addIcon" onClick={() => addInputInfo(inputIndex)}>
