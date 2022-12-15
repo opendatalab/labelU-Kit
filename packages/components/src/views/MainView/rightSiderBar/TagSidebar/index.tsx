@@ -229,7 +229,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
             expandIcon={expandIconFuc}
             key={`collapse_${index}_${basicIndex + 1}`}
             onChange={() => setExpendKeyList(index, info.value)}
-            activeKey={[expandKeyList[index]]}
+            activeKey={[info.value]}
           >
             <Panel
               header={
