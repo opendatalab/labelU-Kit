@@ -739,7 +739,7 @@ export class PointCloud extends EventListener {
         console.error('filter Error');
         return;
       }
-      this.clearPointCloud();
+      // this.clearPointCloud();
       const newPoints = new THREE.Points(filterData.geometry, points.material);
       newPoints.name = this.pointCloudObjectName;
       // this.scene.add(newPoints);
