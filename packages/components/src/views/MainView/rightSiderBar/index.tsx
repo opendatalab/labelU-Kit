@@ -17,6 +17,7 @@ import { IFileItem } from '@/types/data';
 // import { PrevResult } from '@label-u/annotation';
 // import { toolList } from '../toolHeader/ToolOperation';
 import classNames from 'classnames';
+import { toolList } from '../toolHeader/ToolOperation';
 
 interface IProps {
   toolName?: EToolName;
@@ -117,13 +118,30 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           </div>,
         );
       }
-
       // 设置标注件数
-      let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
-      let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
-      let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
-      let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
-      let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length;
+      // let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
+      // let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
+      // let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
+      // let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
+      let imgResult = JSON.parse(imgList[imgIndex].result as string);
+      let count = 0;
+      let order:number[] = [];
+      for (let item of toolList) {
+        if (item.toolName !== 'tagTool') {
+          if(imgResult[item.toolName]&&imgResult[item.toolName]?.result&&imgResult[item.toolName]?.result?.length>0){
+        
+            for(let i=0;i<imgResult[item.toolName].result.length;i++){
+              if(order.indexOf(imgResult[item.toolName].result[i].order)<0){
+                order.push(imgResult[item.toolName].result[i].order)
+              }
+            }
+            count += order.length;
+            order = [];
+          }
+        }}
+
+
+      // let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length;
       setAttributeTab(
         <div className='rightTab'>
           <p>标注结果</p>

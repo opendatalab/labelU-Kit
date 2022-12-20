@@ -51,13 +51,13 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
 
   // 计算attribute栏目 宽度
   useEffect(() => {
-    if (attributeList && attributeList.length > 0) {
+    // if (attributeList && attributeList.length > 0) {
       // const leftSliderDomWidth = document.getElementById('sliderBoxId')?.offsetWidth as number;
       // const rightSliderDomWidth = 240;
       // const attributeBoxLength = window.innerWidth - leftSliderDomWidth - rightSliderDomWidth;
       const toolContainerWidth = document.getElementById('toolContainer')?.offsetWidth as number;
       setAttributeBoxLength(toolContainerWidth - 30);
-    }
+    // }
   }, [attributeList, props.imgListCollapse]);
 
   // 计算可显示 attribute 个数
@@ -105,6 +105,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               })}
               onClick={(e) => {
                 e.stopPropagation();
+                setChoseAttribute(item.key);
                 toolInstance.setDefaultAttribute(item.key);
                 forceRender((s) => s + 1);
               }}
@@ -112,8 +113,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className='circle'
                 style={{
-                  backgroundColor:
-                    COLORS_ARRAY[(index + shwoAttributeCount) % COLORS_ARRAY.length],
+                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.key, allAttributeList ?? [])+1].valid.stroke,
                   marginRight: 5,
                 }}
               />

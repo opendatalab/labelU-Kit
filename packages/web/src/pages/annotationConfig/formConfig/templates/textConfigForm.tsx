@@ -70,14 +70,13 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
 
   return (
     <div className="selectedMain" style={{ paddingLeft: 24 }}>
-      <Form {...formItemLayout} name={props.name} form={form}>
+      <Form {...formItemLayout} name={props.name} form={form} onBlur={formSubmitThrottle}>
         <Form.Item name="textConfig" initialValue={initVal}>
           <TextList
             value={[...initVal]}
             onChange={e => {
               form.setFieldsValue({ textConfig: e });
               setInitVal(e);
-              formSubmitThrottle();
             }}
           />
         </Form.Item>

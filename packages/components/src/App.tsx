@@ -160,7 +160,7 @@ const App: React.FC<AppProps> = (props) => {
   ]);
 
   useEffect(()=>{
-    console.log("you are using version 20221215",imgList)
+    console.log("you are using version 20221220",props)
     initImgList();
   },[])
 

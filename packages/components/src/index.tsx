@@ -31,6 +31,8 @@ const OutputApp = (props: AppProps, ref: any) => {
         },
         getResult:()=>{
           // @ts-ignore
+          console.log("save imgList",store.getState()?.annotation.imgList);
+          // @ts-ignore
           return store.getState()?.annotation.imgList;
         }
       };
