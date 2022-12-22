@@ -64,7 +64,7 @@ export interface AppProps {
   showTips?: boolean; // 是否展示 tips
   defaultLang?: 'en' | 'cn'; // 国际化设置
   leftSiderContent?: React.ReactNode | React.ReactNode; // 左侧图片列表操作空间
-  topActionContent?:React.ReactNode | React.ReactNode; // 顶部操作空间
+  topActionContent?: React.ReactNode | React.ReactNode; // 顶部操作空间
   tagConfigList?: OneTag[]; // 配置tag 信息，工具共享一套tag
   attributeList?: Attribute[]; // 标签配置选项，工具共享一套标签
   toolsBasicConfig: BasicConfig[]; // 多工具配置
@@ -105,15 +105,16 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn'
   } = props;
 
+  // @ts-ignore
+  let result = props.imgList[0].result;
+  console.log("result", result);
   const dispatch = useDispatch();
 
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
 
   useEffect(() => {
-    console.log("you are using version 202212221752",props)
-    // @ts-ignore
-    let result =props.imgList[0].result;
-    console.log("result",result);
+    console.log("you are using version 202212221752", props)
+
 
     if (
       (props.stepList && props.stepList.length > 0) ||
@@ -147,7 +148,7 @@ const App: React.FC<AppProps> = (props) => {
           onStepChange,
         }),
       );
-        initImgList();
+      initImgList();
       // 初始化国际化语言
       i18n.changeLanguage(defaultLang);
     }
@@ -162,10 +163,10 @@ const App: React.FC<AppProps> = (props) => {
     // isShowOrder,
   ]);
 
-  useEffect(()=>{
+  useEffect(() => {
 
     initImgList();
-  },[])
+  }, [])
 
 
   useEffect(() => {
@@ -173,7 +174,7 @@ const App: React.FC<AppProps> = (props) => {
       setToolInstance?.(toolInstance);
       toolInstance.setIsShowOrder(isShowOrder)
     }
-  }, [toolInstance,isShowOrder]);
+  }, [toolInstance, isShowOrder]);
 
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = () => {
