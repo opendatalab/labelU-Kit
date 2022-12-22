@@ -110,6 +110,7 @@ const App: React.FC<AppProps> = (props) => {
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
 
   useEffect(() => {
+    console.log("you are using version 202212221128",props)
     if (
       (props.stepList && props.stepList.length > 0) ||
       (props.toolsBasicConfig && props.toolsBasicConfig.length > 0)
@@ -143,14 +144,12 @@ const App: React.FC<AppProps> = (props) => {
         }),
       );
         initImgList();
-      
-
       // 初始化国际化语言
       i18n.changeLanguage(defaultLang);
     }
   }, [
     imgList,
-    props.toolStyle,
+    // props.toolStyle,
     props.toolsBasicConfig,
     props.attributeList,
     props.textConfig,
@@ -160,7 +159,7 @@ const App: React.FC<AppProps> = (props) => {
   ]);
 
   useEffect(()=>{
-    console.log("you are using version 20221220",props)
+
     initImgList();
   },[])
 

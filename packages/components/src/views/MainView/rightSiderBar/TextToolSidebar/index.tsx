@@ -247,7 +247,10 @@ const TextToolSidebar: React.FC<IProps> = ({
     if(v){
       result[index].value[k] = v;
       let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let currentImgResult = { ...oldImgResult, textTool: result };
+      let currentImgResult = { ...oldImgResult, textTool: {
+        toolName:'textTool',
+        result:result
+      } };
       imgList[imgIndex].result = JSON.stringify(currentImgResult);
       dispatch(UpdateImgList(imgList));
       setResult(result);

@@ -43,7 +43,7 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
   // @ts-ignore
   const formSubmitThrottle = window.throttle(() => {
     form.submit();
-  }, 100);
+  }, 10);
 
   useMemo(() => {
     if (props) {

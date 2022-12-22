@@ -118,7 +118,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
   // @ts-ignore
   const formSubmitThrottle = window.throttle(() => {
     form.submit();
-  }, delayTime);
+  }, 10);
 
   // 表单提交处理
   // useEffect(() => {
