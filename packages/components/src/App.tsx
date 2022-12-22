@@ -105,6 +105,7 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn'
   } = props;
 
+  console.log("you are using version 202212221752", props)
   // @ts-ignore
   let result = props.imgList[0].result;
   console.log("result", result);
@@ -113,9 +114,6 @@ const App: React.FC<AppProps> = (props) => {
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
 
   useEffect(() => {
-    console.log("you are using version 202212221752", props)
-
-
     if (
       (props.stepList && props.stepList.length > 0) ||
       (props.toolsBasicConfig && props.toolsBasicConfig.length > 0)
