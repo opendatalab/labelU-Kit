@@ -1,4 +1,4 @@
-import App,{ AppProps } from './App';
+import App, { AppProps } from './App';
 import AnnotationView from '@/components/AnnotationView';
 import { i18n } from '@label-u/utils';
 import React, { useImperativeHandle, useState } from 'react';
@@ -9,6 +9,7 @@ import configureStore from './configureStore';
 import { ChangeSave, PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { ToolInstance } from './store/annotation/types';
 import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
+import { toolList } from './views/MainView/toolHeader/ToolOperation';
 
 export const store = configureStore();
 
@@ -29,11 +30,34 @@ const OutputApp = (props: AppProps, ref: any) => {
         saveData: () => {
           store.dispatch(ChangeSave as unknown as AnyAction);
         },
-        getResult:()=>{
+        getResult: (imgIndex: number = 0) => {
           // @ts-ignore
-          console.log("save imgList",store.getState()?.annotation.imgList);
+          let imgWithResult = store.getState()?.annotation.imgList[imgIndex];
+          let imgResult = JSON.parse(imgWithResult.result as string);
+          let ids = [] as string[]
+          for (let item of toolList) {
+            let tmpResult = []
+            if (item.toolName !== 'tagTool') {
+              if (imgResult[item.toolName] && imgResult[item.toolName]?.result && imgResult[item.toolName]?.result?.length > 0) {
+                for (let i = 0; i < imgResult[item.toolName].result.length; i++) {
+                  if (ids.indexOf(imgResult[item.toolName].result[i].id) < 0) {
+                    ids.push(imgResult[item.toolName].result[i].id)
+                    tmpResult.push(imgResult[item.toolName].result[i])
+                  } 
+                }
+              }
+            }
+            if(tmpResult.length>0){
+              imgResult[item.toolName].result = tmpResult;
+            }
+          }
           // @ts-ignore
-          return store.getState()?.annotation.imgList;
+          let result = store.getState()?.annotation.imgList;
+          // @ts-ignore
+          result[imgIndex]['result'] = JSON.stringify(imgResult)
+          // @ts-ignore
+          console.log("save imgList", result);
+          return result;
         }
       };
     },
@@ -49,7 +73,7 @@ const OutputApp = (props: AppProps, ref: any) => {
   );
 };
 
-export type { StepConfig, StepConfigState, BasicConfig,TextConfig,FileInfo } from '@/interface/toolConfig';
+export type { StepConfig, StepConfigState, BasicConfig, TextConfig, FileInfo } from '@/interface/toolConfig';
 
 export type { AppProps } from '@/App';
 
