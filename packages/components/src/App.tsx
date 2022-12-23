@@ -1,6 +1,6 @@
 import MainView from '@/views/MainView';
 import { i18n } from '@label-u/utils';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { store } from '.';
 import { AppState } from './store';
@@ -19,7 +19,7 @@ import {
 } from './types/data';
 import { Footer, Header, Sider } from './types/main';
 import { IStepInfo } from './types/step';
-import loacalforage from 'localforage';
+// import loacalforage from 'localforage';
 import { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
 
 interface IAnnotationStyle {
@@ -105,17 +105,24 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn'
   } = props;
 
-  console.log("you are using version 202212221752", props)
-  // @ts-ignore
-  let result = props.imgList[0].result;
-  console.log("result", result);
+  console.log("you are using version 202212231754", props)
+  //@ts-ignore
+  console.info("result",props.imgList[0].result)
   const dispatch = useDispatch();
 
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
+  const [imgUrl,setImgUrl] = useState<string>();
+
+  
+  useEffect(()=>{
+    if(imgList&&imgList?.length>0&&imgList[0].url){
+      setImgUrl(imgList[0].url)
+    }
+  },[])
 
   useEffect(() => {
     if (
-      (props.stepList && props.stepList.length > 0) ||
+      (imgList&&imgList?.length>0)&&
       (props.toolsBasicConfig && props.toolsBasicConfig.length > 0)
     ) {
       let initToolName = currentToolName;
@@ -151,7 +158,7 @@ const App: React.FC<AppProps> = (props) => {
       i18n.changeLanguage(defaultLang);
     }
   }, [
-    imgList,
+    imgUrl,
     // props.toolStyle,
     props.toolsBasicConfig,
     props.attributeList,
@@ -161,10 +168,10 @@ const App: React.FC<AppProps> = (props) => {
     // isShowOrder,
   ]);
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    initImgList();
-  }, [])
+  //   initImgList();
+  // }, [])
 
 
   useEffect(() => {
@@ -189,14 +196,15 @@ const App: React.FC<AppProps> = (props) => {
           imgList,
         },
       });
+      store.dispatch(LoadFileAndFileData(initialIndex));
       // 页数持久化
-      loacalforage.getItem('nextIndex', (error, value) => {
-        if (value && value < imgList.length) {
-          store.dispatch(LoadFileAndFileData(value as number));
-        } else {
-          store.dispatch(LoadFileAndFileData(initialIndex));
-        }
-      });
+      // loacalforage.getItem('nextIndex', (error, value) => {
+      //   // if (value && value < imgList.length) {
+      //   //   store.dispatch(LoadFileAndFileData(value as number));
+      //   // } else {
+   
+      //   // }
+      // });
     }
   };
 

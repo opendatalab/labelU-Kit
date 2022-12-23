@@ -224,7 +224,7 @@ const TextToolSidebar: React.FC<IProps> = ({
   useEffect(() => {
     if (imgList && imgList.length > 0) {
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let textResult = currentImgResult?.textTool ? currentImgResult?.textTool : [];
+      let textResult = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
       if (textResult && textResult.length > 0) {
         setResult(textResult);
       }

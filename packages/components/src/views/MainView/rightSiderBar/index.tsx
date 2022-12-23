@@ -70,7 +70,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   useEffect(() => {
     if (imgList && imgList.length > 0) {
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool : [];
+      let textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
       // 设置文本描述结果
       setTextTab(
         <div className='rightTab'>
@@ -93,7 +93,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         </div>,
       );
       // 设置分类结果
-      if (currentImgResult?.tagTool?.toolName) {
+      // if (currentImgResult?.tagTool?.toolName) {
         let tagResultKeys = currentImgResult?.tagTool
           ? Object.keys(currentImgResult?.tagTool.result[0]?.result)
           : [];
@@ -117,7 +117,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
             </span>
           </div>,
         );
-      }
+      // }
       // 设置标注件数
       // let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
       // let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
