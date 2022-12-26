@@ -60,6 +60,13 @@ const updateSideViewByCanvas2D = (
     const { x, y, z } = SidePointCloud.initCameraPosition;
     SidePointCloud.camera.position.set(x - offsetXX, y - offsetXY, z + offsetY);
   }
+  if (
+    !SidePointCloud.scene.getObjectByName('selectedPointCloud') &&
+    SidePointCloud.selectedPointCloud
+  ) {
+    SidePointCloud.scene.add(SidePointCloud.selectedPointCloud);
+  }
+
   SidePointCloud.camera.updateProjectionMatrix();
   SidePointCloud.render();
 };

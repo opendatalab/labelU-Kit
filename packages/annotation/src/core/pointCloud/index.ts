@@ -86,6 +86,8 @@ export class PointCloud extends EventListener {
 
   private showDirection: boolean = true; // Whether to display the direction of box
 
+  public selectedPointCloud!:THREE.Points; // Selected point cloud
+
   constructor({
     container,
     noAppend,
@@ -149,6 +151,10 @@ export class PointCloud extends EventListener {
 
   public setInitCameraPosition(vector: THREE.Vector3) {
     this.initCameraPosition = vector;
+  }
+
+  public setSelectedPointCloud(points:THREE.Points){
+    this.selectedPointCloud = points;
   }
 
   /**
