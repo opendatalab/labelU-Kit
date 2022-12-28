@@ -31,11 +31,11 @@ export const ViewportProviderComponent = (props: any) => {
     if (!toolUtils.hotkeyFilter(e)) {
       return;
     }
-    if (e.keyCode === EKeyCode.A) {
+    if (e.keyCode === EKeyCode.M) {
       dispatch(PageBackward());
     }
 
-    if (e.keyCode === EKeyCode.D) {
+    if (e.keyCode === EKeyCode.N) {
       dispatch(PageForward());
     }
     if (e.keyCode === EKeyCode.R) {
