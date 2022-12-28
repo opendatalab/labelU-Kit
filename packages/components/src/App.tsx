@@ -105,9 +105,12 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn'
   } = props;
 
-  console.log("you are using version 202212231754", props)
+  console.log("you are using version 202212281508", props)
   //@ts-ignore
-  console.info("result",props.imgList[0].result)
+  if(props.imgList&&props.imgList.length>0){
+    console.info("result",props.imgList[0].result)    
+  }
+
   const dispatch = useDispatch();
 
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
