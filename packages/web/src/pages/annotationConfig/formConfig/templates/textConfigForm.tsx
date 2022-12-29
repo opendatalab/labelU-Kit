@@ -43,7 +43,7 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
   // @ts-ignore
   const formSubmitThrottle = window.throttle(() => {
     form.submit();
-  }, 10);
+  }, 1);
 
   useMemo(() => {
     if (props) {
@@ -78,6 +78,20 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = props => {
               form.setFieldsValue({ textConfig: e });
               setInitVal(e);
             }}
+            onDelete={
+              e => {
+                form.setFieldsValue({ textConfig: e });
+                setInitVal(e);
+                formSubmitThrottle()
+              }
+            }
+            onAdd={
+              e => {
+                form.setFieldsValue({ textConfig: e });
+                setInitVal(e);
+                formSubmitThrottle()
+              }
+            }
           />
         </Form.Item>
       </Form>

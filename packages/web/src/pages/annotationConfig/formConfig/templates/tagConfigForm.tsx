@@ -103,6 +103,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
         lang: 'cn'
       })
     });
+    formSubmitThrottle()
   };
   // 删除对应输入
   const deleteInputInfo = (i: number, subIndex?: number) => {
@@ -113,12 +114,13 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = props => {
     setInitVal({
       tagList: newTagList
     });
+    formSubmitThrottle()
   };
 
   // @ts-ignore
   const formSubmitThrottle = window.throttle(() => {
     form.submit();
-  }, 10);
+  }, 1);
 
   // 表单提交处理
   // useEffect(() => {

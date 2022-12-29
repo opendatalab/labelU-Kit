@@ -33,9 +33,11 @@ export type ItextConfig = Pick<ITextConfigItem, 'label' | 'default' | 'maxLength
 interface IProps {
   value?: ITextConfigItem[];
   onChange?: (value: ITextConfigItem[]) => void;
+  onDelete?:(value: ITextConfigItem[]) => void;
+  onAdd?:(value: ITextConfigItem[]) => void;
 }
 
-const TextList: React.FC<IProps> = ({ value, onChange }) => {
+const TextList: React.FC<IProps> = ({ value, onChange,onDelete,onAdd }) => {
   const [configs, setConfigs] = useState<ITextConfigItem[]>([defaultValue]);
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -43,6 +45,8 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
   const triggerChange = (list: ITextConfigItem[]) => {
     onChange?.(list);
   };
+
+
 
   const updateConfigItem = (newConfig: any, index: number) => {
     const textConfigListArray = cloneDeep(value || configs);
@@ -61,7 +65,8 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
     if (!value) {
       setConfigs(state => [...state, newConfig]);
     }
-    triggerChange([...(value || configs), newConfig]);
+    onAdd?.([...(value || configs), newConfig]);
+    // triggerChange([...(value || configs), newConfig]);
   };
   const deleteConfig = (index: number) => {
     let tmpValue = value || configs;
@@ -74,7 +79,7 @@ const TextList: React.FC<IProps> = ({ value, onChange }) => {
     if (!value) {
       setConfigs([...list]);
     }
-    triggerChange([...list]);
+    onDelete?.([...list]);
   };
 
   function showPromiseConfirm(obj: ItextConfig, index: number) {
