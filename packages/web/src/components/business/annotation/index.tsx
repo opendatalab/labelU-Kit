@@ -30,8 +30,8 @@ const Annotation = (props: {
     console.log('submitData', data);
   };
   // 被动请求方式
-  const getLabelResult = ()=>{
-    const reulst = annotationRef?.current?.getResult()
+  const getLabelResult =async ()=>{
+    const reulst = await annotationRef?.current?.getResult()
     console.log(reulst);
   }
 

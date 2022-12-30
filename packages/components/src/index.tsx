@@ -31,33 +31,40 @@ const OutputApp = (props: AppProps, ref: any) => {
           store.dispatch(ChangeSave as unknown as AnyAction);
         },
         getResult: (imgIndex: number = 0) => {
-          // @ts-ignore
-          let imgWithResult = store.getState()?.annotation.imgList[imgIndex];
-          let imgResult = JSON.parse(imgWithResult.result as string);
-          let ids = [] as string[]
-          for (let item of toolList) {
-            let tmpResult = []
-            if (item.toolName !== 'tagTool') {
-              if (imgResult[item.toolName] && imgResult[item.toolName]?.result && imgResult[item.toolName]?.result?.length > 0) {
-                for (let i = 0; i < imgResult[item.toolName].result.length; i++) {
-                  if (ids.indexOf(imgResult[item.toolName].result[i].id) < 0) {
-                    ids.push(imgResult[item.toolName].result[i].id)
-                    tmpResult.push(imgResult[item.toolName].result[i])
-                  } 
+          store.dispatch(ChangeSave as unknown as AnyAction);
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              // @ts-ignore
+              let imgWithResult = store.getState()?.annotation.imgList[imgIndex];
+              let imgResult = JSON.parse(imgWithResult.result as string);
+              let ids = [] as string[]
+              for (let item of toolList) {
+                let tmpResult = []
+                if (item.toolName !== 'tagTool') {
+                  if (imgResult[item.toolName] && imgResult[item.toolName]?.result && imgResult[item.toolName]?.result?.length > 0) {
+                    for (let i = 0; i < imgResult[item.toolName].result.length; i++) {
+                      if (ids.indexOf(imgResult[item.toolName].result[i].id) < 0) {
+                        ids.push(imgResult[item.toolName].result[i].id)
+                        tmpResult.push(imgResult[item.toolName].result[i])
+                      }
+                    }
+                  }
+                }
+                if (tmpResult.length > 0) {
+                  imgResult[item.toolName].result = tmpResult;
                 }
               }
-            }
-            if(tmpResult.length>0){
-              imgResult[item.toolName].result = tmpResult;
-            }
-          }
-          // @ts-ignore
-          let result = store.getState()?.annotation.imgList;
-          // @ts-ignore
-          result[imgIndex]['result'] = JSON.stringify(imgResult)
-          // @ts-ignore
-          console.log("save imgList", result);
-          return result;
+              // @ts-ignore
+              let result = store.getState()?.annotation.imgList;
+              // @ts-ignore
+              result[imgIndex]['result'] = JSON.stringify(imgResult)
+              // @ts-ignore
+              console.log("save imgList", result);
+              resolve(result);
+            },200)
+
+          })
+          // return result;
         }
       };
     },
