@@ -41,6 +41,7 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
       const selectedPolygon = TopPointCloudPolygonOperation.selectedPolygon;
 
       mainViewInstance.generateBox(selectedPointCloudBox);
+      // alert("synchronizeSideView2")
       // mainViewInstance.highlightOriginPointCloud(selectedPointCloudBox);
       synchronizeSideView(
         selectedPointCloudBox,

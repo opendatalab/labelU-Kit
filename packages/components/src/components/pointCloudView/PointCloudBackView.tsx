@@ -186,6 +186,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         }
 
         synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
+        // alert("synchronizeSideView1")
         synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
         // ptCtx.mainViewInstance.highlightOriginPointCloud(newBoxParams);
         updateSelectedBox(newBoxParams);

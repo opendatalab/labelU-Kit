@@ -362,7 +362,6 @@ export const usePointCloudViews = () => {
   // };
 
   const updateMainViewGenBox = (polygon: IPolygonData) => {
-    debugger;
     if (polygon.id) {
       let zInfo = mainViewInstance?.getSensesPointZAxisInPolygon(polygon.pointList);
       if (zInfo) {
@@ -477,23 +476,15 @@ export const usePointCloudViews = () => {
           ...newBoxParams,
           count,
         };
-
         let box = mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
-        .polygonPointList as IPolygonPoint[];
-        updateMainViewGenBox({
+          .polygonPointList as IPolygonPoint[];
+        let topPolygon = {
+          ...newPolygon,
           pointList: box,
-          id: mainViewInstance.selectedId as string,
-          sourceID: '',
-          valid: false,
-          order: 0,
-          textAttribute: '',
-          attribute: '',
-        });
-
+        };
+        updateSelectedBox(newBoxParams);
+        syncPointCloudViewsFromSideView(fromView, newPolygon, newBoxParams, topPolygon);
       }
-
-      // updateSelectedBox(newBoxParams);
-      // syncPointCloudViews(fromView, newPolygon, newBoxParams);
     }
   };
 
@@ -526,6 +517,57 @@ export const usePointCloudViews = () => {
       updateSelectedBox(newBoxParams);
       syncPointCloudViews(PointCloudView.Top, polygon, selectedPointCloudBox);
     }
+  };
+
+  /**
+   * sync pointcloudview when side view change
+   * @param omitView
+   * @param polygon
+   * @param boxParams
+   * @param topPolygon
+   */
+
+  const syncPointCloudViewsFromSideView = async (
+    omitView: string,
+    polygon: any,
+    boxParams: IPointCloudBox,
+    topPolygon: any,
+  ) => {
+    const dataUrl = currentData?.url;
+
+    const newPoints = (await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
+      width: DEFAULT_SCOPE,
+      depth: DEFAULT_SCOPE,
+    })) as unknown as THREE.Points;
+
+    const viewToBeUpdated = {
+      [PointCloudView.Side]: () => {
+        if (sideViewInstance) {
+          synchronizeSideView(boxParams, polygon, sideViewInstance, newPoints);
+        }
+      },
+      [PointCloudView.Back]: () => {
+        if (backViewInstance) {
+          synchronizeBackView(boxParams, polygon, backViewInstance, newPoints);
+        }
+      },
+      [PointCloudView.Top]: () => {
+        synchronizeTopView(boxParams, polygon, topViewInstance, mainViewInstance);
+      },
+    };
+    Object.keys(viewToBeUpdated).forEach((key) => {
+      if (key !== omitView) {
+        viewToBeUpdated[key]();
+      }
+    });
+
+    updateMainViewGenBox(topPolygon);
+
+    let attribute = mainViewInstance?.attribute as string;
+    mainViewInstance?.updatePointCloudAfterDragBox(dataUrl, {
+      ...boxParams,
+      attribute: attribute,
+    });
   };
 
   /**
