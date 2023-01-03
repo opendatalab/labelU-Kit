@@ -8,7 +8,12 @@ import { IPointCloudBox, IPolygonPoint } from '@label-u/utils';
 // import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
-import { synchronizeSideView, synchronizeTopView } from './hooks/usePointCloudViews';
+import {
+  PointCloudView,
+  synchronizeSideView,
+  synchronizeTopView,
+  usePointCloudViews,
+} from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
@@ -77,6 +82,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   const size = useSize(ref);
   const { updateSelectedBox, selectedBox } = useSingleBox();
   const { t } = useTranslation();
+  const { syncPointCloudViewsFromSideOrBackView } = usePointCloudViews();
 
   useEffect(() => {
     if (ref.current) {
@@ -131,7 +137,6 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         if (!ptCtx.selectedPointCloudBox || !ptCtx.mainViewInstance || !currentData.url) {
           return;
         }
-
         // Notice. The sort of polygon is important.
         const [point1, point2, point3] = newPolygon.pointList;
         const [op1, op2, op3] = originPolygon.pointList;
@@ -184,10 +189,16 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
             count,
           };
         }
+        let box = ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
+          .polygonPointList as IPolygonPoint[];
+        let topPolygon = {
+          ...newPolygon,
+          pointList: box,
+        };
 
-        synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
-        // alert("synchronizeSideView1")
-        synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
+        // synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
+        syncPointCloudViewsFromSideOrBackView?.(PointCloudView.Back, newPolygon, newBoxParams, topPolygon);
+        // synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
         // ptCtx.mainViewInstance.highlightOriginPointCloud(newBoxParams);
         updateSelectedBox(newBoxParams);
       },
@@ -196,7 +207,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
 
   useEffect(() => {
     // Update Size
-   ptCtx?.backViewInstance?.initSize(size);
+    ptCtx?.backViewInstance?.initSize(size);
   }, [size]);
 
   return (

@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
 
-const PointCloudView = {
+export const PointCloudView = {
   '3D': '3D',
   Top: 'Top',
   Side: 'Side',
@@ -483,7 +483,7 @@ export const usePointCloudViews = () => {
           pointList: box,
         };
         updateSelectedBox(newBoxParams);
-        syncPointCloudViewsFromSideView(fromView, newPolygon, newBoxParams, topPolygon);
+        syncPointCloudViewsFromSideOrBackView(fromView, newPolygon, newBoxParams, topPolygon);
       }
     }
   };
@@ -527,7 +527,7 @@ export const usePointCloudViews = () => {
    * @param topPolygon
    */
 
-  const syncPointCloudViewsFromSideView = async (
+  const syncPointCloudViewsFromSideOrBackView = async (
     omitView: string,
     polygon: any,
     boxParams: IPointCloudBox,
@@ -715,6 +715,7 @@ export const usePointCloudViews = () => {
   };
 
   return {
+    syncPointCloudViewsFromSideOrBackView,
     topViewAddBox,
     topViewSelectedChanged,
     topViewUpdateBox,
