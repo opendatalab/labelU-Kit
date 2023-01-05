@@ -38,11 +38,10 @@ class PointCloudUtils {
 
   public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
     const data = this.jsonParser(result);
-
-    const DEFAULT_STEP = `step_1`;
-    const pointCloudDataList = data?.[DEFAULT_STEP]?.result ?? [];
-
-    return pointCloudDataList;
+    if(data?.pctool?.result){
+      return data?.pctool?.result
+    }
+    return [];
   }
 
   public static getPolygonListFromResultList(result: string): any[] {

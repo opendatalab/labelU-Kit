@@ -22,6 +22,7 @@ import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
 import EventListener from '../toolOperation/eventListener';
+import MathUtils from '@/utils/MathUtils';
 
 interface IOrthographicCamera {
   left: number;
@@ -1051,6 +1052,8 @@ export class PointCloud extends EventListener {
     };
   }
 
+
+
   public getBoxTopPolygon2DCoordinate(boxParams: IPointCloudBox) {
     const { width, height } = boxParams;
     const vectorList = this.getPolygonTopPoints(boxParams);
@@ -1074,8 +1077,24 @@ export class PointCloud extends EventListener {
           y: -(vector.y - this.containerHeight / 2),
         };
       });
+      const wZoom = this.containerWidth / width;
+      const hZoom = this.containerHeight / height;
+    return {
+      polygon2d,
+      zoom: Math.min(wZoom, hZoom) / 2,
+    };
+  }
+
+
+  public getBoxTopPolygon2DCoordinateFromBox(boxParams: IPointCloudBox,sizeTop:{width:number,height:number}){
+    const { width, height } = boxParams;
     const wZoom = this.containerWidth / width;
     const hZoom = this.containerHeight / height;
+    
+    const polygon2d = boxParams.rect.map((point) => {
+      return MathUtils.transerWord2Canvas(point, sizeTop);
+    });
+
     return {
       polygon2d,
       zoom: Math.min(wZoom, hZoom) / 2,

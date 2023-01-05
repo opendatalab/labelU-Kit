@@ -19,7 +19,6 @@ interface PointCloudOperationProps {
   config?: ToolConfig;
 }
 
-
 class PointCloudOperation extends PointCloud {
   public boxList!: IPointCloudBox[];
   public attribute: string;
@@ -182,15 +181,13 @@ class PointCloudOperation extends PointCloud {
     return object3d;
   }
 
-  public setTransparencyByName(name: string,opacity: number) {
+  public setTransparencyByName(name: string, opacity: number) {
     let objectMesh = this.scene.getObjectByName(name) as THREE.Mesh;
     if (objectMesh) {
       //@ts-ignore
       objectMesh.children[0].material.opacity = opacity;
     }
   }
-
-
 
   // draw cubebox by four points and zinfo
   public getBox(
@@ -231,6 +228,7 @@ class PointCloudOperation extends PointCloud {
       maxZ: number;
       minZ: number;
     },
+    order: number,
     paramsId?: string,
   ): IPointCloudBox {
     let id = paramsId ? paramsId : uuid(8, 62);
@@ -252,6 +250,9 @@ class PointCloudOperation extends PointCloud {
       width: width,
       height: height,
       depth: zInfo.maxZ - zInfo.minZ,
+      order: order,
+      zInfo: zInfo,
+      rect: points,
     };
   }
 
@@ -264,8 +265,17 @@ class PointCloudOperation extends PointCloud {
     let box = this.scene.getObjectByName(paramId + 'box');
     if (box) {
       let color = this.color;
+      let boxList: IPointCloudBox[] = this.boxList;
+      let order = boxList.length + 1;
+      let boxInfo = this.getBoxFormmat(
+        rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+        zInfo,
+        order,
+        paramId,
+      );
       let newbox = this.addBoxInScene(rectPoints, zInfo, color, paramId);
       this.emit('selectPolygonChange', newbox.id, rectPoints);
+      this.emit('savePcResult', [...boxList, boxInfo]);
     }
   };
 
@@ -286,10 +296,12 @@ class PointCloudOperation extends PointCloud {
         return item.id !== paramId;
       });
     }
+    let order = boxList.length + 1;
     // add new one
     let boxInfo = this.getBoxFormmat(
       rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
       zInfo,
+      order,
       paramId,
     );
 
@@ -303,7 +315,7 @@ class PointCloudOperation extends PointCloud {
         };
       });
       if (this.selectedId) {
-        this.setTransparencyByName(this.selectedId + 'box',0);
+        this.setTransparencyByName(this.selectedId + 'box', 0);
       }
       let boxMesh = this.getBox(sharpRect, zInfo, color);
       boxMesh.name = boxInfo.id + 'box';
@@ -356,23 +368,25 @@ class PointCloudOperation extends PointCloud {
     mouseWord.x = ((event.clientX - containerInfo.left) / containerWidth) * 2 - 1;
     mouseWord.y = -((event.clientY - containerInfo.top) / containerHeight) * 2 + 1;
     raycaster.setFromCamera(mouseWord, camera);
-    let boxMeshList:Object3D[] = []
-    if(this.boxList&&this.boxList.length>0){
-      for(let i=0;i<this.boxList.length;i++){
-        let tmpBox = this.scene.getObjectByName(this.boxList[i].id+'box');
-        if(tmpBox){
-          boxMeshList = [...boxMeshList,tmpBox];
+    let boxMeshList: Object3D[] = [];
+    if (this.boxList && this.boxList.length > 0) {
+      for (let i = 0; i < this.boxList.length; i++) {
+        let tmpBox = this.scene.getObjectByName(this.boxList[i].id + 'box');
+        if (tmpBox) {
+          boxMeshList = [...boxMeshList, tmpBox];
         }
       }
     }
     let raycasterMeshs = raycaster.intersectObjects(boxMeshList);
 
-    if(this.selectedId){
-      this.setTransparencyByName(this.selectedId + 'box',0);
+    if (this.selectedId) {
+      this.setTransparencyByName(this.selectedId + 'box', 0);
     }
-    if(raycasterMeshs[0].object.parent?.name){
-      this.setSelectedId(raycasterMeshs[0].object.parent?.name.substring(0,raycasterMeshs[0].object.parent?.name.length - 3));
-      this.setTransparencyByName(this.selectedId + 'box',0.3);
+    if (raycasterMeshs[0].object.parent?.name) {
+      this.setSelectedId(
+        raycasterMeshs[0].object.parent?.name.substring(0, raycasterMeshs[0].object.parent?.name.length - 3),
+      );
+      this.setTransparencyByName(this.selectedId + 'box', 0.3);
       this.emit('updateSelectedBox', this.selectedId);
     }
   }
@@ -408,7 +422,7 @@ class PointCloudOperation extends PointCloud {
 
     // add box in scene
     this.container.addEventListener('mousedown', function (event) {
-      if(!self.attribute){
+      if (!self.attribute) {
         return;
       }
       if (event.button === MOUSE.LEFT) {
@@ -432,7 +446,7 @@ class PointCloudOperation extends PointCloud {
           self.container.removeEventListener('pointermove', handleMouseMove);
         }
       } else if (event.button === MOUSE.RIGHT) {
-        self.getObjectByClick(self.container, self.camera, self.scene, event)
+        self.getObjectByClick(self.container, self.camera, self.scene, event);
       }
       self.render();
     });
@@ -479,7 +493,10 @@ class PointCloudOperation extends PointCloud {
    * @param boxParams
    * @returns
    */
-   public highlightOriginPointCloud(boxParams: IPointCloudBox, points?: THREE.Points):Promise<{ geometry: any; num: number } | undefined>  {
+  public highlightOriginPointCloud(
+    boxParams: IPointCloudBox,
+    points?: THREE.Points,
+  ): Promise<{ geometry: any; num: number } | undefined> {
     if (!points) {
       const originPoints = this.scene.getObjectByName(this.pointCloudObjectName);
 
@@ -504,10 +521,10 @@ class PointCloudOperation extends PointCloud {
         position,
       };
 
-      if(boxParams.attribute){
+      if (boxParams.attribute) {
         let inColor = new THREE.Color(this.getColor(this.attribute).valid.stroke);
         let rgbArr = [inColor.r, inColor.g, inColor.b];
-       params = {
+        params = {
           boxParams,
           zMin,
           zMax,
@@ -515,7 +532,7 @@ class PointCloudOperation extends PointCloud {
           color,
           position,
           // @ts-ignore
-          inColorArr :rgbArr
+          inColorArr: rgbArr,
         };
       }
       return new Promise((resolve) => {
@@ -537,25 +554,16 @@ class PointCloudOperation extends PointCloud {
     return Promise.resolve(undefined);
   }
 
-
-
-
   /**
    * Load PCD File by box
    * @param src
    * @param boxParams
    * @param scope
    */
-   public updatePointCloudAfterDragBox = async (
-    src: string,
-    boxParams: IPointCloudBox,
-  ) => {
+  public updatePointCloudAfterDragBox = async (src: string, boxParams: IPointCloudBox) => {
     const cb = async (points: THREE.Points) => {
       // TODO. Speed can be optimized.
-      const filterData = await this.highlightOriginPointCloud(
-          boxParams,
-        points,
-      );
+      const filterData = await this.highlightOriginPointCloud(boxParams, points);
       if (!filterData) {
         console.error('filter Error');
         return;
@@ -571,8 +579,6 @@ class PointCloudOperation extends PointCloud {
     const points = await this.cacheInstance.loadPCDFile(src);
     cb(points);
   };
-
-
 }
 
 export default PointCloudOperation;

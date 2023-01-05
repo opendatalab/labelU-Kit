@@ -401,7 +401,6 @@ class PointCloud2dOperation extends PolygonOperation {
         return;
       }
       const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
-
       DrawUtils.drawLineWithPointList(
         this.canvas,
         AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),

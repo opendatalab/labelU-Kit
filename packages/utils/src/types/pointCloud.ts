@@ -63,6 +63,7 @@ export interface IVolume {
   height: number;
   /** Z轴方向的长度 */
   depth: number;
+
 }
 
 export interface I3DSpaceCoord {
@@ -82,6 +83,14 @@ export interface IPointCloudBox extends IVolume {
     [k: string]: string;
   };
   count?: number;
+  order:number;
+  zInfo:{
+    maxZ:number;
+    minZ:number;
+  };
+  rect:[{x:number,y:number},{x:number,y:number},{x:number,y:number},{x:number,y:number}]
 }
+
+
 
 export type IPointCloudBoxList = IPointCloudBox[];

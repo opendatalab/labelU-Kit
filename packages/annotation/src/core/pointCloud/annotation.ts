@@ -39,10 +39,13 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public canvasScheduler: CanvasScheduler;
 
+  public size: { width: number; height: number};
+
   constructor({ size, container, pcdPath, polygonOperationProps,config }: IPointCloudAnnotationProps) {
     const defaultOrthographic = this.getDefaultOrthographic(size);
 
     const imgSrc = createEmptyImage(size);
+    this.size = size;
 
     const image = new Image();
     image.src = imgSrc;
@@ -150,8 +153,13 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
   }
 
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
+
+    let sizeTop = {
+      width: this.pointCloud2dOperation.container.getBoundingClientRect().width,
+      height: this.pointCloud2dOperation.container.getBoundingClientRect().height,
+    };
     let polygonList = pointCloudDataList.map((v) => {
-      const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinate(v);
+      const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinateFromBox(v,sizeTop);
       return {
         id: v.id,
         sourceID: '',

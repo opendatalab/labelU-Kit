@@ -42,16 +42,19 @@ export const useRotate = ({ currentData }: IAnnotationStateProps) => {
 
       mainViewInstance.generateBox(selectedPointCloudBox);
       // mainViewInstance.highlightOriginPointCloud(selectedPointCloudBox);
+
       synchronizeSideView(
         selectedPointCloudBox,
         selectedPolygon,
         ptCtx.sideViewInstance,
+        //@ts-ignore
         currentData.url,
       );
       synchronizeBackView(
         selectedPointCloudBox,
         selectedPolygon,
         ptCtx.backViewInstance,
+        //@ts-ignore
         currentData.url,
       );
       mainViewInstance.render();

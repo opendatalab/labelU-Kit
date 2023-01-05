@@ -41,6 +41,9 @@ export const topViewPolygon2PointCloud = (
   selectedPointCloudBox?: IPointCloudBox,
   defaultValue?: { [v: string]: any },
 ) => {
+  if(!pointCloud){
+    return;
+  }
   const [point1, point2, point3, point4] = newPolygon.pointList.map((v: any) =>
     MathUtils.transferCanvas2World(v, size),
   );
@@ -54,14 +57,14 @@ export const topViewPolygon2PointCloud = (
   let extraData = {};
 
   // Init PointCloud Data
-  if (pointCloud) {
+  // if (pointCloud) {
     const zInfo = pointCloud.getSensesPointZAxisInPolygon([point1, point2, point3, point4]);
     z = (zInfo.maxZ + zInfo.minZ) / 2;
     depth = zInfo.maxZ - zInfo.minZ;
     extraData = {
       count: zInfo.zCount,
     };
-  }
+  // }
 
   if (selectedPointCloudBox) {
     z = selectedPointCloudBox.center.z;
@@ -87,6 +90,8 @@ export const topViewPolygon2PointCloud = (
         ...selectedPointCloudBox,
         ...newPosition,
         ...extraData,
+        rect:[point1, point2, point3, point4],
+        zInfo: zInfo
       }
     : {
         // Init Data
@@ -94,6 +99,9 @@ export const topViewPolygon2PointCloud = (
         attribute: '',
         valid: true,
         ...extraData,
+        order:1,
+        rect:[point1, point2, point3, point4],
+        zInfo: zInfo
       };
 
   if (defaultValue) {
@@ -378,6 +386,9 @@ export const usePointCloudViews = () => {
       attribute: config?.attributeList?.[0]?.value ?? '',
     });
 
+    if(!newParams){
+      return;
+    }
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
     polygonOperation.initImgPos();
     let centerCoordinate = polygonOperation.getGetCenterCoordinate();
@@ -510,6 +521,9 @@ export const usePointCloudViews = () => {
         selectedPointCloudBox,
       );
 
+      if(!newBoxParams){
+        return;
+      }
       Object.assign(
         selectedPointCloudBox,
         _.pickBy(newBoxParams, (v, k) => ['width', 'height', 'x', 'y']),
@@ -682,7 +696,8 @@ export const usePointCloudViews = () => {
 
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {
-        mainViewInstance?.generateBox(v);
+        // mainViewInstance?.generateBox(v);
+        mainViewInstance?.addBoxInScene(v.rect,v.zInfo,0xffffff,v.id)
       });
 
       ptCtx.setPointCloudResult(boxParamsList);
@@ -694,9 +709,8 @@ export const usePointCloudViews = () => {
 
     mainViewInstance.updateTopCamera();
 
-    const valid = jsonParser(currentData.result)?.valid ?? true;
+    const valid = jsonParser(currentData.result?.pctool?.result)?.valid ?? true;
     ptCtx.setPointCloudValid(valid);
-
     // Clear other view data during initialization
     ptCtx?.sideViewInstance?.clearAllData();
     ptCtx?.backViewInstance?.clearAllData();

@@ -7,6 +7,7 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
+import {useDispatch} from '@/store/ctx'
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
 // import { Switch } from 'antd';
@@ -17,6 +18,7 @@ import { LabelUContext, useSelector } from '@/store/ctx';
 import { BoxInfos } from './PointCloudInfos';
 import { BasicConfig } from '@/interface/toolConfig';
 import { AppState } from '@/store';
+import { ANNOTATION_ACTIONS } from '@/store/Actions';
 
 const pointCloudID = 'LABELU-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -75,6 +77,7 @@ const PointCloud3DSideBar = () => {
 };
 
 const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({ currentData,config }) => {
+  const dispatch = useDispatch();
   const ptCtx = useContext(PointCloudContext);
   // const [showDirection, setShowDirection] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
@@ -124,7 +127,9 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
 
         // Add Init Box
         boxParamsList.forEach((v: IPointCloudBox) => {
-          pointCloud?.generateBox(v);
+          // pointCloud?.generateBox(v);
+          // to do change color by attribute
+          pointCloud?.addBoxInScene(v.rect,v.zInfo,0xffffff,v.id)
         });
 
         ptCtx.setPointCloudResult(boxParamsList);
@@ -133,7 +138,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
 
       ptCtx.setMainViewInstance(pointCloud);
     }
-  }, [currentData]);
+  }, [currentData?.url]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance || !ptCtx.mainViewInstance) {
@@ -150,7 +155,6 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       'boxAdded',
       (pointList: ICoordinate[], attribute: string, id: string) => {
         // const currentPolygonList = TopView2dOperation.polygonList;
-
         const cavasPointList = pointList.map((point) => {
           return MathUtils.transerWord2Canvas(point, sizeTop);
         });
@@ -164,12 +168,37 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       },
     );
 
+    mainViewInstance.singleOn(
+      'savePcResult',
+      (boxList: IPointCloudBox[]) => {
+        console.log("boxList",boxList)
+        dispatch({
+          type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
+          payload: {
+            imgList: [{
+              ...currentData,
+              result:JSON.stringify({
+                pctool:
+                {
+                  toolName:'pctool',
+                  result:boxList
+                }
+              }
+    
+              )
+            }],
+          },
+        });
+      },
+    )
+
     mainViewInstance.singleOn('updateSelectedBox', (selectedIDs: string) => {
       let size = {
         width:TopView2dOperation.container.clientWidth,
         height:TopView2dOperation.container.clientHeight
       }
       let [polygon] = TopView2dOperation.polygonList.filter(p => p.id === selectedIDs)
+      debugger;
       pointCloudViews.topViewAddBox(polygon,size)
       ptCtx.setSelectedIDs([selectedIDs]);
     });
