@@ -187,6 +187,7 @@ export const synchronizeSideView = async (
   pointCloudInstance.setInitCameraPosition(cameraPositionVector);
 
   pointCloudInstance.setSelectedPointCloud(newPoints);
+  console.log("newPoints",newPoints)
   // Create Draw Polygon
   const { polygon2d, zoom } = pointCloudInstance.getBoxSidePolygon2DCoordinate(boxParams);
 
@@ -553,7 +554,6 @@ export const usePointCloudViews = () => {
       width: DEFAULT_SCOPE,
       depth: DEFAULT_SCOPE,
     })) as unknown as THREE.Points;
-
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
         if (sideViewInstance) {
@@ -602,7 +602,6 @@ export const usePointCloudViews = () => {
       width: DEFAULT_SCOPE,
       depth: DEFAULT_SCOPE,
     })) as unknown as THREE.Points;
-
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
         if (sideViewInstance) {

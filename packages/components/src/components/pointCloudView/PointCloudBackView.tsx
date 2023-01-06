@@ -66,12 +66,14 @@ const updateBackViewByCanvas2D = (
     const { x, y, z } = backPointCloud.initCameraPosition;
     backPointCloud.camera.position.set(x + offsetXY, y - offsetXX, z + offsetY);
   }
-  if (
-    !backPointCloud.scene.getObjectByName('selectedPointCloud') &&
-    backPointCloud.selectedPointCloud
-  ) {
-    backPointCloud.scene.add(backPointCloud.selectedPointCloud);
-  }
+  // if (
+  //   !backPointCloud.scene.getObjectByName('selectedPointCloud') &&
+  //   backPointCloud.selectedPointCloud
+  // ) {
+
+  // }
+  backPointCloud.removeObjectByName('selectedPointCloud');
+  backPointCloud.scene.add(backPointCloud.selectedPointCloud);
   backPointCloud.camera.updateProjectionMatrix();
   backPointCloud.render();
 };
@@ -197,7 +199,12 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         };
 
         // synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
-        syncPointCloudViewsFromSideOrBackView?.(PointCloudView.Back, newPolygon, newBoxParams, topPolygon);
+        syncPointCloudViewsFromSideOrBackView?.(
+          PointCloudView.Back,
+          newPolygon,
+          newBoxParams,
+          topPolygon,
+        );
         // synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
         // ptCtx.mainViewInstance.highlightOriginPointCloud(newBoxParams);
         updateSelectedBox(newBoxParams);
