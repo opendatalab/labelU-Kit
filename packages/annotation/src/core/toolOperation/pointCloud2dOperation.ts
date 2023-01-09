@@ -138,6 +138,15 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
+  /**
+   * The color of attribute not change by attribute in 2d operation view 
+   * @param attribute 
+   * @returns 
+   */
+  public getColor(attribute: string){
+    return super.getColor('')
+  }
+
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
       return;

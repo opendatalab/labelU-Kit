@@ -7,7 +7,7 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import {useDispatch} from '@/store/ctx'
+import { useDispatch } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
 // import { Switch } from 'antd';
@@ -76,7 +76,10 @@ const PointCloud3DSideBar = () => {
   );
 };
 
-const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({ currentData,config }) => {
+const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
+  currentData,
+  config,
+}) => {
   const dispatch = useDispatch();
   const ptCtx = useContext(PointCloudContext);
   // const [showDirection, setShowDirection] = useState(true);
@@ -119,17 +122,19 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
           isOrthographicCamera: true,
           attribute: '',
           // @ts-ignore
-          config:config.config,
+          config: config.config,
         });
       }
+      pointCloud.setStyle(toolStyle);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-
+        pointCloud.setBoxList(boxParamsList);
         // Add Init Box
         boxParamsList.forEach((v: IPointCloudBox) => {
+          // let color =
           // pointCloud?.generateBox(v);
           // to do change color by attribute
-          pointCloud?.addBoxInScene(v.rect,v.zInfo,0xffffff,v.id)
+          pointCloud?.addBoxInScene(v.rect, v.zInfo, v.attribute, v.id);
         });
 
         ptCtx.setPointCloudResult(boxParamsList);
@@ -160,6 +165,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
         });
         // bacause top view should only show the selected box so we should clear the previous polygon list
         // TopView2dOperation.setPolygonList([]);
+        TopView2dOperation.setDefaultAttribute(attribute);
         TopView2dOperation.drawingPointList = cavasPointList;
         TopView2dOperation.addDrawingPointToPolygonList(true, id);
         TopView2dOperation.setSelectedIDs([id]);
@@ -168,42 +174,37 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       },
     );
 
-    mainViewInstance.singleOn(
-      'savePcResult',
-      (boxList: IPointCloudBox[]) => {
-        console.log("boxList",boxList)
-        dispatch({
-          type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
-          payload: {
-            imgList: [{
+    mainViewInstance.singleOn('savePcResult', (boxList: IPointCloudBox[]) => {
+      console.log('boxList', boxList);
+      dispatch({
+        type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
+        payload: {
+          imgList: [
+            {
               ...currentData,
-              result:JSON.stringify({
-                pctool:
-                {
-                  toolName:'pctool',
-                  result:boxList
-                }
-              }
-    
-              )
-            }],
-          },
-        });
-      },
-    )
+              result: JSON.stringify({
+                pctool: {
+                  toolName: 'pctool',
+                  result: boxList,
+                },
+              }),
+            },
+          ],
+        },
+      });
+    });
 
     mainViewInstance.singleOn('updateSelectedBox', (selectedIDs: string) => {
       let size = {
-        width:TopView2dOperation.container.clientWidth,
-        height:TopView2dOperation.container.clientHeight
-      }
-      let [polygon] = TopView2dOperation.polygonList.filter(p => p.id === selectedIDs)
-      debugger;
-      pointCloudViews.topViewAddBox(polygon,size)
+        width: TopView2dOperation.container.clientWidth,
+        height: TopView2dOperation.container.clientHeight,
+      };
+      let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
+      let [box] = mainViewInstance.boxList.filter((p) => p.id === selectedIDs);
+      ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
+      pointCloudViews.topViewAddBox(polygon, size, box.attribute);
       ptCtx.setSelectedIDs([selectedIDs]);
     });
-
-    mainViewInstance.setStyle(toolStyle);
     // return () => {
     //   TopView2dOperation.unbind('validUpdate', validUpdate);
     // };

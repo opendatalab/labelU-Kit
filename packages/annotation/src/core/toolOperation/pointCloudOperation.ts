@@ -259,12 +259,12 @@ class PointCloudOperation extends PointCloud {
   public updateBoxInSene = (
     rectPoints: ICoordinate[],
     zInfo: { maxZ: number; minZ: number },
-    color: number = 0xffffff,
+    attribute: string,
     paramId?: string,
   ) => {
     let box = this.scene.getObjectByName(paramId + 'box');
+
     if (box) {
-      let color = this.color;
       let boxList: IPointCloudBox[] = this.boxList;
       let order = boxList.length + 1;
       let boxInfo = this.getBoxFormmat(
@@ -273,7 +273,7 @@ class PointCloudOperation extends PointCloud {
         order,
         paramId,
       );
-      let newbox = this.addBoxInScene(rectPoints, zInfo, color, paramId);
+      let newbox = this.addBoxInScene(rectPoints, zInfo, attribute, paramId);
       this.emit('selectPolygonChange', newbox.id, rectPoints);
       this.emit('savePcResult', [...boxList, boxInfo]);
     }
@@ -282,9 +282,10 @@ class PointCloudOperation extends PointCloud {
   public addBoxInScene = (
     rectPoints: ICoordinate[],
     zInfo: { maxZ: number; minZ: number },
-    color: number = 0xffffff,
+    attribute: string,
     paramId?: string,
   ) => {
+    const color = new THREE.Color(this.getColor(attribute).valid.stroke).getHex();
     // delete prevOne
     let boxList: IPointCloudBox[] = this.boxList;
     if (paramId) {
@@ -304,7 +305,7 @@ class PointCloudOperation extends PointCloud {
       order,
       paramId,
     );
-
+    boxInfo.attribute = attribute;
     this.setBoxList([...boxList, boxInfo]);
 
     if (rectPoints.length > 0) {
@@ -356,6 +357,9 @@ class PointCloudOperation extends PointCloud {
   }
 
   public getObjectByClick(container: HTMLElement, camera: THREE.Camera, scene: THREE.Scene, event: THREE.Event) {
+    if (this.boxList.length === 0) {
+      return;
+    }
     let mouseWord: {
       x: number;
       y: number;
@@ -386,6 +390,17 @@ class PointCloudOperation extends PointCloud {
       this.setSelectedId(
         raycasterMeshs[0].object.parent?.name.substring(0, raycasterMeshs[0].object.parent?.name.length - 3),
       );
+
+      // set default atribute from selected box
+      this.boxList.forEach((box) => {
+        if (
+          box.id ===
+          raycasterMeshs[0].object.parent?.name.substring(0, raycasterMeshs[0].object.parent?.name.length - 3)
+        ) {
+          this.setDefaultAttribute(box.attribute);
+        }
+      });
+
       this.setTransparencyByName(this.selectedId + 'box', 0.3);
       this.emit('updateSelectedBox', this.selectedId);
     }
@@ -435,7 +450,7 @@ class PointCloudOperation extends PointCloud {
           let { rect } = self.getFooterRect(points.slice(0, 2), clickPoint);
           let zInfo = self.getSensesPointZAxisInPolygon(rect);
           if (zInfo.zCount > 0) {
-            let box = self.addBoxInScene(rect, zInfo, color);
+            let box = self.addBoxInScene(rect, zInfo, self.attribute);
             self.emit('boxAdded', rect, box.attribute, box.id);
           }
           // 清除点数据

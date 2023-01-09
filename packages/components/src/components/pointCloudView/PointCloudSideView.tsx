@@ -139,7 +139,10 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     });
 
     pointCloud2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
-      sideViewUpdateBox(newPolygon, originPolygon);
+      sideViewUpdateBox(
+        { ...newPolygon, attribute: ptCtx.topViewInstance?.pointCloud2dOperation.defaultAttribute },
+        originPolygon,
+      );
     });
   }, [ptCtx, size]);
 

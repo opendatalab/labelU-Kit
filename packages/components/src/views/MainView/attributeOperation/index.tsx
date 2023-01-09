@@ -1,5 +1,5 @@
 import { Attribute } from '@label-u/annotation';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '../../../store';
 import { BasicConfig } from '../../../interface/toolConfig';
@@ -11,6 +11,7 @@ import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
 import { LabelUContext } from '@/store/ctx';
 import { UseAttributes } from '@/components/pointCloudView/hooks/useAttribute';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -25,6 +26,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [_, forceRender] = useState(0);
   const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance } =
     props;
+  const ptCtx = useContext(PointCloudContext);
   const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
@@ -35,8 +37,10 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
       setChoseAttribute(copytoolInstance?.defaultAttribute);
+    } else if (ptCtx.mainViewInstance && ptCtx.mainViewInstance?.attribute) {
+      setChoseAttribute(ptCtx.mainViewInstance?.attribute);
     }
-  }, [copytoolInstance]);
+  }, [copytoolInstance, ptCtx.mainViewInstance?.attribute]);
 
   // useEffect(() => {
   //   if (toolInstance) {
@@ -108,9 +112,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 e.stopPropagation();
                 if (toolInstance) {
                   toolInstance.setDefaultAttribute(item.key);
-                } 
+                }
                 // updateTopViewAttribute(item.key);
-                updateMainViewAttribute?.(item.key)
+                updateMainViewAttribute?.(item.key);
                 forceRender((s) => s + 1);
               }}
             >
@@ -170,8 +174,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 }
                 // top view don't need attribute
                 // updateTopViewAttribute?.(attribute.key);
-                updateMainViewAttribute?.(attribute.key)
-                
+                updateMainViewAttribute?.(attribute.key);
 
                 forceRender((s) => s + 1);
                 // alert(attribute.key)

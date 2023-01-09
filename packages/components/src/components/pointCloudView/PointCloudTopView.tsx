@@ -179,11 +179,10 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
 
     TopView2dOperation.singleOn('polygonCreated', (polygon: IPolygonData) => {
       if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
-
         addPolygon(polygon);
         return;
       }
-      pointCloudViews.topViewAddBox(polygon, size);
+      pointCloudViews.topViewAddBox(polygon, size, polygon.attribute);
     });
 
     TopView2dOperation.singleOn('deletedObject', ({ id }: { id: string }) => {
@@ -191,11 +190,9 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
       deletePolygon(id);
     });
 
-    TopView2dOperation.singleOn('rotate',(rotate: number) => {
-
-      updateRotate(rotate)
-
-    })
+    TopView2dOperation.singleOn('rotate', (rotate: number) => {
+      updateRotate(rotate);
+    });
 
     TopView2dOperation.singleOn('deleteSelectedIDs', () => {
       ptCtx.setSelectedIDs([]);
@@ -290,7 +287,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
   useEffect(() => {
     pointCloudViews.topViewSelectedChanged();
   }, [ptCtx.selectedIDs]);
-
 
   // const moveCp = ()=>{
   //   if(ptCtx&&ptCtx.topViewInstance){

@@ -196,8 +196,8 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         let topPolygon = {
           ...newPolygon,
           pointList: box,
+          attribute:ptCtx.topViewInstance?.pointCloud2dOperation.defaultAttribute
         };
-
         // synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
         syncPointCloudViewsFromSideOrBackView?.(
           PointCloudView.Back,
