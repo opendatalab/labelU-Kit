@@ -274,8 +274,9 @@ class PointCloudOperation extends PointCloud {
         paramId,
       );
       let newbox = this.addBoxInScene(rectPoints, zInfo, attribute, paramId);
+      let newBoxList = this.addBoxInfoIntoBoxList(boxList,boxInfo);
       this.emit('selectPolygonChange', newbox.id, rectPoints);
-      this.emit('savePcResult', [...boxList, boxInfo]);
+      this.emit('savePcResult', newBoxList);
     }
   };
 
@@ -306,7 +307,9 @@ class PointCloudOperation extends PointCloud {
       paramId,
     );
     boxInfo.attribute = attribute;
-    this.setBoxList([...boxList, boxInfo]);
+    
+    let newBoxList = this.addBoxInfoIntoBoxList(boxList,boxInfo);
+    this.setBoxList(newBoxList);
 
     if (rectPoints.length > 0) {
       let sharpRect = rectPoints.map((item) => {
@@ -326,7 +329,6 @@ class PointCloudOperation extends PointCloud {
       boxArrowMesh.name = boxInfo.id + 'boxArrow';
       this.scene.add(boxMesh);
       this.scene.add(boxArrowMesh);
-
       utils.getSvgTextMesh(attribute, color).then((fmesh) => {
         let position = {...fmesh.position}
         const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
@@ -338,11 +340,35 @@ class PointCloudOperation extends PointCloud {
         fmesh.name = boxInfo.id + 'attribute';
         this.removeObjectByName(fmesh.name);
         this.scene.add(fmesh);
+        this.render();
       });
     }
     this.render();
     return boxInfo;
   };
+
+  // add box into boxList
+  public addBoxInfoIntoBoxList(boxList:IPointCloudBox[],boxInfo:IPointCloudBox){
+    let isExist = false;
+    let newBoxList = []
+    if(boxList&&boxList.length>0){
+      for(let i=0;i<boxList.length;i++){
+        if(boxList[i].id !== boxInfo.id){
+          newBoxList.push(boxList[i])
+        }else{
+          newBoxList.push(boxInfo);
+          isExist = true;
+        }
+      }
+    }
+    if(!isExist){
+      newBoxList.push(boxInfo);
+    }
+    console.log("newBoxList",newBoxList)
+    return newBoxList;
+  }
+
+
 
   // get webgl coordinates by screen event
   public getWebglPositionFromEvent(
