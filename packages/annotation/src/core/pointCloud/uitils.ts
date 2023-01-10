@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 //@ts-ignore
 import { MeshLine, MeshLineMaterial, MeshLineRaycast } from 'three.meshline';
+import { Font } from 'three/examples/jsm/loaders/FontLoader';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 
 export interface Point {
   0: number;
@@ -65,22 +67,26 @@ let utils = {
   },
 
   // 生成矢量字体
-  // getSvgTextMesh: function(word: any, color: any) {
-  //   let font = require('@/assets/fonts/helvetiker_regular.typeface.json');
-  //   let tFont = new THREE.Font(font);
-  //   let fontGeoMetry = new THREE.TextGeometry(word, {
-  //     font: tFont,
-  //     size: 1,
-  //     height: 3
-  //   });
-  //   let mesh = utils.makeMesh('Lambert', fontGeoMetry, color);
-  //   var box = new THREE.Box3().setFromObject(mesh);
-  //   var size = box.size();
-  //   var xLength = size.x;
-  //   mesh.rotation.x = -0.5 * Math.PI;
-  //   mesh.position.x = -xLength / 2;
-  //   return mesh;
-  // },
+  getSvgTextMesh: async function (word: string, color: number) {
+    let { default: tmpl } = await import('../../assets/font/labelU_font_Regular.json');
+    const tFont = new Font(tmpl);
+    let fontGeoMetry = new TextGeometry(word, {
+      font: tFont,
+      size: 1,
+      height: 0.1,
+    });
+    const material = new THREE.MeshBasicMaterial( {
+      color: color,
+      transparent: true,
+      opacity: 1,
+      side: THREE.DoubleSide
+    } );
+    let mesh = new THREE.Mesh( fontGeoMetry, material );
+    var box = new THREE.Box3().setFromObject(mesh);
+    var xLength = box.max.x - box.min.x;
+    mesh.position.x = -xLength / 2;
+    return mesh;
+  },
 
   // 生成meshline线条
   getMeshLine: function (vectors: any, color: THREE.ColorRepresentation | undefined, lineWidth = 5) {

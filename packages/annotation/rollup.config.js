@@ -11,6 +11,7 @@ import alias from '@rollup/plugin-alias';
 import pkg from './package.json';
 // import typescript from 'rollup-plugin-typescript2'
 import webWorkerLoader from 'rollup-plugin-web-worker-loader';
+import json from 'rollup-plugin-json';
 
 const projectRootDir = path.resolve(__dirname);
 const customResolver = resolve({
@@ -56,6 +57,7 @@ const commonPlugin = [
     customResolver,
   }),
   svg(),
+  json(),
 ];
 
 console.log('beehive- annotation isProd ', isProd);
@@ -65,18 +67,24 @@ export default () => [
     input: ['./src/index.ts'],
     coverageDirectory: './dist/',
     plugins: [...commonPlugin, esbuildPlugin()],
-    output: [
-      {
-        format: 'cjs',
-        file: './dist/index.js',
-        banner,
-      },
-      {
-        format: 'es',
-        file: './es/index.js',
-        banner,
-      },
-    ],
+    // output: [
+    //   {
+    //     format: 'cjs',
+    //     file: './dist/index.js',
+    //     banner,
+    //   },
+    //   {
+    //     format: 'es',
+    //     file: './es/index.js',
+    //     banner,
+    //   },
+    // ],
+    output: {
+      format: 'esm',
+      dir: './es',
+      preserveModules: true,
+      preserveModulesRoot: 'src',
+    },
   },
   {
     input: ['./src/index.ts'],

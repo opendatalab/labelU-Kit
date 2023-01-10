@@ -11,20 +11,20 @@
   ],
   "attribute": [
     {
-      "key": "玩偶a",
-      "value": "玩偶a"
+      "key": "奥迪",
+      "value": "奥迪"
     },
     {
-      "key": "玩偶b",
-      "value": "玩偶b"
+      "key": "宝马",
+      "value": "宝马"
     },
     {
-      "key": "玩偶的风格的",
-      "value": "玩偶的风格的"
+      "key": "奔驰",
+      "value": "奔驰"
     },
     {
-      "key": "玩偶d",
-      "value": "玩偶d"
+      "key": "大众",
+      "value": "大众"
     }
   ]
 }

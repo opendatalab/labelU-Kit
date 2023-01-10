@@ -326,6 +326,19 @@ class PointCloudOperation extends PointCloud {
       boxArrowMesh.name = boxInfo.id + 'boxArrow';
       this.scene.add(boxMesh);
       this.scene.add(boxArrowMesh);
+
+      utils.getSvgTextMesh(attribute, color).then((fmesh) => {
+        let position = {...fmesh.position}
+        const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
+        const Tt = new THREE.Matrix4().makeTranslation(boxInfo.center.x + position.x,boxInfo.center.y + position.y,0);
+        const Tb = new THREE.Matrix4().makeTranslation(-position.x,-position.y,boxInfo.zInfo.maxZ + 2);
+        const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
+        fmesh.applyMatrix4(Rz)
+        fmesh.applyMatrix4(tranlateMatrix);
+        fmesh.name = boxInfo.id + 'attribute';
+        this.removeObjectByName(fmesh.name);
+        this.scene.add(fmesh);
+      });
     }
     this.render();
     return boxInfo;

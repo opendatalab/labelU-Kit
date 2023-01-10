@@ -31,7 +31,7 @@ const AnnotationPage: FC = () => {
           toolName: 'pctool',
           result: [
             {
-              "attribute": "玩偶的风格的",
+              "attribute": "奥迪",
               "center": {
                   "x": 32.56179434072837,
                   "y": 6.2644789567587615,
