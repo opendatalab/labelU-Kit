@@ -102,6 +102,7 @@ export const topViewPolygon2PointCloud = (
         order: 1,
         rect: [point1, point2, point3, point4],
         zInfo: zInfo,
+        isVisible: true,
       };
 
   if (defaultValue) {
@@ -696,7 +697,9 @@ export const usePointCloudViews = () => {
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {
         // mainViewInstance?.generateBox(v);
-        mainViewInstance?.addBoxInScene(v.rect, v.zInfo, v.attribute, v.id);
+        if (v.isVisible) {
+          mainViewInstance?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id);
+        }
       });
 
       ptCtx.setPointCloudResult(boxParamsList);
@@ -708,7 +711,7 @@ export const usePointCloudViews = () => {
 
     mainViewInstance.updateTopCamera();
 
-    const valid = jsonParser(currentData.result?.pctool?.result)?.valid ?? true;
+    const valid = jsonParser(currentData.result?.pointCloudTool?.result)?.valid ?? true;
     ptCtx.setPointCloudValid(valid);
     // Clear other view data during initialization
     ptCtx?.sideViewInstance?.clearAllData();

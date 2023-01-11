@@ -78,6 +78,7 @@ export interface IPointCloudBox extends IVolume {
   id: string;
   rotation: number;
   valid: boolean;
+  isVisible: boolean;
   trackID?: number; // It can be deleted.
   subAttribute?: {
     [k: string]: string;

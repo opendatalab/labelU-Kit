@@ -38,8 +38,8 @@ class PointCloudUtils {
 
   public static getBoxParamsFromResultList(result: string): IPointCloudBox[] {
     const data = this.jsonParser(result);
-    if(data?.pctool?.result){
-      return data?.pctool?.result
+    if(data?.pointCloudTool?.result){
+      return data?.pointCloudTool?.result
     }
     return [];
   }

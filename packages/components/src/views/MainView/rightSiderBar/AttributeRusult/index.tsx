@@ -1,4 +1,4 @@
-import React, { FC, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, ReactElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Collapse, Form, Input, Select } from 'antd';
 import { AppState } from '../../../../store';
 import { connect } from 'react-redux';
@@ -19,6 +19,7 @@ import DrageModel from '@/components/dragModal';
 import classNames from 'classnames';
 import { expandIconFuc } from '../TagSidebar';
 import { LabelUContext } from '@/store/ctx';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -73,6 +74,7 @@ const AttributeRusult: FC<IProps> = ({
     icon: '',
     textAttribute: '',
   });
+  const ptCtx = useContext(PointCloudContext);
 
   const dragModalRef = useRef<any>();
   useEffect(() => {
@@ -199,6 +201,9 @@ const AttributeRusult: FC<IProps> = ({
       }
       imgList[imgIndex].result = JSON.stringify(oldImgResult);
       dispatch(UpdateImgList(imgList));
+      setTimeout(()=>{
+        ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView')
+      },100)
       updateCanvasView(oldImgResult);
     }
   };
@@ -242,8 +247,12 @@ const AttributeRusult: FC<IProps> = ({
           oldImgResult[oneTool.toolName].result = newToolLabelItems;
         }
       }
+
       imgList[imgIndex].result = JSON.stringify(oldImgResult);
       dispatch(UpdateImgList(imgList));
+      setTimeout(()=>{
+        ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView')
+      },100)
       updateCanvasView(oldImgResult);
     }
   };
@@ -384,6 +393,9 @@ const AttributeRusult: FC<IProps> = ({
     }
     imgList[imgIndex].result = JSON.stringify(oldImgResult);
     dispatch(UpdateImgList(imgList));
+    setTimeout(()=>{
+      ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView')
+    },100)
     updateCanvasView(oldImgResult);
   };
 

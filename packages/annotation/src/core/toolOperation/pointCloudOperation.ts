@@ -102,6 +102,25 @@ class PointCloudOperation extends PointCloud {
     this.scene.add(groundMesh);
   }
 
+  public clearBoxList(){
+    if(this.boxList && this.boxList.length>0){
+      for(let i = 0; i < this.boxList.length; i++){
+        this.removeObjectByName(this.boxList[i].id+'boxArrow');
+        this.removeObjectByName(this.boxList[i].id+'box');
+        this.removeObjectByName(this.boxList[i].id+'attribute');
+      }
+    }
+    // this.render();
+  }
+
+  public clearBoxInSceneById(id:string){
+    if(id){
+      this.removeObjectByName(id+'boxArrow');
+      this.removeObjectByName(id+'box');
+      this.removeObjectByName(id+'attribute');
+    }
+  }
+
   public renderBoxList() {
     if (!this.boxList) {
       return;
@@ -228,7 +247,6 @@ class PointCloudOperation extends PointCloud {
       maxZ: number;
       minZ: number;
     },
-    order: number,
     paramsId?: string,
   ): IPointCloudBox {
     let id = paramsId ? paramsId : uuid(8, 62);
@@ -250,9 +268,10 @@ class PointCloudOperation extends PointCloud {
       width: width,
       height: height,
       depth: zInfo.maxZ - zInfo.minZ,
-      order: order,
       zInfo: zInfo,
       rect: points,
+      order:1,
+      isVisible:true
     };
   }
 
@@ -265,22 +284,22 @@ class PointCloudOperation extends PointCloud {
     let box = this.scene.getObjectByName(paramId + 'box');
 
     if (box) {
-      let boxList: IPointCloudBox[] = this.boxList;
-      let order = boxList.length + 1;
-      let boxInfo = this.getBoxFormmat(
-        rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
-        zInfo,
-        order,
-        paramId,
-      );
-      let newbox = this.addBoxInScene(rectPoints, zInfo, attribute, paramId);
-      let newBoxList = this.addBoxInfoIntoBoxList(boxList,boxInfo);
+      // let boxList: IPointCloudBox[] = this.boxList;
+      // let boxInfo = this.getBoxFormmat(
+      //   rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+      //   zInfo,
+      //   paramId,
+      // );
+      // let ordr = this.getOrder(boxList,boxInfo);
+      // boxInfo.order = ordr
+      let newbox = this.doUpateboxInScene(rectPoints, zInfo, attribute, paramId);
+      // let newBoxList = this.addBoxInfoIntoBoxList(boxList,boxInfo);
       this.emit('selectPolygonChange', newbox.id, rectPoints);
-      this.emit('savePcResult', newBoxList);
+      // this.emit('savePcResult', newBoxList);
     }
   };
 
-  public addBoxInScene = (
+  public doUpateboxInScene = (
     rectPoints: ICoordinate[],
     zInfo: { maxZ: number; minZ: number },
     attribute: string,
@@ -289,26 +308,33 @@ class PointCloudOperation extends PointCloud {
     const color = new THREE.Color(this.getColor(attribute).valid.stroke).getHex();
     // delete prevOne
     let boxList: IPointCloudBox[] = this.boxList;
+    let prevBox;
     if (paramId) {
       let boxName = paramId + 'box';
       let boxArrName = paramId + 'boxArrow';
       this.removeObjectByName(boxName);
       this.removeObjectByName(boxArrName);
-      boxList = this.boxList.filter((item) => {
-        return item.id !== paramId;
+      prevBox = this.boxList.filter((item) => {
+        return item.id === paramId;
       });
     }
-    let order = boxList.length + 1;
     // add new one
     let boxInfo = this.getBoxFormmat(
       rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
       zInfo,
-      order,
       paramId,
     );
     boxInfo.attribute = attribute;
-    
+    let ordr = this.getOrder(boxList,boxInfo);
+    if(prevBox&&prevBox.length>0) {
+      boxInfo.isVisible = prevBox[0].isVisible
+    }else{
+      boxInfo.isVisible = true;
+    }
+    boxInfo.order = ordr
     let newBoxList = this.addBoxInfoIntoBoxList(boxList,boxInfo);
+    this.emit('savePcResult', newBoxList);
+
     this.setBoxList(newBoxList);
 
     if (rectPoints.length > 0) {
@@ -346,6 +372,28 @@ class PointCloudOperation extends PointCloud {
     this.render();
     return boxInfo;
   };
+
+
+  // get box order 
+  public getOrder(boxList:IPointCloudBox[],boxInfo:IPointCloudBox){
+    let returnOrder = 0;
+    debugger;
+    if(boxList&&boxList.length>0){
+      for(let i=0;i<boxList.length;i++){
+        if(boxList[i].id !== boxInfo.id){
+          if(boxList[i].order >= returnOrder){
+            returnOrder = boxList[i].order + 1;
+          }
+        }else{
+          returnOrder = boxList[i].order;
+          break;
+        }
+      }
+    }else{
+      return boxInfo.order;
+    }
+    return returnOrder;
+  }
 
   // add box into boxList
   public addBoxInfoIntoBoxList(boxList:IPointCloudBox[],boxInfo:IPointCloudBox){
@@ -489,7 +537,7 @@ class PointCloudOperation extends PointCloud {
           let { rect } = self.getFooterRect(points.slice(0, 2), clickPoint);
           let zInfo = self.getSensesPointZAxisInPolygon(rect);
           if (zInfo.zCount > 0) {
-            let box = self.addBoxInScene(rect, zInfo, self.attribute);
+            let box = self.doUpateboxInScene(rect, zInfo, self.attribute);
             self.emit('boxAdded', rect, box.attribute, box.id);
           }
           // 清除点数据

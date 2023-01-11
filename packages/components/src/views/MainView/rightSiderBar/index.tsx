@@ -164,7 +164,8 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
       let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
       let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
-      let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length;
+      let pointCloudResult = currentImgResult?.pointCloudTool ? currentImgResult.pointCloudTool.result:[];
+      let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length + pointCloudResult.length;
       setAttributeTab(
         <div className='rightTab'>
           <p>标注结果</p>

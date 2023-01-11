@@ -113,36 +113,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
   };
 
   useEffect(() => {
-    if (ref.current && currentData?.url) {
-      let pointCloud = ptCtx.mainViewInstance;
-      if (!pointCloud) {
-        pointCloud = new PointCloudOperation({
-          container: ref.current,
-          // backgroundColor: '#4c4c4c',
-          isOrthographicCamera: true,
-          attribute: '',
-          // @ts-ignore
-          config: config.config,
-        });
-      }
-      pointCloud.setStyle(toolStyle);
-      if (currentData.result) {
-        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
-        pointCloud.setBoxList(boxParamsList);
-        // Add Init Box
-        boxParamsList.forEach((v: IPointCloudBox) => {
-          // let color =
-          // pointCloud?.generateBox(v);
-          // to do change color by attribute
-          pointCloud?.addBoxInScene(v.rect, v.zInfo, v.attribute, v.id);
-        });
-
-        ptCtx.setPointCloudResult(boxParamsList);
-        ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
-      }
-
-      ptCtx.setMainViewInstance(pointCloud);
-    }
+    initPointCloud3DView()
   }, [currentData?.url]);
 
   useEffect(() => {
@@ -156,6 +127,12 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       width: TopView2dOperation.container.getBoundingClientRect().width,
       height: TopView2dOperation.container.getBoundingClientRect().height,
     };
+
+
+    mainViewInstance.singleOn('refreshPointCloud3dView',()=>{
+      initPointCloud3DView()
+    })
+
     mainViewInstance.singleOn(
       'boxAdded',
       (pointList: ICoordinate[], attribute: string, id: string) => {
@@ -183,8 +160,8 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
             {
               ...currentData,
               result: JSON.stringify({
-                pctool: {
-                  toolName: 'pctool',
+                pointCloudTool: {
+                  toolName: 'pointCloudTool',
                   result: boxList,
                 },
               }),
@@ -224,6 +201,47 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
   const ptCloud3DCtx = useMemo(() => {
     return { reset3DView, setTarget3DView, isActive: !!selectedBox };
   }, [selectedBox]);
+
+
+  const initPointCloud3DView = ()=>{
+    if (ref.current && currentData?.url) {
+      let pointCloud = ptCtx.mainViewInstance;
+      if (!pointCloud) {
+        pointCloud = new PointCloudOperation({
+          container: ref.current,
+          // backgroundColor: '#4c4c4c',
+          isOrthographicCamera: true,
+          attribute: '',
+          // @ts-ignore
+          config: config.config,
+        });
+      }
+
+      pointCloud.setStyle(toolStyle);
+      if (currentData.result) {
+        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+        pointCloud.setBoxList(boxParamsList);
+        // pointCloud.clearBoxList();
+        pointCloud.loadPCDFile(currentData.url);
+
+        // Add Init Box
+        boxParamsList.forEach((v: IPointCloudBox) => {
+          // let color =
+          // pointCloud?.generateBox(v);
+          // to do change color by attribute
+          if(v.isVisible) {
+            pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id);
+          }else{
+            pointCloud?.clearBoxInSceneById(v.id);
+          }
+        });
+        ptCtx.setPointCloudResult(boxParamsList);
+        ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
+      }
+
+      ptCtx.setMainViewInstance(pointCloud);
+    }
+  }
 
   // const PointCloud3DTitle = (
   //   <div>
