@@ -1,5 +1,4 @@
 import { isNumber } from 'lodash';
-import localforage from 'localforage';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import MathUtils from '@/utils/MathUtils';
@@ -553,23 +552,14 @@ class BasicToolOperation extends EventListener {
       zoomRatio,
       isOriginalSize,
     );
-    // 初始化图片位置信息时，优先从持久化记录中获取
-    const statbleCoord = (await localforage.getItem('coordinate')) as ICoordinate;
-    this.setCurrentPos(statbleCoord || currentPos);
-    this.currentPosStorage = statbleCoord || currentPos;
-    let statblezoom = 0;
-    // 当部位原图比例显示时，采用stable zoom
-    if (!isOriginalSize) {
-      // 初始化图片缩放信息，优先从持久化记录中获取
-      statblezoom = (await localforage.getItem('zoom')) as number;
-    } else {
-      await localforage.setItem('zoom', 1, () => {});
-    }
+    // 初始化图片位置信息
+    this.setCurrentPos(currentPos);
+    this.currentPosStorage = currentPos;
 
     this.imgInfo = imgInfo;
-    this.setZoom(statblezoom || zoom);
+    this.setZoom(zoom);
 
-    this.innerZoom = statblezoom || zoom;
+    this.innerZoom = zoom;
     this.renderReady = true;
     this.render();
     this.renderBasicCanvas();
@@ -801,8 +791,6 @@ class BasicToolOperation extends EventListener {
     if (this.startTime !== 0 && this._firstClickCoordinate) {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
-      // 拖拽时，更新持久化图片位置信息
-      localforage.setItem('coordinate', this.getCurrentPos(currentCoord), () => {});
       /**
        * 图片拖拽判断
        * 1. 拖拽时间超过 1 秒则为拖拽
@@ -962,11 +950,6 @@ class BasicToolOperation extends EventListener {
     }
 
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
-
-    // 缩放时，更新持久化图片位置信息
-    localforage.setItem('coordinate', newCurrentPos, () => {});
-    // 缩放时，更新持久化图片缩放信息
-    localforage.setItem('zoom', zoom, () => {});
 
     this.innerZoom = zoom;
     this.setZoom(zoom);

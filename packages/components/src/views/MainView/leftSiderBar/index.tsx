@@ -47,8 +47,6 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
                     className={classnames({ imgItem: true, chooseImg: index === Number(imgIndex) })}
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await localforage.removeItem('zoom');
-                      await localforage.removeItem('coordinate');
                       pageJump(index);
                     }}
                   >
