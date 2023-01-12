@@ -30,9 +30,9 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
     NEW_ATTRIBUTE_COLORS = NEW_ATTRIBUTE_COLORS.slice(1);
   }
 
-  let className = 'sensebee-radio-group';
+  let className = 'labelu-radio-group';
   if (props.noHeightLimit) {
-    className = 'sensebee-radio-group-no-limit-height';
+    className = 'labelu-radio-group-no-limit-height';
   }
 
   return (
@@ -63,7 +63,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
               ref={radioRef}
               key={index}
             >
-              <span className="sensebee-radio-label" title={i.label}>
+              <span className="labelu-radio-label" title={i.label}>
                 {!props?.forbidColor && (
                   <ColorTag
                     color={
@@ -78,7 +78,7 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
                 )}
                 {i.label}
               </span>
-              <span className="sensebee-radio-num">{hotKey}</span>
+              <span className="labelu-radio-num">{hotKey}</span>
             </Radio>
           );
         })}

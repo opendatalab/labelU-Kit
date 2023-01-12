@@ -211,20 +211,6 @@ export enum EThumbnailOption {
   ImgSearch,
 }
 
-export const CLIENT_TOOL_HEAD_TYPE: { [a: string]: string } = {
-  [EPointCloudName.PointCloud]: 'sensebeepc',
-  [EToolName.ClientAttribute]: 'sensebeepc-EnumAttributeTool',
-  [EToolName.Face]: 'sensebeepc-FacePointsLabellingTool',
-  [EToolName.OCRRelation]: 'sensebeepc-OCRRelationTool',
-};
-
-export const CLIENT_TOOL_NAME: { [a: string]: string } = {
-  [EPointCloudName.PointCloud]: '点云客户端',
-  [EToolName.ClientAttribute]: '客户端属性工具',
-  [EToolName.Face]: '人脸106点工具',
-  [EToolName.OCRRelation]: 'OCR关联关系工具',
-};
-
 /** 曲线分割点数 */
 export const SEGMENT_NUMBER = 16;
 
