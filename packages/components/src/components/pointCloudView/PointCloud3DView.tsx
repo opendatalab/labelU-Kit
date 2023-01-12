@@ -2,7 +2,7 @@ import { getClassName } from '@/utils/dom';
 import { ICoordinate, MathUtils, PointCloudOperation } from '@label-u/annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@label-u/utils';
 import classNames from 'classnames';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
@@ -128,10 +128,19 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       height: TopView2dOperation.container.getBoundingClientRect().height,
     };
 
-
     mainViewInstance.singleOn('refreshPointCloud3dView',()=>{
       initPointCloud3DView()
     })
+
+
+    mainViewInstance.singleOn('deleteBoxes',(ids:string[])=>{
+      if(ids&&ids.length>0){
+        deleteSomeBoxesInScene(ids)
+      }
+    })
+
+
+    
 
     mainViewInstance.singleOn(
       'boxAdded',
@@ -203,31 +212,55 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
   }, [selectedBox]);
 
 
+  const deleteSomeBoxesInScene = (ids:string[])=>{
+    if (ref.current && currentData?.url&&Array.isArray(ids)&&ids.length>0) {
+      let pointCloud = ptCtx.mainViewInstance;
+      if (!pointCloud) {
+        pointCloud = new PointCloudOperation({
+          container: ref.current,
+          isOrthographicCamera: true,
+          attribute: '',
+          config: config.config,
+        });
+        ptCtx.setMainViewInstance(pointCloud);
+      }
+      if (currentData.result) {
+        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+        pointCloud.setBoxList(boxParamsList);
+        pointCloud.loadPCDFile(currentData.url);
+        ids.forEach((id: string) => {
+            pointCloud?.clearBoxInSceneById(id);
+          
+        });
+        ptCtx.setPointCloudResult(boxParamsList);
+        ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
+      }
+
+      ptCtx.setMainViewInstance(pointCloud);
+    }
+  }
+
+
   const initPointCloud3DView = ()=>{
     if (ref.current && currentData?.url) {
       let pointCloud = ptCtx.mainViewInstance;
       if (!pointCloud) {
         pointCloud = new PointCloudOperation({
           container: ref.current,
-          // backgroundColor: '#4c4c4c',
           isOrthographicCamera: true,
           attribute: '',
-          // @ts-ignore
           config: config.config,
         });
+        ptCtx.setMainViewInstance(pointCloud);
       }
 
       pointCloud.setStyle(toolStyle);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
-        // pointCloud.clearBoxList();
         pointCloud.loadPCDFile(currentData.url);
-
         // Add Init Box
         boxParamsList.forEach((v: IPointCloudBox) => {
-          // let color =
-          // pointCloud?.generateBox(v);
           // to do change color by attribute
           if(v.isVisible) {
             pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id);

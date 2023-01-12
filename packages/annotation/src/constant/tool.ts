@@ -67,6 +67,8 @@ export enum EToolName {
   OCRRelation = 'OCRRelationTool',
   /** 算法分割辅助工具 */
   SegmentByRect = 'segmentByRectTool',
+  /** 点云工具 */
+  pointCloud = 'pointCloudTool',
 }
 
 export enum ECheckModel {

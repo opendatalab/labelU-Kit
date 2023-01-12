@@ -377,7 +377,6 @@ class PointCloudOperation extends PointCloud {
   // get box order 
   public getOrder(boxList:IPointCloudBox[],boxInfo:IPointCloudBox){
     let returnOrder = 0;
-    debugger;
     if(boxList&&boxList.length>0){
       for(let i=0;i<boxList.length;i++){
         if(boxList[i].id !== boxInfo.id){

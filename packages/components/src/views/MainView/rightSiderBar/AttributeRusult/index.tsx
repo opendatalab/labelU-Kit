@@ -24,7 +24,13 @@ import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext
 const { Panel } = Collapse;
 const { Option } = Select;
 
-const LableTools = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];
+const LableTools = [
+  EToolName.Rect,
+  EToolName.Point,
+  EToolName.Line,
+  EToolName.Polygon,
+  EToolName.pointCloud,
+];
 
 interface AttributeResult {
   isVisible: boolean;
@@ -201,9 +207,9 @@ const AttributeRusult: FC<IProps> = ({
       }
       imgList[imgIndex].result = JSON.stringify(oldImgResult);
       dispatch(UpdateImgList(imgList));
-      setTimeout(()=>{
-        ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView')
-      },100)
+      setTimeout(() => {
+        ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
+      }, 100);
       updateCanvasView(oldImgResult);
     }
   };
@@ -250,15 +256,16 @@ const AttributeRusult: FC<IProps> = ({
 
       imgList[imgIndex].result = JSON.stringify(oldImgResult);
       dispatch(UpdateImgList(imgList));
-      setTimeout(()=>{
-        ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView')
-      },100)
+      setTimeout(() => {
+        ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
+      }, 100);
       updateCanvasView(oldImgResult);
     }
   };
 
   // 批量删除标注
   const deleteLabelByAttribute = (attributeResult: AttributeResult) => {
+    let deleteBoxArray: string[] = [];
     const getPositionIndexInArr = (arr: number[], value: number) => {
       let p = 0;
       if (arr?.length > 0) {
@@ -292,12 +299,14 @@ const AttributeRusult: FC<IProps> = ({
       for (let i = 0; i < toolList.length; i++) {
         newImgResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
           (
-            res: { order: number; isVisible: boolean }[],
-            item: { order: number; isVisible: boolean },
+            res: { order: number; isVisible: boolean; id?: string }[],
+            item: { order: number; isVisible: boolean; id?: string },
           ) => {
             if (deleteResult.indexOf(item.order) < 0) {
               item.order = item.order - getPositionIndexInArr(deleteResult, item.order);
               res.push(item);
+            } else {
+              item.id ? deleteBoxArray.push(item.id) : '';
             }
             return res;
           },
@@ -306,6 +315,9 @@ const AttributeRusult: FC<IProps> = ({
       }
       imgList[imgIndex].result = JSON.stringify(newImgResult);
       dispatch(UpdateImgList(imgList));
+      setTimeout(() => {
+        ptCtx?.mainViewInstance?.emit('deleteBoxes', deleteBoxArray);
+      }, 100);
       updateCanvasView(newImgResult);
     }
   };
@@ -314,6 +326,7 @@ const AttributeRusult: FC<IProps> = ({
   const delelteLabel = (toolInfo: ToolInfo) => {
     let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
     let newImageResult = { ...oldImgResult };
+    let deleteBoxArray: string[] = [];
     // 更新结果
     if (
       oldImgResult[toolInfo.toolName].result &&
@@ -324,18 +337,19 @@ const AttributeRusult: FC<IProps> = ({
       let toolList = keys.filter((item) => {
         return LableTools.indexOf(item as EToolName) >= 0;
       });
-
       for (let i = 0; i < toolList.length; i++) {
         newImageResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
           (
-            res: { order: number; isVisible: boolean }[],
-            item: { order: number; isVisible: boolean },
+            res: { order: number; isVisible: boolean; id?: string }[],
+            item: { order: number; isVisible: boolean; id?: string },
           ) => {
             if (item.order !== toolInfo.order) {
               if (item.order > toolInfo.order) {
                 item.order = item.order - 1;
               }
               res.push(item);
+            } else {
+              item?.id ? deleteBoxArray.push(item.id) : '';
             }
             return res;
           },
@@ -345,11 +359,17 @@ const AttributeRusult: FC<IProps> = ({
     }
     imgList[imgIndex].result = JSON.stringify(newImageResult);
     dispatch(UpdateImgList(imgList));
+    setTimeout(() => {
+      ptCtx?.mainViewInstance?.emit('deleteBoxes', deleteBoxArray);
+    }, 100);
     updateCanvasView(newImageResult);
   };
 
   // 更新pre 标注结果
   const updateCanvasView = (newLabelResult: any) => {
+    if (currentToolName === 'pointCloudTool') {
+      return;
+    }
     const prevResult: PrevResult[] = [];
     for (let oneTool of toolList) {
       if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
@@ -393,9 +413,9 @@ const AttributeRusult: FC<IProps> = ({
     }
     imgList[imgIndex].result = JSON.stringify(oldImgResult);
     dispatch(UpdateImgList(imgList));
-    setTimeout(()=>{
-      ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView')
-    },100)
+    setTimeout(() => {
+      ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
+    }, 100);
     updateCanvasView(oldImgResult);
   };
 
@@ -704,7 +724,7 @@ const AttributeRusult: FC<IProps> = ({
                             />
                           )}
                           <img
-                           style={{ left: 50, position: 'absolute' }}
+                            style={{ left: 50, position: 'absolute' }}
                             src={AttributeUnionIcon}
                             className='hoverShow'
                             onClick={(e) => {
