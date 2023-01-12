@@ -19,7 +19,6 @@ import {
 } from './types/data';
 import { Footer, Header, Sider } from './types/main';
 import { IStepInfo } from './types/step';
-// import loacalforage from 'localforage';
 import { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
 
 interface IAnnotationStyle {
@@ -108,7 +107,7 @@ const App: React.FC<AppProps> = (props) => {
   console.log("you are using version 202212281508", props)
   //@ts-ignore
   if(props.imgList&&props.imgList.length>0){
-    console.info("result",props.imgList[0].result)    
+    console.info("result",props.imgList[0].result)
   }
 
   const dispatch = useDispatch();
@@ -116,7 +115,7 @@ const App: React.FC<AppProps> = (props) => {
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
   const [imgUrl,setImgUrl] = useState<string>();
 
-  
+
   useEffect(()=>{
     if(imgList&&imgList?.length>0&&imgList[0].url){
       setImgUrl(imgList[0].url)
@@ -205,7 +204,7 @@ const App: React.FC<AppProps> = (props) => {
       //   // if (value && value < imgList.length) {
       //   //   store.dispatch(LoadFileAndFileData(value as number));
       //   // } else {
-   
+
       //   // }
       // });
     }
