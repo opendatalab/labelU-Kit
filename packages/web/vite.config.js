@@ -1,9 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-// import tsMonoAlias from 'vite-plugin-ts-mono-alias';
-// import vitePluginImp from 'vite-plugin-imp';
-
 // import path from 'path';
 // import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 // const pathResolve = (dir) => {
@@ -27,17 +24,6 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    // tsMonoAlias({
-    //   ignoredPackages: ['web', 'server'],
-    // }),
-    // vitePluginImp({
-    //   libList: [
-    //     {
-    //       libName: 'antd',
-    //       style: (name) => `antd/es/${name}/style/index.js`,
-    //     },
-    //   ],
-    // })
     // createSvgIconsPlugin({
     //   // 指定需要缓存的图标文件夹
     //   iconDirs: [path.resolve(process.cwd(), 'src/img')],
