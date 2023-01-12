@@ -11,6 +11,10 @@ import { AppState } from '../../../store';
 import localforage from 'localforage';
 const layoutCls = `${prefix}-layout`;
 
+const isRemote = (url: string | undefined) => {
+  return url && (url.startsWith('http') || url.startsWith('https'));
+}
+
 interface LeftSiderProps {
   path: string;
   loading: boolean;
@@ -47,8 +51,8 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
                     className={classnames({ imgItem: true, chooseImg: index === Number(imgIndex) })}
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await localforage.removeItem(`coordinate::${item.url}`);
-                      await localforage.removeItem(`zoom::${item.url}`);
+                      await localforage.removeItem(`coordinate::${isRemote(item.url) ? '' : location.host}${item.url}`);
+                      await localforage.removeItem(`zoom::${isRemote(item.url) ? '' : location.host}${item.url}`);
                       pageJump(index);
                     }}
                   >
