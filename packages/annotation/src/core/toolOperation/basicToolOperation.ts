@@ -1,5 +1,4 @@
 import { isNumber } from 'lodash';
-import localforage from 'localforage';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import MathUtils from '@/utils/MathUtils';
@@ -23,6 +22,9 @@ import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
+
+// 缓存图片的坐标和缩放比例
+const positionCache: Map<string, ICoordinate | number> = new Map();
 
 interface IBasicToolOperationProps {
   container: HTMLElement;
@@ -573,17 +575,21 @@ class BasicToolOperation extends EventListener {
       isOriginalSize,
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
-    const statbleCoord = (await localforage.getItem(this._coordinateCacheKey)) as ICoordinate;
+    const statbleCoord = positionCache.get(this._coordinateCacheKey) as ICoordinate;
     this.setCurrentPos(statbleCoord || currentPos);
     this.currentPosStorage = statbleCoord || currentPos;
     let statblezoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
       // 初始化图片缩放信息，优先从持久化记录中获取
-      statblezoom = (await localforage.getItem(this._zoomCacheKey)) as number;
+      statblezoom = positionCache.get(this._zoomCacheKey) as number;
     } else {
-      await localforage.setItem(this._zoomCacheKey, 1, () => {});
+      positionCache.set(this._zoomCacheKey, 1);
     }
+
+    // 获取完缓存的坐标和缩放比例后，清除缓存
+    positionCache.delete(this._coordinateCacheKey);
+    positionCache.delete(this._zoomCacheKey);
 
     this.imgInfo = imgInfo;
     this.setZoom(statblezoom || zoom);
@@ -821,7 +827,7 @@ class BasicToolOperation extends EventListener {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
       // 拖拽时，更新持久化图片位置信息
-      localforage.setItem(this._coordinateCacheKey, this.getCurrentPos(currentCoord), () => {});
+      positionCache.set(this._coordinateCacheKey, this.getCurrentPos(currentCoord));
       /**
        * 图片拖拽判断
        * 1. 拖拽时间超过 1 秒则为拖拽
@@ -983,9 +989,9 @@ class BasicToolOperation extends EventListener {
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
 
     // 缩放时，更新持久化图片位置信息
-    localforage.setItem(this._coordinateCacheKey, newCurrentPos, () => {});
+    positionCache.set(this._coordinateCacheKey, newCurrentPos);
     // 缩放时，更新持久化图片缩放信息
-    localforage.setItem(this._zoomCacheKey, zoom, () => {});
+    positionCache.set(this._zoomCacheKey, zoom);
 
     this.innerZoom = zoom;
     this.setZoom(zoom);

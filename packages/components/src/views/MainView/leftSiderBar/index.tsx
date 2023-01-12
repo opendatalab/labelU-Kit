@@ -8,7 +8,6 @@ import { connect, useDispatch } from 'react-redux';
 import { prefix } from '../../../constant';
 import { IFileItem } from '../../../types/data';
 import { AppState } from '../../../store';
-import localforage from 'localforage';
 const layoutCls = `${prefix}-layout`;
 
 const isRemote = (url: string | undefined) => {
@@ -59,8 +58,6 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
                     className={classnames({ imgItem: true, chooseImg: index === Number(imgIndex) })}
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await localforage.removeItem(`coordinate::${getFullUrl(item.url)}`);
-                      await localforage.removeItem(`zoom::${getFullUrl(item.url)}`);
                       pageJump(index);
                     }}
                   >
