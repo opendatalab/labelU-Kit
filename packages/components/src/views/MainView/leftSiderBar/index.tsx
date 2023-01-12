@@ -8,7 +8,6 @@ import { connect, useDispatch } from 'react-redux';
 import { prefix } from '../../../constant';
 import { IFileItem } from '../../../types/data';
 import { AppState } from '../../../store';
-import localforage from 'localforage';
 const layoutCls = `${prefix}-layout`;
 
 interface LeftSiderProps {
@@ -23,7 +22,7 @@ interface LeftSiderProps {
 const LeftSider: React.FC<LeftSiderProps> = (props) => {
   const { imgList, imgIndex, leftSiderContent } = props;
 
-  const [imgListCollapse,setImgListCollapse] = useState<boolean>(true);
+  const [imgListCollapse, setImgListCollapse] = useState<boolean>(true);
   const dispatch = useDispatch();
   const pageJump = (page: number) => {
     dispatch(PageJump(page));
@@ -47,8 +46,6 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
                     className={classnames({ imgItem: true, chooseImg: index === Number(imgIndex) })}
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await localforage.removeItem('zoom');
-                      await localforage.removeItem('coordinate');
                       pageJump(index);
                     }}
                   >
@@ -89,7 +86,6 @@ const mapStateToProps = ({ annotation, toolStyle }: AppState) => {
   return {
     imgList,
     imgIndex,
-
   };
 };
 
