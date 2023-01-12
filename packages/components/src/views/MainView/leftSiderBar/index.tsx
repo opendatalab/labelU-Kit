@@ -15,6 +15,14 @@ const isRemote = (url: string | undefined) => {
   return url && (url.startsWith('http') || url.startsWith('https'));
 }
 
+const getFullUrl = (url: string | undefined) => {
+  if (isRemote(url)) {
+    return url;
+  }
+
+  return `${location.origin}${url?.startsWith('/') ? url : `/${url}`}`;
+}
+
 interface LeftSiderProps {
   path: string;
   loading: boolean;
@@ -51,8 +59,8 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
                     className={classnames({ imgItem: true, chooseImg: index === Number(imgIndex) })}
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await localforage.removeItem(`coordinate::${isRemote(item.url) ? '' : location.host}${item.url}`);
-                      await localforage.removeItem(`zoom::${isRemote(item.url) ? '' : location.host}${item.url}`);
+                      await localforage.removeItem(`coordinate::${getFullUrl(item.url)}`);
+                      await localforage.removeItem(`zoom::${getFullUrl(item.url)}`);
                       pageJump(index);
                     }}
                   >
