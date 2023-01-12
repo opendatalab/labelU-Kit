@@ -159,9 +159,9 @@ class BasicToolOperation extends EventListener {
 
   private _invalidDOM?: HTMLElement;
 
-  private _coordinateCacheKey: string;
+  private _coordinateCacheKey: string = '';
 
-  private _zoomCacheKey: string;
+  private _zoomCacheKey: string = '';
 
   private showDefaultCursor: boolean; // 是否展示默认的 cursor
 
@@ -187,9 +187,9 @@ class BasicToolOperation extends EventListener {
     // this.createCanvas(props.size);
     this.imgNode = props.imgNode;
     // 设置图片位置和zoom缓存key
-    if (props.imgNode) {
-      this._coordinateCacheKey = `coordinate::${props.imgNode.src}`
-      this._zoomCacheKey = `zoom::${props.imgNode.src}`
+    if (props.imgNode && props.imgNode.src) {
+      this._coordinateCacheKey = `coordinate::${props.imgNode.src}`;
+      this._zoomCacheKey = `zoom::${props.imgNode.src}`;
     }
     this.isImgError = !props.imgNode;
     this.basicImgInfo = {
