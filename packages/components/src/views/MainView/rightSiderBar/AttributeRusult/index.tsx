@@ -100,14 +100,16 @@ const AttributeRusult: FC<IProps> = ({
 
   // 工具选中后联动标注结果选中项
   useEffect(() => {
-    const activeId =
+    let activeId =
       currentToolName === EToolName.Rect
         ? // @ts-ignore
           copyToolInstance?.selectedRectID
         : // @ts-ignore
           copyToolInstance?.selectedID;
-    //@ts-ignore
-    const activeArea = copyToolInstance?.activeArea;
+    if (currentToolName === 'pointCloudTool') {
+      activeId = ptCtx.selectedID;
+    }
+
     if (activeId && imgList && imgList.length > imgIndex) {
       const toolInfoStr = localStorage.getItem('toolInfo');
       if (toolInfoStr && toolInfoStr.length > 0) {
@@ -121,8 +123,7 @@ const AttributeRusult: FC<IProps> = ({
     } else {
       setActiveOrder(0);
     }
-    // @ts-ignore
-  }, [copyToolInstance, currentToolName]);
+  }, [copyToolInstance, currentToolName, ptCtx.selectedID]);
 
   useEffect(() => {
     if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
@@ -419,14 +420,18 @@ const AttributeRusult: FC<IProps> = ({
     updateCanvasView(oldImgResult);
   };
 
-  // 设置选中线条
+  // 设置选中项
   const setSelectedLabel = (toolInfo: ToolInfo) => {
     // 选中当前标注
     let toolInfoStr = JSON.stringify(toolInfo);
     localStorage.setItem('toolInfo', toolInfoStr);
-    // 切换工具
-    dispatch(ChangeCurrentTool(toolInfo.toolName));
     setChooseToolInfo(toolInfo);
+    // 切换工具
+    if (currentToolName !== 'pointCloudTool') {
+      dispatch(ChangeCurrentTool(toolInfo.toolName));
+    } else {
+      ptCtx?.mainViewInstance?.emit('setSelectedBoxByOrder', toolInfo.order);
+    }
   };
 
   useEffect(() => {
