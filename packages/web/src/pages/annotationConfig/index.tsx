@@ -79,7 +79,6 @@ const AnnotationConfig: FC = () => {
   }, [fileInfo]);
 
   const goBack = (data: any) => {
-    console.log('goBack', data);
   };
 
   const doSetImage = (img: any, isError: boolean) => {

@@ -105,7 +105,6 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn'
   } = props;
 
-  console.log("you are using version 202212281508", props)
   //@ts-ignore
   if(props.imgList&&props.imgList.length>0){
     console.info("result",props.imgList[0].result)    

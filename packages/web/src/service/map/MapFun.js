@@ -1019,7 +1019,6 @@ export default {
     }
     let newWall = new MPSplitLine(pos.startx, pos.starty, pos.endx, pos.endy);
     newWall.isEdit = true;
-    // console.log(newWall)
     return newWall;
   },
 

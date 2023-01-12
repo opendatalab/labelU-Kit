@@ -99,7 +99,6 @@ function removeCircleInTrace(trace, properties, deeps) {
 }
 
 function beautifyArchedAreaLine(trace, modifyInterval, lineInterval) {
-  //console.log('beautify line, ' + modifyInterval + ', ' + lineInterval);
   const length = trace.length;
 
   const ret = [];

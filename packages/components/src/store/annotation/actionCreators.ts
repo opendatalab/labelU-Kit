@@ -568,7 +568,6 @@ export const ToSaveFileData = (submitType: ESubmitType) => (dispatch: any) =>
 export const saveImageList = (dispatch: any, getState: any) => {
   // const annotationStore = getState().annotation;
   // const { imgList } = annotationStore;
-  // console.log(imgList);
   dispatch(ToSaveFileData(ESubmitType.Save));
 };
 

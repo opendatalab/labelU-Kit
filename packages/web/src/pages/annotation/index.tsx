@@ -51,7 +51,6 @@ const AnnotationPage: FC = () => {
   }, []);
 
   const goBack = (data: any) => {
-    console.log('goBack', data);
   };
   return (
     <div className='annotationBox'>

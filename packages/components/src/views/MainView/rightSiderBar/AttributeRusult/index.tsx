@@ -171,7 +171,6 @@ const AttributeRusult: FC<IProps> = ({
   useEffect(() => {
     if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      // console.log("currentImgResult",currentImgResult)
       let resultKeys = Object.keys(currentImgResult);
       let tmpAttributeResult: AttributeResult[] = [];
       let attributeMap = new Map();
@@ -234,8 +233,6 @@ const AttributeRusult: FC<IProps> = ({
           toolInfo: attributeMap.get(key),
         });
       }
-      // console.log("???????????????")
-      // console.log(tmpAttributeResult)
       setAttributeResultList(tmpAttributeResult);
     }
   }, [imgList, imgIndex]);

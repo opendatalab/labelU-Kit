@@ -56,8 +56,6 @@ const commonPlugin = [
   svg(),
 ];
 
-console.log('beehive- annotation isProd ', isProd);
-
 export default () => [
   {
     input: ['./src/index.ts'],

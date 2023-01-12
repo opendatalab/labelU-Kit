@@ -540,7 +540,6 @@ class BasicToolOperation extends EventListener {
 
   /** 用于初始化图片的位置 */
   public initImgPos = async () => {
-    // console.log('initImgPros');
     if (!this.imgNode || this.imgNode.width === 0) {
       return;
     }
@@ -860,9 +859,6 @@ class BasicToolOperation extends EventListener {
 
       // case EKeyCode.Z:
       //   if (e.ctrlKey) {
-      //     console.log(this)
-      //     console.log(this.prevResultList);
-      //     console.log(this.basicResult);
       //     debugger;
       //     if (e.shiftKey) {
       //       this.redo();
@@ -1164,7 +1160,6 @@ class BasicToolOperation extends EventListener {
     // if (this.forbidBasicResultRender) {
     //   return;
     // }
-    // console.log(this.prevResultList);
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentReulst = this.prevResultList[i];
@@ -1387,9 +1382,7 @@ class BasicToolOperation extends EventListener {
             break;
           }
           default: {
-            console.log(currentReulst.toolName);
-            console.log(currentReulst);
-            //
+            // empty
           }
         }
       }
@@ -1458,8 +1451,6 @@ class BasicToolOperation extends EventListener {
     if (!this.canvas || !this.ctx || !this.imgNode || !this.renderReady) {
       return;
     }
-    // console.log(this.prevResultList);
-    // console.log('clearCn');
     this.clearCanvas();
     this.renderOtherAnnotation();
   }

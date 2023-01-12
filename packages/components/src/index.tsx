@@ -59,7 +59,6 @@ const OutputApp = (props: AppProps, ref: any) => {
               // @ts-ignore
               result[imgIndex]['result'] = JSON.stringify(imgResult)
               // @ts-ignore
-              console.log("save imgList", result);
               resolve(result);
             },200)
 
