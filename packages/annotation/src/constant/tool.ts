@@ -63,6 +63,8 @@ export enum EToolName {
   ClientAttribute = 'clientAttributeTool',
   /** OCR关联关系工具 */
   OCRRelation = 'OCRRelationTool',
+  /** box3d  */
+  Cuboid = 'cuboidTool',
 }
 
 export enum ECheckModel {

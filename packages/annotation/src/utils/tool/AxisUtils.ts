@@ -146,6 +146,38 @@ export default class AxisUtils {
     });
   }
 
+  public static changePlanePointByZoom(
+    planePoints: IPlanePoints,
+    zoom: number,
+    currentPos: ICoordinate = { x: 0, y: 0 },
+  ): IPlanePoints {
+    return Object.entries(planePoints).reduce((acc, [key, coord]) => {
+      const newCoord = AxisUtils.changePointByZoom(coord, zoom, currentPos);
+      return {
+        ...acc,
+        [key]: newCoord,
+      };
+    }, {}) as IPlanePoints;
+  }
+
+  public static changeCuboidByZoom(
+    cuboid: ICuboid | IDrawingCuboid,
+    zoom: number,
+    currentPos: ICoordinate = { x: 0, y: 0 },
+  ): ICuboid | IDrawingCuboid {
+    return {
+      ...cuboid,
+      frontPoints: this.changePlanePointByZoom(cuboid.frontPoints, zoom, currentPos),
+      backPoints: cuboid.backPoints
+        ? this.changePlanePointByZoom(cuboid.backPoints, zoom, currentPos)
+        : cuboid.backPoints,
+    };
+  }
+
+  public static transformPlain2PointList({ tl, tr, br, bl }: IPlanePoints) {
+    return [tl, tr, br, bl];
+  }
+
   /**
    * 扩大点的热区范围
    * @param axis

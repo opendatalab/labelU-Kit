@@ -22,6 +22,27 @@
       }
     },
     {
+      "tool": "cuboidTool",
+      "config": {
+        "isShowCursor": false,
+        "showConfirm": false,
+        "skipWhileNoDependencies": false,
+        "drawOutsideTarget": false,
+        "copyBackwardResult": true,
+        "minWidth": 1,
+        "attributeConfigurable": true,
+        "textConfigurable": true,
+        "textCheckType": 0,
+        "customFormat": "",
+        "attributeList": [
+          {
+            "key": "rectTool",
+            "value": "rectTool"
+          }
+        ]
+      }
+    },
+    {
       "tool": "polygonTool",
       "config": {
         "isShowCursor": false,

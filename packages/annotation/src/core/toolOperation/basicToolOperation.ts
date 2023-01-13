@@ -602,6 +602,19 @@ export default class BasicToolOperation extends EventListener {
     };
   }
 
+  public setDefaultAttribute(attribute: string) {
+    this.defaultAttribute = attribute;
+  }
+
+  public getCoordinateInOrigin(e: MouseEvent) {
+    const bounding = this.canvas.getBoundingClientRect();
+
+    return {
+      x: (e.clientX - bounding.left - this.currentPos.x) / this.zoom,
+      y: (e.clientY - bounding.top - this.currentPos.y) / this.zoom,
+    };
+  }
+
   public getGetCenterCoordinate() {
     return {
       x: this.size.width / 2,

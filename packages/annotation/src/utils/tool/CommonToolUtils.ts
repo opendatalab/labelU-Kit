@@ -15,6 +15,7 @@ import TagOperation from '../../core/toolOperation/tagOperation';
 import LineToolOperation from '../../core/toolOperation/LineToolOperation';
 import PointOperation from '../../core/toolOperation/pointOperation';
 import TextToolOperation from '../../core/toolOperation/TextToolOperation';
+import CuboidOperation from '@/core/toolOperation/cuboidOperation';
 
 interface Point {
   id: string;
@@ -159,6 +160,8 @@ export default class CommonToolUtils {
         return PointOperation;
       case EToolName.Text:
         return TextToolOperation;
+      case EToolName.Cuboid:
+        return CuboidOperation;
       default:
         throw new Error('not match tool');
     }

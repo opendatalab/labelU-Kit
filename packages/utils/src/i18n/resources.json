@@ -237,6 +237,7 @@
     "lineTool": "线条工具",
     "pointTool": "标点工具",
     "textTool": "文本",
+    "cuboidTool": "立体框工具",
     "revocation": "撤回 Ctrl + Z",
     "restore": "重做 Ctrl+Shift+Z",
     "Speed": "倍速",
