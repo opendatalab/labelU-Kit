@@ -1,26 +1,26 @@
 import React, { FC, useEffect, useState } from 'react';
 import Annotation from '../../components/business/annotation';
 import { fileList as mockFileList, videoList } from '../../mock/annotationMock';
-import {  useDispatch,connect } from 'react-redux';
+import { useDispatch, connect } from 'react-redux';
 import {
   updateToolsConfig,
   updateTagConfigList,
   updateAllAttributeConfigList,
-  updateTextConfig,
+  updateTextConfig
 } from '../../stores/toolConfig.store';
 
 import toolCombineConfig from '../../config/toolCombineConfig.json';
 import { AppState } from 'stores';
 
-interface Iprops{
-  tools: any[],
-  tagList: any[],
-  attribute: any[],
-  textConfig: any[]
+interface Iprops {
+  tools: any[];
+  tagList: any[];
+  attribute: any[];
+  textConfig: any[];
 }
 
-const AnnotationPage: FC<Iprops> = (props) => {
-  const {tools, tagList, attribute,textConfig} = props;
+const AnnotationPage: FC<Iprops> = props => {
+  const { tools, tagList, attribute, textConfig } = props;
   const dispatch = useDispatch();
   // const currentIsVideo = StepUtils.currentToolIsVideo(1, stepConfig);
   const currentIsVideo = false;
@@ -62,13 +62,11 @@ const AnnotationPage: FC<Iprops> = (props) => {
   );
 };
 
-
-const mapStateToProps = (state:AppState) => ({
+const mapStateToProps = (state: AppState) => ({
   tools: state.toolsConfig.tools,
   tagList: state.toolsConfig.tagList,
   attribute: state.toolsConfig.attribute,
   textConfig: state.toolsConfig.textConfig
 });
-
 
 export default connect(mapStateToProps)(AnnotationPage);

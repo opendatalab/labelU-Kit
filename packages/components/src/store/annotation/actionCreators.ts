@@ -216,6 +216,30 @@ export function UpdateIsShowOrder(isShowOrder: boolean) {
     },
   };
 }
+export function UpdateIsShowAttribute(isShowAttribute: boolean) {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ATTRIBUTE,
+    payload: {
+      isShowAttribute,
+    },
+  };
+}
+export function UpdateIsShowAttributeText(isShowAttributeText: boolean) {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ATTRIBUTE_TEXT,
+    payload: {
+      isShowAttributeText,
+    },
+  };
+}
+export function UpdateIsShowDirection(isShowDirection: boolean) {
+  return {
+    type: ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ORDER,
+    payload: {
+      isShowDirection,
+    },
+  };
+}
 
 export function InitToolWithStyle(toolStyle: ToolStyleState) {
   return {
