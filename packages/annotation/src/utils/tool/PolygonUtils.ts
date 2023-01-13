@@ -13,7 +13,7 @@ import LineToolUtils from './LineToolUtils';
 export default class PolygonUtils {
   static getHoverPolygonID(
     checkPoint: IPolygonPoint,
-    polygonPoints: IPolygonData[],
+    polygonPoints: Array<{ pointList: IPolygonPoint[]; id: string }>,
     scope = 3,
     lineType: ELineTypes = ELineTypes.Line,
   ): string {
