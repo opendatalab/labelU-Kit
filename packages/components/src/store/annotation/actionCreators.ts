@@ -501,6 +501,7 @@ export const DispatcherTurning = async (
 
   // 翻页
   if (fileIndexChanged) {
+    annotationStore.annotationEngine.toolInstance.clearPositionCache();
     if (annotationStore.loading) {
       return;
     }
