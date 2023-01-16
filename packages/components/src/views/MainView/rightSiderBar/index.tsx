@@ -129,7 +129,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       for (let item of toolList) {
         if (item.toolName !== 'tagTool') {
           if(imgResult[item.toolName]&&imgResult[item.toolName]?.result&&imgResult[item.toolName]?.result?.length>0){
-        
+
             for(let i=0;i<imgResult[item.toolName].result.length;i++){
               if(order.indexOf(imgResult[item.toolName].result[i].order)<0){
                 order.push(imgResult[item.toolName].result[i].order)
@@ -161,7 +161,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   }
 
   return (
-    <div className={`${sidebarCls}`} style={{height:(boxHeight as number - 111)}}>
+    <div className={`${sidebarCls}`} style={{height:(boxHeight as number - 64)}}>
       <Tabs
         defaultActiveKey='1'
         onChange={(e) => {

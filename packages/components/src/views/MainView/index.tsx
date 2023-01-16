@@ -94,10 +94,10 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
           <AttributeOperation />
           <Layout>
             {<LeftSider {...props} />}
-            <Content className={`${layoutCls}__content`} style={{height:(boxHeight as number - 111)}}>
+            <Content className={`${layoutCls}__content`} style={{height:(boxHeight as number - 64)}}>
               <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
-            <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
+            <Sider className={`${layoutCls}__side`} width='auto' style={_.assign({},props.style?.sider, {height: 'max-content'})}>
               {/* <Sidebar sider={props?.sider} /> */}
               <RightSiderbar isPreview={props?.isPreview as boolean} />
             </Sider>

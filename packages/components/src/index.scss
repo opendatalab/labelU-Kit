@@ -254,6 +254,9 @@ body {
       left: 50%;
       font-size: 12px;
     }
+    .label-number {
+      min-width: 24px;
+    }
   }
   .finish {
     color: rgba(0, 0, 0, 0.87) !important;
@@ -662,6 +665,9 @@ body {
           padding: 0px;
           .attributeResultLi {
             display: flex;
+            & > span:first-child {
+              min-width: 20px;
+            }
             .attributeResultRightImgBox {
               // display: flex;
               width: 60px;
@@ -1472,7 +1478,7 @@ $hotkey-container-padding: 7px;
   .label {
     margin-bottom: 8px;
     font-size: 12px;
-    font-family: SourceHanSansCN-Medium;
+    font-family: "PingFang SC";
 
     .required::before {
       display: inline-block;
@@ -1490,6 +1496,7 @@ $hotkey-container-padding: 7px;
   padding: 0px 20px;
   // height: calc(89vh - 180px);
   overflow-y: scroll;
+  font-family: 'Abel';
 }
 
 // .textToolOperationMenuPreview{

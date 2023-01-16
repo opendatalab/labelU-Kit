@@ -178,6 +178,9 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
       onMouseLeave={() => {
         setFlag(false);
       }}
+      align={{
+        offset: [20, 0]
+      }}
       overlayClassName='tool-hotkeys-popover'
       // visible={svgFlag}
     >
@@ -196,7 +199,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, title, toolName }) => {
               style={{ marginRight: '5px' }}
             /> */}
 
-          <a>{t('Hotkeys')}</a>  
+          <a>{t('Hotkeys')}</a>
           {/* </a>
         )} */}
       </div>
