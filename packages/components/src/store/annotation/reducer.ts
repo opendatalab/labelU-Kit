@@ -326,7 +326,14 @@ export const annotationReducer = (
       if (basicResultList?.length > 0) {
         const sourceID = basicResultList[basicIndex]?.id;
         const newResultData = exportResult.map((i: any) => ({ ...i, sourceID }));
-        previousResultList = _.cloneDeep(resultList).filter((i: any) => i.sourceID !== sourceID);
+        previousResultList = _.cloneDeep(resultList).filter((i: any) => {
+          // 修正 https://project.feishu.cn/bigdata_03/issue/detail/3528264?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+          if ((i.sourceID === '' || i.sourceID === undefined) && (sourceID === '' || sourceID === undefined)) {
+            return false;
+          }
+
+          return i.sourceID !== sourceID;
+        });
         previousResultList.push(...newResultData);
       }
       return {
