@@ -59,6 +59,10 @@ const zoomInfo = {
   ratio: 0.4,
 };
 
+const validNumber = (value: number) => {
+  return isNumber(value) && !isNaN(value);
+}
+
 class BasicToolOperation extends EventListener {
   public container: HTMLElement; // 当前结构绑定 container
 
@@ -377,7 +381,7 @@ class BasicToolOperation extends EventListener {
     BasicToolOperation.Cache.clear();
   }
 
-  public clearPositionCache() {
+  public clearCachedCoordinateAndZoom() {
     BasicToolOperation.Cache.delete(this._coordinateCacheKey);
     BasicToolOperation.Cache.delete(this._zoomCacheKey);
   }
@@ -833,7 +837,11 @@ class BasicToolOperation extends EventListener {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
       // 拖拽时，更新持久化图片位置信息
-      BasicToolOperation.Cache.set(this._coordinateCacheKey, this.getCurrentPos(currentCoord));
+      const newCoordinate = this.getCurrentPos(currentCoord);
+
+      if (this._isValidCoordinate(newCoordinate)) {
+        BasicToolOperation.Cache.set(this._coordinateCacheKey, newCoordinate);
+      }
       /**
        * 图片拖拽判断
        * 1. 拖拽时间超过 1 秒则为拖拽
@@ -995,9 +1003,13 @@ class BasicToolOperation extends EventListener {
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
 
     // 缩放时，更新持久化图片位置信息
-    BasicToolOperation.Cache.set(this._coordinateCacheKey, newCurrentPos);
+    if (this._isValidCoordinate(newCurrentPos)) {
+      BasicToolOperation.Cache.set(this._coordinateCacheKey, newCurrentPos);
+    }
     // 缩放时，更新持久化图片缩放信息
-    BasicToolOperation.Cache.set(this._zoomCacheKey, zoom);
+    if (validNumber(zoom)) {
+      BasicToolOperation.Cache.set(this._zoomCacheKey, zoom);
+    }
 
     this.innerZoom = zoom;
     this.setZoom(zoom);
@@ -1078,6 +1090,14 @@ class BasicToolOperation extends EventListener {
     if (sendMessage) {
       // send someting
     }
+  }
+
+  private _isValidCoordinate(coordinate: ICoordinate) {
+    if (!coordinate) {
+      return false;
+    }
+
+    return validNumber(coordinate.x) && validNumber(coordinate.y);
   }
 
   public setValid(valid: boolean) {
