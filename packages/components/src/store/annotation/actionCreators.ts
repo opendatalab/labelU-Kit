@@ -502,7 +502,7 @@ export const DispatcherTurning = async (
 
   // 翻页
   if (fileIndexChanged) {
-    annotationStore.annotationEngine.toolInstance.clearPositionCache();
+    annotationStore.annotationEngine.toolInstance.clearCachedCoordinateAndZoom();
     if (annotationStore.loading) {
       return;
     }
