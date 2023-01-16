@@ -255,6 +255,9 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get enableOutOfTarget() {
+    // temp fix
+    // TODO: if enableOutOfTarget == true, lineTool will not show the line.
+    return false;
     // 兼容旧的目标外标注
     return this.config.drawOutsideTarget ?? this.config.enableOutOfTarget ?? this.config.outOfTarget;
   }
