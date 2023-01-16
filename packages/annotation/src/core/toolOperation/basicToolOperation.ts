@@ -159,7 +159,7 @@ class BasicToolOperation extends EventListener {
   private _invalidDOM?: HTMLElement;
 
   // 缓存图片的坐标和缩放比例
-  static PositionCache: Map<string, ICoordinate | number> = new Map();
+  static Cache: Map<string, ICoordinate | number> = new Map();
 
   private _coordinateCacheKey: string = '';
 
@@ -370,11 +370,16 @@ class BasicToolOperation extends EventListener {
   public destroy() {
     this.destroyCanvas();
     this.eventUnbinding();
-    this.clearPositionCache();
+    this.clearCache();
+  }
+
+  public clearCache() {
+    BasicToolOperation.Cache.clear();
   }
 
   public clearPositionCache() {
-    BasicToolOperation.PositionCache.clear();
+    BasicToolOperation.Cache.delete(this._coordinateCacheKey);
+    BasicToolOperation.Cache.delete(this._zoomCacheKey);
   }
 
   public initCanvas(size: ISize) {
@@ -580,16 +585,16 @@ class BasicToolOperation extends EventListener {
       isOriginalSize,
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
-    const statbleCoord = BasicToolOperation.PositionCache.get(this._coordinateCacheKey) as ICoordinate;
+    const statbleCoord = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
     this.setCurrentPos(statbleCoord || currentPos);
     this.currentPosStorage = statbleCoord || currentPos;
     let statblezoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
       // 初始化图片缩放信息，优先从持久化记录中获取
-      statblezoom = BasicToolOperation.PositionCache.get(this._zoomCacheKey) as number;
+      statblezoom = BasicToolOperation.Cache.get(this._zoomCacheKey) as number;
     } else {
-      BasicToolOperation.PositionCache.set(this._zoomCacheKey, 1);
+      BasicToolOperation.Cache.set(this._zoomCacheKey, 1);
     }
 
     this.imgInfo = imgInfo;
@@ -828,7 +833,7 @@ class BasicToolOperation extends EventListener {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
       // 拖拽时，更新持久化图片位置信息
-      BasicToolOperation.PositionCache.set(this._coordinateCacheKey, this.getCurrentPos(currentCoord));
+      BasicToolOperation.Cache.set(this._coordinateCacheKey, this.getCurrentPos(currentCoord));
       /**
        * 图片拖拽判断
        * 1. 拖拽时间超过 1 秒则为拖拽
@@ -990,9 +995,9 @@ class BasicToolOperation extends EventListener {
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
 
     // 缩放时，更新持久化图片位置信息
-    BasicToolOperation.PositionCache.set(this._coordinateCacheKey, newCurrentPos);
+    BasicToolOperation.Cache.set(this._coordinateCacheKey, newCurrentPos);
     // 缩放时，更新持久化图片缩放信息
-    BasicToolOperation.PositionCache.set(this._zoomCacheKey, zoom);
+    BasicToolOperation.Cache.set(this._zoomCacheKey, zoom);
 
     this.innerZoom = zoom;
     this.setZoom(zoom);
