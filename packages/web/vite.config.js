@@ -23,7 +23,7 @@ export default defineConfig({
     host: '0.0.0.0'
   },
   plugins: [
-    react()
+    react(),
     // createSvgIconsPlugin({
     //   // 指定需要缓存的图标文件夹
     //   iconDirs: [path.resolve(process.cwd(), 'src/img')],

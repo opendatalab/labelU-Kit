@@ -1,5 +1,4 @@
 import { isNumber } from 'lodash';
-import localforage from 'localforage';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import MathUtils from '@/utils/MathUtils';
@@ -159,6 +158,13 @@ class BasicToolOperation extends EventListener {
 
   private _invalidDOM?: HTMLElement;
 
+  // 缓存图片的坐标和缩放比例
+  static Cache: Map<string, ICoordinate | number> = new Map();
+
+  private _coordinateCacheKey: string = '';
+
+  private _zoomCacheKey: string = '';
+
   private showDefaultCursor: boolean; // 是否展示默认的 cursor
 
   public coordUtils: CoordinateUtils;
@@ -182,6 +188,11 @@ class BasicToolOperation extends EventListener {
     // this.destroyCanvas();
     // this.createCanvas(props.size);
     this.imgNode = props.imgNode;
+    // 设置图片位置和zoom缓存key
+    if (props.imgNode && props.imgNode.src) {
+      this._coordinateCacheKey = `coordinate::${props.imgNode.src}`;
+      this._zoomCacheKey = `zoom::${props.imgNode.src}`;
+    }
     this.isImgError = !props.imgNode;
     this.basicImgInfo = {
       width: props.imgNode?.width ?? 0,
@@ -359,6 +370,16 @@ class BasicToolOperation extends EventListener {
   public destroy() {
     this.destroyCanvas();
     this.eventUnbinding();
+    this.clearCache();
+  }
+
+  public clearCache() {
+    BasicToolOperation.Cache.clear();
+  }
+
+  public clearPositionCache() {
+    BasicToolOperation.Cache.delete(this._coordinateCacheKey);
+    BasicToolOperation.Cache.delete(this._zoomCacheKey);
   }
 
   public initCanvas(size: ISize) {
@@ -435,6 +456,13 @@ class BasicToolOperation extends EventListener {
 
   public setImgNode(imgNode: HTMLImageElement, basicImgInfo: Partial<{ valid: boolean; rotate: number }> = {}) {
     this.imgNode = imgNode;
+
+    // 图片更新后，更新缓存key
+    if (imgNode) {
+      this._coordinateCacheKey = `coordinate::${imgNode.src}`;
+      this._zoomCacheKey = `zoom::${imgNode.src}`;
+    }
+
     this.setBasicImgInfo({
       width: imgNode.width,
       height: imgNode.height,
@@ -462,6 +490,9 @@ class BasicToolOperation extends EventListener {
     // 设置当前为错误图片
     this.isImgError = true;
     this.imgNode = undefined;
+
+    this._coordinateCacheKey = ''
+    this._zoomCacheKey = '';
 
     this.setBasicImgInfo({
       width: 0,
@@ -553,16 +584,16 @@ class BasicToolOperation extends EventListener {
       isOriginalSize,
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
-    const statbleCoord = (await localforage.getItem('coordinate')) as ICoordinate;
+    const statbleCoord = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
     this.setCurrentPos(statbleCoord || currentPos);
     this.currentPosStorage = statbleCoord || currentPos;
     let statblezoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
       // 初始化图片缩放信息，优先从持久化记录中获取
-      statblezoom = (await localforage.getItem('zoom')) as number;
+      statblezoom = BasicToolOperation.Cache.get(this._zoomCacheKey) as number;
     } else {
-      await localforage.setItem('zoom', 1, () => {});
+      BasicToolOperation.Cache.set(this._zoomCacheKey, 1);
     }
 
     this.imgInfo = imgInfo;
@@ -801,7 +832,7 @@ class BasicToolOperation extends EventListener {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
       // 拖拽时，更新持久化图片位置信息
-      localforage.setItem('coordinate', this.getCurrentPos(currentCoord), () => {});
+      BasicToolOperation.Cache.set(this._coordinateCacheKey, this.getCurrentPos(currentCoord));
       /**
        * 图片拖拽判断
        * 1. 拖拽时间超过 1 秒则为拖拽
@@ -960,9 +991,9 @@ class BasicToolOperation extends EventListener {
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
 
     // 缩放时，更新持久化图片位置信息
-    localforage.setItem('coordinate', newCurrentPos, () => {});
+    BasicToolOperation.Cache.set(this._coordinateCacheKey, newCurrentPos);
     // 缩放时，更新持久化图片缩放信息
-    localforage.setItem('zoom', zoom, () => {});
+    BasicToolOperation.Cache.set(this._zoomCacheKey, zoom);
 
     this.innerZoom = zoom;
     this.setZoom(zoom);
