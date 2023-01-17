@@ -271,6 +271,18 @@ class PointOperation extends BasicToolOperation {
 
     // 当前目标下没有 hoverId 才进行标注
     if (e.button === 0 && !this.hoverID) {
+      // 超出边界则不绘制
+      if (!this.imgInfo || AxisUtils.isPointOutOfBoundary({
+        coordinate: this.getCoordinateUnderZoom(e),
+        currentPosition: { x: 0, y: 0 },
+        imgInfo: this.imgInfo,
+        drawOutsideTarget: this.config.drawOutsideTarget,
+        basicResult: this.basicResult,
+        zoom: this.zoom,
+      })) {
+        return;
+      }
+      
       this.createPoint(e);
       this.render();
       // this.container.dispatchEvent(this.saveDataEvent);

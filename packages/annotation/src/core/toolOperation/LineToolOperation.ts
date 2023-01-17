@@ -24,6 +24,7 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
+import AxisUtils from '@/utils/tool/AxisUtils';
 
 enum EStatus {
   Create = 0,
@@ -1281,7 +1282,7 @@ class LineToolOperation extends BasicToolOperation {
     this.lineDragging = false;
 
     /** 空格点击为拖拽事件 */
-    if (this.isSpaceKey) {
+    if (this.isSpaceKey || !this.imgInfo) {
       return;
     }
 
@@ -1299,17 +1300,30 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     const nextAxis = this.getNextPoint(e, coord)!;
+    
+    if ((this.isCreate || this.isNone)) {
+      const isPointOutOfBoundary = AxisUtils.isPointOutOfBoundary({
+        coordinate: this.getCoordinateUnderZoom(e),
+        currentPosition: { x: 0, y: 0 },
+        imgInfo: this.imgInfo,
+        drawOutsideTarget: this.config.drawOutsideTarget,
+        basicResult: this.basicResult,
+        zoom: this.zoom,
+      });
 
-    if (this.isCreate || this.isNone) {
+      if (isPointOutOfBoundary) {
+        return;
+      }
+
       this.setCreatStatusAndAddPoint(nextAxis);
       return;
     }
-
+    
     if (this.isActive) {
       if (lineDragging) {
         return;
       }
-
+      
       const isMouseCoordOutsideActiveArea = this.isMouseCoordOutsideActiveArea();
       if (isMouseCoordOutsideActiveArea) {
         this.setNoneStatus(false);
