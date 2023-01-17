@@ -1199,6 +1199,31 @@ class BasicToolOperation extends EventListener {
     return '';
   }
 
+  /**
+   * 判定点是否在边界外
+   * @param coordinate 
+   * @param currentPosition 
+   * @returns boolean
+   */
+  public isPointOutOfBoundary(coordinate: ICoordinate, currentPosition: ICoordinate) {
+    const { zoom, basicResult, imgInfo } = this;
+
+    if (basicResult && zoom) {
+      // brX: basicResult.x
+      const { x: brX, y: brY, width: brW, height: brH } = basicResult;
+      const { x, y } = coordinate;
+      const { x: cX, y: cY } = currentPosition;
+
+      return x - cX > (brX + brW) * zoom || x - cX < brX * zoom || y - cY > (brY + brH) * zoom || y - cY < brY * zoom;
+    } else {
+      const { x, y } = coordinate;
+      const { x: cX, y: cY } = currentPosition;
+      const { width, height } = imgInfo!;
+
+      return x - cX > width || x - cX < 0 || y - cY > height || y - cY < 0;
+    }
+  }
+
   public clearInvalidPage() {
     if (this._invalidDOM && this.container && this.container.contains(this._invalidDOM)) {
       this.container.removeChild(this._invalidDOM);

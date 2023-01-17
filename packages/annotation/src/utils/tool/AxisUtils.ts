@@ -63,45 +63,6 @@ export default class AxisUtils {
     return coord;
   }
 
-  /**
-   * 判定点是否在边界外
-   * @returns boolean
-   */
-  public static isPointOutOfBoundary({
-    coordinate,
-    currentPosition,
-    imgInfo,
-    drawOutsideTarget,
-    basicResult,
-    zoom,
-  }: {
-    coordinate: ICoordinate;
-    currentPosition: ICoordinate;
-    imgInfo: ISize;
-    drawOutsideTarget?: boolean;
-    basicResult?: IRect;
-    zoom?: number;
-  }) {
-    if (drawOutsideTarget) {
-      return true;
-    }
-
-    if (basicResult && zoom) {
-      // brX: basicResult.x
-      const { x: brX, y: brY, width: brW, height: brH } = basicResult;
-      const { x, y } = coordinate;
-      const { x: cX, y: cY } = currentPosition;
-
-      return x - cX > (brX + brW) * zoom || x - cX < brX * zoom || y - cY > (brY + brH) * zoom || y - cY < brY * zoom;
-    } else {
-      const { x, y } = coordinate;
-      const { x: cX, y: cY } = currentPosition;
-      const { width, height } = imgInfo;
-
-      return x - cX > width || x - cX < 0 || y - cY > height || y - cY < 0;
-    }
-  }
-
   public static changeCoordinateByRotate(coordinate: ICoordinate, rotate: number, imgSize: ISize) {
     const { width, height } = imgSize;
     const { x, y } = coordinate;
