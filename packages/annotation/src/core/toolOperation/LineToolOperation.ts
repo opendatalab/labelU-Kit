@@ -24,7 +24,6 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
-import AxisUtils from '@/utils/tool/AxisUtils';
 
 enum EStatus {
   Create = 0,
