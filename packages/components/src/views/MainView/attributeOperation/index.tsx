@@ -101,11 +101,11 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
           label: (
             <a
               className={classNames({
-                chooseAttribute: item.key === chooseAttribute,
+                chooseAttribute: item.value === chooseAttribute,
               })}
               onClick={(e) => {
                 e.stopPropagation();
-                setChoseAttribute(item.key);
+                setChoseAttribute(item.value);
                 toolInstance.setDefaultAttribute(item.value);
                 forceRender((s) => s + 1);
               }}
@@ -113,7 +113,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className='circle'
                 style={{
-                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.key, allAttributeList ?? [])+1].valid.stroke,
+                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.value, allAttributeList ?? [])+1].valid.stroke,
                   marginRight: 5,
                 }}
               />
@@ -186,7 +186,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                setChoseAttribute(attribute.key);
+                setChoseAttribute(attribute.value);
                 toolInstance.setDefaultAttribute(attribute.value);
                 forceRender((s) => s + 1);
                 // alert(attribute.key)
@@ -198,8 +198,8 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 border: '0px',
                 borderRadius: '4px',
                 padding: '1px 8px',
-                backgroundColor:  attribute.key === chooseAttribute? toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? [])+1].valid.stroke :'#FFFFFF',
-                color: attribute.key === chooseAttribute ? '#ffffff':'',
+                backgroundColor:  attribute.value === chooseAttribute? toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? [])+1].valid.stroke :'#FFFFFF',
+                color: attribute.value === chooseAttribute ? '#ffffff':'',
                 // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
               }}
               key={attribute.key}
@@ -207,7 +207,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className='circle'
                 style={{
-                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? [])+1].valid.stroke,
+                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? [])+1].valid.stroke,
                   marginRight: 5,
                 }}
               />
