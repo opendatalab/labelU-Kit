@@ -114,3 +114,10 @@ export interface ICoordinate {
   x: number;
   y: number;
 }
+
+export interface ShowSettingConfig {
+  isShowOrder:boolean; //是否显示标记顺序
+  isShowAttributeText:boolean; //是否显示属性文本
+  isShowDirection:boolean; //是否显示箭头方向
+  isShowAttribute:boolean; //是否显示属性
+}

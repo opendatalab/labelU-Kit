@@ -1,11 +1,11 @@
 import { PointCloud, PointCloudIProps } from '../pointCloud';
 import * as THREE from 'three';
 import utils from '../pointCloud/uitils';
-import { MOUSE, Object3D, Scene, ShapeUtils, Vector3 } from 'three';
+import { MOUSE, Object3D, Vector3 } from 'three';
 import MathUtils from '@/utils/MathUtils';
-import { IPointCloudBox, IPolygonData } from '@label-u/utils';
+import { IPointCloudBox } from '@label-u/utils';
 import uuid from '@/utils/uuid';
-import { Attribute, ToolConfig } from '@/interface/conbineTool';
+import { ShowSettingConfig, ToolConfig } from '@/interface/conbineTool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { COLORS_ARRAY } from '@/constant/style';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
@@ -27,6 +27,7 @@ class PointCloudOperation extends PointCloud {
   public style: any;
   public color: number;
   public selectedId?: string;
+  public showSetting: ShowSettingConfig;
 
   constructor(props: PointCloudIProps & PointCloudOperationProps) {
     super(props);
@@ -40,6 +41,12 @@ class PointCloudOperation extends PointCloud {
       fillColor: COLORS_ARRAY[4],
       strokeWidth: 2 * window?.devicePixelRatio,
       opacity: 1,
+    };
+    this.showSetting = {
+      isShowOrder: false,
+      isShowAttribute: false,
+      isShowAttributeText: false,
+      isShowDirection: false,
     };
     this.color = 0xffff00;
     this.config = props.config;
@@ -64,6 +71,10 @@ class PointCloudOperation extends PointCloud {
 
   public setBoxList(boxList: IPointCloudBox[]) {
     this.boxList = boxList;
+  }
+
+  public setShowSettings(showSettings: ShowSettingConfig) {
+    this.showSetting = showSettings;
   }
 
   public initPointCloudOperation() {
@@ -102,22 +113,22 @@ class PointCloudOperation extends PointCloud {
     this.scene.add(groundMesh);
   }
 
-  public clearBoxList(){
-    if(this.boxList && this.boxList.length>0){
-      for(let i = 0; i < this.boxList.length; i++){
-        this.removeObjectByName(this.boxList[i].id+'boxArrow');
-        this.removeObjectByName(this.boxList[i].id+'box');
-        this.removeObjectByName(this.boxList[i].id+'attribute');
+  public clearBoxList() {
+    if (this.boxList && this.boxList.length > 0) {
+      for (let i = 0; i < this.boxList.length; i++) {
+        this.removeObjectByName(this.boxList[i].id + 'boxArrow');
+        this.removeObjectByName(this.boxList[i].id + 'box');
+        this.removeObjectByName(this.boxList[i].id + 'attribute');
       }
     }
     // this.render();
   }
 
-  public clearBoxInSceneById(id:string){
-    if(id){
-      this.removeObjectByName(id+'boxArrow');
-      this.removeObjectByName(id+'box');
-      this.removeObjectByName(id+'attribute');
+  public clearBoxInSceneById(id: string) {
+    if (id) {
+      this.removeObjectByName(id + 'boxArrow');
+      this.removeObjectByName(id + 'box');
+      this.removeObjectByName(id + 'attribute');
     }
   }
 
@@ -270,8 +281,8 @@ class PointCloudOperation extends PointCloud {
       depth: zInfo.maxZ - zInfo.minZ,
       zInfo: zInfo,
       rect: points,
-      order:1,
-      isVisible:true
+      order: 1,
+      isVisible: true,
     };
   }
 
@@ -310,10 +321,7 @@ class PointCloudOperation extends PointCloud {
     let boxList: IPointCloudBox[] = this.boxList;
     let prevBox;
     if (paramId) {
-      let boxName = paramId + 'box';
-      let boxArrName = paramId + 'boxArrow';
-      this.removeObjectByName(boxName);
-      this.removeObjectByName(boxArrName);
+      this.clearBoxInSceneById(paramId);
       prevBox = this.boxList.filter((item) => {
         return item.id === paramId;
       });
@@ -325,14 +333,14 @@ class PointCloudOperation extends PointCloud {
       paramId,
     );
     boxInfo.attribute = attribute;
-    let ordr = this.getOrder(boxList,boxInfo);
-    if(prevBox&&prevBox.length>0) {
-      boxInfo.isVisible = prevBox[0].isVisible
-    }else{
+    let order = this.getOrder(boxList, boxInfo);
+    if (Array.isArray(prevBox) && prevBox.length > 0) {
+      boxInfo.isVisible = prevBox[0].isVisible;
+    } else {
       boxInfo.isVisible = true;
     }
-    boxInfo.order = ordr
-    let newBoxList = this.addBoxInfoIntoBoxList(boxList,boxInfo);
+    boxInfo.order = order;
+    let newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.emit('savePcResult', newBoxList);
 
     this.setBoxList(newBoxList);
@@ -351,71 +359,78 @@ class PointCloudOperation extends PointCloud {
       boxMesh.name = boxInfo.id + 'box';
       this.setSelectedId(boxInfo.id);
 
-      let boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
-      boxArrowMesh.name = boxInfo.id + 'boxArrow';
       this.scene.add(boxMesh);
-      this.scene.add(boxArrowMesh);
-      utils.getSvgTextMesh(attribute, color).then((fmesh) => {
-        let position = {...fmesh.position}
-        const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
-        const Tt = new THREE.Matrix4().makeTranslation(boxInfo.center.x + position.x,boxInfo.center.y + position.y,0);
-        const Tb = new THREE.Matrix4().makeTranslation(-position.x,-position.y,boxInfo.zInfo.maxZ + 2);
-        const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
-        fmesh.applyMatrix4(Rz)
-        fmesh.applyMatrix4(tranlateMatrix);
-        fmesh.name = boxInfo.id + 'attribute';
-        this.removeObjectByName(fmesh.name);
-        this.scene.add(fmesh);
-        this.render();
-      });
+      if (this.showSetting.isShowDirection) {
+        let boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
+        boxArrowMesh.name = boxInfo.id + 'boxArrow';
+        this.scene.add(boxArrowMesh);
+      }
+
+      if (this.showSetting.isShowAttribute) {
+        utils
+          .getSvgTextMesh(this.showSetting.isShowOrder ? `${boxInfo.order}.${attribute}` : attribute, color)
+          .then((fmesh) => {
+            let position = { ...fmesh.position };
+            const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
+            const Tt = new THREE.Matrix4().makeTranslation(
+              boxInfo.center.x + position.x,
+              boxInfo.center.y + position.y,
+              0,
+            );
+            const Tb = new THREE.Matrix4().makeTranslation(-position.x, -position.y, boxInfo.zInfo.maxZ + 2);
+            const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
+            fmesh.applyMatrix4(Rz);
+            fmesh.applyMatrix4(tranlateMatrix);
+            fmesh.name = boxInfo.id + 'attribute';
+            this.removeObjectByName(fmesh.name);
+            this.scene.add(fmesh);
+            this.render();
+          });
+      }
     }
     this.render();
     return boxInfo;
   };
 
-
-  // get box order 
-  public getOrder(boxList:IPointCloudBox[],boxInfo:IPointCloudBox){
+  // get box order
+  public getOrder(boxList: IPointCloudBox[], boxInfo: IPointCloudBox) {
     let returnOrder = 0;
-    if(boxList&&boxList.length>0){
-      for(let i=0;i<boxList.length;i++){
-        if(boxList[i].id !== boxInfo.id){
-          if(boxList[i].order >= returnOrder){
+    if (Array.isArray(boxList) && boxList.length > 0) {
+      for (let i = 0; i < boxList.length; i++) {
+        if (boxList[i].id !== boxInfo.id) {
+          if (boxList[i].order >= returnOrder) {
             returnOrder = boxList[i].order + 1;
           }
-        }else{
+        } else {
           returnOrder = boxList[i].order;
           break;
         }
       }
-    }else{
+    } else {
       return boxInfo.order;
     }
     return returnOrder;
   }
 
   // add box into boxList
-  public addBoxInfoIntoBoxList(boxList:IPointCloudBox[],boxInfo:IPointCloudBox){
+  public addBoxInfoIntoBoxList(boxList: IPointCloudBox[], boxInfo: IPointCloudBox) {
     let isExist = false;
-    let newBoxList = []
-    if(boxList&&boxList.length>0){
-      for(let i=0;i<boxList.length;i++){
-        if(boxList[i].id !== boxInfo.id){
-          newBoxList.push(boxList[i])
-        }else{
+    let newBoxList = [];
+    if (Array.isArray(boxList) && boxList.length > 0) {
+      for (let i = 0; i < boxList.length; i++) {
+        if (boxList[i].id !== boxInfo.id) {
+          newBoxList.push(boxList[i]);
+        } else {
           newBoxList.push(boxInfo);
           isExist = true;
         }
       }
     }
-    if(!isExist){
+    if (!isExist) {
       newBoxList.push(boxInfo);
     }
-    console.log("newBoxList",newBoxList)
     return newBoxList;
   }
-
-
 
   // get webgl coordinates by screen event
   public getWebglPositionFromEvent(

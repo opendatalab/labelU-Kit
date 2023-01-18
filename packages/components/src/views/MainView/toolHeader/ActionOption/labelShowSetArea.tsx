@@ -36,13 +36,13 @@ const LabelShowSetArea: FC = () => {
         dispatch(UpdateIsShowAttribute(value.target.checked));
       },
     },
-    {
-      name: '显示属性信息',
-      key: 'isShowAttribute',
-      onChange: (value: CheckboxChangeEvent) => {
-        dispatch(UpdateIsShowAttributeText(value.target.checked));
-      },
-    },
+    // {
+    //   name: '显示属性信息',
+    //   key: 'isShowAttribute',
+    //   onChange: (value: CheckboxChangeEvent) => {
+    //     dispatch(UpdateIsShowAttributeText(value.target.checked));
+    //   },
+    // },
     {
       name: '显示标记顺序',
       key: 'isShowOrder',

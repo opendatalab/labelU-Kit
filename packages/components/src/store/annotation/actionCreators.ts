@@ -234,7 +234,7 @@ export function UpdateIsShowAttributeText(isShowAttributeText: boolean) {
 }
 export function UpdateIsShowDirection(isShowDirection: boolean) {
   return {
-    type: ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ORDER,
+    type: ANNOTATION_ACTIONS.UPDATE_IS_SHOW_DIRECTION,
     payload: {
       isShowDirection,
     },

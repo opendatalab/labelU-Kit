@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import { ICoordinate, MathUtils, PointCloudOperation } from '@label-u/annotation';
+import { ICoordinate, MathUtils, PointCloudOperation,ShowSettingConfig } from '@label-u/annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@label-u/utils';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
@@ -76,9 +76,10 @@ const PointCloud3DSideBar = () => {
   );
 };
 
-const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
+const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig,showSettingConfig:ShowSettingConfig }> = ({
   currentData,
   config,
+  showSettingConfig
 }) => {
   const dispatch = useDispatch();
   const ptCtx = useContext(PointCloudContext);
@@ -114,7 +115,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
 
   useEffect(() => {
     initPointCloud3DView();
-  }, [currentData?.url]);
+  }, [currentData?.url,showSettingConfig]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance || !ptCtx.mainViewInstance) {
@@ -231,6 +232,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
         });
         ptCtx.setMainViewInstance(pointCloud);
       }
+      pointCloud.setShowSettings(showSettingConfig)
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
@@ -243,6 +245,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
       }
 
+      
       ptCtx.setMainViewInstance(pointCloud);
     }
   };
@@ -259,7 +262,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
         });
         ptCtx.setMainViewInstance(pointCloud);
       }
-
+      pointCloud.setShowSettings(showSettingConfig)
       pointCloud.setStyle(toolStyle);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);

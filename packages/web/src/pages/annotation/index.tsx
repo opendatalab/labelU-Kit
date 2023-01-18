@@ -28,11 +28,9 @@ const AnnotationPage: FC<Iprops> = props => {
   // 加载工具配置信息 和 文件信息
   useEffect(() => {
     // 工具配置 todo=》补充配置拉取接口
-    // @ts-ignore
     dispatch(updateToolsConfig(toolCombineConfig.tools));
     dispatch(updateTagConfigList(toolCombineConfig.tagList));
     dispatch(updateAllAttributeConfigList(toolCombineConfig.attribute));
-    // @ts-ignore
     dispatch(updateTextConfig(toolCombineConfig.textConfig));
     // 配置标注文件 todo=》补充文件拉取接口
     let fList: any[] = (currentIsVideo ? videoList : mockFileList).map((url, i) => ({
