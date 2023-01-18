@@ -10,18 +10,6 @@ import { IFileItem } from '../../../types/data';
 import { AppState } from '../../../store';
 const layoutCls = `${prefix}-layout`;
 
-const isRemote = (url: string | undefined) => {
-  return url && (url.startsWith('http') || url.startsWith('https'));
-}
-
-const getFullUrl = (url: string | undefined) => {
-  if (isRemote(url)) {
-    return url;
-  }
-
-  return `${location.origin}${url?.startsWith('/') ? url : `/${url}`}`;
-}
-
 interface LeftSiderProps {
   path: string;
   loading: boolean;

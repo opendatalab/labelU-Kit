@@ -320,7 +320,6 @@ export const MAP_TYPE = {
   MAP_TYPE_OTHER: 1
 };
 let decoderCreater = model => {
-  //console.log('model:' + model);
   if (MAP_TYPE.MAP_TYPE_M7 == model) {
     return new M7Decoder();
   }

@@ -23,16 +23,13 @@ const Annotation = (props: {
   const annotationRef = useRef<any>();
 
   const exportData = (data: any) => {
-    // console.log('exportData', data);
   };
    // 标注页面变动时主动上报当前页面数据的标注结果数据
   const onSubmit = (data: any) => {
-    console.log('submitData', data);
   };
   // 被动请求方式
   const getLabelResult =async ()=>{
     const reulst = await annotationRef?.current?.getResult()
-    console.log(reulst);
   }
 
   return (

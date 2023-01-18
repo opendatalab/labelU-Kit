@@ -62,6 +62,10 @@ const zoomInfo = {
   ratio: 0.4,
 };
 
+const validNumber = (value: number) => {
+  return isNumber(value) && !isNaN(value);
+}
+
 class BasicToolOperation extends EventListener {
   public container: HTMLElement; // 当前结构绑定 container
 
@@ -160,6 +164,9 @@ class BasicToolOperation extends EventListener {
   private _imgAttribute?: IImageAttribute;
 
   private _invalidDOM?: HTMLElement;
+
+  // 缓存图片的坐标和缩放比例
+  static Cache: Map<string, ICoordinate | number> = new Map();
 
   private _coordinateCacheKey: string = '';
 
@@ -370,6 +377,16 @@ class BasicToolOperation extends EventListener {
   public destroy() {
     this.destroyCanvas();
     this.eventUnbinding();
+    this.clearCache();
+  }
+
+  public clearCache() {
+    BasicToolOperation.Cache.clear();
+  }
+
+  public clearCachedCoordinateAndZoom() {
+    BasicToolOperation.Cache.delete(this._coordinateCacheKey);
+    BasicToolOperation.Cache.delete(this._zoomCacheKey);
   }
 
   public initCanvas(size: ISize) {
@@ -449,8 +466,8 @@ class BasicToolOperation extends EventListener {
 
     // 图片更新后，更新缓存key
     if (imgNode) {
-      this._coordinateCacheKey = `coordinate::${imgNode.src}`
-      this._zoomCacheKey = `zoom::${imgNode.src}`
+      this._coordinateCacheKey = `coordinate::${imgNode.src}`;
+      this._zoomCacheKey = `zoom::${imgNode.src}`;
     }
 
     this.setBasicImgInfo({
@@ -561,7 +578,6 @@ class BasicToolOperation extends EventListener {
 
   /** 用于初始化图片的位置 */
   public initImgPos = async () => {
-    // console.log('initImgPros');
     if (!this.imgNode || this.imgNode.width === 0) {
       return;
     }
@@ -575,32 +591,36 @@ class BasicToolOperation extends EventListener {
       isOriginalSize,
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
-    const statbleCoord = positionCache.get(this._coordinateCacheKey) as ICoordinate;
-    this.setCurrentPos(statbleCoord || currentPos);
-    this.currentPosStorage = statbleCoord || currentPos;
-    let statblezoom = 0;
+    const cachedCoordinate = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
+    this.setCurrentPos(cachedCoordinate || currentPos);
+    this.currentPosStorage = cachedCoordinate || currentPos;
+    let cachedZoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
       // 初始化图片缩放信息，优先从持久化记录中获取
-      statblezoom = positionCache.get(this._zoomCacheKey) as number;
+      cachedZoom = BasicToolOperation.Cache.get(this._zoomCacheKey) as number;
     } else {
-      positionCache.set(this._zoomCacheKey, 1);
+      BasicToolOperation.Cache.set(this._zoomCacheKey, 1);
     }
 
-    // 获取完缓存的坐标和缩放比例后，清除缓存
-    positionCache.delete(this._coordinateCacheKey);
-    positionCache.delete(this._zoomCacheKey);
+    const finalZoom = cachedZoom || zoom;
+    /**
+     * 修正https://project.feishu.cn/bigdata_03/issue/detail/3756207?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+     * 因zoom可被缓存，在切换工具或切换图片列表时需要由缓存后的zoom重新计算imgInfo
+     **/ 
+    this.imgInfo = {
+      width: this.imgNode.width * finalZoom,
+      height: this.imgNode.height * finalZoom,
+    };
+    this.setZoom(finalZoom);
 
-    this.imgInfo = imgInfo;
-    this.setZoom(statblezoom || zoom);
-
-    this.innerZoom = statblezoom || zoom;
+    this.innerZoom = finalZoom;
     this.renderReady = true;
     this.render();
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom', zoom);
+    this.emit('renderZoom', finalZoom);
   };
 
   /**
@@ -827,7 +847,11 @@ class BasicToolOperation extends EventListener {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
       // 拖拽时，更新持久化图片位置信息
-      positionCache.set(this._coordinateCacheKey, this.getCurrentPos(currentCoord));
+      const newCoordinate = this.getCurrentPos(currentCoord);
+
+      if (this._isValidCoordinate(newCoordinate)) {
+        BasicToolOperation.Cache.set(this._coordinateCacheKey, newCoordinate);
+      }
       /**
        * 图片拖拽判断
        * 1. 拖拽时间超过 1 秒则为拖拽
@@ -885,9 +909,6 @@ class BasicToolOperation extends EventListener {
 
       // case EKeyCode.Z:
       //   if (e.ctrlKey) {
-      //     console.log(this)
-      //     console.log(this.prevResultList);
-      //     console.log(this.basicResult);
       //     debugger;
       //     if (e.shiftKey) {
       //       this.redo();
@@ -989,9 +1010,13 @@ class BasicToolOperation extends EventListener {
     const { currentPos: newCurrentPos, ratio, zoom, imgInfo } = pos;
 
     // 缩放时，更新持久化图片位置信息
-    positionCache.set(this._coordinateCacheKey, newCurrentPos);
+    if (this._isValidCoordinate(newCurrentPos)) {
+      BasicToolOperation.Cache.set(this._coordinateCacheKey, newCurrentPos);
+    }
     // 缩放时，更新持久化图片缩放信息
-    positionCache.set(this._zoomCacheKey, zoom);
+    if (validNumber(zoom)) {
+      BasicToolOperation.Cache.set(this._zoomCacheKey, zoom);
+    }
 
     this.innerZoom = zoom;
     this.setZoom(zoom);
@@ -1072,6 +1097,14 @@ class BasicToolOperation extends EventListener {
     if (sendMessage) {
       // send someting
     }
+  }
+
+  private _isValidCoordinate(coordinate: ICoordinate) {
+    if (!coordinate) {
+      return false;
+    }
+
+    return validNumber(coordinate.x) && validNumber(coordinate.y);
   }
 
   public setValid(valid: boolean) {
@@ -1169,6 +1202,31 @@ class BasicToolOperation extends EventListener {
     return '';
   }
 
+  /**
+   * 判定点是否在边界外
+   * @param coordinate 
+   * @param currentPosition 
+   * @returns boolean
+   */
+  public isPointOutOfBoundary(coordinate: ICoordinate, currentPosition: ICoordinate) {
+    const { zoom, basicResult, imgInfo } = this;
+
+    if (basicResult && zoom) {
+      // brX: basicResult.x
+      const { x: brX, y: brY, width: brW, height: brH } = basicResult;
+      const { x, y } = coordinate;
+      const { x: cX, y: cY } = currentPosition;
+
+      return x - cX > (brX + brW) * zoom || x - cX < brX * zoom || y - cY > (brY + brH) * zoom || y - cY < brY * zoom;
+    } else {
+      const { x, y } = coordinate;
+      const { x: cX, y: cY } = currentPosition;
+      const { width, height } = imgInfo!;
+
+      return x - cX > width || x - cX < 0 || y - cY > height || y - cY < 0;
+    }
+  }
+
   public clearInvalidPage() {
     if (this._invalidDOM && this.container && this.container.contains(this._invalidDOM)) {
       this.container.removeChild(this._invalidDOM);
@@ -1189,7 +1247,6 @@ class BasicToolOperation extends EventListener {
     // if (this.forbidBasicResultRender) {
     //   return;
     // }
-    // console.log(this.prevResultList);
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentReulst = this.prevResultList[i];
@@ -1412,9 +1469,7 @@ class BasicToolOperation extends EventListener {
             break;
           }
           default: {
-            console.log(currentReulst.toolName);
-            console.log(currentReulst);
-            //
+            // empty
           }
         }
       }
@@ -1483,8 +1538,6 @@ class BasicToolOperation extends EventListener {
     if (!this.canvas || !this.ctx || !this.imgNode || !this.renderReady) {
       return;
     }
-    // console.log(this.prevResultList);
-    // console.log('clearCn');
     this.clearCanvas();
     this.renderOtherAnnotation();
   }

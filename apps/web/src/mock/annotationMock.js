@@ -252,7 +252,6 @@ export const DEFAULT_ANNOTATIONS = [
       stroke: 'pink',
       name: 'Bag',
       renderEnhance: (params) => {
-        console.log(params);
         const {
           ctx,
           data: { annotation },

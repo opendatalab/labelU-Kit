@@ -2,6 +2,7 @@ import MainView from '@/views/MainView';
 import { i18n } from '@label-u/utils';
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
+import { BasicToolOperation } from '@label-u/annotation';
 import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
@@ -91,7 +92,7 @@ const App: React.FC<AppProps> = (props) => {
     currentToolName,
     onPageChange,
     onStepChange,
-    initialIndex = 0,
+    initialIndex = BasicToolOperation.Cache.get('nextIndex') || 0,
     toolInstance,
     tagConfigList,
     attributeList,
@@ -104,7 +105,6 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn'
   } = props;
 
-  console.log("you are using version 202212281508", props)
   //@ts-ignore
   if(props.imgList&&props.imgList.length>0){
     console.info("result",props.imgList[0].result)
@@ -121,6 +121,11 @@ const App: React.FC<AppProps> = (props) => {
       setImgUrl(imgList[0].url)
     }
   },[])
+
+  // unmount时销毁BasicToolOperation.Cache
+  useEffect(() => () => {
+    BasicToolOperation.Cache.clear();
+  }, []);
 
   useEffect(() => {
     if (

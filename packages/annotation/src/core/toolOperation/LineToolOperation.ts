@@ -255,6 +255,9 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get enableOutOfTarget() {
+    // temp fix
+    // TODO: if enableOutOfTarget == true, lineTool will not show the line.
+    return false;
     // 兼容旧的目标外标注
     return this.config.drawOutsideTarget ?? this.config.enableOutOfTarget ?? this.config.outOfTarget;
   }
@@ -1278,7 +1281,7 @@ class LineToolOperation extends BasicToolOperation {
     this.lineDragging = false;
 
     /** 空格点击为拖拽事件 */
-    if (this.isSpaceKey) {
+    if (this.isSpaceKey || !this.imgInfo) {
       return;
     }
 
@@ -1296,17 +1299,21 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     const nextAxis = this.getNextPoint(e, coord)!;
+    
+    if ((this.isCreate || this.isNone)) {
+      if (this.config.drawOutSideTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 })) {
+        return;
+      }
 
-    if (this.isCreate || this.isNone) {
       this.setCreatStatusAndAddPoint(nextAxis);
       return;
     }
-
+    
     if (this.isActive) {
       if (lineDragging) {
         return;
       }
-
+      
       const isMouseCoordOutsideActiveArea = this.isMouseCoordOutsideActiveArea();
       if (isMouseCoordOutsideActiveArea) {
         this.setNoneStatus(false);

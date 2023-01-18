@@ -28,7 +28,7 @@
     "antd": "^4.17.1-alpha.0",
     "axios": "^0.19.0",
     "brace": "^0.11.1",
-    "classnames": "^2.3.0",
+    "classnames": "^2.3.2",
     "craco-less": "^1.20.0",
     "driver.js": "^0.9.8",
     "history": "^5.0.0",

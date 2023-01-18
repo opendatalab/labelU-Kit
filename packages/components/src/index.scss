@@ -772,8 +772,8 @@ body {
     border-bottom: 1px dashed #eee;
   }
 
-  .sensebee-radio-group,
-  .sensebee-radio-group-no-limit-height .ant-radio-group {
+  .labelu-radio-group,
+  .labelu-radio-group-no-limit-height .ant-radio-group {
     max-height: calc(100vh - 61px);
 
     display: flex;
@@ -805,7 +805,7 @@ body {
         overflow: hidden;
       }
 
-      .sensebee-radio-num {
+      .labelu-radio-num {
         width: 20px;
         height: 20px;
         border: 1px solid rgba(204, 204, 204, 1);
@@ -815,7 +815,7 @@ body {
         line-height: 18px;
       }
 
-      .sensebee-radio-label {
+      .labelu-radio-label {
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1378,7 +1378,7 @@ $hotkey-container-padding: 7px;
 }
 
 
-.sensebee-checkbox-group .ant-checkbox-group {
+.labelu-checkbox-group .ant-checkbox-group {
   display: flex;
   flex-direction: column;
 
@@ -1406,7 +1406,7 @@ $hotkey-container-padding: 7px;
       overflow: hidden;
     }
 
-    .sensebee-checkbox-num {
+    .labelu-checkbox-num {
       width: 20px;
       height: 20px;
       border: 1px solid rgba(204, 204, 204, 1);
@@ -1415,7 +1415,7 @@ $hotkey-container-padding: 7px;
       text-align: center;
     }
 
-    .sensebee-checkbox-label {
+    .labelu-checkbox-label {
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;

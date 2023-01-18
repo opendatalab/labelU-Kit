@@ -6,8 +6,6 @@ export function formatSearch(se: string) {
     newarr = [];
   arr.forEach((v, i) => {
     //数组遍历
-    console.log(v);
-    console.log(i);
     newarr = v.split('=');
     if (typeof obj[newarr[0]] === 'undefined') {
       obj[newarr[0]] = newarr[1];

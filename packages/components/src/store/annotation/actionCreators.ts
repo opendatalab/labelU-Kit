@@ -1,3 +1,5 @@
+import { BasicToolOperation } from '@label-u/annotation';
+
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { IStepInfo } from '@/types/step';
 import {
@@ -15,7 +17,6 @@ import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
 import { jsonParser } from '@/utils';
-import localforage from 'localforage';
 import { BasicConfig } from '@/types/tool';
 import { Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
 import { ToolStyleState } from '../toolStyle/types';
@@ -494,13 +495,14 @@ export const DispatcherTurning = async (
   const annotationStore = getState().annotation;
   const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } =
     PageOperator.getNextPageInfo(pageTurningOperation, annotationStore, toIndex);
-  await localforage.setItem('nextIndex', fileIndex);
+  BasicToolOperation.Cache.set('nextIndex', fileIndex);
   const submitType: ESubmitType = getSubmitByPageOperation(pageTurningOperation);
 
   ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
   // 翻页
   if (fileIndexChanged) {
+    annotationStore.annotationEngine.toolInstance.clearCachedCoordinateAndZoom();
     if (annotationStore.loading) {
       return;
     }
@@ -568,7 +570,6 @@ export const ToSaveFileData = (submitType: ESubmitType) => (dispatch: any) =>
 export const saveImageList = (dispatch: any, getState: any) => {
   // const annotationStore = getState().annotation;
   // const { imgList } = annotationStore;
-  // console.log(imgList);
   dispatch(ToSaveFileData(ESubmitType.Save));
 };
 

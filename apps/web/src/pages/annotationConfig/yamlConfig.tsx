@@ -33,7 +33,6 @@ const YamlConfig: FC<YamlConfigProps> = props => {
   const dispatch = useDispatch();
   const { tools, tagList, attribute, textConfig } = useSelector(state => state.toolsConfig);
   const onLoad = () => {
-    console.log('load');
   };
 
   useEffect(() => {

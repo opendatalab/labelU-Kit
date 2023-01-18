@@ -108,7 +108,7 @@ const TextList: React.FC<IProps> = ({ value, onChange,onDelete,onAdd }) => {
     <div
       className={classnames({
         // selectedMain: true,
-        sensebeeInputWrap: true
+        labeluInputWrap: true
       })}
     >
       {(value || configs).map((i: Config, index: number) => (
@@ -122,7 +122,7 @@ const TextList: React.FC<IProps> = ({ value, onChange,onDelete,onAdd }) => {
           <span className="textConfigIndex">{index + 1}</span>
           <Input
             value={i.label}
-            className={`textConfigInput sensebee-input`}
+            className={`textConfigInput labelu-input`}
             placeholder={t('DisplayValue')}
             onChange={e => {
               updateConfigItem({ label: e.target.value }, index);

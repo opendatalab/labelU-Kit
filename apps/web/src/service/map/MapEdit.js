@@ -197,7 +197,6 @@ const saveMap = async function saveMap() {
         }, 6000);
       })
       .catch(error => {
-        console.log(error);
         api.request_result_buried_point('save_setting', 'fail', ['关', '关'], setting_param, error);
       });
   };

@@ -90,7 +90,7 @@ const JSONTab = (props: IJsonTabProps) => {
         value.length > 0 &&
         value?.map((info, i) => (
           <div
-            className="sensebee-input-wrap"
+            className="labelu-input-wrap"
             key={`inputList_${i}`}
             onMouseOver={e => {
               e.stopPropagation();
@@ -105,7 +105,7 @@ const JSONTab = (props: IJsonTabProps) => {
             <div className="select">
               <span className="inputSeria">{i + 1}</span>
               <SenseInput
-                className={`sensebee-input`}
+                className={`labelu-input`}
                 value={info.key}
                 placeholder={t('Type')}
                 onChange={(e: any) => changeInputInfo(e, 'key', i)}
@@ -113,7 +113,7 @@ const JSONTab = (props: IJsonTabProps) => {
                 // addonBefore={isAttributeList && <ColorTag color={COLORS_ARRAY[i % 8]} />}
               />
               <SenseInput
-                className={'sensebee-input'}
+                className={'labelu-input'}
                 value={info.value}
                 placeholder={t('Value')}
                 onChange={(e: any) => changeInputInfo(e, 'value', i)}

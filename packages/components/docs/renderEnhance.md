@@ -22,7 +22,6 @@ const data=[{
       stroke: 'pink',
       name: 'Bag',
       renderEnhance: (params) => {
-        console.log(params);
         const {
           ctx,
           data: { annotation },
