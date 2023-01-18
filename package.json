@@ -2,7 +2,8 @@
   "name": "label-u",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/web"
   ],
   "version": "1.7.0",
   "scripts": {
@@ -47,7 +48,7 @@
     "@semantic-release/github": "^8.0.7",
     "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
-    "multi-semantic-release": "^2.13.0",
+    "multi-semantic-release": "^3.0.1",
     "semantic-release": "^19.0.3"
   },
   "config": {
