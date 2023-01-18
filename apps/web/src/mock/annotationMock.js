@@ -5,7 +5,8 @@ import img4 from './images/66.jpg';
 
 // const MOCK_URL = 'http://bee-sdk-demo.sensebee.xyz/images/';
 // export const fileList = ['10', '19', '20', '66'].map((i) => `${MOCK_URL}${i}.jpg`);
-export const fileList = [img1, img2, img3, img4];
+export const fileList = [
+  'https://images.unsplash.com/photo-1671726203588-4f551c9afe97', img2, img3, img4];
 // export const fileList = ['https://images.unsplash.com/photo-1653122952207-f20ba3c64f35?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80']
 export const videoList = [
   'https://pjlab-label-data.oss-cn-shanghai.aliyuncs.com/test4/obj/2ffdfe12-b10b-4d9b-a036-0a7b323f84b8.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=LTAI5tSmKP8Yi6KfdRCy6omN%2F20220817%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220817T062222Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=2eddbd9b33705efda600c94e199700b101f4a46ee08fa61f62006b61f30c18fd',
@@ -108,7 +109,7 @@ export const getMockResult = (tool) => {
 export const mockFileList = [
   {
     id: 1,
-    url: 'http://bee-sdk-demo.sensebee.xyz/images/10.jpg',
+    url: 'https://images.unsplash.com/photo-1671726203588-4f551c9afe97',
     result:
       '{"width":720,"height":1280,"valid":true,"rotate":0,"step_1":{"dataSourceStep":0,"toolName":"rectTool","result":[{"x":272.47863247863245,"y":397.4928774928775,"width":288.0911680911681,"height":346.4387464387464,"attribute":"","valid":true,"id":"AwL2kecs","sourceID":"","textAttribute":"","order":1}]}}',
   },

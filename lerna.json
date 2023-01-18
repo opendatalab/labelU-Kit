@@ -1,16 +1,12 @@
 {
   "packages": [
-    "packages/*"
+    "packages/*",
+    "apps/web"
   ],
+  "npmClient": "pnpm",
+  "useWorkspaces": true,
   "version": "independent",
   "publishConfig": {
     "access": "public"
-  },
-  "publish": {
-    "ignoreChanges": [
-      "ignored-file",
-      "*.md"
-    ],
-    "message": "chore(release): publish %s"
   }
 }

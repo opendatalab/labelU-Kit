@@ -23,6 +23,9 @@ import EventListener from './eventListener';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 
+// 缓存图片的坐标和缩放比例
+const positionCache: Map<string, ICoordinate | number> = new Map();
+
 interface IBasicToolOperationProps {
   container: HTMLElement;
   size: ISize;
@@ -588,28 +591,36 @@ class BasicToolOperation extends EventListener {
       isOriginalSize,
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
-    const statbleCoord = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
-    this.setCurrentPos(statbleCoord || currentPos);
-    this.currentPosStorage = statbleCoord || currentPos;
-    let statblezoom = 0;
+    const cachedCoordinate = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
+    this.setCurrentPos(cachedCoordinate || currentPos);
+    this.currentPosStorage = cachedCoordinate || currentPos;
+    let cachedZoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
       // 初始化图片缩放信息，优先从持久化记录中获取
-      statblezoom = BasicToolOperation.Cache.get(this._zoomCacheKey) as number;
+      cachedZoom = BasicToolOperation.Cache.get(this._zoomCacheKey) as number;
     } else {
       BasicToolOperation.Cache.set(this._zoomCacheKey, 1);
     }
 
-    this.imgInfo = imgInfo;
-    this.setZoom(statblezoom || zoom);
+    const finalZoom = cachedZoom || zoom;
+    /**
+     * 修正https://project.feishu.cn/bigdata_03/issue/detail/3756207?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+     * 因zoom可被缓存，在切换工具或切换图片列表时需要由缓存后的zoom重新计算imgInfo
+     **/ 
+    this.imgInfo = {
+      width: this.imgNode.width * finalZoom,
+      height: this.imgNode.height * finalZoom,
+    };
+    this.setZoom(finalZoom);
 
-    this.innerZoom = statblezoom || zoom;
+    this.innerZoom = finalZoom;
     this.renderReady = true;
     this.render();
     this.renderBasicCanvas();
 
     this.emit('dependRender');
-    this.emit('renderZoom', zoom);
+    this.emit('renderZoom', finalZoom);
   };
 
   /**
@@ -1189,6 +1200,31 @@ class BasicToolOperation extends EventListener {
       return lineColor[color];
     }
     return '';
+  }
+
+  /**
+   * 判定点是否在边界外
+   * @param coordinate 
+   * @param currentPosition 
+   * @returns boolean
+   */
+  public isPointOutOfBoundary(coordinate: ICoordinate, currentPosition: ICoordinate) {
+    const { zoom, basicResult, imgInfo } = this;
+
+    if (basicResult && zoom) {
+      // brX: basicResult.x
+      const { x: brX, y: brY, width: brW, height: brH } = basicResult;
+      const { x, y } = coordinate;
+      const { x: cX, y: cY } = currentPosition;
+
+      return x - cX > (brX + brW) * zoom || x - cX < brX * zoom || y - cY > (brY + brH) * zoom || y - cY < brY * zoom;
+    } else {
+      const { x, y } = coordinate;
+      const { x: cX, y: cY } = currentPosition;
+      const { width, height } = imgInfo!;
+
+      return x - cX > width || x - cX < 0 || y - cY > height || y - cY < 0;
+    }
   }
 
   public clearInvalidPage() {

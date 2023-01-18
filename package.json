@@ -8,15 +8,12 @@
   "scripts": {
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
-    "bootstrap": "lerna bootstrap --no-ci",
-    "build": "lerna run build",
+    "build": "lerna run --scope=@label-u/utils --scope=@label-u/annotation --scope=@label-u/components build",
     "build:type": "lerna run build:type",
     "lint": "lerna run --parallel --stream lint",
-    "clean": "lerna clean && rimraf ./packages/**/package-lock.json && rimraf ./node_modules",
-    "version": "lerna version --conventional-graduate --yes",
-    "publish": "lerna publish from-package --yes",
+    "clean": "lerna clean && rimraf ./packages/**/package-lock.json",
     "commit": "cz",
-    "release": "standard-version"
+    "release": "multi-semantic-release --ignore-private-packages"
   },
   "author": "wuhui",
   "contributors": [
@@ -45,7 +42,13 @@
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^4.0.3",
     "lerna": "^4.0.0",
-    "standard-version": "^9.3.1"
+    "@semantic-release/commit-analyzer": "^9.0.2",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^8.0.7",
+    "@semantic-release/npm": "^9.0.1",
+    "@semantic-release/release-notes-generator": "^10.0.3",
+    "multi-semantic-release": "^2.13.0",
+    "semantic-release": "^19.0.3"
   },
   "config": {
     "commitizen": {
