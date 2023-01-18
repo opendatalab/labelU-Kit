@@ -44,6 +44,6 @@ jobs:
         run: pnpm install
       - name: Build packages
         run: pnpm run build
-      - run: npm config set //npm.shlab.tech/:_authToken ${LAB_LAB_NPM_TOKEN}
+      - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
       - name: Publish packages
         run: pnpm run release
