@@ -10,14 +10,12 @@
 # lock file
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 
 .idea
 
 # lock file
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 
 # testing
 /coverage

@@ -33,9 +33,9 @@
     "react"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://github.com/opendatalab/labelU/tree/main/packages/lb-components",
+  "homepage": "https://github.com/opendatalab/labelU-Kit/tree/main/packages/components",
   "bugs": {
-    "url": "https://github.com/opendatalab/labelU.git",
+    "url": "https://github.com/opendatalab/labelU-Kit/issues",
     "email": "751569801@qq.com"
   },
   "dependencies": {

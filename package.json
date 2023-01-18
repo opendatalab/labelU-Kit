@@ -29,9 +29,9 @@
     "canvas",
     "react"
   ],
-  "homepage": "https://github.com/opendatalab/labelU.git",
+  "homepage": "https://github.com/opendatalab/labelU-Kit.git",
   "bugs": {
-    "url": "https://github.com/opendatalab/labelU.git",
+    "url": "https://github.com/opendatalab/labelU-Kit.git",
     "email": "751569801@qq.com"
   },
   "main": "index.js",
