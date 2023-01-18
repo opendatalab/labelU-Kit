@@ -35,6 +35,7 @@ export enum EDragTarget {
   Point,
   Line,
   Plane,
+  Cuboid,
 }
 
 /** 顺序 */
@@ -61,6 +62,25 @@ export enum ERotateDirection {
   Clockwise, // 顺时针
   Anticlockwise, // 逆时针
 }
+
+export enum ECuboidPlain {
+  Front = 'front',
+  Back = 'back',
+}
+
+export enum ECuboidPosition {
+  TL = 'tl',
+  TR = 'tr',
+  BL = 'bl',
+  BR = 'br',
+}
+
+export const DIAGONAL_POINT = {
+  tl: 'br',
+  tr: 'bl',
+  br: 'tl',
+  bl: 'tr',
+};
 
 /**
  * 默认多边形文本偏移量

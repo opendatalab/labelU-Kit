@@ -6,6 +6,8 @@ import type { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/to
 import MathUtils from '../MathUtils';
 import PolygonUtils from './PolygonUtils';
 import LineToolUtils, { POINT_RADIUS } from './LineToolUtils';
+import { getHighlightLines, getHighlightPoints } from './CuboidUtils';
+import { ICuboid, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
 
 export default class AxisUtils {
   /**
@@ -224,8 +226,8 @@ export default class AxisUtils {
    * @returns {number}
    */
   public static returnClosePointIndex(
-    checkPoint: IPolygonPoint,
-    polygonPoints: IPolygonPoint[],
+    checkPoint: IPolygonPoint | ICoordinate,
+    polygonPoints: IPolygonPoint[] | ICoordinate[],
     scope: number = 3,
   ): number {
     let pointIndex = -1;
@@ -238,6 +240,60 @@ export default class AxisUtils {
     }
 
     return pointIndex;
+  }
+
+  /**
+   * Point > Line
+   * @param checkPoint
+   * @param cuboid
+   * @param scope
+   */
+  public static returnClosePointOrLineInCuboid(
+    checkPoint: ICoordinate,
+    cuboid: ICuboid,
+    options: Partial<{ scope: number; zoom: number }> = { scope: 3, zoom: 1 },
+  ) {
+    const points = getHighlightPoints(cuboid);
+    const { scope = 3, zoom = 1 } = options;
+
+    // 1. Points
+    for (let i = 0; i < points.length; i++) {
+      const pointData = points[i];
+      if (this.getIsInScope(checkPoint, pointData.point, scope)) {
+        return [
+          {
+            type: 'point',
+            points: [this.changePointByZoom(points[i].point, zoom)],
+            originCuboid: cuboid,
+            positions: pointData.positions,
+          },
+        ];
+      }
+    }
+
+    // 2. Line
+    let minLength = scope;
+    const lines = getHighlightLines(cuboid);
+    let linePoints;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, line.p1, line.p2, true);
+      if (length < minLength) {
+        minLength = length;
+        linePoints = [
+          {
+            type: 'line',
+            points: this.changePointListByZoom([line.p1, line.p2], zoom),
+            originCuboid: cuboid,
+            positions: line.positions,
+          },
+        ];
+      }
+    }
+
+    if (linePoints) {
+      return linePoints;
+    }
   }
 
   /**

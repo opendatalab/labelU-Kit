@@ -1,10 +1,4 @@
-enum ECuboidDirection {
-  Front = 'front',
-  Back = 'back',
-  left = 'left',
-  right = 'right',
-  Top = 'top',
-}
+import { ECuboidDirection, ECuboidPlain, ECuboidPosition } from '@/constant/annotation';
 
 declare interface IPlanePoints {
   bl: ICoordinate; // Bottom Left Point;
@@ -13,6 +7,10 @@ declare interface IPlanePoints {
   tr: ICoordinate; // Top Right Point;
 }
 
+declare interface ICuboidPosition {
+  plain: ECuboidPlain;
+  position: ECuboidPosition;
+}
 declare interface IBasicAnnotationInfo {
   // Basic
   id: string;

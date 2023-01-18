@@ -1,3 +1,8 @@
+import { DIAGONAL_POINT, ECuboidPlain, ECuboidPosition, EDragTarget } from '@/constant/annotation';
+import { ICuboid, ICuboidPosition, IPlanePoints } from '@/types/tool/cuboid';
+import Vector from '../VectorUtils';
+import LineToolUtils from './LineToolUtils';
+
 /**
  * Get the basicInfo of cuboid-frontPoints.
  * @param param0
@@ -14,7 +19,13 @@ export function getPlanePointsBasicInfo({ tr, tl, br }: IPlanePoints) {
   };
 }
 
-export function getCuboidBasicInfo({ frontPoints, backPoints }: ICuboid) {
+export function getCuboidBasicInfo({
+  frontPoints,
+  backPoints,
+}: {
+  frontPoints: IPlanePoints;
+  backPoints: IPlanePoints;
+}) {
   const { width: frontWidth, height: frontHeight, centerPoints: frontCenter } = getPlanePointsBasicInfo(frontPoints);
   const { width: backWidth, height: backHeight, centerPoints: backCenter } = getPlanePointsBasicInfo(backPoints);
   return {
@@ -24,24 +35,50 @@ export function getCuboidBasicInfo({ frontPoints, backPoints }: ICuboid) {
     frontHeight,
     backWidth,
     backHeight,
+    isLeftSide: backCenter.x < frontCenter.x,
   };
 }
 
 /**
- * Know the frontPoints and coord to get the backPoints
+ * Use two diagonalPoints to create Regular Rect(Plain)
+ * @param p1
+ * @param p2
+ * @returns
+ */
+export function getPlainPointsByDiagonalPoints(p1: ICoordinate, p2: ICoordinate): IPlanePoints {
+  return {
+    tl: {
+      x: Math.min(p1.x, p2.x),
+      y: Math.min(p1.y, p2.y),
+    },
+    tr: {
+      x: Math.max(p1.x, p2.x),
+      y: Math.min(p1.y, p2.y),
+    },
+    bl: {
+      x: Math.min(p1.x, p2.x),
+      y: Math.max(p1.y, p2.y),
+    },
+    br: {
+      x: Math.max(p1.x, p2.x),
+      y: Math.max(p1.y, p2.y),
+    },
+  };
+}
+
+/**
+ * Copy the plain through points and new bottomRightPoint.
  * @param param0
  * @returns
  */
-export function getBackPointsByCoord({
+export function getPointsByBottomRightPoint({
   coord,
-  frontPoints,
+  points,
 }: {
   coord: ICoordinate;
-  frontPoints: IPlanePoints;
+  points: IPlanePoints;
 }): IPlanePoints {
-  const { width, height } = getPlanePointsBasicInfo(frontPoints);
-
-  // Right Side
+  const { width, height } = getPlanePointsBasicInfo(points);
   return {
     br: coord,
     tr: {
@@ -60,11 +97,203 @@ export function getBackPointsByCoord({
 }
 
 /**
+ * Copy the plain through points and new bottomLeftPoint.
+ *
+ * Notice: currentPoints is just regular rectangle.
+ *
+ * @param param0
+ * @returns
+ */
+export function getPointsByBottomLeftPoint({
+  coord,
+  points,
+}: {
+  coord: ICoordinate;
+  points: IPlanePoints;
+}): IPlanePoints {
+  const { width, height } = getPlanePointsBasicInfo(points);
+  return {
+    bl: coord,
+    tr: {
+      x: coord.x + width,
+      y: coord.y - height,
+    },
+    tl: {
+      x: coord.x,
+      y: coord.y - height,
+    },
+    br: {
+      x: coord.x + width,
+      y: coord.y,
+    },
+  };
+}
+
+/**
+ * The showing sideline is line that connects the front and back planes.
+ * @param param0
+ * @returns
+ */
+export function getCuboidShowingSideLine({
+  frontPoints,
+  backPoints,
+}: {
+  frontPoints: IPlanePoints;
+  backPoints: IPlanePoints;
+}) {
+  const { isLeftSide } = getCuboidBasicInfo({ frontPoints, backPoints });
+
+  if (isLeftSide) {
+    return {
+      top: {
+        p1: frontPoints.tl,
+        p2: backPoints.tl,
+      },
+      bottom: {
+        p1: frontPoints.bl,
+        p2: backPoints.bl,
+      },
+    };
+  }
+  return {
+    top: {
+      p1: frontPoints.tr,
+      p2: backPoints.tr,
+    },
+    bottom: {
+      p1: frontPoints.br,
+      p2: backPoints.br,
+    },
+  };
+}
+
+/**
+ *
+ * @param param0
+ * @returns
+ */
+export function getPointsByIntersection({
+  frontPoints,
+  backPoints,
+}: {
+  frontPoints: IPlanePoints;
+  backPoints: IPlanePoints;
+}) {
+  const { isLeftSide } = getCuboidBasicInfo({ frontPoints, backPoints });
+
+  let newBackPoints = { ...backPoints };
+
+  const sideLine = getCuboidShowingSideLine({ frontPoints, backPoints });
+  const intersectionPoint = LineToolUtils.lineIntersection(
+    { pointA: sideLine.bottom.p1, pointB: sideLine.bottom.p2 },
+    { pointA: sideLine.top.p1, pointB: sideLine.top.p2 },
+  ) as ICoordinate;
+
+  if (isLeftSide) {
+    const newBRPoint = LineToolUtils.lineIntersection(
+      { pointA: backPoints.bl, pointB: backPoints.br },
+      { pointA: frontPoints.br, pointB: intersectionPoint },
+    );
+
+    if (newBRPoint) {
+      newBackPoints = {
+        ...backPoints,
+        br: newBRPoint,
+        tr: {
+          x: newBRPoint.x,
+          y: backPoints.tl.y,
+        },
+      };
+    }
+  } else {
+    const newBLPoint = LineToolUtils.lineIntersection(
+      { pointA: backPoints.bl, pointB: backPoints.br },
+      { pointA: frontPoints.bl, pointB: intersectionPoint },
+    );
+
+    if (newBLPoint) {
+      newBackPoints = {
+        ...backPoints,
+        bl: newBLPoint,
+        tl: {
+          x: newBLPoint.x,
+          y: backPoints.tr.y,
+        },
+      };
+    }
+  }
+
+  return {
+    backPoints: newBackPoints,
+  };
+}
+
+/**
+ * When the point
+ * @param frontPoints
+ * @param backPoints
+ */
+export function getBackPointsByFrontPoints({
+  frontPoints,
+  backPoints,
+}: {
+  frontPoints: IPlanePoints;
+  backPoints: IPlanePoints;
+}) {
+  const { isLeftSide, frontHeight, backHeight } = getCuboidBasicInfo({ frontPoints, backPoints });
+
+  // 1. Create the Following BackPoints by frontPoints.
+  let newBackPoints = { ...backPoints };
+  if (isLeftSide) {
+    newBackPoints = getPointsByBottomLeftPoint({ coord: backPoints.bl, points: frontPoints });
+  } else {
+    newBackPoints = getPointsByBottomRightPoint({ coord: backPoints.br, points: frontPoints });
+  }
+
+  // 2 . If frontPoints height is higher than origin-backPoints, Need to update the backPoints through 6 points.(Fronts points 4 + backPoints 2)
+  if (frontHeight > backHeight) {
+    newBackPoints = getPointsByIntersection({ frontPoints, backPoints }).backPoints;
+  }
+
+  return newBackPoints;
+}
+
+export function getFrontPointsByBackPoints({
+  frontPoints,
+  backPoints,
+}: {
+  frontPoints: IPlanePoints;
+  backPoints: IPlanePoints;
+}) {
+  const { isLeftSide, frontHeight, backHeight } = getCuboidBasicInfo({ frontPoints, backPoints });
+
+  // 1. Create the Following BackPoints by frontPoints.
+  let newFrontPoints = { ...frontPoints };
+  let newBackPoints = backPoints;
+  if (isLeftSide) {
+    newFrontPoints = getPointsByBottomLeftPoint({ coord: frontPoints.bl, points: backPoints });
+  } else {
+    newFrontPoints = getPointsByBottomRightPoint({ coord: frontPoints.br, points: backPoints });
+  }
+
+  // 2 . If frontPoints height is higher than origin-backPoints, Need to sync tl & tr in frontPoints
+  if (frontHeight > backHeight) {
+    newFrontPoints.tl.y = frontPoints.tl.y;
+    newFrontPoints.tr.y = frontPoints.tr.y;
+    newBackPoints = getPointsByIntersection({ backPoints, frontPoints }).backPoints;
+  }
+
+  return {
+    frontPoints: newFrontPoints,
+    backPoints: newBackPoints,
+  };
+}
+/**
  * Get SideLine By FrontPoints & BackPoints
  * @param param0
  * @returns
  */
-export function getCuboidSideLine({ frontPoints, backPoints }: ICuboid) {
+export function getCuboidAllSideLine({ frontPoints, backPoints }: ICuboid) {
   return [
     {
       p1: frontPoints.bl,
@@ -85,30 +314,144 @@ export function getCuboidSideLine({ frontPoints, backPoints }: ICuboid) {
   ];
 }
 
+export function getHighlightLines(cuboid: ICuboid) {
+  const { frontPoints, backPoints } = cuboid;
+  const { isLeftSide } = getCuboidBasicInfo(cuboid);
+
+  // 1. FrontPlaneLine
+  const frontLine = [
+    {
+      p1: frontPoints.tl,
+      p2: frontPoints.tr,
+      positions: [
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.TL,
+        },
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.TR,
+        },
+      ],
+    },
+    {
+      p1: frontPoints.tr,
+      p2: frontPoints.br,
+      plain: ECuboidPlain.Front,
+      positions: [
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.TR,
+        },
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.BR,
+        },
+      ],
+    },
+    {
+      p1: frontPoints.br,
+      p2: frontPoints.bl,
+      plain: ECuboidPlain.Front,
+      positions: [
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.BR,
+        },
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.BL,
+        },
+      ],
+    },
+    {
+      p1: frontPoints.bl,
+      p2: frontPoints.tl,
+      plain: ECuboidPlain.Front,
+      positions: [
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.BL,
+        },
+        {
+          plain: ECuboidPlain.Front,
+          position: ECuboidPosition.TL,
+        },
+      ],
+    },
+  ];
+
+  // 2. BackColumnLine
+  if (isLeftSide) {
+    return [
+      ...frontLine,
+      {
+        p1: backPoints.tl,
+        p2: backPoints.bl,
+        positions: [
+          {
+            plain: ECuboidPlain.Back,
+            position: ECuboidPosition.TL,
+          },
+          {
+            plain: ECuboidPlain.Back,
+            position: ECuboidPosition.BL,
+          },
+        ],
+      },
+    ];
+  }
+
+  return [
+    ...frontLine,
+    {
+      p1: backPoints.tr,
+      p2: backPoints.br,
+      positions: [
+        {
+          plain: ECuboidPlain.Back,
+          position: ECuboidPosition.TR,
+        },
+        {
+          plain: ECuboidPlain.Back,
+          position: ECuboidPosition.BR,
+        },
+      ],
+    },
+  ];
+}
+
 /**
  * Just showing the points which can be adjusted
  * @param cuboid
  * @returns
  */
-export function getHighlightPoints(cuboid: ICuboid) {
+export function getHighlightPoints(cuboid: ICuboid): Array<{ point: ICoordinate; positions: ICuboidPosition[] }> {
   const { backPoints } = cuboid;
-  const { backCenter, frontCenter } = getCuboidBasicInfo(cuboid);
+  const { isLeftSide } = getCuboidBasicInfo(cuboid);
 
-  const isLeftSide = backCenter.x < frontCenter.x;
+  const frontPointsData = Object.entries(cuboid.frontPoints).map(([position, point]) => ({
+    positions: [
+      {
+        plain: ECuboidPlain.Front,
+        position,
+      },
+    ],
+    point,
+  })) as Array<{ point: ICoordinate; positions: ICuboidPosition[] }>;
 
   if (isLeftSide) {
-    return [backPoints.tl, backPoints.bl, ...Object.values(cuboid.frontPoints)];
+    return [
+      { point: backPoints.tl, positions: [{ position: ECuboidPosition.TL, plain: ECuboidPlain.Back }] },
+      { point: backPoints.bl, positions: [{ position: ECuboidPosition.BL, plain: ECuboidPlain.Back }] },
+      ...frontPointsData,
+    ];
   }
-  return [backPoints.tr, backPoints.br, ...Object.values(cuboid.frontPoints)];
-}
-
-/**
- * Notice. The order of points is disordered.
- * @param cuboid
- * @returns
- */
-export function getHighLight(cuboid: ICuboid) {
-  return [...Object.values(cuboid.frontPoints), ...Object.values(cuboid.backPoints)];
+  return [
+    { point: backPoints.tr, positions: [{ position: ECuboidPosition.TR, plain: ECuboidPlain.Back }] },
+    { point: backPoints.br, positions: [{ position: ECuboidPosition.BR, plain: ECuboidPlain.Back }] },
+    ...frontPointsData,
+  ];
 }
 
 /**
@@ -120,7 +463,8 @@ export function getHighLight(cuboid: ICuboid) {
  */
 export function getCuboidHoverRange(cuboid: ICuboid): ICoordinate[] {
   const { frontPoints, backPoints } = cuboid;
-  const { backCenter, frontCenter, frontHeight, frontWidth, backHeight, backWidth } = getCuboidBasicInfo(cuboid);
+  const { backCenter, frontCenter, frontHeight, frontWidth, backHeight, backWidth, isLeftSide } =
+    getCuboidBasicInfo(cuboid);
 
   const diffWidth = Math.abs(frontWidth - backWidth);
   const diffHeight = Math.abs(frontHeight - backHeight);
@@ -142,14 +486,12 @@ export function getCuboidHoverRange(cuboid: ICuboid): ICoordinate[] {
    */
 
   // 2. leftSide - BackPlane is to the left of FrontPlane.
-  const isLeftSide = backCenter.x < frontCenter.x;
-
-  // 1. Just Y is Over.
+  // 2-1. Just Y is Over.
   if (isOverY && !isOverX) {
     return [frontPoints.tl, backPoints.tl, backPoints.tr, frontPoints.tr, frontPoints.br, frontPoints.bl];
   }
 
-  // 2. JustX is Over
+  // 2-2. JustX is Over
   if (isOverX && !isOverY) {
     if (isLeftSide) {
       return [frontPoints.tl, frontPoints.tr, frontPoints.br, frontPoints.bl, backPoints.bl, backPoints.tl];
@@ -157,7 +499,7 @@ export function getCuboidHoverRange(cuboid: ICuboid): ICoordinate[] {
     return [frontPoints.tl, frontPoints.tr, backPoints.tr, backPoints.br, frontPoints.br, frontPoints.bl];
   }
 
-  // 3. Both over in X & Y Axis.
+  // 2-3. Both over in X & Y Axis.
   if (isOverX && isOverY) {
     if (isLeftSide) {
       return [backPoints.tl, backPoints.tr, frontPoints.tr, frontPoints.br, frontPoints.bl, backPoints.bl];
@@ -167,4 +509,119 @@ export function getCuboidHoverRange(cuboid: ICuboid): ICoordinate[] {
   }
 
   return [];
+}
+
+/**
+ * Update cuboid when dragging.
+ * @param param0
+ * @returns
+ */
+export function getCuboidDragMove({
+  offset,
+  cuboid,
+  dragTarget,
+  positions,
+}: {
+  offset: ICoordinate;
+  cuboid: ICuboid;
+  dragTarget: EDragTarget;
+  positions: ICuboidPosition[];
+}): ICuboid | undefined {
+  const { frontPoints, backPoints } = cuboid;
+
+  switch (dragTarget) {
+    case EDragTarget.Cuboid: {
+      const newFrontPoints = Object.entries(frontPoints).reduce((acc, [key, point]) => {
+        return {
+          ...acc,
+          [key]: {
+            x: point.x + offset.x,
+            y: point.y + offset.y,
+          },
+        };
+      }, {}) as IPlanePoints;
+
+      const newBackPoints = Object.entries(backPoints).reduce((acc, [key, point]) => {
+        return {
+          ...acc,
+          [key]: {
+            x: point.x + offset.x,
+            y: point.y + offset.y,
+          },
+        };
+      }, {}) as IPlanePoints;
+
+      return {
+        ...cuboid,
+        frontPoints: newFrontPoints,
+        backPoints: newBackPoints,
+      };
+    }
+    case EDragTarget.Line: {
+      //
+      break;
+    }
+
+    case EDragTarget.Point: {
+      if (!positions?.[0]) {
+        return;
+      }
+      const pointPosition = positions[0];
+
+      // Front
+      if (pointPosition.plain === ECuboidPlain.Front) {
+        // 1. Find the
+        let movePoint = frontPoints[pointPosition.position];
+        const diagonalPoint = frontPoints[DIAGONAL_POINT[pointPosition.position] as ECuboidPosition];
+
+        if (!movePoint || !diagonalPoint) {
+          return;
+        }
+
+        // 1. Get the New Front Size
+        movePoint = Vector.add(movePoint, offset);
+
+        const newFrontPoints = getPlainPointsByDiagonalPoints(movePoint, diagonalPoint);
+        const newBackPoints = getBackPointsByFrontPoints({
+          frontPoints: newFrontPoints,
+          backPoints,
+        });
+
+        // Calculate New Points by Diagonal Point (对角点)
+        return {
+          ...cuboid,
+          frontPoints: newFrontPoints,
+          backPoints: newBackPoints,
+        };
+      }
+
+      if (pointPosition.plain === ECuboidPlain.Back) {
+        let movePoint = backPoints[pointPosition.position];
+        const diagonalPoint = backPoints[DIAGONAL_POINT[pointPosition.position] as ECuboidPosition];
+
+        if (!movePoint || !diagonalPoint) {
+          return;
+        }
+        movePoint = Vector.add(movePoint, offset);
+
+        // 1. Get the New Back Size
+        const newBackPoints = getPlainPointsByDiagonalPoints(movePoint, diagonalPoint);
+        const { frontPoints: newFrontPoints, backPoints: newBackPoints2 } = getFrontPointsByBackPoints({
+          frontPoints,
+          backPoints: newBackPoints,
+        });
+        return {
+          ...cuboid,
+          frontPoints: newFrontPoints,
+          backPoints: newBackPoints2 || newBackPoints,
+        };
+      }
+      break;
+    }
+
+    default: {
+      console.error('No DragTarget');
+      break;
+    }
+  }
 }

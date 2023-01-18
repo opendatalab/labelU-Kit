@@ -4,12 +4,15 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import uuid from '@/utils/uuid';
 import {
-  getBackPointsByCoord,
+  getPointsByBottomRightPoint,
+  getCuboidDragMove,
   getCuboidHoverRange,
-  getCuboidSideLine,
+  getCuboidAllSideLine,
   getHighlightPoints,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
+import { EDragStatus, EDragTarget } from '@/constant/annotation';
+import { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
 
 interface ICuboidOperationProps extends IBasicToolOperationProps {}
 
@@ -32,6 +35,22 @@ class CuboidOperation extends BasicToolOperation {
   public selectedID = '';
 
   public hoverID = '';
+
+  // Drag Data
+  private dragInfo?: {
+    dragStartCoord: ICoordinate; // Need to set under zoom in order to avoid inaccurate data due to precision conversion
+    initCuboid: ICuboid;
+    dragTarget: EDragTarget;
+    positions?: ICuboidPosition[]; // Confirm the update Position.
+  };
+
+  // For effects when hover is highlighted.
+  private highlightInfo?: Array<{
+    type: string;
+    points: ICoordinate[];
+    originCuboid: ICuboid;
+    positions: ICuboidPosition[];
+  }>;
 
   public constructor(props: ICuboidOperationProps) {
     super(props);
@@ -61,6 +80,10 @@ class CuboidOperation extends BasicToolOperation {
     return cuboidList;
   }
 
+  public get selectedCuboid() {
+    return this.cuboidList.find((v) => v.id === this.selectedID);
+  }
+
   public getHoverID = (e: MouseEvent) => {
     const coordinate = this.getCoordinateUnderZoom(e);
 
@@ -77,10 +100,87 @@ class CuboidOperation extends BasicToolOperation {
     return '';
   };
 
+  public updateSelectedCuboid(newCuboid: ICuboid) {
+    this.cuboidList = this.cuboidList.map((cuboid) => {
+      if (cuboid.id === this.selectedID) {
+        return newCuboid;
+      }
+      return cuboid;
+    });
+  }
+
   public setResult() {}
 
+  public onMouseDown(e: MouseEvent) {
+    if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
+      return;
+    }
+
+    const { selectedCuboid } = this;
+
+    if (!selectedCuboid || e.button === 2 || (e.button === 0 && this.isSpaceKey === true)) {
+      return;
+    }
+
+    const hoverID = this.getHoverID(e);
+
+    // Drag must be done only if the hoverID and selectedID are the same.
+    if (hoverID !== this.selectedID) {
+      return;
+    }
+
+    this.dragStatus = EDragStatus.Start;
+    const dragStartCoord = this.getCoordinateUnderZoom(e);
+    const DEFAULT_DRAG_INFO = {
+      initCuboid: selectedCuboid,
+      dragStartCoord,
+    };
+
+    const highlightInfo = AxisUtils.returnClosePointOrLineInCuboid(
+      dragStartCoord,
+      AxisUtils.changeCuboidByZoom(selectedCuboid, this.zoom) as ICuboid,
+      {
+        zoom: 1 / this.zoom,
+        scope: 5,
+      },
+    );
+
+    // Just use the first one.
+    const firstHighlightInfo = highlightInfo?.[0];
+
+    if (firstHighlightInfo?.type === 'point') {
+      this.dragInfo = {
+        ...DEFAULT_DRAG_INFO,
+        dragTarget: EDragTarget.Point,
+        positions: firstHighlightInfo.positions,
+      };
+
+      return;
+    }
+
+    // 3. Last Cuboid
+    this.dragInfo = {
+      ...DEFAULT_DRAG_INFO,
+      dragTarget: EDragTarget.Cuboid,
+    };
+  }
+
   public onMouseUp(e: MouseEvent): boolean | void {
-    super.onMouseUp(e);
+    if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
+      return undefined;
+    }
+
+    if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
+      // 拖拽停止
+      this.dragInfo = undefined;
+      this.dragStatus = EDragStatus.Wait;
+      // TODO History.
+      // this.history.pushHistory(this.polygonList);
+
+      // 同步 结果
+      this.emit('updateResult');
+      return;
+    }
 
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
 
@@ -107,10 +207,20 @@ class CuboidOperation extends BasicToolOperation {
         }
       }
     }
+
+    // Right Click
+    if (e.button === 2) {
+      this.rightMouseUp(e);
+    }
   }
 
   public onMouseMove(e: MouseEvent): boolean | void {
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
+      return;
+    }
+
+    if (this.selectedID && this.dragInfo) {
+      this.onDragMove(e);
       return;
     }
 
@@ -128,8 +238,8 @@ class CuboidOperation extends BasicToolOperation {
 
     this.hoverID = this.getHoverID(e);
 
-    // Render HoverRender
-    this.render();
+    // Hover HightLight
+    this.onHoverMove(e);
   }
 
   public drawingFrontPlanesMove(e: MouseEvent) {
@@ -172,8 +282,53 @@ class CuboidOperation extends BasicToolOperation {
       // }
       this.drawingCuboid = {
         ...this.drawingCuboid,
-        backPoints: getBackPointsByCoord({ coord, frontPoints: this.drawingCuboid.frontPoints }),
+        backPoints: getPointsByBottomRightPoint({ coord, points: this.drawingCuboid.frontPoints }),
       };
+      this.render();
+    }
+  }
+
+  public onDragMove(e: MouseEvent) {
+    if (!this.dragInfo || !this.selectedID) {
+      return;
+    }
+
+    const { dragTarget, initCuboid, dragStartCoord, positions } = this.dragInfo;
+    if (!positions) {
+      return;
+    }
+
+    const coordinate = this.getCoordinateUnderZoom(e);
+
+    const offset = {
+      x: (coordinate.x - dragStartCoord.x) / this.zoom,
+      y: (coordinate.y - dragStartCoord.y) / this.zoom,
+    };
+
+    this.dragStatus = EDragStatus.Move;
+
+    const newCuboid = getCuboidDragMove({ offset, cuboid: initCuboid, dragTarget, positions });
+    if (newCuboid) {
+      this.updateSelectedCuboid(newCuboid);
+    }
+    this.render();
+  }
+
+  public onHoverMove(e: MouseEvent) {
+    const { selectedCuboid } = this;
+    if (selectedCuboid) {
+      const currentCoord = this.getCoordinateUnderZoom(e);
+
+      const highlightInfo = AxisUtils.returnClosePointOrLineInCuboid(
+        currentCoord,
+        AxisUtils.changeCuboidByZoom(selectedCuboid, this.zoom) as ICuboid, // The highlighted range needs to be under zoom to work properly
+        {
+          zoom: 1 / this.zoom,
+          scope: 5,
+        },
+      );
+
+      this.highlightInfo = highlightInfo;
       this.render();
     }
   }
@@ -233,6 +388,15 @@ class CuboidOperation extends BasicToolOperation {
     this.render();
   }
 
+  public rightMouseUp(e: MouseEvent) {
+    // 1. Selected
+    const hoverID = this.getHoverID(e);
+    if (hoverID) {
+      this.selectedID = hoverID;
+    }
+    this.render();
+  }
+
   public renderSingleCuboid(cuboid: ICuboid | IDrawingCuboid) {
     const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
     const toolColor = this.getColor(transformCuboid.attribute);
@@ -245,7 +409,7 @@ class CuboidOperation extends BasicToolOperation {
     };
     const { backPoints } = transformCuboid;
     if (backPoints) {
-      const sideLine = getCuboidSideLine(transformCuboid as ICuboid);
+      const sideLine = getCuboidAllSideLine(transformCuboid as ICuboid);
       sideLine?.forEach((line) => {
         DrawUtils.drawLine(this.canvas, line.p1, line.p2, { ...defaultStyle });
       });
@@ -256,10 +420,10 @@ class CuboidOperation extends BasicToolOperation {
       DrawUtils.drawPolygon(this.canvas, backPointList, { ...defaultStyle, isClose: true });
 
       // Hover Highlight
-      if (transformCuboid.id === this.hoverID) {
+      if (transformCuboid.id === this.hoverID || transformCuboid.id === this.selectedID) {
         const hoverPointList = getHighlightPoints(transformCuboid as ICuboid);
-        hoverPointList.forEach((point) => {
-          DrawUtils.drawCircleWithFill(this.canvas, point, 5, { ...defaultStyle });
+        hoverPointList.forEach((data) => {
+          DrawUtils.drawCircleWithFill(this.canvas, data.point, 5, { ...defaultStyle });
         });
       }
     }
@@ -292,12 +456,63 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   public renderStatic() {
-    this.cuboidList.forEach((box3d) => this.renderSingleCuboid(box3d));
+    this.cuboidList.forEach((cuboid) => this.renderSingleCuboid(cuboid));
+  }
+
+  public renderSelected() {
+    const { selectedCuboid } = this;
+    if (selectedCuboid) {
+      this.renderSingleCuboid(selectedCuboid);
+    }
+  }
+
+  /**
+   * Notice: Hover is under selectedCuboid.
+   */
+  public renderHover() {
+    if (this.dragInfo) {
+      return;
+    }
+    this.highlightInfo?.forEach((data) => {
+      const toolColor = this.getColor(data.originCuboid.attribute);
+      const strokeColor = toolColor.valid.stroke;
+      const thickness = 8;
+
+      switch (data.type) {
+        case 'point':
+          data.points?.forEach((point) => {
+            DrawUtils.drawCircleWithFill(
+              this.canvas,
+              AxisUtils.changePointByZoom(point, this.zoom, this.currentPos),
+              thickness,
+              {
+                color: strokeColor,
+              },
+            );
+          });
+
+          // TODO - Update cursor
+          break;
+        case 'line': {
+          const pointList = data.points?.map((point) => AxisUtils.changePointByZoom(point, this.zoom, this.currentPos));
+          if (pointList) {
+            DrawUtils.drawLineWithPointList(this.canvas, pointList, { color: strokeColor, thickness });
+          }
+          // TODO - Update cursor
+          break;
+        }
+        default: {
+          //
+        }
+      }
+    });
   }
 
   public renderCuboid() {
     this.renderStatic();
     this.renderDrawing();
+    this.renderSelected();
+    this.renderHover();
   }
 
   public render() {
