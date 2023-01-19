@@ -66,6 +66,7 @@ export enum ERotateDirection {
 export enum ECuboidPlain {
   Front = 'front',
   Back = 'back',
+  Side = 'side',
 }
 
 export enum ECuboidPosition {
@@ -75,11 +76,38 @@ export enum ECuboidPosition {
   BR = 'br',
 }
 
+export enum ECuboidDirection {
+  Front = 'front',
+  Back = 'back',
+  left = 'left',
+  right = 'right',
+  Top = 'top',
+}
+
 export const DIAGONAL_POINT = {
   tl: 'br',
   tr: 'bl',
   br: 'tl',
   bl: 'tr',
+};
+
+export enum ECuboidLineDirection {
+  Row = 'row',
+  Column = 'column',
+}
+
+export const CUBOID_ROW = {
+  [ECuboidPosition.TL]: ECuboidPosition.TR,
+  [ECuboidPosition.TR]: ECuboidPosition.TL,
+  [ECuboidPosition.BL]: ECuboidPosition.BR,
+  [ECuboidPosition.BR]: ECuboidPosition.BL,
+};
+
+export const CUBOID_COLUMN = {
+  [ECuboidPosition.TL]: ECuboidPosition.BL,
+  [ECuboidPosition.TR]: ECuboidPosition.BR,
+  [ECuboidPosition.BL]: ECuboidPosition.TL,
+  [ECuboidPosition.BR]: ECuboidPosition.TR,
 };
 
 /**

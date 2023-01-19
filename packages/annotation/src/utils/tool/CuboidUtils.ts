@@ -1,4 +1,13 @@
-import { DIAGONAL_POINT, ECuboidPlain, ECuboidPosition, EDragTarget } from '@/constant/annotation';
+import { cloneDeep } from 'lodash';
+import {
+  CUBOID_COLUMN,
+  CUBOID_ROW,
+  DIAGONAL_POINT,
+  ECuboidLineDirection,
+  ECuboidPlain,
+  ECuboidPosition,
+  EDragTarget,
+} from '@/constant/annotation';
 import { ICuboid, ICuboidPosition, IPlanePoints } from '@/types/tool/cuboid';
 import Vector from '../VectorUtils';
 import LineToolUtils from './LineToolUtils';
@@ -64,6 +73,49 @@ export function getPlainPointsByDiagonalPoints(p1: ICoordinate, p2: ICoordinate)
       y: Math.max(p1.y, p2.y),
     },
   };
+}
+
+/**
+ * Get the max external quadrilateral by points.
+ * @param points
+ * @returns
+ */
+export function getMaxExternalQuadrilateral(points: IPlanePoints) {
+  const minX = Object.values(points).reduce((acc, coord) => (coord.x < acc ? coord.x : acc), Number.MAX_SAFE_INTEGER);
+  const maxX = Object.values(points).reduce((acc, coord) => (coord.x > acc ? coord.x : acc), 0);
+  const minY = Object.values(points).reduce((acc, coord) => (coord.y < acc ? coord.y : acc), Number.MAX_SAFE_INTEGER);
+  const maxY = Object.values(points).reduce((acc, coord) => (coord.y > acc ? coord.y : acc), 0);
+
+  return {
+    tl: {
+      x: minX,
+      y: minY,
+    },
+    tr: {
+      x: maxX,
+      y: minY,
+    },
+    bl: {
+      x: minX,
+      y: maxY,
+    },
+    br: {
+      x: maxX,
+      y: maxY,
+    },
+  };
+}
+
+export function judgeCuboidLineIsRowOrColumn(pointList: [ICuboidPosition, ICuboidPosition]) {
+  const [firstPosition, secondPosition] = pointList;
+
+  if (CUBOID_ROW[firstPosition.position] === secondPosition.position) {
+    return ECuboidLineDirection.Row;
+  }
+
+  if (CUBOID_COLUMN[firstPosition.position] === secondPosition.position) {
+    return ECuboidLineDirection.Column;
+  }
 }
 
 /**
@@ -255,7 +307,7 @@ export function getBackPointsByFrontPoints({
     newBackPoints = getPointsByIntersection({ frontPoints, backPoints }).backPoints;
   }
 
-  return newBackPoints;
+  return { frontPoints, backPoints: newBackPoints };
 }
 
 export function getFrontPointsByBackPoints({
@@ -265,12 +317,21 @@ export function getFrontPointsByBackPoints({
   frontPoints: IPlanePoints;
   backPoints: IPlanePoints;
 }) {
-  const { isLeftSide, frontHeight, backHeight } = getCuboidBasicInfo({ frontPoints, backPoints });
+  const { isLeftSide, frontHeight, backHeight, frontWidth, backWidth } = getCuboidBasicInfo({
+    frontPoints,
+    backPoints,
+  });
 
   // 1. Create the Following BackPoints by frontPoints.
   let newFrontPoints = { ...frontPoints };
   let newBackPoints = backPoints;
-  if (isLeftSide) {
+
+  /**
+   * Create New FrontPoints.
+   * 1. leftSide
+   * 2. If the update backWidth > frontWidth.
+   */
+  if (isLeftSide || backWidth > frontWidth) {
     newFrontPoints = getPointsByBottomLeftPoint({ coord: frontPoints.bl, points: backPoints });
   } else {
     newFrontPoints = getPointsByBottomRightPoint({ coord: frontPoints.br, points: backPoints });
@@ -281,6 +342,13 @@ export function getFrontPointsByBackPoints({
     newFrontPoints.tl.y = frontPoints.tl.y;
     newFrontPoints.tr.y = frontPoints.tr.y;
     newBackPoints = getPointsByIntersection({ backPoints, frontPoints }).backPoints;
+  }
+
+  if (frontWidth >= backWidth) {
+    Object.keys(newFrontPoints).forEach((key) => {
+      // @ts-ignore
+      newFrontPoints[key].x = frontPoints[key].x;
+    });
   }
 
   return {
@@ -512,6 +580,92 @@ export function getCuboidHoverRange(cuboid: ICuboid): ICoordinate[] {
 }
 
 /**
+ * Notice: positions just support point and line moving.
+ * @param param0
+ */
+export function getNewPointsAfterOffset({
+  offset,
+  frontPoints,
+  backPoints,
+  positions,
+}: {
+  frontPoints: IPlanePoints;
+  backPoints: IPlanePoints;
+  offset: ICoordinate;
+  positions?: ICuboidPosition[];
+}) {
+  let newFrontPoints = cloneDeep(frontPoints);
+  let newBackPoints = cloneDeep(backPoints);
+
+  // Line Move
+  if (positions?.length === 2) {
+    const isFrontPlain = positions.every((v) => v.plain === ECuboidPlain.Front);
+    const isBackPlain = !isFrontPlain;
+
+    const lineDirection = judgeCuboidLineIsRowOrColumn([positions[0], positions[1]]);
+    const forbidX = lineDirection === ECuboidLineDirection.Row;
+    const forbidY = lineDirection === ECuboidLineDirection.Column;
+
+    // Allows movement only in vertical direction of the line.
+    if (forbidX) {
+      offset = {
+        x: 0,
+        y: offset.y,
+      };
+    }
+    if (forbidY) {
+      offset = {
+        y: 0,
+        x: offset.x,
+      };
+    }
+
+    // Just Update the Positions.
+    if (isFrontPlain) {
+      positions?.forEach(({ position }) => {
+        const points = newFrontPoints;
+
+        const movePoint = points[position];
+        points[position] = {
+          x: movePoint.x + offset.x,
+          y: movePoint.y + offset.y,
+        };
+      });
+      newFrontPoints = getMaxExternalQuadrilateral(newFrontPoints);
+      newBackPoints = getMaxExternalQuadrilateral(newBackPoints);
+    }
+
+    // If the backLine is moved. Need to keep backPoints size.
+    if (isBackPlain) {
+      Object.keys(newBackPoints).forEach((key) => {
+        //@ts-ignore
+        newBackPoints[key] = {
+          //@ts-ignore
+          x: newBackPoints[key].x + offset.x,
+          //@ts-ignore
+          y: newBackPoints[key].y + offset.y,
+        };
+      });
+    }
+
+    // Perspective
+    const getNewPlainPoints = isFrontPlain ? getBackPointsByFrontPoints : getFrontPointsByBackPoints;
+    const { frontPoints: newFrontPoints2, backPoints: newBackPoints2 } = getNewPlainPoints({
+      frontPoints: newFrontPoints,
+      backPoints: newBackPoints,
+    });
+
+    newFrontPoints = newFrontPoints2;
+    newBackPoints = newBackPoints2;
+  }
+
+  return {
+    frontPoints: newFrontPoints,
+    backPoints: newBackPoints,
+  };
+}
+
+/**
  * Update cuboid when dragging.
  * @param param0
  * @returns
@@ -525,7 +679,7 @@ export function getCuboidDragMove({
   offset: ICoordinate;
   cuboid: ICuboid;
   dragTarget: EDragTarget;
-  positions: ICuboidPosition[];
+  positions?: ICuboidPosition[];
 }): ICuboid | undefined {
   const { frontPoints, backPoints } = cuboid;
 
@@ -559,7 +713,18 @@ export function getCuboidDragMove({
     }
     case EDragTarget.Line: {
       //
-      break;
+      const { frontPoints: newFrontPoints, backPoints: newBackPoints } = getNewPointsAfterOffset({
+        offset,
+        frontPoints,
+        backPoints,
+        positions,
+      });
+
+      return {
+        ...cuboid,
+        frontPoints: newFrontPoints,
+        backPoints: newBackPoints,
+      };
     }
 
     case EDragTarget.Point: {
@@ -568,55 +733,45 @@ export function getCuboidDragMove({
       }
       const pointPosition = positions[0];
 
-      // Front
-      if (pointPosition.plain === ECuboidPlain.Front) {
-        // 1. Find the
-        let movePoint = frontPoints[pointPosition.position];
-        const diagonalPoint = frontPoints[DIAGONAL_POINT[pointPosition.position] as ECuboidPosition];
+      const isFrontPlain = pointPosition.plain === ECuboidPlain.Front;
 
-        if (!movePoint || !diagonalPoint) {
-          return;
-        }
+      // Notice: The following solution involves only the front and back plains.
+      const movePoints = isFrontPlain ? frontPoints : backPoints;
 
-        // 1. Get the New Front Size
-        movePoint = Vector.add(movePoint, offset);
+      // 1. Get the NewPlain by pointPosition.plain.
+      let movePoint = movePoints[pointPosition.position];
+      const diagonalPoint = movePoints[DIAGONAL_POINT[pointPosition.position] as ECuboidPosition];
 
-        const newFrontPoints = getPlainPointsByDiagonalPoints(movePoint, diagonalPoint);
-        const newBackPoints = getBackPointsByFrontPoints({
-          frontPoints: newFrontPoints,
+      if (!movePoint || !diagonalPoint) {
+        return;
+      }
+
+      movePoint = Vector.add(movePoint, offset);
+
+      const newPlainsPoints = getPlainPointsByDiagonalPoints(movePoint, diagonalPoint);
+
+      const getNewPlainPoints = isFrontPlain ? getBackPointsByFrontPoints : getFrontPointsByBackPoints;
+
+      let payload = {
+        frontPoints,
+        backPoints: newPlainsPoints,
+      };
+
+      if (isFrontPlain) {
+        payload = {
+          frontPoints: newPlainsPoints,
           backPoints,
-        });
-
-        // Calculate New Points by Diagonal Point (对角点)
-        return {
-          ...cuboid,
-          frontPoints: newFrontPoints,
-          backPoints: newBackPoints,
         };
       }
 
-      if (pointPosition.plain === ECuboidPlain.Back) {
-        let movePoint = backPoints[pointPosition.position];
-        const diagonalPoint = backPoints[DIAGONAL_POINT[pointPosition.position] as ECuboidPosition];
+      const { frontPoints: newFrontPoints, backPoints: newBackPoints } = getNewPlainPoints(payload);
 
-        if (!movePoint || !diagonalPoint) {
-          return;
-        }
-        movePoint = Vector.add(movePoint, offset);
-
-        // 1. Get the New Back Size
-        const newBackPoints = getPlainPointsByDiagonalPoints(movePoint, diagonalPoint);
-        const { frontPoints: newFrontPoints, backPoints: newBackPoints2 } = getFrontPointsByBackPoints({
-          frontPoints,
-          backPoints: newBackPoints,
-        });
-        return {
-          ...cuboid,
-          frontPoints: newFrontPoints,
-          backPoints: newBackPoints2 || newBackPoints,
-        };
-      }
-      break;
+      // Calculate New Points by Diagonal Point (对角点)
+      return {
+        ...cuboid,
+        frontPoints: newFrontPoints,
+        backPoints: newBackPoints,
+      };
     }
 
     default: {

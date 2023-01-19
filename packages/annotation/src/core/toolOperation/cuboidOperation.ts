@@ -148,21 +148,30 @@ class CuboidOperation extends BasicToolOperation {
     // Just use the first one.
     const firstHighlightInfo = highlightInfo?.[0];
 
-    if (firstHighlightInfo?.type === 'point') {
-      this.dragInfo = {
-        ...DEFAULT_DRAG_INFO,
-        dragTarget: EDragTarget.Point,
-        positions: firstHighlightInfo.positions,
-      };
+    switch (firstHighlightInfo?.type) {
+      case 'point':
+        this.dragInfo = {
+          ...DEFAULT_DRAG_INFO,
+          dragTarget: EDragTarget.Point,
+          positions: firstHighlightInfo.positions,
+        };
+        break;
 
-      return;
+      case 'line':
+        this.dragInfo = {
+          ...DEFAULT_DRAG_INFO,
+          dragTarget: EDragTarget.Line,
+          positions: firstHighlightInfo.positions,
+        };
+        break;
+
+      default: {
+        this.dragInfo = {
+          ...DEFAULT_DRAG_INFO,
+          dragTarget: EDragTarget.Cuboid,
+        };
+      }
     }
-
-    // 3. Last Cuboid
-    this.dragInfo = {
-      ...DEFAULT_DRAG_INFO,
-      dragTarget: EDragTarget.Cuboid,
-    };
   }
 
   public onMouseUp(e: MouseEvent): boolean | void {
@@ -294,9 +303,6 @@ class CuboidOperation extends BasicToolOperation {
     }
 
     const { dragTarget, initCuboid, dragStartCoord, positions } = this.dragInfo;
-    if (!positions) {
-      return;
-    }
 
     const coordinate = this.getCoordinateUnderZoom(e);
 
