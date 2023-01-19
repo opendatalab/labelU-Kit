@@ -49,7 +49,7 @@ interface IProps {
   copyToolInstance: ToolInstance;
   currentToolName: string;
   basicResultList: [];
-  isShowClear:boolean
+  isShowClear: boolean;
 }
 
 const AttributeRusult: FC<IProps> = ({
@@ -61,7 +61,7 @@ const AttributeRusult: FC<IProps> = ({
   copyToolInstance,
   attributeList,
   basicResultList,
-  isShowClear
+  isShowClear,
 }) => {
   const [attributeResultList, setAttributeResultList] = useState<AttributeResult[]>([]);
   // const attributeShowRef = useRef<HTMLImageElement>(null);
@@ -115,21 +115,19 @@ const AttributeRusult: FC<IProps> = ({
     initToolInfo();
   }, []);
 
-
   const showPopconfirm = () => {
     setOpen(true);
   };
 
-  const [boxHeight,setBoxHeight] = useState<number>();
-  const [boxWidth,setBoxWidth] = useState<number>();
+  const [boxHeight, setBoxHeight] = useState<number>();
+  const [boxWidth, setBoxWidth] = useState<number>();
 
-
-  useEffect(()=>{
-    let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+  useEffect(() => {
+    let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')
+      ?.parentNode as HTMLElement;
     setBoxHeight(boxParent.clientHeight);
     setBoxWidth(boxParent.clientWidth);
-  })
-
+  });
 
   const initToolInfo = () => {
     const initStr = JSON.stringify({
@@ -184,13 +182,13 @@ const AttributeRusult: FC<IProps> = ({
               if (attributeMap.has(oneLabel.attribute)) {
                 let tmpToolInfo = attributeMap.get(oneLabel.attribute);
                 // 去重
-                for(let i=0;i<tmpToolInfo.length;i++){
-                  if(tmpToolInfo[i].order === oneLabel.order){
+                for (let i = 0; i < tmpToolInfo.length; i++) {
+                  if (tmpToolInfo[i].order === oneLabel.order) {
                     isExistInTmpToolInfo = true;
                   }
                 }
 
-                if(!isExistInTmpToolInfo){
+                if (!isExistInTmpToolInfo) {
                   tmpToolInfo.push({
                     toolName: item.toolName,
                     order: oneLabel.order,
@@ -199,7 +197,6 @@ const AttributeRusult: FC<IProps> = ({
                     textAttribute: oneLabel.textAttribute,
                   });
                 }
-   
               } else {
                 attributeMap.set(oneLabel.attribute, [
                   {
@@ -524,7 +521,7 @@ const AttributeRusult: FC<IProps> = ({
       // eslint-disable-next-line react/jsx-no-undef
       children.push(<Option key={item.key}>{item.value}</Option>);
     }
-    children.push(<Option key={'无标签'}>无标签</Option>)
+    children.push(<Option key={'无标签'}>无标签</Option>);
     return (
       <Form
         name='basic'
@@ -579,16 +576,14 @@ const AttributeRusult: FC<IProps> = ({
 
   if (!attributeResultList || attributeResultList.length === 0 || !boxHeight) {
     return (
-      <div className='containerBox'
-      style={{height: boxHeight as number - 220}}
-      >
+      <div className='containerBox' style={{ height: (boxHeight as number) - 220 }}>
         <img className='emptyAttributeImg' src={emptyAttributeImg} />
       </div>
     );
   }
   return (
     <div
-    style={{height: boxHeight as number - 220}}
+      style={{ height: (boxHeight as number) - 220 }}
       className={classNames({
         attributeResult: true,
       })}
@@ -776,17 +771,17 @@ const AttributeRusult: FC<IProps> = ({
                       </div>
                     );
                   })}
-        
-                  <Popconfirm
-                    title='确认清空标注？'
-                    open={open}
-                    okText='确认'
-                    cancelText='取消'
-                    onConfirm={handleOk}
-                    okButtonProps={{ loading: confirmLoading }}
-                    onCancel={handleCancel}
-                  >
-                    <div className='rightBarFooter'>
+
+                <Popconfirm
+                  title='确认清空标注？'
+                  open={open}
+                  okText='确认'
+                  cancelText='取消'
+                  onConfirm={handleOk}
+                  okButtonProps={{ loading: confirmLoading }}
+                  onCancel={handleCancel}
+                >
+                  <div className='rightBarFooter'>
                     <img
                       onMouseEnter={(e) => {
                         e.stopPropagation();
@@ -800,10 +795,8 @@ const AttributeRusult: FC<IProps> = ({
                       className='clrearResult'
                       src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
                     />
-                    </div>
-                  </Popconfirm>
-          
-
+                  </div>
+                </Popconfirm>
               </Panel>
             );
           })}
