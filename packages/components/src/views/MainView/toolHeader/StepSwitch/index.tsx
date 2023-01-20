@@ -1,18 +1,15 @@
-/**
- * 用于多步骤中的切换
- */
-
 import { Dropdown } from 'antd/es';
 import { CaretDownOutlined, OrderedListOutlined } from '@ant-design/icons';
 import React from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { AppState } from '@/store';
+import { useTranslation } from 'react-i18next';
+
+import type { AppState } from '@/store';
 import IconWithText from '@/components/customAntd/IconWithText';
 import { prefix } from '@/constant';
 import AnnotationStepPopover from '@/components/annotationStepPopover';
-import { IStepInfo } from '@/types/step';
+import type { IStepInfo } from '@/types/step';
 import { UpdateProcessingStep } from '@/store/annotation/actionCreators';
-import { useTranslation } from 'react-i18next';
 
 interface IProps {
   stepProgress: number;
@@ -20,7 +17,11 @@ interface IProps {
   step: number;
 }
 
-const StepSwitch: React.FC<IProps> = ({ stepProgress, step, stepList }) => {
+/**
+ * 用于多步骤中的切换
+ */
+
+const StepSwitch: React.FC<IProps> = ({ step, stepList }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const updateStep = (toStep: number) => {
@@ -29,11 +30,7 @@ const StepSwitch: React.FC<IProps> = ({ stepProgress, step, stepList }) => {
 
   return (
     <span className={`${prefix}`}>
-      <Dropdown
-        overlay={
-          <AnnotationStepPopover stepList={stepList} updateStep={updateStep} currentStep={step} />
-        }
-      >
+      <Dropdown overlay={<AnnotationStepPopover stepList={stepList} updateStep={updateStep} currentStep={step} />}>
         <IconWithText
           text={t('Steps')}
           Icon={OrderedListOutlined}

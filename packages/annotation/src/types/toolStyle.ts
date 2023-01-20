@@ -1,9 +1,9 @@
-declare interface IBaseColorStyle {
+export interface IBaseColorStyle {
   stroke: string;
   fill: string;
 }
 
-declare interface IToolColorStyle {
+export interface IToolColorStyle {
   valid: IBaseColorStyle;
   invalid: IBaseColorStyle;
   validSelected: IBaseColorStyle;

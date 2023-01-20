@@ -1,26 +1,20 @@
-import MainView from '@/views/MainView';
 import { i18n } from '@label-u/utils';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { BasicToolOperation } from '@label-u/annotation';
+
+import MainView from '@/views/MainView';
+import type { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
+
 import { store } from '.';
-import { AppState } from './store';
+import type { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
 import { ChangeCurrentTool, InitTaskData, loadImgList } from './store/annotation/actionCreators';
 import { LoadFileAndFileData } from './store/annotation/reducer';
-import { ToolInstance } from './store/annotation/types';
-import {
-  GetFileData,
-  OnSave,
-  OnSubmit,
-  IFileItem,
-  OnPageChange,
-  OnStepChange,
-  LoadFileList,
-} from './types/data';
-import { Footer, Header, Sider } from './types/main';
-import { IStepInfo } from './types/step';
-import { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
+import type { ToolInstance } from './store/annotation/types';
+import type { GetFileData, OnSave, OnSubmit, IFileItem, OnPageChange, OnStepChange, LoadFileList } from './types/data';
+import type { Footer, Header, Sider } from './types/main';
+import type { IStepInfo } from './types/step';
 
 interface IAnnotationStyle {
   strokeColor: string;
@@ -54,10 +48,10 @@ export interface AppProps {
   footer?: Footer;
   sider?: Sider;
   style?: {
-    layout?: { [key: string]: any };
-    header?: { [key: string]: any };
-    sider?: { [key: string]: any };
-    footer?: { [key: string]: any };
+    layout?: Record<string, any>;
+    header?: Record<string, any>;
+    sider?: Record<string, any>;
+    footer?: Record<string, any>;
   };
   setToolInstance?: (tool: ToolInstance) => void;
   mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
@@ -92,6 +86,7 @@ const App: React.FC<AppProps> = (props) => {
     currentToolName,
     onPageChange,
     onStepChange,
+    // @ts-ignore
     initialIndex = BasicToolOperation.Cache.get('nextIndex') || 0,
     toolInstance,
     tagConfigList,
@@ -102,38 +97,65 @@ const App: React.FC<AppProps> = (props) => {
     getFileData,
     pageSize = 10,
     loadFileList,
-    defaultLang = 'cn'
+    defaultLang = 'cn',
   } = props;
 
   //@ts-ignore
-  if(props.imgList&&props.imgList.length>0){
-    console.info("result",props.imgList[0].result)
+  if (props.imgList && props.imgList.length > 0) {
+    console.info('result', props.imgList[0].result);
   }
+
+  // 初始化imgList 优先以loadFileList方式加载数据
+  const initImgList = useCallback(() => {
+    if (loadFileList) {
+      loadImgList(store.dispatch, store.getState, initialIndex, true).then((isSuccess) => {
+        if (isSuccess) {
+          store.dispatch(LoadFileAndFileData(initialIndex));
+        }
+      });
+    } else if (imgList && imgList.length > 0) {
+      store.dispatch({
+        type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
+        payload: {
+          imgList,
+        },
+      });
+      store.dispatch(LoadFileAndFileData(initialIndex));
+      // 页数持久化
+      // loacalforage.getItem('nextIndex', (error, value) => {
+      //   // if (value && value < imgList.length) {
+      //   //   store.dispatch(LoadFileAndFileData(value as number));
+      //   // } else {
+
+      //   // }
+      // });
+    }
+  }, [imgList, initialIndex, loadFileList]);
 
   const dispatch = useDispatch();
 
   const { isShowOrder } = useSelector((state: AppState) => state.annotation);
-  const [imgUrl,setImgUrl] = useState<string>();
-
-
-  useEffect(()=>{
-    if(imgList&&imgList?.length>0&&imgList[0].url){
-      setImgUrl(imgList[0].url)
-    }
-  },[])
-
-  // unmount时销毁BasicToolOperation.Cache
-  useEffect(() => () => {
-    BasicToolOperation.Cache.clear();
-  }, []);
+  const [imgUrl, setImgUrl] = useState<string>();
 
   useEffect(() => {
-    if (
-      (imgList&&imgList?.length>0)&&
-      (props.toolsBasicConfig && props.toolsBasicConfig.length > 0)
-    ) {
+    if (imgList && imgList?.length > 0 && imgList[0].url) {
+      setImgUrl(imgList[0].url);
+    }
+  }, [imgList]);
+
+  // unmount时销毁BasicToolOperation.Cache
+  useEffect(
+    () => () => {
+      // @ts-ignore
+      BasicToolOperation.Cache.clear();
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (imgList && imgList?.length > 0 && props.toolsBasicConfig && props.toolsBasicConfig.length > 0) {
       let initToolName = currentToolName;
-      let findToolConfigByToolName = toolsBasicConfig.filter((item) => {
+      const findToolConfigByToolName = toolsBasicConfig.filter((item) => {
         return item.tool === currentToolName;
       });
       // 当工具配置中不包含currentToolName时，重置currentToolName
@@ -166,13 +188,29 @@ const App: React.FC<AppProps> = (props) => {
     }
   }, [
     imgUrl,
-    // props.toolStyle,
     props.toolsBasicConfig,
     props.attributeList,
     props.textConfig,
     props.tagConfigList,
     currentToolName,
-    // isShowOrder,
+    imgList,
+    toolsBasicConfig,
+    toolStyle,
+    onSubmit,
+    stepList,
+    tagConfigList,
+    attributeList,
+    textConfig,
+    step,
+    getFileData,
+    pageSize,
+    loadFileList,
+    onSave,
+    onPageChange,
+    onStepChange,
+    initImgList,
+    defaultLang,
+    dispatch,
   ]);
 
   // useEffect(() => {
@@ -180,43 +218,15 @@ const App: React.FC<AppProps> = (props) => {
   //   initImgList();
   // }, [])
 
-
   useEffect(() => {
     if (toolInstance) {
       setToolInstance?.(toolInstance);
-      toolInstance.setIsShowOrder(isShowOrder)
+      toolInstance.setIsShowOrder(isShowOrder);
     }
-  }, [toolInstance, isShowOrder]);
-
-  // 初始化imgList 优先以loadFileList方式加载数据
-  const initImgList = () => {
-    if (loadFileList) {
-      loadImgList(store.dispatch, store.getState, initialIndex, true).then((isSuccess) => {
-        if (isSuccess) {
-          store.dispatch(LoadFileAndFileData(initialIndex));
-        }
-      });
-    } else if (imgList && imgList.length > 0) {
-      store.dispatch({
-        type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
-        payload: {
-          imgList,
-        },
-      });
-      store.dispatch(LoadFileAndFileData(initialIndex));
-      // 页数持久化
-      // loacalforage.getItem('nextIndex', (error, value) => {
-      //   // if (value && value < imgList.length) {
-      //   //   store.dispatch(LoadFileAndFileData(value as number));
-      //   // } else {
-
-      //   // }
-      // });
-    }
-  };
+  }, [toolInstance, isShowOrder, setToolInstance]);
 
   return (
-    <div id='annotationCotentAreaIdtoGetBox'>
+    <div id="annotationCotentAreaIdtoGetBox">
       <MainView {...props} currentToolName={currentToolName as string} />
     </div>
   );

@@ -7,16 +7,13 @@ import canvasEdit5 from '../assets/attributeIcon/icon_canvasEdit5.svg';
 import canvasEdit6 from '../assets/attributeIcon/icon_canvasEdit6.svg';
 import canvasEdit7 from '../assets/attributeIcon/icon_canvasEdit7.svg';
 import canvasEdit8 from '../assets/attributeIcon/icon_canvasEdit8.svg';
-
 // 基础颜色
 import baseEditLan from '../assets/attributeIcon/icon_editLAN.svg';
 import baseEditQing from '../assets/attributeIcon/icon_editQING.svg';
 import baseEditLv from '../assets/attributeIcon/icon_editLV.svg';
 import baseEditHuang from '../assets/attributeIcon/icon_editHUANG.svg';
 import baseEditFen from '../assets/attributeIcon/icon_editFEN.svg';
-
 import { EFilterToolOperation } from './tool';
-
 import INVALID_ICON from '../assets/attributeIcon/icon_canvasEdit_miss.svg';
 
 const NULL_ICON = canvasEdit0;
@@ -78,7 +75,7 @@ export const ICON_ARRAY = [
 ];
 
 /** svg base icon */
-export const BASE_ICON: { [a: number]: any } = {
+export const BASE_ICON: Record<number, any> = {
   1: baseEditLan,
   3: baseEditQing,
   5: baseEditLv,

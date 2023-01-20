@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { ToolInstance } from '@/store/annotation/types';
 import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';
+
+import type { ToolInstance } from '@/store/annotation/types';
+import type { AppState } from '@/store';
 
 interface IProps {
   toolInstance: ToolInstance;
@@ -11,7 +12,7 @@ interface IProps {
 
 const HiddenTips = (props: IProps) => {
   const { toolInstance } = props;
-  const [_, forceRender] = useState(0);
+  const [, forceRender] = useState(0);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const HiddenTips = (props: IProps) => {
     return (
       <span>
         {t('HideDrawnAnnotation')}
-        <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
+        <Divider type="vertical" style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
       </span>
     );
   }

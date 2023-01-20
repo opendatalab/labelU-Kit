@@ -1,3 +1,5 @@
+import type { ICoordinate, ISize } from '@/types/tool/common';
+
 import MathUtils from '../MathUtils';
 
 export default class CanvasUtils {

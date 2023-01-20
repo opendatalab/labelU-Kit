@@ -1,4 +1,4 @@
-declare interface IImageAttribute {
+export interface IImageAttribute {
   contrast: number;
   saturation: number;
   brightness: number;

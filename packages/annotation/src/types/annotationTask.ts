@@ -1,4 +1,6 @@
-declare interface IAnnotationTaskInfo {
+import type { IPolygonData } from './tool/polygon';
+
+export interface IAnnotationTaskInfo {
   id: string;
   name: string;
   type: number;
@@ -14,19 +16,19 @@ declare interface IAnnotationTaskInfo {
   currentStep: number;
 }
 
-type Result = IPolygonData | Rect;
+export type Result = IPolygonData;
 
-declare interface PrevResult {
+export interface PrevResult {
   toolName: string;
   result: Result[];
 }
 
-declare interface Attribute {
+export interface Attribute {
   key: string;
   value: string;
 }
 
-declare interface OneTag {
+export interface OneTag {
   key: string;
   value: string;
   isMulti: boolean;

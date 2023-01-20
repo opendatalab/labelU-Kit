@@ -5,6 +5,7 @@ import SelectedRectSvg from '@/assets/annotation/toolHotKeyIcon/icon_frameActive
 import MouseRightSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_right_kj.svg';
 import ChangeValidSvg from '@/assets/annotation/toolHotKeyIcon/icon_frameChange_kj.svg';
 import DeleteRectSvg from '@/assets/annotation/toolHotKeyIcon/icon_del_kj.svg';
+
 import {
   backward,
   dargWithRightClick,

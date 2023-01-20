@@ -1,17 +1,17 @@
-declare interface ITagConfig extends IToolConfig {
+import type { IToolConfig } from './common';
+
+export interface ITagConfig extends IToolConfig {
   pageSize: number;
   inputList: IInputList[];
 }
 
-declare interface ITagResult {
+export interface ITagResult {
   id: string;
   sourceID: string;
-  result: {
-    [a: string]: string;
-  };
+  result: Record<string, string>;
 }
 
-declare interface IInputList {
+export interface IInputList {
   key: string;
   value: string;
   isMulti?: boolean;

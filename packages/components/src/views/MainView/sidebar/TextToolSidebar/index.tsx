@@ -1,15 +1,17 @@
-import React, { useEffect, useState, useRef, FocusEvent } from 'react';
+import type { FocusEvent } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
-import { AppState } from '@/store';
 import { cloneDeep } from 'lodash';
-import { classnames } from '@/utils';
 import { Input } from 'antd/es';
 import { cKeyCode } from '@label-u/annotation';
+import type { TextToolOperation } from '@label-u/annotation';
+import { useTranslation } from 'react-i18next';
+
+import type { AppState } from '@/store';
+import { classnames } from '@/utils';
 import { PageForward } from '@/store/annotation/actionCreators';
 import { ConfigUtils } from '@/utils/ConfigUtils';
-import { IStepInfo } from '@/types/step';
-import TextToolOperation from '@label-u/annotation/dist/types/core/toolOperation/TextToolOperation';
-import { useTranslation } from 'react-i18next';
+import type { IStepInfo } from '@/types/step';
 
 const EKeyCode = cKeyCode.default;
 
@@ -71,8 +73,7 @@ export const SingleTextInput = (props: any) => {
   const [invalid, setInvalid] = useState(false);
   const { t } = useTranslation();
 
-  const { disabled, config, result, updateText, index, switchToNextTextarea, hasMultiple, onNext } =
-    props;
+  const { disabled, config, result, updateText, index, switchToNextTextarea, hasMultiple, onNext } = props;
   const { maxLength } = config;
 
   const value = result ? result[config.key] : '';
@@ -97,8 +98,7 @@ export const SingleTextInput = (props: any) => {
     maxLength,
     autoSize: { minRows: 2, maxRows: 6 },
     onChange: (e: FocusEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      updateTextWithKey(value);
+      updateTextWithKey(e.target.value);
     },
     onFocus: () => {
       setTextAreaFocus(true);
@@ -132,14 +132,13 @@ export const SingleTextInput = (props: any) => {
   };
 
   const TextareaFooter = (
-    <div className='textAreaFooter'>
-      <div className='hotkeyTip'>
+    <div className="textAreaFooter">
+      <div className="hotkeyTip">
         {tabToSwitchEnabled && <span>{`[${t('Switch')}]Tab`}</span>}
         <span>{`[${t('TurnPage')}]Ctrl+Enter`}</span>
       </div>
-      <div className='wordCount'>
-        <span className={textLength >= maxLength ? 'warning' : ''}>{textLength}</span>/
-        <span>{maxLength}</span>
+      <div className="wordCount">
+        <span className={textLength >= maxLength ? 'warning' : ''}>{textLength}</span>/<span>{maxLength}</span>
       </div>
     </div>
   );
@@ -151,8 +150,8 @@ export const SingleTextInput = (props: any) => {
   }, [disabled]);
 
   return (
-    <div className='textField'>
-      <div className='label'>
+    <div className="textField">
+      <div className="label">
         <span className={classnames({ required: config.required })}>{config.label}</span>
         <i
           className={classnames({ clearText: true, disabled: disabled })}
@@ -193,11 +192,6 @@ const TextToolSidebar: React.FC<IProps> = ({
   const [focusIndex, setFocusIndex] = useState(0);
   const [, forceRender] = useState(0);
 
-  const switchToNextTextarea = (currentIndex: number) => {
-    const nextIndex = (currentIndex + 1) % configList.length;
-    textareaFocus(nextIndex);
-  };
-
   const textareaFocus = (index: number) => {
     setTimeout(() => {
       const textarea = document.getElementById(`textInput-${index}`) as HTMLTextAreaElement;
@@ -208,6 +202,11 @@ const TextToolSidebar: React.FC<IProps> = ({
         textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
+  };
+
+  const switchToNextTextarea = (currentIndex: number) => {
+    const nextIndex = (currentIndex + 1) % configList.length;
+    textareaFocus(nextIndex);
   };
 
   useEffect(() => {
@@ -227,7 +226,7 @@ const TextToolSidebar: React.FC<IProps> = ({
     if (imgIndex > -1 && triggerEventAfterIndexChanged) {
       textareaFocus(0);
     }
-  }, [imgIndex]);
+  }, [imgIndex, triggerEventAfterIndexChanged]);
 
   const result = toolInstance.textList[0]?.value ?? {};
 
@@ -239,7 +238,7 @@ const TextToolSidebar: React.FC<IProps> = ({
   const disabled = stepConfig.dataSourceStep > 0 && basicResultList.length === 0;
 
   return (
-    <div className='textToolOperationMenu'>
+    <div className="textToolOperationMenu">
       {configList.map((i, index) => (
         <SingleTextInput
           config={i}

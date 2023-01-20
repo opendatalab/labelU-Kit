@@ -1,17 +1,19 @@
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import { useMemo } from 'react';
 import { Popover } from 'antd/es';
-import ToolStyle from './ToolStyle';
+
 import { prefix } from '@/constant';
 
+import ToolStyle from './ToolStyle';
+
 const ImageStyle: FC = () => {
-  const toolStyle = <ToolStyle />;
+  const toolStyle = useMemo(() => <ToolStyle />, []);
 
-  const content = useMemo(() => <div className={`${prefix}-sidebar`}>{toolStyle}</div>, []);
-
+  const content = useMemo(() => <div className={`${prefix}-sidebar`}>{toolStyle}</div>, [toolStyle]);
 
   return (
     <Popover
-      placement='topLeft'
+      placement="topLeft"
       content={content}
       // visible={visible}
       // @ts-ignore
@@ -19,11 +21,11 @@ const ImageStyle: FC = () => {
       // onMouseLeave={() => {
       //   setFlag(false);
       // }}
-      overlayClassName='tool-hotkeys-popover'
+      overlayClassName="tool-hotkeys-popover"
       // visible={svgFlag}
     >
       <div
-        className='item'
+        className="item"
         //   onMouseMove={() => setFlag(true)}
         //   onMouseLeave={() => setFlag(false)}
         //   style={containerStyle}

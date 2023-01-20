@@ -1,3 +1,1 @@
-declare interface AnyObject {
-  [a: string]: any;
-}
+type AnyObject = Record<string, any>;

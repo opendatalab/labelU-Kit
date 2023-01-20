@@ -15,7 +15,7 @@ export const getNewNode = <T>(newNode: T, oldNode: T): T => {
   return newNode || _.isNull(newNode) ? newNode : oldNode;
 };
 
-export const classnames = (className: { [key: string]: boolean } | string[]) => {
+export const classnames = (className: Record<string, boolean> | string[]) => {
   if (Array.isArray(className)) {
     return className.join(' ');
   }

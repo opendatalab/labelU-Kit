@@ -1,5 +1,6 @@
 import { IMAGE_ATTRIBUTE_ACTIONS } from '@/store/Actions';
-import { ImgAttributeState, ImgAttributeActionTypes } from './types';
+
+import type { ImgAttributeState, ImgAttributeActionTypes } from './types';
 
 const initialState: ImgAttributeState = {
   contrast: 1,
@@ -9,10 +10,7 @@ const initialState: ImgAttributeState = {
   isOriginalSize: false,
 };
 
-export function imgAttributeReducer(
-  state = { ...initialState },
-  action: ImgAttributeActionTypes,
-): ImgAttributeState {
+export function imgAttributeReducer(state = { ...initialState }, action: ImgAttributeActionTypes): ImgAttributeState {
   switch (action.type) {
     case IMAGE_ATTRIBUTE_ACTIONS.UPDATE_IMG_ATTRIBUTE: {
       return {

@@ -1,3 +1,5 @@
+import type { ISize } from '@/types/tool/common';
+
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 

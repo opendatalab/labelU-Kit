@@ -1,16 +1,18 @@
-import RadioList from '@/components/attributeList';
-import CheckBoxList from '@/components/checkboxList';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Badge, Collapse, Tooltip } from 'antd/es';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { TagOperation } from '@label-u/annotation';
+import { TagUtils } from '@label-u/annotation';
+import { connect } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+
 import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import clearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
-import { TagOperation, TagUtils } from '@label-u/annotation';
-import { connect } from 'react-redux';
-import { AppState } from '@/store';
-import { IInputList } from '@/types/main';
-import { useTranslation } from 'react-i18next';
+import type { AppState } from '@/store';
+import type { IInputList } from '@/types/main';
+import CheckBoxList from '@/components/checkboxList';
+import RadioList from '@/components/attributeList';
 
 interface IProps {
   imgIndex: number;
@@ -19,17 +21,41 @@ interface IProps {
 
 const { Panel } = Collapse;
 
-export const expandIconFuc = ({ isActive }: any) => (
-  <CaretRightOutlined rotate={isActive ? 90 : 0} />
-);
+export const expandIconFuc = ({ isActive }: any) => <CaretRightOutlined rotate={isActive ? 90 : 0} />;
 
 const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
+  const {
+    labelSelectedList,
+    config: { inputList },
+    currentTagResult,
+    setLabel,
+  } = toolInstance;
+
   const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
-  
+
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [, forceRender] = useState<number>(0);
   const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
   const { t } = useTranslation();
+
+  const setExpendKeyList = useCallback(
+    (index: number, value: string, expend?: boolean) => {
+      const newKeyList = cloneDeep(expandKeyList);
+      if (newKeyList[index] === '' || expend === true) {
+        newKeyList[index] = value;
+      } else {
+        newKeyList[index] = '';
+      }
+      setExpandKeyList(newKeyList);
+    },
+    [expandKeyList],
+  );
+
+  const expendRender = () => {
+    const index = toolInstance.labelSelectedList[0];
+    const value = inputList.filter((v: IInputList, i: number) => i === index)[0]?.value;
+    setExpendKeyList(index, value, true);
+  };
 
   useEffect(() => {
     if (toolInstance) {
@@ -52,11 +78,10 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
         let height = 0;
         for (let i = 0; i < toolInstance.labelSelectedList[0]; i++) {
           height += 46;
-          inputList[i] &&
-            expandKeyList[i] !== '' &&
-            inputList[i].subSelected.forEach((i: any) => {
-              height += 40;
-            });
+          if (inputList[i] && expandKeyList[i] !== '') {
+            // eslint-disable-next-line @typescript-eslint/no-loop-func
+            inputList[i].subSelected.forEach(() => (height += 40));
+          }
         }
         if (sidebarRef.current) {
           sidebarRef.current.children[0].scrollTop = height;
@@ -72,39 +97,13 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
     }
   }, [imgIndex]);
 
-  const expendRender = () => {
-    const index = toolInstance.labelSelectedList[0];
-    const value = inputList.filter((v: IInputList, i: number) => i === index)[0]?.value;
-    setExpendKeyList(index, value, true);
-  };
-
-  const setExpendKeyList = useCallback(
-    (index: number, value: string, expend?: boolean) => {
-      const newKeyList = cloneDeep(expandKeyList);
-      if (newKeyList[index] === '' || expend === true) {
-        newKeyList[index] = value;
-      } else {
-        newKeyList[index] = '';
-      }
-      setExpandKeyList(newKeyList);
-    },
-    [expandKeyList],
-  );
-
   if (!toolInstance) return null;
-
-  const {
-    labelSelectedList,
-    config: { inputList },
-    currentTagResult,
-    setLabel,
-  } = toolInstance;
 
   const selectedButton = (index: number) => {
     if (labelSelectedList.length > 0 && labelSelectedList[0] === index) {
-      return <span className='keyDownIconActive'>{index + 1}</span>;
+      return <span className="keyDownIconActive">{index + 1}</span>;
     }
-    return <span className='keyDownIcon'>{index + 1}</span>;
+    return <span className="keyDownIcon">{index + 1}</span>;
   };
 
   // basicIndex 到底是那一层
@@ -142,7 +141,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
                 >
                   <span>
                     {info.key}
-                    <Tooltip placement='bottom' title={t('ClearThisOption')}>
+                    <Tooltip placement="bottom" title={t('ClearThisOption')}>
                       <img
                         style={{ marginLeft: 5, cursor: 'pointer' }}
                         onClick={(e) => {
@@ -158,7 +157,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
                         }}
                       />
                     </Tooltip>
-                    {isResult && expandKeyList[index] === '' && <Badge color='#87d068' />}
+                    {isResult && expandKeyList[index] === '' && <Badge color="#87d068" />}
                   </span>
 
                   {inputList?.length > 1 && selectedButton(index)}
@@ -167,12 +166,10 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
               key={info.value}
             >
               <div
-                className='level'
+                className="level"
                 style={{
                   backgroundColor:
-                    labelSelectedList.length > 0 && labelSelectedList[0] === index
-                      ? 'rgba(158, 158, 158, 0.18)'
-                      : '',
+                    labelSelectedList.length > 0 && labelSelectedList[0] === index ? 'rgba(158, 158, 158, 0.18)' : '',
                 }}
               >
                 {labelPanel(info.subSelected, index)}
@@ -182,12 +179,11 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
         );
       }
       const key = inputList?.[basicIndex] ? inputList?.[basicIndex].value : 0;
-      const selectedAttribute =
-        currentTagResult?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
+      const selectedAttribute = currentTagResult?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
 
       if (inputList?.[basicIndex]?.isMulti === true) {
         return (
-          <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
+          <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
             <CheckBoxList
               attributeChanged={() => setLabel(basicIndex, index)}
               selectedAttribute={[selectedAttribute]}
@@ -198,7 +194,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
         );
       }
       return (
-        <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
+        <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
           <RadioList
             forbidColor
             attributeChanged={() => setLabel(basicIndex, index)}
@@ -213,13 +209,11 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   const height = window?.innerHeight - 61 - 80;
 
   return (
-    <div className='tagOperationMenu' ref={sidebarRef}>
+    <div className="tagOperationMenu" ref={sidebarRef}>
       {inputList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div style={{ height }}>
-          {labelPanel(inputList)}
-        </div>
+        <div style={{ height }}>{labelPanel(inputList)}</div>
       )}
     </div>
   );

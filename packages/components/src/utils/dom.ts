@@ -1,11 +1,8 @@
-import { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
+
 import { prefix } from '@/constant';
 
-export type BasicTarget<T = HTMLElement> =
-  | (() => T | null)
-  | T
-  | null
-  | MutableRefObject<T | null | undefined>;
+export type BasicTarget<T = HTMLElement> = (() => T | null) | T | null | MutableRefObject<T | null | undefined>;
 
 type TargetElement = HTMLElement | Element | Document | Window;
 
@@ -35,5 +32,4 @@ export function getTargetElement(
  * @param elm
  * @param modify
  */
-export const getClassName = (elm: string, modify?: string) =>
-  `${prefix}-${elm}${modify ? '__' + modify : ''}`;
+export const getClassName = (elm: string, modify?: string) => `${prefix}-${elm}${modify ? '__' + modify : ''}`;

@@ -5,13 +5,18 @@
  */
 
 import _ from 'lodash';
+
 import { DEFAULT_FONT, ELineColor, ELineTypes, ETextType, EToolName } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
-import { LineToolConfig } from '@/interface/conbineTool';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { LineToolConfig } from '@/interface/conbineTool';
+import type { ICoordinate, IPoint, IRectArea } from '@/types/tool/common';
+import type { ILine, ILinePoint } from '@/types/tool/lineTool';
+
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 import LineToolUtils from '../../utils/tool/LineToolUtils';
 import {
   isInPolygon,
@@ -48,7 +53,7 @@ export const POINT_ACTIVE_RADIUS = 5;
 /** 内侧圆的半径 */
 export const INNER_POINT_RADIUS = 2;
 
-interface ILineOperationProps extends IBasicToolOperationProps {}
+type ILineOperationProps = IBasicToolOperationProps;
 
 class LineToolOperation extends BasicToolOperation {
   /**
@@ -70,7 +75,7 @@ class LineToolOperation extends BasicToolOperation {
       order = existLine.order;
     } else {
       // order = this.nextOrder();
-      order = CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList) +1
+      order = CommonToolUtils.getAllToolsMaxOrder(this.lineList, this.prevResultList) + 1;
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
     activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
@@ -531,7 +536,7 @@ class LineToolOperation extends BasicToolOperation {
    * @param showPoint 是否显示点
    */
   public drawLine = (
-    points: Array<ILinePoint | ICoordinate>,
+    points: (ILinePoint | ICoordinate)[],
     cursor: ICoordinate | undefined,
     color: string,
     showPoint: boolean = false,
@@ -841,18 +846,21 @@ class LineToolOperation extends BasicToolOperation {
 
       if (twoPointDistance1 <= minLength * 2) {
         point = point1;
+        // eslint-disable-next-line no-param-reassign
         minLength = 0;
         break;
       }
 
       if (twoPointDistance2 <= minLength * 2) {
         point = point2;
+        // eslint-disable-next-line no-param-reassign
         minLength = 0;
         break;
       }
 
       if (length < minLength) {
         point = footPoint;
+        // eslint-disable-next-line no-param-reassign
         minLength = length;
       }
     }
@@ -1296,8 +1304,8 @@ class LineToolOperation extends BasicToolOperation {
     }
 
     const nextAxis = this.getNextPoint(e, coord)!;
-    
-    if ((this.isCreate || this.isNone)) {
+
+    if (this.isCreate || this.isNone) {
       if (this.enableOutOfTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 })) {
         return;
       }
@@ -1305,12 +1313,12 @@ class LineToolOperation extends BasicToolOperation {
       this.setCreatStatusAndAddPoint(nextAxis);
       return;
     }
-    
+
     if (this.isActive) {
       if (lineDragging) {
         return;
       }
-      
+
       const isMouseCoordOutsideActiveArea = this.isMouseCoordOutsideActiveArea();
       if (isMouseCoordOutsideActiveArea) {
         this.setNoneStatus(false);
@@ -1430,7 +1438,7 @@ class LineToolOperation extends BasicToolOperation {
       id,
       valid: this.isLineValid,
       // order: this.nextOrder(),
-      order :CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList) +1,
+      order: CommonToolUtils.getAllToolsMaxOrder(this.lineList, this.prevResultList) + 1,
       isVisible: true,
     };
     newLine.attribute = this.defaultAttribute;

@@ -1,6 +1,9 @@
+import type { ICoordinate, IPoint, ISize } from '@/types/tool/common';
+import type { IRect } from '@/types/tool/rectTool';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import { IPolygonPoint } from '../../types/tool/polygon';
+
+import type { IPolygonPoint } from '../../types/tool/polygon';
 import { isInPolygon } from './polygonTool';
 
 export default class RectUtils {

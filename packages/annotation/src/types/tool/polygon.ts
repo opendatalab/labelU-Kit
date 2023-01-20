@@ -1,4 +1,6 @@
-import { ELineColor, ELineTypes } from '../../constant/tool';
+import type { ELineColor, ELineTypes } from '../../constant/tool';
+import type { IToolConfig } from './common';
+import type { IInputList } from './tagTool';
 
 export interface IPolygonData {
   sourceID: string;

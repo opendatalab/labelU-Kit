@@ -1,4 +1,4 @@
-import { ToolConfig, cTool } from '@label-u/annotation';
+import type { ToolConfig, cTool } from '@label-u/annotation';
 
 export type { ToolConfig } from '@label-u/annotation';
 export type { PolygonConfig } from '@label-u/annotation';
@@ -37,10 +37,10 @@ export interface IConfigListItem {
 
 export type TextConfig = IConfigListItem[];
 
-type fileType = 'img' | 'video' | 'aodio' | 'text';
+type FileType = 'img' | 'video' | 'aodio' | 'text';
 
 export interface FileInfo {
-  type: fileType;
+  type: FileType;
   list: [
     {
       id: number;

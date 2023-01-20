@@ -1,15 +1,17 @@
-
 import React from 'react';
-import { CommonToolUtils, tagToolConfig, uuid } from '@label-u/annotation';
+import type { tagToolConfig } from '@label-u/annotation';
+import { CommonToolUtils, uuid } from '@label-u/annotation';
+import _ from 'lodash';
+
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
+import type { IStepInfo } from '@/types/step';
+import type { IFileItem } from '@/types/data';
+
 import { VideoPlayer } from './index';
 import { VideoTagLayer } from './VideoTagLayer';
-import { IStepInfo } from '@/types/step';
-import _ from 'lodash';
 import type { ObjectString } from './types';
 import { getKeyCodeNumber } from './utils';
-import { IFileItem } from '@/types/data';
 
 export interface IVideoTagInstanceAdaptorProps {
   imgIndex: number;
@@ -34,7 +36,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   IVideoTagInstanceAdaptorProps,
   IVideoTagInstanceAdaptorState
 > {
-  public fns: { [key: string]: () => void } = {};
+  public fns: Record<string, () => void> = {};
   public videoRef?: HTMLVideoElement;
   public labelSelectedList: number[] = [];
 
@@ -66,7 +68,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     return this.state.valid;
   }
 
-  public clearResult = (sendMsg = true, value?: string) => {
+  public clearResult = (sendMsg: boolean, value?: string) => {
     const newTag = value
       ? this.state.tagResult.map((v) => {
           if (v?.result[value]) {
@@ -91,10 +93,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     const videoWidth = this.videoRef?.videoWidth ?? 0;
     const videoHeight = this.videoRef?.videoHeight ?? 0;
 
-    return [
-      this.state.tagResult,
-      { valid: this.state.valid, duration, frames, videoWidth, videoHeight },
-    ];
+    return [this.state.tagResult, { valid: this.state.valid, duration, frames, videoWidth, videoHeight }];
   };
 
   public singleOn(event: string, func: () => void) {
@@ -193,8 +192,8 @@ export class TagToolInstanceAdaptor extends React.Component<
       tagResult,
     });
 
-    if (this.fns['render']) {
-      this.fns['render']();
+    if (this.fns.render) {
+      this.fns.render();
     }
   };
 

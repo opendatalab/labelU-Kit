@@ -1,4 +1,7 @@
-declare interface IRect {
+import type { IToolConfig } from './common';
+import type { IInputList } from './tagTool';
+
+export interface IRect {
   x: number;
   y: number;
   width: number;
@@ -15,13 +18,13 @@ declare interface IRect {
   label?: string; // 列表标签
 }
 
-declare interface RectStyle {
+export interface RectStyle {
   width?: number;
   color?: number;
   opacity?: number;
 }
 
-declare interface IRectConfig extends IToolConfig {
+export interface IRectConfig extends IToolConfig {
   attributeList: IInputList[];
   attributeConfigurable: boolean;
   drawOutsideTarget: boolean;

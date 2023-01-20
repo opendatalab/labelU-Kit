@@ -1,6 +1,7 @@
-import { EStepType } from '@/constant';
-import { IStepInfo } from '@/types/step';
 import { cTool } from '@label-u/annotation';
+
+import { EStepType } from '@/constant';
+import type { IStepInfo } from '@/types/step';
 
 const { EVideoToolName } = cTool;
 

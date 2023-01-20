@@ -6,7 +6,8 @@
 import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
 import { ViewOperation, ImgUtils } from '@label-u/annotation';
 import { Spin } from 'antd/es';
-import { ToolConfig } from '@/interface/toolConfig';
+
+import type { ToolConfig } from '@/interface/toolConfig';
 
 interface IProps {
   src: string; // 图片路径
@@ -23,7 +24,7 @@ interface IProps {
   zoomChange?: (zoom: number) => void;
   backgroundStyle: React.CSSProperties;
   onChange?: (type: 'hover' | 'selected', ids: string[]) => void;
-
+  onInitialized?: (viewOperation: ViewOperation) => void;
   showLoading?: boolean;
 }
 
@@ -45,6 +46,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     backgroundStyle = {},
     onChange,
     showLoading = false,
+    onInitialized,
   } = props;
   const [loading, setLoading] = useState(false);
   const annotationRef = useRef<HTMLDivElement>(null);
@@ -65,13 +67,14 @@ const AnnotationView = (props: IProps, ref: any) => {
         toolInstance,
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [viewOperation.current],
   );
 
   useEffect(() => {
     if (annotationRef.current) {
       viewOperation.current = new ViewOperation({
-        isShowOrder:false,
+        isShowOrder: false,
         container: annotationRef.current,
         size,
         style,
@@ -80,12 +83,17 @@ const AnnotationView = (props: IProps, ref: any) => {
         config: {} as ToolConfig, // TODO，暂时不需要
       });
 
+      if (typeof onInitialized === 'function') {
+        onInitialized(viewOperation.current);
+      }
+
       viewOperation.current.init();
     }
 
     return () => {
       viewOperation.current?.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -122,11 +130,12 @@ const AnnotationView = (props: IProps, ref: any) => {
     if (toolInstance?.setSize) {
       toolInstance.setSize(size);
     }
-  }, [size?.width, size?.height]);
+  }, [size.width, size.height, size]);
 
   useEffect(() => {
     if (viewOperation.current) {
       viewOperation.current?.on('onChange', (...args: any) => {
+        // eslint-disable-next-line prefer-spread
         onChange?.apply(null, args);
       });
 
@@ -142,9 +151,7 @@ const AnnotationView = (props: IProps, ref: any) => {
     };
   }, [zoomChange, onChange]);
 
-  const mainRender = (
-    <div ref={annotationRef} style={{ position: 'relative', ...size, ...backgroundStyle }} />
-  );
+  const mainRender = <div ref={annotationRef} style={{ position: 'relative', ...size, ...backgroundStyle }} />;
 
   return (
     <Spin spinning={showLoading || loading} delay={300}>

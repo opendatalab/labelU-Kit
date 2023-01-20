@@ -1,4 +1,5 @@
-import { toolNameType } from '@/constant/tool';
+import type { ToolNameType } from '@/constant/tool';
+import type { Result } from '@/types/annotationTask';
 
 export interface Attribute {
   key: string;
@@ -39,7 +40,7 @@ export interface RectConfig extends CommonConfig {
   textCheckType: number; //
 }
 
-export interface tagToolConfig extends CommonConfig {
+export interface TagToolConfig extends CommonConfig {
   pageSize: number;
   inputList: OneTag[];
 }
@@ -95,14 +96,14 @@ export type ToolConfig =
   | PolygonConfig
   | TextToolConfig
   | LineToolConfig
-  | tagToolConfig
+  | TagToolConfig
   | RectConfig
   | IMeasureToolConfig;
 
 export interface StepConfig {
   step: number;
   dataSourceStep: number;
-  tool: toolNameType;
+  tool: ToolNameType;
   config: string;
 }
 

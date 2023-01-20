@@ -33,6 +33,7 @@
       2,
       "always",
       [
+        "workspace",
         "docs",
         "components",
         "utils",

@@ -1,7 +1,7 @@
 // 编辑步骤的侧边栏宽度
 export const editStepWidth = 320;
 
-export type toolNameType =
+export type ToolNameType =
   | `rectTool`
   | `tagTool`
   | `polygonTool`
@@ -77,7 +77,7 @@ export enum ERectPattern {
 
 export type ToolName = EToolName | EVideoToolName | EPointCloudName;
 
-export const TOOL_NAME: { [a: string]: string } = {
+export const TOOL_NAME: Record<string, string> = {
   [EToolName.Rect]: '拉框',
   [EToolName.Tag]: '标签分类',
   [EToolName.Point]: '标点',

@@ -1,6 +1,7 @@
-import { RectOperation, IRectOperationProps } from './rectOperation';
+import type { IRectOperationProps } from './rectOperation';
+import { RectOperation } from './rectOperation';
 
-interface IMeasureOpeartion extends IRectOperationProps {}
+type IMeasureOpeartion = IRectOperationProps;
 
 const config = {
   textConfigurable: false,

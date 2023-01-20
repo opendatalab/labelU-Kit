@@ -1,16 +1,21 @@
+import type { ELineTypes } from '@/constant/tool';
+import type ViewOperation from '@/core/toolOperation/ViewOperation';
+
+import type { ICoordinate, IPoint } from './common';
+
 /*
  * @Author: Laoluo luozefeng@sensetime.com
  * @Date: 2022-02-15 16:41:44
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-05-17 17:10:30
  */
-declare interface IBasicStyle {
+export interface IBasicStyle {
   stroke?: string; // 边框颜色
   fill?: string; // 填充颜色
   thickness?: number; // 当前图形宽度
 }
 
-declare interface IRenderEnhanceParams {
+export interface IRenderEnhanceParams {
   ctx: CanvasRenderingContext2D | null;
   canvas: HTMLCanvasElement | null;
   currentPos: ICoordinate;
@@ -19,18 +24,18 @@ declare interface IRenderEnhanceParams {
   toolInstance: ViewOperation;
 }
 
-declare interface IGraphicsBasicConfig extends IBasicStyle {
+export interface IGraphicsBasicConfig extends IBasicStyle {
   hiddenText?: boolean; // 是否隐藏文本
   isReference?: boolean; // 是否进行的参考显示
   renderEnhance?: (params: IRenderEnhanceParams) => void;
 }
 
-declare interface IAnnotationData {
+export interface IAnnotationData {
   type: 'rect' | 'polygon' | 'line' | 'point' | 'text';
   annotation: IBasicRect & IBasicPolygon & IBasicLine & IPoint & IBasicText;
 }
 
-declare interface IBasicRect extends IGraphicsBasicConfig {
+export interface IBasicRect extends IGraphicsBasicConfig {
   id: string;
   x: number;
   y: number;
@@ -38,14 +43,14 @@ declare interface IBasicRect extends IGraphicsBasicConfig {
   height: number;
 }
 
-declare interface IBasicPoint extends IGraphicsBasicConfig {
+export interface IBasicPoint extends IGraphicsBasicConfig {
   id: string;
   x: number;
   y: number;
   radius?: number;
 }
 
-declare interface IBasicPolygon extends IGraphicsBasicConfig {
+export interface IBasicPolygon extends IGraphicsBasicConfig {
   id: string;
   pointList: IBasicPoint[];
   showDirection?: boolean;
@@ -56,9 +61,9 @@ declare interface IBasicPolygon extends IGraphicsBasicConfig {
   showKeyPoint: boolean; // 是否展示关键点
 }
 
-declare type IBasicLine = IBasicPolygon;
+export type IBasicLine = IBasicPolygon;
 
-declare interface IBasicText {
+export interface IBasicText {
   id: string;
   x: number;
   y: number;

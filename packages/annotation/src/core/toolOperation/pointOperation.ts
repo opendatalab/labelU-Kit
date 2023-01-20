@@ -3,18 +3,22 @@ import RectUtils from '@/utils/tool/RectUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import MarkerUtils from '@/utils/tool/MarkerUtils';
 import MathUtils from '@/utils/MathUtils';
+import type { IPointToolConfig, IPointUnit } from '@/types/tool/pointTool';
+import type { ICoordinate } from '@/types/tool/common';
+
 import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import { IPolygonData } from '../../types/tool/polygon';
+import type { IPolygonData } from '../../types/tool/polygon';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXTAREA_WIDTH = 200;
@@ -273,10 +277,13 @@ class PointOperation extends BasicToolOperation {
     if (e.button === 0 && !this.hoverID) {
       // 超出边界则不绘制
       // REVIEW: 这里的 config.drawOutsideTarget 跟 lineToolOperation里的 config.drawOutSideTarget 中的「s」大小写不一致
-      if (!this.imgInfo || (this.config.drawOutsideTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 }))) {
+      if (
+        !this.imgInfo ||
+        (this.config.drawOutsideTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 }))
+      ) {
         return;
       }
-      
+
       this.createPoint(e);
       this.render();
       // this.container.dispatchEvent(this.saveDataEvent);
@@ -781,7 +788,7 @@ class PointOperation extends BasicToolOperation {
 
     let showText = '';
 
-    const isShowOrder = this.isShowOrder 
+    const isShowOrder = this.isShowOrder;
 
     if (isShowOrder && point.order && point?.order > 0) {
       showText = `${point.order}`;
@@ -806,7 +813,7 @@ class PointOperation extends BasicToolOperation {
       });
     }
 
-    // 文本 
+    // 文本
     if (selected) {
       // this.renderTextAttribute();
     } else if (!hiddenText && this.isShowAttributeText) {

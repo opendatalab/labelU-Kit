@@ -1,33 +1,28 @@
-import { ESubmitType, prefix } from '@/constant';
-import { EToolName } from '@/data/enums/ToolType';
-// import useSize from '@/hooks/useSize';
-import { AppState } from '@/store';
-import {
-  loadImgList,
-  PageForward,
-  ToNextStep,
-  ToSubmitFileData,
-} from '@/store/annotation/actionCreators';
-import { IFileItem } from '@/types/data';
-import { Header } from '@/types/main';
-import { IStepInfo } from '@/types/step';
 import { LeftOutlined } from '@ant-design/icons';
-import { AnnotationEngine } from '@label-u/annotation';
+import type { AnnotationEngine } from '@label-u/annotation';
 import { i18n } from '@label-u/utils';
-import { Button, Tooltip } from 'antd/es';
+import { Button, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { last } from 'lodash';
 import React, { useReducer, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { connect, useDispatch } from 'react-redux';
-import { store } from 'src';
-// import ExportData from './ExportData';
+
+import { store } from '@/index';
+import type { IStepInfo } from '@/types/step';
+import type { Header } from '@/types/main';
+import type { IFileItem } from '@/types/data';
+import { loadImgList, PageForward, ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
+import type { AppState } from '@/store';
+import type { EToolName } from '@/data/enums/ToolType';
+import { ESubmitType, prefix } from '@/constant';
+import type { BasicConfig } from '@/types/tool';
+
 import HeaderOption from './headerOption';
 import StepSwitch from './StepSwitch';
 import ActionOption from './ActionOption';
 // import { BasicConfig } from '@/types/tool';
 import ToolOperation from './ToolOperation';
-import { BasicConfig } from '@/types/tool';
 interface INextStep {
   stepProgress: number;
   stepList: IStepInfo[];
@@ -35,10 +30,7 @@ interface INextStep {
   imgList: IFileItem[];
 }
 
-const NextButton: React.FC<{ disabled: boolean; imgList: IFileItem[] }> = ({
-  disabled,
-  imgList,
-}) => {
+const NextButton: React.FC<{ disabled: boolean; imgList: IFileItem[] }> = ({ disabled, imgList }) => {
   const { t } = useTranslation();
 
   const toNext = () => {
@@ -57,7 +49,7 @@ const NextButton: React.FC<{ disabled: boolean; imgList: IFileItem[] }> = ({
 
   return (
     <Button
-      type='primary'
+      type="primary"
       style={{
         marginLeft: 10,
       }}
@@ -152,11 +144,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const backNode = <LeftOutlined className={`${prefix}-header__icon`} onClick={closeAnnotation} />;
 
-  const headerNameNode = headerName ? (
-    <span className={`${prefix}-header__name`}>{headerName}</span>
-  ) : (
-    ''
-  );
+  const headerNameNode = headerName ? <span className={`${prefix}-header__name`}>{headerName}</span> : '';
 
   const stepListNode = stepList.length > 1 && (
     <>
@@ -169,31 +157,25 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
 
   const langNode = (
     <div className={`${prefix}-header__lang`}>
-      <span
-        className={`${prefix}-langCN ${curLang === 'cn' ? 'active' : ''}`}
-        onClick={() => changeLanguage('cn')}
-      >
+      <span className={`${prefix}-langCN ${curLang === 'cn' ? 'active' : ''}`} onClick={() => changeLanguage('cn')}>
         中文
       </span>
       {` / `}
-      <span
-        className={`${prefix}-langEN ${curLang === 'en' ? 'active' : ''}`}
-        onClick={() => changeLanguage('en')}
-      >
+      <span className={`${prefix}-langEN ${curLang === 'en' ? 'active' : ''}`} onClick={() => changeLanguage('en')}>
         En
       </span>
     </div>
   );
 
   const NextImageOption = (
-    <div className='nextImageOption'>
+    <div className="nextImageOption">
       {topActionContent ? (
         topActionContent
       ) : (
         <>
           <Button>跳过</Button>
           <Button
-            type='primary'
+            type="primary"
             onClick={(e) => {
               e.stopPropagation();
               dispatch(PageForward());
@@ -234,7 +216,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         {stepListNode}
         {currentOption} */}
         <ToolOperation toolsBasicConfig={toolsBasicConfig} />
-        <div id='operationNode' className={`${prefix}-header__operationNode`}>
+        <div id="operationNode" className={`${prefix}-header__operationNode`}>
           {headerOptionNode}
         </div>
         {/* <div className={`${prefix}-header__titlePlacement`} /> */}

@@ -1,8 +1,10 @@
 import { uuid } from '@label-u/annotation';
-import { jsonParser } from '.';
-import { EToolName } from '@/data/enums/ToolType';
 import _ from 'lodash';
-import { IStepInfo } from '@/types/step';
+
+import { EToolName } from '@/data/enums/ToolType';
+import type { IStepInfo } from '@/types/step';
+
+import { jsonParser } from '.';
 
 export default class AnnotationDataUtils {
   /**
@@ -22,8 +24,8 @@ export default class AnnotationDataUtils {
         // 这层可能还要处理 dataSource 依赖问题
         const info = copyData[stepName];
         if (info.result) {
-          info.result = info.result.map((info: any) => ({
-            ...info,
+          info.result = info.result.map((info_: any) => ({
+            ...info_,
             // @ts-ignore
             id: uuid(8, 62),
           }));
@@ -74,8 +76,8 @@ export default class AnnotationDataUtils {
     stepResult: any[] | undefined,
     toolInstance: any,
     stepConfig: any,
-    basicResultList: any[],
-    isInitData: boolean,
+    // basicResultList: any[],
+    // isInitData: boolean,
   ) {
     const resultList = stepResult ?? [];
 
@@ -96,7 +98,7 @@ export default class AnnotationDataUtils {
         // }
 
         // if (isInitData !== true) {
-          return resultList;
+        return resultList;
         // }
 
         // return toolInstance.getInitResultList(stepConfig.dataSourceStep, basicResultList);
@@ -115,24 +117,19 @@ export default class AnnotationDataUtils {
    * @param step 当前操作的步骤
    * @param stepList 步骤列表
    */
-  public static dataCorrection(
-    newResStr: string,
-    oldResStr: string,
-    step: number,
-    stepList: IStepInfo[],
-  ) {
+  public static dataCorrection(newResStr: string, oldResStr: string, step: number, stepList: IStepInfo[]) {
     try {
       // 将当前步骤替换为当前工具
       // const curStep = StepUtils.getStepInfo(step, stepList);
       // const stepKey = `step_${curStep.step}`;
-      const stepKey = stepList[0]['tool'];
+      const stepKey = stepList[0].tool;
       const newRes = jsonParser(newResStr);
       const oldRes = jsonParser(oldResStr);
       const newResForCurStep = newRes[stepKey]?.result;
       const oldResForCurStep = oldRes[stepKey]?.result;
 
       /** 没有旧数据时不处理 */
-      if (!oldResForCurStep||oldResForCurStep&&oldResForCurStep.length===0) {
+      if (!oldResForCurStep || (oldResForCurStep && oldResForCurStep.length === 0)) {
         return newResStr;
       }
 
@@ -221,12 +218,7 @@ export default class AnnotationDataUtils {
    * @param deletedIds 需要删除的sourceID
    * @param stepKeys 结果的步骤
    */
-  public static deleteRes(
-    resData: any,
-    dataSourceStep: number,
-    deletedIds: string[],
-    stepKeys: number[],
-  ) {
+  public static deleteRes(resData: any, dataSourceStep: number, deletedIds: string[], stepKeys: number[]) {
     stepKeys.forEach((s) => {
       if (s > dataSourceStep) {
         const stepRes = resData[`step_${s}`];

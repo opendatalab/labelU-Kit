@@ -1,9 +1,11 @@
-declare interface ILinePoint extends IPoint {
+import type { IPoint } from './common';
+
+export interface ILinePoint extends IPoint {
   id: string;
   specialEdge?: boolean;
 }
 
-declare interface ILine {
+export interface ILine {
   id: string;
   valid: boolean;
   pointList?: ILinePoint[];

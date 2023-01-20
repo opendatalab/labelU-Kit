@@ -3,6 +3,8 @@
  * @author laoluo
  */
 
+import type { ICoordinate } from '@/types/tool/common';
+
 export default class Vector {
   public static add(vector1: ICoordinate, vector2: ICoordinate) {
     return {
