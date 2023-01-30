@@ -111,6 +111,35 @@ class CuboidOperation extends BasicToolOperation {
 
   public setResult() {}
 
+  public onRightDblClick(e: MouseEvent) {
+    super.onRightDblClick(e);
+
+    const hoverRectID = this.getHoverID(e);
+    if (this.selectedID && this.selectedID === hoverRectID) {
+      this.deleteCuboid(hoverRectID);
+    }
+  }
+
+  public setCuboidList(cuboidList: ICuboid[]) {
+    const oldLen = this.cuboidList.length;
+    this.cuboidList = cuboidList;
+
+    if (oldLen !== cuboidList.length) {
+      this.emit('updatePageNumber');
+    }
+  }
+
+  public deleteCuboid(id: string) {
+    if (!id) {
+      return;
+    }
+    this.setCuboidList(this.cuboidList.filter((v) => v.id !== id));
+    // TODO - History.
+
+    this.selectedID = '';
+    this.render();
+  }
+
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
       return;
