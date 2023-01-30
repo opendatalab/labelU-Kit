@@ -427,14 +427,14 @@ class CuboidOperation extends BasicToolOperation {
   public rightMouseUp(e: MouseEvent) {
     // 1. Selected
     const hoverID = this.getHoverID(e);
-    if (hoverID) {
-      this.selectedID = hoverID;
-    }
+    this.selectedID = hoverID;
     this.render();
   }
 
   public renderSingleCuboid(cuboid: ICuboid | IDrawingCuboid) {
     const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
+    const isHover = transformCuboid.id === this.hoverID;
+    const isSelected = transformCuboid.id === this.selectedID;
     const toolColor = this.getColor(transformCuboid.attribute);
     const strokeColor = toolColor.valid.stroke;
     const lineWidth = this.style?.width ?? 2;
@@ -454,18 +454,23 @@ class CuboidOperation extends BasicToolOperation {
       const backPointList = AxisUtils.transformPlain2PointList(backPoints);
 
       DrawUtils.drawPolygon(this.canvas, backPointList, { ...defaultStyle, isClose: true });
-
-      // Hover Highlight
-      if (transformCuboid.id === this.hoverID || transformCuboid.id === this.selectedID) {
-        const hoverPointList = getHighlightPoints(transformCuboid as ICuboid);
-        hoverPointList.forEach((data) => {
-          DrawUtils.drawCircleWithFill(this.canvas, data.point, 5, { ...defaultStyle });
-        });
-      }
     }
     const pointList = AxisUtils.transformPlain2PointList(transformCuboid.frontPoints);
     DrawUtils.drawPolygonWithFill(this.canvas, pointList, { color: toolColor.valid.fill });
     DrawUtils.drawPolygon(this.canvas, pointList, { ...defaultStyle, isClose: true });
+
+    // Hover Highlight
+    if (isHover || isSelected) {
+      const hoverPointList = getHighlightPoints(transformCuboid as ICuboid);
+      hoverPointList.forEach((data) => {
+        DrawUtils.drawCircleWithFill(this.canvas, data.point, 5, { ...defaultStyle });
+      });
+      if (isSelected) {
+        hoverPointList.forEach((data) => {
+          DrawUtils.drawCircleWithFill(this.canvas, data.point, 3, { color: 'white' });
+        });
+      }
+    }
 
     let showText = '';
     if (this.isShowOrder && transformCuboid.order && transformCuboid?.order > 0) {
