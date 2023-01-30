@@ -310,14 +310,23 @@ class CuboidOperation extends BasicToolOperation {
     }
   }
 
+  // Forbidden to draw a cuboid if the backPlane is front than the frontPlane.
+  public isForbiddenMove(e: MouseEvent, cuboid: ICuboid | IDrawingCuboid) {
+    const coord = this.getCoordinateInOrigin(e);
+
+    if (coord.y > cuboid.frontPoints.br.y) {
+      return true;
+    }
+    return false;
+  }
+
   public drawingBackPlaneMove(e: MouseEvent) {
     if (this.drawingCuboid && this.firstClickCoord && this.drawingStatus === EDrawingStatus.Cuboid) {
       const coord = this.getCoordinateInOrigin(e);
 
-      // Forbidden to draw a cuboid if the backPlane is front than the frontPlane.
-      // if (coord.y > this.drawingCuboid.y + this.drawingCuboid.height) {
-      //   return;
-      // }
+      if (this.isForbiddenMove(e, this.drawingCuboid)) {
+        return;
+      }
       this.drawingCuboid = {
         ...this.drawingCuboid,
         backPoints: getPointsByBottomRightPoint({ coord, points: this.drawingCuboid.frontPoints }),
@@ -343,6 +352,15 @@ class CuboidOperation extends BasicToolOperation {
     this.dragStatus = EDragStatus.Move;
 
     const newCuboid = getCuboidDragMove({ offset, cuboid: initCuboid, dragTarget, positions });
+
+    /**
+     * DEFAULT：
+     * The backPoints is not allowed to be in front of the frontPoints.
+     */
+    if (newCuboid?.backPoints && newCuboid?.backPoints.br.y > newCuboid?.frontPoints.br.y) {
+      return;
+    }
+
     if (newCuboid) {
       this.updateSelectedCuboid(newCuboid);
     }
