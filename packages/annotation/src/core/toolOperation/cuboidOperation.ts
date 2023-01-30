@@ -418,6 +418,7 @@ class CuboidOperation extends BasicToolOperation {
 
   public closeCuboid() {
     this.cuboidList.push(this.drawingCuboid as ICuboid);
+    this.selectedID = this.drawingCuboid?.id ?? '';
     this.drawingCuboid = undefined;
     this.drawingStatus = EDrawingStatus.Ready;
     this.render();
