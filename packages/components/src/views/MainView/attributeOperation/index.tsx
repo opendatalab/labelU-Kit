@@ -106,7 +106,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               onClick={(e) => {
                 e.stopPropagation();
                 setChoseAttribute(item.key);
-                toolInstance.setDefaultAttribute(item.value);
+                toolInstance.setDefaultAttribute(item.key);
                 forceRender((s) => s + 1);
               }}
             >
@@ -187,7 +187,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               onClick={(e) => {
                 e.stopPropagation();
                 setChoseAttribute(attribute.key);
-                toolInstance.setDefaultAttribute(attribute.value);
+                toolInstance.setDefaultAttribute(attribute.key);
                 forceRender((s) => s + 1);
                 // alert(attribute.key)
               }}

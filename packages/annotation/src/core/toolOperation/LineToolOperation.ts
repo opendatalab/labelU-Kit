@@ -255,11 +255,8 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get enableOutOfTarget() {
-    // temp fix
-    // TODO: if enableOutOfTarget == true, lineTool will not show the line.
-    return false;
     // 兼容旧的目标外标注
-    return this.config.drawOutsideTarget ?? this.config.enableOutOfTarget ?? this.config.outOfTarget;
+    return this.config.drawOutSideTarget ?? this.config.enableOutOfTarget ?? this.config.outOfTarget;
   }
 
   get showOrder() {
@@ -1000,7 +997,7 @@ class LineToolOperation extends BasicToolOperation {
    */
   public getNextPoint(e: MouseEvent | KeyboardEvent | { altKey: boolean; shiftKey?: boolean }, nextPoint: ICoordinate) {
     const newPoint = this.getCoordByConfig(e, nextPoint) || nextPoint;
-    return this.enableOutOfTarget ? newPoint : this.getNextCoordByRenderCoord(newPoint);
+    return this.enableOutOfTarget ? this.coordUtils.getAbsCoord(newPoint) : this.getNextCoordByRenderCoord(newPoint);
   }
 
   // TODO: 渲染hover样式
@@ -1301,7 +1298,7 @@ class LineToolOperation extends BasicToolOperation {
     const nextAxis = this.getNextPoint(e, coord)!;
     
     if ((this.isCreate || this.isNone)) {
-      if (this.config.drawOutSideTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 })) {
+      if (this.enableOutOfTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 })) {
         return;
       }
 
