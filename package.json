@@ -72,6 +72,7 @@
     "**/*.less": [
       "stylelint --fix"
     ],
+    "packages/**/src/**/*.ts": "tsc-files --noEmit",
     "packages/**/src/**/*.{js,jsx,ts,tsx,json,css,scss,less,md}": [
       "prettier --check --write"
     ],
