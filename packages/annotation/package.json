@@ -19,6 +19,7 @@
   "main": "./dist/index.js",
   "module": "./es/index.js",
   "types": "./es/types/index.d.ts",
+  "typings": "./es/types/index.d.ts",
   "author": "wuhui,luoluo",
   "email": "751569801@qq.com",
   "contributors": [
