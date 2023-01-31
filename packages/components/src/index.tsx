@@ -1,15 +1,20 @@
-import App, { AppProps } from './App';
-import AnnotationView from '@/components/AnnotationView';
 import { i18n } from '@label-u/utils';
 import React, { useImperativeHandle, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
-import { AnyAction } from 'redux';
-import configureStore from './configureStore';
-import { ChangeSave, PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
-import { ToolInstance } from './store/annotation/types';
+import type { AnyAction } from 'redux';
+
+import AnnotationView from '@/components/AnnotationView';
 import { VideoTagTool } from '@/components/videoPlayer/TagToolInstanceAdaptorI18nProvider';
+
+import configureStore from './configureStore';
+import type { ToolInstance } from './store/annotation/types';
+import App from './App';
+import type { AppProps } from './App';
+import { ChangeSave, PageBackward, PageForward, PageJump } from './store/annotation/actionCreators';
 import { toolList } from './views/MainView/toolHeader/ToolOperation';
+
+import './index.scss';
 
 export const store = configureStore();
 
@@ -32,20 +37,24 @@ const OutputApp = (props: AppProps, ref: any) => {
         },
         getResult: (imgIndex: number = 0) => {
           store.dispatch(ChangeSave as unknown as AnyAction);
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             setTimeout(() => {
               // @ts-ignore
-              let imgWithResult = store.getState()?.annotation.imgList[imgIndex];
-              let imgResult = JSON.parse(imgWithResult.result as string);
-              let ids = [] as string[]
-              for (let item of toolList) {
-                let tmpResult = []
+              const imgWithResult = store.getState()?.annotation.imgList[imgIndex];
+              const imgResult = JSON.parse(imgWithResult.result as string);
+              const ids = [] as string[];
+              for (const item of toolList) {
+                const tmpResult = [];
                 if (item.toolName !== 'tagTool') {
-                  if (imgResult[item.toolName] && imgResult[item.toolName]?.result && imgResult[item.toolName]?.result?.length > 0) {
+                  if (
+                    imgResult[item.toolName] &&
+                    imgResult[item.toolName]?.result &&
+                    imgResult[item.toolName]?.result?.length > 0
+                  ) {
                     for (let i = 0; i < imgResult[item.toolName].result.length; i++) {
                       if (ids.indexOf(imgResult[item.toolName].result[i].id) < 0) {
-                        ids.push(imgResult[item.toolName].result[i].id)
-                        tmpResult.push(imgResult[item.toolName].result[i])
+                        ids.push(imgResult[item.toolName].result[i].id);
+                        tmpResult.push(imgResult[item.toolName].result[i]);
                       }
                     }
                   }
@@ -55,16 +64,15 @@ const OutputApp = (props: AppProps, ref: any) => {
                 }
               }
               // @ts-ignore
-              let result = store.getState()?.annotation.imgList;
+              const result = store.getState()?.annotation.imgList;
               // @ts-ignore
-              result[imgIndex]['result'] = JSON.stringify(imgResult)
+              result[imgIndex].result = JSON.stringify(imgResult);
               // @ts-ignore
               resolve(result);
-            },200)
-
-          })
+            }, 200);
+          });
           // return result;
-        }
+        },
       };
     },
     [toolInstance],

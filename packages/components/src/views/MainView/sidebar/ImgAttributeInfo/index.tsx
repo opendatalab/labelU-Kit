@@ -1,17 +1,15 @@
-import { Col, Row, Slider, Switch, Input } from 'antd/es';
+import { Col, Row, Slider, Input } from 'antd/es';
 import { connect } from 'react-redux';
 import { throttle } from 'lodash';
 import React, { useEffect } from 'react';
-import { ImgAttributeState } from '@/store/imgAttribute/types';
+import { useTranslation } from 'react-i18next';
+
+import type { ImgAttributeState } from '@/store/imgAttribute/types';
 import ImgAttribute from '@/store/imgAttribute/actionCreators';
 import { store } from '@/index';
-
 import saturationSvg from '@/assets/annotation/image/saturation.svg';
 import contrastSvg from '@/assets/annotation/image/contrast.svg';
 import brightnessSvg from '@/assets/annotation/image/brightness.svg';
-import ZoomUpSvg from '@/assets/attributeIcon/zoomUp.svg';
-import originalPic from '@/assets/annotation/image/icon_yuantu.svg';
-import { useTranslation } from 'react-i18next';
 
 interface IProps {
   imgAttribute: ImgAttributeState;
@@ -19,7 +17,7 @@ interface IProps {
 
 const ImgAttributeInfo = (props: IProps) => {
   const {
-    imgAttribute: { contrast, saturation, brightness, zoomRatio, isOriginalSize },
+    imgAttribute: { contrast, saturation, brightness },
   } = props;
 
   const { t } = useTranslation();
@@ -80,12 +78,12 @@ const ImgAttributeInfo = (props: IProps) => {
   return (
     <div>
       {imgAttributeInfo.map((info: any, index: number) => (
-        <div className='imgAttributeController' key={`option_${index}`}>
-          <Row className='tools' style={{ padding: '0px 0' }}>
+        <div className="imgAttributeController" key={`option_${index}`}>
+          <Row className="tools" style={{ padding: '0px 0' }}>
             <Col span={24}>
-              <span className='singleTool'>
+              <span className="singleTool">
                 <img width={16} height={16} src={info.svg} />
-                <span className='toolName'>{t(info.name)}</span>
+                <span className="toolName">{t(info.name)}</span>
               </span>
             </Col>
           </Row>

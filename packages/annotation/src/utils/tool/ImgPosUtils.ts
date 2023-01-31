@@ -2,6 +2,9 @@
  * 图像初始化相关函数的
  */
 
+import type { ISize } from '@/types/tool/common';
+import type { IRect } from '@/types/tool/rectTool';
+
 export default class ImgPosUtils {
   /**
    * 初始化图片在页面中的大小
@@ -14,6 +17,7 @@ export default class ImgPosUtils {
   public static getInitImgPos(canvasSize: ISize, imgSize: ISize, rotate = 0, zoomRatio = 1, isOriginalSize = false) {
     // rotate 仅在 90 270 中判断
     if (rotate === 90 || rotate === 270) {
+      // eslint-disable-next-line no-param-reassign
       imgSize = {
         width: imgSize.height,
         height: imgSize.width,

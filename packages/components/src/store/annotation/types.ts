@@ -1,4 +1,4 @@
-import {
+import type {
   AnnotationEngine,
   RectOperation,
   TagOperation,
@@ -9,26 +9,15 @@ import {
   Attribute,
   OneTag,
 } from '@label-u/annotation';
-import { ANNOTATION_ACTIONS } from '@/store/Actions';
-import { IStepInfo } from '@/types/step';
-import {
-  OnSubmit,
-  IFileItem,
-  GetFileData,
-  OnSave,
-  OnPageChange,
-  OnStepChange,
-  LoadFileList,
-} from '@/types/data';
-import { ESubmitType } from '@/constant';
-import { BasicConfig } from '@/types/tool';
-import { TextConfig } from '@/interface/toolConfig';
 
-export type GraphToolInstance =
-  | RectOperation
-  | PointOperation
-  | PolygonOperation
-  | LineToolOperation;
+import type { ANNOTATION_ACTIONS } from '@/store/Actions';
+import type { IStepInfo } from '@/types/step';
+import type { OnSubmit, IFileItem, GetFileData, OnSave, OnPageChange, OnStepChange, LoadFileList } from '@/types/data';
+import type { ESubmitType } from '@/constant';
+import type { BasicConfig } from '@/types/tool';
+import type { TextConfig } from '@/interface/toolConfig';
+
+export type GraphToolInstance = RectOperation | PointOperation | PolygonOperation | LineToolOperation;
 
 export type ToolInstance = GraphToolInstance | TagOperation | TextToolOperation;
 
@@ -38,8 +27,8 @@ interface CommonActions {
 }
 
 export interface AnnotationState {
-  isShowOrder:boolean;
-  currentToolName:string; // 当前工具名称
+  isShowOrder: boolean;
+  currentToolName: string; // 当前工具名称
   toolInstance: ToolInstance | null;
   annotationEngine: AnnotationEngine | null;
   imgList: IFileItem[];
@@ -49,7 +38,7 @@ export interface AnnotationState {
   tagConfigList: OneTag[]; // 配置tag 信息，工具共享一套tag
   attributeList: Attribute[]; // 标签配置选项，工具共享一套标签
   toolsBasicConfig?: BasicConfig[]; // 融合标注工具配置
-  textConfig?:TextConfig;
+  textConfig?: TextConfig;
   step: number;
   stepList: IStepInfo[];
   imgNode: HTMLImageElement;

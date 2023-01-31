@@ -1,14 +1,16 @@
-import { Attribute,AttributeUtils } from '@label-u/annotation';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import type { Attribute } from '@label-u/annotation';
+import { AttributeUtils } from '@label-u/annotation';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { AppState } from '../../../store';
-import { BasicConfig } from '../../../interface/toolConfig';
 import { Button, Dropdown, Space, Menu } from 'antd';
-import { COLORS_ARRAY } from '@/data/Style';
-// import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
+
+import type { BasicConfig } from '../../../interface/toolConfig';
+import type { AppState } from '../../../store';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -17,19 +19,18 @@ interface AttributeOperationProps {
   toolInstance: any;
   copytoolInstance: any;
   imgListCollapse: boolean;
-  toolStyle:any;
+  toolStyle: any;
 }
 
 const AttributeOperation: FC<AttributeOperationProps> = (props) => {
-  const [_, forceRender] = useState(0);
-  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance,toolStyle } =
-    props;
+  const [, forceRender] = useState(0);
+  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance, toolStyle } = props;
   const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
-  const [allAttributeList,setAllAttributeList] = useState<Attribute[]>([])
+  const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
 
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
@@ -52,11 +53,11 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   // 计算attribute栏目 宽度
   useEffect(() => {
     // if (attributeList && attributeList.length > 0) {
-      // const leftSliderDomWidth = document.getElementById('sliderBoxId')?.offsetWidth as number;
-      // const rightSliderDomWidth = 240;
-      // const attributeBoxLength = window.innerWidth - leftSliderDomWidth - rightSliderDomWidth;
-      const toolContainerWidth = document.getElementById('toolContainer')?.offsetWidth as number;
-      setAttributeBoxLength(toolContainerWidth - 30);
+    // const leftSliderDomWidth = document.getElementById('sliderBoxId')?.offsetWidth as number;
+    // const rightSliderDomWidth = 240;
+    // const attributeBoxLength = window.innerWidth - leftSliderDomWidth - rightSliderDomWidth;
+    const toolContainerWidth = document.getElementById('toolContainer')?.offsetWidth as number;
+    setAttributeBoxLength(toolContainerWidth - 30);
     // }
   }, [attributeList, props.imgListCollapse]);
 
@@ -74,9 +75,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
         if (totalWidth + 200 < attributeBoxLength) {
           let textMeasure = ctx?.measureText(currentAttributeList[i].key + ' ' + i + 1);
           if (currentAttributeList[i].key.length > 6) {
-            textMeasure = ctx?.measureText(
-              currentAttributeList[i].key.substring(0, 6) + '... ' + i + 1,
-            );
+            textMeasure = ctx?.measureText(currentAttributeList[i].key.substring(0, 6) + '... ' + i + 1);
           }
           totalWidth += Number(textMeasure?.width) * 1.38 + 26 + 8 + 5;
         } else {
@@ -87,16 +86,12 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     }
   }, [attributeBoxLength, currentAttributeList]);
 
-  const drowpDownIcon = (
-    <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIcon} />
-  );
-  const drowpUpIconA = (
-    <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIconA} />
-  );
+  const drowpDownIcon = <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIcon} />;
+  const drowpUpIconA = <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIconA} />;
 
   const attributeMenue = useCallback(() => {
     if (currentAttributeList.length >= shwoAttributeCount) {
-      let items = currentAttributeList.slice(shwoAttributeCount).map((item, index) => {
+      const items = currentAttributeList.slice(shwoAttributeCount).map((item) => {
         return {
           label: (
             <a
@@ -111,13 +106,15 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               }}
             >
               <div
-                className='circle'
+                className="circle"
                 style={{
-                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.key, allAttributeList ?? [])+1].valid.stroke,
+                  backgroundColor:
+                    toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.key, allAttributeList ?? []) + 1]
+                      .valid.stroke,
                   marginRight: 5,
                 }}
               />
-              <span className='attributeName'>{item.value}</span>
+              <span className="attributeName">{item.value}</span>
             </a>
           ),
           key: item.key,
@@ -127,20 +124,24 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     } else {
       return <div />;
     }
-  }, [shwoAttributeCount, currentAttributeList, toolInstance,chooseAttribute]);
+  }, [
+    currentAttributeList,
+    shwoAttributeCount,
+    chooseAttribute,
+    toolStyle.attributeColor,
+    allAttributeList,
+    toolInstance,
+  ]);
 
   // 根据工具名称的修改情况获取最新的attributeList
   useEffect(() => {
     let currentToolConfig: BasicConfig[] = [];
     let tmpCurrentAttributeList: Attribute[] = [];
     if (currentToolName && toolsBasicConfig && toolsBasicConfig.length > 0) {
-      currentToolConfig = toolsBasicConfig.filter((item, index) => {
+      currentToolConfig = toolsBasicConfig.filter((item) => {
         return item.tool === currentToolName;
       });
-      if (
-        currentToolConfig?.[0].config &&
-        Object.keys(currentToolConfig?.[0].config).indexOf('attributeList') > 0
-      ) {
+      if (currentToolConfig?.[0].config && Object.keys(currentToolConfig?.[0].config).indexOf('attributeList') > 0) {
         // @ts-ignore
         tmpCurrentAttributeList = attributeList.concat(currentToolConfig?.[0].config.attributeList);
       }
@@ -151,34 +152,36 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     setCurrentAttributeList(tmpCurrentAttributeList);
   }, [attributeList, toolsBasicConfig, currentToolName]);
 
-
-
-
-  useEffect(()=>{
-    if(toolInstance){
-        let tmpAttributesList:Attribute[] = []
-        if(props.attributeList&&props.attributeList.length>0){
-          tmpAttributesList = [...tmpAttributesList,...props.attributeList]
-        }
-        if(props.toolsBasicConfig&&props.toolsBasicConfig.length>0){
-          for(let i=0;i<props.toolsBasicConfig.length;i++){
+  useEffect(() => {
+    if (toolInstance) {
+      let tmpAttributesList: Attribute[] = [];
+      if (props.attributeList && props.attributeList.length > 0) {
+        tmpAttributesList = [...tmpAttributesList, ...props.attributeList];
+      }
+      if (props.toolsBasicConfig && props.toolsBasicConfig.length > 0) {
+        for (let i = 0; i < props.toolsBasicConfig.length; i++) {
+          // @ts-ignore
+          if (props.toolsBasicConfig[i].config?.attributeList) {
             // @ts-ignore
-            if(props.toolsBasicConfig[i].config?.attributeList){
-              // @ts-ignore
-              tmpAttributesList = [...tmpAttributesList,...props.toolsBasicConfig[i].config?.attributeList]
-            }
+            tmpAttributesList = [...tmpAttributesList, ...props.toolsBasicConfig[i].config?.attributeList];
           }
         }
-        toolInstance?.setAllAttributes(tmpAttributesList)
-        setAllAttributeList(tmpAttributesList);
+      }
+      toolInstance?.setAllAttributes(tmpAttributesList);
+      setAllAttributeList(tmpAttributesList);
     }
-  },[currentToolName,toolInstance?.isShowOrder,toolsBasicConfig,attributeList])
-
-
-
+  }, [
+    currentToolName,
+    toolInstance?.isShowOrder,
+    toolsBasicConfig,
+    attributeList,
+    toolInstance,
+    props.attributeList,
+    props.toolsBasicConfig,
+  ]);
 
   return (
-    <div className='attributeBox' key={chooseAttribute}>
+    <div className="attributeBox" key={chooseAttribute}>
       {currentAttributeList &&
         currentAttributeList.length > 0 &&
         currentAttributeList.map((attribute, index) => {
@@ -198,20 +201,28 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 border: '0px',
                 borderRadius: '4px',
                 padding: '1px 8px',
-                backgroundColor:  attribute.key === chooseAttribute? toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? [])+1].valid.stroke :'#FFFFFF',
-                color: attribute.key === chooseAttribute ? '#ffffff':'',
+                backgroundColor:
+                  attribute.key === chooseAttribute
+                    ? toolStyle.attributeColor[
+                        AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
+                      ].valid.stroke
+                    : '#FFFFFF',
+                color: attribute.key === chooseAttribute ? '#ffffff' : '',
                 // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
               }}
               key={attribute.key}
             >
               <div
-                className='circle'
+                className="circle"
                 style={{
-                  backgroundColor:toolStyle.attributeColor[AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? [])+1].valid.stroke,
+                  backgroundColor:
+                    toolStyle.attributeColor[
+                      AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
+                    ].valid.stroke,
                   marginRight: 5,
                 }}
               />
-              <span title={attribute.key} className='attributeName'>{`${attribute.key} ${
+              <span title={attribute.key} className="attributeName">{`${attribute.key} ${
                 index <= 8 ? index + 1 : ''
               }`}</span>
             </Button>
@@ -233,7 +244,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               setIsHoverDropdown(false);
             }}
             onClick={(e) => e.preventDefault()}
-            className='dropdowm-a'
+            className="dropdowm-a"
           >
             <Space style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
               更多

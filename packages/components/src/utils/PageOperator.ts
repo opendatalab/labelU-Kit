@@ -1,5 +1,6 @@
-import { EPageTurningOperation } from '../data/enums/AnnotationSize';
 import _ from 'lodash';
+
+import { EPageTurningOperation } from '../data/enums/AnnotationSize';
 import { jsonParser } from '.';
 
 interface IPageInfo {
@@ -37,21 +38,14 @@ class PageOperator {
    * @param pageTurningOperation
    * @param nextIndex
    */
-  public static getNextPageInfo(
-    pageTurningOperation: EPageTurningOperation,
-    annotationStore: any,
-    nextIndex?: number,
-  ) {
+  public static getNextPageInfo(pageTurningOperation: EPageTurningOperation, annotationStore: any, nextIndex?: number) {
     const pageInfo: IPageInfo = PageOperator.getPageInfo(annotationStore);
     const { fileIndex: currentFileIndex } = PageOperator.getPageInfo(annotationStore);
 
     const nextFileIndex = PageOperator.getNextFileIndex(pageTurningOperation, pageInfo, nextIndex);
-    const nextBasicIndex = PageOperator.getNextBasicIndex(
-      pageTurningOperation,
-      pageInfo.basicIndex,
-    );
+    const nextBasicIndex = PageOperator.getNextBasicIndex(pageTurningOperation, pageInfo.basicIndex);
     const fileIndexChanged = nextFileIndex !== currentFileIndex;
-    
+
     // 智能标注工具无需考虑数据依赖
     // const hasNextBasicIndex = PageOperator.hasNextBasicIndex(pageTurningOperation, pageInfo);
 
@@ -81,10 +75,7 @@ class PageOperator {
    * 获取下一个依赖索引
    * @param pageTurningOperation
    */
-  public static getNextBasicIndex = (
-    pageTurningOperation: EPageTurningOperation,
-    basicIndex: number,
-  ) => {
+  public static getNextBasicIndex = (pageTurningOperation: EPageTurningOperation, basicIndex: number) => {
     return basicIndex + (pageTurningOperation === EPageTurningOperation.Forward ? 1 : -1);
   };
 
@@ -92,16 +83,10 @@ class PageOperator {
    * 存在下一个依赖数据
    * @param pageTurningOperation
    */
-  public static hasNextBasicIndex = (
-    pageTurningOperation: EPageTurningOperation,
-    pageInfo: IPageInfo,
-  ) => {
+  public static hasNextBasicIndex = (pageTurningOperation: EPageTurningOperation, pageInfo: IPageInfo) => {
     const { basicList } = pageInfo;
     if (basicList?.length > 0) {
-      const nextBasicIndex = PageOperator.getNextBasicIndex(
-        pageTurningOperation,
-        pageInfo.basicIndex,
-      );
+      const nextBasicIndex = PageOperator.getNextBasicIndex(pageTurningOperation, pageInfo.basicIndex);
 
       return nextBasicIndex >= 0 && basicList.length > nextBasicIndex;
     }

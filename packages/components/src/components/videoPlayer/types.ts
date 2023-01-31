@@ -5,6 +5,4 @@ export interface ITagLabelItem {
 
 export type ITagLabelsArray = ITagLabelItem[];
 
-export interface ObjectString {
-  [key: string]: string | undefined;
-}
+export type ObjectString = Record<string, string | undefined>;

@@ -3,7 +3,9 @@
  */
 
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, SEGMENT_NUMBER } from '@/constant/tool';
-import { IPolygonPoint } from '@/types/tool/polygon';
+import type { ICoordinate } from '@/types/tool/common';
+import type { IPolygonPoint } from '@/types/tool/polygon';
+
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
 import Vector from './VectorUtils';
 
@@ -219,6 +221,7 @@ export default class MathUtils {
 
     let height = 0;
     if (typeof lineHeight === 'undefined' && typeof window !== 'undefined') {
+      // eslint-disable-next-line no-param-reassign
       lineHeight =
         (canvas && parseInt(window.getComputedStyle(canvas).lineHeight, 10)) ||
         parseInt(window.getComputedStyle(document.body).lineHeight, 10);

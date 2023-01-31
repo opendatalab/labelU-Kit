@@ -1,0 +1,11 @@
+dist
+node_modules
+coverage
+.next
+build
+__tests__
+storybook-static
+cy-example
+**/*.stories.ts
+**/*.stories.tsx
+es

@@ -4,8 +4,9 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-05-30 15:51:43
  */
-import { ETextType } from '@/data/enums/ToolType';
 import { i18n } from '@label-u/utils';
+
+import { ETextType } from '@/data/enums/ToolType';
 
 export const REGEXP_NUMBER = '^[0-9]+$';
 export const REGEXP_ENGLISH = '^[A-Za-z]+$';
@@ -32,11 +33,11 @@ export class TextUtils {
     switch (textCheckType) {
       case ETextType.Order:
       case ETextType.NumberOnly:
-        return i18n.t("TextCheckNumberOnly");
+        return i18n.t('TextCheckNumberOnly');
       case ETextType.EnglishOnly:
-        return i18n.t("TextCheckEnglishOnly");
+        return i18n.t('TextCheckEnglishOnly');
       case ETextType.CustomFormat:
-        return i18n.t("TextCheckCustomFormat");
+        return i18n.t('TextCheckCustomFormat');
       default:
         return '';
     }

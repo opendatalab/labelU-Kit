@@ -1,7 +1,8 @@
 import { COLORS_ARRAY, NULL_COLOR } from '@/data/Style';
 import { ToolStyleUtils } from '@/utils/ToolStyleUtils';
 import { TOOL_STYLE_ACTIONS } from '@/store/Actions';
-import { ToolStyleActionTypes, ToolStyleState } from './types';
+
+import type { ToolStyleActionTypes, ToolStyleState } from './types';
 
 const initialState: ToolStyleState = {
   color: 1,
@@ -12,13 +13,10 @@ const initialState: ToolStyleState = {
   attributeColor: ToolStyleUtils.getAttributeColors(),
   lineColor: ToolStyleUtils.getDefaultToolLineColors(),
   attributeLineColor: [NULL_COLOR].concat(COLORS_ARRAY),
-  imgListCollapse:true
+  imgListCollapse: true,
 };
 
-export function toolStyleReducer(
-  state = { ...initialState },
-  action: ToolStyleActionTypes,
-): ToolStyleState {
+export function toolStyleReducer(state = { ...initialState }, action: ToolStyleActionTypes): ToolStyleState {
   switch (action.type) {
     case TOOL_STYLE_ACTIONS.INIT_TOOL_STYLE_CONFIG: {
       return {
@@ -46,11 +44,11 @@ export function toolStyleReducer(
       };
     }
 
-    case TOOL_STYLE_ACTIONS.UPDATE_COLLAPSE_STATUS:{
-      return{
+    case TOOL_STYLE_ACTIONS.UPDATE_COLLAPSE_STATUS: {
+      return {
         ...state,
-        ...action.payload
-      }
+        ...action.payload,
+      };
     }
 
     default:

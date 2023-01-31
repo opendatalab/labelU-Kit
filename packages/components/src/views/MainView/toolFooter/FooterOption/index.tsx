@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../../../store';
+import { useTranslation } from 'react-i18next';
+import { cTool } from '@label-u/annotation';
+
+import { store } from '@/index';
+import ImgAttribute from '@/store/imgAttribute/actionCreators';
+import type { ImgAttributeState } from '@/store/imgAttribute/types';
+
+import type { AppState } from '../../../../store';
 import rotateSvg from '../../../../assets/annotation/common/icon_r.svg';
-
 import rotateHighlightSvg from '../../../../assets/annotation/common/icon_rA.svg';
-
 import { prefix } from '../../../../constant';
 import { EToolName } from '../../../../data/enums/ToolType';
 // import { ChangeSave } from '@/store/annotation/actionCreators';
-import { IStepInfo } from '../../../../types/step';
-import { useTranslation } from 'react-i18next';
-import { cTool } from '@label-u/annotation';
-import { store } from '@/index';
+import type { IStepInfo } from '../../../../types/step';
+
 const { EVideoToolName } = cTool;
-import ImgAttribute from '@/store/imgAttribute/actionCreators';
-import { ImgAttributeState } from '@/store/imgAttribute/types';
 
 interface IProps {
   isBegin?: boolean;
@@ -105,7 +106,7 @@ const FooterOption: React.FC<IProps> = (props) => {
           info.show && (
             <div
               key={info.toolName}
-              className='oneOption'
+              className="oneOption"
               onMouseEnter={(e) => {
                 setToolHover(info.toolName);
                 e.stopPropagation();
@@ -115,9 +116,9 @@ const FooterOption: React.FC<IProps> = (props) => {
                 setToolHover('');
               }}
             >
-              <a className='item' onClick={info.click}>
+              <a className="item" onClick={info.click}>
                 <img
-                  className='singleTool'
+                  className="singleTool"
                   src={toolHover === info.toolName ? info.selectedSvg : info.commonSvg}
                   style={{ ...info.style, width: 16 }}
                 />

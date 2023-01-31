@@ -1,5 +1,6 @@
-import { Tooltip } from 'antd/es';
 import React, { useState } from 'react';
+import { Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 // 图片调整的刷子
 import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
@@ -7,9 +8,8 @@ import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import { InitImgAttribute } from '@/store/imgAttribute/actionCreators';
 import { store } from '@/index';
 import clearSmallA from '@//assets/annotation/common/icon_clearSmall_a.svg';
-import { useTranslation } from 'react-i18next';
 
-const clearIcon = () => {
+const ClearIcon = () => {
   const [hoverDelete, setHoverDelete] = useState(false);
 
   const clearAttribute = () => {
@@ -18,7 +18,7 @@ const clearIcon = () => {
   const { t } = useTranslation();
 
   return (
-    <Tooltip placement='bottom' title={t('RestoreImageAttributes')}>
+    <Tooltip placement="bottom" title={t('RestoreImageAttributes')}>
       <img
         onMouseEnter={() => setHoverDelete(true)}
         onMouseLeave={() => setHoverDelete(false)}
@@ -33,4 +33,4 @@ const clearIcon = () => {
   );
 };
 
-export default clearIcon;
+export default ClearIcon;

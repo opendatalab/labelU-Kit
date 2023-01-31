@@ -1,5 +1,5 @@
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
-import { IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonPoint } from '../../types/tool/polygon';
 // 计算曲线的值
 export function createSmoothCurvePoints(
   points: any[],
@@ -101,7 +101,7 @@ export function createSmoothCurvePoints(
  * @returns {Array<number>}
  */
 export const createSmoothCurvePointsFromPointList = (
-  pointList: Array<{ x: number; y: number }>,
+  pointList: { x: number; y: number }[],
   numberOfSegments: number = 16,
 ) =>
   createSmoothCurvePoints(
@@ -132,8 +132,10 @@ export function isInPolygon(
   let p1;
   let p2;
 
+  // eslint-disable-next-line no-param-reassign
   polygonPoints = [...polygonPoints];
   if (lineType === ELineTypes.Curve) {
+    // eslint-disable-next-line no-param-reassign
     polygonPoints = createSmoothCurvePoints(
       polygonPoints.reduce<any[]>((acc, cur) => {
         return [...acc, cur.x, cur.y];

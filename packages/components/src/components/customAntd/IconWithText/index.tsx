@@ -1,5 +1,6 @@
-import { componentCls } from '@/constant';
 import React from 'react';
+
+import { componentCls } from '@/constant';
 
 interface IProps {
   text: string; // icon 文本
@@ -14,14 +15,14 @@ const IconWithText = (props: IProps) => {
   const marginLeft = props.marginLeft === undefined ? 30 : props.marginLeft;
 
   return (
-    <div {...otherProps} className={componentCls} >
+    <div {...otherProps} className={componentCls}>
       <div className={`${componentCls}__iconWithText`} style={{ marginLeft }}>
-        <div className='iconGroup'>
-          <Icon className='icon' />
+        <div className="iconGroup">
+          <Icon className="icon" />
           {iconChildren}
         </div>
 
-        <span className='name'>{text}</span>
+        <span className="name">{text}</span>
       </div>
     </div>
   );

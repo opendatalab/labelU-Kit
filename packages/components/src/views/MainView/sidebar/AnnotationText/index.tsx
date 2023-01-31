@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { message } from 'antd/es';
+import { connect } from 'react-redux';
+
 import TextAreaFormat from '@/views/MainView/sidebar/TextAreaFormat';
 import { TextUtils } from '@/utils/TextUtils';
-import { AppState } from '@/store';
-import { GraphToolInstance } from '@/store/annotation/types';
-import { connect } from 'react-redux';
+import type { AppState } from '@/store';
+import type { GraphToolInstance } from '@/store/annotation/types';
 
 interface IProps {
   toolInstance: GraphToolInstance;

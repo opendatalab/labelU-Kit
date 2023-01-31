@@ -1,3 +1,5 @@
+import type { IInputList } from '@/types/tool/tagTool';
+
 import uuid from '../uuid';
 
 export default class TagUtil {
@@ -122,7 +124,7 @@ export default class TagUtil {
    * @returns
    */
   public static getDefaultResultByConfig(inputList: IInputList[]) {
-    return inputList.reduce((acc: { [a: string]: string }, cur: IInputList) => {
+    return inputList.reduce((acc: Record<string, string>, cur: IInputList) => {
       if (cur.subSelected) {
         cur.subSelected.forEach((data) => {
           if (data.isDefault) {

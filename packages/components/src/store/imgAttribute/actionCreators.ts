@@ -1,5 +1,6 @@
 import { IMAGE_ATTRIBUTE_ACTIONS } from '@/store/Actions';
-import { ImgAttributeActionTypes, ImgAttributeState } from './types';
+
+import type { ImgAttributeActionTypes, ImgAttributeState } from './types';
 
 export function UpdateImgAttribute(imgAttribute: ImgAttributeState): ImgAttributeActionTypes {
   return {
@@ -11,7 +12,7 @@ export function UpdateImgAttribute(imgAttribute: ImgAttributeState): ImgAttribut
 export function InitImgAttribute(): ImgAttributeActionTypes {
   return {
     type: IMAGE_ATTRIBUTE_ACTIONS.INIT_IMG_ATTRIBUTE,
-    payload: {}
+    payload: {},
   };
 }
 
