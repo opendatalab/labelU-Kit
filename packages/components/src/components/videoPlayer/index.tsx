@@ -5,10 +5,12 @@
  */
 
 import React from 'react';
-import VideoController from './components/controller';
-import { getClassName } from '@/utils/dom';
 import { cKeyCode } from '@label-u/annotation';
-import { IFileItem } from '@/types/data';
+
+import { getClassName } from '@/utils/dom';
+import type { IFileItem } from '@/types/data';
+
+import VideoController from './components/controller';
 import { decimalReserved } from './utils';
 import FileException from '../fileException';
 
@@ -41,7 +43,7 @@ export const VideoPlayerCtx = React.createContext<{
   imgList: [],
   imgIndex: -1,
   pageBackward: () => {},
-  pageJump: (page: string) => {},
+  pageJump: () => {},
   pageForward: () => {},
 });
 
@@ -113,7 +115,7 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
 
   public updateNextPlaybackRate = (isForward = true) => {
     const idx = PLAYBACK_RATES.findIndex((r) => r === this.state.playbackRate);
-    let nextIdx = isForward ? Math.min(idx + 1, PLAYBACK_RATES.length - 1) : Math.max(idx - 1, 0);
+    const nextIdx = isForward ? Math.min(idx + 1, PLAYBACK_RATES.length - 1) : Math.max(idx - 1, 0);
     this.changePlaybackPate(PLAYBACK_RATES[nextIdx]);
   };
 
@@ -314,13 +316,13 @@ export class VideoPlayer extends React.Component<IVideoPlayerProps, IVideoPlayer
               onLoadedMetadata={resetVideoData}
               onError={onError}
               onDurationChange={setDuration}
-              width='100%'
-              height='100%'
+              width="100%"
+              height="100%"
               onClick={playPause}
             />
 
             <FileException
-              fileType='video'
+              fileType="video"
               errorProps={{
                 reloadImage: this.reload,
                 backgroundColor: '#e2e2e2',

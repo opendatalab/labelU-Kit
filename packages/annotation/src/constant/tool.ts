@@ -1,7 +1,7 @@
 // 编辑步骤的侧边栏宽度
 export const editStepWidth = 320;
 
-export type toolNameType =
+export type ToolNameType =
   | `rectTool`
   | `tagTool`
   | `polygonTool`
@@ -77,7 +77,7 @@ export enum ERectPattern {
 
 export type ToolName = EToolName | EVideoToolName | EPointCloudName;
 
-export const TOOL_NAME: { [a: string]: string } = {
+export const TOOL_NAME: Record<string, string> = {
   [EToolName.Rect]: '拉框',
   [EToolName.Tag]: '标签分类',
   [EToolName.Point]: '标点',
@@ -210,20 +210,6 @@ export enum EThumbnailOption {
   TrackPrediction,
   ImgSearch,
 }
-
-export const CLIENT_TOOL_HEAD_TYPE: { [a: string]: string } = {
-  [EPointCloudName.PointCloud]: 'sensebeepc',
-  [EToolName.ClientAttribute]: 'sensebeepc-EnumAttributeTool',
-  [EToolName.Face]: 'sensebeepc-FacePointsLabellingTool',
-  [EToolName.OCRRelation]: 'sensebeepc-OCRRelationTool',
-};
-
-export const CLIENT_TOOL_NAME: { [a: string]: string } = {
-  [EPointCloudName.PointCloud]: '点云客户端',
-  [EToolName.ClientAttribute]: '客户端属性工具',
-  [EToolName.Face]: '人脸106点工具',
-  [EToolName.OCRRelation]: 'OCR关联关系工具',
-};
 
 /** 曲线分割点数 */
 export const SEGMENT_NUMBER = 16;

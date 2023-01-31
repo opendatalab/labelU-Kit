@@ -1,15 +1,17 @@
-import React, { useEffect, useState, useRef, FocusEvent } from 'react';
+import type { FocusEvent } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
-import { AppState } from '@/store';
-import { classnames } from '@/utils';
 import { Input } from 'antd/es';
 import { cKeyCode, uuid } from '@label-u/annotation';
+import { useTranslation } from 'react-i18next';
+
+import type { AppState } from '@/store';
+import { classnames } from '@/utils';
 import { PageForward, UpdateImgList } from '@/store/annotation/actionCreators';
 import { ConfigUtils } from '@/utils/ConfigUtils';
-import { IStepInfo } from '@/types/step';
-import { useTranslation } from 'react-i18next';
-import { TextConfig } from '@/interface/toolConfig';
-import { IFileItem } from '@/types/data';
+import type { IStepInfo } from '@/types/step';
+import type { TextConfig } from '@/interface/toolConfig';
+import type { IFileItem } from '@/types/data';
 
 const EKeyCode = cKeyCode.default;
 
@@ -39,7 +41,7 @@ interface IProps {
 interface ITextResult {
   id: string;
   sourceID: string;
-  value: { [key: string]: string };
+  value: Record<string, string>;
 }
 
 export const TextareaWithFooter = (props: ITextareaWithFooterProps) => {
@@ -71,17 +73,15 @@ export const SingleTextInput = (props: any) => {
   const [invalid, setInvalid] = useState(false);
   const { t } = useTranslation();
 
-  const { disabled, config, result, updateText, index, switchToNextTextarea, hasMultiple, onNext } =
-    props;
+  const { disabled, config, result, updateText, index, switchToNextTextarea, hasMultiple, onNext } = props;
   const { maxLength } = config;
   const [value, setValue] = useState<string>('');
 
   useEffect(() => {
-    if (result && result.length > 0&&result[index]) {
-      setValue(result[index]['value'][config.key]);
+    if (result && result.length > 0 && result[index]) {
+      setValue(result[index].value[config.key]);
     }
-  }, [result]);
-
+  }, [config.key, index, result]);
 
   const textLength = value?.length ?? 0;
 
@@ -104,16 +104,14 @@ export const SingleTextInput = (props: any) => {
     maxLength,
     autoSize: { minRows: 2, maxRows: 6 },
     onChange: (e: FocusEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      setValue(value)
-      // updateTextWithKey(value);
+      setValue(e.target.value);
     },
     onFocus: () => {
       setTextAreaFocus(true);
     },
     onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
       setTextAreaFocus(false);
-      updateTextWithKey(value)
+      updateTextWithKey(value);
       if (config.required) {
         setInvalid(!e.target.value);
       }
@@ -141,14 +139,13 @@ export const SingleTextInput = (props: any) => {
   };
 
   const TextareaFooter = (
-    <div className='textAreaFooter'>
-      <div className='hotkeyTip'>
+    <div className="textAreaFooter">
+      <div className="hotkeyTip">
         {tabToSwitchEnabled && <span>{`[${t('Switch')}]Tab`}</span>}
         <span>{`[${t('TurnPage')}]Ctrl+Enter`}</span>
       </div>
-      <div className='wordCount'>
-        <span className={textLength >= maxLength ? 'warning' : ''}>{textLength}</span>/
-        <span>{maxLength}</span>
+      <div className="wordCount">
+        <span className={textLength >= maxLength ? 'warning' : ''}>{textLength}</span>/<span>{maxLength}</span>
       </div>
     </div>
   );
@@ -160,8 +157,8 @@ export const SingleTextInput = (props: any) => {
   }, [disabled]);
 
   return (
-    <div className='textField'>
-      <div className='label'>
+    <div className="textField">
+      <div className="label">
         <span className={classnames({ required: config.required })}>{config.label}</span>
         {/* <i
           className={classnames({ clearText: true, disabled: disabled })}
@@ -201,13 +198,8 @@ const TextToolSidebar: React.FC<IProps> = ({
   basicResultList,
 }) => {
   const [focusIndex, setFocusIndex] = useState(0);
-  const [forceRender,setForceRender ] = useState(0);
+  const [forceRender, setForceRender] = useState(0);
   const [result, setResult] = useState<ITextResult[]>([]);
-
-  const switchToNextTextarea = (currentIndex: number) => {
-    const nextIndex = (currentIndex + 1) % textConfig.length;
-    textareaFocus(nextIndex);
-  };
 
   const textareaFocus = (index: number) => {
     setTimeout(() => {
@@ -221,16 +213,21 @@ const TextToolSidebar: React.FC<IProps> = ({
     });
   };
 
+  const switchToNextTextarea = (currentIndex: number) => {
+    const nextIndex = (currentIndex + 1) % textConfig.length;
+    textareaFocus(nextIndex);
+  };
+
   useEffect(() => {
     if (imgList && imgList.length > 0) {
-      let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let textResult = currentImgResult?.textTool ? currentImgResult?.textTool : [];
+      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const textResult = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
       if (textResult && textResult.length > 0) {
         setResult(textResult);
       }
       if (!textResult || textResult.length === 0) {
         if (textConfig && textConfig.length > 0) {
-          const res = textConfig.map((item, index) => {
+          const res = textConfig.map((item) => {
             return {
               id: uuid(),
               sourceID: '',
@@ -244,20 +241,25 @@ const TextToolSidebar: React.FC<IProps> = ({
   }, [textConfig, imgList, imgIndex]);
 
   const updateText = (v: string, k: string, index: number) => {
-    if(v){
+    if (v) {
       result[index].value[k] = v;
-      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let currentImgResult = { ...oldImgResult, textTool: result };
+      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const currentImgResult = {
+        ...oldImgResult,
+        textTool: {
+          toolName: 'textTool',
+          result: result,
+        },
+      };
       imgList[imgIndex].result = JSON.stringify(currentImgResult);
       dispatch(UpdateImgList(imgList));
       setResult(result);
     }
   };
 
-
-  useEffect(()=>{
-    setForceRender(new Date().getTime())
-  },[result])
+  useEffect(() => {
+    setForceRender(new Date().getTime());
+  }, [result]);
 
   // useEffect(() => {
   //   if (imgIndex > -1 && triggerEventAfterIndexChanged) {
@@ -275,10 +277,12 @@ const TextToolSidebar: React.FC<IProps> = ({
   const disabled = stepConfig.dataSourceStep > 0 && basicResultList.length === 0;
 
   return (
-    <div className={classnames({
-      "textToolOperationMenu":true,
-      "textToolOperationMenuPreview":isPreview
-    })}>
+    <div
+      className={classnames({
+        textToolOperationMenu: true,
+        textToolOperationMenuPreview: isPreview,
+      })}
+    >
       {result &&
         result.length > 0 &&
         textConfig.map((i, index) => (

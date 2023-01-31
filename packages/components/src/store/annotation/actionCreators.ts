@@ -1,26 +1,29 @@
+import { BasicToolOperation } from '@label-u/annotation';
+
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
-import { IStepInfo } from '@/types/step';
-import {
-  GetFileData,
-  LoadFileList,
-  IFileItem,
-  OnPageChange,
-  OnSave,
-  OnStepChange,
-  OnSubmit,
-} from '@/types/data';
-import { AnnotationActionTypes, ToolInstance } from './types';
-import { LoadFileAndFileData, getStepConfig } from './reducer';
+import type { IStepInfo } from '@/types/step';
+import type { GetFileData, LoadFileList, IFileItem, OnPageChange, OnSave, OnStepChange, OnSubmit } from '@/types/data';
 import { ESubmitType } from '@/constant';
 import { EPageTurningOperation } from '@/data/enums/AnnotationSize';
 import PageOperator from '@/utils/PageOperator';
 import { jsonParser } from '@/utils';
-import localforage from 'localforage';
-import { BasicConfig } from '@/types/tool';
-import { Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
-import { ToolStyleState } from '../toolStyle/types';
+import type { BasicConfig } from '@/types/tool';
+import type { Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
+
+import { LoadFileAndFileData, getStepConfig } from './reducer';
+import type { AnnotationActionTypes, ToolInstance } from './types';
+import type { ToolStyleState } from '../toolStyle/types';
 
 const dispatchTasks = (dispatch: any, tasks: any[]) => tasks.map((task) => dispatch(task));
+
+export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
+  dispatch({
+    type: ANNOTATION_ACTIONS.SET_LOADING,
+    payload: {
+      loading,
+    },
+  });
+};
 
 /**
  * @param {pageTurningOperation} pageTurningOperation 翻页操作
@@ -45,7 +48,7 @@ const getSubmitByPageOperation = (pageTurningOperation: EPageTurningOperation) =
 const getBasicIndex = (annotationStore: any, basicIndex: number) => {
   const { imgList, imgIndex } = annotationStore;
   const { dataSourceStep } = getStepConfig(annotationStore.stepList, annotationStore.step);
-  let backwardResult = jsonParser(imgList[imgIndex - 1].result);
+  const backwardResult = jsonParser(imgList[imgIndex - 1].result);
   const index = backwardResult[`step_${dataSourceStep}`]?.result?.length - 1;
   return index || basicIndex;
 };
@@ -77,13 +80,7 @@ export function UpdateAnnotationConfig(config: string): AnnotationActionTypes {
   };
 }
 
-export function SetTaskConfig({
-  stepList,
-  step,
-}: {
-  stepList: IStepInfo[];
-  step: number;
-}): AnnotationActionTypes {
+export function SetTaskConfig({ stepList, step }: { stepList: IStepInfo[]; step: number }): AnnotationActionTypes {
   return {
     type: ANNOTATION_ACTIONS.SET_TASK_CONFIG,
     payload: {
@@ -310,10 +307,32 @@ export function InitTaskData({
   //   type: ANNOTATION_ACTIONS.INIT_TOOL,
   // });
 
-  tasks.push(InitToolWithStyle(toolStyle))
+  tasks.push(InitToolWithStyle(toolStyle));
 
   return (dispatch: any) => dispatchTasks(dispatch, tasks);
 }
+
+/**
+ * 更新当前操作的步骤
+ * @param {number} toStep
+ */
+export const UpdateProcessingStep = (toStep: number, index?: number) => (dispatch: any, getState: any) => {
+  const { annotation } = getState();
+  annotation?.onStepChange?.(toStep);
+  const imgIndex = annotation?.imgIndex ?? 0;
+  return [
+    dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
+    dispatch({
+      type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA,
+      payload: { submitType: ESubmitType.StepChanged },
+    }),
+    // ToSubmitFileData(ESubmitType.StepChanged),
+    dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
+    dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
+    // 切换步骤保持图片位置
+    dispatch(LoadFileAndFileData(index ?? imgIndex, 0)),
+  ];
+};
 
 /** 获取下一步的step */
 const getNextStep = (step: number, stepList: any) => {
@@ -328,29 +347,6 @@ export const ToNextStep = (pageNumber?: number) => (dispatch: any, getState: any
   const nextStep = getNextStep(step, stepList);
   return [dispatch(UpdateProcessingStep(nextStep, pageNumber))];
 };
-
-/**
- * 更新当前操作的步骤
- * @param {number} toStep
- */
-export const UpdateProcessingStep =
-  (toStep: number, index?: number) => (dispatch: any, getState: any) => {
-    const { annotation } = getState();
-    annotation?.onStepChange?.(toStep);
-    const imgIndex = annotation?.imgIndex ?? 0;
-    return [
-      dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
-      dispatch({
-        type: ANNOTATION_ACTIONS.SUBMIT_FILE_DATA,
-        payload: { submitType: ESubmitType.StepChanged },
-      }),
-      // ToSubmitFileData(ESubmitType.StepChanged),
-      dispatch({ type: ANNOTATION_ACTIONS.SET_STEP, payload: { toStep } }),
-      dispatch({ type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS }),
-      // 切换步骤保持图片位置
-      dispatch(LoadFileAndFileData(index ?? imgIndex, 0)),
-    ];
-  };
 
 /**
  * 提交当前的文件数据
@@ -374,20 +370,14 @@ const SubmitAndChangeFileIndex = (
   nextIndex: number,
   submitType: ESubmitType,
   nextBasicIndex?: number,
-) => [
-  dispatch(ToSubmitFileData(submitType)),
-  dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex)),
-];
+) => [dispatch(ToSubmitFileData(submitType)), dispatch(LoadFileAndFileData(nextIndex, nextBasicIndex))];
 
 const ChangeBasicIndex = (dispatch: any, nextBasicIndex: number) => [
   dispatch({ type: ANNOTATION_ACTIONS.SUBMIT_RESULT }),
   dispatch({ type: ANNOTATION_ACTIONS.SET_BASIC_INDEX, payload: { basicIndex: nextBasicIndex } }),
 ];
 
-const ChangeTriggerEventAfterIndexChanged = (
-  dispatch: any,
-  triggerEventAfterIndexChanged: boolean,
-) => {
+const ChangeTriggerEventAfterIndexChanged = (dispatch: any, triggerEventAfterIndexChanged: boolean) => {
   dispatch({
     type: ANNOTATION_ACTIONS.SET_TRIGGER_EVENT_AFTER_INDEX_CHANGED,
     payload: {
@@ -396,50 +386,6 @@ const ChangeTriggerEventAfterIndexChanged = (
   });
 };
 
-/** 向前翻页 */
-export const PageBackward =
-  (triggerEventAfterIndexChanged = false) =>
-  (dispatch: any, getState: any) => {
-    return DispatcherTurning(
-      dispatch,
-      getState,
-      EPageTurningOperation.Backward,
-      triggerEventAfterIndexChanged,
-    );
-  };
-
-/** 向后翻页 */
-export const PageForward =
-  (triggerEventAfterIndexChanged = false) =>
-  (dispatch: any, getState: any) => {
-    return DispatcherTurning(
-      dispatch,
-      getState,
-      EPageTurningOperation.Forward,
-      triggerEventAfterIndexChanged,
-    );
-  };
-
-/**
- * 跳到指定文件索引
- * @param toIndex
- */
-export const PageJump =
-  (toIndex: number, triggerEventAfterIndexChanged = false) =>
-  (dispatch: any, getState: any) => {
-    if (toIndex === getState().imgIndex) {
-      return;
-    }
-
-    return DispatcherTurning(
-      dispatch,
-      getState,
-      EPageTurningOperation.Jump,
-      triggerEventAfterIndexChanged,
-      toIndex,
-    );
-  };
-
 /**
  * 加载文件列表
  * @param dispatch
@@ -447,12 +393,7 @@ export const PageJump =
  * @param nextIndex 需要加载的图片index
  * @param isInitial // 是否为初始化加载
  */
-export const loadImgList = async (
-  dispatch: any,
-  getState: any,
-  nextIndex: number,
-  isInitial?: boolean,
-) => {
+export const loadImgList = async (dispatch: any, getState: any, nextIndex: number, isInitial?: boolean) => {
   const { loadFileList, imgList, pageSize } = getState().annotation;
   const page = Math.floor(nextIndex / pageSize);
   SetAnnotationLoading(dispatch, true);
@@ -492,15 +433,21 @@ export const DispatcherTurning = async (
   toIndex?: number,
 ) => {
   const annotationStore = getState().annotation;
-  const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } =
-    PageOperator.getNextPageInfo(pageTurningOperation, annotationStore, toIndex);
-  await localforage.setItem('nextIndex', fileIndex);
+  const { fileIndexChanged, fileIndex, basicIndexChanged, basicIndex } = PageOperator.getNextPageInfo(
+    pageTurningOperation,
+    annotationStore,
+    toIndex,
+  );
+
+  // @ts-ignore
+  BasicToolOperation.Cache.set('nextIndex', fileIndex);
   const submitType: ESubmitType = getSubmitByPageOperation(pageTurningOperation);
 
   ChangeTriggerEventAfterIndexChanged(dispatch, triggerEventAfterIndexChanged);
 
   // 翻页
   if (fileIndexChanged) {
+    annotationStore.annotationEngine.toolInstance.clearCachedCoordinateAndZoom();
     if (annotationStore.loading) {
       return;
     }
@@ -513,10 +460,7 @@ export const DispatcherTurning = async (
       }
     }
     annotationStore.onPageChange?.(fileIndex);
-    const index =
-      submitType === ESubmitType.Backward
-        ? getBasicIndex(getState().annotation, basicIndex)
-        : basicIndex;
+    const index = submitType === ESubmitType.Backward ? getBasicIndex(getState().annotation, basicIndex) : basicIndex;
     return SubmitAndChangeFileIndex(dispatch, fileIndex, submitType, index);
   }
 
@@ -526,6 +470,34 @@ export const DispatcherTurning = async (
 
   return dispatch(ToSubmitFileData(submitType));
 };
+
+/** 向前翻页 */
+export const PageBackward =
+  (triggerEventAfterIndexChanged = false) =>
+  (dispatch: any, getState: any) => {
+    return DispatcherTurning(dispatch, getState, EPageTurningOperation.Backward, triggerEventAfterIndexChanged);
+  };
+
+/** 向后翻页 */
+export const PageForward =
+  (triggerEventAfterIndexChanged = false) =>
+  (dispatch: any, getState: any) => {
+    return DispatcherTurning(dispatch, getState, EPageTurningOperation.Forward, triggerEventAfterIndexChanged);
+  };
+
+/**
+ * 跳到指定文件索引
+ * @param toIndex
+ */
+export const PageJump =
+  (toIndex: number, triggerEventAfterIndexChanged = false) =>
+  (dispatch: any, getState: any) => {
+    if (toIndex === getState().imgIndex) {
+      return;
+    }
+
+    return DispatcherTurning(dispatch, getState, EPageTurningOperation.Jump, triggerEventAfterIndexChanged, toIndex);
+  };
 
 /**
  * 保存当前页数据
@@ -565,18 +537,8 @@ export const ToSaveFileData = (submitType: ESubmitType) => (dispatch: any) =>
  * @param dispatch
  * @param loading
  */
-export const saveImageList = (dispatch: any, getState: any) => {
+export const saveImageList = (dispatch: any) => {
   // const annotationStore = getState().annotation;
   // const { imgList } = annotationStore;
-  // console.log(imgList);
   dispatch(ToSaveFileData(ESubmitType.Save));
-};
-
-export const SetAnnotationLoading = (dispatch: Function, loading: boolean) => {
-  dispatch({
-    type: ANNOTATION_ACTIONS.SET_LOADING,
-    payload: {
-      loading,
-    },
-  });
 };

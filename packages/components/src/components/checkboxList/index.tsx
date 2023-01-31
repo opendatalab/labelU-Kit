@@ -12,7 +12,7 @@ const CheckboxList = (props: IProps) => {
   const checkboxRef = React.useRef<any>(null);
   const list = props.list || [];
   return (
-    <div className="sensebee-checkbox-group">
+    <div className="labelu-checkbox-group">
       <Checkbox.Group
         name="checkboxgroup"
         // defaultValue={props.selectedAttribute}
@@ -26,10 +26,10 @@ const CheckboxList = (props: IProps) => {
             }}
             key={index}
           >
-            <span className="sensebee-checkbox-label" title={i.label}>
+            <span className="labelu-checkbox-label" title={i.label}>
               {i.label}
             </span>
-            {/* <span className="sensebee-checkbox-num">{props?.num ?? index}</span> */}
+            {/* <span className="labelu-checkbox-num">{props?.num ?? index}</span> */}
           </Checkbox>
         ))}
       </Checkbox.Group>

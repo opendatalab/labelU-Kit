@@ -1,11 +1,13 @@
+import { Input, message, Tooltip } from 'antd/es';
+import type { FocusEvent } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { TEXT_ATTRIBUTE_MAX_LENGTH } from '@/data/enums/ToolType';
 import { TextUtils } from '@/utils/TextUtils';
-import { Input, message, Tooltip } from 'antd/es';
-import React, { FocusEvent, useEffect, useState } from 'react';
 import IconClearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
 import IconClearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import { classnames } from '@/utils';
-import { useTranslation } from 'react-i18next';
 
 interface IProps {
   onChange: (value: string, isSubmit?: boolean) => void;
@@ -25,7 +27,7 @@ const TextAreaFormat = (props: IProps) => {
 
   const clearIcon = (
     <a>
-      <Tooltip placement='bottom' title={t('EmptyTextInput')}>
+      <Tooltip placement="bottom" title={t('EmptyTextInput')}>
         <img
           onMouseEnter={() => setHoverDelete(true)}
           onMouseLeave={() => setHoverDelete(false)}
@@ -48,22 +50,24 @@ const TextAreaFormat = (props: IProps) => {
     if (textValue) {
       setTextLength(textValue.length);
     }
-  }, []);
+  }, [textValue]);
 
   useEffect(() => {
     if (textValue === undefined || textValue === '') {
       setError(false);
     } else {
       try {
-        textValue && setError(!new RegExp(checkString).test(textValue));
-      } catch (error) {
+        if (textValue) {
+          setError(!new RegExp(checkString).test(textValue));
+        }
+      } catch (err) {
         setError(true);
         message.destroy();
         message.error(t('RegularExpIncorrectly'));
       }
     }
     setTextLength(textValue?.length ?? 0);
-  }, [textValue]);
+  }, [checkString, t, textValue]);
 
   const checkText = (e: FocusEvent<HTMLTextAreaElement>) => {
     if (error) {
@@ -75,8 +79,8 @@ const TextAreaFormat = (props: IProps) => {
   };
 
   return (
-    <div className='textInputContainer'>
-      <div className='label'>
+    <div className="textInputContainer">
+      <div className="label">
         {t('TextInput')}
         {clearIcon}
       </div>
@@ -105,7 +109,7 @@ const TextAreaFormat = (props: IProps) => {
               onChange(e.target.value);
               setTextLength(e.target.value.length);
             }}
-            onFocus={(e) => setOnFocus(true)}
+            onFocus={() => setOnFocus(true)}
             onBlur={(e) => {
               checkText(e);
               setOnFocus(false);
@@ -114,12 +118,10 @@ const TextAreaFormat = (props: IProps) => {
             onKeyDown={keyDown}
             className={error ? 'warning' : ''}
           />
-          <div className='textAreaFooter'>
-            <span className='wordCount'>
-              <span className={textLength > TEXT_ATTRIBUTE_MAX_LENGTH || error ? 'warning' : ''}>
-                {textLength}
-              </span>
-              /<span>{TEXT_ATTRIBUTE_MAX_LENGTH}</span>
+          <div className="textAreaFooter">
+            <span className="wordCount">
+              <span className={textLength > TEXT_ATTRIBUTE_MAX_LENGTH || error ? 'warning' : ''}>{textLength}</span>/
+              <span>{TEXT_ATTRIBUTE_MAX_LENGTH}</span>
             </span>
           </div>
         </div>

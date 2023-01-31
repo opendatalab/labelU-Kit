@@ -528,11 +528,10 @@ body {
 //
 
 .#{$prefix}-sidebar {
-  height: 100%;
   width: 280px;
   // box-shadow: 0px 2px 14px 0px rgba(204, 204, 204, 0.5);
   background: #ffffff;
-  overflow: hidden;
+  overflow: scroll;
   display: flex;
   position: relative;
   flex-direction: column;
@@ -542,7 +541,9 @@ body {
   user-select: none;
   text-align: left;
 
-  .leftBarFooter{
+  .rightBarFooter{
+    position: absolute;
+    bottom: 5px;
     width: 100%;
     height: 40px;
     display: flex;
@@ -558,14 +559,14 @@ body {
     // }
   }
 
-  .attributeResultPreview{
-    height: calc(89vh - 220px) !important;
-  }
+  // .attributeResultPreview{
+  //   height: calc(89vh - 220px) !important;
+  // }
 
   .attributeResult {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     width: 100%;
-    height: calc(100vh - 230px);
+    // height: calc(100vh - 230px);
     overflow-y: scroll;
     overflow-x: hidden;
   }
@@ -588,8 +589,6 @@ body {
 
     .containerBox {
       width: 100%;
-      height: calc(100vh - 200px);
-      overflow: scroll;
       .emptyAttributeImg {
         left: 50%;
         top: 50%;
@@ -773,8 +772,8 @@ body {
     border-bottom: 1px dashed #eee;
   }
 
-  .sensebee-radio-group,
-  .sensebee-radio-group-no-limit-height .ant-radio-group {
+  .labelu-radio-group,
+  .labelu-radio-group-no-limit-height .ant-radio-group {
     max-height: calc(100vh - 61px);
 
     display: flex;
@@ -806,7 +805,7 @@ body {
         overflow: hidden;
       }
 
-      .sensebee-radio-num {
+      .labelu-radio-num {
         width: 20px;
         height: 20px;
         border: 1px solid rgba(204, 204, 204, 1);
@@ -816,7 +815,7 @@ body {
         line-height: 18px;
       }
 
-      .sensebee-radio-label {
+      .labelu-radio-label {
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1286,7 +1285,7 @@ $hotkey-container-padding: 7px;
 
 .tagOperationMenu {
   padding: 0px 20px;
-  height: calc(89vh - 180px);
+  // height: calc(89vh - 180px);
   overflow-y: scroll;
 
 
@@ -1379,7 +1378,7 @@ $hotkey-container-padding: 7px;
 }
 
 
-.sensebee-checkbox-group .ant-checkbox-group {
+.labelu-checkbox-group .ant-checkbox-group {
   display: flex;
   flex-direction: column;
 
@@ -1407,7 +1406,7 @@ $hotkey-container-padding: 7px;
       overflow: hidden;
     }
 
-    .sensebee-checkbox-num {
+    .labelu-checkbox-num {
       width: 20px;
       height: 20px;
       border: 1px solid rgba(204, 204, 204, 1);
@@ -1416,7 +1415,7 @@ $hotkey-container-padding: 7px;
       text-align: center;
     }
 
-    .sensebee-checkbox-label {
+    .labelu-checkbox-label {
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1489,13 +1488,13 @@ $hotkey-container-padding: 7px;
 
 .textToolOperationMenu {
   padding: 0px 20px;
-  height: calc(89vh - 180px);
+  // height: calc(89vh - 180px);
   overflow-y: scroll;
 }
 
-.textToolOperationMenuPreview{
-  height: calc(89vh - 220px) !important;
-}
+// .textToolOperationMenuPreview{
+//   height: calc(89vh - 220px) !important;
+// }
 
 .textareaContainer {
   position: relative;

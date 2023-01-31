@@ -1,6 +1,6 @@
 {
   "name": "@label-u/components",
-  "version": "0.0.4",
+  "version": "0.0.9",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -19,7 +19,7 @@
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
     "commitmsg": "commitlint -e $GIT_PARAMS"
   },
-  "author": "wuhui",
+  "author": "wuhui,luoluo",
   "contributors": [
     "lijingchi",
     "tanjunbao",
@@ -33,19 +33,18 @@
     "react"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://github.com/opendatalab/labelU/tree/main/packages/lb-components",
+  "homepage": "https://github.com/opendatalab/labelU-Kit/tree/main/packages/components",
   "bugs": {
-    "url": "https://github.com/opendatalab/labelU.git",
+    "url": "https://github.com/opendatalab/labelU-Kit/issues",
     "email": "751569801@qq.com"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@label-u/annotation": "^0.0.8",
     "@label-u/utils": "^1.2.0",
-    "@label-u/annotation": "^0.0.3",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "copyfiles": "^2.4.1",
-    "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "react-i18next": "^11.12.0",
     "react-redux": "^7.2.3",
@@ -58,13 +57,11 @@
     "shx": "^0.3.4"
   },
   "peerDependencies": {
-    "antd": ">=4.15.0",
     "@ant-design/icons": "^4.7.0",
+    "antd": ">=4.15.0",
     "react": ">=16.9.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^13.1.0",
-    "@commitlint/config-conventional": "^13.1.0",
     "@rollup/plugin-alias": "^3.1.2",
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-eslint": "^8.0.1",
@@ -74,26 +71,15 @@
     "@types/react": "^16.13.1",
     "@types/react-redux": "^7.1.16",
     "@types/redux": "^3.6.0",
-    "@typescript-eslint/eslint-plugin": "^4.15.1",
-    "@typescript-eslint/parser": "^4.15.1",
     "antd": "^4.15.0",
-    "commitizen": "^4.2.4",
     "cross-env": "^7.0.3",
-    "cz-conventional-changelog": "^3.3.0",
     "dart-sass": "^1.25.0",
     "esbuild": "^0.11.0",
-    "eslint": "7.20.0",
-    "eslint-config-airbnb": "18.2.1",
-    "eslint-config-alloy": "4.2.0",
-    "eslint-plugin-import": "2.22.1",
-    "eslint-plugin-jsx-a11y": "6.4.1",
-    "eslint-plugin-react": "^7.22.0",
-    "eslint-plugin-react-hooks": "^4.2.0",
-    "husky": "^7.0.1",
-    "prettier": "^2.3.2",
+    "react": "^17.0.2",
     "react-draggable": "^4.4.5",
     "rollup": "^2.43.1",
     "rollup-plugin-esbuild": "^3.0.2",
+    "rollup-plugin-postcss": "^4.0.2",
     "typescript": "^4.2.3"
   },
   "config": {

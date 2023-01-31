@@ -1,26 +1,24 @@
-import { AppProps } from '@/App';
+import { Spin, Layout } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { cTool } from '@label-u/annotation';
+import { connect } from 'react-redux';
+import classNames from 'classnames';
+
+import type { AppProps } from '@/App';
 import { ViewportProvider } from '@/components/customResizeHook';
 import { prefix } from '@/constant';
-import { Spin } from 'antd';
-import { Layout } from 'antd/es';
-import _ from 'lodash';
-import React from 'react';
+import VideoAnnotate from '@/components/videoAnnotate';
+import type { AppState } from '@/store';
+import type { IFileItem } from '@/types/data';
+
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 // import Sidebar from './sidebar';
 import RightSiderbar from './rightSiderBar';
 import ToolFooter from './toolFooter';
 import ToolHeader from './toolHeader';
-// import { getStepConfig } from '@/store/annotation/reducer';
-import { cTool } from '@label-u/annotation';
-// import { ChangeSave } from '../../store/annotation/actionCreators';
-import VideoAnnotate from '@/components/videoAnnotate';
-import { AppState } from '@/store';
-import { connect } from 'react-redux';
 import AttributeOperation from './attributeOperation';
-import { IFileItem } from '@/types/data';
 import LeftSider from './leftSiderBar';
-import classNames from 'classnames';
 
 const { EVideoToolName } = cTool;
 
@@ -60,6 +58,15 @@ const AnnotatedArea: React.FC<AppProps & IProps & { currentToolName: string }> =
 const MainView: React.FC<AppProps & IProps> = (props) => {
   // const dispatch = useDispatch();
   const { currentToolName } = props;
+
+  const [boxHeight, setBoxHeight] = useState<number>();
+  const [, setBoxWidth] = useState<number>();
+  useEffect(() => {
+    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    setBoxHeight(boxParent.clientHeight);
+    setBoxWidth(boxParent.clientWidth);
+  }, []);
+
   // 取消加载时loading
   return (
     <ViewportProvider>
@@ -84,10 +91,10 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
           <AttributeOperation />
           <Layout>
             {<LeftSider {...props} />}
-            <Content className={`${layoutCls}__content`}>
+            <Content className={`${layoutCls}__content`} style={{ height: (boxHeight as number) - 111 }}>
               <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
-            <Sider className={`${layoutCls}__side`} width='auto' style={props.style?.sider}>
+            <Sider className={`${layoutCls}__side`} width="auto" style={props.style?.sider}>
               {/* <Sidebar sider={props?.sider} /> */}
               <RightSiderbar isPreview={props?.isPreview as boolean} />
             </Sider>

@@ -6,9 +6,10 @@
 
 import React from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { AppState } from '@/store';
+
+import type { AppState } from '@/store';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
-import { AnnotationState } from '@/store/annotation/types';
+import type { AnnotationState } from '@/store/annotation/types';
 import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
 import { TagToolInstanceAdaptor } from '@/components/videoPlayer/TagToolInstanceAdaptor';
 

@@ -1,15 +1,17 @@
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 
 interface ITextResult {
   id: string;
   sourceID: string;
-  value: { [key: string]: string };
+  value: Record<string, string>;
 }
 
-interface ITextToolProps extends IBasicToolOperationProps {}
+type ITextToolProps = IBasicToolOperationProps;
 
 class TextToolOperation extends BasicToolOperation {
   public textList: ITextResult[];
@@ -100,7 +102,7 @@ class TextToolOperation extends BasicToolOperation {
   /** 初始化文本渲染元素 */
   public initTextDisplayContainer() {
     const dom = document.createElement('div');
-    const domStyle: { [key: string]: string } = {
+    const domStyle: Record<string, string> = {
       position: 'absolute',
       right: '0',
       top: '0',
@@ -120,6 +122,7 @@ class TextToolOperation extends BasicToolOperation {
     dom.setAttribute(
       'style',
       Object.keys(domStyle).reduce((pre: string, key: string) => {
+        // eslint-disable-next-line no-param-reassign
         pre += `${key}: ${domStyle[key]};`;
         return pre;
       }, ''),

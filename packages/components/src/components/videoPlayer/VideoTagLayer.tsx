@@ -1,10 +1,12 @@
 import React from 'react';
+
+import type { IInputList } from '@/types/main';
+
 import { result2LabelKey } from './utils';
 import type { ITagLabelsArray } from './types';
-import { IInputList } from '@/types/main';
 
 interface IVideoTagLayerProps {
-  result: Array<{ result: { [key: string]: string } }>;
+  result: { result: Record<string, string> }[];
   inputList: IInputList[];
 }
 

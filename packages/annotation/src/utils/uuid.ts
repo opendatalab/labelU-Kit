@@ -2,6 +2,7 @@ export default function uuid(len: number = 8, radix: number = 62) {
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
   const id = [];
   let i;
+  // eslint-disable-next-line no-param-reassign
   radix = radix || chars.length;
 
   if (len) {

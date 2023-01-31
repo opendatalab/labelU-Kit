@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { AppState } from '@/store';
-import { ToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
+
+import type { AppState } from '@/store';
+import type { ToolInstance } from '@/store/annotation/types';
 import useSafeState from '@/hooks/useSafeSate';
 
 interface IProps {
@@ -17,16 +18,11 @@ const ZoomLevel: React.FC<IProps> = ({ toolInstance }) => {
         forceRender((s) => s + 1);
       });
     }
-  }, [toolInstance]);
+  }, [forceRender, toolInstance]);
 
   const zoom = toolInstance?.zoom ?? 1;
 
-  return (
-    <span className="zoomValue">
-      {(zoom * 100).toFixed(1)}
-      %
-    </span>
-  );
+  return <span className="zoomValue">{(zoom * 100).toFixed(1)}%</span>;
 };
 
 const mapStateToProps = (state: AppState) => ({

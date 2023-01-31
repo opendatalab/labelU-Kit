@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import {
   CHANGE_COLOR,
   DEFAULT_COLOR,
@@ -6,12 +8,11 @@ import {
   BORDER_OPACITY_LEVEL,
   FILL_OPACITY_LEVEL,
 } from '@/data/Style';
-import _ from 'lodash';
 
 const FILL_OPACITY = 0.8;
 
 export class ToolStyleUtils {
-  public static changeOpacity: { [a: number]: number } = {
+  public static changeOpacity: Record<number, number> = {
     1: 0.2,
     3: 0.4,
     5: 0.6,
@@ -32,7 +33,7 @@ export class ToolStyleUtils {
         .split(' ')
         .join('')
         .match(/,[0-9]+([.]{1}[0-9]+){0,1}\)/)?.[0] || '';
-    let firstOpacity = s.match(/[0-9]+([.]{1}[0-9]+){0,1}/)?.[0];
+    const firstOpacity = s.match(/[0-9]+([.]{1}[0-9]+){0,1}/)?.[0];
     return opacity * Number(firstOpacity);
   }
 
@@ -112,24 +113,12 @@ export class ToolStyleUtils {
     AttributeColorList = AttributeColorList.map((item) => {
       const showColor = JSON.parse(JSON.stringify(DEFAULT_COLOR));
       showColor.valid.stroke = colorSplit(item, computeOpacity(borderOpacity, item));
-      showColor.valid.fill = colorSplit(
-        item,
-        computeOpacity(fillOpacity, item) * FILL_OPACITY * 0.5,
-      );
+      showColor.valid.fill = colorSplit(item, computeOpacity(fillOpacity, item) * FILL_OPACITY * 0.5);
       showColor.validSelected.stroke = colorSplit(item, computeOpacity(borderOpacity, item));
-      showColor.validSelected.fill = colorSplit(
-        item,
-        computeOpacity(fillOpacity, item) * FILL_OPACITY,
-      );
+      showColor.validSelected.fill = colorSplit(item, computeOpacity(fillOpacity, item) * FILL_OPACITY);
       showColor.validHover.stroke = colorSplit(item, computeOpacity(borderOpacity, item));
-      showColor.validHover.fill = colorSplit(
-        item,
-        computeOpacity(fillOpacity, item) * FILL_OPACITY,
-      );
-      showColor.invalid.stroke = colorSplit(
-        showColor.invalid.stroke,
-        computeOpacity(borderOpacity, item),
-      );
+      showColor.validHover.fill = colorSplit(item, computeOpacity(fillOpacity, item) * FILL_OPACITY);
+      showColor.invalid.stroke = colorSplit(showColor.invalid.stroke, computeOpacity(borderOpacity, item));
       showColor.invalid.fill = colorSplit(
         showColor.invalid.fill,
         computeOpacity(fillOpacity, item) * FILL_OPACITY * 0.5,
@@ -142,10 +131,7 @@ export class ToolStyleUtils {
         showColor.invalidSelected.fill,
         computeOpacity(fillOpacity, item) * FILL_OPACITY,
       );
-      showColor.invalidHover.stroke = colorSplit(
-        showColor.invalidHover.stroke,
-        computeOpacity(borderOpacity, item),
-      );
+      showColor.invalidHover.stroke = colorSplit(showColor.invalidHover.stroke, computeOpacity(borderOpacity, item));
       showColor.invalidHover.fill = colorSplit(
         showColor.invalidHover.fill,
         computeOpacity(fillOpacity, item) * FILL_OPACITY,

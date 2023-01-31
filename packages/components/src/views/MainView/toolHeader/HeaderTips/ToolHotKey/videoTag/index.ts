@@ -1,16 +1,9 @@
 import _ from 'lodash';
-import {
-  rewind,
-  backward,
-  forward,
-  forwardForward,
-  fullScreen,
-  playPause,
-  speed,
-  saveResult,
-} from '../common';
+
+import type { IShortcut } from '@/types/tool';
+
+import { rewind, backward, forward, forwardForward, fullScreen, playPause, speed, saveResult } from '../common';
 import { tagInSingleImg } from '../tag';
-import { IShortcut } from '@/types/tool';
 
 const videoForward = _.cloneDeep(forward);
 const videoBackward = _.cloneDeep(backward);

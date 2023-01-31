@@ -1,6 +1,12 @@
 import { isNumber } from 'lodash';
-import { ELang } from '../../constant/annotation';
-import { IPolygonData } from '../../types/tool/polygon';
+
+import type { IInputList } from '@/types/tool/tagTool';
+import type { IPoint } from '@/types/tool/common';
+import type { ILine } from '@/types/tool/lineTool';
+import type { IRect } from '@/types/tool/rectTool';
+
+import type { ELang } from '../../constant/annotation';
+import type { IPolygonData } from '../../types/tool/polygon';
 import { COLORS_ARRAY, ICON_ARRAY, INVALID_ICON, NULL_COLOR, NULL_ICON } from '../../constant/style';
 import { ETextType } from '../../constant/tool';
 import locale from '../../locales';

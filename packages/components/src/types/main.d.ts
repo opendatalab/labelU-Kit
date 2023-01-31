@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 /**
  * 后续下方的定义由 @label-u/annotation 提供
  */

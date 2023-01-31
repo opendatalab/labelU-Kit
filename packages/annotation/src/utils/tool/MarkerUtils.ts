@@ -1,3 +1,5 @@
+import type { IInputList } from '@/types/tool/tagTool';
+
 import AttributeUtils from './AttributeUtils';
 
 export default class MarkerUtils {

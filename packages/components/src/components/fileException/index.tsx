@@ -5,8 +5,11 @@
  */
 
 import React from 'react';
-import FileError, { IFileErrorProps } from './FileError';
-import FileInvalid, { IFileInvalidProps } from './FileInvalid';
+
+import type { IFileErrorProps } from './FileError';
+import FileError from './FileError';
+import type { IFileInvalidProps } from './FileInvalid';
+import FileInvalid from './FileInvalid';
 
 interface IFileExceptionProps {
   errorProps: IFileErrorProps & { isError: boolean };
