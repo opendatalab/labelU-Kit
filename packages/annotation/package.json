@@ -32,8 +32,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
     "start": "npm run dev",
-    "build:type": "tsc --emitDeclarationOnly",
-    "build": "rimraf -rf dist && rimraf -rf es && cross-env NODE_ENV=production rollup -c rollup.config.js",
+    "build:types": "tsc -d --emitDeclarationOnly",
+    "build": "rimraf -rf dist && rimraf -rf es && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:types",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx  --fix --format=pretty ./src && npm run lint:prettier && npm run build:type",
     "lint:prettier": "npm run prettier && prettier --version && prettier --check \"src/**/*.{js,jsx,ts,tsx,less,md,json}\" --end-of-line auto",
@@ -51,7 +51,6 @@
     "cross-env": "^7.0.3",
     "esbuild": "^0.11.0",
     "rollup": "^2.43.1",
-    "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-esbuild": "^3.0.2",
     "rollup-plugin-svg": "^2.0.0",
     "rollup-plugin-typescript2": "^0.32.1",

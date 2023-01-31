@@ -1,6 +1,5 @@
 import path from 'path';
 
-import dts from 'rollup-plugin-dts';
 import esbuild from 'rollup-plugin-esbuild';
 // 为了支持import xx from 'xxx'
 import resolve from '@rollup/plugin-node-resolve';
@@ -75,17 +74,5 @@ export default () => [
         banner,
       },
     ],
-  },
-  {
-    input: ['./src/index.ts'],
-    coverageDirectory: './dist/',
-    plugins: [...commonPlugin, dts()],
-    output: {
-      format: 'esm',
-      dir: TYPE_OUTPUT_DIR,
-      preserveModules: true,
-      preserveModulesRoot: 'src',
-    },
-    external: [/\.svg$/],
   },
 ];
