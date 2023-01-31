@@ -279,7 +279,7 @@ class PointOperation extends BasicToolOperation {
       // REVIEW: 这里的 config.drawOutsideTarget 跟 lineToolOperation里的 config.drawOutSideTarget 中的「s」大小写不一致
       if (
         !this.imgInfo ||
-        (this.config.drawOutsideTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 }))
+        (!this.drawOutsideTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 }))
       ) {
         return;
       }

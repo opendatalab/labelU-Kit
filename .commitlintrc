@@ -25,6 +25,7 @@
         "revert"
       ]
     ],
+    "header-max-length": [0, "always", 100],
     "header-case": [
       0,
       "never"
