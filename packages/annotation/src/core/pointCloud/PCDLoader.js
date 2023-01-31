@@ -110,6 +110,7 @@ class PCDLoader extends Loader {
       PCDheader.height = /height (.*)/i.exec(PCDheader.str);
       PCDheader.viewpoint = /viewpoint (.*)/i.exec(PCDheader.str);
       PCDheader.points = /points (.*)/i.exec(PCDheader.str);
+      console.log(PCDheader);
 
       // evaluate
 
@@ -176,6 +177,7 @@ class PCDLoader extends Loader {
     // parse data
 
     const position = [];
+    const intensity = [];
     const normal = [];
     const color = [];
 
@@ -197,6 +199,9 @@ class PCDLoader extends Loader {
           position.push(parseFloat(line[offset.z]));
         }
 
+        if (offset.intensity !== undefined) {
+          intensity.push(parseFloat(line[offset.intensity]));
+        }
         // if (offset.rgb !== undefined) {
         //   const rgb_field_index = PCDheader.fields.findIndex((field) => field === 'rgb');
         //   const rgb_type = PCDheader.type[rgb_field_index];
@@ -279,6 +284,16 @@ class PCDLoader extends Loader {
           );
         }
 
+        if (offset.intensity !== undefined) {
+          const intensityIndex = PCDheader.fields.indexOf('intensity');
+          intensity.push(
+            dataview.getFloat32(
+              PCDheader.points * offset.intensity + PCDheader.size[intensityIndex] * i,
+              this.littleEndian,
+            ),
+          );
+        }
+
         if (this.genColorByCoord) {
           const pdColor = this.genColorByCoord(
             dataview.getFloat32(PCDheader.points * offset.x + PCDheader.size[0] * i, this.littleEndian),
@@ -304,6 +319,9 @@ class PCDLoader extends Loader {
           position.push(dataview.getFloat32(row + offset.z, this.littleEndian));
         }
 
+        if (offset.intensity !== undefined) {
+          intensity.push(dataview.getFloat32(row + offset.intensity, this.littleEndian));
+        }
         // if (offset.rgb !== undefined) {
         //   color.push(dataview.getUint8(row + offset.rgb + 2) / 255.0);
         //   color.push(dataview.getUint8(row + offset.rgb + 1) / 255.0);
@@ -333,6 +351,7 @@ class PCDLoader extends Loader {
     const geometry = new BufferGeometry();
 
     if (position.length > 0) geometry.setAttribute('position', new Float32BufferAttribute(position, 3));
+    if (position.length > 0) geometry.setAttribute('intensity', new Float32BufferAttribute(intensity, 1));
     if (normal.length > 0) geometry.setAttribute('normal', new Float32BufferAttribute(normal, 3));
     if (color.length > 0) geometry.setAttribute('color', new Float32BufferAttribute(color, 3));
 

@@ -124,7 +124,7 @@ export class PointCloud extends EventListener {
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    // this.scene.add(this.axesHelper);
+    this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
@@ -688,6 +688,7 @@ export class PointCloud extends EventListener {
     this.pointsUuid = points.uuid;
     points.material = pointsMaterial;
     this.filterZAxisPoints(points);
+    this.removeObjectByName(this.pointCloudObjectName);
 
     this.scene.add(points);
 
@@ -712,7 +713,6 @@ export class PointCloud extends EventListener {
     this.clearPointCloud();
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
     points.name = this.pointCloudObjectName;
-
     this.renderPointCloud(points, radius);
   };
 
