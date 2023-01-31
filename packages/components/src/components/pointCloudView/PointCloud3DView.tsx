@@ -1,8 +1,13 @@
 import { getClassName } from '@/utils/dom';
-import { ICoordinate, MathUtils, PointCloudOperation } from '@label-u/annotation';
+import {
+  ICoordinate,
+  MathUtils,
+  PointCloudOperation,
+  ShowSettingConfig,
+} from '@label-u/annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@label-u/utils';
 import classNames from 'classnames';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
@@ -76,10 +81,9 @@ const PointCloud3DSideBar = () => {
   );
 };
 
-const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
-  currentData,
-  config,
-}) => {
+const PointCloud3D: React.FC<
+  IAnnotationStateProps & { config: BasicConfig; showSettingConfig: ShowSettingConfig }
+> = ({ currentData, config, showSettingConfig }) => {
   const dispatch = useDispatch();
   const ptCtx = useContext(PointCloudContext);
   // const [showDirection, setShowDirection] = useState(true);
@@ -113,8 +117,8 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
   };
 
   useEffect(() => {
-    initPointCloud3DView()
-  }, [currentData?.url]);
+    refreshtPointCloud3DView();
+  }, [currentData?.url, showSettingConfig]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance || !ptCtx.mainViewInstance) {
@@ -128,10 +132,27 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
       height: TopView2dOperation.container.getBoundingClientRect().height,
     };
 
+    mainViewInstance.singleOn('refreshPointCloud3dView', () => {
+      refreshtPointCloud3DView();
+    });
 
-    mainViewInstance.singleOn('refreshPointCloud3dView',()=>{
-      initPointCloud3DView()
-    })
+    mainViewInstance.singleOn('deleteBoxes', (ids: string[]) => {
+      if (ids && ids.length > 0) {
+        deleteSomeBoxesInScene(ids);
+      }
+    });
+
+    mainViewInstance.singleOn('setSelectedBoxByOrder', (order: number) => {
+      let boxList = mainViewInstance.boxList;
+      if (Array.isArray(boxList) && boxList.length > 0) {
+        for (let i = 0; i < boxList.length; i++) {
+          if (boxList[i].order === order) {
+            mainViewInstance.emit('updateSelectedBox', boxList[i].id);
+            break;
+          }
+        }
+      }
+    });
 
     mainViewInstance.singleOn(
       'boxAdded',
@@ -152,7 +173,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
     );
 
     mainViewInstance.singleOn('savePcResult', (boxList: IPointCloudBox[]) => {
-      console.log('boxList', boxList);
+      mainViewInstance?.updatePointCloudByAttributes(currentData.url as string, boxList);
       dispatch({
         type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
         payload: {
@@ -202,38 +223,25 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
     return { reset3DView, setTarget3DView, isActive: !!selectedBox };
   }, [selectedBox]);
 
-
-  const initPointCloud3DView = ()=>{
-    if (ref.current && currentData?.url) {
+  const deleteSomeBoxesInScene = (ids: string[]) => {
+    if (ref.current && currentData?.url && Array.isArray(ids) && ids.length > 0) {
       let pointCloud = ptCtx.mainViewInstance;
       if (!pointCloud) {
         pointCloud = new PointCloudOperation({
           container: ref.current,
-          // backgroundColor: '#4c4c4c',
           isOrthographicCamera: true,
           attribute: '',
-          // @ts-ignore
           config: config.config,
         });
+        ptCtx.setMainViewInstance(pointCloud);
       }
-
-      pointCloud.setStyle(toolStyle);
+      pointCloud.setShowSettings(showSettingConfig);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
-        // pointCloud.clearBoxList();
         pointCloud.loadPCDFile(currentData.url);
-
-        // Add Init Box
-        boxParamsList.forEach((v: IPointCloudBox) => {
-          // let color =
-          // pointCloud?.generateBox(v);
-          // to do change color by attribute
-          if(v.isVisible) {
-            pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id);
-          }else{
-            pointCloud?.clearBoxInSceneById(v.id);
-          }
+        ids.forEach((id: string) => {
+          pointCloud?.clearBoxInSceneById(id);
         });
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
@@ -241,7 +249,41 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
 
       ptCtx.setMainViewInstance(pointCloud);
     }
-  }
+  };
+
+  const refreshtPointCloud3DView = async () => {
+    if (ref.current && currentData?.url) {
+      let pointCloud = ptCtx.mainViewInstance;
+      if (!pointCloud) {
+        pointCloud = new PointCloudOperation({
+          container: ref.current,
+          isOrthographicCamera: true,
+          attribute: '',
+          config: config.config,
+        });
+        ptCtx.setMainViewInstance(pointCloud);
+      }
+      pointCloud.setShowSettings(showSettingConfig);
+      pointCloud.setStyle(toolStyle);
+      if (currentData.result) {
+        const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
+        pointCloud.setBoxList(boxParamsList);
+        // Add Init Box
+        boxParamsList.forEach((v: IPointCloudBox) => {
+          // to do change color by attribute
+          if (v.isVisible) {
+            pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id);
+          } else {
+            pointCloud?.clearBoxInSceneById(v.id);
+          }
+        });
+        ptCtx.setPointCloudResult(boxParamsList);
+        ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
+        pointCloud?.updatePointCloudByAttributes(currentData.url, boxParamsList);
+      }
+      ptCtx.setMainViewInstance(pointCloud);
+    }
+  };
 
   // const PointCloud3DTitle = (
   //   <div>
@@ -270,7 +312,7 @@ const PointCloud3D: React.FC<IAnnotationStateProps & { config: BasicConfig }> = 
     >
       <div className={getClassName('point-cloud-3d-content')} style={{ position: 'relative' }}>
         <PointCloud3DContext.Provider value={ptCloud3DCtx}>
-          <PointCloud3DSideBar />
+          {/* <PointCloud3DSideBar /> */}
         </PointCloud3DContext.Provider>
         <BoxInfos />
         <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />

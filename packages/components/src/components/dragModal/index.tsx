@@ -4,12 +4,14 @@ import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 interface Iprops {
   // 弹框左上角位置
   width: number;
+  height?: number;
   content: React.ReactElement;
-  title: string;
+  title?: string;
   okWord: string;
   cancelWord: string;
   okEvent?: () => void;
   cancelEvent?: () => void;
+  closable?: boolean;
 }
 
 interface Bounds {
@@ -18,7 +20,7 @@ interface Bounds {
 }
 
 const DrageModel = (props: Iprops, ref: any) => {
-  const { title, okWord, content, cancelWord } = props;
+  const { title, okWord, content, cancelWord, closable = true } = props;
 
   const [isVisble, setIsVisible] = useState(false);
   //   const [coordinate,setCoordinate] = useState<Coordinate>({
@@ -47,8 +49,6 @@ const DrageModel = (props: Iprops, ref: any) => {
       setBounds(bounds);
     },
   }));
-
-  
 
   // 计算是否超出屏幕;超出后
   const inWindow = (left: number, top: number, startPosX: number, startPosY: number) => {
@@ -85,6 +85,30 @@ const DrageModel = (props: Iprops, ref: any) => {
     };
   };
 
+  if (!title) {
+    return (
+      <Modal
+        mask={false}
+        footer={null}
+        style={{
+          top: `${bounds.top}px`,
+          left: `${bounds.left}px`,
+          margin: '0px 0px',
+          maxWidth: props.width,
+          height: props.height,
+        }}
+        closable={closable}
+        visible={isVisble}
+        okText={okWord}
+        cancelText={cancelWord}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        {content}
+      </Modal>
+    );
+  }
+
   return (
     <Modal
       mask={false}
@@ -110,12 +134,11 @@ const DrageModel = (props: Iprops, ref: any) => {
           onMouseOut={() => {
             setDisabled(true);
           }}
-          onFocus={() => {}}
-          onBlur={() => {}} // end
         >
           {title}
         </div>
       }
+      closable={closable}
       visible={isVisble}
       okText={okWord}
       cancelText={cancelWord}

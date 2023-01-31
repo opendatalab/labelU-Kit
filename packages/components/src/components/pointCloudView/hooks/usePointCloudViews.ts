@@ -575,12 +575,6 @@ export const usePointCloudViews = () => {
     });
 
     updateMainViewGenBox(topPolygon);
-
-    let attribute = mainViewInstance?.attribute as string;
-    mainViewInstance?.updatePointCloudAfterDragBox(dataUrl, {
-      ...boxParams,
-      attribute: attribute,
-    });
   };
 
   /**
@@ -638,12 +632,6 @@ export const usePointCloudViews = () => {
       };
 
       updateMainViewGenBox(wordPolygon);
-
-      let attribute = mainViewInstance?.attribute as string;
-      mainViewInstance?.updatePointCloudAfterDragBox(dataUrl, {
-        ...boxParams,
-        attribute: attribute,
-      });
     }
   };
 

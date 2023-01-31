@@ -22,11 +22,11 @@
   "author": "wuhui",
   "email": "751569801@qq.com",
   "contributors": [
+    "luoluo",
     "lijingchi",
     "tanjunbao",
     "chenlu",
-    "lihuaqi",
-    "wuhui"
+    "lihuaqi"
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",

@@ -33,6 +33,12 @@ export class PointCloudCache {
     return this.instance;
   }
 
+  public setInstance(src:string,points:THREE.Points) {
+    if( PointCloudCache.instance){
+      this.pointsMap.set(src,points);
+    }
+  }
+
   public loadPCDFile = (src: string): Promise<THREE.Points> => {
     return new Promise((resolve, reject) => {
       const clonePoints = this.pointsMap.get(src)?.clone();

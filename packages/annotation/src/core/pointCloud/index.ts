@@ -68,7 +68,6 @@ export class PointCloud extends EventListener {
 
   public initCameraPosition = this.DEFAULT_INIT_CAMERA_POSITION; // It will init when the camera position be set
 
-  
   protected pointCloudObjectName = 'pointCloud';
 
   protected container: HTMLElement;
@@ -87,7 +86,7 @@ export class PointCloud extends EventListener {
 
   private showDirection: boolean = true; // Whether to display the direction of box
 
-  public selectedPointCloud!:THREE.Points; // Selected point cloud
+  public selectedPointCloud!: THREE.Points; // Selected point cloud
 
   constructor({
     container,
@@ -125,7 +124,7 @@ export class PointCloud extends EventListener {
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    // this.scene.add(this.axesHelper);
+    this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
@@ -154,7 +153,7 @@ export class PointCloud extends EventListener {
     this.initCameraPosition = vector;
   }
 
-  public setSelectedPointCloud(points:THREE.Points){
+  public setSelectedPointCloud(points: THREE.Points) {
     this.selectedPointCloud = points;
   }
 
@@ -250,7 +249,6 @@ export class PointCloud extends EventListener {
 
   public init() {
     const { scene } = this;
-    // Background
     scene.background = new THREE.Color(this.backgroundColor);
     this.initControls();
     this.initRenderer();
@@ -690,6 +688,7 @@ export class PointCloud extends EventListener {
     this.pointsUuid = points.uuid;
     points.material = pointsMaterial;
     this.filterZAxisPoints(points);
+    this.removeObjectByName(this.pointCloudObjectName);
 
     this.scene.add(points);
 
@@ -714,7 +713,6 @@ export class PointCloud extends EventListener {
     this.clearPointCloud();
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
     points.name = this.pointCloudObjectName;
-
     this.renderPointCloud(points, radius);
   };
 
@@ -751,7 +749,7 @@ export class PointCloud extends EventListener {
       newPoints.name = this.pointCloudObjectName;
       // this.scene.add(newPoints);
       // this.render();
-      return newPoints
+      return newPoints;
     };
     const points = await this.cacheInstance.loadPCDFile(src);
     const returnPoints = await cb(points);
@@ -1052,8 +1050,6 @@ export class PointCloud extends EventListener {
     };
   }
 
-
-
   public getBoxTopPolygon2DCoordinate(boxParams: IPointCloudBox) {
     const { width, height } = boxParams;
     const vectorList = this.getPolygonTopPoints(boxParams);
@@ -1077,20 +1073,19 @@ export class PointCloud extends EventListener {
           y: -(vector.y - this.containerHeight / 2),
         };
       });
-      const wZoom = this.containerWidth / width;
-      const hZoom = this.containerHeight / height;
+    const wZoom = this.containerWidth / width;
+    const hZoom = this.containerHeight / height;
     return {
       polygon2d,
       zoom: Math.min(wZoom, hZoom) / 2,
     };
   }
 
-
-  public getBoxTopPolygon2DCoordinateFromBox(boxParams: IPointCloudBox,sizeTop:{width:number,height:number}){
+  public getBoxTopPolygon2DCoordinateFromBox(boxParams: IPointCloudBox, sizeTop: { width: number; height: number }) {
     const { width, height } = boxParams;
     const wZoom = this.containerWidth / width;
     const hZoom = this.containerHeight / height;
-    
+
     const polygon2d = boxParams.rect.map((point) => {
       return MathUtils.transerWord2Canvas(point, sizeTop);
     });
@@ -1270,6 +1265,38 @@ export class PointCloud extends EventListener {
     }
 
     this.render();
+  };
+
+  public shaderForPoints = (geometry:THREE.BufferGeometry) => {
+    var material = new THREE.ShaderMaterial({
+      vertexShader:`
+        attribute vec3 customColor;
+        varying vec3 color;
+        void main(){
+          color = customColor;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+        }
+      `,
+      fragmentShader:`
+        varying vec3 color;
+        void main(){
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `
+    })
+
+    let color = new THREE.Color();
+    color.setRGB(255,255,255);
+    let numberVertex = geometry.getAttribute('position').count;
+    let itemCount = 3;
+    const colors = new Uint8Array(numberVertex*itemCount)
+    let colorAttribute = new THREE.BufferAttribute(colors,itemCount,true);
+    geometry.setAttribute('customColor',colorAttribute);
+    for(let i = 0; i <numberVertex; i++){
+      colorAttribute.setXYZ(i,color.r,color.g,color.b);
+    }
+    var mesh = new THREE.Mesh(geometry, material);
+    return mesh;
   };
 
   public render() {

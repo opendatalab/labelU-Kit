@@ -28,13 +28,22 @@ const PointCloudView: React.FC<IProps> = (props) => {
     };
   }, [props.toolsBasicConfig, props.attributeList]);
 
+  const showSettings = useMemo(() => {
+    return {
+      isShowOrder:props.isShowOrder as boolean,
+      isShowAttribute:props.isShowAttribute as boolean,
+      isShowAttributeText:props.isShowAttributeText as boolean,
+      isShowDirection:props.isShowDirection as boolean
+    }
+  },[props.isShowOrder,props.isShowAttribute,props.isShowAttributeText,props.isShowDirection])
+
   return (
     <>
       <PointCloudListener />
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <div className={getClassName('point-cloud-container', 'left')}>
-            <PointCloud3DView config={pcConfig}/>
+            <PointCloud3DView config={pcConfig} showSettingConfig={showSettings}/>
           </div>
 
           <div className={getClassName('point-cloud-container', 'right')}>

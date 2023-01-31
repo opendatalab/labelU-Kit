@@ -39,6 +39,9 @@ interface CommonActions {
 
 export interface AnnotationState {
   isShowOrder:boolean;
+  isShowAttributeText:boolean;
+  isShowAttribute:boolean;
+  isShowDirection:boolean;
   currentToolName:string; // 当前工具名称
   toolInstance: ToolInstance | null;
   annotationEngine: AnnotationEngine | null;

@@ -20,6 +20,9 @@ export const getStepConfig = (stepList: any[], step: number) =>
 
 const initialState: AnnotationState = {
   isShowOrder: false,
+  isShowAttributeText:false,
+  isShowAttribute:false,
+  isShowDirection:false,
   currentToolName: '',
   annotationEngine: null,
   toolInstance: null,
@@ -236,6 +239,24 @@ export const annotationReducer = (
       return {
         ...state,
         isShowOrder: action.payload.isShowOrder,
+      };
+    }
+    case ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ATTRIBUTE_TEXT: {
+      return {
+        ...state,
+        isShowAttributeText: action.payload.isShowAttributeText,
+      };
+    }
+    case ANNOTATION_ACTIONS.UPDATE_IS_SHOW_DIRECTION: {
+      return {
+        ...state,
+        isShowDirection: action.payload.isShowDirection,
+      };
+    }
+    case ANNOTATION_ACTIONS.UPDATE_IS_SHOW_ATTRIBUTE: {
+      return {
+        ...state,
+        isShowAttribute: action.payload.isShowAttribute,
       };
     }
 

@@ -1,8 +1,8 @@
 import MainView from '@/views/MainView';
 import { i18n } from '@label-u/utils';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { useDispatch, useSelector } from '@/store/ctx';
+import { useDispatch } from '@/store/ctx';
 import { store } from '.';
 import { AppState } from './store';
 import { ANNOTATION_ACTIONS } from './store/Actions';
@@ -70,10 +70,12 @@ export interface AppProps {
   attributeList?: Attribute[]; // 标签配置选项，工具共享一套标签
   toolsBasicConfig: BasicConfig[]; // 多工具配置
   textConfig: TextConfig;
+  isShowOrder?:boolean; //是否显示标记顺序
+  isShowAttributeText?:boolean; //是否显示属性文本
+  isShowDirection?:boolean; //是否显示箭头方向
+  isShowAttribute?:boolean; //是否显示属性
   // 标注信息扩展的功能
   dataInjectionAtCreation?: (annotationData: any) => {};
-  // 是否显示标注顺序
-  isShowOrder?: boolean;
   // 渲染增强
   renderEnhance?: {
     staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
@@ -107,8 +109,14 @@ const App: React.FC<AppProps> = (props) => {
   } = props;
   const dispatch = useDispatch();
 
-  const { isShowOrder } = useSelector((state: AppState) => state.annotation);
+  const [imgUrl,setImgUrl] = useState<string>();
 
+
+  useEffect(()=>{
+    if(imgList&&imgList?.length>0&&imgList[0].url){
+      setImgUrl(imgList[0].url)
+    }
+  },[])
 
   useEffect(() => {
     if (
@@ -149,13 +157,12 @@ const App: React.FC<AppProps> = (props) => {
       i18n.changeLanguage(defaultLang);
     }
   }, [
-    props.toolStyle,
+    imgUrl,
     props.toolsBasicConfig,
     props.attributeList,
     props.textConfig,
     props.tagConfigList,
-    currentToolName,
-    isShowOrder,
+    currentToolName
   ]);
 
   useEffect(() => {
@@ -163,7 +170,6 @@ const App: React.FC<AppProps> = (props) => {
       setToolInstance?.(toolInstance);
     }
   }, [toolInstance]);
-  
 
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = () => {
@@ -201,6 +207,10 @@ const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,
   currentToolName: state.annotation.currentToolName,
   toolStyle: state.toolStyle,
+  isShowOrder:state.annotation.isShowOrder,
+  isShowAttributeText:state.annotation.isShowAttributeText,
+  isShowDirection:state.annotation.isShowDirection,
+  isShowAttribute:state.annotation.isShowAttribute
 });
 
 export default connect(mapStateToProps, null, null, { context: LabelUContext })(App);

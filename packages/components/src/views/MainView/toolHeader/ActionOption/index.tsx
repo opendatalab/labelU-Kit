@@ -1,28 +1,42 @@
-import React, { FC, useEffect, useState } from 'react';
-import { Switch } from 'antd';
-import HeaderTips from '../HeaderTips'
-import GeneralOperation from '../GeneralOperation'
-import { useDispatch, useSelector } from '@/store/ctx';
-import { UpdateIsShowOrder } from '@/store/annotation/actionCreators';
-import { AppState } from '@/store';
+import React, { FC, ReactElement, useRef, useState } from 'react';
+import HeaderTips from '../HeaderTips';
+import GeneralOperation from '../GeneralOperation';
+import LabelShowSetArea from './LabelShowSetArea';
+import DrageModel from '@/components/dragModal';
 
 const ActionOption: FC = () => {
-  const dispatch = useDispatch()
-  const [defaultChecked,setDefaultChecked] = useState<boolean>()
-  const onChange = (e: any) => {
-    dispatch(UpdateIsShowOrder(e))
-  };
-
-  const {isShowOrder} = useSelector((state:AppState)=>state.annotation)
-
-  useEffect(()=>{
-    setDefaultChecked(isShowOrder)
-  },[isShowOrder])
-
+  const [content, setContent] = useState<ReactElement>(<div />);
+  const dragModalRef = useRef<any>();
   return (
     <div className='lbc-left-sider'>
-      <a>
-        显示顺序 <Switch style={{marginLeft:"10px"}} checked={defaultChecked} onChange={onChange} />
+      <DrageModel
+        ref={dragModalRef}
+        width={148}
+        height={166}
+        okWord='确认'
+        closable={false}
+        cancelWord='取消'
+        content={content}
+      />
+      <a
+        id='lbc-tool-set-id'
+        onClick={(e) => {
+          const boundingClientRect = document
+            .getElementById(`lbc-tool-set-id`)
+            ?.getBoundingClientRect() as {
+            left: number;
+            bottom: number;
+          };
+          const tmpBounds = {
+            left: boundingClientRect.left,
+            top: boundingClientRect.bottom,
+          };
+          dragModalRef.current.switchModal(true);
+          dragModalRef.current.switchSetBounds(tmpBounds);
+          setContent(<LabelShowSetArea />);
+        }}
+      >
+        显示设置
       </a>
       <GeneralOperation />
       <HeaderTips />

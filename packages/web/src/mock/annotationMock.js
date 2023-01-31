@@ -237,7 +237,7 @@ export const cloudMockFileList = [
       }
     ],
     id: 1,
-    url: 'http://localhost:3001/cloudpoint/1565685654060904.pcd',
+    url: 'http://localhost:3001/cloudpoint/1565685665061034.pcd',
     result: '{}'
   }
 ];

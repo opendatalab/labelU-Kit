@@ -18,7 +18,13 @@ declare module 'web-worker:./filterBoxWorker.js' {
 }
 
 
-declare module 'web-worker:../pointCloud/highlightWorker.js' {
+declare module 'web-worker:../pointCloud/highlightOneBoxWorker.js' {
+  const content: any;
+  export default content;
+}
+
+
+declare module 'web-worker:../pointCloud/highlightBoxesWorkder.js' {
   const content: any;
   export default content;
 }
