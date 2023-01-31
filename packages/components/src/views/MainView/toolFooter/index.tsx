@@ -1,19 +1,21 @@
-import { prefix } from '@/constant';
-import { AppState } from '@/store';
-import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
-import { getTotalPage } from '@/store/annotation/reducer';
-import { Footer } from '@/types/main';
-import { IStepInfo } from '@/types/step';
 import { Divider, Input } from 'antd/es';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { connect, useDispatch } from 'react-redux';
+
+import { prefix } from '@/constant';
+import type { AppState } from '@/store';
+import { PageBackward, PageForward, PageJump } from '@/store/annotation/actionCreators';
+import { getTotalPage } from '@/store/annotation/reducer';
+import type { Footer } from '@/types/main';
+import type { IStepInfo } from '@/types/step';
+
 import FooterTips from './FooterTips';
 import HiddenTips from './HiddenTips';
 import PageNumber from './PageNumber';
 import ZoomController from './ZoomController';
 import { Pagination } from './Pagination';
-import FooterOption from './FooterOption'
+import FooterOption from './FooterOption';
 
 interface IPageProps {
   jumpSkip: Function;
@@ -44,20 +46,14 @@ export const PageInput = (props: IPageProps) => {
   };
 
   return (
-    <Input
-      className='pageInput'
-      ref={inputEl}
-      onChange={newHandleJump}
-      value={newIndex}
-      onKeyDown={newJumpSkip}
-    />
+    <Input className="pageInput" ref={inputEl} onChange={newHandleJump} value={newIndex} onKeyDown={newJumpSkip} />
   );
 };
 
 interface IProps {
   totalPage: number;
   imgIndex: number;
-  style?: { [key: string]: any };
+  style?: Record<string, any>;
   stepList: IStepInfo[];
   step: number;
   basicResultList: any[];
@@ -69,7 +65,7 @@ interface IProps {
 export const footerCls = `${prefix}-footer`;
 
 const FooterDivider = () => (
-  <Divider type='vertical' style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
+  <Divider type="vertical" style={{ background: 'rgba(153, 153, 153, 1)', height: '16px' }} />
 );
 
 const ToolFooter: React.FC<IProps> = (props: IProps) => {
@@ -101,7 +97,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
 
   const pageNumber = <PageNumber />;
 
-  const footerOption = <FooterOption stepInfo={stepInfo} />
+  const footerOption = <FooterOption stepInfo={stepInfo} />;
 
   const pagination = (
     <Pagination
@@ -116,13 +112,9 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
 
   const zoomController = <ZoomController mode={mode} />;
 
-  const curItems = (
-    <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>
-  );
+  const curItems = <span>{t('curItems', { current: basicIndex + 1, total: basicResultList.length })}</span>;
 
   const footerDivider = <FooterDivider />;
-
-  
 
   if (footer) {
     if (typeof footer === 'function') {
@@ -145,7 +137,7 @@ const ToolFooter: React.FC<IProps> = (props: IProps) => {
   }
 
   return (
-    <div className={`${footerCls}`} style={{...props.style,paddingRight:20}}>
+    <div className={`${footerCls}`} style={{ ...props.style, paddingRight: 20 }}>
       {footerTips}
       <div style={{ flex: 1 }} />
       {/* {hiddenTips} */}

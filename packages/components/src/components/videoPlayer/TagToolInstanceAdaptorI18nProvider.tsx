@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@label-u/utils';
 import { I18nextProvider } from 'react-i18next';
-import { IVideoTagInstanceAdaptorProps, TagToolInstanceAdaptor } from './TagToolInstanceAdaptor';
+
+import type { IVideoTagInstanceAdaptorProps } from './TagToolInstanceAdaptor';
+import { TagToolInstanceAdaptor } from './TagToolInstanceAdaptor';
 
 /**
  * I18n provider for InstanceAdaptorI18nProvider

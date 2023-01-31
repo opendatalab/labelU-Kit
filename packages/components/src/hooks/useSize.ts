@@ -1,5 +1,6 @@
 import { useLayoutEffect } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
+
 import type { BasicTarget } from '../utils/dom';
 import { getTargetElement } from '../utils/dom';
 import useRafState from './useRafState';
@@ -37,7 +38,7 @@ function useSize(target: BasicTarget): Size {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [target]);
+  }, [setState, target]);
 
   return state;
 }

@@ -1,22 +1,19 @@
-import { prefix } from '../../../constant';
-import { EToolName } from '../../../data/enums/ToolType';
-import { AppState } from '../../../store';
-import { Sider } from '../../../types/main';
-import StepUtils from '../../../utils/StepUtils';
 import React, { useEffect, useState } from 'react';
-import { Popconfirm, Tabs } from 'antd';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { Tabs } from 'antd';
+import { connect, useSelector } from 'react-redux';
+import classNames from 'classnames';
+
+import type { IFileItem } from '@/types/data';
+
+import { prefix } from '../../../constant';
+import type { EToolName } from '../../../data/enums/ToolType';
+import type { AppState } from '../../../store';
+import type { Sider } from '../../../types/main';
+import StepUtils from '../../../utils/StepUtils';
 import TextToolSidebar from './TextToolSidebar';
 import TagSidebar from './TagSidebar';
 import AttributeRusult from './AttributeRusult';
-import ClearResultIconHover from '../../../assets/annotation/common/clear_result_hover.svg';
-import ClearResultIcon from '../../../assets/annotation/common/clear_result.svg';
-import { IFileItem } from '@/types/data';
-import { labelTool } from '../toolHeader/headerOption';
-import { UpdateImgList } from '@/store/annotation/actionCreators';
-import { PrevResult } from '@label-u/annotation';
 import { toolList } from '../toolHeader/ToolOperation';
-import classNames from 'classnames';
 
 interface IProps {
   toolName?: EToolName;
@@ -31,28 +28,32 @@ interface IProps {
 const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar: React.FC<IProps> = (props) => {
   const { imgList, imgIndex, currentToolName, isPreview } = props;
-
-  const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
   const [textTab, setTextTab] = useState<any>();
   const [tabIndex, setTabIndex] = useState<string>('1');
   const [tagTab, setTagTab] = useState<any>(
-    <div className='rightTab'>
+    <div className="rightTab">
       <p>分类</p>
-      <span className='innerWord'>未完成</span>
+      <span className="innerWord">未完成</span>
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
-  const [isClearnHover, setIsClearHover] = useState<boolean>(false);
+  // const [isClearnHover, setIsClearHover] = useState<boolean>(false);
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
   const [isShowClear, setIsShowClear] = useState(false);
   const tagConfigList = useSelector((state: AppState) => state.annotation.tagConfigList);
   const textConfig = useSelector((state: AppState) => state.annotation.textConfig);
-  const toolInstance = useSelector((state: AppState) => state.annotation.toolInstance);
   const toolName = stepInfo?.tool;
+
+  const [boxHeight, setBoxHeight] = useState<number>();
+  const [, setBoxWidth] = useState<number>();
+
+  useEffect(() => {
+    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    setBoxHeight(boxParent.clientHeight);
+    setBoxWidth(boxParent.clientWidth);
+  }, []);
 
   // 删除标注结果
   // const doClearAllResult = () => {
@@ -60,118 +61,76 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   //   toolInstance?.setPrevResultList([]);
   // };
 
-  const showPopconfirm = () => {
-    setOpen(true);
-  };
-
-  // 更新pre 标注结果
-  const updateCanvasView = (newLabelResult: any) => {
-    const prevResult: PrevResult[] = [];
-    for (let oneTool of toolList) {
-      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
-        let onePrevResult = {
-          toolName: oneTool.toolName,
-          result: newLabelResult[oneTool.toolName].result,
-        };
-        prevResult.push(onePrevResult);
-      }
-      if (oneTool.toolName === currentToolName) {
-        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
-      }
-    }
-    toolInstance.setPrevResultList(prevResult);
-    toolInstance.render();
-  };
-
-  // 删除标注结果
-  const doClearAllResult = () => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    for (let tool of labelTool) {
-      let tmpResult = oldImgResult[tool]?.result;
-      if (tmpResult && tmpResult.length > 0) {
-        oldImgResult[tool].result = [];
-      }
-    }
-    imgList[imgIndex].result = JSON.stringify(oldImgResult);
-    dispatch(UpdateImgList(imgList));
-    updateCanvasView(oldImgResult);
-  };
-
-  const handleOk = () => {
-    setConfirmLoading(true);
-    setTimeout(() => {
-      doClearAllResult();
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 100);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
-
   useEffect(() => {
     if (imgList && imgList.length > 0) {
-      let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool : [];
+      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
       // 设置文本描述结果
       setTextTab(
-        <div className='rightTab'>
+        <div className="rightTab">
           <p>文本描述</p>
           <span
             className={classNames({
               innerWord: true,
-              finish:
-                textResultKeys &&
-                textResultKeys.length > 0 &&
-                textResultKeys.length === textConfig.length,
+              finish: textResultKeys && textResultKeys.length > 0 && textResultKeys.length === textConfig.length,
             })}
           >
-            {textResultKeys &&
-            textResultKeys.length > 0 &&
-            textResultKeys.length === textConfig.length
+            {textResultKeys && textResultKeys.length > 0 && textResultKeys.length === textConfig.length
               ? '已完成'
               : '未完成'}
           </span>
         </div>,
       );
       // 设置分类结果
-      if (currentImgResult?.tagTool?.toolName) {
-        let tagResultKeys = currentImgResult?.tagTool
-          ? Object.keys(currentImgResult?.tagTool.result[0]?.result)
-          : [];
-        setTagTab(
-          <div className='rightTab'>
-            <p>分类</p>
-            <span
-              className={classNames({
-                innerWord: true,
-                finish:
-                  tagResultKeys &&
-                  tagResultKeys.length > 0 &&
-                  tagResultKeys.length === tagConfigList.length,
-              })}
-            >
-              {tagResultKeys &&
-              tagResultKeys.length > 0 &&
-              tagResultKeys.length === tagConfigList.length
-                ? '已完成'
-                : '未完成'}
-            </span>
-          </div>,
-        );
+      // if (currentImgResult?.tagTool?.toolName) {
+      const tagResultKeys = currentImgResult?.tagTool ? Object.keys(currentImgResult?.tagTool.result[0]?.result) : [];
+      setTagTab(
+        <div className="rightTab">
+          <p>分类</p>
+          <span
+            className={classNames({
+              innerWord: true,
+              finish: tagResultKeys && tagResultKeys.length > 0 && tagResultKeys.length === tagConfigList.length,
+            })}
+          >
+            {tagResultKeys && tagResultKeys.length > 0 && tagResultKeys.length === tagConfigList.length
+              ? '已完成'
+              : '未完成'}
+          </span>
+        </div>,
+      );
+      // }
+      // 设置标注件数
+      // let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
+      // let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
+      // let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
+      // let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
+      const imgResult = JSON.parse(imgList[imgIndex].result as string);
+      let count = 0;
+      let order: number[] = [];
+      for (const item of toolList) {
+        if (item.toolName !== 'tagTool') {
+          if (
+            imgResult[item.toolName] &&
+            imgResult[item.toolName]?.result &&
+            imgResult[item.toolName]?.result?.length > 0
+          ) {
+            for (let i = 0; i < imgResult[item.toolName].result.length; i++) {
+              if (order.indexOf(imgResult[item.toolName].result[i].order) < 0) {
+                order.push(imgResult[item.toolName].result[i].order);
+              }
+            }
+            count += order.length;
+            order = [];
+          }
+        }
       }
 
-      // 设置标注件数
-      let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
-      let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
-      let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
-      let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
-      let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length;
+      // let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length;
       setAttributeTab(
-        <div className='rightTab'>
+        <div className="rightTab">
           <p>标注结果</p>
-          <span className='innerWord'>{count}件</span>
+          <span className="innerWord">{count}件</span>
         </div>,
       );
       if (count > 0) {
@@ -180,30 +139,30 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         setIsShowClear(false);
       }
     }
-  }, [currentToolName, tabIndex, imgList, imgIndex]);
+  }, [currentToolName, tabIndex, imgList, imgIndex, textConfig.length, tagConfigList.length]);
 
   if (!toolName) {
     return null;
   }
 
   return (
-    <div className={`${sidebarCls}`}>
+    <div className={`${sidebarCls}`} style={{ height: (boxHeight as number) - 111 }}>
       <Tabs
-        defaultActiveKey='1'
+        defaultActiveKey="1"
         onChange={(e) => {
           setTabIndex(e);
         }}
       >
         {tagConfigList && tagConfigList.length > 0 && (
-          <Tabs.TabPane tab={tagTab} key='1'>
+          <Tabs.TabPane tab={tagTab} key="1">
             <div className={`${sidebarCls}`}>
               <TagSidebar isPreview={isPreview} />
             </div>
           </Tabs.TabPane>
         )}
-        <Tabs.TabPane tab={attributeTab} key='2'>
-          <AttributeRusult isPreview={isPreview} />
-          {isShowClear && (
+        <Tabs.TabPane tab={attributeTab} key="2">
+          <AttributeRusult isPreview={isPreview} isShowClear={isShowClear} />
+          {/* {isShowClear && (
             <Popconfirm
               title='确认清空标注？'
               open={open}
@@ -228,12 +187,11 @@ const RightSiderbar: React.FC<IProps> = (props) => {
                 src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
               />
               </div>
- 
             </Popconfirm>
-          )}
+          )} */}
         </Tabs.TabPane>
         {textConfig && textConfig.length > 0 && (
-          <Tabs.TabPane tab={textTab} key='3'>
+          <Tabs.TabPane tab={textTab} key="3">
             <div className={`${sidebarCls}`}>
               <TextToolSidebar isPreview={isPreview} />
             </div>

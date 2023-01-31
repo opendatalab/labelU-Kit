@@ -5,7 +5,6 @@ import ChangePolygonAttribute from '@/assets/annotation/toolHotKeyIcon/icon_poly
 import DeletePolygonSvg from '@/assets/annotation/toolHotKeyIcon/icon_polygonDel_kj.svg';
 import MouseLeftSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_left_kj.svg';
 import MouseRightSvg from '@/assets/annotation/toolHotKeyIcon/icon_mouse_right_kj.svg';
-
 import IconLineContKj from '@/assets/annotation/toolHotKeyIcon/icon_lineCont_kj.svg';
 import IconPolygonInsertKj from '@/assets/annotation/toolHotKeyIcon/icon_polygonInsert_kj.svg';
 import IconUnGripKj from '@/assets/annotation/toolHotKeyIcon/icon_unGrip_kj.svg';

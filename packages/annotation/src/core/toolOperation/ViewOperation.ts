@@ -4,6 +4,7 @@
 
 import _ from 'lodash';
 import rgba from 'color-rgba';
+
 import DrawUtils from '@/utils/tool/DrawUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import RectUtils from '@/utils/tool/RectUtils';
@@ -12,7 +13,11 @@ import MathUtils from '@/utils/MathUtils';
 import RenderDomClass from '@/utils/tool/RenderDomClass';
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IAnnotationData, IBasicStyle } from '@/types/tool/annotationView';
+import type { IPoint } from '@/types/tool/common';
+
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
@@ -151,7 +156,7 @@ export default class ViewOperation extends BasicToolOperation {
    * @param obj
    * @returns
    */
-  private getSpecificStyle(obj: { [a: string]: any }) {
+  private getSpecificStyle(obj: Record<string, any>) {
     const specificStyle = _.pick(obj, ['stroke', 'thickness', 'fill', 'radius']);
 
     const newStyle = {

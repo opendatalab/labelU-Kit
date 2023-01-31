@@ -1,4 +1,4 @@
-import { EToolName } from './tool';
+import type { EToolName } from './tool';
 
 const rectToolConfig = {
   showConfirm: false,

@@ -1,17 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { message } from 'antd/es';
-import { AppState } from 'src/store';
+import type { AppState } from 'src/store';
 import { connect, useDispatch } from 'react-redux';
-import { ImgAttributeState } from 'src/store/imgAttribute/types';
+import type { ImgAttributeState } from 'src/store/imgAttribute/types';
 import _ from 'lodash';
-import { store } from '@/index';
+import type { AnnotationEngine } from '@label-u/annotation';
+import { ImgUtils } from '@label-u/annotation';
+import { i18n } from '@label-u/utils';
 
+import { store } from '@/index';
 import useSize from '@/hooks/useSize';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
-import { AnnotationEngine, ImgUtils } from '@label-u/annotation';
 import FileError from '@/components/fileException/FileError';
-import { i18n } from '@label-u/utils';
-import { AppProps } from '@/App';
+import type { AppProps } from '@/App';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 
 interface IProps extends AppState, AppProps {
@@ -89,7 +90,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     if (toolInstance) {
       toolInstance.setImgAttribute(imgAttribute);
     }
-  }, [imgAttribute]);
+  }, [imgAttribute, toolInstance]);
 
   /** 样式同步 */
   useEffect(() => {
@@ -99,7 +100,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     if (annotationEngine) {
       annotationEngine.setStyle(toolStyle);
     }
-  }, [toolStyle]);
+  }, [annotationEngine, toolInstance, toolStyle]);
 
   /** 窗口大小监听 */
   useEffect(() => {
@@ -110,7 +111,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     if (annotationEngine) {
       annotationEngine.setSize(size);
     }
-  }, [size]);
+  }, [annotationEngine, size, toolInstance]);
 
   /**
    * 重新加载图片，避免网络问题导致的图片无法加载
@@ -132,7 +133,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     // 初始化配置防抖方法
     const throttle = (fun: () => void, time: number) => {
       let timmer: any;
-      let returnFunction = () => {
+      const returnFunction = () => {
         if (timmer) {
           clearTimeout(timmer);
         }
@@ -149,21 +150,16 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
       // 切换工具保存标注结果
       dispatch(ChangeSave);
     }, 100);
-    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', (e) => {
+    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', () => {
       throtthleSave();
     });
-  }, []);
+  }, [dispatch]);
 
   return (
-    <div ref={annotationRef} className='annotationOperation'>
-      <div className='canvas' ref={containerRef} style={size} id='toolContainer' key={toolName} />
+    <div ref={annotationRef} className="annotationOperation">
+      <div className="canvas" ref={containerRef} style={size} id="toolContainer" key={toolName} />
       {toolInstance?.isImgError === true && (
-        <FileError
-          {...size}
-          reloadImage={reloadImg}
-          backgroundColor='#e2e2e2'
-          ignoreOffsetY={true}
-        />
+        <FileError {...size} reloadImage={reloadImg} backgroundColor="#e2e2e2" ignoreOffsetY={true} />
       )}
     </div>
   );
@@ -171,15 +167,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
 const mapStateToProps = (state: AppState) => {
   const annotationState = _.pickBy(state.annotation, (v, k) =>
-    [
-      'imgList',
-      'imgIndex',
-      'stepList',
-      'step',
-      'toolInstance',
-      'annotationEngine',
-      'loading',
-    ].includes(k),
+    ['imgList', 'imgIndex', 'stepList', 'step', 'toolInstance', 'annotationEngine', 'loading'].includes(k),
   );
   return {
     imgAttribute: state.imgAttribute,

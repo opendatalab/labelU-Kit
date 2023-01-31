@@ -1,23 +1,24 @@
-import sLineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
-import sPointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
-import sIconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
-import sIconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern_a.svg';
-
-import lineASvg from '@/assets/annotation/lineTool/icon_line.svg';
-import pointASvg from '@/assets/annotation/pointTool/icon_point.svg';
-import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon.svg';
-import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
-
-import icon_tag from '@/assets/annotation/icon_tag.svg'
-import { prefix } from '@/constant';
-import { EToolName } from '@/data/enums/ToolType';
-import { AppState } from '@/store';
-import { Sider } from '@/types/main';
-import StepUtils from '@/utils/StepUtils';
 import { Collapse, Row } from 'antd/es';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { cTool } from '@label-u/annotation';
+
+import sLineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
+import sPointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
+import sIconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
+import sIconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern_a.svg';
+import lineASvg from '@/assets/annotation/lineTool/icon_line.svg';
+import pointASvg from '@/assets/annotation/pointTool/icon_point.svg';
+import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon.svg';
+import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
+import icon_tag from '@/assets/annotation/icon_tag.svg';
+import { prefix } from '@/constant';
+import { EToolName } from '@/data/enums/ToolType';
+import type { AppState } from '@/store';
+import type { Sider } from '@/types/main';
+import StepUtils from '@/utils/StepUtils';
+
 import AnnotationText from './AnnotationText';
 import ClearIcon from './ClearIcon';
 import GeneralOperation from './GeneralOperation';
@@ -26,7 +27,6 @@ import SwitchAttributeList from './SwitchAttributeList';
 import TagSidebar, { expandIconFuc } from './TagSidebar';
 import TextToolSidebar from './TextToolSidebar';
 import ToolStyle from './ToolStyle';
-import { cTool } from '@label-u/annotation';
 
 const { EVideoToolName } = cTool;
 
@@ -88,7 +88,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   const renderStylePanel = (key: string) => {
     const ToolStyleComponent = <ToolStyle />;
     return (
-      <Panel header={t('Style')} className='panel' key={key}>
+      <Panel header={t('Style')} className="panel" key={key}>
         {ToolStyleComponent}
       </Panel>
     );
@@ -114,7 +114,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     <Collapse
       defaultActiveKey={['1', 'imgAttribute']}
       bordered={false}
-      expandIconPosition='right'
+      expandIconPosition="right"
       className={`${sidebarCls}__content`}
       expandIcon={expandIconFuc}
     >
@@ -126,7 +126,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     <Collapse
       defaultActiveKey={['1', 'imgAttribute']}
       bordered={false}
-      expandIconPosition='right'
+      expandIconPosition="right"
       className={`${sidebarCls}__content`}
       expandIcon={expandIconFuc}
     >
@@ -138,8 +138,8 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
             <ClearIcon />
           </div>
         }
-        className='panel'
-        key='imgAttribute'
+        className="panel"
+        key="imgAttribute"
       >
         <ImgAttributeInfo />
       </Panel>
@@ -176,15 +176,9 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
   }
 
   if (
-    (
-      [
-        EToolName.Rect,
-        EToolName.Point,
-        EToolName.Line,
-        EToolName.Rect,
-        EToolName.Polygon,
-      ] as string[]
-    ).includes(toolName)
+    ([EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Rect, EToolName.Polygon] as string[]).includes(
+      toolName,
+    )
   ) {
     return (
       <div className={`${sidebarCls}`}>

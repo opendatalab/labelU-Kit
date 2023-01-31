@@ -1,5 +1,8 @@
 import { EToolName, ELineTypes } from '@/constant/tool';
-import { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
+import type { ICoordinate, IPoint, ISize } from '@/types/tool/common';
+import type { IRect, IRectConfig } from '@/types/tool/rectTool';
+
+import type { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
 import MathUtils from '../MathUtils';
 import PolygonUtils from './PolygonUtils';
 import LineToolUtils, { POINT_RADIUS } from './LineToolUtils';

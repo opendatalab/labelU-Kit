@@ -1,10 +1,12 @@
 // 标注步骤中的 popover 的内容
 
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { componentCls } from '@/constant';
 import { classnames } from '@/utils';
-import React from 'react';
-import { IStepInfo } from '@/types/step';
-import { useTranslation } from 'react-i18next';
+import type { IStepInfo } from '@/types/step';
+
 interface IProps {
   stepList: IStepInfo[];
   currentStep: number;

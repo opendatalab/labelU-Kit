@@ -1,3 +1,5 @@
+import type { ICoordinate, ISize } from '@/types/tool/common';
+
 import { EGrowthMode } from '../../constant/annotation';
 import MathUtils from '../MathUtils';
 

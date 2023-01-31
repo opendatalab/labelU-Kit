@@ -1,3 +1,10 @@
+import type { Attribute } from '@label-u/annotation';
+import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@label-u/annotation';
+import type { EToolName } from '@label-u/annotation/es/types/constant/tool';
+import { i18n } from '@label-u/utils';
+import { message } from 'antd/es';
+import _ from 'lodash';
+
 import { getFormatSize } from '@/components/customResizeHook';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { jsonParser } from '@/utils';
@@ -5,18 +12,13 @@ import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
 // import { ConfigUtils } from '@/utils/ConfigUtils';
 import { composeResult, composeResultWithBasicImgInfo } from '@/utils/data';
 import StepUtils from '@/utils/StepUtils';
-import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@label-u/annotation';
-import { EToolName } from '@label-u/annotation/es/types/constant/tool';
-import { i18n } from '@label-u/utils';
-import { message } from 'antd/es';
-import _ from 'lodash';
-import { ToolStyleState } from '../toolStyle/types';
+
+import type { ToolStyleState } from '../toolStyle/types';
 import { SetAnnotationLoading } from './actionCreators';
-import { AnnotationActionTypes, AnnotationState } from './types';
+import type { AnnotationActionTypes, AnnotationState } from './types';
 const { EVideoToolName } = cTool;
 
-export const getStepConfig = (stepList: any[], step: number) =>
-  stepList.find((i) => i.step === step);
+export const getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
   isShowOrder: false,
@@ -66,12 +68,8 @@ const calcStepProgress = (fileList: any[], step: number) =>
     return pre;
   }, 0) / fileList.length;
 
-const updateToolInstance = (
-  annotation: AnnotationState,
-  imgNode: HTMLImageElement,
-  toolStyle: ToolStyleState,
-) => {
-  const { step, stepList, attributeList, tagConfigList, toolInstance, isShowOrder } = annotation;
+const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement, toolStyle: ToolStyleState) => {
+  const { step, stepList, attributeList, tagConfigList, toolInstance, toolsBasicConfig, isShowOrder } = annotation;
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   // const stepConfig = stepList[0]; // 修改为无步骤，因此无需通过步骤来选定工具
   // 此前工具绑定时间清空
@@ -89,9 +87,23 @@ const updateToolInstance = (
 
   const container = document.getElementById('toolContainer');
   if (!container) {
-    throw `Not exist dom named id-toolContainer`;
+    throw Error(`Not exist dom named id-toolContainer`);
   }
   const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
+
+  let allAttributesList: Attribute[] = [];
+  if (attributeList && attributeList.length > 0) {
+    allAttributesList = [...allAttributesList, ...attributeList];
+  }
+  if (toolsBasicConfig && toolsBasicConfig.length > 0) {
+    for (let i = 0; i < toolsBasicConfig.length; i++) {
+      // @ts-ignore
+      if (toolsBasicConfig[i].config?.attributeList) {
+        // @ts-ignore
+        allAttributesList = [...allAttributesList, ...toolsBasicConfig[i].config?.attributeList];
+      }
+    }
+  }
   const annotationEngine = new AnnotationEngine({
     container,
     isShowOrder: isShowOrder,
@@ -102,34 +114,12 @@ const updateToolInstance = (
     style: toolStyle,
     tagConfigList,
     attributeList,
+    allAttributesList,
   });
   // annotationEngine.toolInstance.setResult()
 
   return { toolInstance: annotationEngine?.toolInstance, annotationEngine };
 };
-
-/**
- * 初始化imgNode并加载数据
- * @param nextIndex
- * @param nextBasicIndex
- */
-export const LoadFileAndFileData =
-  (nextIndex: number, nextBasicIndex?: number): any =>
-  async (dispatch: any, getState: any) => {
-    const { stepList, step } = getState().annotation;
-    const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
-
-    SetAnnotationLoading(dispatch, true);
-
-    dispatch(TryGetFileDataByAPI(nextIndex));
-
-    if (currentIsVideo) {
-      dispatch(AfterVideoLoaded(nextIndex));
-      return;
-    }
-
-    dispatch(AfterImageLoaded(nextIndex, nextBasicIndex));
-  };
 
 /**
  * 支持并优先外部传入的获取文件接口
@@ -160,39 +150,58 @@ const AfterVideoLoaded = (nextIndex: number) => (dispatch: any) => {
   });
 };
 
-const AfterImageLoaded =
-  (nextIndex: number, nextBasicIndex?: number) => (dispatch: any, getState: any) => {
-    const { toolInstance, imgList } = getState().annotation;
-    const url = imgList?.[nextIndex]?.url;
-    ImgUtils.load(url)
-      .then((imgNode: HTMLImageElement) => {
-        SetAnnotationLoading(dispatch, false);
-        dispatch({
-          type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
-          payload: {
-            imgNode,
-            nextIndex,
-            nextBasicIndex,
-          },
-        });
-      })
-      .catch(() => {
-        SetAnnotationLoading(dispatch, false);
-        toolInstance?.setErrorImg();
-        dispatch({
-          type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
-          payload: {
-            nextIndex,
-            nextBasicIndex,
-          },
-        });
+const AfterImageLoaded = (nextIndex: number, nextBasicIndex?: number) => (dispatch: any, getState: any) => {
+  const { toolInstance, imgList } = getState().annotation;
+  const url = imgList?.[nextIndex]?.url;
+  ImgUtils.load(url)
+    .then((imgNode: HTMLImageElement) => {
+      SetAnnotationLoading(dispatch, false);
+      dispatch({
+        type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
+        payload: {
+          imgNode,
+          nextIndex,
+          nextBasicIndex,
+        },
       });
+    })
+    .catch(() => {
+      SetAnnotationLoading(dispatch, false);
+      toolInstance?.setErrorImg();
+      dispatch({
+        type: ANNOTATION_ACTIONS.LOAD_FILE_DATA,
+        payload: {
+          nextIndex,
+          nextBasicIndex,
+        },
+      });
+    });
+};
+
+/**
+ * 初始化imgNode并加载数据
+ * @param nextIndex
+ * @param nextBasicIndex
+ */
+export const LoadFileAndFileData =
+  (nextIndex: number, nextBasicIndex?: number): any =>
+  async (dispatch: any, getState: any) => {
+    const { stepList, step } = getState().annotation;
+    const currentIsVideo = StepUtils.currentToolIsVideo(step, stepList);
+
+    SetAnnotationLoading(dispatch, true);
+
+    dispatch(TryGetFileDataByAPI(nextIndex));
+
+    if (currentIsVideo) {
+      dispatch(AfterVideoLoaded(nextIndex));
+      return;
+    }
+
+    dispatch(AfterImageLoaded(nextIndex, nextBasicIndex));
   };
 
-export const annotationReducer = (
-  state = initialState,
-  action: AnnotationActionTypes,
-): AnnotationState => {
+export const annotationReducer = (state = initialState, action: AnnotationActionTypes): AnnotationState => {
   switch (action.type) {
     case ANNOTATION_ACTIONS.UPDATE_TOOL_INSTANCE: {
       return {
@@ -266,17 +275,8 @@ export const annotationReducer = (
       const oldResultString = imgList[imgIndex]?.result || '';
       const [, basicImgInfo] = toolInstance?.exportData() ?? [];
       const resultWithBasicInfo = composeResultWithBasicImgInfo(oldResultString, basicImgInfo);
-      const newResultString = composeResult(
-        resultWithBasicInfo,
-        { step, stepList },
-        { rect: resultList },
-      );
-      imgList[imgIndex].result = AnnotationDataUtils.dataCorrection(
-        newResultString,
-        oldResultString,
-        step,
-        stepList,
-      );
+      const newResultString = composeResult(resultWithBasicInfo, { step, stepList }, { rect: resultList });
+      imgList[imgIndex].result = AnnotationDataUtils.dataCorrection(newResultString, oldResultString, step, stepList);
 
       if (onSubmit) {
         onSubmit([imgList[imgIndex]], action.payload?.submitType, imgIndex);
@@ -300,19 +300,25 @@ export const annotationReducer = (
 
     case ANNOTATION_ACTIONS.SUBMIT_RESULT: {
       const { imgList, basicIndex, resultList, toolInstance, basicResultList } = state;
+
       if (!toolInstance) {
         return state;
       }
       const [exportResult] = toolInstance?.exportData() ?? [];
-      console.log("**************************")
-      console.log(exportResult)
 
       let previousResultList = exportResult;
 
       if (basicResultList?.length > 0) {
         const sourceID = basicResultList[basicIndex]?.id;
         const newResultData = exportResult.map((i: any) => ({ ...i, sourceID }));
-        previousResultList = _.cloneDeep(resultList).filter((i: any) => i.sourceID !== sourceID);
+        previousResultList = _.cloneDeep(resultList).filter((i: any) => {
+          // 修正 https://project.feishu.cn/bigdata_03/issue/detail/3528264?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+          if ((i.sourceID === '' || i.sourceID === undefined) && (sourceID === '' || sourceID === undefined)) {
+            return false;
+          }
+
+          return i.sourceID !== sourceID;
+        });
         previousResultList.push(...newResultData);
       }
       return {
@@ -323,16 +329,7 @@ export const annotationReducer = (
     }
 
     case ANNOTATION_ACTIONS.SET_BASIC_INDEX: {
-      const {
-        toolInstance,
-        step,
-        imgList,
-        imgIndex,
-        stepList,
-        annotationEngine,
-        resultList,
-        basicResultList,
-      } = state;
+      const { toolInstance, step, imgList, imgIndex, stepList, annotationEngine, resultList, basicResultList } = state;
 
       if (!toolInstance || !annotationEngine) {
         return state;
@@ -353,10 +350,7 @@ export const annotationReducer = (
       if (dataSourceStep && tool) {
         stepBasicResultList = fileResult[`step_${dataSourceStep}`]?.result;
         if (stepBasicResultList?.length > 0) {
-          annotationEngine?.setBasicInfo(
-            dependStepConfig.tool,
-            stepBasicResultList[nextBasicIndex],
-          );
+          annotationEngine?.setBasicInfo(dependStepConfig.tool, stepBasicResultList[nextBasicIndex]);
           annotationEngine?.launchOperation();
         } else {
           annotationEngine?.setBasicInfo(dependStepConfig.tool);
@@ -402,7 +396,7 @@ export const annotationReducer = (
 
       const stepResult = fileResult[stepList[0].tool];
 
-      const isInitData = !stepResult; // 是否为初始化数据
+      // const isInitData = !stepResult; // 是否为初始化数据
 
       const basicImgInfo = {
         rotate: fileResult.rotate ?? 0,
@@ -427,8 +421,8 @@ export const annotationReducer = (
         stepResult?.result,
         toolInstance,
         stepConfig,
-        stepBasicResultList,
-        isInitData,
+        // stepBasicResultList,
+        // isInitData,
       );
       // annotationEngine?.launchOperation();
       // 将此前绘制信息导入 wh
@@ -455,9 +449,7 @@ export const annotationReducer = (
         // @ts-ignore
         const sourceID = stepBasicResultList[basicIndex]?.id ?? '';
         const resultForBasicIndex = hasDataSourceStep
-          ? result.filter((i: { sourceID: string | number }) =>
-              CommonToolUtils.isSameSourceID(i.sourceID, sourceID),
-            )
+          ? result.filter((i: { sourceID: string | number }) => CommonToolUtils.isSameSourceID(i.sourceID, sourceID))
           : result;
         toolInstance?.setResult(resultForBasicIndex);
         toolInstance?.history.initRecord(result, true);
@@ -606,11 +598,7 @@ export const annotationReducer = (
         return state;
       }
 
-      const newResult = AnnotationDataUtils.copyResultChange(
-        backwardResult,
-        step,
-        imgList[imgIndex].result ?? '',
-      );
+      const newResult = AnnotationDataUtils.copyResultChange(backwardResult, step, imgList[imgIndex].result ?? '');
       imgList[imgIndex].result = newResult;
 
       // 更新当前的结果

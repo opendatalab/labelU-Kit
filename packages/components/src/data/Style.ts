@@ -26,8 +26,7 @@ export const COLORS_ARRAY_LIGHT = [
   'rgba(255, 153, 51, 0.1)',
   'rgba(51, 255, 238, 0.1)',
   'rgba(255, 221, 51, 0.1)',
-]
-
+];
 
 export const NULL_COLOR = 'rgba(204, 204, 204, 1)';
 
@@ -59,7 +58,7 @@ export const DEFAULT_COLOR = {
   },
 };
 
-export const CHANGE_COLOR: { [a: number]: any } = {
+export const CHANGE_COLOR: Record<number, any> = {
   1: {
     valid: 'rgba(0, 0, 255, 0.5)',
     select: {
@@ -107,7 +106,7 @@ export const CHANGE_COLOR: { [a: number]: any } = {
   },
 };
 
-export const BORDER_OPACITY_LEVEL: { [a: number]: number } = {
+export const BORDER_OPACITY_LEVEL: Record<number, number> = {
   1: 0.2,
   3: 0.4,
   5: 0.6,
@@ -115,7 +114,7 @@ export const BORDER_OPACITY_LEVEL: { [a: number]: number } = {
   9: 1.0,
 };
 
-export const FILL_OPACITY_LEVEL: { [a: number]: number } = {
+export const FILL_OPACITY_LEVEL: Record<number, number> = {
   1: 0,
   3: 0.2,
   5: 0.4,

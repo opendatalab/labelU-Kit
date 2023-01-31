@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppState } from '@/store';
+import { useTranslation } from 'react-i18next';
+import type { PrevResult } from '@label-u/annotation';
+import { cTool, EKeyCode } from '@label-u/annotation';
+import { Popover } from 'antd';
+
+import type { AppState } from '@/store';
 // import rotateSvg from '@/assets/annotation/common/icon_r.svg';
 import revocationSvg from '@/assets/annotation/common/icon_next.svg';
 import restoreSvg from '@/assets/annotation/common/icon_back.svg';
@@ -12,14 +17,13 @@ import restoreHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
 import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 // import { ChangeSave } from '@/store/annotation/actionCreators';
-import { IStepInfo } from '@/types/step';
-import { useTranslation } from 'react-i18next';
-import { cTool, PrevResult } from '@label-u/annotation';
-import { Popover } from 'antd';
+import type { IStepInfo } from '@/types/step';
 import { UpdateImgList } from '@/store/annotation/actionCreators';
+
 import { toolList } from '../ToolOperation';
-import { EKeyCode } from '@label-u/annotation';
 const { EVideoToolName } = cTool;
+
+import './index.scss';
 
 interface IProps {
   isBegin?: boolean;
@@ -38,8 +42,8 @@ const HeaderOption: React.FC<IProps> = (props) => {
   const [historyRevocation, setHistoryRevocation] = useState<any>([]);
   const { stepInfo } = props;
   const dispatch = useDispatch();
-  const undoRef = useRef<HTMLElement>()
-  const redoRef = useRef<HTMLElement>()
+  const undoRef = useRef<HTMLElement>();
+  const redoRef = useRef<HTMLElement>();
 
   const { t } = useTranslation();
   const {
@@ -75,10 +79,9 @@ const HeaderOption: React.FC<IProps> = (props) => {
       case EKeyCode.Z:
         if (e.ctrlKey) {
           if (e.shiftKey) {
-            redoRef.current?.click()
-            
+            redoRef.current?.click();
           } else {
-            undoRef.current?.click()
+            undoRef.current?.click();
           }
 
           return false;
@@ -100,9 +103,9 @@ const HeaderOption: React.FC<IProps> = (props) => {
   // 更新pre 标注结果
   const updateCanvasView = (newLabelResult: any) => {
     const prevResult: PrevResult[] = [];
-    for (let oneTool of toolList) {
+    for (const oneTool of toolList) {
       if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
-        let onePrevResult = {
+        const onePrevResult = {
           toolName: oneTool.toolName,
           result: newLabelResult[oneTool.toolName].result,
         };
@@ -120,16 +123,16 @@ const HeaderOption: React.FC<IProps> = (props) => {
   const restore = () => {
     if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
       let count = 0;
-      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      for (let tool of labelTool) {
+      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      for (const tool of labelTool) {
         if (oldImgResult[tool]?.result) {
           count += oldImgResult[tool]?.result.length;
         }
       }
-      for (let tool of labelTool) {
-        let tmpResult = oldImgResult[tool]?.result;
+      for (const tool of labelTool) {
+        const tmpResult = oldImgResult[tool]?.result;
         if (tmpResult && tmpResult.length > 0) {
-          let newTmpResult = tmpResult.reduce((res: any[], item: { order: number }) => {
+          const newTmpResult = tmpResult.reduce((res: any[], item: { order: number }) => {
             if (item.order !== count) {
               res.push(item);
             } else {
@@ -149,26 +152,26 @@ const HeaderOption: React.FC<IProps> = (props) => {
 
   // 统一处理重做
   const revocation = () => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    let lastRestore = historyRevocation.pop();
+    const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    const lastRestore = historyRevocation.pop();
     if (!lastRestore) {
       setHistoryRevocation([]);
       return;
     }
     // 获取最大序号
     let maxOrder = 0;
-    for (let tool of labelTool) {
-      let tmpResult = oldImgResult[tool]?.result;
+    for (const tool of labelTool) {
+      const tmpResult = oldImgResult[tool]?.result;
       if (tmpResult && tmpResult.length > 0) {
         maxOrder += tmpResult.length;
       }
     }
     lastRestore.order = maxOrder + 1;
-    for (let tool of labelTool) {
+    for (const tool of labelTool) {
       let tmpResult = oldImgResult[tool]?.result;
 
       if (lastRestore.toolName === tool) {
-        delete lastRestore['toolName'];
+        delete lastRestore.toolName;
         if (tmpResult && tmpResult.length > 0) {
           tmpResult = [...tmpResult, lastRestore];
         } else {
@@ -180,8 +183,7 @@ const HeaderOption: React.FC<IProps> = (props) => {
     imgList[imgIndex].result = JSON.stringify(oldImgResult);
     dispatch(UpdateImgList(imgList));
     updateCanvasView(oldImgResult);
-
-  }
+  };
 
   const commonOptionList: any = [
     // {
@@ -208,15 +210,14 @@ const HeaderOption: React.FC<IProps> = (props) => {
         if (isTagTool) {
           return;
         }
-
-        revocation();
+        restore();
       },
       style: {
         opacity: isBegin === true ? 0.4 : 1,
         fontSize: '12px',
         color: !isBegin && toolHover === 'restore' ? EColor.Hover : EColor.Normal,
       },
-      ref:undoRef
+      ref: undoRef,
     },
     {
       toolName: 'restore',
@@ -228,14 +229,14 @@ const HeaderOption: React.FC<IProps> = (props) => {
         if (isTagTool) {
           return;
         }
-        restore();
+        revocation();
       },
       style: {
         opacity: isBegin === true ? 0.4 : 1,
         fontSize: '12px',
         color: !isBegin && toolHover === 'revocation' ? EColor.Hover : EColor.Normal,
       },
-      ref:redoRef
+      ref: redoRef,
     },
 
     // {
@@ -264,15 +265,15 @@ const HeaderOption: React.FC<IProps> = (props) => {
       {commonOptionList.map((info: any) => {
         return (
           info.show && (
-            <Popover key={info.toolName} content={t(info.toolName)} trigger='hover'>
+            <Popover key={info.toolName} content={t(info.toolName)} trigger="hover">
               <div
-                className='item'
+                className="item"
                 onMouseEnter={() => setToolHover(info.toolName)}
                 onMouseLeave={() => setToolHover('')}
               >
-                <a ref={info.ref}  className='item' onClick={info.click}>
+                <a ref={info.ref} className="item" onClick={info.click}>
                   <img
-                    className='singleTool'
+                    className="singleTool"
                     src={toolHover === info.toolName ? info.selectedSvg : info.commonSvg}
                     style={info.style}
                   />

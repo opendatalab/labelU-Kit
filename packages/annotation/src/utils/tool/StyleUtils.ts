@@ -1,3 +1,5 @@
+import type { IToolColorStyle } from '@/types/toolStyle';
+
 export default class StyleUtils {
   public static getStrokeAndFill(
     toolStyle: IToolColorStyle,

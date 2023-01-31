@@ -1,16 +1,16 @@
 import { Slider } from 'antd/es';
 import React from 'react';
+import { connect } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+
 import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
 import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
-
-import { connect } from 'react-redux';
 import { UpdateToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { store } from '@/index';
-import { AppState } from '@/store';
-import { ToolStyleState } from '@/store/toolStyle/types';
-import { useTranslation } from 'react-i18next';
+import type { AppState } from '@/store';
+import type { ToolStyleState } from '@/store/toolStyle/types';
 
 interface IProps {
   toolStyle: ToolStyleState;
@@ -48,13 +48,14 @@ const getMarks = (type: string, t: any) => {
     { step: 7, value: '0.6' },
     { step: 9, value: '0.8' },
   ];
-  let list: Array<{ step: number; value: string }> = [];
-  const marks: {
-    [a: number]: {
+  let list: { step: number; value: string }[] = [];
+  const marks: Record<
+    number,
+    {
       style: {};
       label: any;
-    };
-  } = {};
+    }
+  > = {};
   switch (type) {
     case 'width':
       list = lineMarks;
@@ -137,12 +138,12 @@ const ToolStyle = (props: IProps) => {
   // TODO - 样式标准的定义
   const annotationConfig: any = props.config;
 
-  const changeToolStyle = (obj: { [key: string]: number }) => {
+  const changeToolStyle = (obj: Record<string, number>) => {
     store.dispatch(UpdateToolStyleConfig(obj));
   };
 
   return (
-    <div className='toolStyle'>
+    <div className="toolStyle">
       {Object.entries(styleConfig).map((item: any[]) => {
         const key: ToolStyleKey = item[0];
         // 判断是否需要 color 的使用，现在暂时默认不需要
@@ -150,12 +151,12 @@ const ToolStyle = (props: IProps) => {
           return null;
         }
         return (
-          <div id={`style-${key}`} className='styleSlider' key={key}>
-            <span className='title'>
-              <img src={getImage(key)} className='icon' />
+          <div id={`style-${key}`} className="styleSlider" key={key}>
+            <span className="title">
+              <img src={getImage(key)} className="icon" />
               {t(getTitle(key))}
             </span>
-            <span className='slider'>
+            <span className="slider">
               <Slider
                 tipFormatter={null}
                 max={getStyleType(key) ? 5 : 10}

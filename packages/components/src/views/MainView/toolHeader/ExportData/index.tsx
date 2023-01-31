@@ -1,13 +1,14 @@
 import React from 'react';
 import { Button } from 'antd/es';
-import { AppState } from '@/store';
-import { ToolInstance } from '@/store/annotation/types';
 import { connect } from 'react-redux';
-import { IFileItem, OnSubmit } from '@/types/data';
+import type { Dispatch } from 'redux';
+import { useTranslation } from 'react-i18next';
+
+import type { AppState } from '@/store';
+import type { ToolInstance } from '@/store/annotation/types';
+import type { IFileItem, OnSubmit } from '@/types/data';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { ESubmitType } from '@/constant';
-import { Dispatch } from 'redux';
-import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolInstance: ToolInstance;
@@ -17,7 +18,7 @@ interface IProps {
   dispatch: Dispatch;
 }
 
-const ExportData: React.FC<IProps> = ({ imgList, dispatch, onSubmit, exportData }) => {
+const ExportData: React.FC<IProps> = ({ imgList, dispatch, exportData }) => {
   const { t } = useTranslation();
 
   if (!exportData) {

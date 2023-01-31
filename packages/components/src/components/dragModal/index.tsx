@@ -1,5 +1,5 @@
 import { Modal } from 'antd';
-import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 
 interface Iprops {
   // 弹框左上角位置
@@ -31,11 +31,11 @@ const DrageModel = (props: Iprops, ref: any) => {
     top: 0,
   });
 
-  const handleOk = (e: any) => {
+  const handleOk = () => {
     setIsVisible(false);
   };
 
-  const handleCancel = (e: any) => {
+  const handleCancel = () => {
     setIsVisible(false);
   };
 
@@ -43,17 +43,15 @@ const DrageModel = (props: Iprops, ref: any) => {
     switchModal: (isVisible: boolean) => {
       setIsVisible(isVisible);
     },
-    switchSetBounds: (bounds: Bounds) => {
-      setBounds(bounds);
+    switchSetBounds: (bounds_: Bounds) => {
+      setBounds(bounds_);
     },
   }));
 
-  
-
   // 计算是否超出屏幕;超出后
   const inWindow = (left: number, top: number, startPosX: number, startPosY: number) => {
-    let H = document.body.clientHeight;
-    let W = document.body.clientWidth;
+    const H = document.body.clientHeight;
+    const W = document.body.clientWidth;
     if (
       (left < 20 && startPosX > left) ||
       (left > W - 20 && startPosX < left) ||
@@ -68,12 +66,12 @@ const DrageModel = (props: Iprops, ref: any) => {
   };
   const onMouseDown = (e: { preventDefault: () => void; clientX: any; clientY: any }) => {
     e.preventDefault(); // 记录初始移动的鼠标位置
-    let startPosX = e.clientX;
-    let startPosY = e.clientY; // 添加鼠标移动事件
-    document.body.onmousemove = (e) => {
-      let left = e.clientX - startPosX + bounds.left;
-      let top = e.clientY - startPosY + bounds.top;
-      if (inWindow(e.clientX, e.clientY, startPosX, startPosY)) {
+    const startPosX = e.clientX;
+    const startPosY = e.clientY; // 添加鼠标移动事件
+    document.body.onmousemove = (e_: MouseEvent) => {
+      const left = e_.clientX - startPosX + bounds.left;
+      const top = e_.clientY - startPosY + bounds.top;
+      if (inWindow(e_.clientX, e_.clientY, startPosX, startPosY)) {
         setBounds({
           left: left,
           top: top,

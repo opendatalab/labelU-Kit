@@ -2,7 +2,9 @@
  * 渲染 DOM 类
  */
 
+import type { IBasicText } from '@/types/tool/annotationView';
 import DrawUtils from '@/utils/tool/DrawUtils';
+
 import StyleUtils from './StyleUtils';
 
 interface IProps {

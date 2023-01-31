@@ -1,16 +1,11 @@
-import {
-  editStepWidth,
-  footerHeight,
-  headerHeight,
-  sidebarWidth,
-} from '@/data/enums/AnnotationSize';
 import { cKeyCode, toolUtils } from '@label-u/annotation';
-
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
-import { AppState } from '@/store';
+
+import { editStepWidth, footerHeight, headerHeight, sidebarWidth } from '@/data/enums/AnnotationSize';
+import type { AppState } from '@/store';
 import { UpdateRotate, PageBackward, PageForward } from '@/store/annotation/actionCreators';
-import { ISize } from '@/types/main';
+import type { ISize } from '@/types/main';
 
 const EKeyCode = cKeyCode.default;
 
@@ -27,21 +22,24 @@ export const ViewportProviderComponent = (props: any) => {
   const [width] = useState(typeof window !== 'undefined' ? window.innerWidth : 800);
   const [height] = useState(typeof window !== 'undefined' ? window.innerHeight : 400);
 
-  const keydown = (e: KeyboardEvent) => {
-    if (!toolUtils.hotkeyFilter(e)) {
-      return;
-    }
-    if (e.keyCode === EKeyCode.A) {
-      dispatch(PageBackward());
-    }
+  const keydown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!toolUtils.hotkeyFilter(e)) {
+        return;
+      }
+      if (e.keyCode === EKeyCode.M) {
+        dispatch(PageBackward());
+      }
 
-    if (e.keyCode === EKeyCode.D) {
-      dispatch(PageForward());
-    }
-    if (e.keyCode === EKeyCode.R) {
-      dispatch(UpdateRotate());
-    }
-  };
+      if (e.keyCode === EKeyCode.N) {
+        dispatch(PageForward());
+      }
+      if (e.keyCode === EKeyCode.R) {
+        dispatch(UpdateRotate());
+      }
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -50,7 +48,7 @@ export const ViewportProviderComponent = (props: any) => {
         window?.removeEventListener('keydown', keydown);
       };
     }
-  }, []);
+  }, [keydown]);
 
   const size = useMemo(() => ({ width, height }), [width, height]);
 

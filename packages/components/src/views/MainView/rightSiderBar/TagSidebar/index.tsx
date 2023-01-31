@@ -1,18 +1,20 @@
-import RadioList from '@/components/attributeList';
-import CheckBoxList from '@/components/checkboxList';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Collapse, Tooltip } from 'antd/es';
 import _, { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { CommonToolUtils, OneTag, TagUtils, uuid } from '@label-u/annotation';
+import type { OneTag } from '@label-u/annotation';
+import { CommonToolUtils, TagUtils, uuid } from '@label-u/annotation';
 import { connect, useDispatch } from 'react-redux';
-import { AppState } from '@/store';
-import { IInputList } from '@/types/main';
 import { useTranslation } from 'react-i18next';
-import { ObjectString } from '@/components/videoPlayer/types';
-import { IFileItem } from '@/types/data';
-import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
 import classNames from 'classnames';
+
+import type { AppState } from '@/store';
+import type { IInputList } from '@/types/main';
+import type { ObjectString } from '@/components/videoPlayer/types';
+import type { IFileItem } from '@/types/data';
+import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
+import CheckBoxList from '@/components/checkboxList';
+import RadioList from '@/components/attributeList';
 
 interface IProps {
   imgIndex: number;
@@ -24,9 +26,7 @@ interface IProps {
 declare interface ITagResult {
   id: string;
   sourceID: string;
-  result: {
-    [a: string]: string;
-  };
+  result: Record<string, string>;
 }
 
 const { Panel } = Collapse;
@@ -35,14 +35,14 @@ export const expandIconFuc = ({ isActive }: any) => (
   <CaretRightOutlined rotate={isActive ? 90 : 0} style={{ color: 'rgba(0, 0, 0, 0.36)' }} />
 );
 
-const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPreview }) => {
+const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPreview }) => {
   const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
   const [tagResult, setTagResult] = useState<ITagResult[]>([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
   // const [, forceRender] = useState<number>(0);
   // const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
   const { t } = useTranslation();
-  const height = window?.innerHeight - 61 - 200;
+  // const height = window?.innerHeight - 61 - 200;
 
   const dispatch = useDispatch();
 
@@ -69,17 +69,13 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
 
   useEffect(() => {
     if (imgList && imgList.length > 0) {
-      let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let tagResult = currentImgResult?.tagTool ? currentImgResult?.tagTool?.result : [];
-      setTagResult(tagResult);
+      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const tagResult_ = currentImgResult?.tagTool ? currentImgResult?.tagTool?.result : [];
+      setTagResult(tagResult_);
     }
   }, [imgIndex, imgList]);
 
-  useEffect(() => {
-    renderTag();
-  }, [tagResult]);
-
-  const renderTag = () => {
+  const renderTag = useCallback(() => {
     clearTag();
     if (!(tagResult?.length > 0)) {
       return;
@@ -116,7 +112,11 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
     if (!parentNode?.contains(preTagToolTag)) {
       parentNode?.appendChild(dom);
     }
-  };
+  }, [tagConfigList, tagResult]);
+
+  useEffect(() => {
+    renderTag();
+  }, [renderTag, tagResult]);
 
   const getTagResultByCode = (num1: number, num2?: number) => {
     try {
@@ -138,31 +138,6 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
       }
     } catch {
       return;
-    }
-  };
-
-  const setLabelBySelectedList = (num1: number, num2?: number) => {
-    const newTagConfig = getTagResultByCode(num1, num2);
-    if (newTagConfig) {
-      const tagRes = combineResult(newTagConfig, tagResult[0]?.result ?? {});
-      const result = [
-        {
-          sourceID: CommonToolUtils.getSourceID(),
-          id: uuid(8, 62),
-          result: tagRes,
-        },
-      ];
-      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let currentImgResult = {
-        ...oldImgResult,
-        tagTool: {
-          toolName: 'tagTool',
-          result: [...result],
-        },
-      };
-      imgList[imgIndex].result = JSON.stringify(currentImgResult);
-      dispatch(UpdateImgList(imgList));
-      setTagResult(result as ITagResult[]);
     }
   };
 
@@ -189,6 +164,31 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
     existValue[key] = existValue[key] === value ? undefined : value;
 
     return _.pickBy(existValue, (v) => v);
+  };
+
+  const setLabelBySelectedList = (num1: number, num2?: number) => {
+    const newTagConfig = getTagResultByCode(num1, num2);
+    if (newTagConfig) {
+      const tagRes = combineResult(newTagConfig, tagResult[0]?.result ?? {});
+      const result = [
+        {
+          sourceID: CommonToolUtils.getSourceID(),
+          id: uuid(8, 62),
+          result: tagRes,
+        },
+      ];
+      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const currentImgResult = {
+        ...oldImgResult,
+        tagTool: {
+          toolName: 'tagTool',
+          result: [...result],
+        },
+      };
+      imgList[imgIndex].result = JSON.stringify(currentImgResult);
+      dispatch(UpdateImgList(imgList));
+      setTagResult(result as ITagResult[]);
+    }
   };
 
   const setLabel = (num1: number, num2: number) => {
@@ -229,7 +229,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
             expandIcon={expandIconFuc}
             key={`collapse_${index}_${basicIndex + 1}`}
             onChange={() => setExpendKeyList(index, info.value)}
-            activeKey={[expandKeyList[index]]}
+            activeKey={[info.value]}
           >
             <Panel
               header={
@@ -243,7 +243,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
                 >
                   <span>
                     {info.key}
-                    <Tooltip placement='bottom' title={t('ClearThisOption')}>
+                    <Tooltip placement="bottom" title={t('ClearThisOption')}>
                       <img
                         style={{ marginLeft: 5, cursor: 'pointer' }}
                         onClick={(e) => {
@@ -268,7 +268,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
               key={info.value}
             >
               <div
-                className='level'
+                className="level"
                 // style={{
                 //   backgroundColor:
                 //     labelSelectedList.length > 0 && labelSelectedList[0] === index
@@ -283,12 +283,11 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
         );
       }
       const key = tagConfigList?.[basicIndex] ? tagConfigList?.[basicIndex].value : 0;
-      const selectedAttribute =
-        tagResult[0]?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
+      const selectedAttribute = tagResult[0]?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
 
       if (tagConfigList?.[basicIndex]?.isMulti === true) {
         return (
-          <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
+          <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
             <CheckBoxList
               attributeChanged={() => {
                 dispatch(ChangeSave);
@@ -302,7 +301,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
         );
       }
       return (
-        <div className='singleBar' key={`${key}_${basicIndex}_${index}`}>
+        <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
           <RadioList
             forbidColor
             attributeChanged={() => setLabel(basicIndex, index)}
@@ -316,15 +315,17 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex,isPrevi
   };
 
   return (
-    <div className={classNames({
-      "tagOperationMenu":true,
-      "tagOperationMenuPreview":isPreview
-
-    })} ref={sidebarRef}>
+    <div
+      className={classNames({
+        tagOperationMenu: true,
+        tagOperationMenuPreview: isPreview,
+      })}
+      ref={sidebarRef}
+    >
       {tagConfigList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div style={{ height }}>{labelPanel(tagConfigList)}</div>
+        <div>{labelPanel(tagConfigList)}</div>
       )}
     </div>
   );

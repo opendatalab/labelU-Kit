@@ -1,5 +1,5 @@
 /** 步骤对象 */
-import {ToolConfig} from '@/interface/toolConfig'
+import type { ToolConfig } from '@/interface/toolConfig';
 
 export interface IStepInfo {
   type: number; // 1 为标注， 2 为质检
