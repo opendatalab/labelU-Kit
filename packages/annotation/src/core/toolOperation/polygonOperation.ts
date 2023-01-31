@@ -1,3 +1,4 @@
+// @ts-ignore
 import { i18n } from '@label-u/utils';
 
 import MathUtils from '@/utils/MathUtils';
