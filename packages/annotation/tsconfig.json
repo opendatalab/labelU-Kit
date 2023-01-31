@@ -4,6 +4,7 @@
     "isolatedModules": false,
     "sourceMap": false,
     "esModuleInterop": false,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "outDir": "dist",
     "baseUrl": "./"
