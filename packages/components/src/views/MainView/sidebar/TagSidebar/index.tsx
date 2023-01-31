@@ -1,7 +1,7 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Badge, Collapse, Tooltip } from 'antd/es';
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { TagOperation } from '@label-u/annotation';
 import { TagUtils } from '@label-u/annotation';
 import { connect } from 'react-redux';
@@ -51,11 +51,11 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
     [expandKeyList],
   );
 
-  const expendRender = () => {
+  const expendRender = useCallback(() => {
     const index = toolInstance.labelSelectedList[0];
     const value = inputList.filter((v: IInputList, i: number) => i === index)[0]?.value;
     setExpendKeyList(index, value, true);
-  };
+  }, [inputList, setExpendKeyList, toolInstance.labelSelectedList]);
 
   useEffect(() => {
     if (toolInstance) {
@@ -88,7 +88,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
         }
       }
     }
-  });
+  }, [expandKeyList, expendRender, inputList, toolInstance]);
 
   useEffect(() => {
     // 翻页侧边栏跳到最上
@@ -97,116 +97,136 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
     }
   }, [imgIndex]);
 
-  if (!toolInstance) return null;
-
-  const selectedButton = (index: number) => {
-    if (labelSelectedList.length > 0 && labelSelectedList[0] === index) {
-      return <span className="keyDownIconActive">{index + 1}</span>;
-    }
-    return <span className="keyDownIcon">{index + 1}</span>;
-  };
+  const selectedButton = useCallback(
+    (index: number) => {
+      if (labelSelectedList.length > 0 && labelSelectedList[0] === index) {
+        return <span className="keyDownIconActive">{index + 1}</span>;
+      }
+      return <span className="keyDownIcon">{index + 1}</span>;
+    },
+    [labelSelectedList],
+  );
 
   // basicIndex 到底是那一层
-  const labelPanel = (labelInfoSet: IInputList[], basicIndex = -1) => {
-    if (!labelInfoSet) {
-      return null;
-    }
+  const labelPanel = useCallback(
+    (labelInfoSet: IInputList[], basicIndex = -1) => {
+      if (!labelInfoSet) {
+        return null;
+      }
 
-    return labelInfoSet.map((info: IInputList, index: number) => {
-      if (info.subSelected) {
-        // 判断是否有数据
-        const isResult = TagUtils.judgeResultIsInInputList(
-          info.value,
-          currentTagResult?.result?.[info.value],
-          inputList,
-        );
+      return labelInfoSet.map((info: IInputList, index: number) => {
+        if (info.subSelected) {
+          // 判断是否有数据
+          const isResult = TagUtils.judgeResultIsInInputList(
+            info.value,
+            currentTagResult?.result?.[info.value],
+            inputList,
+          );
 
-        return (
-          <Collapse
-            bordered={false}
-            expandIcon={expandIconFuc}
-            key={`collapse_${index}_${basicIndex + 1}`}
-            onChange={() => setExpendKeyList(index, info.value)}
-            activeKey={[expandKeyList[index]]}
-          >
-            <Panel
-              header={
+          return (
+            <Collapse
+              bordered={false}
+              expandIcon={expandIconFuc}
+              key={`collapse_${index}_${basicIndex + 1}`}
+              onChange={() => setExpendKeyList(index, info.value)}
+              activeKey={[expandKeyList[index]]}
+            >
+              <Panel
+                header={
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flex: 1,
+                    }}
+                  >
+                    <span>
+                      {info.key}
+                      <Tooltip placement="bottom" title={t('ClearThisOption')}>
+                        <img
+                          style={{ marginLeft: 5, cursor: 'pointer' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toolInstance.clearResult(true, info.value);
+                          }}
+                          src={hoverDeleteIndex === index || isResult ? clearSmallA : clearSmall}
+                          onMouseEnter={() => {
+                            setHoverDeleteIndex(index);
+                          }}
+                          onMouseLeave={() => {
+                            setHoverDeleteIndex(-1);
+                          }}
+                        />
+                      </Tooltip>
+                      {isResult && expandKeyList[index] === '' && <Badge color="#87d068" />}
+                    </span>
+
+                    {inputList?.length > 1 && selectedButton(index)}
+                  </div>
+                }
+                key={info.value}
+              >
                 <div
+                  className="level"
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flex: 1,
+                    backgroundColor:
+                      labelSelectedList.length > 0 && labelSelectedList[0] === index ? 'rgba(158, 158, 158, 0.18)' : '',
                   }}
                 >
-                  <span>
-                    {info.key}
-                    <Tooltip placement="bottom" title={t('ClearThisOption')}>
-                      <img
-                        style={{ marginLeft: 5, cursor: 'pointer' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toolInstance.clearResult(true, info.value);
-                        }}
-                        src={hoverDeleteIndex === index || isResult ? clearSmallA : clearSmall}
-                        onMouseEnter={() => {
-                          setHoverDeleteIndex(index);
-                        }}
-                        onMouseLeave={() => {
-                          setHoverDeleteIndex(-1);
-                        }}
-                      />
-                    </Tooltip>
-                    {isResult && expandKeyList[index] === '' && <Badge color="#87d068" />}
-                  </span>
-
-                  {inputList?.length > 1 && selectedButton(index)}
+                  {labelPanel(info.subSelected, index)}
                 </div>
-              }
-              key={info.value}
-            >
-              <div
-                className="level"
-                style={{
-                  backgroundColor:
-                    labelSelectedList.length > 0 && labelSelectedList[0] === index ? 'rgba(158, 158, 158, 0.18)' : '',
-                }}
-              >
-                {labelPanel(info.subSelected, index)}
-              </div>
-            </Panel>
-          </Collapse>
-        );
-      }
-      const key = inputList?.[basicIndex] ? inputList?.[basicIndex].value : 0;
-      const selectedAttribute = currentTagResult?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
+              </Panel>
+            </Collapse>
+          );
+        }
+        const key = inputList?.[basicIndex] ? inputList?.[basicIndex].value : 0;
+        const selectedAttribute =
+          currentTagResult?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
 
-      if (inputList?.[basicIndex]?.isMulti === true) {
+        if (inputList?.[basicIndex]?.isMulti === true) {
+          return (
+            <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
+              <CheckBoxList
+                attributeChanged={() => setLabel(basicIndex, index)}
+                selectedAttribute={[selectedAttribute]}
+                list={[{ value: info.value, label: info.key }]}
+                num={index + 1}
+              />
+            </div>
+          );
+        }
         return (
           <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
-            <CheckBoxList
+            <RadioList
+              forbidColor
               attributeChanged={() => setLabel(basicIndex, index)}
-              selectedAttribute={[selectedAttribute]}
+              selectedAttribute={selectedAttribute}
               list={[{ value: info.value, label: info.key }]}
               num={index + 1}
             />
           </div>
         );
-      }
-      return (
-        <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
-          <RadioList
-            forbidColor
-            attributeChanged={() => setLabel(basicIndex, index)}
-            selectedAttribute={selectedAttribute}
-            list={[{ value: info.value, label: info.key }]}
-            num={index + 1}
-          />
-        </div>
-      );
-    });
-  };
+      });
+    },
+    [
+      currentTagResult?.result,
+      expandKeyList,
+      hoverDeleteIndex,
+      inputList,
+      labelSelectedList,
+      selectedButton,
+      setExpendKeyList,
+      setLabel,
+      t,
+      toolInstance,
+    ],
+  );
   const height = window?.innerHeight - 61 - 80;
+
+  if (!toolInstance) {
+    return null;
+  }
 
   return (
     <div className="tagOperationMenu" ref={sidebarRef}>

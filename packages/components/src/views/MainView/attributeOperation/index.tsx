@@ -172,7 +172,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     }
   }, [
     currentToolName,
-    toolInstance.isShowOrder,
+    toolInstance?.isShowOrder,
     toolsBasicConfig,
     attributeList,
     toolInstance,

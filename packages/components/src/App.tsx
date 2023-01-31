@@ -1,7 +1,8 @@
 import { i18n } from '@label-u/utils';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { BasicToolOperation } from '@label-u/annotation';
+import _ from 'lodash';
 
 import MainView from '@/views/MainView';
 import type { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
@@ -79,7 +80,7 @@ const App: React.FC<AppProps> = (props) => {
   const {
     imgList,
     step = 1,
-    stepList = [],
+    stepList,
     onSubmit,
     onSave,
     toolStyle,
@@ -152,65 +153,69 @@ const App: React.FC<AppProps> = (props) => {
     [],
   );
 
+  const shouldInitial = useMemo(() => {
+    return _.size(imgList) > 0 && _.size(props.toolsBasicConfig) > 0;
+  }, [imgList, props.toolsBasicConfig]);
+
   useEffect(() => {
-    if (imgList && imgList?.length > 0 && props.toolsBasicConfig && props.toolsBasicConfig.length > 0) {
-      let initToolName = currentToolName;
-      const findToolConfigByToolName = toolsBasicConfig.filter((item) => {
-        return item.tool === currentToolName;
-      });
-      // 当工具配置中不包含currentToolName时，重置currentToolName
-      if (findToolConfigByToolName && findToolConfigByToolName.length === 0) {
-        initToolName = toolsBasicConfig[0].tool;
-        dispatch(ChangeCurrentTool(initToolName));
-      }
-      store.dispatch(
-        InitTaskData({
-          toolStyle,
-          initToolName,
-          onSubmit,
-          stepList,
-          tagConfigList,
-          attributeList,
-          toolsBasicConfig,
-          textConfig,
-          step,
-          getFileData,
-          pageSize,
-          loadFileList,
-          onSave,
-          onPageChange,
-          onStepChange,
-        }),
-      );
-      initImgList();
-      // 初始化国际化语言
-      i18n.changeLanguage(defaultLang);
+    if (!shouldInitial) {
+      return;
     }
+
+    let initToolName = currentToolName;
+    const findToolConfigByToolName = toolsBasicConfig.filter((item) => {
+      return item.tool === currentToolName;
+    });
+    // 当工具配置中不包含currentToolName时，重置currentToolName
+    if (findToolConfigByToolName && findToolConfigByToolName.length === 0) {
+      initToolName = toolsBasicConfig[0].tool;
+      dispatch(ChangeCurrentTool(initToolName));
+    }
+    store.dispatch(
+      InitTaskData({
+        toolStyle,
+        initToolName,
+        onSubmit,
+        stepList: stepList || [],
+        tagConfigList,
+        attributeList,
+        toolsBasicConfig,
+        textConfig,
+        step,
+        getFileData,
+        pageSize,
+        loadFileList,
+        onSave,
+        onPageChange,
+        onStepChange,
+      }),
+    );
+    initImgList();
+    // 初始化国际化语言
+    i18n.changeLanguage(defaultLang);
   }, [
-    imgUrl,
-    props.toolsBasicConfig,
-    props.attributeList,
-    props.textConfig,
-    props.tagConfigList,
-    currentToolName,
-    imgList,
-    toolsBasicConfig,
-    toolStyle,
-    onSubmit,
-    stepList,
-    tagConfigList,
-    attributeList,
-    textConfig,
-    step,
-    getFileData,
-    pageSize,
-    loadFileList,
-    onSave,
-    onPageChange,
-    onStepChange,
-    initImgList,
     defaultLang,
     dispatch,
+    getFileData,
+    initImgList,
+    loadFileList,
+    onPageChange,
+    onSave,
+    onStepChange,
+    onSubmit,
+    pageSize,
+    step,
+    stepList,
+    shouldInitial,
+    // ====
+    attributeList,
+    currentToolName,
+    tagConfigList,
+    textConfig,
+    toolStyle,
+    toolsBasicConfig,
+    // REVIEW: 尚不清楚imgUrl为何要加在deps中
+    imgUrl,
   ]);
 
   // useEffect(() => {
