@@ -16,7 +16,10 @@ export interface IAnnotationTaskInfo {
   currentStep: number;
 }
 
-export type Result = IPolygonData;
+// TODO 完善原先缺失的Rect类型
+export type Rect = any;
+
+export type Result = IPolygonData | Rect;
 
 export interface PrevResult {
   toolName: string;

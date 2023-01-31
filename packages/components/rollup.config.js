@@ -5,6 +5,7 @@ import image from '@rollup/plugin-image';
 import alias from '@rollup/plugin-alias';
 import resolve from '@rollup/plugin-node-resolve';
 import dts from 'rollup-plugin-dts';
+import postcss from 'rollup-plugin-postcss';
 
 const customResolver = resolve({
   extensions: ['.tsx', '.ts', 'scss'],
@@ -47,6 +48,7 @@ const commonPlugin = [
     customResolver,
   }),
   image(),
+  postcss(),
 ];
 
 export default () => {

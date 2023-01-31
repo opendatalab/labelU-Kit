@@ -108,9 +108,9 @@ const App: React.FC<AppProps> = (props) => {
   // 初始化imgList 优先以loadFileList方式加载数据
   const initImgList = useCallback(() => {
     if (loadFileList) {
-      loadImgList(store.dispatch, store.getState, initialIndex, true).then((isSuccess) => {
+      loadImgList(store.dispatch, store.getState, initialIndex as number, true).then((isSuccess) => {
         if (isSuccess) {
-          store.dispatch(LoadFileAndFileData(initialIndex));
+          store.dispatch(LoadFileAndFileData(initialIndex as number));
         }
       });
     } else if (imgList && imgList.length > 0) {
@@ -120,7 +120,7 @@ const App: React.FC<AppProps> = (props) => {
           imgList,
         },
       });
-      store.dispatch(LoadFileAndFileData(initialIndex));
+      store.dispatch(LoadFileAndFileData(initialIndex as number));
       // 页数持久化
       // loacalforage.getItem('nextIndex', (error, value) => {
       //   // if (value && value < imgList.length) {

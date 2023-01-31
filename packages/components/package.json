@@ -62,7 +62,6 @@
     "react": ">=16.9.0"
   },
   "devDependencies": {
-    "react": "^17.0.2",
     "@rollup/plugin-alias": "^3.1.2",
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-eslint": "^8.0.1",
@@ -76,9 +75,11 @@
     "cross-env": "^7.0.3",
     "dart-sass": "^1.25.0",
     "esbuild": "^0.11.0",
+    "react": "^17.0.2",
     "react-draggable": "^4.4.5",
     "rollup": "^2.43.1",
     "rollup-plugin-esbuild": "^3.0.2",
+    "rollup-plugin-postcss": "^4.0.2",
     "typescript": "^4.2.3"
   },
   "config": {

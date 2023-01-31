@@ -1,5 +1,5 @@
 import React from 'react';
-import type { tagToolConfig } from '@label-u/annotation';
+import type { TagToolConfig } from '@label-u/annotation';
 import { CommonToolUtils, uuid } from '@label-u/annotation';
 import _ from 'lodash';
 
@@ -106,7 +106,7 @@ export class TagToolInstanceAdaptor extends React.Component<
 
   public getTagResultByCode(num1: number, num2?: number) {
     try {
-      const inputList = (this.config as tagToolConfig)?.inputList ?? [];
+      const inputList = (this.config as TagToolConfig)?.inputList ?? [];
       const mulitTags = inputList.length > 1;
       const keycode1 = num2 !== undefined ? num1 : 0;
       const keycode2 = num2 !== undefined ? num2 : num1;
@@ -211,7 +211,7 @@ export class TagToolInstanceAdaptor extends React.Component<
     if (keyCode) {
       const keyIndex = keyCode - 1;
 
-      if ((this.config as tagToolConfig).inputList.length === 1) {
+      if ((this.config as TagToolConfig).inputList.length === 1) {
         // 说明标签只有一层
         this.labelSelectedList = [0, keyIndex];
         this.setLabel(0, keyIndex);
@@ -297,7 +297,7 @@ export class TagToolInstanceAdaptor extends React.Component<
             this.videoRef = video;
           }}
         />
-        <VideoTagLayer result={tagResult} inputList={(this.config as tagToolConfig)?.inputList} />
+        <VideoTagLayer result={tagResult} inputList={(this.config as TagToolConfig)?.inputList} />
       </div>
     );
   }
