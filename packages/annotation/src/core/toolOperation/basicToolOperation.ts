@@ -5,13 +5,12 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
-import { EToolName } from '@/constant/tool';
-
-import LineToolUtils from '@/utils/tool/LineToolUtils';
+import { DEFAULT_FONT, EToolName } from '@/constant/tool';
+import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
 import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import TagUtils from '@/utils/tool/TagUtils';
 import { ToolConfig } from '@/interface/conbineTool';
-import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang } from '../../constant/annotation';
+import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
 import ActionsHistory from '../../utils/ActionsHistory';
@@ -66,6 +65,10 @@ const zoomInfo = {
   ratio: 0.4,
 };
 
+const validNumber = (value: number) => {
+  return isNumber(value) && !isNaN(value);
+};
+
 class BasicToolOperation extends EventListener {
   public container: HTMLElement; // 当前结构绑定 container
 
@@ -97,9 +100,11 @@ class BasicToolOperation extends EventListener {
 
   public forbidBasicResultRender: boolean; // 禁止渲染基础依赖图形
 
-  public isShowOrder?: boolean; //是否显示标注顺序
+  public isShowOrder: boolean; //是否显示标注顺序
 
-  public isPointCloud2DTool?: boolean = false; // 是否为点云标注工具
+  public isShowAttributeText: boolean = false; //是否显示标签文本
+
+  public isPointCloud2DTool?: boolean = false;
 
   // public style: {
   //   strokeColor: string;
@@ -123,6 +128,8 @@ class BasicToolOperation extends EventListener {
   public isSpaceKey = false; // 是否点击空格键
 
   public attributeLockList: string[]; // 属性限制列表
+
+  public allAttributes!: Attribute[]; // 多工具所有标签集合
 
   public dblClickListener: DblClickEventListener;
 
@@ -149,7 +156,7 @@ class BasicToolOperation extends EventListener {
   // 拖拽 - 私有变量
   protected _firstClickCoordinate?: ICoordinate; // 存储第一次点击的坐标
 
-  private innerZoom = 1; // 用于内外 zoom 事件的变量，缓存 zoom 变换前的数据
+  private innerZoom = 1; // 用于内外 zoom 事件的变量
 
   private currentPosStorage?: ICoordinate; // 存储当前点击的平移位置
 
@@ -184,7 +191,6 @@ class BasicToolOperation extends EventListener {
     this.saveDataEvent = new CustomEvent('saveLabelResultToImg', {});
     this.renderReady = false;
     this.container = props.container;
-    // this.config = CommonToolUtils.jsonParser(props.config);
     this.showDefaultCursor = props.showDefaultCursor || false;
     if (!this.basicCanvas) {
       this.initCanvas(props.size);
@@ -218,6 +224,7 @@ class BasicToolOperation extends EventListener {
     };
     this.isShowCursor = false;
     this.isShowOrder = false;
+    this.isShowAttributeText = true;
     this.style = {
       strokeColor: COLORS_ARRAY[4],
       fillColor: COLORS_ARRAY[4],
@@ -246,7 +253,6 @@ class BasicToolOperation extends EventListener {
     this.onRightDblClick = this.onRightDblClick.bind(this);
     this.onClick = this.onClick.bind(this);
     this.clearImgDrag = this.clearImgDrag.bind(this);
-
     // 初始化监听事件
     this.dblClickListener = new DblClickEventListener(this.container, 200);
     this.coordUtils = new CoordinateUtils(this);
@@ -308,6 +314,13 @@ class BasicToolOperation extends EventListener {
   }
 
   /**
+   * 多工具全量标签设置
+   */
+  public setAllAttributes(allAttributes: Attribute[]) {
+    this.allAttributes = allAttributes;
+  }
+
+  /**
    * 是否含有列表标注
    */
   public get hasMarkerConfig() {
@@ -344,7 +357,6 @@ class BasicToolOperation extends EventListener {
    */
   public updatePosition(params: { zoom: number; currentPos: ICoordinate }) {
     const { zoom, currentPos } = params;
-
     // 内部位置初始化
     this.setZoom(zoom);
     this.setCurrentPos(currentPos);
@@ -416,7 +428,6 @@ class BasicToolOperation extends EventListener {
       canvas.style.height = `${size.height}px`;
       canvas.width = size.width * pixel;
       canvas.height = size.height * pixel;
-
       this.canvas = canvas;
       this.basicCanvas = basicCanvas;
       this.container.appendChild(basicCanvas);
@@ -499,7 +510,7 @@ class BasicToolOperation extends EventListener {
   /**
    * 设置框的样式
    * @param lineWidth
-   * @param strokeColor
+   * @param strokeColorinitImgPos
    */
   public setStyle(toolStyle: any) {
     this.style = toolStyle;
@@ -586,6 +597,14 @@ class BasicToolOperation extends EventListener {
     this.render();
   }
 
+  /**
+   * 用于外界控制标签文本是否显示
+   */
+  public setisShowAttributeText(isShowAttributeText: boolean) {
+    this.isShowAttributeText = isShowAttributeText;
+    this.renderBasicCanvas();
+  }
+
   /** 获取坐标值 */
   public getCoordinate(e: MouseEvent) {
     const bounding = this.canvas.getBoundingClientRect();
@@ -650,7 +669,6 @@ class BasicToolOperation extends EventListener {
 
   /** 用于初始化图片的位置 */
   public initImgPos = async () => {
-    // console.log('initImgPros');
     if (!this.imgNode || this.imgNode.width === 0) {
       return;
     }
@@ -663,7 +681,7 @@ class BasicToolOperation extends EventListener {
       zoomRatio,
       isOriginalSize,
     );
-    
+
     // 初始化图片位置信息时，优先从持久化记录中获取
     const statbleCoord = this.isPointCloud2DTool
       ? undefined
@@ -687,8 +705,8 @@ class BasicToolOperation extends EventListener {
     this.render();
     this.renderBasicCanvas();
 
-      this.emit('dependRender');
-      this.emit('renderZoom', zoom, currentPos, imgInfo);
+    this.emit('dependRender');
+    this.emit('renderZoom', zoom, currentPos, imgInfo);
   };
 
   /**
@@ -873,7 +891,6 @@ class BasicToolOperation extends EventListener {
     if (!this.canvas || this.isImgError) {
       return true;
     }
-
     const coord = this.getCoordinate(e);
 
     // 是否展示十字光标
@@ -922,7 +939,7 @@ class BasicToolOperation extends EventListener {
     if (this.startTime !== 0 && this._firstClickCoordinate) {
       const time = new Date().getTime();
       const currentCoord = this.getCoordinate(e);
-      // 拖拽时，更新持久化图片位置信息 
+      // 拖拽时，更新持久化图片位置信息
       localforage.setItem('coordinate', this.getCurrentPos(currentCoord), () => {});
       /**
        * 图片拖拽判断
@@ -979,17 +996,16 @@ class BasicToolOperation extends EventListener {
         this.isSpaceKey = true;
         break;
 
-      case EKeyCode.Z:
-        if (e.ctrlKey) {
-          if (e.shiftKey) {
-            this.redo();
-          } else {
-            this.undo();
-          }
-
-          return false;
-        }
-        break;
+      // case EKeyCode.Z:
+      //   if (e.ctrlKey) {
+      //     if (e.shiftKey) {
+      //       this.redo();
+      //     } else {
+      //       this.undo();
+      //     }
+      //     return false;
+      //   }
+      //   break;
 
       default: {
         break;
@@ -1186,6 +1202,14 @@ class BasicToolOperation extends EventListener {
     }
   }
 
+  private _isValidCoordinate(coordinate: ICoordinate) {
+    if (!coordinate) {
+      return false;
+    }
+
+    return validNumber(coordinate.x) && validNumber(coordinate.y);
+  }
+
   public setValid(valid: boolean) {
     this.basicImgInfo.valid = valid;
     if (valid === false) {
@@ -1265,7 +1289,7 @@ class BasicToolOperation extends EventListener {
   /** 获取当前属性颜色 */
   public getColor(attribute = '', config = this.config) {
     if (config?.attributeConfigurable === true && this.style.attributeColor) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, config?.attributeList ?? []) + 1;
+      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
       return this.style.attributeColor[attributeIndex];
     }
     const { color, toolColor } = this.style;
@@ -1277,7 +1301,7 @@ class BasicToolOperation extends EventListener {
 
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.config?.attributeList ?? []) + 1;
+      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
       return this.style.attributeLineColor ? this.style.attributeLineColor[attributeIndex] : '';
     }
     const { color, lineColor } = this.style;
@@ -1307,7 +1331,6 @@ class BasicToolOperation extends EventListener {
     // if (this.forbidBasicResultRender) {
     //   return;
     // }
-    // console.log(this.prevResultList);
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentReulst = this.prevResultList[i];
@@ -1318,17 +1341,30 @@ class BasicToolOperation extends EventListener {
                 if (item.isVisible) {
                   const toolColor = this.getColor(item.attribute);
                   const color = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-                  DrawUtils.drawRect(
-                    this.canvas,
-                    // @ts-ignore
-                    AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos),
-                    {
-                      isShowOrder: this.isShowOrder,
-                      order: item.order,
-                      color,
-                      thickness,
-                    },
-                  );
+                  const transformRect = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
+                  let rectSize = `${Math.round(item.width)} * ${Math.round(item.height)}`;
+                  const textSizeWidth = rectSize.length * 7;
+                  DrawUtils.drawRect(this.canvas, transformRect, {
+                    isShowOrder: this.isShowOrder,
+                    order: item.order,
+                    color,
+                    thickness,
+                  });
+                  if (this.isShowAttributeText) {
+                    const marginTop = 0;
+                    const textWidth = Math.max(20, transformRect.width - textSizeWidth);
+                    DrawUtils.drawText(
+                      this.canvas,
+                      { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
+                      item.textAttribute,
+                      {
+                        color: color,
+                        // font: 'italic normal 900 14px Arial',
+                        textMaxWidth: textWidth,
+                        // ...DEFAULT_TEXT_SHADOW,
+                      },
+                    );
+                  }
                 }
               });
             }
@@ -1362,6 +1398,20 @@ class BasicToolOperation extends EventListener {
                   color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
+                if (this.isShowAttributeText) {
+                  const endPoint = transformPointList[transformPointList.length - 1];
+                  if (endPoint && endPoint.x) {
+                    DrawUtils.drawText(
+                      this.canvas,
+                      { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
+                      item.textAttribute,
+                      {
+                        color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        ...DEFAULT_TEXT_OFFSET,
+                      },
+                    );
+                  }
+                }
               }
             });
             break;
@@ -1394,6 +1444,21 @@ class BasicToolOperation extends EventListener {
                   color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
+                if (this.isShowAttributeText) {
+                  let ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+                  ctx?.save();
+                  // this.ctx.font = 'italic bold 14px SourceHanSansCN-Regular';
+                  ctx.font = DEFAULT_FONT;
+                  ctx.fillStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  ctx.strokeStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  DrawUtils.wrapText(
+                    this.canvas,
+                    item.textAttribute,
+                    transformPointList[1].x - LINE_ORDER_OFFSET.x,
+                    transformPointList[1].y - LINE_ORDER_OFFSET.y,
+                    200,
+                  );
+                }
               }
             });
             break;
@@ -1428,6 +1493,18 @@ class BasicToolOperation extends EventListener {
                       color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                     },
                   );
+
+                  if (this.isShowAttributeText) {
+                    DrawUtils.drawText(
+                      this.canvas,
+                      { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
+                      item.textAttribute,
+                      {
+                        color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        ...DEFAULT_TEXT_OFFSET,
+                      },
+                    );
+                  }
                 }
               });
             }
@@ -1474,9 +1551,7 @@ class BasicToolOperation extends EventListener {
             break;
           }
           default: {
-            console.log(currentReulst.toolName);
-            console.log(currentReulst);
-            //
+            // empty
           }
         }
       }
@@ -1490,7 +1565,7 @@ class BasicToolOperation extends EventListener {
     this.clearBasicCanvas();
     this.drawImg();
 
-    //  无多步骤，无需依赖，因此注释
+    //  无多步骤，无需依赖，因此注销
     // if (this.basicResult && this.dependToolName) {
     //   switch (this.dependToolName) {
     //     case EToolName.Rect: {
@@ -1545,8 +1620,6 @@ class BasicToolOperation extends EventListener {
     if (!this.canvas || !this.ctx || !this.imgNode || !this.renderReady) {
       return;
     }
-    // console.log(this.prevResultList);
-    // console.log('clearCn');
     this.clearCanvas();
     this.renderOtherAnnotation();
   }

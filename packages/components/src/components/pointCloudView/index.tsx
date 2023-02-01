@@ -10,15 +10,21 @@ import { AppState } from '@/store';
 import { connect } from 'react-redux';
 import { LabelUContext } from '@/store/ctx';
 import { IProps } from '@/views/MainView/annotationOperation';
+import { BasicConfig } from '@/interface/toolConfig';
+import { PointCloudConfig } from '@label-u/annotation/es/types/interface/conbineTool';
+import { getCombineAttributes } from '@/views/MainView/attributeOperation';
 
 const PointCloudView: React.FC<IProps> = (props) => {
   if (props.imgList.length === 0) {
     return null;
   }
   const pcConfig = useMemo(() => {
-    let comBineConfig = { ...props.toolsBasicConfig[0] };
-    //@ts-ignore
-    let tmpAttribute = [...comBineConfig['config']['attributeList'], ...props.attributeList];
+    let comBineConfig = {
+      ...(props.toolsBasicConfig[0] as BasicConfig & {
+        config: PointCloudConfig;
+      }),
+    };
+    let tmpAttribute = getCombineAttributes(props.toolsBasicConfig,props.attributeList??[]);
     return {
       tool: 'pointTool',
       config: {
@@ -30,12 +36,12 @@ const PointCloudView: React.FC<IProps> = (props) => {
 
   const showSettings = useMemo(() => {
     return {
-      isShowOrder:props.isShowOrder as boolean,
-      isShowAttribute:props.isShowAttribute as boolean,
-      isShowAttributeText:props.isShowAttributeText as boolean,
-      isShowDirection:props.isShowDirection as boolean
-    }
-  },[props.isShowOrder,props.isShowAttribute,props.isShowAttributeText,props.isShowDirection])
+      isShowOrder: props.isShowOrder as boolean,
+      isShowAttribute: props.isShowAttribute as boolean,
+      isShowAttributeText: props.isShowAttributeText as boolean,
+      isShowDirection: props.isShowDirection as boolean,
+    };
+  }, [props.isShowOrder, props.isShowAttribute, props.isShowAttributeText, props.isShowDirection]);
 
   return (
     <>
@@ -43,7 +49,7 @@ const PointCloudView: React.FC<IProps> = (props) => {
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <div className={getClassName('point-cloud-container', 'left')}>
-            <PointCloud3DView config={pcConfig} showSettingConfig={showSettings}/>
+            <PointCloud3DView config={pcConfig} showSettingConfig={showSettings} />
           </div>
 
           <div className={getClassName('point-cloud-container', 'right')}>

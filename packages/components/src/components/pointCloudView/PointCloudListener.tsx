@@ -146,10 +146,10 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
     };
   }, [ptCtx, copiedBoxes]);
 
-  // Page switch data initialization
-  useEffect(() => {
-    updatePointCloudData?.();
-  }, [currentData?.url, ptCtx.mainViewInstance]);
+  // Page switch data initialization -- view will be initialed when url change at 3d component
+  // useEffect(() => {
+  //   updatePointCloudData?.();
+  // }, [currentData?.url, ptCtx.mainViewInstance]);
 
   // Update the listener of toolInstance.
   useEffect(() => {

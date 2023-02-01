@@ -72,8 +72,6 @@ const PointCloud2DView = ({ imgInfo }: IProps) => {
         fill: 'transparent',
         color: 'green',
       };
-
-      console.log(pointCloudBoxList);
       const newAnnotations2d: IAnnotationDataTemporarily[] = pointCloudBoxList.reduce(
         (acc: IAnnotationDataTemporarily[], pointCloudBox) => {
           const viewDataPointList = pointCloudInstance.pointCloudLidar2image(

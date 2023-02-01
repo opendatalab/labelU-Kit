@@ -24,6 +24,7 @@ import { BoxInfos } from './PointCloudInfos';
 import { BasicConfig } from '@/interface/toolConfig';
 import { AppState } from '@/store';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
+import { PointCloudConfig } from '@label-u/annotation/es/types/interface/conbineTool';
 
 const pointCloudID = 'LABELU-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -82,15 +83,15 @@ const PointCloud3DSideBar = () => {
 };
 
 const PointCloud3D: React.FC<
-  IAnnotationStateProps & { config: BasicConfig; showSettingConfig: ShowSettingConfig }
+  IAnnotationStateProps & { config: BasicConfig & {
+    config:PointCloudConfig
+  }; showSettingConfig: ShowSettingConfig }
 > = ({ currentData, config, showSettingConfig }) => {
   const dispatch = useDispatch();
   const ptCtx = useContext(PointCloudContext);
-  // const [showDirection, setShowDirection] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
   const { initPointCloud3d } = usePointCloudViews();
   const size = useSize(ref);
-  // const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
   const toolStyle = useSelector((state: AppState) => {
     return { ...state.toolStyle };
@@ -212,13 +213,6 @@ const PointCloud3D: React.FC<
    *  Observe selectedID and reset camera to target top-view
    */
 
-  // do not change 3D view when add a box in point cloud scene
-  // useEffect(() => {
-  //   if (selectedBox) {
-  //     setTarget3DView(EPerspectiveView.Top);
-  //   }
-  // }, [selectedBox]);
-
   const ptCloud3DCtx = useMemo(() => {
     return { reset3DView, setTarget3DView, isActive: !!selectedBox };
   }, [selectedBox]);
@@ -234,6 +228,7 @@ const PointCloud3D: React.FC<
           config: config.config,
         });
         ptCtx.setMainViewInstance(pointCloud);
+        pointCloud.setAllAttributes(config.config.attributeList);
       }
       pointCloud.setShowSettings(showSettingConfig);
       if (currentData.result) {
@@ -262,6 +257,7 @@ const PointCloud3D: React.FC<
           config: config.config,
         });
         ptCtx.setMainViewInstance(pointCloud);
+        pointCloud.setAllAttributes(config.config.attributeList);
       }
       pointCloud.setShowSettings(showSettingConfig);
       pointCloud.setStyle(toolStyle);
