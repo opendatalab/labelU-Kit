@@ -58,7 +58,5 @@ jobs:
       - name: Build packages
         run: pnpm run build
       - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
-      - name: disable husky in ci
-        run: npm pkg delete scripts.prepare
       - name: Publish packages
         run: pnpm run release
