@@ -1,9 +1,5 @@
 {
-  "packages": [
-    "packages/*",
-    "apps/web",
-    "apps/frontend"
-  ],
+  "packages": ["packages/*", "apps/frontend"],
   "npmClient": "pnpm",
   "useWorkspaces": true,
   "version": "independent",
