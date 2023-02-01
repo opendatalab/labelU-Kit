@@ -1,10 +1,6 @@
-import {
-  LeftOutlined,
-  RightOutlined,
-  StepForwardFilled,
-  StepBackwardFilled,
-} from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, StepForwardFilled, StepBackwardFilled } from '@ant-design/icons';
 import React from 'react';
+
 import { PageInput } from './index';
 
 interface IPageIconProps {
@@ -32,17 +28,9 @@ interface IPagination {
 }
 
 const Forward: React.FC<IPageIconProps> = (props) =>
-  props.isVideo ? (
-    <StepForwardFilled {...props.iconProps} />
-  ) : (
-    <RightOutlined {...props.iconProps} />
-  );
+  props.isVideo ? <StepForwardFilled {...props.iconProps} /> : <RightOutlined {...props.iconProps} />;
 const Back: React.FC<IPageIconProps> = (props) =>
-  props.isVideo ? (
-    <StepBackwardFilled {...props.iconProps} />
-  ) : (
-    <LeftOutlined {...props.iconProps} />
-  );
+  props.isVideo ? <StepBackwardFilled {...props.iconProps} /> : <LeftOutlined {...props.iconProps} />;
 
 export const Pagination: React.FC<IPagination> = ({
   pageBackward,
@@ -62,8 +50,7 @@ export const Pagination: React.FC<IPagination> = ({
           onClick: pageBackward,
         }}
       />
-      <PageInput imgIndex={imgIndex} jumpSkip={pageJump} />/
-      <span className={`${footerCls}__pageAll`}>{totalPage}</span>
+      <PageInput imgIndex={imgIndex} jumpSkip={pageJump} />/<span className={`${footerCls}__pageAll`}>{totalPage}</span>
       <Forward
         isVideo={isVideo}
         iconProps={{

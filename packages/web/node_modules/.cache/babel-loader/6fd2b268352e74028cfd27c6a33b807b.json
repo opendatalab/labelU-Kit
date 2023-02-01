@@ -1,0 +1,1 @@
+{"ast":null,"code":"import _extends from \"@babel/runtime/helpers/esm/extends\";\nimport * as React from 'react';\nimport Tag from '../tag';\nexport default function PickerTag(props) {\n  return /*#__PURE__*/React.createElement(Tag, _extends({\n    color: \"blue\"\n  }, props));\n}","map":null,"metadata":{},"sourceType":"module"}

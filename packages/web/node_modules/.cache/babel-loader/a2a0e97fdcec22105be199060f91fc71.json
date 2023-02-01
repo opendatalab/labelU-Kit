@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react'; // Tell cell that browser support sticky\n\nvar StickyContext = /*#__PURE__*/React.createContext(false);\nexport default StickyContext;","map":null,"metadata":{},"sourceType":"module"}

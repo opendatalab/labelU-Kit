@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react';\nvar ResizeContext = /*#__PURE__*/React.createContext(null);\nexport default ResizeContext;","map":null,"metadata":{},"sourceType":"module"}

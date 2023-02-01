@@ -1,4 +1,4 @@
-import { TOOL_STYLE_ACTIONS } from '@/store/Actions';
+import type { TOOL_STYLE_ACTIONS } from '@/store/Actions';
 
 export interface ToolStyleState {
   color: number;
@@ -6,13 +6,11 @@ export interface ToolStyleState {
   borderOpacity: number; // 边框透明度
   fillOpacity: number; // 填充透明度
 
-  toolColor: {
-    [color: number]: any;
-  };
+  toolColor: Record<number, any>;
   attributeColor: any[];
   lineColor: string;
   attributeLineColor: string[];
-  imgListCollapse:boolean
+  imgListCollapse: boolean;
 }
 
 interface UpdateToolStyleConfig {
@@ -25,5 +23,4 @@ interface InitToolStyleConfig {
   payload: undefined;
 }
 
-
-export type ToolStyleActionTypes = InitToolStyleConfig | UpdateToolStyleConfig ;
+export type ToolStyleActionTypes = InitToolStyleConfig | UpdateToolStyleConfig;

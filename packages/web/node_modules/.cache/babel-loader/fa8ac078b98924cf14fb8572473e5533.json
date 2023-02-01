@@ -1,0 +1,1 @@
+{"ast":null,"code":"import InternalCheckbox from './Checkbox';\nimport Group from './Group';\nvar Checkbox = InternalCheckbox;\nCheckbox.Group = Group;\nCheckbox.__ANT_CHECKBOX = true;\nexport default Checkbox;","map":null,"metadata":{},"sourceType":"module"}

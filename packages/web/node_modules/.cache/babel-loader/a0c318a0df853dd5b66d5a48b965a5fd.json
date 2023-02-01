@@ -1,0 +1,1 @@
+{"ast":null,"code":"export default function get(entity, path) {\n  var current = entity;\n  for (var i = 0; i < path.length; i += 1) {\n    if (current === null || current === undefined) {\n      return undefined;\n    }\n    current = current[path[i]];\n  }\n  return current;\n}","map":null,"metadata":{},"sourceType":"module"}

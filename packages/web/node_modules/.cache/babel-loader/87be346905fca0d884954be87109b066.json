@@ -1,0 +1,1 @@
+{"ast":null,"code":"/* tslint:disable: no-object-literal-type-assertion */\nimport * as React from 'react';\n// We will never use default, here only to fix TypeScript warning\nvar MentionsContext = /*#__PURE__*/React.createContext(null);\nexport default MentionsContext;","map":null,"metadata":{},"sourceType":"module"}

@@ -1,0 +1,1 @@
+{"ast":null,"code":"import { useEffect, useLayoutEffect } from 'react';\nimport canUseDom from \"rc-util/es/Dom/canUseDom\"; // It's safe to use `useLayoutEffect` but the warning is annoying\n\nvar useIsomorphicLayoutEffect = canUseDom() ? useLayoutEffect : useEffect;\nexport default useIsomorphicLayoutEffect;","map":null,"metadata":{},"sourceType":"module"}

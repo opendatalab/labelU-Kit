@@ -1,0 +1,1 @@
+{"ast":null,"code":"export var inline = false;\nexport function inlineMock(nextInline) {\n  if (typeof nextInline === 'boolean') {\n    inline = nextInline;\n  }\n  return inline;\n}","map":null,"metadata":{},"sourceType":"module"}

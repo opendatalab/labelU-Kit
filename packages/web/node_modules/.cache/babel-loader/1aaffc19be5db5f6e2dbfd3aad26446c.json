@@ -1,0 +1,1 @@
+{"ast":null,"code":"/**\n * BaseSelect provide some parsed data into context.\n * You can use this hooks to get them.\n */\nimport * as React from 'react';\nexport var BaseSelectContext = /*#__PURE__*/React.createContext(null);\nexport default function useBaseProps() {\n  return React.useContext(BaseSelectContext);\n}","map":null,"metadata":{},"sourceType":"module"}

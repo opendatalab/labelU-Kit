@@ -1,0 +1,1 @@
+{"ast":null,"code":"import Portal from \"./Portal\";\nimport { inlineMock } from \"./mock\";\nexport { inlineMock };\nexport default Portal;","map":null,"metadata":{},"sourceType":"module"}

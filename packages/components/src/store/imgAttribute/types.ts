@@ -1,4 +1,4 @@
-import { IMAGE_ATTRIBUTE_ACTIONS } from '@/store/Actions';
+import type { IMAGE_ATTRIBUTE_ACTIONS } from '@/store/Actions';
 
 export interface ImgAttributeState {
   contrast: number;
@@ -20,7 +20,7 @@ interface UpdateImgAttribute {
 
 interface InitImgAttribute {
   type: typeof IMAGE_ATTRIBUTE_ACTIONS.INIT_IMG_ATTRIBUTE;
-  payload: {}
+  payload: {};
 }
 
 export type ImgAttributeActionTypes = UpdateImgAttribute | InitImgAttribute;

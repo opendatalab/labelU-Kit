@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import { AppState } from 'src/store';
-import { GraphToolInstance } from 'src/store/annotation/types';
+import type { AppState } from 'src/store';
+import type { GraphToolInstance } from 'src/store/annotation/types';
+import { useTranslation } from 'react-i18next';
+
 import AttributeList from '@/components/attributeList';
 import StepUtils from '@/utils/StepUtils';
-import { IStepInfo } from '@/types/step';
+import type { IStepInfo } from '@/types/step';
 import { jsonParser } from '@/utils';
-import { useTranslation } from 'react-i18next';
 
 interface IProps {
   toolInstance: GraphToolInstance;
@@ -14,7 +15,7 @@ interface IProps {
 }
 
 const SwitchAttributeList: React.FC<IProps> = (props) => {
-  const [_, forceRender] = useState(0);
+  const [, forceRender] = useState(0);
   const listRef = useRef<HTMLElement>(null);
   const { toolInstance } = props;
   const { t } = useTranslation();

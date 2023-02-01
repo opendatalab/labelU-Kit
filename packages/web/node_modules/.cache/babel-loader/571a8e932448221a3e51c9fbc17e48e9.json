@@ -1,0 +1,1 @@
+{"ast":null,"code":"import Button from './button';\nexport default Button;","map":null,"metadata":{},"sourceType":"module"}

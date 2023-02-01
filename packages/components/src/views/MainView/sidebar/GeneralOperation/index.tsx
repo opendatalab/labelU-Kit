@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { Col, Popconfirm } from 'antd/es';
+import { StopOutlined } from '@ant-design/icons';
+import { connect } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+
 import clearResultSvg from '@/assets/annotation/common/icon_clear.svg';
 import clearResultASvg from '@/assets/annotation/common/icon_clear_a.svg';
 import copyBackStepSvg from '@/assets/annotation/common/icon_invalid.svg';
 import copyBackStepASvg from '@/assets/annotation/common/icon_invalid_a.svg';
-import { StopOutlined } from '@ant-design/icons';
 import { store } from '@/index';
-
-import { AppState } from '@/store';
-import { connect } from 'react-redux';
-import { ToolInstance } from '@/store/annotation/types';
+import type { AppState } from '@/store';
+import type { ToolInstance } from '@/store/annotation/types';
 import StepUtils from '@/utils/StepUtils';
-import { IStepInfo } from '@/types/step';
+import type { IStepInfo } from '@/types/step';
 // import { jsonParser } from '@/utils';
-import { AnnotationFileList } from '@/types/data';
+import type { AnnotationFileList } from '@/types/data';
 import { CopyBackWordResult } from '@/store/annotation/actionCreators';
-import { useTranslation } from 'react-i18next';
 
 const makeSure = (info: string, key: string, t: any) => {
   return <div key={key}>{`${t('ConfirmTo')}${info.slice(0)}？`}</div>;
@@ -45,13 +45,13 @@ const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
       imgSvg: clearResultSvg,
       hoverSvg: clearResultASvg,
       onClick: () => {
-        toolInstance?.clearResult();
+        toolInstance?.clearResult(false);
       },
     },
   ];
 
   // const config = jsonParser(stepInfo?.config);
-  const config = stepInfo?.config
+  const config = stepInfo?.config;
   if (stepInfo?.dataSourceStep === 0) {
     const iconStyle = {
       height: '25px',
@@ -86,12 +86,12 @@ const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
   const annotationLength = Math.floor(24 / allOperation.length);
 
   return (
-    <div className='generalOperation'>
+    <div className="generalOperation">
       {allOperation.map((info, index) => (
         <Col span={annotationLength} key={index}>
           <div
             key={info.key}
-            className='item'
+            className="item"
             onMouseEnter={() => {
               setHover(info.key);
             }}
@@ -102,15 +102,13 @@ const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
             <Popconfirm
               title={info.key.startsWith('sure') ? makeSure(info.name, info.key, t) : info.name}
               disabled={!info.key.startsWith('sure')}
-              placement='topRight'
+              placement="topRight"
               okText={t('Confirm')}
               cancelText={t('Cancel')}
               onConfirm={info.onClick}
             >
-              <div className='icon'>
-                {renderImg(info.key === isHover ? info.hoverSvg : info.imgSvg)}
-              </div>
-              <div className='toolName' style={{ color: info.key === isHover ? '#1B67FF' : '' }}>
+              <div className="icon">{renderImg(info.key === isHover ? info.hoverSvg : info.imgSvg)}</div>
+              <div className="toolName" style={{ color: info.key === isHover ? '#1B67FF' : '' }}>
                 {info.name}
               </div>
             </Popconfirm>

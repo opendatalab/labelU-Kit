@@ -1,0 +1,1 @@
+{"ast":null,"code":"import _extends from \"@babel/runtime/helpers/esm/extends\";\nimport * as React from 'react';\nimport Button from '../button';\nexport default function PickerButton(props) {\n  return /*#__PURE__*/React.createElement(Button, _extends({\n    size: \"small\",\n    type: \"primary\"\n  }, props));\n}","map":null,"metadata":{},"sourceType":"module"}

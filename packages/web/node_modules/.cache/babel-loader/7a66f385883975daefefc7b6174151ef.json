@@ -1,0 +1,1 @@
+{"ast":null,"code":"var now = +new Date();\nvar index = 0;\nexport default function uid() {\n  // eslint-disable-next-line no-plusplus\n  return \"rc-upload-\".concat(now, \"-\").concat(++index);\n}","map":null,"metadata":{},"sourceType":"module"}

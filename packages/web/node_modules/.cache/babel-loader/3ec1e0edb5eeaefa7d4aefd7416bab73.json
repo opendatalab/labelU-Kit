@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react';\nvar PanelContext = /*#__PURE__*/React.createContext({});\nexport default PanelContext;","map":null,"metadata":{},"sourceType":"module"}

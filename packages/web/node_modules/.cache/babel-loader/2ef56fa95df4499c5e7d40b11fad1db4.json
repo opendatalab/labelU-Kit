@@ -1,0 +1,1 @@
+{"ast":null,"code":"var root = require('./_root');\n\n/** Used to detect overreaching core-js shims. */\nvar coreJsData = root['__core-js_shared__'];\nmodule.exports = coreJsData;","map":null,"metadata":{},"sourceType":"script"}

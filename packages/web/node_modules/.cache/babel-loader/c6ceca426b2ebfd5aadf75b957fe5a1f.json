@@ -1,0 +1,1 @@
+{"ast":null,"code":"import momentGenerateConfig from \"rc-picker/es/generate/moment\";\nimport generatePicker from './generatePicker';\nvar DatePicker = generatePicker(momentGenerateConfig);\nexport default DatePicker;","map":null,"metadata":{},"sourceType":"module"}

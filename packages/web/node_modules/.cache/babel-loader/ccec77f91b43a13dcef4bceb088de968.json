@@ -1,0 +1,1 @@
+{"ast":null,"code":"export default function canUseDom() {\n  return !!(typeof window !== 'undefined' && window.document && window.document.createElement);\n}","map":null,"metadata":{},"sourceType":"module"}

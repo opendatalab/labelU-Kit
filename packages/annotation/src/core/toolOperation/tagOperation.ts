@@ -1,11 +1,14 @@
-import { tagToolConfig } from '@/interface/conbineTool';
+import type { TagToolConfig } from '@/interface/conbineTool';
+import type { ITagConfig, ITagResult } from '@/types/tool/tagTool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 
 interface ITagOperationProps extends IBasicToolOperationProps {
-  config: tagToolConfig;
+  config: TagToolConfig;
 }
 
 class TagOperation extends BasicToolOperation {
@@ -226,7 +229,7 @@ class TagOperation extends BasicToolOperation {
 
   // 清空当前页面的标注结果
   // eslint-disable-next-line no-unused-vars
-  public clearResult = (sendMessage = true, value?: string) => {
+  public clearResult = (sendMessage: boolean, value?: string) => {
     // 依赖原图
     if (value) {
       this.tagResult = this.tagResult.map((v) => {
@@ -274,15 +277,15 @@ class TagOperation extends BasicToolOperation {
         top: 0;
         right: 0;
         z-index: 5;
-      
+
         padding: 0 20px;
-      
+
         font-size: 15px;
         color: white;
         text-align: right;
         line-height: 32px;
         white-space: pre;
-      
+
         background: rgba(102, 111, 255, 1);
         opacity: 0.6;
         clear: both;

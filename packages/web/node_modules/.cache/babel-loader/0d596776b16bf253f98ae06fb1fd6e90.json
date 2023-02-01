@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react';\nvar PrivateContext = /*#__PURE__*/React.createContext({});\nexport default PrivateContext;","map":null,"metadata":{},"sourceType":"module"}

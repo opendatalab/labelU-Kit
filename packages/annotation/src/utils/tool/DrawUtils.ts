@@ -1,5 +1,9 @@
+import type { IImageAttribute } from '@/types/imgAttributeStore';
+import type { ICoordinate, IOffsetCanvasPosition, IPoint } from '@/types/tool/common';
+import type { IRect } from '@/types/tool/rectTool';
+
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
-import { IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
 import UnitUtils from './UnitUtils';
 
@@ -95,14 +99,22 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
-      isShowOrder?:boolean;
-      order?:number;
+      isShowOrder?: boolean;
+      order?: number;
       hiddenText: boolean;
       lineDash: number[];
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false, lineDash,isShowOrder,order } = options;
+    const {
+      color = DEFAULT_COLOR,
+      thickness = 1,
+      lineCap = 'round',
+      hiddenText = false,
+      lineDash,
+      isShowOrder,
+      order,
+    } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
@@ -119,8 +131,8 @@ export default class DrawUtils {
       if (rect.attribute) {
         showText = `${showText}  ${rect.attribute}`;
       }
-      if(isShowOrder){
-        showText = `${order}${showText}`
+      if (isShowOrder) {
+        showText = `${order}${showText}`;
       }
       this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
       // if (rect.textAttribute) {
@@ -252,14 +264,18 @@ export default class DrawUtils {
         pointList.push(pointList[0]);
       }
 
+      // eslint-disable-next-line no-param-reassign
       pointList = PolygonUtils.createSmoothCurvePointsFromPointList([...pointList], SEGMENT_NUMBER);
 
       if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
         // 想要绘制第 hoverEdgeIndex 的边, 注意，现在发现这种闭合的初始化的点并不是从 点 0 开始，而是从  0的后一个点开始
+        // eslint-disable-next-line no-param-reassign
         pointList = pointList.slice((SEGMENT_NUMBER + 1) * hoverEdgeIndex, (SEGMENT_NUMBER + 1) * (hoverEdgeIndex + 1));
       }
     } else if (hoverEdgeIndex !== undefined && hoverEdgeIndex > -1) {
+      // eslint-disable-next-line no-param-reassign
       pointList = [...pointList, pointList[0]];
+      // eslint-disable-next-line no-param-reassign
       pointList = pointList.slice(hoverEdgeIndex, hoverEdgeIndex + 2);
     }
 
@@ -421,10 +437,12 @@ export default class DrawUtils {
   ) {
     const { isClose = false, lineType = ELineTypes.Line } = options;
     if (isClose === true) {
+      // eslint-disable-next-line no-param-reassign
       pointList = [...pointList, pointList[0]];
     }
 
     if (lineType === ELineTypes.Curve) {
+      // eslint-disable-next-line no-param-reassign
       pointList = PolygonUtils.createSmoothCurvePointsFromPointList([...pointList]);
     }
 
@@ -457,6 +475,7 @@ export default class DrawUtils {
     ctx.beginPath();
 
     if (lineType === ELineTypes.Curve) {
+      // eslint-disable-next-line no-param-reassign
       pointList = PolygonUtils.createSmoothCurvePointsFromPointList([...pointList, pointList[0]]);
     }
 
@@ -623,9 +642,11 @@ export default class DrawUtils {
 
     const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
     if (typeof maxWidth === 'undefined') {
+      // eslint-disable-next-line no-param-reassign
       maxWidth = (canvas && canvas.width) || 300;
     }
     if (typeof lineHeight === 'undefined' && typeof window !== 'undefined') {
+      // eslint-disable-next-line no-param-reassign
       lineHeight =
         (canvas && parseInt(window.getComputedStyle(canvas).lineHeight, 10)) ||
         parseInt(window.getComputedStyle(document.body).lineHeight, 10);
@@ -643,12 +664,14 @@ export default class DrawUtils {
         const metrics = context.measureText(testLine);
         const testWidth = metrics.width;
         if (!maxWidth) {
+          // eslint-disable-next-line no-param-reassign
           maxWidth = 300;
         }
 
         if (testWidth > maxWidth && n > 0) {
           context.fillText(line, x, y);
           line = arrText[n];
+          // eslint-disable-next-line no-param-reassign
           y += lineHeight as number;
         } else {
           line = testLine;
@@ -656,6 +679,7 @@ export default class DrawUtils {
       }
       context.fillText(line, x, y);
 
+      // eslint-disable-next-line no-param-reassign
       y += lineHeight as number;
     }
   }

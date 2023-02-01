@@ -8,9 +8,7 @@ import type { ITagLabelsArray } from './types';
  */
 export const findTagLabel = (key: string, value: string, inputList: any[]) => {
   const primaryTagConfig = inputList.find((i) => i.value === key);
-  const secondaryTagConfig = primaryTagConfig.subSelected.find(
-    (i: { value: string }) => i.value === value,
-  );
+  const secondaryTagConfig = primaryTagConfig.subSelected.find((i: { value: string }) => i.value === value);
   return { keyLabel: primaryTagConfig.key, valueLabel: secondaryTagConfig.key };
 };
 
@@ -28,6 +26,25 @@ export const tagsSortThruInputList = (tagsKeys: string[], inputList: any[]) => {
 };
 
 /**
+ * find label from valuesArray and push to exitsTags
+ * @param valuesArray
+ * @param key
+ * @param inputList
+ * @param exitsTags
+ */
+const findLabelFromValuesArray = (valuesArray: string[], key: string, inputList: any[], exitsTags: ITagLabelsArray) => {
+  valuesArray.forEach((value) => {
+    const { keyLabel, valueLabel } = findTagLabel(key, value, inputList);
+    const tagHasAssign = exitsTags.find((i) => i.keyLabel === keyLabel);
+    if (tagHasAssign) {
+      tagHasAssign.valuesLabelArray.push(valueLabel);
+    } else {
+      exitsTags.push({ keyLabel, valuesLabelArray: [valueLabel] });
+    }
+  });
+};
+
+/**
  * Convent result's array to array of showing the labels
  * @param result
  * @param inputList
@@ -36,7 +53,7 @@ export const tagsSortThruInputList = (tagsKeys: string[], inputList: any[]) => {
 export const result2LabelKey = (result: any[], inputList: any[]) => {
   try {
     return (
-      result?.reduce((exitsTags: ITagLabelsArray, res: { result: { [key: string]: string } }) => {
+      result?.reduce((exitsTags: ITagLabelsArray, res: { result: Record<string, string> }) => {
         tagsSortThruInputList(Object.keys(res.result), inputList).forEach((key) => {
           const valuesArray = res.result[key]?.split(';');
           findLabelFromValuesArray(valuesArray, key, inputList, exitsTags);
@@ -47,30 +64,6 @@ export const result2LabelKey = (result: any[], inputList: any[]) => {
   } catch (error) {
     return [];
   }
-};
-
-/**
- * find label from valuesArray and push to exitsTags
- * @param valuesArray
- * @param key
- * @param inputList
- * @param exitsTags
- */
-const findLabelFromValuesArray = (
-  valuesArray: string[],
-  key: string,
-  inputList: any[],
-  exitsTags: ITagLabelsArray,
-) => {
-  valuesArray.forEach((value) => {
-    const { keyLabel, valueLabel } = findTagLabel(key, value, inputList);
-    const tagHasAssign = exitsTags.find((i) => i.keyLabel === keyLabel);
-    if (tagHasAssign) {
-      tagHasAssign.valuesLabelArray.push(valueLabel);
-    } else {
-      exitsTags.push({ keyLabel, valuesLabelArray: [valueLabel] });
-    }
-  });
 };
 
 /**

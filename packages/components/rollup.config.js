@@ -1,9 +1,10 @@
+import path from 'path';
+
 import esbuild from 'rollup-plugin-esbuild';
 import image from '@rollup/plugin-image';
 import alias from '@rollup/plugin-alias';
 import resolve from '@rollup/plugin-node-resolve';
-import dts from 'rollup-plugin-dts';
-import path from 'path';
+import postcss from 'rollup-plugin-postcss';
 
 const customResolver = resolve({
   extensions: ['.tsx', '.ts', 'scss'],
@@ -12,7 +13,7 @@ const customResolver = resolve({
 const projectRootDir = path.resolve(__dirname);
 
 const CJS_OUTPUT_DIR = 'dist';
-const ES_OUTPUT_DIR = 'es';
+// const ES_OUTPUT_DIR = 'es';
 const TYPE_OUTPUT_DIR = 'dist/types';
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -46,6 +47,7 @@ const commonPlugin = [
     customResolver,
   }),
   image(),
+  postcss(),
 ];
 
 export default () => {
@@ -71,17 +73,6 @@ export default () => {
       },
       plugins: [...commonPlugin, esbuildPlugin()],
       external: ['react', 'antd'],
-    },
-    {
-      input: 'src/index.tsx',
-      output: {
-        format: 'es',
-        dir: TYPE_OUTPUT_DIR,
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-      },
-      plugins: [...commonPlugin, dts()],
-      external: ['react', 'antd', '@ant-design/icons'],
     },
   ];
 };

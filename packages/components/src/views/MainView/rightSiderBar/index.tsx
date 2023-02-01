@@ -1,22 +1,18 @@
-import { prefix } from '../../../constant';
-import { EToolName } from '../../../data/enums/ToolType';
-import { AppState } from '../../../store';
-import { Sider } from '../../../types/main';
-import StepUtils from '../../../utils/StepUtils';
 import React, { useEffect, useState } from 'react';
 import { Tabs } from 'antd';
 import { connect, useSelector } from 'react-redux';
+import classNames from 'classnames';
+
+import type { IFileItem } from '@/types/data';
+
+import { prefix } from '../../../constant';
+import type { EToolName } from '../../../data/enums/ToolType';
+import type { AppState } from '../../../store';
+import type { Sider } from '../../../types/main';
+import StepUtils from '../../../utils/StepUtils';
 import TextToolSidebar from './TextToolSidebar';
 import TagSidebar from './TagSidebar';
 import AttributeRusult from './AttributeRusult';
-// import ClearResultIconHover from '../../../assets/annotation/common/clear_result_hover.svg';
-// import ClearResultIcon from '../../../assets/annotation/common/clear_result.svg';
-import { IFileItem } from '@/types/data';
-// import { labelTool } from '../toolHeader/headerOption';
-// import { UpdateImgList } from '@/store/annotation/actionCreators';
-// import { PrevResult } from '@label-u/annotation';
-// import { toolList } from '../toolHeader/ToolOperation';
-import classNames from 'classnames';
 import { toolList } from '../toolHeader/ToolOperation';
 
 interface IProps {
@@ -35,9 +31,9 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const [textTab, setTextTab] = useState<any>();
   const [tabIndex, setTabIndex] = useState<string>('1');
   const [tagTab, setTagTab] = useState<any>(
-    <div className='rightTab'>
+    <div className="rightTab">
       <p>分类</p>
-      <span className='innerWord'>未完成</span>
+      <span className="innerWord">未完成</span>
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
@@ -50,15 +46,14 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const textConfig = useSelector((state: AppState) => state.annotation.textConfig);
   const toolName = stepInfo?.tool;
 
-  const [boxHeight,setBoxHeight] = useState<number>();
-  const [boxWidth,setBoxWidth] = useState<number>();
+  const [boxHeight, setBoxHeight] = useState<number>();
+  const [, setBoxWidth] = useState<number>();
 
-
-  useEffect(()=>{
-    let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+  useEffect(() => {
+    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
     setBoxHeight(boxParent.clientHeight);
     setBoxWidth(boxParent.clientWidth);
-  })
+  }, []);
 
   // 删除标注结果
   // const doClearAllResult = () => {
@@ -66,27 +61,21 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   //   toolInstance?.setPrevResultList([]);
   // };
 
-
   useEffect(() => {
     if (imgList && imgList.length > 0) {
-      let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
+      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
       // 设置文本描述结果
       setTextTab(
-        <div className='rightTab'>
+        <div className="rightTab">
           <p>文本描述</p>
           <span
             className={classNames({
               innerWord: true,
-              finish:
-                textResultKeys &&
-                textResultKeys.length > 0 &&
-                textResultKeys.length === textConfig.length,
+              finish: textResultKeys && textResultKeys.length > 0 && textResultKeys.length === textConfig.length,
             })}
           >
-            {textResultKeys &&
-            textResultKeys.length > 0 &&
-            textResultKeys.length === textConfig.length
+            {textResultKeys && textResultKeys.length > 0 && textResultKeys.length === textConfig.length
               ? '已完成'
               : '未完成'}
           </span>
@@ -94,58 +83,54 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       );
       // 设置分类结果
       // if (currentImgResult?.tagTool?.toolName) {
-        let tagResultKeys = currentImgResult?.tagTool
-          ? Object.keys(currentImgResult?.tagTool.result[0]?.result)
-          : [];
-        setTagTab(
-          <div className='rightTab'>
-            <p>分类</p>
-            <span
-              className={classNames({
-                innerWord: true,
-                finish:
-                  tagResultKeys &&
-                  tagResultKeys.length > 0 &&
-                  tagResultKeys.length === tagConfigList.length,
-              })}
-            >
-              {tagResultKeys &&
-              tagResultKeys.length > 0 &&
-              tagResultKeys.length === tagConfigList.length
-                ? '已完成'
-                : '未完成'}
-            </span>
-          </div>,
-        );
+      const tagResultKeys = currentImgResult?.tagTool ? Object.keys(currentImgResult?.tagTool.result[0]?.result) : [];
+      setTagTab(
+        <div className="rightTab">
+          <p>分类</p>
+          <span
+            className={classNames({
+              innerWord: true,
+              finish: tagResultKeys && tagResultKeys.length > 0 && tagResultKeys.length === tagConfigList.length,
+            })}
+          >
+            {tagResultKeys && tagResultKeys.length > 0 && tagResultKeys.length === tagConfigList.length
+              ? '已完成'
+              : '未完成'}
+          </span>
+        </div>,
+      );
       // }
       // 设置标注件数
       // let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
       // let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
       // let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
       // let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
-      let imgResult = JSON.parse(imgList[imgIndex].result as string);
+      const imgResult = JSON.parse(imgList[imgIndex].result as string);
       let count = 0;
-      let order:number[] = [];
-      for (let item of toolList) {
+      let order: number[] = [];
+      for (const item of toolList) {
         if (item.toolName !== 'tagTool') {
-          if(imgResult[item.toolName]&&imgResult[item.toolName]?.result&&imgResult[item.toolName]?.result?.length>0){
-
-            for(let i=0;i<imgResult[item.toolName].result.length;i++){
-              if(order.indexOf(imgResult[item.toolName].result[i].order)<0){
-                order.push(imgResult[item.toolName].result[i].order)
+          if (
+            imgResult[item.toolName] &&
+            imgResult[item.toolName]?.result &&
+            imgResult[item.toolName]?.result?.length > 0
+          ) {
+            for (let i = 0; i < imgResult[item.toolName].result.length; i++) {
+              if (order.indexOf(imgResult[item.toolName].result[i].order) < 0) {
+                order.push(imgResult[item.toolName].result[i].order);
               }
             }
             count += order.length;
             order = [];
           }
-        }}
-
+        }
+      }
 
       // let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length;
       setAttributeTab(
-        <div className='rightTab'>
+        <div className="rightTab">
           <p>标注结果</p>
-          <span className='innerWord'>{count}件</span>
+          <span className="innerWord">{count}件</span>
         </div>,
       );
       if (count > 0) {
@@ -154,28 +139,28 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         setIsShowClear(false);
       }
     }
-  }, [currentToolName, tabIndex, imgList, imgIndex]);
+  }, [currentToolName, tabIndex, imgList, imgIndex, textConfig.length, tagConfigList.length]);
 
   if (!toolName) {
     return null;
   }
 
   return (
-    <div className={`${sidebarCls}`} style={{height:(boxHeight as number - 64)}}>
+    <div className={`${sidebarCls}`} style={{ height: (boxHeight as number) - 111 }}>
       <Tabs
-        defaultActiveKey='1'
+        defaultActiveKey="1"
         onChange={(e) => {
           setTabIndex(e);
         }}
       >
         {tagConfigList && tagConfigList.length > 0 && (
-          <Tabs.TabPane tab={tagTab} key='1'>
+          <Tabs.TabPane tab={tagTab} key="1">
             <div className={`${sidebarCls}`}>
               <TagSidebar isPreview={isPreview} />
             </div>
           </Tabs.TabPane>
         )}
-        <Tabs.TabPane tab={attributeTab} key='2'>
+        <Tabs.TabPane tab={attributeTab} key="2">
           <AttributeRusult isPreview={isPreview} isShowClear={isShowClear} />
           {/* {isShowClear && (
             <Popconfirm
@@ -206,7 +191,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           )} */}
         </Tabs.TabPane>
         {textConfig && textConfig.length > 0 && (
-          <Tabs.TabPane tab={textTab} key='3'>
+          <Tabs.TabPane tab={textTab} key="3">
             <div className={`${sidebarCls}`}>
               <TextToolSidebar isPreview={isPreview} />
             </div>

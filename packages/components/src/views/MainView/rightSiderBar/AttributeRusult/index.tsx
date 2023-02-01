@@ -1,21 +1,23 @@
-import React, { FC, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC, ReactElement } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Collapse, Form, Input, Popconfirm, Select } from 'antd';
-import { AppState } from '../../../../store';
 import { connect, useDispatch } from 'react-redux';
-import { IFileItem } from '@/types/data';
-import _ from 'lodash';
-import { toolList } from '../../toolHeader/ToolOperation';
+import type { PrevResult, Attribute } from '@label-u/annotation';
+import { EToolName } from '@label-u/annotation';
+import classNames from 'classnames';
+
 import AttributeEditorIcon from '@/assets/cssIcon/attribute_editor.svg';
 import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';
 import AttributeUnionIcon from '@/assets/cssIcon/attribute_union.svg';
 import emptyAttributeImg from '@/assets/common/emptyAttribute.png';
 import AttributeHideIcon from '@/assets/common/attribute_hide.svg';
-// import AttributeShowHoverIcon from '@/assets/common/attribute_show_hover.svg';
 import { ChangeCurrentTool, UpdateImgList } from '@/store/annotation/actionCreators';
-import { ToolInstance } from '@/store/annotation/types';
-import { PrevResult, Attribute, EToolName } from '@label-u/annotation';
+import type { ToolInstance } from '@/store/annotation/types';
 import DrageModel from '@/components/dragModal';
-import classNames from 'classnames';
+import type { IFileItem } from '@/types/data';
+
+import { toolList } from '../../toolHeader/ToolOperation';
+import type { AppState } from '../../../../store';
 import { labelTool } from '../../toolHeader/headerOption';
 import { expandIconFuc } from '../TagSidebar';
 import ClearResultIconHover from '../../../../assets/annotation/common/clear_result_hover.svg';
@@ -49,11 +51,10 @@ interface IProps {
   copyToolInstance: ToolInstance;
   currentToolName: string;
   basicResultList: [];
-  isShowClear:boolean
+  isShowClear: boolean;
 }
 
 const AttributeRusult: FC<IProps> = ({
-  isPreview,
   imgIndex,
   imgList,
   toolInstance,
@@ -61,7 +62,6 @@ const AttributeRusult: FC<IProps> = ({
   copyToolInstance,
   attributeList,
   basicResultList,
-  isShowClear
 }) => {
   const [attributeResultList, setAttributeResultList] = useState<AttributeResult[]>([]);
   // const attributeShowRef = useRef<HTMLImageElement>(null);
@@ -83,54 +83,6 @@ const AttributeRusult: FC<IProps> = ({
   const [isClearnHover, setIsClearHover] = useState<boolean>(false);
   // const [isShowClear, setIsShowClear] = useState(false);
 
-  const handleOk = () => {
-    setConfirmLoading(true);
-    setTimeout(() => {
-      doClearAllResult();
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 100);
-  };
-
-  // 删除标注结果
-  const doClearAllResult = () => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    for (let tool of labelTool) {
-      let tmpResult = oldImgResult[tool]?.result;
-      if (tmpResult && tmpResult.length > 0) {
-        oldImgResult[tool].result = [];
-      }
-    }
-    imgList[imgIndex].result = JSON.stringify(oldImgResult);
-    dispatch(UpdateImgList(imgList));
-    updateCanvasView(oldImgResult);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
-
-  const dragModalRef = useRef<any>();
-  useEffect(() => {
-    initToolInfo();
-  }, []);
-
-
-  const showPopconfirm = () => {
-    setOpen(true);
-  };
-
-  const [boxHeight,setBoxHeight] = useState<number>();
-  const [boxWidth,setBoxWidth] = useState<number>();
-
-
-  useEffect(()=>{
-    let boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
-    setBoxHeight(boxParent.clientHeight);
-    setBoxWidth(boxParent.clientWidth);
-  })
-
-
   const initToolInfo = () => {
     const initStr = JSON.stringify({
       toolName: '',
@@ -142,6 +94,70 @@ const AttributeRusult: FC<IProps> = ({
     localStorage.setItem('toolInfo', initStr);
   };
 
+  // 更新pre 标注结果
+  const updateCanvasView = (newLabelResult: any) => {
+    const prevResult: PrevResult[] = [];
+    for (const oneTool of toolList) {
+      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
+        const onePrevResult = {
+          toolName: oneTool.toolName,
+          result: newLabelResult[oneTool.toolName].result,
+        };
+        prevResult.push(onePrevResult);
+      }
+      if (oneTool.toolName === currentToolName) {
+        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
+      }
+    }
+    toolInstance.setPrevResultList(prevResult);
+    toolInstance.render();
+  };
+
+  // 删除标注结果
+  const doClearAllResult = () => {
+    const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    for (const tool of labelTool) {
+      const tmpResult = oldImgResult[tool]?.result;
+      if (tmpResult && tmpResult.length > 0) {
+        oldImgResult[tool].result = [];
+      }
+    }
+    imgList[imgIndex].result = JSON.stringify(oldImgResult);
+    dispatch(UpdateImgList(imgList));
+    updateCanvasView(oldImgResult);
+  };
+
+  const handleOk = () => {
+    setConfirmLoading(true);
+    setTimeout(() => {
+      doClearAllResult();
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 100);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+  };
+
+  const dragModalRef = useRef<any>();
+  useEffect(() => {
+    initToolInfo();
+  }, []);
+
+  const showPopconfirm = () => {
+    setOpen(true);
+  };
+
+  const [boxHeight, setBoxHeight] = useState<number>();
+  const [, setBoxWidth] = useState<number>();
+
+  useEffect(() => {
+    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    setBoxHeight(boxParent.clientHeight);
+    setBoxWidth(boxParent.clientWidth);
+  }, []);
+
   // 工具选中后联动标注结果选中项
   useEffect(() => {
     const activeId =
@@ -150,13 +166,11 @@ const AttributeRusult: FC<IProps> = ({
           copyToolInstance?.selectedRectID
         : // @ts-ignore
           copyToolInstance?.selectedID;
-    //@ts-ignore
-    const activeArea = copyToolInstance?.activeArea;
     if (activeId && imgList && imgList.length > imgIndex) {
       const toolInfoStr = localStorage.getItem('toolInfo');
       if (toolInfoStr && toolInfoStr.length > 0) {
-        let imgResult = JSON.parse(imgList[imgIndex].result as string);
-        for (let item of imgResult[currentToolName]?.result) {
+        const imgResult = JSON.parse(imgList[imgIndex].result as string);
+        for (const item of imgResult[currentToolName]?.result) {
           if (item.id === activeId) {
             setActiveOrder(item.order);
           }
@@ -166,31 +180,31 @@ const AttributeRusult: FC<IProps> = ({
       setActiveOrder(0);
     }
     // @ts-ignore
-  }, [copyToolInstance, currentToolName]);
+  }, [copyToolInstance, currentToolName, imgIndex, imgList]);
 
   useEffect(() => {
     if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
-      let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let resultKeys = Object.keys(currentImgResult);
-      let tmpAttributeResult: AttributeResult[] = [];
-      let attributeMap = new Map();
-      for (let item of toolList) {
+      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const resultKeys = Object.keys(currentImgResult);
+      const tmpAttributeResult: AttributeResult[] = [];
+      const attributeMap = new Map();
+      for (const item of toolList) {
         if (resultKeys.indexOf(item.toolName) >= 0 && item.toolName !== 'tagTool') {
-          let result = currentImgResult[item.toolName].result;
+          const result = currentImgResult[item.toolName].result;
           if (result && Array.isArray(result)) {
-            for (let oneLabel of result) {
+            for (const oneLabel of result) {
               // eslint-disable-next-line max-depth
               let isExistInTmpToolInfo = false;
               if (attributeMap.has(oneLabel.attribute)) {
-                let tmpToolInfo = attributeMap.get(oneLabel.attribute);
+                const tmpToolInfo = attributeMap.get(oneLabel.attribute);
                 // 去重
-                for(let i=0;i<tmpToolInfo.length;i++){
-                  if(tmpToolInfo[i].order === oneLabel.order){
+                for (let i = 0; i < tmpToolInfo.length; i++) {
+                  if (tmpToolInfo[i].order === oneLabel.order) {
                     isExistInTmpToolInfo = true;
                   }
                 }
 
-                if(!isExistInTmpToolInfo){
+                if (!isExistInTmpToolInfo) {
                   tmpToolInfo.push({
                     toolName: item.toolName,
                     order: oneLabel.order,
@@ -199,7 +213,6 @@ const AttributeRusult: FC<IProps> = ({
                     textAttribute: oneLabel.textAttribute,
                   });
                 }
-   
               } else {
                 attributeMap.set(oneLabel.attribute, [
                   {
@@ -216,11 +229,11 @@ const AttributeRusult: FC<IProps> = ({
         }
       }
       // 初始化attributeResultList
-      for (let key of attributeMap.keys()) {
-        let toolInfo = attributeMap.get(key);
+      for (const key of attributeMap.keys()) {
+        const toolInfo = attributeMap.get(key);
         let isVisible = false;
         if (toolInfo && toolInfo.length > 0) {
-          for (let tool of toolInfo) {
+          for (const tool of toolInfo) {
             if (tool.isVisible) {
               isVisible = true;
               break;
@@ -240,13 +253,10 @@ const AttributeRusult: FC<IProps> = ({
   // 修改标注描述信息 || 修改是否可以显示
   const updateLabelResult = (toolInfo: ToolInfo) => {
     if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
-      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
       // 更新结果
-      if (
-        oldImgResult[toolInfo.toolName].result &&
-        oldImgResult[toolInfo.toolName].result.length > 0
-      ) {
-        let newToolLabelItems = oldImgResult[toolInfo.toolName].result.map(
+      if (oldImgResult[toolInfo.toolName].result && oldImgResult[toolInfo.toolName].result.length > 0) {
+        const newToolLabelItems = oldImgResult[toolInfo.toolName].result.map(
           (item: { order: number; isVisible: boolean }) => {
             if (item.order === toolInfo.order) {
               return {
@@ -268,7 +278,7 @@ const AttributeRusult: FC<IProps> = ({
 
   // 批量修改是否可以显示
   const updateLabelsResult = (attributeResult: AttributeResult) => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
     // 更新标注结果
     let newToolInfo: ToolInfo[] = [];
     if (attributeResult.toolInfo.length > 0) {
@@ -277,7 +287,7 @@ const AttributeRusult: FC<IProps> = ({
       });
     }
     attributeResult.toolInfo = newToolInfo;
-    const newAttributeResultList = attributeResultList.map((item, index) => {
+    const newAttributeResultList = attributeResultList.map((item) => {
       if (item.attributeName === attributeResult.attributeName) {
         return { ...attributeResult };
       }
@@ -286,12 +296,9 @@ const AttributeRusult: FC<IProps> = ({
     setAttributeResultList(newAttributeResultList);
     // 更新显示结果
     if (attributeResult.toolInfo && attributeResult.toolInfo.length > 0) {
-      for (let oneTool of attributeResult.toolInfo) {
-        if (
-          oldImgResult[oneTool.toolName].result &&
-          oldImgResult[oneTool.toolName].result.length > 0
-        ) {
-          let newToolLabelItems = oldImgResult[oneTool.toolName].result.map(
+      for (const oneTool of attributeResult.toolInfo) {
+        if (oldImgResult[oneTool.toolName].result && oldImgResult[oneTool.toolName].result.length > 0) {
+          const newToolLabelItems = oldImgResult[oneTool.toolName].result.map(
             (item: { order: number; isVisible: boolean }) => {
               if (item.order === oneTool.order) {
                 return {
@@ -335,20 +342,17 @@ const AttributeRusult: FC<IProps> = ({
         })
         .sort((a, b) => a - b);
 
-      let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      let newImgResult = { ...oldImgResult };
+      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+      const newImgResult = { ...oldImgResult };
       // 获取已用工具列表
-      let keys = Object.keys(oldImgResult);
-      let toolList = keys.filter((item) => {
+      const keys = Object.keys(oldImgResult);
+      const toolList_ = keys.filter((item) => {
         return LableTools.indexOf(item as EToolName) >= 0;
       });
 
-      for (let i = 0; i < toolList.length; i++) {
-        newImgResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
-          (
-            res: { order: number; isVisible: boolean }[],
-            item: { order: number; isVisible: boolean },
-          ) => {
+      for (let i = 0; i < toolList_.length; i++) {
+        newImgResult[toolList_[i]].result = oldImgResult[toolList_[i]].result.reduce(
+          (res: { order: number; isVisible: boolean }[], item: { order: number; isVisible: boolean }) => {
             if (deleteResult.indexOf(item.order) < 0) {
               item.order = item.order - getPositionIndexInArr(deleteResult, item.order);
               res.push(item);
@@ -366,25 +370,19 @@ const AttributeRusult: FC<IProps> = ({
 
   // 删除标注
   const delelteLabel = (toolInfo: ToolInfo) => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    let newImageResult = { ...oldImgResult };
+    const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    const newImageResult = { ...oldImgResult };
     // 更新结果
-    if (
-      oldImgResult[toolInfo.toolName].result &&
-      oldImgResult[toolInfo.toolName].result.length > 0
-    ) {
+    if (oldImgResult[toolInfo.toolName].result && oldImgResult[toolInfo.toolName].result.length > 0) {
       // 获取已用工具列表
-      let keys = Object.keys(oldImgResult);
-      let toolList = keys.filter((item) => {
+      const keys = Object.keys(oldImgResult);
+      const toolList_ = keys.filter((item) => {
         return LableTools.indexOf(item as EToolName) >= 0;
       });
 
-      for (let i = 0; i < toolList.length; i++) {
-        newImageResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
-          (
-            res: { order: number; isVisible: boolean }[],
-            item: { order: number; isVisible: boolean },
-          ) => {
+      for (let i = 0; i < toolList_.length; i++) {
+        newImageResult[toolList_[i]].result = oldImgResult[toolList_[i]].result.reduce(
+          (res: { order: number; isVisible: boolean }[], item: { order: number; isVisible: boolean }) => {
             if (item.order !== toolInfo.order) {
               if (item.order > toolInfo.order) {
                 item.order = item.order - 1;
@@ -402,25 +400,6 @@ const AttributeRusult: FC<IProps> = ({
     updateCanvasView(newImageResult);
   };
 
-  // 更新pre 标注结果
-  const updateCanvasView = (newLabelResult: any) => {
-    const prevResult: PrevResult[] = [];
-    for (let oneTool of toolList) {
-      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
-        let onePrevResult = {
-          toolName: oneTool.toolName,
-          result: newLabelResult[oneTool.toolName].result,
-        };
-        prevResult.push(onePrevResult);
-      }
-      if (oneTool.toolName === currentToolName) {
-        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
-      }
-    }
-    toolInstance.setPrevResultList(prevResult);
-    toolInstance.render();
-  };
-
   // 根据标签及工具 修改标签及描述
   const updateLabelResultByOrderAndToolName = (
     order: number,
@@ -428,10 +407,10 @@ const AttributeRusult: FC<IProps> = ({
     toAttributeName: string,
     toAttributeText: string,
   ) => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
     // 更新结果
     if (oldImgResult[fromToolName].result && oldImgResult[fromToolName].result.length > 0) {
-      let newToolLabelItems = oldImgResult[fromToolName].result.map(
+      const newToolLabelItems = oldImgResult[fromToolName].result.map(
         (item: { order: number; isVisible: boolean; attribute: string; textAttribute: string }) => {
           if (item.order === order) {
             return {
@@ -453,7 +432,7 @@ const AttributeRusult: FC<IProps> = ({
   // 设置选中线条
   const setSelectedLabel = (toolInfo: ToolInfo) => {
     // 选中当前标注
-    let toolInfoStr = JSON.stringify(toolInfo);
+    const toolInfoStr = JSON.stringify(toolInfo);
     localStorage.setItem('toolInfo', toolInfoStr);
     // 切换工具
     dispatch(ChangeCurrentTool(toolInfo.toolName));
@@ -470,35 +449,35 @@ const AttributeRusult: FC<IProps> = ({
       }, [] as string[]);
 
       if (toolInfoStr && toolInfoStr.length > 0) {
-        const chooseToolInfo = JSON.parse(toolInfoStr as string);
-        let imgResult = JSON.parse(imgList[imgIndex].result as string);
+        const chooseToolInfo_ = JSON.parse(toolInfoStr as string);
+        const imgResult = JSON.parse(imgList[imgIndex].result as string);
         if (
           toolInstance &&
-          chooseToolInfo.toolName &&
-          chooseToolInfo.toolName === currentToolName &&
-          basicResultTools.indexOf(chooseToolInfo.toolName) < 0 &&
-          imgResult[chooseToolInfo.toolName].result &&
-          imgResult[chooseToolInfo.toolName].result.length > 0
+          chooseToolInfo_.toolName &&
+          chooseToolInfo_.toolName === currentToolName &&
+          basicResultTools.indexOf(chooseToolInfo_.toolName) < 0 &&
+          imgResult[chooseToolInfo_.toolName].result &&
+          imgResult[chooseToolInfo_.toolName].result.length > 0
         ) {
-          for (let item of imgResult[chooseToolInfo.toolName].result) {
-            if (item.order === chooseToolInfo.order) {
+          for (const item of imgResult[chooseToolInfo_.toolName].result) {
+            if (item.order === chooseToolInfo_.order) {
               // eslint-disable-next-line max-depth
-              if (chooseToolInfo.toolName === EToolName.Line) {
+              if (chooseToolInfo_.toolName === EToolName.Line) {
                 // @ts-ignore
                 toolInstance?.setActiveAreaByPoint(item?.pointList[0]);
                 // 选中之后，重新初始化
                 initToolInfo();
-              } else if (chooseToolInfo.toolName === EToolName.Point) {
+              } else if (chooseToolInfo_.toolName === EToolName.Point) {
                 // @ts-ignore
                 toolInstance?.setSelectedID(item.id);
                 // 选中之后，重新初始化
                 initToolInfo();
-              } else if (chooseToolInfo.toolName === EToolName.Polygon) {
+              } else if (chooseToolInfo_.toolName === EToolName.Polygon) {
                 // @ts-ignore
                 toolInstance?.setSelectedID(item.id);
                 // 选中之后，重新初始化
                 initToolInfo();
-              } else if (chooseToolInfo.toolName === EToolName.Rect) {
+              } else if (chooseToolInfo_.toolName === EToolName.Rect) {
                 // @ts-ignore
                 toolInstance?.setSelectedID(item.id);
                 // 选中之后，重新初始化
@@ -509,32 +488,32 @@ const AttributeRusult: FC<IProps> = ({
         }
       }
     }
-  }, [toolInstance, basicResultList, chooseToolInfo]);
+  }, [toolInstance, basicResultList, chooseToolInfo, imgList, imgIndex, currentToolName]);
 
   const defaultKeys = useMemo(() => {
-    let keys = attributeResultList.map((attribute, index) => {
+    const keys = attributeResultList.map((attribute) => {
       return attribute.attributeName;
     });
     return keys;
   }, [attributeResultList]);
 
   const generateContent = (toolInfo: ToolInfo, attributeResult: AttributeResult) => {
-    let children = [];
-    for (let item of attributeList) {
+    const children = [];
+    for (const item of attributeList) {
       // eslint-disable-next-line react/jsx-no-undef
       children.push(<Option key={item.key}>{item.value}</Option>);
     }
-    children.push(<Option key={'无标签'}>无标签</Option>)
+    children.push(<Option key={'无标签'}>无标签</Option>);
     return (
       <Form
-        name='basic'
-        layout='vertical'
+        name="basic"
+        layout="vertical"
         key={new Date().getTime()}
         initialValues={{
           changeAttribute: attributeResult.attributeName,
           description: toolInfo.textAttribute,
         }}
-        autoComplete='off'
+        autoComplete="off"
         onFieldsChange={(_, allFields) => {
           updateLabelResultByOrderAndToolName(
             toolInfo.order,
@@ -545,8 +524,8 @@ const AttributeRusult: FC<IProps> = ({
         }}
       >
         <Form.Item
-          label='标签'
-          name='changeAttribute'
+          label="标签"
+          name="changeAttribute"
           rules={[
             {
               required: true,
@@ -563,8 +542,8 @@ const AttributeRusult: FC<IProps> = ({
           </Select>
         </Form.Item>
         <Form.Item
-          label='描述'
-          name='description'
+          label="描述"
+          name="description"
           rules={[
             {
               required: true,
@@ -579,40 +558,27 @@ const AttributeRusult: FC<IProps> = ({
 
   if (!attributeResultList || attributeResultList.length === 0 || !boxHeight) {
     return (
-      <div className='containerBox'
-      style={{height: boxHeight as number - 220}}
-      >
-        <img className='emptyAttributeImg' src={emptyAttributeImg} />
+      <div className="containerBox" style={{ height: (boxHeight as number) - 220 }}>
+        <img className="emptyAttributeImg" src={emptyAttributeImg} />
       </div>
     );
   }
   return (
     <div
-    style={{height: boxHeight as number - 220}}
+      style={{ height: (boxHeight as number) - 220 }}
       className={classNames({
         attributeResult: true,
       })}
     >
-      <DrageModel
-        title='详细信息'
-        ref={dragModalRef}
-        width={333}
-        okWord='确认'
-        cancelWord='取消'
-        content={content}
-      />
-      <Collapse
-        key={defaultKeys.join('')}
-        defaultActiveKey={defaultKeys}
-        expandIcon={expandIconFuc}
-      >
+      <DrageModel title="详细信息" ref={dragModalRef} width={333} okWord="确认" cancelWord="取消" content={content} />
+      <Collapse key={defaultKeys.join('')} defaultActiveKey={defaultKeys} expandIcon={expandIconFuc}>
         {attributeResultList &&
           attributeResultList.length > 0 &&
-          attributeResultList.map((item, index) => {
+          attributeResultList.map((item) => {
             return (
               <Panel
                 header={
-                  <div className='attributeResultLi'>
+                  <div className="attributeResultLi">
                     <span
                       title={item.attributeName}
                       style={{
@@ -625,10 +591,10 @@ const AttributeRusult: FC<IProps> = ({
                     >
                       {item.attributeName}
                     </span>{' '}
-                    <div className='attributeResultRightImgBox'>
+                    <div className="attributeResultRightImgBox">
                       {item.isVisible ? (
                         <img
-                          className='hoverShow'
+                          className="hoverShow"
                           id={`${item.attributeName}`}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -661,7 +627,7 @@ const AttributeRusult: FC<IProps> = ({
                       )}
                       <img
                         src={AttributeUnionIcon}
-                        className='hoverShow'
+                        className="hoverShow"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteLabelByAttribute(item);
@@ -674,7 +640,7 @@ const AttributeRusult: FC<IProps> = ({
               >
                 {item.toolInfo &&
                   item.toolInfo.length > 0 &&
-                  item.toolInfo.map((tItem, tIndex) => {
+                  item.toolInfo.map((tItem) => {
                     return (
                       <div
                         // key={item.attributeName}
@@ -702,7 +668,7 @@ const AttributeRusult: FC<IProps> = ({
                         >
                           {item.attributeName}
                         </span>
-                        <div className='attributeResultRightImgBox'>
+                        <div className="attributeResultRightImgBox">
                           <img
                             id={`${tItem.toolName + tItem.order} + edit`}
                             onClick={(e) => {
@@ -721,12 +687,12 @@ const AttributeRusult: FC<IProps> = ({
                               setContent(generateContent(tItem, item));
                             }}
                             src={AttributeEditorIcon}
-                            className='hoverShow'
+                            className="hoverShow"
                             style={{ left: 10, position: 'absolute' }}
                           />
                           {tItem.isVisible ? (
                             <img
-                              className='hoverShow'
+                              className="hoverShow"
                               id={`${tItem.toolName + tItem.order}`}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -766,7 +732,7 @@ const AttributeRusult: FC<IProps> = ({
                           <img
                             style={{ left: 50, position: 'absolute' }}
                             src={AttributeUnionIcon}
-                            className='hoverShow'
+                            className="hoverShow"
                             onClick={(e) => {
                               e.stopPropagation();
                               delelteLabel(tItem);
@@ -776,17 +742,17 @@ const AttributeRusult: FC<IProps> = ({
                       </div>
                     );
                   })}
-        
-                  <Popconfirm
-                    title='确认清空标注？'
-                    open={open}
-                    okText='确认'
-                    cancelText='取消'
-                    onConfirm={handleOk}
-                    okButtonProps={{ loading: confirmLoading }}
-                    onCancel={handleCancel}
-                  >
-                    <div className='rightBarFooter'>
+
+                <Popconfirm
+                  title="确认清空标注？"
+                  open={open}
+                  okText="确认"
+                  cancelText="取消"
+                  onConfirm={handleOk}
+                  okButtonProps={{ loading: confirmLoading }}
+                  onCancel={handleCancel}
+                >
+                  <div className="rightBarFooter">
                     <img
                       onMouseEnter={(e) => {
                         e.stopPropagation();
@@ -797,13 +763,11 @@ const AttributeRusult: FC<IProps> = ({
                         setIsClearHover(false);
                       }}
                       onClick={showPopconfirm}
-                      className='clrearResult'
+                      className="clrearResult"
                       src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
                     />
-                    </div>
-                  </Popconfirm>
-          
-
+                  </div>
+                </Popconfirm>
               </Panel>
             );
           })}

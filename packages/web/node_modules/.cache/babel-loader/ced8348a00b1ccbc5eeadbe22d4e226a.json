@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react';\nexport default /*#__PURE__*/React.memo(function (_ref) {\n  var children = _ref.children;\n  return children;\n}, function (_, _ref2) {\n  var shouldUpdate = _ref2.shouldUpdate;\n  return !shouldUpdate;\n});","map":null,"metadata":{},"sourceType":"module"}

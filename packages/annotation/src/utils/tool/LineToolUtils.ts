@@ -1,4 +1,7 @@
 import { ELineTypes, EToolName } from '@/constant/tool';
+import type { ICoordinate, IPoint, IRectArea, ISize } from '@/types/tool/common';
+import type { ILinePoint } from '@/types/tool/lineTool';
+
 import { createSmoothCurvePointsFromPointList } from './polygonTool';
 import PolygonUtils from './PolygonUtils';
 import MathUtils from '../MathUtils';
@@ -73,12 +76,13 @@ class LineToolUtils {
     let optimalIntersection: IPoint | undefined;
     let minDistance: number = Infinity;
     let scopeIntersection: { point: IPoint; minDistance: number } | undefined;
-    const matchLineOnExistLine = pointList.find((p, index) => {
+    // @ts-ignore
+    const matchLineOnExistLine = pointList.find((p, index: number) => {
       if (index === 0) {
         return;
       }
-      const pointAOnLine = LineToolUtils.isInLine(matchLine.pointA, p, pointList[index - 1]);
-      const pointBOnLine = LineToolUtils.isInLine(matchLine.pointB, p, pointList[index - 1]);
+      const pointAOnLine = LineToolUtils.isInLine(matchLine.pointA, p as IPoint, pointList[index - 1] as IPoint);
+      const pointBOnLine = LineToolUtils.isInLine(matchLine.pointB, p as IPoint, pointList[index - 1] as IPoint);
       return pointAOnLine && pointBOnLine;
     });
 
@@ -94,6 +98,8 @@ class LineToolUtils {
         pointA: pointList[index - 1],
         pointB: point,
       };
+      // TODO
+      // @ts-ignore
       const intersection = LineToolUtils.lineIntersection(matchLine, line2);
 
       if (intersection && matchLine) {

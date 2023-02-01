@@ -1,0 +1,1 @@
+{"ast":null,"code":"import { createContext } from 'react';\nvar LocaleContext = /*#__PURE__*/createContext(undefined);\nexport default LocaleContext;","map":null,"metadata":{},"sourceType":"module"}

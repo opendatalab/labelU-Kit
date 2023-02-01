@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react';\nvar SliderContext = /*#__PURE__*/React.createContext({\n  min: 0,\n  max: 0,\n  direction: 'ltr',\n  step: 1,\n  includedStart: 0,\n  includedEnd: 0,\n  tabIndex: 0\n});\nexport default SliderContext;","map":null,"metadata":{},"sourceType":"module"}

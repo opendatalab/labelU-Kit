@@ -1,0 +1,1 @@
+{"ast":null,"code":"import Image from \"./Image\";\nexport * from \"./Image\";\nexport default Image;","map":null,"metadata":{},"sourceType":"module"}

@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react';\nfunction Panel(_ref) {\n  var className = _ref.className,\n    children = _ref.children;\n  return /*#__PURE__*/React.createElement(\"div\", {\n    className: className\n  }, children);\n}\nexport default Panel;","map":null,"metadata":{},"sourceType":"module"}

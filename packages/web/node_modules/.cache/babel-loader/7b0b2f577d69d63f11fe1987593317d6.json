@@ -1,0 +1,1 @@
+{"ast":null,"code":"/**\n * Webpack has bug for import loop, which is not the same behavior as ES module.\n * When util.js imports the TreeNode for tree generate will cause treeContextTypes be empty.\n */\nimport * as React from 'react';\nexport var TreeContext = /*#__PURE__*/React.createContext(null);","map":null,"metadata":{},"sourceType":"module"}

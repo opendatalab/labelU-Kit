@@ -1,7 +1,10 @@
 import { difference, polygon, union } from '@turf/turf';
+
 import { ERotateDirection } from '@/constant/annotation';
+import type { ICoordinate } from '@/types/tool/common';
+
 import CommonToolUtils from './CommonToolUtils';
-import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
@@ -63,8 +66,10 @@ export default class PolygonUtils {
     let xinters;
     let p1;
     let p2;
+    // eslint-disable-next-line no-param-reassign
     polygonPoints = [...polygonPoints];
     if (lineType === ELineTypes.Curve) {
+      // eslint-disable-next-line no-param-reassign
       polygonPoints = this.createSmoothCurvePoints(
         polygonPoints.reduce<any[]>((acc, cur) => {
           return [...acc, cur.x, cur.y];
@@ -104,7 +109,7 @@ export default class PolygonUtils {
    * @returns {Array<number>}
    */
   static createSmoothCurvePointsFromPointList(
-    pointList: Array<{ x: number; y: number; [a: string]: any }>,
+    pointList: { x: number; y: number; [a: string]: any }[],
     numberOfSegments: number = SEGMENT_NUMBER,
   ) {
     const newPoints = this.createSmoothCurvePoints(

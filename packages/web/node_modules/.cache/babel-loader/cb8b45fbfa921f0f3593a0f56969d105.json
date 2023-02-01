@@ -1,0 +1,1 @@
+{"ast":null,"code":"export function nextSlice(callback) {\n  /* istanbul ignore next */\n  Promise.resolve().then(callback);\n}","map":null,"metadata":{},"sourceType":"module"}

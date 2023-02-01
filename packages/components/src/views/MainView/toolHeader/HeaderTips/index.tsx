@@ -1,8 +1,10 @@
 import React from 'react';
-import ToolHotKey from './ToolHotKey';
 import { useSelector } from 'react-redux';
-import StepUtils from '../../../../utils/StepUtils';
+
 import { prefix } from '@/constant';
+
+import ToolHotKey from './ToolHotKey';
+import StepUtils from '../../../../utils/StepUtils';
 
 export const footerCls = `${prefix}-footer`;
 
@@ -14,7 +16,7 @@ const HeaderTips: React.FC = () => {
   );
 
   return (
-    <div className='tipsBar'>
+    <div className="tipsBar">
       <ToolHotKey toolName={stepInfo?.tool} />
     </div>
   );

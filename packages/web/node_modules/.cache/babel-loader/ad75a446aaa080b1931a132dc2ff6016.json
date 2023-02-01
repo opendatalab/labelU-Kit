@@ -1,0 +1,1 @@
+{"ast":null,"code":"/* istanbul ignore file */\n\n/** This is a placeholder, not real render in dom */\nvar OptGroup = function OptGroup() {\n  return null;\n};\nOptGroup.isSelectOptGroup = true;\nexport default OptGroup;","map":null,"metadata":{},"sourceType":"module"}

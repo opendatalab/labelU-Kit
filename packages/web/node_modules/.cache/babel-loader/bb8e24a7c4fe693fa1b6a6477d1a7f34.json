@@ -1,0 +1,1 @@
+{"ast":null,"code":"/**\n * Test usage export. Do not use in your production\n */\nexport function isBodyOverflowing() {\n  return document.body.scrollHeight > (window.innerHeight || document.documentElement.clientHeight) && window.innerWidth > document.body.offsetWidth;\n}","map":null,"metadata":{},"sourceType":"module"}

@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
+import classnames from 'classnames';
+import { connect, useDispatch } from 'react-redux';
+
 import CollapseIcon from '@/assets/cssIcon/collapse.svg';
 import SpreadIcon from '@/assets/cssIcon/spread.svg';
-import classnames from 'classnames';
-import { PageJump } from '../../../store/annotation/actionCreators';
+import { PageJump } from '@/store/annotation/actionCreators';
+
 // import { updateCollapseStatus } from '../../../store/toolStyle/actionCreators';
-import { connect, useDispatch } from 'react-redux';
+
 import { prefix } from '../../../constant';
-import { IFileItem } from '../../../types/data';
-import { AppState } from '../../../store';
+import type { IFileItem } from '../../../types/data';
+import type { AppState } from '../../../store';
 const layoutCls = `${prefix}-layout`;
 
 interface LeftSiderProps {
@@ -33,15 +36,13 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
   }
 
   return (
-    <div className='sliderBox' id='sliderBoxId'>
-      <div
-        className={imgListCollapse ? `${layoutCls}__left_sider_hide` : `${layoutCls}__left_sider`}
-      >
+    <div className="sliderBox" id="sliderBoxId">
+      <div className={imgListCollapse ? `${layoutCls}__left_sider_hide` : `${layoutCls}__left_sider`}>
         {leftSiderContent
           ? leftSiderContent
           : imgList.map((item, index) => {
               return (
-                <div key={item.id} className='item'>
+                <div key={item.id} className="item">
                   <div
                     className={classnames({ imgItem: true, chooseImg: index === Number(imgIndex) })}
                     onClick={async (e) => {
@@ -70,7 +71,7 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
       </div>
 
       <img
-        className='itemOpIcon'
+        className="itemOpIcon"
         src={imgListCollapse ? SpreadIcon : CollapseIcon}
         onClick={(e) => {
           setImgListCollapse(!imgListCollapse);
@@ -81,7 +82,7 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
   );
 };
 
-const mapStateToProps = ({ annotation, toolStyle }: AppState) => {
+const mapStateToProps = ({ annotation }: AppState) => {
   const { imgList, imgIndex } = annotation;
   return {
     imgList,

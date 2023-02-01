@@ -1,0 +1,1 @@
+{"ast":null,"code":"import * as React from 'react';\nvar BodyContext = /*#__PURE__*/React.createContext(null);\nexport default BodyContext;","map":null,"metadata":{},"sourceType":"module"}

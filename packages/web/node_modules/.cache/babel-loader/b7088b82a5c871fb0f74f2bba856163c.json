@@ -1,0 +1,1 @@
+{"ast":null,"code":"/* istanbul ignore file */\n\n/** This is a placeholder, not real render in dom */\nvar TreeNode = function TreeNode() {\n  return null;\n};\nexport default TreeNode;","map":null,"metadata":{},"sourceType":"module"}

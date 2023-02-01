@@ -1,4 +1,6 @@
-import { combineReducers, CombinedState } from 'redux';
+import type { CombinedState } from 'redux';
+import { combineReducers } from 'redux';
+
 import { annotationReducer } from './annotation/reducer';
 import { imgAttributeReducer } from './imgAttribute/reducer';
 import { toolStyleReducer } from './toolStyle/reducer';

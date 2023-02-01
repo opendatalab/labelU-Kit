@@ -1,0 +1,1 @@
+{"ast":null,"code":"export function getMotion(mode, motion, defaultMotions) {\n  if (motion) {\n    return motion;\n  }\n  if (defaultMotions) {\n    return defaultMotions[mode] || defaultMotions.other;\n  }\n  return undefined;\n}","map":null,"metadata":{},"sourceType":"module"}

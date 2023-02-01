@@ -1,10 +1,23 @@
 {
   "name": "@label-u/utils",
-  "version": "1.2.0",
+  "version": "1.0.0-alpha.1",
   "description": "utils for label-bee",
   "author": "Glenfiddish <edwinlee0927@hotmail.com>",
   "license": "Apache-2.0",
   "types": "dist/types/index.d.ts",
+  "typings": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./es/index.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
   "homepage": "",
   "main": "dist/index.js",
   "module": "es/index.js",
@@ -14,7 +27,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:open-mmlab/labelbee.git"
+    "url": "git@github.com:opendatalab/labelU-Kit.git"
   },
   "scripts": {
     "start": "npm run dev",

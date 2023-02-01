@@ -1,0 +1,1 @@
+{"ast":null,"code":"import _typeof from \"@babel/runtime/helpers/esm/typeof\";\nvar isFF = (typeof navigator === \"undefined\" ? \"undefined\" : _typeof(navigator)) === 'object' && /Firefox/i.test(navigator.userAgent);\nexport default isFF;","map":null,"metadata":{},"sourceType":"module"}

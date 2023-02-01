@@ -1,19 +1,18 @@
 import React from 'react';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { connect } from 'react-redux';
+
 import adaptIcon from '@/assets/annotation/common/icon_adapt.svg';
 import adaptIconBlack from '@/assets/annotation/common/icon_adapt_black.svg';
-import {
-  MinusOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
-import { AppState } from '@/store';
-import { ToolInstance } from '@/store/annotation/types';
-import { connect } from 'react-redux';
+import type { AppState } from '@/store';
+import type { ToolInstance } from '@/store/annotation/types';
+
 import ZoomLevel from './ZoomLevel';
 import { footerCls } from '../index';
 
 interface IProps {
-  toolInstance: ToolInstance
-  mode?: 'light' | 'dark'
+  toolInstance: ToolInstance;
+  mode?: 'light' | 'dark';
 }
 
 const ZoomController: React.FC<IProps> = ({ toolInstance, mode }) => {
@@ -22,32 +21,34 @@ const ZoomController: React.FC<IProps> = ({ toolInstance, mode }) => {
   };
 
   let defaultIcon = adaptIcon;
-  
+
   if (mode === 'light') {
     defaultIcon = adaptIconBlack;
   }
 
-  return <div>
-    <span className={`${footerCls}__zoomController`}>
-      <MinusOutlined
-        className={`${footerCls}__highlight`}
-        onClick={() => {
-          toolInstance.zoomChanged(false);
-        }}
-      />
-      <span className={`${footerCls}__zoomText`} onClick={initialPosition}>
-        <img src={defaultIcon} className='adaptIcon' />
-        <ZoomLevel />
+  return (
+    <div>
+      <span className={`${footerCls}__zoomController`}>
+        <MinusOutlined
+          className={`${footerCls}__highlight`}
+          onClick={() => {
+            toolInstance.zoomChanged(false);
+          }}
+        />
+        <span className={`${footerCls}__zoomText`} onClick={initialPosition}>
+          <img src={defaultIcon} className="adaptIcon" />
+          <ZoomLevel />
+        </span>
+        <PlusOutlined
+          className={`${footerCls}__highlight`}
+          onClick={() => {
+            toolInstance.zoomChanged(true);
+          }}
+        />
       </span>
-      <PlusOutlined
-        className={`${footerCls}__highlight`}
-        onClick={() => {
-          toolInstance.zoomChanged(true);
-        }}
-      />
-    </span>
-  </div>
-}
+    </div>
+  );
+};
 
 const mapStateToProps = (state: AppState) => ({
   toolInstance: state.annotation.toolInstance,

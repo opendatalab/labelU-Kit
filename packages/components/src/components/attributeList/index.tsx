@@ -1,15 +1,16 @@
-import { COLORS_ARRAY, NULL_COLOR } from '@/data/Style';
-import { ColorTag } from '@/components/colorTag';
 import { Radio } from 'antd/es';
 import React from 'react';
+
+import { COLORS_ARRAY, NULL_COLOR } from '@/data/Style';
+import { ColorTag } from '@/components/colorTag';
 
 export const ATTRIBUTE_COLORS = [NULL_COLOR].concat(COLORS_ARRAY);
 
 interface IProps {
-  list: Array<{
+  list: {
     label: string;
     value: string;
-  }>;
+  }[];
   selectedAttribute: string;
   attributeChanged: (v: string) => void;
   forbidDefault?: boolean;
@@ -58,20 +59,14 @@ const AttributeList = React.forwardRef((props: IProps, ref) => {
           }
 
           return (
-            <Radio
-              value={i.value}
-              ref={radioRef}
-              key={index}
-            >
+            <Radio value={i.value} ref={radioRef} key={index}>
               <span className="labelu-radio-label" title={i.label}>
                 {!props?.forbidColor && (
                   <ColorTag
                     color={
                       index > 8 && !props.forbidDefault
                         ? COLORS_ARRAY[(index - 1) % COLORS_ARRAY.length]
-                        : NEW_ATTRIBUTE_COLORS[
-                          index % NEW_ATTRIBUTE_COLORS.length
-                        ]
+                        : NEW_ATTRIBUTE_COLORS[index % NEW_ATTRIBUTE_COLORS.length]
                     }
                     style={{ marginRight: '8px' }}
                   />

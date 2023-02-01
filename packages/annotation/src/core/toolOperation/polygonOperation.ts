@@ -1,6 +1,11 @@
+// @ts-ignore
 import { i18n } from '@label-u/utils';
+
 import MathUtils from '@/utils/MathUtils';
 import RectUtils from '@/utils/tool/RectUtils';
+import type { ICoordinate } from '@/types/tool/common';
+import type { IRect } from '@/types/tool/rectTool';
+
 import {
   DEFAULT_TEXT_OFFSET,
   EDragStatus,
@@ -13,7 +18,7 @@ import EKeyCode from '../../constant/keyCode';
 import { edgeAdsorptionScope, ELineTypes, EPolygonPattern, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
@@ -23,12 +28,13 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import PolygonUtils from '../../utils/tool/PolygonUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
-interface IPolygonOperationProps extends IBasicToolOperationProps {}
+type IPolygonOperationProps = IBasicToolOperationProps;
 
 class PolygonOperation extends BasicToolOperation {
   public config: IPolygonConfig;
@@ -483,11 +489,7 @@ class PolygonOperation extends BasicToolOperation {
         textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
-        order:
-          CommonToolUtils.getAllToolsMaxOrder( 
-            this.polygonList,
-               this.prevResultList
-          ) + 1,
+        order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1,
       };
       if (this.config.textConfigurable) {
         let textAttribute = '';
@@ -977,8 +979,7 @@ class PolygonOperation extends BasicToolOperation {
             pointList: v,
             valid,
             isVisible: true,
-            order: 
-            CommonToolUtils.getAllToolsMaxOrder( this.polygonList,this.prevResultList) + 1 + i,
+            order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1 + i,
             attribute: defaultAttribute,
             textAttribute,
           });
@@ -1456,7 +1457,7 @@ class PolygonOperation extends BasicToolOperation {
           });
 
           // 文本输入
-          if(this.isShowAttributeText){
+          if (this.isShowAttributeText) {
             const endPoint = transformPointList[transformPointList.length - 1];
             if (endPoint && endPoint.x) {
               DrawUtils.drawText(

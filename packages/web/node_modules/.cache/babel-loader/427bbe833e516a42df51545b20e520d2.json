@@ -1,0 +1,1 @@
+{"ast":null,"code":"import Dragger from './Dragger';\nimport InternalUpload, { LIST_IGNORE } from './Upload';\nvar Upload = InternalUpload;\nUpload.Dragger = Dragger;\nUpload.LIST_IGNORE = LIST_IGNORE;\nexport default Upload;","map":null,"metadata":{},"sourceType":"module"}

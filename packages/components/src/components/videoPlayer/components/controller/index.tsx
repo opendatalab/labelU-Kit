@@ -1,18 +1,16 @@
 import React from 'react';
+import { CaretRightOutlined, CaretUpOutlined, CaretDownOutlined, PauseOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
+import { cTool } from '@label-u/annotation';
+
 import { getClassName } from '@/utils/dom';
-import {
-  CaretRightOutlined,
-  CaretUpOutlined,
-  CaretDownOutlined,
-  PauseOutlined,
-} from '@ant-design/icons';
-import { VideoPlayerCtx } from '../..';
 import { Pagination } from '@/views/MainView/toolFooter/Pagination';
 import hotkey from '@/assets/annotation/video/icon_keyboard_h.svg';
 import ToolHotKey from '@/views/MainView/toolHeader/HeaderTips/ToolHotKey';
-import { useTranslation } from 'react-i18next';
+
+import { VideoPlayerCtx } from '../..';
 import { decimalReserved } from '../../utils';
-import { cTool } from '@label-u/annotation';
+
 const { EVideoToolName } = cTool;
 
 /**
@@ -55,10 +53,7 @@ const VideoProgress = () => {
     >
       <div className={getClassName('video-slider')}>
         <div className={getClassName('video-slider', 'played')} style={{ width: playedPercent }} />
-        <div
-          className={getClassName('video-slider', 'loaded')}
-          style={{ width: bufferLoadedPercent }}
-        />
+        <div className={getClassName('video-slider', 'loaded')} style={{ width: bufferLoadedPercent }} />
         <div className={getClassName('video-slider', 'played')} style={{ width: playedPercent }} />
       </div>
 
@@ -108,8 +103,7 @@ const VideoHotKeys = () => {
 };
 
 const VideoPageChange = () => {
-  const { imgIndex, imgList, pageBackward, pageJump, pageForward } =
-    React.useContext(VideoPlayerCtx);
+  const { imgIndex, imgList, pageBackward, pageJump, pageForward } = React.useContext(VideoPlayerCtx);
 
   return (
     <Pagination

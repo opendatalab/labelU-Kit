@@ -1,0 +1,1 @@
+{"ast":null,"code":"/* eslint import/no-unresolved: 0 */\n// @ts-ignore\nimport version from './version';\nexport default version;","map":null,"metadata":{},"sourceType":"module"}

@@ -1,0 +1,1 @@
+{"ast":null,"code":"/* istanbul ignore file */\nexport function isPlatformMac() {\n  return /(mac\\sos|macintosh)/i.test(navigator.appVersion);\n}","map":null,"metadata":{},"sourceType":"module"}

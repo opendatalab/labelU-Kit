@@ -1,0 +1,1 @@
+{"ast":null,"code":"/**\n * http://ecma-international.org/ecma-402/7.0/index.html#sec-canonicalizelocalelist\n * @param locales\n */\nexport function CanonicalizeLocaleList(locales) {\n  // TODO\n  return Intl.getCanonicalLocales(locales);\n}","map":null,"metadata":{},"sourceType":"module"}

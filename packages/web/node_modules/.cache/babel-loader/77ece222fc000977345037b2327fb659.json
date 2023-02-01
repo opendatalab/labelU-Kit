@@ -1,0 +1,1 @@
+{"ast":null,"code":"import InternalLayout, { Content, Footer, Header } from './layout';\nimport Sider from './Sider';\nvar Layout = InternalLayout;\nLayout.Header = Header;\nLayout.Footer = Footer;\nLayout.Content = Content;\nLayout.Sider = Sider;\nexport default Layout;","map":null,"metadata":{},"sourceType":"module"}
