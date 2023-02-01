@@ -4,6 +4,7 @@
     "isolatedModules": false,
     "sourceMap": false,
     "outDir": "dist",
+    "declarationDir": "dist/types",
     "baseUrl": "./"
   },
   "include": ["./src", "images.d.ts"]

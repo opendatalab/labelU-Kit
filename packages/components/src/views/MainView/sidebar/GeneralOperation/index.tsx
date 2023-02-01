@@ -45,7 +45,7 @@ const GeneralOperation: React.FC<IProps> = ({ toolInstance, stepInfo }) => {
       imgSvg: clearResultSvg,
       hoverSvg: clearResultASvg,
       onClick: () => {
-        toolInstance?.clearResult();
+        toolInstance?.clearResult(false);
       },
     },
   ];
