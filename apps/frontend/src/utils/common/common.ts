@@ -1,18 +1,20 @@
 import { message } from 'antd';
-import { ErrorMessages } from '../../services/errorMessage';
 import { util } from 'prettier';
+
+import { ErrorMessages } from '../../services/errorMessage';
+
 import addDanglingComment = util.addDanglingComment;
 const commonController = {
   isNullObject(obj: any) {
     let result = true;
-    for (let key in obj) {
+    for (const key in obj) {
       result = false;
       break;
     }
     return result;
   },
   checkEmail(event: any, emailValue?: any) {
-    let email: any = event ? event.target.value : emailValue;
+    const email: any = event ? event.target.value : emailValue;
     let result = false;
     if (email !== undefined && email.indexOf('@') > -1 && email.indexOf('@') === email.lastIndexOf('@')) {
       result = true;
@@ -23,7 +25,7 @@ const commonController = {
     return result;
   },
   checkPassword(event: any, passwordValue?: any) {
-    let password: any = event ? event.target.value : passwordValue;
+    const password: any = event ? event.target.value : passwordValue;
     let result = false;
     if (password !== undefined && password.length >= 6 && password.length <= 18) {
       result = true;
@@ -35,7 +37,7 @@ const commonController = {
   },
   isEmail(value: string) {
     let result = false;
-    let index = value.indexOf('@');
+    const index = value.indexOf('@');
     if (index > -1 && value.lastIndexOf('@') === index) {
       result = true;
     }
@@ -52,8 +54,8 @@ const commonController = {
     return result;
   },
   checkObjectHasUndefined(obj: any) {
-    let result: any = { tag: false };
-    for (let key in obj) {
+    const result: any = { tag: false };
+    for (const key in obj) {
       if ((!obj[key] || obj[key] === undefined) && obj[key] !== 0) {
         result.tag = true;
         switch (key) {
@@ -74,17 +76,17 @@ const commonController = {
   },
   notificationErrorMessage(error: any, time: number) {
     console.log(error);
-    let errCode = error['err_code'];
+    const errCode = error.err_code;
     if (errCode || errCode === 0) {
-      let errorMessage = ErrorMessages[errCode];
+      const errorMessage = ErrorMessages[errCode];
       if (errorMessage) {
         message.error(errorMessage, time);
       } else {
         message.error('没有后端匹配的错误信息', time);
       }
     }
-    if (error && !error['err_code']) {
-      let messageValue = error.msg ? error.msg : error.message;
+    if (error && !error.err_code) {
+      const messageValue = error.msg ? error.msg : error.message;
       message.error(messageValue, time);
     }
     if (!error) {
@@ -120,10 +122,10 @@ const commonController = {
   isCorrectFileType(fileName: string) {
     let result = false;
     // let correctType = ['jpg', 'png', 'bmp', 'gif', 'mp4', 'wav', 'mp3', 'cav', 'txt', 'json', 'pcd', 'bin'];
-    let correctType = ['jpg', 'png', 'bmp', 'gif'];
-    let dotIndex = fileName.lastIndexOf('.');
+    const correctType = ['jpg', 'png', 'bmp', 'gif'];
+    const dotIndex = fileName.lastIndexOf('.');
     if (dotIndex > -1) {
-      let type = fileName.slice(dotIndex + 1);
+      const type = fileName.slice(dotIndex + 1);
       if (correctType.indexOf(type) > -1) {
         result = true;
       }
@@ -140,9 +142,9 @@ const commonController = {
     return state.existTask.haveConfigedStep;
   },
   findElement(arr: any[], index: number, path: string) {
-    let pathsArr = path.split('/');
+    const pathsArr = path.split('/');
     for (let itemIndex = 0; itemIndex < arr.length; itemIndex++) {
-      let item = arr[itemIndex];
+      const item = arr[itemIndex];
       if (item.path === pathsArr[index]) {
         if (index === pathsArr.length - 1) {
           arr.splice(itemIndex, 1);
@@ -155,9 +157,9 @@ const commonController = {
     }
   },
   updateElement(arr: any[], index: number, path: string, updateValue: boolean) {
-    let pathsArr = path.split('/');
+    const pathsArr = path.split('/');
     for (let itemIndex = 0; itemIndex < arr.length; itemIndex++) {
-      let item = arr[itemIndex];
+      const item = arr[itemIndex];
       if (item.path === pathsArr[index]) {
         if (index === pathsArr.length - 1) {
           item.hasUploaded = updateValue;
@@ -170,9 +172,9 @@ const commonController = {
     }
   },
   transformFileList(data: any, sampleId: number) {
-    let id = sampleId;
+    const id = sampleId;
     let url = data.urls[sampleId];
-    for (let sampleId in data.urls) {
+    for (const sampleId in data.urls) {
       url = data.urls[sampleId];
     }
     // delete
@@ -182,7 +184,7 @@ const commonController = {
     } else {
       newResult = '{}';
     }
-    let finalResult = [
+    const finalResult = [
       {
         id,
         url,
@@ -194,15 +196,15 @@ const commonController = {
   },
   drawImg(divId: number, src: string) {
     console.log(divId + '');
-    let img: any = window.document.getElementById(divId + '');
+    const img: any = window.document.getElementById(divId + '');
     img.onload = (e: any) => {};
     // @ts-ignore
     img.src = src;
   },
   downloadToFile(data: any, fileType: string) {
-    let info = new Blob(data.data);
+    const info = new Blob(data.data);
     // @ts-ignore
-    let dataTimestamp = new Date().getTime();
+    const dataTimestamp = new Date().getTime();
     try {
       // @ts-ignore
       window.saveAs(info, dataTimestamp + '.json');

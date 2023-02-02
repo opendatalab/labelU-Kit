@@ -1,10 +1,12 @@
-import { BasicConfig } from '@label-u/components';
-import React, { FC, useMemo, useState } from 'react';
+import type { BasicConfig } from '@label-u/components';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Form, Input } from 'antd';
+import { useForm } from 'antd/es/form/Form';
+
 import { MapStateJSONTab } from '../../components/AttributeConfig';
 // import SvgIcon from '../../../../components/basic/svgIcon';
-import { AttributeItem } from './rectConfigForm';
-import { useForm } from 'antd/es/form/Form';
+import type { AttributeItem } from './rectConfigForm';
 // const { Option } = Select;
 import { delayTime } from '../constants';
 import commonController from '../../../../utils/common/common';
@@ -47,7 +49,7 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = (props) => {
 
   useMemo(() => {
     if (props.config) {
-      let initV: any = {
+      const initV: any = {
         // @ts-ignore
         // upperLimit: props.config.upperLimit ? props.config.upperLimit : 10,
         upperLimit: props.config.upperLimit ?? 100,
@@ -73,7 +75,7 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = (props) => {
   }, delayTime);
 
   const changeUpperLimit = (e: any) => {
-    let value = parseInt(e.target.value);
+    const value = parseInt(e.target.value);
     if (isNaN(value)) {
       commonController.notificationErrorMessage({ message: '请输入数字' }, 1);
     } else {

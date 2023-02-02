@@ -4,7 +4,7 @@ import { Modal } from 'antd';
 import { useSelector } from 'react-redux';
 
 const AnnotationTips = (props: any) => {
-  let taskTips = useSelector((state) => state.existTask.taskTips);
+  const taskTips = useSelector((state) => state.existTask.taskTips);
   const [isShowModal, setIsShowModal] = useState(false);
   const clickShowModal = () => {
     Modal.success({

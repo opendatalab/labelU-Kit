@@ -1,7 +1,9 @@
+import type { FC } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
 import { decoderCreater } from '../../../service/map/MapDecoder';
 import { parserCreater } from '../../..//service/map/MapParser';
-import { FC, useEffect, useMemo, useState } from 'react';
-import { CanvasMapData, MapVueInfo, Rect } from '../../../interface/virtualMachine';
+import type { CanvasMapData, MapVueInfo, Rect } from '../../../interface/virtualMachine';
 import { mapColorMgr } from '../../..//service/map/MapColorMgr';
 
 const MapBase: FC<MapVueInfo> = (props) => {
@@ -9,8 +11,8 @@ const MapBase: FC<MapVueInfo> = (props) => {
   const [mapData, setMapData] = useState([] as number[]);
 
   const tmpMapData = useMemo(() => {
-    let decodedMap = decoderCreater(0).decoderMap(props.map);
-    let tmpMapData = parserCreater(0).parseMap(decodedMap) as CanvasMapData;
+    const decodedMap = decoderCreater(0).decoderMap(props.map);
+    const tmpMapData = parserCreater(0).parseMap(decodedMap) as CanvasMapData;
     setRect(tmpMapData.rect);
     setMapData(tmpMapData.mapData);
     return tmpMapData;
@@ -18,18 +20,18 @@ const MapBase: FC<MapVueInfo> = (props) => {
 
   useEffect(() => {
     const AREA_DISABLE_COLOR = [100, 100, 100, 100];
-    let width = tmpMapData.rect.right - tmpMapData.rect.left + 1;
-    let height = tmpMapData.rect.top - tmpMapData.rect.bottom + 1;
-    let currentMapImage = document.getElementById('canvas' + props.mapId);
+    const width = tmpMapData.rect.right - tmpMapData.rect.left + 1;
+    const height = tmpMapData.rect.top - tmpMapData.rect.bottom + 1;
+    const currentMapImage = document.getElementById('canvas' + props.mapId);
     // @ts-ignore
-    let ctx = currentMapImage.getContext('2d');
-    let clearCanvas = () => {
+    const ctx = currentMapImage.getContext('2d');
+    const clearCanvas = () => {
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = '#f5f5f5';
       ctx.fillRect(0, 0, width, height);
     };
-    let mapImageData = ctx.createImageData(width, height);
-    let datas = tmpMapData.mapData;
+    const mapImageData = ctx.createImageData(width, height);
+    const datas = tmpMapData.mapData;
     let i = 0;
     if (datas[0] == 0xaa) {
       let i = 0;
@@ -91,7 +93,7 @@ const MapBase: FC<MapVueInfo> = (props) => {
 
   return (
     <>
-      <canvas width={rect.top - rect.bottom} height={rect.right - rect.left} id={'canvas' + props.mapId}></canvas>
+      <canvas width={rect.top - rect.bottom} height={rect.right - rect.left} id={'canvas' + props.mapId} />
     </>
   );
 };

@@ -1,5 +1,6 @@
 import { Modal } from 'antd';
-import React, { forwardRef, ReactNode, useImperativeHandle, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 
 interface Iprops {
   // 弹框左上角位置

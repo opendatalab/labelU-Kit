@@ -1,4 +1,6 @@
-import { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { useEffect, useState } from 'react';
+
 import { loadImg } from '../../pages/annotationConfig/configTemplate/config';
 interface SvgProps {
   name: string;
@@ -12,9 +14,9 @@ interface SvgProps {
 const SvgIcon: FC<SvgProps> = ({ name, prefix = 'icon', color = '#333', ...props }) => {
   const [imgSrc, setImgSrc] = useState<string>();
   useEffect(() => {
-    let shortImgSrc = name.split('-').join('/');
+    const shortImgSrc = name.split('-').join('/');
     new Promise(async (resolve, reject) => {
-      let src = await loadImg(shortImgSrc + '.svg');
+      const src = await loadImg(shortImgSrc + '.svg');
       if (src) {
         setImgSrc(src);
       }

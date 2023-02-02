@@ -1,29 +1,30 @@
 import React, { useState, useEffect, memo, createRef } from 'react';
+
 // import Annotation from '../annotation/index';
-import Annotation from '../../components/business/annotation';
-import './index.module.scss';
-import { getTask, getSample, getPreSample } from '../../services/samples';
 import classnames from 'classnames';
-import commonController from '../../utils/common/common';
-import SlideLoader from '../../components/slideLoader';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateCurrentSampleId } from '../../stores/sample.store';
-// import otherStore from "../../stores/other";
-import currentStyles from './index.module.scss';
-import AnnotationRightCorner from '../../components/annotationRightCorner';
-import { updateAnnotationDatas } from '../../stores/annotation.store';
 import { useLocation } from 'react-router';
 
+import Annotation from '../../components/business/annotation';
+import currentStyles from './index.module.scss';
+import { getTask, getSample, getPreSample } from '../../services/samples';
+import commonController from '../../utils/common/common';
+import SlideLoader from '../../components/slideLoader';
+import { updateCurrentSampleId } from '../../stores/sample.store';
+// import otherStore from "../../stores/other";
+import AnnotationRightCorner from '../../components/annotationRightCorner';
+import { updateAnnotationDatas } from '../../stores/annotation.store';
+
 // import TF from './tF';
-export let annotationRef = createRef();
+export const annotationRef = createRef();
 
 // @ts-ignore
 const AnnotationPage = () => {
   const location = useLocation();
   // @ts-ignore
   const MemoSlideLoader = memo(SlideLoader);
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
-  let sampleId = parseInt(window.location.pathname.split('/')[4]);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
+  const sampleId = parseInt(window.location.pathname.split('/')[4]);
   // @ts-ignore
   // otherStore.currentSampleId = sampleId;
   // let annotationRef = useSelector(state => state.annotation.annotationDatas)
@@ -32,7 +33,7 @@ const AnnotationPage = () => {
   const [taskSample, setTaskSample] = useState<any>([]);
   const getDatas = async function (taskId: number, sampleId: number) {
     try {
-      let taskRes = await getTask(taskId);
+      const taskRes = await getTask(taskId);
       // @ts-ignore
       if (taskRes.status === 200) {
         // taskRes.data.data.config = {
@@ -75,9 +76,9 @@ const AnnotationPage = () => {
         commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
         return;
       }
-      let sampleRes = await getSample(taskId, sampleId);
+      const sampleRes = await getSample(taskId, sampleId);
       if (sampleRes.status === 200) {
-        let newSample = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
+        const newSample = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
         setTaskSample(newSample);
       } else {
         commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
@@ -88,8 +89,8 @@ const AnnotationPage = () => {
   };
 
   useEffect(() => {
-    let taskId = parseInt(window.location.pathname.split('/')[2]);
-    let sampleId = parseInt(window.location.pathname.split('/')[4]);
+    const taskId = parseInt(window.location.pathname.split('/')[2]);
+    const sampleId = parseInt(window.location.pathname.split('/')[4]);
     // if(taskSample && taskSample.length > 0 && sampleId === taskSample[0].id) {
     //
     //   return;
@@ -131,8 +132,8 @@ const AnnotationPage = () => {
 
   const updatePrevImageListResult = async function () {
     // let temp : any= Object.assign([],prevImgList);
-    let taskId = parseInt(window.location.pathname.split('/')[2]);
-    let sampleId = parseInt(window.location.pathname.split('/')[4]);
+    const taskId = parseInt(window.location.pathname.split('/')[2]);
+    const sampleId = parseInt(window.location.pathname.split('/')[4]);
 
     // getSamples(taskId, {
     //     before : sampleId,
@@ -154,8 +155,8 @@ const AnnotationPage = () => {
     getPreSample(taskId, sampleId)
       .then((res: any) => {
         if (res.status === 200) {
-          let result = res.data.data.data.result;
-          let newTaskSample = [{ ...taskSample[0], result }];
+          const result = res.data.data.data.result;
+          const newTaskSample = [{ ...taskSample[0], result }];
           setTaskSample(newTaskSample);
         } else {
           commonController.notificationErrorMessage({ message: '请求数据错误' }, 1);
@@ -164,7 +165,7 @@ const AnnotationPage = () => {
       .catch((error) => commonController.notificationErrorMessage(error, 1));
   };
   useEffect(() => {
-    let search = window.location.search;
+    const search = window.location.search;
     if (search.indexOf('COPYPRE') > -1) {
       updatePrevImageListResult();
     }

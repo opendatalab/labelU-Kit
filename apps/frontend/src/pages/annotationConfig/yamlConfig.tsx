@@ -6,13 +6,14 @@ import 'ace-builds/src-min-noconflict/ext-searchbox';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/webpack-resolver';
 import _ from 'lodash';
-import { FC, useEffect, useState } from 'react';
-import { ToolsConfigState } from 'interface/toolConfig';
+import type { FC } from 'react';
+import { useEffect, useState } from 'react';
+import type { ToolsConfigState } from 'interface/toolConfig';
 import { message } from 'antd';
-import jsonToyam from '../../utils/jsonToyml';
 import { useDispatch, useSelector } from 'react-redux';
-import ConfigNotMatchImg from '../../img/annotationCommon/configNotMatch.png';
 
+import jsonToyam from '../../utils/jsonToyml';
+import ConfigNotMatchImg from '../../img/annotationCommon/configNotMatch.png';
 import {
   updateAllAttributeConfigList,
   updateTagConfigList,
@@ -35,7 +36,7 @@ const YamlConfig: FC<YamlConfigProps> = (props) => {
 
   useEffect(() => {
     let tmpStepConfig = {};
-    let keys: string[] = Object.keys(props.toolsConfigState);
+    const keys: string[] = Object.keys(props.toolsConfigState);
     for (let i = 0; i < keys.length; i++) {
       if (
         // @ts-ignore
@@ -53,7 +54,7 @@ const YamlConfig: FC<YamlConfigProps> = (props) => {
         tmpStepConfig = { ...tmpStepConfig, [keys[i]]: props.toolsConfigState[keys[i]] };
       }
     }
-    let jsonToyamUtil = new jsonToyam();
+    const jsonToyamUtil = new jsonToyam();
     const yml = jsonToyamUtil.json2yaml(tmpStepConfig);
     setXmlValue(yml);
   }, [props.toolsConfigState]);
@@ -62,9 +63,9 @@ const YamlConfig: FC<YamlConfigProps> = (props) => {
   const [aceWidth, setAceWidth] = useState<number>(0);
 
   useEffect(() => {
-    let leftSiderDom = document.getElementById('lefeSiderId');
-    let height = leftSiderDom?.getBoundingClientRect().height as number;
-    let width = leftSiderDom?.getBoundingClientRect().width as number;
+    const leftSiderDom = document.getElementById('lefeSiderId');
+    const height = leftSiderDom?.getBoundingClientRect().height as number;
+    const width = leftSiderDom?.getBoundingClientRect().width as number;
     setAceHeight(height - 105);
     setAceWidth(width - 50);
   }, []);
@@ -87,7 +88,7 @@ const YamlConfig: FC<YamlConfigProps> = (props) => {
         ...yamlConfigs,
       };
       const keys = Object.keys(configs);
-      for (let key of keys) {
+      for (const key of keys) {
         if (key === 'attribute' && !compare(configs[key], attribute)) {
           dispatch(updateAllAttributeConfigList(configs[key]));
         } else if (key === 'tagList' && !compare(configs[key], tagList)) {

@@ -1,5 +1,6 @@
-import { ToolsConfigState } from 'interface/toolConfig';
-import { Item } from './tmplateBox';
+import type { ToolsConfigState } from 'interface/toolConfig';
+
+import type { Item } from './tmplateBox';
 // import RectImg from '../../../img/annotationCommon/configNotMatch.png';
 interface configItem {
   label: string;
@@ -7,7 +8,7 @@ interface configItem {
   tmplateName: any;
 }
 
-const defaultLabelConfig: Array<configItem> = [
+const defaultLabelConfig: configItem[] = [
   {
     label: '',
     img: '',
@@ -52,9 +53,9 @@ export const getLabelConfig: () => Promise<configItem[]> = async () => {
   return new Promise(async (resolve, reject) => {
     const reuslt: configItem[] = [];
     if (imgLebalConfig.length > 0) {
-      for (let item of imgLebalConfig) {
-        let { default: imgSrc } = await import(`../frontCoverImg/${item.img}.png`);
-        let { default: tmpl } = await import(`../configs/${item.tmplateName}`);
+      for (const item of imgLebalConfig) {
+        const { default: imgSrc } = await import(`../frontCoverImg/${item.img}.png`);
+        const { default: tmpl } = await import(`../configs/${item.tmplateName}`);
         reuslt.push({
           label: item.label,
           img: imgSrc,
@@ -69,7 +70,7 @@ export const getLabelConfig: () => Promise<configItem[]> = async () => {
 // 加载初始化配置
 export const LoadInitConfig: (toolName: string) => Promise<ToolsConfigState> = async (toolName: string) => {
   return new Promise(async (resolve, reject) => {
-    let { default: tmpl } = await import(`../configs/${toolName}.json`);
+    const { default: tmpl } = await import(`../configs/${toolName}.json`);
     if (tmpl) {
       //@ts-ignore
       resolve(tmpl);
@@ -83,7 +84,7 @@ export const LoadInitConfig: (toolName: string) => Promise<ToolsConfigState> = a
 export const loadImg: (path: string) => Promise<any> = async (path: string) => {
   return new Promise(async (resolve, reject) => {
     const basePath = '../../../img/';
-    let { default: imgSrc } = await import(/* @vite-ignore */ basePath + path);
+    const { default: imgSrc } = await import(/* @vite-ignore */ basePath + path);
     if (imgSrc) {
       resolve(imgSrc);
     } else {

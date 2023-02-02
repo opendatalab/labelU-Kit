@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { debounceTime, scan } from 'rxjs';
+import { useNavigate } from 'react-router';
+import { useSelector, connect, Provider } from 'react-redux';
+
 import SliderCard from './components/sliderCard';
 import { getPrevSamples, getSample, getPreSample } from '../../services/samples';
 import commonController from '../../utils/common/common';
 import currentStyles from './index.module.scss';
 import Ob from '../../utils/Observable';
-import { debounceTime, scan } from 'rxjs';
-import { useNavigate } from 'react-router';
-import { useSelector, connect, Provider } from 'react-redux';
 import store from '../../stores';
-let tempInit: any = [];
+const tempInit: any = [];
 const SlideLoader = () => {
   const [prevImgList, setPrevImgList] = useState<any[]>([]);
   // const t = useSelector(state=>{console.log(state); return state;})
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
-  let sampleId = parseInt(window.location.pathname.split('/')[4]);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
+  const sampleId = parseInt(window.location.pathname.split('/')[4]);
   const [upNoneTipShow, setUpNoneTipShow] = useState(false);
   const [downNoneTipShow, setDownNoneTipShow] = useState(false);
   const [requestUpDoor, setRequestUpDoor] = useState(true);
@@ -22,9 +23,9 @@ const SlideLoader = () => {
     await getPrevSamples(taskId, params)
       .then((res) => {
         if (res.status === 200) {
-          let newPrevImgList: any[] = [];
-          for (let prevImg of res.data.data) {
-            let transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
+          const newPrevImgList: any[] = [];
+          for (const prevImg of res.data.data) {
+            const transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
             //delete
             transformedPrevImg[0].state = prevImg.state;
             newPrevImgList.push(transformedPrevImg[0]);
@@ -82,29 +83,29 @@ const SlideLoader = () => {
       });
   };
   const lazyLoading = (e: any) => {
-    let scrollHeight = e.target.scrollHeight;
-    let scrollTop = e.target.scrollTop;
-    let clientHeight = e.target.clientHeight;
-    let diff = scrollHeight - scrollTop;
-    let newDiff = Math.abs(diff - clientHeight);
+    const scrollHeight = e.target.scrollHeight;
+    const scrollTop = e.target.scrollTop;
+    const clientHeight = e.target.clientHeight;
+    const diff = scrollHeight - scrollTop;
+    const newDiff = Math.abs(diff - clientHeight);
     if (newDiff <= 1 && requestDownDoor) {
       requestPreview({
-        after: prevImgList[prevImgList.length - 1]['id'],
+        after: prevImgList[prevImgList.length - 1].id,
         pageSize: 10,
       });
     }
 
     if (scrollTop === 0 && requestUpDoor) {
       requestPreview({
-        before: prevImgList[0]['id'],
+        before: prevImgList[0].id,
         pageSize: 10,
       });
     }
   };
   const getSampleLocal = async function () {
-    let sampleRes = await getSample(taskId, sampleId);
+    const sampleRes = await getSample(taskId, sampleId);
     if (sampleRes.status === 200) {
-      let newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
+      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
       newSample[0].state = sampleRes.data.data.state;
       await getSampleLocalNew();
     } else {
@@ -112,12 +113,12 @@ const SlideLoader = () => {
     }
   };
   const getSampleLocalNew = async function () {
-    let sampleRes = await getSample(taskId, sampleId);
+    const sampleRes = await getSample(taskId, sampleId);
     if (sampleRes.status === 200) {
-      let newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
+      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
       newSample[0].state = sampleRes.data.data.state;
-      let after10 = await get10Samples('after');
-      let before10 = await get10Samples('before');
+      const after10 = await get10Samples('after');
+      const before10 = await get10Samples('before');
       setPrevImgList(Object.assign(before10.concat(newSample, after10)));
     } else {
       commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
@@ -126,14 +127,14 @@ const SlideLoader = () => {
 
   const get10Samples = async function (direction: string) {
     try {
-      let samplesRes = await getPrevSamples(taskId, {
+      const samplesRes = await getPrevSamples(taskId, {
         [direction]: sampleId,
         pageSize: 10,
       });
       if (samplesRes.status === 200) {
-        let newPrevImgList: any[] = [];
-        for (let prevImg of samplesRes.data.data) {
-          let transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
+        const newPrevImgList: any[] = [];
+        for (const prevImg of samplesRes.data.data) {
+          const transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
           //delete
           transformedPrevImg[0].state = prevImg.state;
           newPrevImgList.push(transformedPrevImg[0]);
@@ -163,11 +164,11 @@ const SlideLoader = () => {
 
   const navigate = useNavigate();
   const getAfterSampleId = async function (params: any) {
-    let samplesRes = await getPrevSamples(taskId, params);
+    const samplesRes = await getPrevSamples(taskId, params);
     if (samplesRes.status === 200) {
-      let newPrevImgList: any[] = [];
-      for (let prevImg of samplesRes.data.data) {
-        let transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
+      const newPrevImgList: any[] = [];
+      for (const prevImg of samplesRes.data.data) {
+        const transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
         //delete
         transformedPrevImg[0].state = prevImg.state;
         newPrevImgList.push(transformedPrevImg[0]);
@@ -183,11 +184,11 @@ const SlideLoader = () => {
     }
   };
   const getBeforeSampleId = async function (params: any) {
-    let samplesRes = await getPrevSamples(taskId, params);
+    const samplesRes = await getPrevSamples(taskId, params);
     if (samplesRes.status === 200) {
-      let newPrevImgList: any[] = [];
-      for (let prevImg of samplesRes.data.data) {
-        let transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
+      const newPrevImgList: any[] = [];
+      for (const prevImg of samplesRes.data.data) {
+        const transformedPrevImg: any = commonController.transformFileList(prevImg.data, prevImg.id);
         //delete
         transformedPrevImg[transformedPrevImg.length - 1].state = prevImg.state;
         newPrevImgList.push(transformedPrevImg[transformedPrevImg.length - 1]);
@@ -203,10 +204,10 @@ const SlideLoader = () => {
     }
   };
   const updatePrevImageListState = async function (state: string) {
-    let temp: any = Object.assign([], prevImgList);
+    const temp: any = Object.assign([], prevImgList);
     let nextPageId: any = null;
     for (let prevImgIndex = 0; prevImgIndex < temp.length; prevImgIndex++) {
-      let prevImg: any = temp[prevImgIndex];
+      const prevImg: any = temp[prevImgIndex];
       if (prevImg.id === sampleId) {
         prevImg.state = state;
         if (temp[prevImgIndex + 1]) {
@@ -214,7 +215,7 @@ const SlideLoader = () => {
           nextPageId = temp[prevImgIndex + 1].id;
         } else {
           nextPageId = await getAfterSampleId({
-            after: prevImgList[prevImgList.length - 1]['id'],
+            after: prevImgList[prevImgList.length - 1].id,
             pageSize: 10,
           });
         }
@@ -222,7 +223,7 @@ const SlideLoader = () => {
       }
     }
     if (nextPageId || nextPageId === 0) {
-      let pathnames = window.location.pathname.split('/');
+      const pathnames = window.location.pathname.split('/');
       if (typeof nextPageId !== 'number') {
         setPrevImgList(temp.concat(nextPageId));
         pathnames.splice(4, 1, nextPageId[0].id);
@@ -233,7 +234,7 @@ const SlideLoader = () => {
       navigate(pathnames.join('/'));
     } else {
       setPrevImgList(temp);
-      let currentPathname = window.location.pathname.split('/');
+      const currentPathname = window.location.pathname.split('/');
       currentPathname.pop();
       currentPathname.push('finished');
       navigate(currentPathname.join('/') + '?sampleId=' + temp[temp.length - 1]?.id);
@@ -242,10 +243,10 @@ const SlideLoader = () => {
   };
 
   const updatePrevImageListStatePrev = async function (state: string) {
-    let temp: any = Object.assign([], prevImgList);
+    const temp: any = Object.assign([], prevImgList);
     let prevPageId: any = null;
     for (let prevImgIndex = 0; prevImgIndex < temp.length; prevImgIndex++) {
-      let prevImg: any = temp[prevImgIndex];
+      const prevImg: any = temp[prevImgIndex];
       if (prevImg.id === sampleId) {
         prevImg.state = state;
         if (temp[prevImgIndex - 1]) {
@@ -253,7 +254,7 @@ const SlideLoader = () => {
           prevPageId = temp[prevImgIndex - 1].id;
         } else {
           prevPageId = await getBeforeSampleId({
-            before: prevImgList[0]['id'],
+            before: prevImgList[0].id,
             pageSize: 10,
           });
         }
@@ -261,7 +262,7 @@ const SlideLoader = () => {
       }
     }
     if (prevPageId || prevPageId === 0) {
-      let pathnames = window.location.pathname.split('/');
+      const pathnames = window.location.pathname.split('/');
       if (typeof prevPageId !== 'number') {
         setPrevImgList(prevPageId.concat(temp));
         pathnames.splice(4, 1, prevPageId[0].id);
@@ -312,9 +313,9 @@ const SlideLoader = () => {
     //   // navigate(currentPathname.join('/')+'?sampleId='+temp[temp.length - 1]?.id);
     //   // commonController.notificationInfoMessage({message : '已经是最后一张'}, 1);
     // }
-    let temp: any = Object.assign([], prevImgList);
+    const temp: any = Object.assign([], prevImgList);
     for (let prevImgIndex = 0; prevImgIndex < temp.length; prevImgIndex++) {
-      let prevImg: any = temp[prevImgIndex];
+      const prevImg: any = temp[prevImgIndex];
       if (prevImg.id === sampleId) {
         if (prevImg.state !== 'SKIPPED') {
           prevImg.state = state;
@@ -323,24 +324,24 @@ const SlideLoader = () => {
       }
     }
     setPrevImgList(temp);
-    let ids = window.location.search.split('&').pop();
+    const ids = window.location.search.split('&').pop();
     // @ts-ignore
-    let id = parseInt(ids?.split('=').pop());
-    let location = window.location.pathname.split('/');
+    const id = parseInt(ids?.split('=').pop());
+    const location = window.location.pathname.split('/');
     location.pop();
     // @ts-ignore
     location.push(id);
-    let newPathname = location.join('/');
+    const newPathname = location.join('/');
     navigate(newPathname);
   };
 
   const updatePrevImageListStateForSkippedAndNew = async function (state: string) {
     // navigate(window.location.pathname+'?sampleId='+sampleId);
 
-    let temp: any = Object.assign([], prevImgList);
-    let nextPageId: any = null;
+    const temp: any = Object.assign([], prevImgList);
+    const nextPageId: any = null;
     for (let prevImgIndex = 0; prevImgIndex < temp.length; prevImgIndex++) {
-      let prevImg: any = temp[prevImgIndex];
+      const prevImg: any = temp[prevImgIndex];
       if (prevImg.id === sampleId) {
         prevImg.state = state;
         break;
@@ -358,7 +359,7 @@ const SlideLoader = () => {
   }, []);
 
   useEffect(() => {
-    let search = window.location.search;
+    const search = window.location.search;
     if (search.indexOf('DONE') > -1) {
       updatePrevImageListState('DONE');
     }

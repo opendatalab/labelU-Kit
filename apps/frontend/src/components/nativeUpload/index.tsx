@@ -1,5 +1,8 @@
-import React, { HTMLAttributes, PropsWithChildren, createRef, useEffect, useState } from 'react';
-import { UploadFileStatus, UploadFile, RcFile } from 'antd/lib/upload/interface';
+import type { HTMLAttributes, PropsWithChildren } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
+import type { RcFile } from 'antd/lib/upload/interface';
+import { UploadFileStatus, UploadFile } from 'antd/lib/upload/interface';
+
 import styles from './index.module.scss';
 
 type IProps = HTMLAttributes<HTMLDivElement> & {

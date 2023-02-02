@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import MyRadio from 'components/basic/radio';
-import { RadioGroupProps } from 'antd';
+import type { RadioGroupProps } from 'antd';
 import { css } from '@emotion/react';
 
 export interface MyRadioCardssOption {

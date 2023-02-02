@@ -1,8 +1,10 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Form } from 'antd';
-import TagInput from '../../components/TagInput';
-import { OneTag } from '../../../../interface/toolConfig';
 import { useForm } from 'antd/es/form/Form';
+
+import TagInput from '../../components/TagInput';
+import type { OneTag } from '../../../../interface/toolConfig';
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 import { delayTime } from '../constants';
 export interface AttributeItem {
@@ -40,7 +42,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
 
   useMemo(() => {
     if (props) {
-      let initV = {
+      const initV = {
         // @ts-ignore
         tagList:
           props.tagList && props.tagList.length > 0
@@ -109,7 +111,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
   const deleteInputInfo = (i: number, subIndex?: number) => {
     const tagList = form?.getFieldValue('tagList');
 
-    let newTagList = deleteInputList(tagList, i, subIndex);
+    const newTagList = deleteInputList(tagList, i, subIndex);
     form?.setFieldsValue({ tagList: newTagList });
     setInitVal({
       tagList: newTagList,

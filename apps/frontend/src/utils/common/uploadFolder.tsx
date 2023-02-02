@@ -30,11 +30,13 @@ const UploadFolderController = {
               <div className={currentStyles.columnStatus}>
                 {data.hasUploaded ? (
                   <div className={currentStyles.uploadStatus}>
-                    <div className={currentStyles.greenCircle}></div>已上传
+                    <div className={currentStyles.greenCircle} />
+                    已上传
                   </div>
                 ) : (
                   <div className={currentStyles.uploadStatus}>
-                    <div className={currentStyles.redCircle}></div>上传失败
+                    <div className={currentStyles.redCircle} />
+                    上传失败
                   </div>
                 )}
               </div>
@@ -64,7 +66,7 @@ const UploadFolderController = {
       }
     } else {
       if (index !== paths.length - 1) {
-        let childIndex = UploadFolderController.getIndexInArray(parent.children, index, paths);
+        const childIndex = UploadFolderController.getIndexInArray(parent.children, index, paths);
         if (childIndex || childIndex === 0) {
           UploadFolderController.confirmFolder(parent.children[childIndex], index + 1, paths, data);
         } else {

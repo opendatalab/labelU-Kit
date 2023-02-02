@@ -1,11 +1,15 @@
 import { Button, Tabs } from 'antd';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
 import DrageModel from '../../../components/basic/modal';
 import './index.less';
 import { getLabelConfig } from './config';
 import TmplateBox from './tmplateBox';
+
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+
 import { getTask } from '../../../services/samples';
 import { updateStatus } from '../../../stores/task.store';
 import commonController from '../../../utils/common/common';
@@ -64,11 +68,11 @@ const ConfigTemplate: FC = () => {
     //     setIsShowChoose(false);
     //   }
     // }
-    let taskId = parseInt(window.location.pathname.split('/')[2]);
+    const taskId = parseInt(window.location.pathname.split('/')[2]);
     getTask(taskId)
       .then((res: any) => {
         if (res.status === 200) {
-          let newTaskStatus = res.data.data.status;
+          const newTaskStatus = res.data.data.status;
           if (newTaskStatus !== 'DRAFT' && newTaskStatus !== 'IMPORTED' && newTaskStatus !== 'CONFIGURED') {
             setIsShowChoose(false);
           }

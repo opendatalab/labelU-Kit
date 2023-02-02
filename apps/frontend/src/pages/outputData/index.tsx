@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import currentStyles from './index.module.scss';
 import { Modal } from 'antd';
-import { outputSamples } from '../../services/samples';
 import { useParams, useSearchParams } from 'react-router-dom';
+
+import currentStyles from './index.module.scss';
+import { outputSamples } from '../../services/samples';
+
 const OutputData = (props: any) => {
   const { setFalse } = props;
   let { taskId } = useParams();
   // @ts-ignore
   taskId = parseInt(taskId ? taskId : '');
-  let sampleId = parseInt(window.location.search.split('=')[1]);
+  const sampleId = parseInt(window.location.search.split('=')[1]);
   const [isShowModal, setIsShowModal] = useState(true);
   const [activeTxt, setActiveTxt] = useState('JSON');
   const highLight = (value: string) => {

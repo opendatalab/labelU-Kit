@@ -1,8 +1,10 @@
 // cl 2021/9/8 14:17
 import React from 'react';
-import { Form, FormInstance, InputNumber, Input } from 'antd';
-import { ItextConfig } from '../TextList';
+import type { FormInstance } from 'antd';
+import { Form, InputNumber, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
+
+import type { ItextConfig } from '../TextList';
 const { TextArea } = Input;
 
 interface IProps {

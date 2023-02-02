@@ -1,9 +1,10 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
 import currentStyles from './index.module.scss';
 import { updateConfigStep, updateHaveConfigedStep, updateTask } from '../../stores/task.store';
 import Constatns from '../../constants';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { clearConfig } from '../../stores/toolConfig.store';
 const NullTask = () => {
   const dispatch = useDispatch();

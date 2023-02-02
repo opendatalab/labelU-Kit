@@ -4,7 +4,7 @@ export default class JsonToyml {
   public spacing = '  ';
 
   getType(obj: any) {
-    var type = typeof obj;
+    const type = typeof obj;
     if (obj instanceof Array) {
       return 'array';
     } else if (type === 'string') {
@@ -21,7 +21,7 @@ export default class JsonToyml {
   }
 
   convert(obj: any, ret: string[]) {
-    var type = this.getType(obj);
+    const type = this.getType(obj);
     switch (type) {
       case 'array':
         this.convertArray(obj, ret);
@@ -48,30 +48,30 @@ export default class JsonToyml {
     if (obj.length === 0) {
       ret.push('[]');
     }
-    for (var i = 0; i < obj.length; i++) {
-      var ele = obj[i];
-      var recurse: string[] = [];
+    for (let i = 0; i < obj.length; i++) {
+      const ele = obj[i];
+      const recurse: string[] = [];
       this.convert(ele, recurse);
 
-      for (var j = 0; j < recurse.length; j++) {
+      for (let j = 0; j < recurse.length; j++) {
         ret.push((j === 0 ? '- ' : this.spacing) + recurse[j]);
       }
     }
   }
 
   convertHash(obj: object, ret: string[]) {
-    for (var k in obj) {
-      var recurse: string[] = [];
+    for (const k in obj) {
+      const recurse: string[] = [];
       if (obj.hasOwnProperty(k)) {
         // @ts-ignore
-        var ele = obj[k];
+        const ele = obj[k];
         this.convert(ele, recurse);
-        var type = this.getType(ele);
+        const type = this.getType(ele);
         if (type === 'string' || type === 'null' || type === 'number' || type === 'boolean') {
           ret.push(this.normalizeString(k) + ': ' + recurse[0]);
         } else {
           ret.push(this.normalizeString(k) + ': ');
-          for (var i = 0; i < recurse.length; i++) {
+          for (let i = 0; i < recurse.length; i++) {
             ret.push(this.spacing + recurse[i]);
           }
         }
@@ -101,7 +101,7 @@ export default class JsonToyml {
     if (typeof obj == 'string') {
       obj = JSON.parse(obj);
     }
-    var ret: string[] = [];
+    const ret: string[] = [];
     this.convert(obj, ret);
     return ret.join('\n');
   }

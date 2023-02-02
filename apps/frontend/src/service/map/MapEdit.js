@@ -1,10 +1,11 @@
+import { Toast } from 'vant';
+
 import api from '@/api';
 import { i18n } from '@/utils/i18n';
 import ustorage from '@/utils/LocalStorage';
 import { MPVirtualWall, MapDef, MapMode, MPForbiddenZone, MapElemKey } from '@/service/Map/MapDefined';
 import { mapHelper } from '@/service/Map/MapHelper';
 import VuexFun from '@/utils/VuexFun.js';
-import { Toast } from 'vant';
 
 //获取分区地图（云端获取）
 const getMap = async function getMap() {

@@ -1,19 +1,21 @@
 import React from 'react';
-import currentStyles from './index.module.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
+import { useDispatch } from 'react-redux';
+
+import currentStyles from './index.module.scss';
 import { getTask } from '../../services/samples';
 import { updateTask } from '../../stores/task.store';
 import { updateAllConfig, clearConfig } from '../../stores/toolConfig.store';
 import commonController from '../../utils/common/common';
-import { useDispatch } from 'react-redux';
+
 const GoToEditTask = (props: any) => {
   const { taskStatus } = props;
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
   const turnToEditTask = () => {
-    let taskId = parseInt(window.location.pathname.split('/')[2]);
+    const taskId = parseInt(window.location.pathname.split('/')[2]);
     if (taskId > 0) {
       getTask(taskId)
         .then((res: any) => {

@@ -38,8 +38,8 @@ const existTaskSlice = createSlice({
       state.taskTips = action.payload;
     },
     updateTask(state: any, action: any) {
-      let taskInfo = action.payload.data;
-      let currentStatus = action.payload.configStatus;
+      const taskInfo = action.payload.data;
+      const currentStatus = action.payload.configStatus;
       const { name, tips, description, config, status, id } = taskInfo;
       state.taskName = name;
       state.taskTips = tips;

@@ -1,5 +1,5 @@
-import { Attribute, OneTag } from '@label-u/annotation';
-import { BasicConfig, TextConfig } from '@label-u/components';
+import type { Attribute, OneTag } from '@label-u/annotation';
+import type { BasicConfig, TextConfig } from '@label-u/components';
 
 export type { ToolConfig } from '@label-u/annotation';
 export type { PolygonConfig } from '@label-u/annotation';

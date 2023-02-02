@@ -1,4 +1,5 @@
-import MyForm, { MyFormProps } from 'components/core/form';
+import type { MyFormProps } from 'components/core/form';
+import MyForm from 'components/core/form';
 import MyButton from 'components/basic/button';
 import { css } from '@emotion/react';
 

@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import currentStyles from './index.module.scss';
 import { CheckOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router';
+import { Modal } from 'antd';
+
+import currentStyles from './index.module.scss';
 import { getTask, outputSamples } from '../../services/samples';
 import commonController from '../../utils/common/common';
-import { useNavigate } from 'react-router';
 import OutputData from '../outputData';
-import { Modal } from 'antd';
 import currentStyles1 from '../outputData/index.module.scss';
 const SamplesFinished = (props: any) => {
   const [stat, setStat] = useState<any>({});
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
   const { sampleId } = props;
   useEffect(() => {
     getTask(taskId)
@@ -26,7 +27,7 @@ const SamplesFinished = (props: any) => {
   }, []);
   const navigate = useNavigate();
   const turnToSamples = () => {
-    let currentPathnames = window.location.pathname.split('/');
+    const currentPathnames = window.location.pathname.split('/');
     currentPathnames.splice(3, 2);
     navigate(currentPathnames.join('/'));
   };

@@ -1,9 +1,11 @@
-import { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu } from 'antd';
-import { MenuList } from '../../interface/layout/menu.interface';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { CustomIcon } from './customIcon';
 import { useDispatch, useSelector } from 'react-redux';
+
+import type { MenuList } from '../../interface/layout/menu.interface';
+import { CustomIcon } from './customIcon';
 import { setUserItem } from '../../stores/user.store';
 
 const { SubMenu, Item } = Menu;

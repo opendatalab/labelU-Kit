@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import currentStyles from './index.module.scss';
-import { Modal, Pagination } from 'antd';
+import { Modal, Pagination, Progress, Tooltip } from 'antd';
 import { useNavigate } from 'react-router';
 import moment from 'moment';
-import { Progress, Tooltip } from 'antd';
+import { CheckCircleOutlined, UploadOutlined, DeleteOutlined, ExclamationOutlined } from '@ant-design/icons';
+
 import commonController from '../../utils/common/common';
 import { outputSamples } from '../../services/samples';
-import { CheckCircleOutlined, UploadOutlined, DeleteOutlined, ExclamationOutlined } from '@ant-design/icons';
+import currentStyles from './index.module.scss';
 import { deleteTask } from '../../services/createTask';
 import currentStyles1 from '../../pages/outputData/index.module.scss';
 
 const TaskCard = (props: any) => {
   const { cardInfo } = props;
   const { stats, id, status } = cardInfo;
-  let unDoneSample = stats.new;
-  let doneSample = stats.done + stats.skipped;
-  let total = unDoneSample + doneSample;
+  const unDoneSample = stats.new;
+  const doneSample = stats.done + stats.skipped;
+  const total = unDoneSample + doneSample;
   const createTask = () => {
     alert('createTask');
   };
@@ -28,7 +28,7 @@ const TaskCard = (props: any) => {
     // navigate('/taskList/task/taskAnnotation');
     navigate('/tasks/' + id);
   };
-  let localUserEmail = localStorage.getItem('username');
+  const localUserEmail = localStorage.getItem('username');
 
   const outputDataLocal = (e: any) => {
     // outputSamples(id)

@@ -1,6 +1,8 @@
 // import { COLORS_ARRAY } from '@/constant/style';
 import { COLORS_ARRAY } from '@label-u/annotation';
+
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
+
 import { CloseCircleFilled } from '@ant-design/icons';
 import { Button, Input as SenseInput } from 'antd';
 import React, { useRef, useState } from 'react';

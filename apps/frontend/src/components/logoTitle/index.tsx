@@ -1,6 +1,7 @@
 import React from 'react';
-import currentStyles from './index.module.scss';
 import intl from 'react-intl-universal';
+
+import currentStyles from './index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
 const LogoTitle = () => {
@@ -23,7 +24,7 @@ const LogoTitle = () => {
   }
   return (
     <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.logo}></div>
+      <div className={currentStyles.logo} />
       <div className={currentStyles.logoText}>
         {/*<div>Uniform, Unlimited, Universal and Unbelievable</div>*/}
         <div>{intl.get('loginTitle1')}</div>

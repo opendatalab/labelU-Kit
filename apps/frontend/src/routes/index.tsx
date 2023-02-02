@@ -1,6 +1,8 @@
-import React, { lazy, FC } from 'react';
-import { RouteObject } from 'react-router';
+import type { FC } from 'react';
+import React, { lazy } from 'react';
+import type { RouteObject } from 'react-router';
 import { useRoutes } from 'react-router-dom';
+
 import AnnotationConfig from '../pages/annotationConfig';
 import Login1 from '../pages/login1/index';
 import SignUp from '../pages/signUp';

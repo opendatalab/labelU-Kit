@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import currentStyles from './index.module.scss';
-import { updateSampleState, updateSampleAnnotationResult } from '../../services/samples';
-import commonController from '../../utils/common/common';
 import { useNavigate } from 'react-router';
 import { Observable, fromEvent, Subject } from 'rxjs';
-import Ob from '../../utils/Observable/index';
 import { useSelector } from 'react-redux';
+
+import currentStyles from './index.module.scss';
+import { updateSampleState, updateSampleAnnotationResult, getSample } from '../../services/samples';
+import commonController from '../../utils/common/common';
+import Ob from '../../utils/Observable/index';
 import { updateAnnotationDatas } from '../../stores/annotation.store';
 import { annotationRef } from '../../pages/annotation2';
-import { getSample } from '../../services/samples';
 import TempStore from './tempStore';
 const AnnotationRightCorner = () => {
   const navigate = useNavigate();
-  let annotationDatas = useSelector((state) => state.annotation.annotationDatas);
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
-  let sampleId = parseInt(window.location.pathname.split('/')[4]);
+  const annotationDatas = useSelector((state) => state.annotation.annotationDatas);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
+  const sampleId = parseInt(window.location.pathname.split('/')[4]);
   const [isSkippedShow, setIsSkippedShow] = useState('');
   // const [currentSampleId, setCurrentSampleId] = useState(0);
-  let currentSampleId = 0;
+  const currentSampleId = 0;
   const skipSample = () => {
     setIsSkippedShow('SKIPPED');
     getSample(taskId, sampleId)
@@ -74,7 +74,7 @@ const AnnotationRightCorner = () => {
     // setTimestamp(new Date().getTime());
     timestampNew = new Date().getTime();
     // @ts-ignore
-    let sampleId = parseInt(window.location.pathname.split('/')[4]);
+    const sampleId = parseInt(window.location.pathname.split('/')[4]);
 
     // if (sampleId === currentSampleId || currentSampleId === oldCurrentSampleId){
     //   // currentSampleId
@@ -84,15 +84,15 @@ const AnnotationRightCorner = () => {
     // setOldCurrentSampleId(sampleId);
     // currentSampleId = sampleId;
     // @ts-ignore
-    let cResult = await annotationRef?.current?.getResult();
-    let rResult = cResult[0].result;
+    const cResult = await annotationRef?.current?.getResult();
+    const rResult = cResult[0].result;
     console.log(rResult);
     getSample(taskId, sampleId)
       .then((res) => {
         //   setOldCurrentSampleId(sampleId);
         //   if (oldCurrentSampleId === sampleId) return;
         if (res.status === 200) {
-          let sampleResData = res.data.data.data;
+          const sampleResData = res.data.data.data;
           let annotated_count = 0;
           // @ts-ignore
           console.log(annotationRef?.current?.getResult()[0]);
@@ -100,13 +100,13 @@ const AnnotationRightCorner = () => {
           // @ts-ignore
           // @ts-ignore
           // let  dataParam = Object.assign({},sampleResData,{ result :  annotationRef?.current?.getResult()[0].result});
-          let dataParam = Object.assign({}, sampleResData, { result: rResult });
+          const dataParam = Object.assign({}, sampleResData, { result: rResult });
           if (res.data.data.state !== 'SKIPPED') {
             console.log(dataParam);
-            let resultJson = JSON.parse(dataParam.result);
-            for (let key in resultJson) {
+            const resultJson = JSON.parse(dataParam.result);
+            for (const key in resultJson) {
               if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
-                let tool = resultJson[key];
+                const tool = resultJson[key];
                 if (!tool.result) {
                   let temp = 0;
                   if (tool.length) {
@@ -155,25 +155,25 @@ const AnnotationRightCorner = () => {
     }
     setTimestamp(new Date().getTime());
     // @ts-ignore
-    let sampleId = parseInt(window.location.pathname.split('/')[4]);
+    const sampleId = parseInt(window.location.pathname.split('/')[4]);
     // @ts-ignore
-    let cResult = await annotationRef?.current?.getResult();
-    let rResult = cResult[0].result;
+    const cResult = await annotationRef?.current?.getResult();
+    const rResult = cResult[0].result;
     console.log(rResult);
 
     getSample(taskId, sampleId)
       .then((res) => {
         if (res.status === 200) {
-          let sampleResData = res.data.data.data;
+          const sampleResData = res.data.data.data;
           let annotated_count = 0;
           // @ts-ignore
           // let  dataParam = Object.assign({},sampleResData,{ result :  annotationRef?.current?.getResult()[0].result});
-          let dataParam = Object.assign({}, sampleResData, { result: rResult });
+          const dataParam = Object.assign({}, sampleResData, { result: rResult });
           if (res.data.data.state !== 'SKIPPED') {
-            let resultJson = JSON.parse(dataParam.result);
-            for (let key in resultJson) {
+            const resultJson = JSON.parse(dataParam.result);
+            for (const key in resultJson) {
               if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
-                let tool = resultJson[key];
+                const tool = resultJson[key];
                 if (!tool.result) {
                   let temp = 0;
                   if (tool.length) {
@@ -231,7 +231,7 @@ const AnnotationRightCorner = () => {
 
   let timestampNew = new Date().getTime();
   let oldTimestampNew = 0;
-  let count = 1;
+  const count = 1;
   const onKeyDown = (e: any) => {
     // count = count + 1;
 
@@ -253,7 +253,7 @@ const AnnotationRightCorner = () => {
     oldTimestampNew = new Date().getTime();
     TempStore.old = new Date().getTime();
     console.log(e);
-    let keyCode = e.keyCode;
+    const keyCode = e.keyCode;
     if (keyCode === 65) {
       // prevPage();
       commonController.debounce(prevPage, 1000)('');

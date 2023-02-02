@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import currentStyles from '../signUp/index.module.scss';
 import { Input } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { IdcardOutlined, LockOutlined } from '@ant-design/icons';
+import intl from 'react-intl-universal';
+
 import CommonController from '../../utils/common/common';
 import { login as loginService, signUp } from '../../services/general';
-import { useNavigate } from 'react-router-dom';
-import intl from 'react-intl-universal';
+import currentStyles from '../signUp/index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
 const SignUp = (props: any) => {
@@ -33,15 +33,15 @@ const SignUp = (props: any) => {
     });
   }
   const changeEmail = (event: any) => {
-    let targetValue = event.target.value;
-    let isNull = CommonController.isInputValueNull(event);
+    const targetValue = event.target.value;
+    const isNull = CommonController.isInputValueNull(event);
     if (!isNull) {
       setUsername(targetValue);
     }
   };
   const changePassword = (event: any) => {
-    let targetValue = event.target.value;
-    let isNull = CommonController.isInputValueNull(event);
+    const targetValue = event.target.value;
+    const isNull = CommonController.isInputValueNull(event);
     if (!isNull) {
       setPassword(targetValue);
     }
@@ -57,7 +57,7 @@ const SignUp = (props: any) => {
 
   const register = async function () {
     try {
-      let hasUndefined = CommonController.checkObjectHasUndefined({
+      const hasUndefined = CommonController.checkObjectHasUndefined({
         username,
         password,
         repeatPassword,
@@ -66,20 +66,20 @@ const SignUp = (props: any) => {
         CommonController.notificationErrorMessage({ msg: hasUndefined.key }, 2);
         return;
       }
-      let checkUsername = CommonController.checkEmail(undefined, username);
+      const checkUsername = CommonController.checkEmail(undefined, username);
       if (!checkUsername) {
         return;
       }
-      let checkPassword = CommonController.checkPassword(undefined, password);
+      const checkPassword = CommonController.checkPassword(undefined, password);
       if (!checkPassword) {
         return;
       }
-      let checkRepeatPassword = password === repeatPassword;
+      const checkRepeatPassword = password === repeatPassword;
       if (!checkRepeatPassword) {
         CommonController.notificationErrorMessage({ msg: '两次输入的密码不一致' }, 1);
         return;
       }
-      let res = await signUp({
+      const res = await signUp({
         username,
         password,
       });
@@ -102,8 +102,8 @@ const SignUp = (props: any) => {
     // }
   };
   const changeRepeatPassword = (event: any, repeatPassword?: any) => {
-    let targetValue = event ? event.target.value : repeatPassword;
-    let isNull = CommonController.isInputValueNull(event);
+    const targetValue = event ? event.target.value : repeatPassword;
+    const isNull = CommonController.isInputValueNull(event);
     if (!isNull) {
       setRepeatPassword(targetValue);
     }

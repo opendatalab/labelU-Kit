@@ -1,8 +1,10 @@
-import { TextConfig } from '@label-u/components';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { TextConfig } from '@label-u/components';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Form } from 'antd';
-import TextList from '../../components/TextList';
 import { useForm } from 'antd/lib/form/Form';
+
+import TextList from '../../components/TextList';
 import { delayTime } from '../constants';
 
 interface TextConfigProp {
@@ -47,7 +49,7 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = (props) => {
 
   useMemo(() => {
     if (props) {
-      let initV =
+      const initV =
         // @ts-ignore
         props.textConfig && props.textConfig.length > 0
           ? // @ts-ignore

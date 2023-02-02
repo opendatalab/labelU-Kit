@@ -6,7 +6,9 @@ class MPDecoderBase {
     // this.trace = '';
     // this.map = '';
   }
+
   decoderMap(strMap) {}
+
   decoderTrace(strTrace) {}
 }
 
@@ -14,6 +16,7 @@ class M7Decoder extends MPDecoderBase {
   constructor() {
     super();
   }
+
   /**return: object like:{
    * rect:{
    *  left:leftValue,
@@ -35,7 +38,9 @@ class M7Decoder extends MPDecoderBase {
     /**对http获取到的地图数据做简单解析，获取地图的尺寸 */
     var index;
     var info_map = strMap.indexOf(' ');
-    if (info_map <= 0) return {};
+    if (info_map <= 0) {
+      return {};
+    }
     strMap = strMap.substring(info_map + 1);
 
     var r = { left: 0, bottom: 0, right: 0, top: 0 };
@@ -145,6 +150,7 @@ class M7Decoder extends MPDecoderBase {
       mapData: mapDecoded,
     };
   }
+
   decoderTrace(strTrace) {
     if (strTrace == undefined || strTrace == null || strTrace == '') {
       return { mapTraceArr: [] };
@@ -154,6 +160,7 @@ class M7Decoder extends MPDecoderBase {
       mapTraceArr: toByteArray(strTrace),
     };
   }
+
   handleAreaData(data) {
     let mapData = data.mapInfo;
     let info_map = mapData.indexOf(' ');
@@ -211,7 +218,9 @@ class M7Decoder extends MPDecoderBase {
           break;
         case 4:
           roombottom = parseInt(rdata);
-          if (ii == 0) continue;
+          if (ii == 0) {
+            continue;
+          }
           if (roomnamekeyvalue) {
             roomObj = new MPAreaZone(roomleft, roombottom, roomright, roomtop, roomid, roomnamekeyvalue[roomid]);
           } else {

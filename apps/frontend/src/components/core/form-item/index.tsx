@@ -1,19 +1,20 @@
-import React, { FC, useMemo } from 'react';
-import { FormItemProps } from 'antd/lib/form';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { FormItemProps } from 'antd/lib/form';
 import { Form, Input, InputNumber, Switch, DatePicker, Checkbox, Radio, Select } from 'antd';
 
 export type ControlTypes = 'input' | 'input-number' | 'switch' | 'checkbox' | 'radio' | 'select';
 
 type GetRCPropsType<T> = T extends (props: infer R) => any ? R : T extends React.ComponentClass<infer R> ? R : any;
 
-type InnerProps = {
+interface InnerProps {
   input: GetRCPropsType<typeof Input>;
   'input-number': GetRCPropsType<typeof InputNumber>;
   switch: GetRCPropsType<typeof Switch>;
   checkbox: GetRCPropsType<typeof Checkbox>;
   radio: GetRCPropsType<typeof Radio>;
   select: GetRCPropsType<typeof Select>;
-};
+}
 
 export interface MyFormItemProps<T extends ControlTypes = ControlTypes> extends Omit<FormItemProps, 'required'> {
   type?: T;

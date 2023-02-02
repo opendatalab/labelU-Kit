@@ -1,4 +1,5 @@
-import { FC } from 'react';
+import type { FC } from 'react';
+
 import GuideSvg from '../../img/menu/guide.svg';
 import PermissionSvg from '../../img/menu/permission.svg';
 import DashboardSvg from '../../img/menu/dashboard.svg';

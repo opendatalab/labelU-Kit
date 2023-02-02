@@ -1,5 +1,7 @@
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
+
 import {
   updateAllAttributeConfigList,
   updateTagConfigList,
@@ -30,7 +32,7 @@ const TmplateBox: FC<Iprops> = ({ tempaltes, hideBox }) => {
       };
       // 配置设置
       const keys = Object.keys(initConfig);
-      for (let key of keys) {
+      for (const key of keys) {
         if (key === 'attribute') {
           dispatch(updateAllAttributeConfigList(initConfig[key]));
         } else if (key === 'tagList') {

@@ -13,7 +13,9 @@ function isArchedAreaLineEndPoint(current, next) {
 
 // 两个点是否相同
 function isPointEqual(p1, p2) {
-  if (p1 === p2) return true;
+  if (p1 === p2) {
+    return true;
+  }
 
   return p1[0] === p2[0] && p1[1] === p2[1] && p1[2] == p2[2];
 }
@@ -335,7 +337,9 @@ function deleteLinePoint(cleanWay) {
         break;
       }
     }
-    if (cleanWay[p2] !== undefined) cleanedLine.push(cleanWay[p2]);
+    if (cleanWay[p2] !== undefined) {
+      cleanedLine.push(cleanWay[p2]);
+    }
     p = p2 + 1;
     judge = null;
   }
@@ -350,7 +354,9 @@ class MPParserBase {
     // this.trace = [];
     // this.map = [];
   }
+
   parseMap(decodedMapData) {}
+
   parseTrace(decodedTraceData, mopType) {}
 }
 
@@ -358,6 +364,7 @@ class M7Parser extends MPParserBase {
   constructor() {
     super();
   }
+
   parseMap(decodedMapData) {
     if (decodedMapData == undefined || decodedMapData.mapData == undefined || decodedMapData.rect == undefined) {
       return { rect: undefined, mapData: undefined };
@@ -413,6 +420,7 @@ class M7Parser extends MPParserBase {
     decodedMapData.mapData = datas;
     return decodedMapData;
   }
+
   parseTrace(decodedTraceData, mopType) {
     if (decodedTraceData == undefined || decodedTraceData.mapTraceArr == undefined) {
       return {

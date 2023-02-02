@@ -1,4 +1,3 @@
-import { mapHelper } from './MapHelper';
 import {
   MPTargetZone,
   MapElemKey,
@@ -12,6 +11,8 @@ import {
 import { DrawForbiden } from '@/BussinessComponents/VCBaseMapCanvas/service/drawForbiddenZone.js';
 import { DrawVirtualWall } from '@/BussinessComponents/VCBaseMapCanvas/service/drawVirtualWall.js';
 import store from '@/store';
+
+import { mapHelper } from './MapHelper';
 const TARGET_RECT_WIDTH = 20;
 
 /*默认禁区坐标列表 屏幕坐标*/
@@ -124,7 +125,9 @@ export default {
         let wallArray = [];
         //代码疑点？？
         for (var i = 0; i < walls.length; ) {
-          if (i > MapDef.VIRTUAL_WALL_MAX * 4 - 1) break;
+          if (i > MapDef.VIRTUAL_WALL_MAX * 4 - 1) {
+            break;
+          }
           let wallLine = new MPVirtualWall(
             parseInt(walls[i++]),
             parseInt(walls[i++]),
@@ -154,7 +157,9 @@ export default {
     } else {
       let forbiddenZoneArray = [];
       for (var i = 0; i < forbiddens.length; ) {
-        if (i > 16) break;
+        if (i > 16) {
+          break;
+        }
         let forbidden = new MPForbiddenZone(
           parseInt(forbiddens[i++]),
           parseInt(forbiddens[i++]),
@@ -186,7 +191,9 @@ export default {
       } else {
         let forbiddenZoneArray = [];
         for (var i = 0; i < forbiddens.length; ) {
-          if (i > 16) break;
+          if (i > 16) {
+            break;
+          }
           let forbidden = new MPForbiddenZone(
             parseInt(forbiddens[i++]),
             parseInt(forbiddens[i++]),
@@ -1098,7 +1105,9 @@ export default {
     var dot = A * C + B * D;
     var len_sq = C * C + D * D;
     var param = -1;
-    if (len_sq != 0) param = dot / len_sq;
+    if (len_sq != 0) {
+      param = dot / len_sq;
+    }
     var xx, yy;
     if (param < 0) {
       xx = x1;

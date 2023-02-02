@@ -1,4 +1,4 @@
-import { ColumnProps } from 'antd/lib/table';
+import type { ColumnProps } from 'antd/lib/table';
 
 export interface TableColumnPropsOption {
   label: string;

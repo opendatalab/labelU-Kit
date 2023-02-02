@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import currentStyles from './index.module.scss';
 import { Input } from 'antd';
+import { useSelector, useDispatch } from 'react-redux';
+
+import currentStyles from './index.module.scss';
 import { submitBasicConfig } from '../../services/createTask';
 import CommonController from '../../utils/common/common';
-import { useSelector, useDispatch } from 'react-redux';
 import {
   updateConfigStep,
   updateHaveConfigedStep,
@@ -17,16 +18,16 @@ import { updateAllConfig } from '../../stores/toolConfig.store';
 import commonController from '../../utils/common/common';
 const InputInfoConfig = () => {
   const dispatch = useDispatch();
-  let taskName = useSelector((state) => state.existTask.taskName);
-  let taskDescription = useSelector((state) => state.existTask.taskDescription);
-  let taskTips = useSelector((state) => state.existTask.taskTips);
+  const taskName = useSelector((state) => state.existTask.taskName);
+  const taskDescription = useSelector((state) => state.existTask.taskDescription);
+  const taskTips = useSelector((state) => state.existTask.taskTips);
   const [isErrorShow, setIsErrorShow] = useState(false);
   const changeTaskNamme = (event: any) => {
-    let targetValue = event.target.value;
-    let isNull = CommonController.isInputValueNull(targetValue);
+    const targetValue = event.target.value;
+    const isNull = CommonController.isInputValueNull(targetValue);
     if (!isNull) {
       setIsErrorShow(false);
-      let isOver = commonController.isOverFontCount(targetValue, 50);
+      const isOver = commonController.isOverFontCount(targetValue, 50);
       if (isOver) {
         return;
       }
@@ -39,10 +40,10 @@ const InputInfoConfig = () => {
     }
   };
   const changeTaskDescription = (event: any) => {
-    let targetValue = event.target.value;
-    let isNull = CommonController.isInputValueNull(targetValue);
+    const targetValue = event.target.value;
+    const isNull = CommonController.isInputValueNull(targetValue);
     if (!isNull) {
-      let isOver = commonController.isOverFontCount(targetValue, 500);
+      const isOver = commonController.isOverFontCount(targetValue, 500);
       if (isOver) {
         return;
       }
@@ -52,10 +53,10 @@ const InputInfoConfig = () => {
     dispatch(updateTaskDescription(targetValue));
   };
   const changeTaskTips = (event: any) => {
-    let targetValue = event.target.value;
-    let isNull = CommonController.isInputValueNull(targetValue);
+    const targetValue = event.target.value;
+    const isNull = CommonController.isInputValueNull(targetValue);
     if (!isNull) {
-      let isOver = commonController.isOverFontCount(targetValue, 1000);
+      const isOver = commonController.isOverFontCount(targetValue, 1000);
       if (isOver) {
         return;
       }
@@ -67,7 +68,7 @@ const InputInfoConfig = () => {
 
   const tijiao = async function () {
     try {
-      let res: any = submitBasicConfig({ name: taskName, description: taskDescription, tips: taskTips });
+      const res: any = submitBasicConfig({ name: taskName, description: taskDescription, tips: taskTips });
       alert(res.id);
     } catch (error) {}
   };
@@ -75,7 +76,7 @@ const InputInfoConfig = () => {
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.title}>
-        <div className={currentStyles.icon}></div>
+        <div className={currentStyles.icon} />
         <div className={currentStyles.titleText}>基础配置</div>
       </div>
       <div className={currentStyles.content}>

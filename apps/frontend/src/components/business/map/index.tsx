@@ -1,5 +1,7 @@
-import { FC, useMemo, useState } from 'react';
-import { MapInfo, MapVueInfo } from '../../../interface/virtualMachine';
+import type { FC } from 'react';
+import { useMemo, useState } from 'react';
+
+import type { MapInfo, MapVueInfo } from '../../../interface/virtualMachine';
 import MapBase from './VC7Map';
 
 const Map: FC<{ props: MapInfo }> = ({ props }) => {
@@ -18,7 +20,7 @@ const Map: FC<{ props: MapInfo }> = ({ props }) => {
   });
 
   const initMap = useMemo(async () => {
-    let mapInfo: MapVueInfo = {
+    const mapInfo: MapVueInfo = {
       map: props.data,
       locus: '', // 轨迹信息
       partirion: '', // 分区地图信息

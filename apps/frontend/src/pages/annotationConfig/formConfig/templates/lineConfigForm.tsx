@@ -1,12 +1,14 @@
-import { BasicConfig } from '@label-u/components';
-import React, { FC, useMemo, useState } from 'react';
+import type { BasicConfig } from '@label-u/components';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Col, Row, Switch, Input as SenseInput, Form, Select } from 'antd';
+import { useForm } from 'antd/es/form/Form';
+import _ from 'lodash';
+
 import { MapStateJSONTab } from '../../components/AttributeConfig';
 import DownWardIcon from '../../../../img/common/downWardIcon.svg';
 import UpperIcon from '../../../../img/common/upperIcon.svg';
-import { AttributeItem } from './rectConfigForm';
-import { useForm } from 'antd/es/form/Form';
-import _ from 'lodash';
+import type { AttributeItem } from './rectConfigForm';
 import { delayTime } from '../constants';
 const { Option } = Select;
 
@@ -56,7 +58,7 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = (props) => {
 
   useMemo(() => {
     if (props.config) {
-      let initV = {
+      const initV = {
         // @ts-ignore
         edgeAdsorption: props.config.edgeAdsorption ? props.config.edgeAdsorption : false,
         // @ts-ignore

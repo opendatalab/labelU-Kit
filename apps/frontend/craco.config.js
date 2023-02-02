@@ -1,7 +1,8 @@
+const path = require('path');
+
 const CracoLessPlugin = require('craco-less');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const path = require('path');
 const resolve = dir => path.resolve(__dirname, dir);
 
 module.exports = {

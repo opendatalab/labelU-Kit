@@ -2,7 +2,7 @@ import axiosProxy from './axiosProxy';
 import CommonController from '../utils/common/common';
 const { axiosInstance } = axiosProxy;
 const login = async function (params: { username: string; password: string }) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: '/api/v1/users/login',
     method: 'POST',
     data: params,
@@ -15,7 +15,7 @@ const login = async function (params: { username: string; password: string }) {
 
 const signUp = async function (params: { username: string; password: string }) {
   // try {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: '/api/v1/users/signup',
     method: 'POST',
     data: params,

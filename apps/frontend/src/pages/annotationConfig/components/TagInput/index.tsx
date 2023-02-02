@@ -1,9 +1,8 @@
 import React from 'react';
-import { Input as SensebeeInput } from 'antd';
+import { Input as SensebeeInput, Checkbox, Col, Input, Row, Tooltip } from 'antd';
 import './index.less';
 
 import { CloseCircleFilled, PlusCircleFilled, StarFilled } from '@ant-design/icons';
-import { Checkbox, Col, Input, Row, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 const InputGroup = Input.Group;
 
@@ -17,7 +16,7 @@ interface IProps {
 }
 
 export interface IInputList {
-  isMulti?: Boolean;
+  isMulti?: boolean;
   key: string;
   value: string;
   subSelected?: IInfoList[];
@@ -97,7 +96,7 @@ const TagInput = (props: IProps) => {
         <div className="subMain">
           {inputInfo.subSelected.map((subInfo, j, arr) => (
             <Row className="subSelect" key={j}>
-              <Col span={1} className="inputSerial"></Col>
+              <Col span={1} className="inputSerial" />
               <Col span={16} className="firstItem">
                 <div className="sub_input_box">
                   <SensebeeInput

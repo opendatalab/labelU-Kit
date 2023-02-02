@@ -1,11 +1,15 @@
-import { EToolName, OneTag } from '@label-u/annotation';
-import { BasicConfig } from '@label-u/components';
+import type { OneTag } from '@label-u/annotation';
+import { EToolName } from '@label-u/annotation';
+import type { BasicConfig } from '@label-u/components';
 import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
-import React, { FC, useEffect, useMemo, useState, Dispatch, SetStateAction } from 'react';
+import type { FC, Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { ToolsConfigState } from 'interface/toolConfig';
+
 import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
 import CommonFormItem from '../components/commonFormItems';
-import { useDispatch, useSelector } from 'react-redux';
 import { LoadInitConfig } from '../configTemplate/config';
 import {
   updateAllAttributeConfigList,
@@ -16,7 +20,7 @@ import {
 } from '../../../stores/toolConfig.store';
 import '../index.less';
 import { validateTools } from '../../../utils/tool/common';
-import { ToolsConfigState } from 'interface/toolConfig';
+
 const { Option } = Select;
 
 const noCommonConfigTools = ['tagTool', 'textTool'];
@@ -55,7 +59,7 @@ const FormConfig: FC<IProps> = (props: IProps) => {
     };
   }, []);
   const items = useMemo(() => {
-    let items = [];
+    const items = [];
     for (let i = 0; i < toolnames.length; i++) {
       if (selectTools.indexOf(toolnameT[toolnames[i]]) < 0) {
         items.push({
@@ -84,7 +88,7 @@ const FormConfig: FC<IProps> = (props: IProps) => {
       if (toolname) {
         const config = await LoadInitConfig(toolname);
         const keys = Object.keys(config);
-        for (let key of keys) {
+        for (const key of keys) {
           if (key === 'attribute' && attribute.length === 0) {
             dispatch(updateAllAttributeConfigList(config[key]));
           } else if (key === 'tagList' && tagList.length === 0) {
@@ -92,7 +96,7 @@ const FormConfig: FC<IProps> = (props: IProps) => {
           } else if (key === 'textConfig' && textConfig.length === 0) {
             dispatch(updateTextConfig(config[key]));
           } else if (key === 'tools') {
-            let newTools = [...tools].concat(config[key]);
+            const newTools = [...tools].concat(config[key]);
             dispatch(updateToolsConfig(newTools));
           }
         }
@@ -103,7 +107,7 @@ const FormConfig: FC<IProps> = (props: IProps) => {
   };
 
   useEffect(() => {
-    let toolArr = [];
+    const toolArr = [];
     if (tools && tools.length > 0) {
       for (let i = 0; i < tools.length; i++) {
         if (selectTools.indexOf(tools[i].tool) < 0 && toolArr.indexOf(tools[i].tool) < 0) {
@@ -126,7 +130,7 @@ const FormConfig: FC<IProps> = (props: IProps) => {
   }, [tools, tagList, textConfig]);
 
   const updateSelectTools = (toolname: string) => {
-    let tmp = selectTools;
+    const tmp = selectTools;
     if (tmp.indexOf(toolname) >= 0) {
       tmp.splice(tmp.indexOf(toolname), 1);
     } else {
@@ -139,8 +143,8 @@ const FormConfig: FC<IProps> = (props: IProps) => {
   const [height, setHeight] = useState<number>(0);
 
   useEffect(() => {
-    let leftSiderDom = document.getElementById('lefeSiderId');
-    let height = leftSiderDom?.getBoundingClientRect().height as number;
+    const leftSiderDom = document.getElementById('lefeSiderId');
+    const height = leftSiderDom?.getBoundingClientRect().height as number;
     setHeight(height - 128);
   }, []);
 
@@ -149,10 +153,10 @@ const FormConfig: FC<IProps> = (props: IProps) => {
   };
 
   const updateCombineToolsConfig = (tools: BasicConfig[], config: object, toolname: string) => {
-    let newTools = tools.reduce((res, item) => {
+    const newTools = tools.reduce((res, item) => {
       if (item.tool === toolname || toolname === 'commonForm') {
-        let copyItem = { ...item };
-        let newConfig = {
+        const copyItem = { ...item };
+        const newConfig = {
           ...copyItem.config,
           ...config,
         };
@@ -201,7 +205,7 @@ const FormConfig: FC<IProps> = (props: IProps) => {
       </div>
       <div className="oneRow">
         <label>标注工具</label>
-        <Dropdown overlay={<Menu items={items}></Menu>} placement="bottomLeft" trigger={['click']}>
+        <Dropdown overlay={<Menu items={items} />} placement="bottomLeft" trigger={['click']}>
           <Button type="primary" ghost>
             <span style={{ fontSize: 22, marginTop: -7 }}>+ </span> 新增工具
           </Button>

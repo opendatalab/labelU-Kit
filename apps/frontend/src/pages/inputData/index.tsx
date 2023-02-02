@@ -1,28 +1,29 @@
 import React, { useState, useEffect, createRef } from 'react';
-import currentStyles from './index.module.scss';
-import { UploadStatus } from '../../constants/upload';
 import type { UploadProps } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import type { UploadFile } from 'antd/es/upload/interface';
-import commonController from '../../utils/common/common';
-import { uploadFile as uploadFileService } from '../../services/createTask';
 import { Tree } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
+
+import commonController from '../../utils/common/common';
+import { uploadFile as uploadFileService } from '../../services/createTask';
+import { UploadStatus } from '../../constants/upload';
+import currentStyles from './index.module.scss';
 import { updateNewSamples } from '../../stores/sample.store';
 import NativeUpload from '../../components/nativeUpload';
 let newFileList: any[] = [];
-let newFileListInfo: any[] = [];
-let newFolder: any = {};
-let saveFolderFiles: any[] = [];
+const newFileListInfo: any[] = [];
+const newFolder: any = {};
+const saveFolderFiles: any[] = [];
 const InputInfoConfig = () => {
   const { DirectoryTree } = Tree;
   const dispatch = useDispatch();
-  let configStep = useSelector((state) => state.existTask.configStep);
-  let haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
-  let taskName = useSelector((state) => state.existTask.taskName);
-  let taskDescription = useSelector((state) => state.existTask.taskDescription);
-  let taskTips = useSelector((state) => state.existTask.taskTips);
-  let taskId = useSelector((state) => state.existTask.taskId);
+  const configStep = useSelector((state) => state.existTask.configStep);
+  const haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
+  const taskName = useSelector((state) => state.existTask.taskName);
+  const taskDescription = useSelector((state) => state.existTask.taskDescription);
+  const taskTips = useSelector((state) => state.existTask.taskTips);
+  const taskId = useSelector((state) => state.existTask.taskId);
   const [uploadedTotal, setUploadedTotal] = useState(0);
   const [uploadedSuccessful, setUploadedSuccessful] = useState(0);
   const [uploadedFailed, setUploadedFailed] = useState(0);
@@ -31,7 +32,7 @@ const InputInfoConfig = () => {
 
   const [haveUploadFiles, setHaveUploadFiles] = useState<any[]>([]);
   const handleChange: UploadProps['onChange'] = (info) => {
-    let newFileList1 = [...info.fileList];
+    const newFileList1 = [...info.fileList];
     newFileList = newFileList1;
   };
 
@@ -55,14 +56,14 @@ const InputInfoConfig = () => {
       return;
     }
     for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
-      let fileUnit = files[fileIndex];
-      let isOverSize = commonController.isOverSize(fileUnit.size);
+      const fileUnit = files[fileIndex];
+      const isOverSize = commonController.isOverSize(fileUnit.size);
       if (isOverSize) {
         commonController.notificationErrorMessage({ message: '单个文件大小超过100MB限制' }, 3);
         result = false;
         break;
       }
-      let isCorrectFileType = commonController.isCorrectFileType(fileUnit.name);
+      const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name);
       if (!isCorrectFileType) {
         commonController.notificationErrorMessage({ message: '请上传支持的文件类型，类型包括：jpg、png、bmp、gif' }, 3);
         result = false;
@@ -72,9 +73,9 @@ const InputInfoConfig = () => {
     return result;
   };
   const updateOneOfHaveUplodaedFileList = (uid: any, hasUploaded: any, result: any) => {
-    let temp = haveUploadFiles.concat([]);
+    const temp = haveUploadFiles.concat([]);
     for (let haveUploadedFilesIndex = 0; haveUploadedFilesIndex < temp.length; haveUploadedFilesIndex++) {
-      let haveUploadedFile = temp[haveUploadedFilesIndex];
+      const haveUploadedFile = temp[haveUploadedFilesIndex];
       if (uid === haveUploadedFile.uid) {
         haveUploadedFile.hasUploaded = hasUploaded;
         if (result) {
@@ -88,13 +89,13 @@ const InputInfoConfig = () => {
     }
   };
   const addToHaveUploadFilesList = (currentNewFileList: any) => {
-    let currentListContainer = [];
+    const currentListContainer = [];
     for (
       let currentNewFileListIndex = 0;
       currentNewFileListIndex < currentNewFileList.length;
       currentNewFileListIndex++
     ) {
-      let currentInfo = currentNewFileList[currentNewFileListIndex];
+      const currentInfo = currentNewFileList[currentNewFileListIndex];
       currentListContainer.push({
         name: currentInfo.name,
         size: currentInfo.size,
@@ -120,7 +121,7 @@ const InputInfoConfig = () => {
     let tempFailed = 0;
     // console.log(temp);
     for (let newFileListInfoIndex = 0; newFileListInfoIndex < temp.length; newFileListInfoIndex++) {
-      let currentInfo = temp[newFileListInfoIndex];
+      const currentInfo = temp[newFileListInfoIndex];
       let result = undefined;
       // if (path.indexOf('/') > -1)
       {
@@ -166,8 +167,8 @@ const InputInfoConfig = () => {
     setHaveUploadFiles(tempArr);
   };
   const renewUpload = async function (item: any, itemIndex: number) {
-    let result = await uploadFileService(taskId, item.params);
-    let temp: any = Object.assign([], haveUploadFiles);
+    const result = await uploadFileService(taskId, item.params);
+    const temp: any = Object.assign([], haveUploadFiles);
     if (result?.status === 201) {
       temp[itemIndex].hasUploaded = UploadStatus.SUCCESS;
       commonController.notificationSuccessMessage({ message: '一个文件上传成功' }, 2);
@@ -178,11 +179,11 @@ const InputInfoConfig = () => {
     setHaveUploadFiles(temp);
   };
   const updateUploadedFiles = () => {
-    let result = [];
+    const result = [];
     for (let fileIndex = 0; fileIndex < haveUploadFiles.length; fileIndex++) {
-      let fileItem = haveUploadFiles[fileIndex];
+      const fileItem = haveUploadFiles[fileIndex];
       if (fileItem.id || fileItem === 0) {
-        let newItem = {
+        const newItem = {
           attachement_ids: [fileItem.id],
           data: {
             result: '{}',
@@ -204,7 +205,7 @@ const InputInfoConfig = () => {
     }
     let successfulFiles = 0;
     let failedFiles = 0;
-    for (let haveUploadFile of haveUploadFiles) {
+    for (const haveUploadFile of haveUploadFiles) {
       if (haveUploadFile.hasUploaded === UploadStatus.SUCCESS) {
         successfulFiles = successfulFiles + 1;
       } else {
@@ -216,7 +217,7 @@ const InputInfoConfig = () => {
   }, [haveUploadFiles]);
 
   const inputFolder = (files: any) => {
-    let isCorrectCondition = isCorrectFiles(files);
+    const isCorrectCondition = isCorrectFiles(files);
     if (!isCorrectCondition) {
       return;
     } else {
@@ -229,14 +230,14 @@ const InputInfoConfig = () => {
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.title}>
-        <div className={currentStyles.icon}></div>
+        <div className={currentStyles.icon} />
         <div className={currentStyles.titleText}>数据导入</div>
       </div>
       <div className={currentStyles.content}>
         <div className={currentStyles.left}>
           <div className={currentStyles.leftTitle}>本地上传</div>
           <div className={currentStyles.dragAndDrop}>
-            <div className={currentStyles.survey}></div>
+            <div className={currentStyles.survey} />
             <div className={currentStyles.buttons}>
               <div className={currentStyles.uploadFileButton}>
                 <NativeUpload
@@ -273,7 +274,7 @@ const InputInfoConfig = () => {
             {/*    <input type="file" multiple ref = {inputRef} onChange = {inputFolder}/>*/}
             {/*</div>*/}
 
-            <div></div>
+            <div />
           </div>
         </div>
         <div className={currentStyles.right}>
@@ -376,11 +377,13 @@ const InputInfoConfig = () => {
                             </div>
                           ) : item.hasUploaded === UploadStatus.SUCCESS ? (
                             <div className={currentStyles.uploadStatus}>
-                              <div className={currentStyles.greenCircle}></div>上传成功
+                              <div className={currentStyles.greenCircle} />
+                              上传成功
                             </div>
                           ) : (
                             <div className={currentStyles.uploadStatus}>
-                              <div className={currentStyles.redCircle}></div>上传失败
+                              <div className={currentStyles.redCircle} />
+                              上传失败
                             </div>
                           )}
                         </div>

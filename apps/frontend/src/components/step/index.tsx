@@ -1,13 +1,15 @@
 import React from 'react';
-import currentStyles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
-import commonController from '../../utils/common/common';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateConfigStep } from '../../stores/task.store';
 import { CheckOutlined } from '@ant-design/icons';
+
+import currentStyles from './index.module.scss';
+import commonController from '../../utils/common/common';
+import { updateConfigStep } from '../../stores/task.store';
+
 const Step = (props: any) => {
-  let configStep = useSelector(commonController.getConfigStep);
-  let haveConfigedStep = useSelector(commonController.getHaveConfigedStep);
+  const configStep = useSelector(commonController.getConfigStep);
+  const haveConfigedStep = useSelector(commonController.getHaveConfigedStep);
   const { title, ordinalNumber, contentUrl } = props;
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -18,6 +20,7 @@ const Step = (props: any) => {
       return;
     }
     navigate(contentUrl);
+    // @ts-ignore
     dispatch(updateConfigStep(ordinalNumber - 2));
   };
   return (

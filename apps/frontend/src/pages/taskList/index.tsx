@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import currentStyles from './index.module.scss';
 import { Pagination } from 'antd';
-import TaskCard from '../../components/taskCard';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+
+import currentStyles from './index.module.scss';
+import TaskCard from '../../components/taskCard';
 import Constatns from '../../constants';
 import { getTaskList, updateTaskConfig } from '../../services/createTask';
 import CommonController from '../../utils/common/common';
-import { useDispatch } from 'react-redux';
 import { updateConfigStep, updateHaveConfigedStep, updateTask } from '../../stores/task.store';
 import NullTask from '../nullTask';
 import { clearConfig } from '../../stores/toolConfig.store';

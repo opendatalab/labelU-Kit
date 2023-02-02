@@ -1,4 +1,4 @@
-export type TagItem = {
+export interface TagItem {
   id: string;
 
   label: {
@@ -11,7 +11,7 @@ export type TagItem = {
 
   /** can be closed ? */
   closable: boolean;
-};
+}
 
 export interface TagState {
   /** tagsView list */

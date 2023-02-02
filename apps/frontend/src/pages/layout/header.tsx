@@ -1,7 +1,9 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { LogoutOutlined, UserOutlined, MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { Layout, Dropdown, Menu } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+
 import HeaderNoticeComponent from './notice';
 import Avator from '../../img/header/avator.jpeg';
 // import LanguageSvg from '../../img/header/language.svg';
@@ -11,7 +13,6 @@ import { LocaleFormatter, useLocale } from '../../locales';
 import LogoIcon from '../../img/logo/logo.svg';
 // import AntdSvg from '../../img/logo/antd.svg';
 import { logoutAsync, setUserItem } from '../../stores/user.store';
-import { useDispatch, useSelector } from 'react-redux';
 // import SvgIcon from '../../components/basic/svgIcon';
 
 const { Header } = Layout;

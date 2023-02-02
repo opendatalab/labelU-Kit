@@ -1,7 +1,8 @@
+import _ from 'lodash';
+
 import axiosProxy from './axiosProxy';
 import commonController from '../utils/common/common';
 import { generateAttributeMapFromConfig } from '../utils/generateAttributeMapFromConfig';
-import _ from 'lodash';
 import { jsonParse } from '../utils';
 const { axiosInstance } = axiosProxy;
 
@@ -43,7 +44,7 @@ function changeKeyToValue(data: any, attributeMap: ReturnType<typeof generateAtt
 
 const createSamples = async function (taskId: number, data: any) {
   // try {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples`,
     method: 'POST',
     data,
@@ -58,7 +59,7 @@ const getTask = async function (taskId: number) {
   if (taskId === 0) {
     return {};
   }
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}`,
     method: 'GET',
     params: {
@@ -69,7 +70,7 @@ const getTask = async function (taskId: number) {
 };
 
 const getSamples = async function (taskId: number, params: any) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples`,
     method: 'GET',
     params,
@@ -78,7 +79,7 @@ const getSamples = async function (taskId: number, params: any) {
 };
 
 const getPrevSamples = async function (taskId: number, params: any) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples`,
     method: 'GET',
     params,
@@ -87,7 +88,7 @@ const getPrevSamples = async function (taskId: number, params: any) {
 };
 
 const getSample = async function (taskId: number, sampleId: number) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
     method: 'GET',
   });
@@ -95,7 +96,7 @@ const getSample = async function (taskId: number, sampleId: number) {
 };
 
 const updateSampleState = async function (taskId: number, sampleId: number, data: any, state?: string) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
     method: 'PATCH',
     params: {
@@ -110,7 +111,7 @@ const updateSampleState = async function (taskId: number, sampleId: number, data
 };
 
 const updateSampleAnnotationResult = async function (taskId: number, sampleId: number, data: any) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
     method: 'PATCH',
     params: {
@@ -151,14 +152,14 @@ const outputSample = async function (taskId: number, sampleIds: any, activeTxt: 
       responseType: 'blob',
     });
   }
-  let data = res;
+  const data = res;
   // @ts-ignore
   // res.blob().then(blob=>console.log(blob));
   // res.blob().then(blob => {
   // let afString = res.headers['content-disposition'].split(';')[1].split('=')[1];
   // afString = afString.slice(1,-1);
   // let blobUrl = 'blob:'+window.location.origin + '/'+ afString;
-  let taskRes: any = await getTask(taskId);
+  const taskRes: any = await getTask(taskId);
   // 导出结果中需要将key换成value导出
   const attributeMap = generateAttributeMapFromConfig(taskRes.data.data.config);
   const dataWithAttributeValue = changeKeyToValue(data.data, attributeMap);
@@ -198,17 +199,17 @@ const outputSample = async function (taskId: number, sampleIds: any, activeTxt: 
 
 const outputSamples = async function (taskId: number, activeTxt: string) {
   try {
-    let samplesRes = await getSamples(taskId, { pageNo: 0, pageSize: 100000 });
-    let sampleIdArrays = samplesRes.data.data;
-    let sampleIds = [];
-    for (let sample of sampleIdArrays) {
-      sampleIds.push(sample['id']);
+    const samplesRes = await getSamples(taskId, { pageNo: 0, pageSize: 100000 });
+    const sampleIdArrays = samplesRes.data.data;
+    const sampleIds = [];
+    for (const sample of sampleIdArrays) {
+      sampleIds.push(sample.id);
     }
     if (sampleIds.length === 0) {
       commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
       return;
     }
-    let outputSamplesRes = await outputSample(taskId, sampleIds, activeTxt);
+    const outputSamplesRes = await outputSample(taskId, sampleIds, activeTxt);
     console.log(outputSamplesRes);
     return true;
   } catch (error) {
@@ -218,7 +219,7 @@ const outputSamples = async function (taskId: number, activeTxt: string) {
 };
 
 const deleteSamples = async function (taskId: number, sampleIds: number[]) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples`,
     method: 'DELETE',
     data: {
@@ -229,7 +230,7 @@ const deleteSamples = async function (taskId: number, sampleIds: number[]) {
 };
 
 const getPreSample = async function (taskId: number, sampleId: number) {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}/pre`,
     method: 'GET',
   });

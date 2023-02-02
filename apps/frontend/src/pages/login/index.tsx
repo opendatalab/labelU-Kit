@@ -1,10 +1,11 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import './index.less';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LoginParams } from '../../interface/user/login';
-import { loginAsync } from '../../stores/user.store';
 import { useDispatch } from 'react-redux';
+
+import type { LoginParams } from '../../interface/user/login';
+import { loginAsync } from '../../stores/user.store';
 import { formatSearch } from '../../utils/formatSearch';
 
 const initialValues: LoginParams = {

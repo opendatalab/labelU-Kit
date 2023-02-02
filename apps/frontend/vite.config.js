@@ -1,6 +1,7 @@
+import { resolve } from 'path';
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
 // import { viteMockServe } from 'vite-plugin-mock';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import vitePluginImp from 'vite-plugin-imp';

@@ -1,8 +1,10 @@
-import { BasicConfig } from '@label-u/components';
-import React, { FC, useMemo, useState } from 'react';
+import type { BasicConfig } from '@label-u/components';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Col, Row, Input as SenseInput, Form } from 'antd';
-import { MapStateJSONTab } from '../../components/AttributeConfig';
 import { useForm } from 'antd/es/form/Form';
+
+import { MapStateJSONTab } from '../../components/AttributeConfig';
 import { delayTime } from '../constants';
 export interface AttributeItem {
   key: string;
@@ -48,7 +50,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = (props) => {
 
   useMemo(() => {
     if (props.config) {
-      let initV = {
+      const initV = {
         // @ts-ignore
         minWidth: props.config.minWidth ? props.config.minWidth : 1,
         // @ts-ignore

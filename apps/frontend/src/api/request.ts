@@ -1,5 +1,6 @@
 import { message as $message } from 'antd';
-import axios, { AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 // import { history } from 'routes/history';
 
 const axiosInstance = axios.create({
@@ -41,11 +42,11 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-export type Response<T = any> = {
+export interface Response<T = any> {
   status: string;
   message: string;
   result: T;
-};
+}
 
 type Method = 'get' | 'post';
 

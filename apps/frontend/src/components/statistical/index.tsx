@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import currentStyles from './index.module.scss';
-import commonController from '../../utils/common/common';
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
-import { getSamples, getTask, outputSamples } from '../../services/samples';
 import { useNavigate } from 'react-router';
-import currentStyles1 from '../../pages/outputData/index.module.scss';
 import { Modal } from 'antd';
 import { useDispatch } from 'react-redux';
+
+import currentStyles from './index.module.scss';
+import commonController from '../../utils/common/common';
+import { getSamples, getTask, outputSamples } from '../../services/samples';
+import currentStyles1 from '../../pages/outputData/index.module.scss';
 import { updateTask, updateStatus } from '../../stores/task.store';
 import { updateAllConfig } from '../../stores/toolConfig.store';
 const Statistical = () => {
   const dispatch = useDispatch();
   const [statisticalDatas, setStatisticalDatas] = useState<any>({});
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
   const [taskStatus, setTaskStatus] = useState(undefined);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const Statistical = () => {
           // @ts-ignore
           setStatisticalDatas(res.data.data.stats);
           setTaskStatus(res.data.data.status);
+          // @ts-ignore
           dispatch(updateTask({ data: res.data.data }));
           dispatch(updateStatus(res.data.data.status));
           if (res.data.data.config) {
@@ -50,7 +52,7 @@ const Statistical = () => {
     getSamples(taskId, params)
       .then((res) => {
         if (res.status === 200 && res.data.data.length > 0) {
-          let sampleId = res.data.data[0].id;
+          const sampleId = res.data.data[0].id;
           navigate('/tasks/' + taskId + '/samples/' + sampleId);
         } else {
           commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
@@ -120,28 +122,28 @@ const Statistical = () => {
         </div>
         <div className={currentStyles.leftTitleContent}>
           <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionBlueIcon}></div>
+            <div className={currentStyles.leftTitleContentOptionBlueIcon} />
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>已标注</b>
             </div>
             <div className={currentStyles.leftTitleContentOptionContent}>{statisticalDatas.done}</div>
           </div>
           <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionGrayIcon}></div>
+            <div className={currentStyles.leftTitleContentOptionGrayIcon} />
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>未标注</b>
             </div>
             <div className={currentStyles.leftTitleContentOptionContent}>{statisticalDatas.new}</div>
           </div>
           <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionOrangeIcon}></div>
+            <div className={currentStyles.leftTitleContentOptionOrangeIcon} />
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>跳过</b>
             </div>
             <div className={currentStyles.leftTitleContentOptionContent}>{statisticalDatas.skipped}</div>
           </div>
           <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionWhiteIcon}></div>
+            <div className={currentStyles.leftTitleContentOptionWhiteIcon} />
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>总计</b>
             </div>

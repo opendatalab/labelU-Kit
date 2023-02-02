@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { connect, useSelector, useDispatch } from 'react-redux';
+import { Table, Pagination, Modal } from 'antd';
+import moment from 'moment';
+
 import currentStyles from './index.module.scss';
 import commonStyles from '../../utils/common/common.module.scss';
 import Statistical from '../../components/statistical';
-import { Outlet, useNavigate } from 'react-router-dom';
 import Separator from '../../components/separator';
 import { updateTaskConfig } from '../../services/createTask';
 import constant from '../../constants';
-import { connect, useSelector, useDispatch } from 'react-redux';
 import GoToEditTask from '../goToEditTask';
 import commonController from '../../utils/common/common';
-import { Table, Pagination, Modal } from 'antd';
 import { updateConfigStep } from '../../stores/task.store';
 import { getTask, getSamples, deleteSamples, outputSamples, outputSample } from '../../services/samples';
 import statisticalStyles from '../../components/statistical/index.module.scss';
-import moment from 'moment';
 import currentStyles1 from '../outputData/index.module.scss';
 const Samples = (props: any) => {
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  let configStep = useSelector((state) => state.existTask.configStep);
+  const configStep = useSelector((state) => state.existTask.configStep);
 
   const steps = [
     {
@@ -60,7 +61,7 @@ const Samples = (props: any) => {
       align: 'left',
       render: (data: any) => {
         let url = '';
-        for (let sampleId in data.urls) {
+        for (const sampleId in data.urls) {
           url = data.urls[sampleId];
         }
         return <img src={url} style={{ width: '116px', height: '70px' }} />;
@@ -81,7 +82,7 @@ const Samples = (props: any) => {
           case 'DONE':
             result = (
               <div className={currentStyles.leftTitleContentOption}>
-                <div className={statisticalStyles.leftTitleContentOptionBlueIcon}></div>
+                <div className={statisticalStyles.leftTitleContentOptionBlueIcon} />
                 <div className={statisticalStyles.leftTitleContentOptionContent}>已标注</div>
               </div>
             );
@@ -89,7 +90,7 @@ const Samples = (props: any) => {
           case 'NEW':
             result = (
               <div className={currentStyles.leftTitleContentOption}>
-                <div className={statisticalStyles.leftTitleContentOptionGrayIcon}></div>
+                <div className={statisticalStyles.leftTitleContentOptionGrayIcon} />
                 <div className={statisticalStyles.leftTitleContentOptionContent}>未标注</div>
               </div>
             );
@@ -97,7 +98,7 @@ const Samples = (props: any) => {
           case 'SKIPPED':
             result = (
               <div className={currentStyles.leftTitleContentOption}>
-                <div className={statisticalStyles.leftTitleContentOptionOrangeIcon}></div>
+                <div className={statisticalStyles.leftTitleContentOptionOrangeIcon} />
                 <div className={statisticalStyles.leftTitleContentOptionContent}>跳过</div>
               </div>
             );
@@ -115,10 +116,10 @@ const Samples = (props: any) => {
 
       render: (temp: any, record: any) => {
         let result = 0;
-        let resultJson = JSON.parse(record.data.result);
-        for (let key in resultJson) {
+        const resultJson = JSON.parse(record.data.result);
+        for (const key in resultJson) {
           if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
-            let tool = resultJson[key];
+            const tool = resultJson[key];
             if (!tool.result) {
               let temp = 0;
               if (tool.length) {
@@ -243,7 +244,7 @@ const Samples = (props: any) => {
       .then((res) => {
         if (res.status === 200) {
           setShowDatas(res.data.data);
-          setTotal(res.data['meta_data'].total);
+          setTotal(res.data.meta_data.total);
           setCurrentPage(params.pageNo + 1);
           setCurrentPageSize(params.pageSize);
         } else {
@@ -259,7 +260,7 @@ const Samples = (props: any) => {
     getTask(taskId)
       .then((res: any) => {
         if (res.status === 200) {
-          let status = res.data.data.status;
+          const status = res.data.data.status;
           setTaskStatus(status);
         } else {
           commonController.notificationErrorMessage({ message: '请求任务详情出错' }, 1);
@@ -349,7 +350,7 @@ const Samples = (props: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentPageSize, setCurrentPageSize] = useState(10);
   const reactSorter = (p: any, f: any, s: any) => {
-    let field = s.field;
+    const field = s.field;
     let sortStr = s.order;
     switch (sortStr) {
       case 'ascend':
@@ -362,9 +363,9 @@ const Samples = (props: any) => {
         sortStr = 'desc';
         break;
     }
-    let newSortGroup = Object.assign({}, { [field]: sortStr });
+    const newSortGroup = Object.assign({}, { [field]: sortStr });
     // setSortGroup(newSortGroup);
-    let queryStr = `${field}:${newSortGroup[field]}`;
+    const queryStr = `${field}:${newSortGroup[field]}`;
     getSamplesLocal({ pageNo: currentPage - 1, pageSize: currentPageSize, sort: queryStr });
   };
   // @ts-ignore
@@ -386,7 +387,7 @@ const Samples = (props: any) => {
           rowSelection={rowSelection}
           onRow={onRow}
           onChange={reactSorter}
-        ></Table>
+        />
         <div className={currentStyles.pagination}>
           <div className={currentStyles.dataProcess}>
             <div

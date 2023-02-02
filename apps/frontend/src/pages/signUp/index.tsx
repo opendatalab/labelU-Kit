@@ -1,4 +1,5 @@
 import React from 'react';
+
 import currentStyles from './index.module.scss';
 import SignUp from '../../components/signUp';
 import Constants from '../../constants';

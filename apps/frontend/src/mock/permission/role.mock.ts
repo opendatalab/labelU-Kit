@@ -1,5 +1,5 @@
 import { mock, intercepter } from '../config';
-import { Role } from '../../interface/permission/role.interface';
+import type { Role } from '../../interface/permission/role.interface';
 
 const roles: Role[] = [
   {

@@ -3,7 +3,7 @@ import CommonController from '../utils/common/common';
 const { axiosInstance } = axiosProxy;
 const submitBasicConfig = async function (data: { name: string; description?: string; tips?: string }) {
   // try {
-  let res = await axiosInstance({
+  const res = await axiosInstance({
     url: `/api/v1/tasks`,
     method: 'POST',
     data,
@@ -16,10 +16,10 @@ const submitBasicConfig = async function (data: { name: string; description?: st
 
 const uploadFile = async function (taskId: number, params: any) {
   try {
-    let data = new FormData();
+    const data = new FormData();
     data.append('file', params.file);
     // data.append('path', './')
-    let res = await axiosInstance({
+    const res = await axiosInstance({
       url: `/api/v1/tasks/${taskId}/attachments`,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -35,7 +35,7 @@ const uploadFile = async function (taskId: number, params: any) {
 
 const updateTaskConfig = async function (taskId: number, taskConfig: any) {
   try {
-    let res = await axiosInstance({
+    const res = await axiosInstance({
       url: `/api/v1/tasks/${taskId}`,
       method: 'PATCH',
       data: taskConfig,
@@ -48,7 +48,7 @@ const updateTaskConfig = async function (taskId: number, taskConfig: any) {
 
 const getTaskList = async function (page: number) {
   try {
-    let res = await axiosInstance({
+    const res = await axiosInstance({
       url: `/api/v1/tasks`,
       method: 'GET',
       params: {
@@ -64,7 +64,7 @@ const getTaskList = async function (page: number) {
 
 const deleteTask = async function (taskId: number) {
   try {
-    let res = await axiosInstance({
+    const res = await axiosInstance({
       url: `/api/v1/tasks/${taskId}`,
       method: 'DELETE',
       params: {

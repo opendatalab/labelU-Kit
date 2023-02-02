@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { Checkbox } from 'antd';
-import { CheckboxProps } from 'antd/lib/checkbox';
+import type { CheckboxProps } from 'antd/lib/checkbox';
 
-interface MyButtonProps extends CheckboxProps {}
+type MyButtonProps = CheckboxProps;
 
 const BaseCheckBox: FC<MyButtonProps> = (props) => {
   return <Checkbox {...props} />;

@@ -1,19 +1,19 @@
 import { useEffect } from 'react';
 import { IntlProvider } from 'react-intl';
-import { localeConfig } from './locales';
 import { ConfigProvider } from 'antd';
 import enUS from 'antd/es/locale/en_US';
 import zhCN from 'antd/es/locale/zh_CN';
+import moment from 'moment';
+import { useSelector } from 'react-redux';
+import intl from 'react-intl-universal';
 
 import enUS1 from './locales/en-US';
 import zhCN1 from './locales/zh-CN';
 
-import moment from 'moment';
 import 'moment/locale/zh-cn';
 import RenderRouter from './routes';
-import { useSelector } from 'react-redux';
 import { history, HistoryRouter } from './routes/history';
-import intl from 'react-intl-universal';
+import { localeConfig } from './locales';
 const App: React.FC = () => {
   const { locale } = useSelector((state) => state.user);
 

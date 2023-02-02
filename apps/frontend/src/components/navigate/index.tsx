@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import currentStyles from './index.module.scss';
 import { Breadcrumb } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { UserOutlined, PoweroffOutlined } from '@ant-design/icons';
+
+import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
 import constants from '../../constants';
 import AnnotationTips from '../../components/annotationTips';
 import { getTask } from '../../services/samples';
 import HelpTips from '../helpTips';
-import { UserOutlined, PoweroffOutlined } from '@ant-design/icons';
+
 const Homepage = (props: any) => {
   // const username = useSelector(commonController.getUsername);
-  let username = localStorage.getItem('username');
+  const username = localStorage.getItem('username');
   const [isShowHelp, setIsShowHelp] = useState(false);
   const navigate = useNavigate();
-  let location = useLocation();
+  const location = useLocation();
   // const crumbs  : any = {
   //     '/tasks' : (<Breadcrumb.Item>
   //         <Link to = ''>任务列表</Link>
@@ -104,7 +106,7 @@ const Homepage = (props: any) => {
         );
         break;
       default:
-        let pathnames = pathname.split('/');
+        const pathnames = pathname.split('/');
         if (pathnames[1] === 'tasks' && pathnames[2] === '0' && pathnames[3] === 'edit' && pathnames[4] === 'basic') {
           setIsShowAnnotationTips(false);
           setIsShowHelp(false);
@@ -179,13 +181,13 @@ const Homepage = (props: any) => {
   const [taskTips, setTaskTips] = useState('');
   useEffect(() => {
     if (location.pathname) {
-      let pathnames = window.location.pathname.split('/');
+      const pathnames = window.location.pathname.split('/');
       if (pathnames[2] && pathnames[2] !== '0') {
         getTask(parseInt(pathnames[2]))
           .then((res: any) => {
             if (res.status === 200) {
               // setTaskName(res.data.data.name);
-              let taskName = res.data.data.name;
+              const taskName = res.data.data.name;
               setTaskTips(res.data.data.tips);
               setBreadcrumbItems(getBreadcrumb(location.pathname, taskName));
             } else {
@@ -217,7 +219,7 @@ const Homepage = (props: any) => {
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.left}>
-        <div className={currentStyles.logo}></div>
+        <div className={currentStyles.logo} />
         {/*<div className = {currentStyles.shortCutButton}></div>*/}
         <div className={currentStyles.breadcrumb}>
           <Breadcrumb>{breadcrumbItems}</Breadcrumb>

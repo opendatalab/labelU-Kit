@@ -1,8 +1,9 @@
-import AnnotationOperation, { TextConfig } from '@label-u/components';
+import type { TextConfig } from '@label-u/components';
+import AnnotationOperation from '@label-u/components';
 
 import '@label-u/components/dist/index.css';
 // import LeftSider from './leftSider';
-import { BasicConfig, Attribute, OneTag } from 'interface/toolConfig';
+import type { BasicConfig, Attribute, OneTag } from 'interface/toolConfig';
 import React, { memo, useEffect, useState } from 'react';
 // import tagConfigList from '../../../config/tagConfigList.json';
 // import attributeList from '../../../config/attributeList.json';

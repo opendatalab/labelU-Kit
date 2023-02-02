@@ -1,15 +1,18 @@
-import { FC, useEffect, Suspense, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import { useEffect, Suspense, useCallback, useState } from 'react';
 import { Layout, Drawer } from 'antd';
+
 import './index.less';
+import { Outlet, useLocation, useNavigate } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
+
 import MenuComponent from './menu';
 import HeaderComponent from './header';
 import { getGlobalState } from '../../utils/getGloabal';
 import SuspendFallbackLoading from './suspendFallbackLoading';
 import { getMenuList } from '../../api/layout.api';
-import { MenuList, MenuChild } from '../../interface/layout/menu.interface';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import type { MenuList, MenuChild } from '../../interface/layout/menu.interface';
 import { setUserItem } from '../../stores/user.store';
-import { useDispatch, useSelector } from 'react-redux';
 
 const { Sider, Content } = Layout;
 const WIDTH = 992;

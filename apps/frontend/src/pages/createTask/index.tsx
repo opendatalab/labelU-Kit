@@ -1,34 +1,40 @@
 // @ts-ignore
 import React, { useState, useEffect } from 'react';
+import { Breadcrumb, Modal, Steps } from 'antd';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { connect, useSelector, useDispatch } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
+
 import currentStyles from './index.module.scss';
 import commonStyles from '../../utils/common/common.module.scss';
-import { Breadcrumb, Modal, Steps } from 'antd';
 import Step from '../../components/step';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
 import Separator from '../../components/separator';
 import { submitBasicConfig, updateTaskConfig, deleteTask } from '../../services/createTask';
 import constant from '../../constants';
-import { connect, useSelector, useDispatch } from 'react-redux';
-import { updateHaveConfigedStep, updateTask } from '../../stores/task.store';
+import {
+  updateHaveConfigedStep,
+  updateTask,
+  updateConfigStep,
+  updateTaskId,
+  updateStatus,
+} from '../../stores/task.store';
 import commonController from '../../utils/common/common';
-
-import { updateConfigStep, updateTaskId, updateStatus } from '../../stores/task.store';
 import { createSamples, getTask } from '../../services/samples';
 import { updateAllConfig } from '../../stores/toolConfig.store';
-import { v4 as uuidv4 } from 'uuid';
+
 const CreateTask = (props: any) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  let configStep = useSelector((state) => state.existTask.configStep);
-  let haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
-  let taskName = useSelector((state) => state.existTask.taskName);
-  let taskDescription = useSelector((state) => state.existTask.taskDescription);
-  let taskTips = useSelector((state) => state.existTask.taskTips);
-  let taskId = useSelector((state) => state.existTask.taskId);
+  const configStep = useSelector((state) => state.existTask.configStep);
+  const haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
+  const taskName = useSelector((state) => state.existTask.taskName);
+  const taskDescription = useSelector((state) => state.existTask.taskDescription);
+  const taskTips = useSelector((state) => state.existTask.taskTips);
+  const taskId = useSelector((state) => state.existTask.taskId);
 
-  let newSamples = useSelector((state) => state.samples.newSamples);
-  let toolsConfig = useSelector((state) => state.toolsConfig);
-  let taskStatus = useSelector((state) => state.existTask.status);
+  const newSamples = useSelector((state) => state.samples.newSamples);
+  const toolsConfig = useSelector((state) => state.toolsConfig);
+  const taskStatus = useSelector((state) => state.existTask.status);
   const steps = [
     {
       title: '基础配置',
@@ -63,9 +69,9 @@ const CreateTask = (props: any) => {
       return;
     }
     if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length > 0) {
-      let currentTools = toolsConfig.tools;
+      const currentTools = toolsConfig.tools;
       for (let toolIndex = 0; toolIndex < currentTools.length; toolIndex++) {
-        let currentConfig = currentTools[toolIndex];
+        const currentConfig = currentTools[toolIndex];
         // if (currentConfig.tool === 'pointTool') {
         //     // @ts-ignore
         //     if (!currentConfig?.config?.upperLimit) {
@@ -75,7 +81,7 @@ const CreateTask = (props: any) => {
         // }
       }
     }
-    let res = await updateTaskConfig(taskId, {
+    const res = await updateTaskConfig(taskId, {
       config: JSON.stringify(toolsConfig),
       media_type: 'IMAGE',
     });
@@ -114,15 +120,15 @@ const CreateTask = (props: any) => {
       commonController.notificationErrorMessage({ message: '请填入任务名称' }, 1);
       return false;
     }
-    let isTaskNameOver = commonController.isOverFontCount(taskName, 50);
+    const isTaskNameOver = commonController.isOverFontCount(taskName, 50);
     if (isTaskNameOver) {
       return false;
     }
-    let isTaskDescriptionOver = commonController.isOverFontCount(taskDescription, 500);
+    const isTaskDescriptionOver = commonController.isOverFontCount(taskDescription, 500);
     if (isTaskDescriptionOver) {
       return false;
     }
-    let isTaskTipsOver = commonController.isOverFontCount(taskTips, 1000);
+    const isTaskTipsOver = commonController.isOverFontCount(taskTips, 1000);
     if (isTaskTipsOver) {
       return false;
     }
@@ -159,7 +165,7 @@ const CreateTask = (props: any) => {
       return true;
     }
     try {
-      let res: any = await createSamples(taskId, newSamples);
+      const res: any = await createSamples(taskId, newSamples);
       if (res.status === 201) {
         const { status, id } = res.data.data;
         updateStep('IMPORTED');
@@ -179,13 +185,13 @@ const CreateTask = (props: any) => {
     let childOutlet = `/tasks/${taskId}/edit/basic`;
     switch (configStep) {
       case -1:
-        let isSuccess0 = await nextWhen0();
+        const isSuccess0 = await nextWhen0();
         if (!isSuccess0) return;
         currentStep = 0;
         childOutlet = `/tasks/${isSuccess0}/edit/upload`;
         break;
       case 0:
-        let isSuccess1 = await nextWhen1();
+        const isSuccess1 = await nextWhen1();
         if (!isSuccess1) return;
         currentStep = 1;
         childOutlet = `/tasks/${taskId}/edit/config`;
@@ -198,8 +204,8 @@ const CreateTask = (props: any) => {
   };
 
   useEffect(() => {
-    let taskId = parseInt(window.location.pathname.split('/')[2]);
-    let searchString = window.location.search;
+    const taskId = parseInt(window.location.pathname.split('/')[2]);
+    const searchString = window.location.search;
     // bad name
     let currentStatus = 1;
     if (searchString.indexOf('currentStatus=2') > -1) {
@@ -247,20 +253,20 @@ const CreateTask = (props: any) => {
     setIsShowCancelModal(false);
     switch (configStep) {
       case -1:
-        let isSuccess0 = await nextWhen0();
+        const isSuccess0 = await nextWhen0();
         if (!isSuccess0) return;
         break;
       case 0:
-        let isSuccess1 = await nextWhen1();
+        const isSuccess1 = await nextWhen1();
         if (!isSuccess1) return;
         break;
       case 1:
         return;
-        let isNullToolConfigResult = isNullToolConfig();
+        const isNullToolConfigResult = isNullToolConfig();
         if (isNullToolConfigResult) {
           return;
         }
-        let isSuccess2 = await finallySave();
+        const isSuccess2 = await finallySave();
         // if (!isSuccess2) return;
         break;
     }

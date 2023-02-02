@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import currentStyles from './index.module.scss';
-import commonStyles from '../../utils/common/common.module.scss';
 import { IdcardOutlined, LockOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import intl from 'react-intl-universal';
+
 import CommonController from '../../utils/common/common';
 import { login as loginService } from '../../services/general';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { setUsername } from '../../stores/user.store';
-import intl from 'react-intl-universal';
+import commonStyles from '../../utils/common/common.module.scss';
+import currentStyles from './index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
 const Login = (props: any) => {
@@ -35,7 +35,7 @@ const Login = (props: any) => {
   };
   const loginController = async function () {
     try {
-      let hasUndefined = CommonController.checkObjectHasUndefined({
+      const hasUndefined = CommonController.checkObjectHasUndefined({
         username: email,
         password,
       });
@@ -43,15 +43,15 @@ const Login = (props: any) => {
         CommonController.notificationErrorMessage({ msg: hasUndefined.key }, 5);
         return;
       }
-      let checkUsername = CommonController.checkEmail(undefined, email);
+      const checkUsername = CommonController.checkEmail(undefined, email);
       if (!checkUsername) {
         return;
       }
-      let checkPassword = CommonController.checkPassword(undefined, password);
+      const checkPassword = CommonController.checkPassword(undefined, password);
       if (!checkPassword) {
         return;
       }
-      let res = await loginService({
+      const res = await loginService({
         username: email,
         password,
       });
@@ -59,7 +59,7 @@ const Login = (props: any) => {
         CommonController.notificationErrorMessage(res.data, 5);
         return;
       }
-      let token = res.data.data.token;
+      const token = res.data.data.token;
       localStorage.setItem('token', token);
       localStorage.setItem('username', email);
       dispatch(setUsername(email));

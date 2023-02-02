@@ -1,8 +1,9 @@
-import { FC } from 'react';
+import type { FC, ReactElement } from 'react';
+
 // import { RouteProps } from 'react-router';
-import PrivateRoute from './pravateRoute';
 import { useIntl } from 'react-intl';
-import { ReactElement } from 'react';
+
+import PrivateRoute from './pravateRoute';
 
 export interface WrapperRouteProps {
   /** document title locale id */

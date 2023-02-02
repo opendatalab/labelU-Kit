@@ -1,11 +1,16 @@
-import { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { useEffect, useState } from 'react';
+
 import Annotation from '../../components/business/annotation';
+
 import AnnotationOperation from '@label-u/components';
+
 import './index.less';
-import YamlConfig from './yamlConfig';
 import { shallowEqual, useSelector } from 'react-redux';
-import { ToolsConfigState } from 'interface/toolConfig';
+import type { ToolsConfigState } from 'interface/toolConfig';
 import { Button, Steps, Tabs } from 'antd';
+
+import YamlConfig from './yamlConfig';
 import EmptyConfigImg from '../../img/annotationCommon/emptyConfig.png';
 import ConfigTemplate from './configTemplate/index';
 import FormConfig from './formConfig';
@@ -26,7 +31,7 @@ const defaultFile: OneFile = {
 };
 
 const AnnotationConfig: FC = () => {
-  let taskId = parseInt(window.location.pathname.split('/')[2]);
+  const taskId = parseInt(window.location.pathname.split('/')[2]);
 
   const [fileList, setFileList] = useState<OneFile[]>([defaultFile]);
 
@@ -87,7 +92,7 @@ const AnnotationConfig: FC = () => {
     // 初始化配置防抖方法
     const throttle = (fun: () => void, time: number) => {
       let timmer: any;
-      let returnFunction = () => {
+      const returnFunction = () => {
         if (timmer) {
           clearTimeout(timmer);
         }

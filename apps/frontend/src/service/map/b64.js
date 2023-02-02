@@ -24,7 +24,9 @@ function getLens(b64) {
   // Trim off extra bytes after placeholder bytes are found
   // See: https://github.com/beatgammit/base64-js/issues/42
   var validLen = b64.indexOf('=');
-  if (validLen === -1) validLen = len;
+  if (validLen === -1) {
+    validLen = len;
+  }
 
   var placeHoldersLen = validLen === len ? 0 : 4 - (validLen % 4);
 

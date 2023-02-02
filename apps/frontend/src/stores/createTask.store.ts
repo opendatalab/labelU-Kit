@@ -1,7 +1,10 @@
-import { createSlice, PayloadAction, Dispatch } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, Dispatch } from '@reduxjs/toolkit';
+
 import { apiLogin, apiLogout } from '../api/user.api';
-import { LoginParams, Role } from '../interface/user/login';
-import { Locale, UserState } from '../interface/user/user';
+import type { Role } from '../interface/user/login';
+import { LoginParams } from '../interface/user/login';
+import type { Locale, UserState } from '../interface/user/user';
 import { createAsyncAction } from './utils';
 import { getGlobalState } from '../utils/getGloabal';
 

@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { Input, Button, Tooltip, Modal, Form } from 'antd';
 import { cloneDeep } from 'lodash';
 import { SettingOutlined, CloseCircleFilled } from '@ant-design/icons';
+
 // import { Config, defaultValue } from '../index';
 import TextConfig from './textConfig';
+
 import classnames from 'classnames';
 import './index.less';
 import { useTranslation } from 'react-i18next';
@@ -67,8 +69,8 @@ const TextList: React.FC<IProps> = ({ value, onChange, onDelete, onAdd }) => {
     // triggerChange([...(value || configs), newConfig]);
   };
   const deleteConfig = (index: number) => {
-    let tmpValue = value || configs;
-    let list = [...tmpValue].filter((item, Tindex) => {
+    const tmpValue = value || configs;
+    const list = [...tmpValue].filter((item, Tindex) => {
       return Tindex !== index;
     });
     if (!value) {

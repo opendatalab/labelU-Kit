@@ -1,6 +1,7 @@
 // import debounce from '@utils/debounce';
 // import { message, Modal, notification } from 'antd';
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 // import React from 'react';
 //
 //
@@ -136,7 +137,7 @@ const responseFailedHandler = (res: any) => {
 };
 
 const authorizationBearerSuccess = (config: any) => {
-  let token = localStorage.token;
+  const token = localStorage.token;
   if (token) {
     config.headers.Authorization = localStorage.token;
   }

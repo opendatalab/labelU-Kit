@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+
 import currentStyles from './index.module.scss';
 import Navigate from '../../components/navigate/index';
-import { Outlet, useNavigate } from 'react-router-dom';
 import constants from '../../constants';
 const Homepage = () => {
   const navigate = useNavigate();
@@ -10,8 +11,8 @@ const Homepage = () => {
     if (window.location.pathname === '/') {
       navigate(constants.urlToTasks);
     }
-    let token = localStorage.getItem('token');
-    let username = localStorage.getItem('username');
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
     if (token && username) {
       navigate('/tasks');
     } else {
