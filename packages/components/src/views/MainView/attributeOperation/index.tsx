@@ -1,10 +1,9 @@
-import { Attribute } from '@label-u/annotation';
+import { Attribute, AttributeUtils } from '@label-u/annotation';
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '../../../store';
 import { BasicConfig } from '../../../interface/toolConfig';
 import { Button, Dropdown, Space, Menu } from 'antd';
-import { COLORS_ARRAY } from '@/data/Style';
 // import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
@@ -20,18 +19,50 @@ interface AttributeOperationProps {
   toolInstance: any;
   copytoolInstance: any;
   imgListCollapse: boolean;
+  toolStyle: any;
 }
 
+export const getCombineAttributes = (
+  toolsBasicConfig: BasicConfig[],
+  attributeList: Attribute[],
+) => {
+  let tmpAttributesList: Attribute[] = [];
+  if (attributeList && attributeList.length > 0) {
+    tmpAttributesList = [...tmpAttributesList, ...attributeList];
+  }
+  if (toolsBasicConfig && toolsBasicConfig.length > 0) {
+    for (let i = 0; i < toolsBasicConfig.length; i++) {
+      //@ts-ignore
+      if (toolsBasicConfig[i].config?.attributeList) {
+        // @ts-ignore
+        tmpAttributesList = [
+          ...tmpAttributesList,
+          // @ts-ignore
+          ...toolsBasicConfig[i].config?.attributeList,
+        ];
+      }
+    }
+  }
+  return tmpAttributesList;
+};
+
 const AttributeOperation: FC<AttributeOperationProps> = (props) => {
-  const [_, forceRender] = useState(0);
-  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance } =
-    props;
+  const [, forceRender] = useState(0);
+  const {
+    attributeList,
+    toolsBasicConfig,
+    currentToolName,
+    toolInstance,
+    copytoolInstance,
+    toolStyle,
+  } = props;
   const ptCtx = useContext(PointCloudContext);
   const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
+  const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
   const { updateMainViewAttribute } = UseAttributes();
 
   useEffect(() => {
@@ -42,24 +73,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     }
   }, [copytoolInstance, ptCtx.mainViewInstance?.attribute]);
 
-  // useEffect(() => {
-  //   if (toolInstance) {
-  //     toolInstance.singleOn('changeAttributeSidebar', (index: number) => {
-  //       forceRender((s) => s + 1);
-
-  //     });
-  //   }
-  //   return () => {
-  //     toolInstance.unbindAll('changeAttributeSidebar');
-  //   };
-  // }, [toolInstance]);
-
   // 计算attribute栏目 宽度
   useEffect(() => {
     if (attributeList && attributeList.length > 0) {
-      // const leftSliderDomWidth = document.getElementById('sliderBoxId')?.offsetWidth as number;
-      // const rightSliderDomWidth = 240;
-      // const attributeBoxLength = window.innerWidth - leftSliderDomWidth - rightSliderDomWidth;
       const toolContainerWidth = window.innerWidth as number;
       setAttributeBoxLength(toolContainerWidth - 190);
     }
@@ -110,18 +126,23 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               })}
               onClick={(e) => {
                 e.stopPropagation();
+                setChoseAttribute(item.value);
                 if (toolInstance) {
                   toolInstance.setDefaultAttribute(item.key);
                 }
-                // updateTopViewAttribute(item.key);
-                updateMainViewAttribute?.(item.key);
+                if (ptCtx.mainViewInstance) {
+                  updateMainViewAttribute?.(item.key);
+                }
                 forceRender((s) => s + 1);
               }}
             >
               <div
                 className='circle'
                 style={{
-                  backgroundColor: COLORS_ARRAY[(index + shwoAttributeCount) % COLORS_ARRAY.length],
+                  backgroundColor:
+                    toolStyle.attributeColor[
+                      AttributeUtils.getAttributeIndex(item.key, allAttributeList ?? []) + 1
+                    ].valid.stroke,
                   marginRight: 5,
                 }}
               />
@@ -155,9 +176,25 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     } else {
       tmpCurrentAttributeList = attributeList;
     }
-    // tmpCurrentAttributeList.unshift({ key: t('NoAttribute'), value: '' });
     setCurrentAttributeList(tmpCurrentAttributeList);
   }, [attributeList, toolsBasicConfig, currentToolName]);
+
+  // 设置工具全量标签列表
+  useEffect(() => {
+    let tmpAttributesList = getCombineAttributes(props.toolsBasicConfig, props.attributeList);
+    if (ptCtx?.mainViewInstance) {
+      ptCtx?.mainViewInstance?.setAllAttributes(tmpAttributesList);
+    } else if (toolInstance) {
+      toolInstance?.setAllAttributes(tmpAttributesList);
+    }
+    setAllAttributeList(tmpAttributesList);
+  }, [
+    currentToolName,
+    toolInstance?.isShowOrder,
+    toolsBasicConfig,
+    attributeList,
+    ptCtx.mainViewInstance,
+  ]);
 
   return (
     <div className='attributeBox' key={chooseAttribute}>
@@ -172,12 +209,10 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 if (toolInstance) {
                   toolInstance.setDefaultAttribute(attribute.key);
                 }
-                // top view don't need attribute
-                // updateTopViewAttribute?.(attribute.key);
-                updateMainViewAttribute?.(attribute.key);
-
+                if (ptCtx.mainViewInstance) {
+                  updateMainViewAttribute?.(attribute.key);
+                }
                 forceRender((s) => s + 1);
-                // alert(attribute.key)
               }}
               // className={classNames({
               //   chooseAttribute: attribute.key === chooseAttribute,
@@ -188,7 +223,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 padding: '1px 8px',
                 backgroundColor:
                   attribute.key === chooseAttribute
-                    ? COLORS_ARRAY[index % COLORS_ARRAY.length]
+                    ? toolStyle.attributeColor[
+                        AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
+                      ].valid.stroke
                     : '#FFFFFF',
                 color: attribute.key === chooseAttribute ? '#ffffff' : '',
                 // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
@@ -198,7 +235,10 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className='circle'
                 style={{
-                  backgroundColor: COLORS_ARRAY[index % COLORS_ARRAY.length],
+                  backgroundColor:
+                    toolStyle.attributeColor[
+                      AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
+                    ].valid.stroke,
                   marginRight: 5,
                 }}
               />
@@ -246,6 +286,7 @@ const mapStateToProps = (appState: AppState) => ({
   toolsBasicConfig: appState.annotation.toolsBasicConfig,
   currentToolName: appState.annotation.currentToolName,
   imgListCollapse: appState.toolStyle.imgListCollapse,
+  toolStyle: appState.toolStyle,
 });
 
 export default connect(mapStateToProps, null, null, { context: LabelUContext })(AttributeOperation);

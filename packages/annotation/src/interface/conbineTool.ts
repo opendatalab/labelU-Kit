@@ -9,6 +9,12 @@ interface CommonConfig {
   copyBackwardResult?: boolean;
 }
 
+export interface PointCloudConfig extends CommonConfig {
+  radis: number;
+  attributeConfigurable: boolean;
+  attributeList: Attribute[];
+}
+
 export interface IMeasureToolConfig extends CommonConfig {
   textConfigurable: boolean;
   attributeConfigurable: boolean;
@@ -116,8 +122,8 @@ export interface ICoordinate {
 }
 
 export interface ShowSettingConfig {
-  isShowOrder:boolean; //是否显示标记顺序
-  isShowAttributeText:boolean; //是否显示属性文本
-  isShowDirection:boolean; //是否显示箭头方向
-  isShowAttribute:boolean; //是否显示属性
+  isShowOrder: boolean; //是否显示标记顺序
+  isShowAttributeText: boolean; //是否显示属性文本
+  isShowDirection: boolean; //是否显示箭头方向
+  isShowAttribute: boolean; //是否显示属性
 }

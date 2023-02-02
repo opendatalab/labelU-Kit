@@ -242,8 +242,6 @@ function mapStateToProps(state: AppState) {
     currentToolName: state.annotation.currentToolName,
     imgList: [...state.annotation.imgList],
     toolInstance: state.annotation.toolInstance,
-    tagConfigList: state.annotation.tagConfigList,
-    textConfig: state.annotation.textConfig,
     imgIndex: state.annotation.imgIndex,
   };
 }

@@ -374,7 +374,7 @@ export const usePointCloudViews = () => {
     if (polygon.id) {
       let zInfo = mainViewInstance?.getSensesPointZAxisInPolygon(polygon.pointList);
       if (zInfo) {
-        mainViewInstance?.updateBoxInSene(polygon.pointList, zInfo, polygon.attribute, polygon.id);
+        mainViewInstance?.doUpateboxInScene(polygon.pointList, zInfo, polygon.attribute, polygon.id);
         mainViewInstance?.controls.update();
         mainViewInstance?.render();
       }
