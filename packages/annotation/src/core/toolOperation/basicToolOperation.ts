@@ -65,7 +65,7 @@ const zoomInfo = {
   ratio: 0.4,
 };
 
-const minTextWidth = 20
+const MIN_TEXT_WIDTH = 20;
 
 const validNumber = (value: number) => {
   return isNumber(value) && !isNaN(value);
