@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: release
 
 env:
   LAB_NPM_TOKEN: ${{ secrets.LAB_NPM_TOKEN }}
@@ -16,7 +16,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  install-build-publish:
+  publish-packages:
     runs-on: ubuntu-latest
 
     steps:
@@ -60,3 +60,7 @@ jobs:
       - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
       - name: Publish packages
         run: pnpm run release
+      - name: Build frontend
+        run: pnpm run build:frontend
+      - name: Release frontend
+        run: pnpm run release:frontend
