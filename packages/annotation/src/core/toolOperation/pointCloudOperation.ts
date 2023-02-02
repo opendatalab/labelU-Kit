@@ -527,7 +527,7 @@ class PointCloudOperation extends PointCloud {
 
     // add box in scene
     this.container.addEventListener('mousedown', function (event) {
-      if (!self.attribute) {
+      if (!self.attribute || event.ctrlKey) {
         return;
       }
       if (event.button === MOUSE.LEFT) {

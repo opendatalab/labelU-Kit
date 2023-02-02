@@ -22,8 +22,10 @@ interface AttributeOperationProps {
   toolStyle: any;
 }
 
-
-export const getCombineAttributes = (toolsBasicConfig:BasicConfig[],attributeList:Attribute[])=>{
+export const getCombineAttributes = (
+  toolsBasicConfig: BasicConfig[],
+  attributeList: Attribute[],
+) => {
   let tmpAttributesList: Attribute[] = [];
   if (attributeList && attributeList.length > 0) {
     tmpAttributesList = [...tmpAttributesList, ...attributeList];
@@ -42,10 +44,10 @@ export const getCombineAttributes = (toolsBasicConfig:BasicConfig[],attributeLis
     }
   }
   return tmpAttributesList;
-}
+};
 
 const AttributeOperation: FC<AttributeOperationProps> = (props) => {
-  const [_, forceRender] = useState(0);
+  const [, forceRender] = useState(0);
   const {
     attributeList,
     toolsBasicConfig,
@@ -70,18 +72,6 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       setChoseAttribute(ptCtx.mainViewInstance?.attribute);
     }
   }, [copytoolInstance, ptCtx.mainViewInstance?.attribute]);
-
-  // useEffect(() => {
-  //   if (toolInstance) {
-  //     toolInstance.singleOn('changeAttributeSidebar', (index: number) => {
-  //       forceRender((s) => s + 1);
-
-  //     });
-  //   }
-  //   return () => {
-  //     toolInstance.unbindAll('changeAttributeSidebar');
-  //   };
-  // }, [toolInstance]);
 
   // 计算attribute栏目 宽度
   useEffect(() => {
@@ -140,7 +130,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 if (toolInstance) {
                   toolInstance.setDefaultAttribute(item.key);
                 }
-                if(ptCtx.mainViewInstance ){
+                if (ptCtx.mainViewInstance) {
                   updateMainViewAttribute?.(item.key);
                 }
                 forceRender((s) => s + 1);
@@ -189,17 +179,22 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     setCurrentAttributeList(tmpCurrentAttributeList);
   }, [attributeList, toolsBasicConfig, currentToolName]);
 
-
   // 设置工具全量标签列表
   useEffect(() => {
-    let tmpAttributesList = getCombineAttributes(props.toolsBasicConfig,props.attributeList)
+    let tmpAttributesList = getCombineAttributes(props.toolsBasicConfig, props.attributeList);
     if (ptCtx?.mainViewInstance) {
-      ptCtx?.mainViewInstance?.setAllAttributes(tmpAttributesList)
-    } else if(toolInstance) {
+      ptCtx?.mainViewInstance?.setAllAttributes(tmpAttributesList);
+    } else if (toolInstance) {
       toolInstance?.setAllAttributes(tmpAttributesList);
     }
     setAllAttributeList(tmpAttributesList);
-  }, [currentToolName, toolInstance?.isShowOrder, toolsBasicConfig, attributeList,ptCtx.mainViewInstance]);
+  }, [
+    currentToolName,
+    toolInstance?.isShowOrder,
+    toolsBasicConfig,
+    attributeList,
+    ptCtx.mainViewInstance,
+  ]);
 
   return (
     <div className='attributeBox' key={chooseAttribute}>
@@ -214,7 +209,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 if (toolInstance) {
                   toolInstance.setDefaultAttribute(attribute.key);
                 }
-                if(ptCtx.mainViewInstance ){
+                if (ptCtx.mainViewInstance) {
                   updateMainViewAttribute?.(attribute.key);
                 }
                 forceRender((s) => s + 1);
@@ -229,8 +224,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 backgroundColor:
                   attribute.key === chooseAttribute
                     ? toolStyle.attributeColor[
-                        AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) +
-                          1
+                        AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
                       ].valid.stroke
                     : '#FFFFFF',
                 color: attribute.key === chooseAttribute ? '#ffffff' : '',

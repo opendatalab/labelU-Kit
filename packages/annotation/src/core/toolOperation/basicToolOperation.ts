@@ -65,6 +65,8 @@ const zoomInfo = {
   ratio: 0.4,
 };
 
+const minTextWidth = 20
+
 const validNumber = (value: number) => {
   return isNumber(value) && !isNaN(value);
 };
@@ -996,31 +998,9 @@ class BasicToolOperation extends EventListener {
         this.isSpaceKey = true;
         break;
 
-      // case EKeyCode.Z:
-      //   if (e.ctrlKey) {
-      //     if (e.shiftKey) {
-      //       this.redo();
-      //     } else {
-      //       this.undo();
-      //     }
-      //     return false;
-      //   }
-      //   break;
-
       default: {
         break;
       }
-      // case EKeyCode.F11:
-      //   if (!document.fullscreenElement) {
-      //     document.documentElement.requestFullscreen();
-      //   } else {
-      //     if (document.exitFullscreen) {
-      //       document.exitFullscreen();
-      //     }
-      //   }
-      //   e.preventDefault();
-
-      //   break;
     }
     return true;
   }
@@ -1352,16 +1332,14 @@ class BasicToolOperation extends EventListener {
                   });
                   if (this.isShowAttributeText) {
                     const marginTop = 0;
-                    const textWidth = Math.max(20, transformRect.width - textSizeWidth);
+                    const textWidth = Math.max(minTextWidth, transformRect.width - textSizeWidth);
                     DrawUtils.drawText(
                       this.canvas,
                       { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
                       item.textAttribute,
                       {
                         color: color,
-                        // font: 'italic normal 900 14px Arial',
                         textMaxWidth: textWidth,
-                        // ...DEFAULT_TEXT_SHADOW,
                       },
                     );
                   }
@@ -1564,59 +1542,9 @@ class BasicToolOperation extends EventListener {
     }
     this.clearBasicCanvas();
     this.drawImg();
-
-    //  无多步骤，无需依赖，因此注销
-    // if (this.basicResult && this.dependToolName) {
-    //   switch (this.dependToolName) {
-    //     case EToolName.Rect: {
-    //       DrawUtils.drawRect(
-    //         this.basicCanvas,
-    //         AxisUtils.changeRectByZoom(this.basicResult, this.zoom, this.currentPos),
-    //         {
-    //           color: 'rgba(204,204,204,1.00)',
-    //           thickness,
-    //         },
-    //       );
-    //       break;
-    //     }
-
-    //     case EToolName.Polygon: {
-    //       DrawUtils.drawPolygonWithFillAndLine(
-    //         this.basicCanvas,
-    //         AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
-    //         {
-    //           fillColor: 'transparent',
-    //           strokeColor: 'rgba(204,204,204,1.00)',
-    //           isClose: true,
-    //           thickness,
-    //         },
-    //       );
-
-    //       break;
-    //     }
-
-    //     case EToolName.Line: {
-    //       DrawUtils.drawLineWithPointList(
-    //         this.basicCanvas,
-    //         AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
-    //         {
-    //           color: 'rgba(204,204,204,1.00)',
-    //           thickness,
-    //         },
-    //       );
-
-    //       break;
-    //     }
-
-    //     default: {
-    //       //
-    //     }
-    //   }
-    // }
   }
 
   public render() {
-    // const haPre = localStorage.getItem('haPrevList');
     if (!this.canvas || !this.ctx || !this.imgNode || !this.renderReady) {
       return;
     }
