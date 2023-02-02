@@ -3,7 +3,7 @@ import { BasicConfig, TextConfig } from '@label-u/components';
 
 export type { ToolConfig } from '@label-u/annotation';
 export type { PolygonConfig } from '@label-u/annotation';
-export type { tagToolConfig } from '@label-u/annotation';
+export type { TagToolConfig } from '@label-u/annotation';
 export type { LineToolConfig } from '@label-u/annotation';
 export type { OneTag } from '@label-u/annotation';
 export type { RectConfig } from '@label-u/annotation';

@@ -3,8 +3,6 @@
 # dependencies
 node_modules
 .DS_Store
-/dist
-/es
 
 # lock file
 package-lock.json
@@ -22,7 +20,9 @@ pnpm-lock.yaml
 /coverage
 
 # production
-/build
+build
+dist
+es
 
 # misc
 .DS_Store
