@@ -1332,7 +1332,7 @@ class BasicToolOperation extends EventListener {
                   });
                   if (this.isShowAttributeText) {
                     const marginTop = 0;
-                    const textWidth = Math.max(minTextWidth, transformRect.width - textSizeWidth);
+                    const textWidth = Math.max(MIN_TEXT_WIDTH, transformRect.width - textSizeWidth);
                     DrawUtils.drawText(
                       this.canvas,
                       { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
