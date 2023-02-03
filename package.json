@@ -8,6 +8,7 @@
   "version": "1.7.0",
   "scripts": {
     "prepare": "husky install",
+    "precommit": "lint-staged",
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
     "build": "lerna run --scope=@label-u/utils --scope=@label-u/annotation --scope=@label-u/components build",
