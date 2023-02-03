@@ -5,7 +5,6 @@
  * @LastEditors: Laoluo luozefeng@sensetime.com
  * @LastEditTime: 2022-05-12 19:34:32
  */
-import React from 'react';
 import { Tooltip } from 'antd';
 
 import { prefix } from '@/constant';
