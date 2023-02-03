@@ -54,7 +54,7 @@ jobs:
         run: |
           echo $RELEASE_VERSION
       - name: Install dependencies
-        run: pnpm cache clean
+        run: npm cache clean
       - run: pnpm install
       - name: Build packages
         run: pnpm run build
