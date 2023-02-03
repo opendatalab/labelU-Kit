@@ -3,26 +3,21 @@
 # dependencies
 /node_modules
 .DS_Store
-/dist
-/es
 
 # lock file
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
-
+# ide file
 .idea
-
-# lock file
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
 
 # testing
 /coverage
 
 # production
 /build
+/dist
+/es
 
 # misc
 .DS_Store

@@ -19,14 +19,6 @@
     "commit": "cz",
     "release": "multi-semantic-release --ignore-private-packages"
   },
-  "author": "wuhui",
-  "contributors": [
-    "lijingchi",
-    "tanjunbao",
-    "chenlu",
-    "lihuaqi",
-    "luoluo"
-  ],
   "keywords": [
     "annotation",
     "canvas",
@@ -48,6 +40,9 @@
     "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "@shlab/fabric": "^1.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.0.1",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^8.0.0",
