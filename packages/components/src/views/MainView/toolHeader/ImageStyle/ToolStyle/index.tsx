@@ -1,5 +1,5 @@
 import { Slider } from 'antd/es';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 

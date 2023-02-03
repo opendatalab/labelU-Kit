@@ -1,7 +1,7 @@
 import type { Attribute } from '@label-u/annotation';
 import { AttributeUtils } from '@label-u/annotation';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Button, Dropdown, Space, Menu } from 'antd';
 import classNames from 'classnames';

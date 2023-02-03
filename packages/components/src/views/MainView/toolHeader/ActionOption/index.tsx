@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Switch } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 

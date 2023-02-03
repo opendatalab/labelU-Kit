@@ -1,5 +1,5 @@
 import type { FC, ReactElement } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Collapse, Form, Input, Popconfirm, Select } from 'antd';
 import { connect, useDispatch } from 'react-redux';
 import type { PrevResult, Attribute } from '@label-u/annotation';

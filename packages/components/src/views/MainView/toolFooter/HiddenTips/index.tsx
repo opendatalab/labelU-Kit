@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Divider } from 'antd/es';
 import { useTranslation } from 'react-i18next';

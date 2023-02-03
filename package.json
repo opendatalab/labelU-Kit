@@ -11,9 +11,11 @@
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
     "build": "lerna run --scope=@label-u/utils --scope=@label-u/annotation --scope=@label-u/components build",
-    "build:type": "lerna run build:type",
+    "build:frontend": "lerna run --scope=@label-u/frontend build",
+    "release:frontend": "cd apps/frontend && npm run release",
     "lint": "lerna run --parallel --stream lint",
-    "lint:script": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
+    "lint:frontend": "eslint ./apps/frontend --ext .js,.jsx,.ts,.tsx --fix",
+    "lint:packages": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
     "lint:style": "stylelint --fix '**/*.less'",
     "clean": "lerna clean && rimraf ./packages/**/package-lock.json",
     "commit": "cz",
@@ -55,6 +57,7 @@
     "lint-staged": "^10.5.4",
     "multi-semantic-release": "^3.0.1",
     "semantic-release": "^19.0.3",
+    "semantic-release-github-pullrequest": "^1.3.0",
     "stylelint": "^14.16.1",
     "stylelint-prettier": "^2.0.0",
     "tsc-files": "^1.1.3"
@@ -72,11 +75,16 @@
     "**/*.less": [
       "stylelint --fix"
     ],
-    "packages/**/src/**/*.ts": "tsc-files --noEmit",
+    "packages/**/src/**/*.{ts,tsx}": "tsc-files --noEmit",
+    "apps/frontend/src/**/*.{ts,tsx}": "tsc-files --noEmit",
     "packages/**/src/**/*.{js,jsx,ts,tsx,json,css,scss,less,md}": [
       "prettier --check --write"
     ],
-    "packages/**/src/**/*.{js,ts,jsx,tsx}": "eslint --ext .js,.jsx,.ts,.tsx"
+    "apps/frontend/src/**/*.{js,jsx,ts,tsx,json,css,scss,less,md}": [
+      "prettier --check --write"
+    ],
+    "packages/**/src/**/*.{js,ts,jsx,tsx}": "eslint",
+    "apps/frontend/src/**/*.{js,ts,jsx,tsx}": "eslint"
   },
   "config": {
     "commitizen": {

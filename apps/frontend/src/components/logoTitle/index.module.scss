@@ -1,0 +1,24 @@
+@import '../../utils/common/common.module';
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  width: 100%;
+  height: 109px;
+  justify-content: space-around;
+  align-items: center;
+}
+.logo {
+  background-image: url('../../assets/svg/LOGO.svg');
+  background-repeat: no-repeat;
+  width: 170px;
+  height: 61px;
+}
+
+.logoText {
+  width: 359px;
+  height: 48px;
+  text-align: center;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
+}
