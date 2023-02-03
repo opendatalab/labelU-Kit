@@ -26,6 +26,8 @@ interface IPointCloud2dOperationProps {
   config?: ToolConfig;
 }
 
+const POINT_CLOUD_POLYGON_PIXELRATIO = 1
+
 class PointCloud2dOperation extends PolygonOperation {
   public showDirectionLine: boolean;
 
@@ -52,6 +54,10 @@ class PointCloud2dOperation extends PolygonOperation {
     this.isPointCloud2DTool = true;
     this.showDirectionLine = props.showDirectionLine ?? true;
     this.forbidAddNew = props.forbidAddNew ?? false;
+  }
+
+  public get pixelRatio() {
+    return POINT_CLOUD_POLYGON_PIXELRATIO;
   }
 
   get getSelectedIDs() {

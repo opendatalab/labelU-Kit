@@ -15,8 +15,9 @@
     "lint": "lerna run --parallel --stream lint",
     "lint:script": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
     "lint:style": "stylelint --fix '**/*.less'",
-    "clean": "lerna clean && rimraf ./packages/**/package-lock.json",
+    "clean": "lerna clean && rimraf ./node_modules && rimraf ./packages/**/package-lock.json",
     "commit": "cz",
+    "bootstrap": "lerna bootstrap --no-ci",
     "release": "multi-semantic-release --ignore-private-packages"
   },
   "keywords": [
