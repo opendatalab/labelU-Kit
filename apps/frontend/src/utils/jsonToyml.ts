@@ -59,7 +59,7 @@ export default class JsonToyml {
     }
   }
 
-  convertHash(obj: object, ret: string[]) {
+  convertHash(obj: Record<string, unknown>, ret: string[]) {
     for (const k in obj) {
       const recurse: string[] = [];
       if (obj.hasOwnProperty(k)) {
@@ -97,12 +97,14 @@ export default class JsonToyml {
     ret.push(this.normalizeString(obj));
   }
 
-  json2yaml(obj: object) {
-    if (typeof obj == 'string') {
-      obj = JSON.parse(obj);
+  json2yaml(obj: Record<string, unknown>) {
+    let temp = obj;
+
+    if (typeof temp == 'string') {
+      temp = JSON.parse(temp);
     }
     const ret: string[] = [];
-    this.convert(obj, ret);
+    this.convert(temp, ret);
     return ret.join('\n');
   }
 }

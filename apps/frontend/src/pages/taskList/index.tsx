@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import currentStyles from './index.module.scss';
 import TaskCard from '../../components/taskCard';
 import Constatns from '../../constants';
-import { getTaskList, updateTaskConfig } from '../../services/createTask';
+import { getTaskList } from '../../services/createTask';
 import CommonController from '../../utils/common/common';
 import { updateConfigStep, updateHaveConfigedStep, updateTask } from '../../stores/task.store';
 import NullTask from '../nullTask';
@@ -15,9 +15,12 @@ const TaskList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const createTask = () => {
+    // @ts-ignore
     dispatch(updateConfigStep(-1));
+    // @ts-ignore
     dispatch(updateHaveConfigedStep(0));
     dispatch(
+      // @ts-ignore
       updateTask({
         data: {
           name: '',
@@ -32,9 +35,6 @@ const TaskList = () => {
   };
   const [taskCards, setTaskCards] = useState<any>([]);
   const [taskTotal, setTaskTotal] = useState<any>(0);
-  const changeCurrentPage = (page: number) => {
-    requestTaskList(page - 1);
-  };
   const requestTaskList = (page: number) => {
     getTaskList(page).then((res) => {
       if (res) {
@@ -48,6 +48,10 @@ const TaskList = () => {
         CommonController.notificationErrorMessage({ message: '拉取文件列表失败, 请刷新页面' }, 1);
       }
     });
+  };
+
+  const changeCurrentPage = (page: number) => {
+    requestTaskList(page - 1);
   };
   useEffect(function () {
     requestTaskList(0);
@@ -147,7 +151,8 @@ const TaskList = () => {
 
   useEffect(() => {
     requestTaskList(0);
-  }, [window.location.search]);
+    // REVIEW: }, [window.location.search]);
+  }, []);
   return (
     <React.Fragment>
       {taskCards.length > 0 && (

@@ -11,17 +11,17 @@ interface SvgProps {
   [key: string]: any;
 }
 
-const SvgIcon: FC<SvgProps> = ({ name, prefix = 'icon', color = '#333', ...props }) => {
+const SvgIcon: FC<SvgProps> = ({ name, ...props }) => {
   const [imgSrc, setImgSrc] = useState<string>();
   useEffect(() => {
     const shortImgSrc = name.split('-').join('/');
-    new Promise(async (resolve, reject) => {
+    new Promise(async () => {
       const src = await loadImg(shortImgSrc + '.svg');
       if (src) {
         setImgSrc(src);
       }
     });
-  }, []);
+  }, [name]);
 
   return (
     <img

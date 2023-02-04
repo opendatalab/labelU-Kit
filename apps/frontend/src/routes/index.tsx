@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import React, { lazy } from 'react';
 import type { RouteObject } from 'react-router';
 import { useRoutes } from 'react-router-dom';
 
@@ -16,7 +15,6 @@ import Samples from '../pages/samples';
 import RootGuard from '../pages/guards/rootGuard';
 import TaskSamplesFinished from '../pages/sampleFinished';
 import OutputData from '../pages/outputData';
-const NotFound = lazy(() => import(/* webpackChunkName: "404'"*/ '../pages/404'));
 
 const routeList: RouteObject[] = [
   // {

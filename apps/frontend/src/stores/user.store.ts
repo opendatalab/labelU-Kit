@@ -63,7 +63,7 @@ export default userSlice.reducer;
 
 // typed wrapper async thunk function demo, no extra feature, just for powerful typings
 export const loginAsync = createAsyncAction<LoginParams, boolean>((payload) => {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     const { result, status } = await apiLogin(payload);
     if (status) {
       localStorage.setItem('t', result.token);

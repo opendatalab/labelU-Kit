@@ -1,5 +1,5 @@
-type config = Record<string, string>;
-type GetConfig = () => config;
+type Config = Record<string, string>;
+type GetConfig = () => Config;
 
 const getConfig: GetConfig = () => {
   const conf: Record<string, string> = {};

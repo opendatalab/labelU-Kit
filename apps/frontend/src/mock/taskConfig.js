@@ -157,7 +157,7 @@ export const getConfig = (tool) => {
   return rectToolConfig;
 };
 
-export const getStepList = (tool, sourceStep, step) => {
+export const getStepList = (tool) => {
   return [getStepConfig(tool)];
 };
 

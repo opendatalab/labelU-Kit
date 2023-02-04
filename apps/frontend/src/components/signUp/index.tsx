@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { IdcardOutlined, LockOutlined } from '@ant-design/icons';
 import intl from 'react-intl-universal';
 
 import CommonController from '../../utils/common/common';
-import { login as loginService, signUp } from '../../services/general';
+import { signUp } from '../../services/general';
 import currentStyles from '../signUp/index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
@@ -74,8 +73,8 @@ const SignUp = (props: any) => {
       if (!checkPassword) {
         return;
       }
-      const checkRepeatPassword = password === repeatPassword;
-      if (!checkRepeatPassword) {
+      const _checkRepeatPassword = password === repeatPassword;
+      if (!_checkRepeatPassword) {
         CommonController.notificationErrorMessage({ msg: '两次输入的密码不一致' }, 1);
         return;
       }
@@ -101,8 +100,8 @@ const SignUp = (props: any) => {
     //
     // }
   };
-  const changeRepeatPassword = (event: any, repeatPassword?: any) => {
-    const targetValue = event ? event.target.value : repeatPassword;
+  const changeRepeatPassword = (event: any, _repeatPassword?: any) => {
+    const targetValue = event ? event.target.value : _repeatPassword;
     const isNull = CommonController.isInputValueNull(event);
     if (!isNull) {
       setRepeatPassword(targetValue);

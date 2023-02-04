@@ -38,7 +38,7 @@ export default defineConfig({
         },
       ],
     }),
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/'),

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useLocale } from '../locales';
 
-const NotFoundPage: React.FC<{}> = () => {
+const NotFoundPage: React.FC<Record<string, unknown>> = () => {
   const navigate = useNavigate();
   const { formatMessage } = useLocale();
   return (

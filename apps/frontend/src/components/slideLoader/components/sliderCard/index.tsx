@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch, connect } from 'react-redux';
 import { useNavigate } from 'react-router';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../../../utils/common/common';
 import { getSample, updateSampleAnnotationResult } from '../../../../services/samples';
-import { updateCurrentSampleId } from '../../../../stores/sample.store';
-import otherStore from '../../../../stores/other';
 import { annotationRef } from '../../../../pages/annotation2';
 
 const SliderCard = (props: any) => {
@@ -44,19 +41,10 @@ const SliderCard = (props: any) => {
                 }
               }
             }
-            console.log(annotated_count);
             // @ts-ignore
             updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam })
-              .then((res) => {
-                if (res.status === 200) {
-                  // Ob.nextPageS.next('DONE');
-
-                  // let location = window.location.pathname.split('/');
-                  // location.pop();
-                  // location.push(id)
-                  // let newPathname = location.join('/');
-                  // navigate(newPathname);
-
+              .then((_res) => {
+                if (_res.status === 200) {
                   navigate(window.location.pathname + '?' + 'POINTER' + new Date().getTime() + '&id=' + id);
                 } else {
                   commonController.notificationErrorMessage({ message: '请求保存失败' }, 1);
@@ -78,7 +66,7 @@ const SliderCard = (props: any) => {
   };
   useEffect(() => {
     setCurrentSampleId(parseInt(window.location.pathname.split('/')[4]));
-  }, [window.location.pathname]);
+  }, []);
   return (
     <React.Fragment>
       {id === currentSampleId && (

@@ -1,11 +1,10 @@
 import type { FC } from 'react';
 import { useEffect, Suspense, useCallback, useState } from 'react';
 import { Layout, Drawer } from 'antd';
-
-import './index.less';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 
+import './index.less';
 import MenuComponent from './menu';
 import HeaderComponent from './header';
 import { getGlobalState } from '../../utils/getGloabal';
@@ -19,6 +18,7 @@ const WIDTH = 992;
 
 const LayoutPage: FC = () => {
   const [menuList, setMenuList] = useState<MenuList>([]);
+  // @ts-ignore
   const { device, collapsed } = useSelector((state) => state.user);
   const isMobile = device === 'MOBILE';
   const dispatch = useDispatch();
@@ -72,12 +72,13 @@ const LayoutPage: FC = () => {
 
   useEffect(() => {
     window.onresize = () => {
-      const { device } = getGlobalState();
+      // @ts-ignore
+      const { _device } = getGlobalState();
       const rect = document.body.getBoundingClientRect();
       const needCollapse = rect.width < WIDTH;
       dispatch(
         setUserItem({
-          device,
+          device: _device,
           collapsed: needCollapse,
         }),
       );
