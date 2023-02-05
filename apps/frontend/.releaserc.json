@@ -8,6 +8,7 @@
         }
       }
     ],
+    "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     [
       "@semantic-release/github",
@@ -22,11 +23,10 @@
         "message": "chore(release): ${nextRelease.version} [skip ci] \n\n${nextRelease.notes}"
       }
     ],
-    "@semantic-release/release-notes-generator",
     [
       "@semantic-release/exec",
       {
-        "publishCmd": "node ./scripts/release.js ${branch.name} ${nextRelease.version} ${Date.now()}"
+        "verifyReleaseCmd": "node ./scripts/release.js ${branch.name} ${nextRelease.version} ${Date.now()}"
       }
     ]
   ]
