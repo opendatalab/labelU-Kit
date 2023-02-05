@@ -1,6 +1,6 @@
 import type { BasicConfig } from '@label-u/components';
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Col, Row, Input as SenseInput, Form, Select, Switch } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 
@@ -80,6 +80,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = (props) => {
 
       setInitVal(initV);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // @ts-ignore
@@ -90,20 +91,10 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = (props) => {
     <div>
       <div className="selectedMain">
         <Form {...formItemLayout} name={props.name} form={form} onChange={formSubmitThrottle}>
-          <Form.Item
-            name="lineType"
-            label="线条类型"
-            initialValue={initVal.lineType}
-            // rules={[
-            //   {
-            //     required: true,
-            //     message: 'Please select lineType!'
-            //   }
-            // ]}
-          >
+          <Form.Item name="lineType" label="线条类型" initialValue={initVal.lineType}>
             <Select
               placeholder="请选择线类型"
-              onChange={(e) => {
+              onChange={() => {
                 form.submit();
               }}
             >
@@ -135,7 +126,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = (props) => {
           >
             <Switch
               disabled={isAllReadOnly}
-              onChange={(e) => {
+              onChange={() => {
                 form.submit();
               }}
             />

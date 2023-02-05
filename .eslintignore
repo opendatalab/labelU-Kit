@@ -3,6 +3,7 @@ node_modules
 coverage
 .next
 build
+mock
 public
 __tests__
 storybook-static

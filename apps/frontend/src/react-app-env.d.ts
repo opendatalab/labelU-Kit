@@ -3,7 +3,7 @@
 import type { AppState } from './stores';
 declare module '@emotion/core/jsx-runtime';
 declare interface Window {
-  __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function;
+  __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: () => any;
 }
 
 declare interface ObjectConstructor {
@@ -11,5 +11,5 @@ declare interface ObjectConstructor {
 }
 
 declare module 'react-redux' {
-  export interface DefaultRootState extends AppState {}
+  export type DefaultRootState = AppState;
 }

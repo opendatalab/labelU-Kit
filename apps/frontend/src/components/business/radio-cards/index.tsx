@@ -1,7 +1,8 @@
 import type { FC } from 'react';
-import MyRadio from 'components/basic/radio';
 import type { RadioGroupProps } from 'antd';
 import { css } from '@emotion/react';
+
+import MyRadio from '@/components/basic/radio';
 
 export interface MyRadioCardssOption {
   label: React.ReactNode;
@@ -11,23 +12,6 @@ export interface MyRadioCardssOption {
 export interface MyRadioCardsProps extends RadioGroupProps {
   options: MyRadioCardssOption[];
 }
-
-const MyRadioCards: FC<MyRadioCardsProps> = (props) => {
-  const { options, ...rest } = props;
-  return (
-    <div css={styles}>
-      <MyRadio.Group buttonStyle="solid" {...rest}>
-        {options?.map((option) => (
-          <MyRadio.Button style={{ width: `calc(100% / ${options.length})` }} key={option.value} value={option.value}>
-            {option.label}
-          </MyRadio.Button>
-        ))}
-      </MyRadio.Group>
-    </div>
-  );
-};
-
-export default MyRadioCards;
 
 const styles = css`
   padding: 8px;
@@ -46,3 +30,21 @@ const styles = css`
   .ant-radio-button {
   }
 `;
+
+const MyRadioCards: FC<MyRadioCardsProps> = (props) => {
+  const { options, ...rest } = props;
+  return (
+    // eslint-disable-next-line react/no-unknown-property
+    <div css={styles}>
+      <MyRadio.Group buttonStyle="solid" {...rest}>
+        {options?.map((option) => (
+          <MyRadio.Button style={{ width: `calc(100% / ${options.length})` }} key={option.value} value={option.value}>
+            {option.label}
+          </MyRadio.Button>
+        ))}
+      </MyRadio.Group>
+    </div>
+  );
+};
+
+export default MyRadioCards;

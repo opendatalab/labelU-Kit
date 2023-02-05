@@ -32,8 +32,11 @@ axiosInstance.interceptors.response.use(
     } else {
       errorMessage = error?.message;
     }
-    console.dir(error);
-    error.message && $message.error(errorMessage);
+
+    if (error.message) {
+      $message.error(errorMessage);
+    }
+
     return {
       status: false,
       message: errorMessage,
@@ -66,11 +69,11 @@ export const request = <T = any>(
 ): MyResponse<T> => {
   // const prefix = '/api'
   const prefix = '';
-  url = prefix + url;
+  const newUrl = prefix + url;
   if (method === 'post') {
-    return axiosInstance.post(url, data, config);
+    return axiosInstance.post(newUrl, data, config);
   } else {
-    return axiosInstance.get(url, {
+    return axiosInstance.get(newUrl, {
       params: data,
       ...config,
     });

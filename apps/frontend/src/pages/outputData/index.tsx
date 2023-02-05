@@ -1,30 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Modal } from 'antd';
-import { useParams, useSearchParams } from 'react-router-dom';
 
 import currentStyles from './index.module.scss';
-import { outputSamples } from '../../services/samples';
+
+// REVIEW
 
 const OutputData = (props: any) => {
   const { setFalse } = props;
-  let { taskId } = useParams();
-  // @ts-ignore
-  taskId = parseInt(taskId ? taskId : '');
-  const sampleId = parseInt(window.location.search.split('=')[1]);
-  const [isShowModal, setIsShowModal] = useState(true);
+  const [isShowModal] = useState(true);
   const [activeTxt, setActiveTxt] = useState('JSON');
   const highLight = (value: string) => {
     setActiveTxt(value);
   };
   const clickCancel = () => {
-    // setIsShowModal(false);
     setFalse();
   };
   const clickOk = () => {
-    // setIsShowModal(false);
     setFalse();
-
-    // outputSample([sampleId])
   };
   return (
     <Modal title="选择导出格式" okText={'导出'} onOk={clickOk} onCancel={clickCancel} open={isShowModal}>

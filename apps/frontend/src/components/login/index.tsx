@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { IdcardOutlined, LockOutlined } from '@ant-design/icons';
+import { useState } from 'react';
 import { Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -14,7 +13,8 @@ import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
 const Login = (props: any) => {
   const { turnToSignUp, turnToTaskList } = props;
-  const [checkMessage, setCheckMessage] = useState<any>({});
+  // REVIEW: checkMessage 没有设置值的地方
+  const [checkMessage] = useState<any>({});
   const [email, setEmail] = useState<any>(null);
   const [password, setPassword] = useState<any>(null);
   const navigate = useNavigate();
@@ -86,17 +86,6 @@ const Login = (props: any) => {
       },
     });
   }
-
-  // let loginText = ()=>intl.get('login123');
-  useEffect(() => {
-    console.log(navigator.language);
-    // @ts-ignore
-    console.log(navigator?.browserLanguage);
-    // intl.load({
-    //     'zh-CN' : zhCN1,
-    //     'en-US': enUS1
-    // });
-  }, []);
 
   return (
     <div className={currentStyles.outerFrame}>

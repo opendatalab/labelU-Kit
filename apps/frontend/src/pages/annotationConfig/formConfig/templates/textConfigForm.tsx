@@ -1,11 +1,10 @@
 import type { TextConfig } from '@label-u/components';
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Form } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 
 import TextList from '../../components/TextList';
-import { delayTime } from '../constants';
 
 interface TextConfigProp {
   textConfig: TextConfig;
@@ -65,6 +64,7 @@ const TextConfigForm: FC<TextConfigProp & { name: string }> = (props) => {
             ];
       setInitVal(initV);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { children } = props;
 

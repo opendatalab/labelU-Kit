@@ -10,12 +10,12 @@ export interface MyFormProps<T> extends FormProps<T> {
   options?: MyFormOptions;
 }
 
-const BaseForm = <Values extends object>(props: MyFormProps<Values>) => {
+const BaseForm = <Values extends Record<string, unknown>>(props: MyFormProps<Values>) => {
   const { options, children, ...rest } = props;
   return (
     <Form<Values> {...rest}>
-      {options?.map((option) => {
-        return <MyFormItem {...option} />;
+      {options?.map((option, index) => {
+        return <MyFormItem key={index} {...option} />;
       })}
       {children}
     </Form>

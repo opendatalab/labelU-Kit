@@ -1,25 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Input } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 
 import currentStyles from './index.module.scss';
-import { submitBasicConfig } from '../../services/createTask';
 import CommonController from '../../utils/common/common';
-import {
-  updateConfigStep,
-  updateHaveConfigedStep,
-  updateTask,
-  updateTaskDescription,
-  updateTaskName,
-  updateTaskTips,
-} from '../../stores/task.store';
-import { getTask } from '../../services/samples';
-import { updateAllConfig } from '../../stores/toolConfig.store';
-import commonController from '../../utils/common/common';
+import { updateTaskDescription, updateTaskName, updateTaskTips } from '../../stores/task.store';
+
 const InputInfoConfig = () => {
   const dispatch = useDispatch();
+  // @ts-ignore
   const taskName = useSelector((state) => state.existTask.taskName);
+  // @ts-ignore
   const taskDescription = useSelector((state) => state.existTask.taskDescription);
+  // @ts-ignore
   const taskTips = useSelector((state) => state.existTask.taskTips);
   const [isErrorShow, setIsErrorShow] = useState(false);
   const changeTaskNamme = (event: any) => {
@@ -27,7 +20,7 @@ const InputInfoConfig = () => {
     const isNull = CommonController.isInputValueNull(targetValue);
     if (!isNull) {
       setIsErrorShow(false);
-      const isOver = commonController.isOverFontCount(targetValue, 50);
+      const isOver = CommonController.isOverFontCount(targetValue, 50);
       if (isOver) {
         return;
       }
@@ -43,7 +36,7 @@ const InputInfoConfig = () => {
     const targetValue = event.target.value;
     const isNull = CommonController.isInputValueNull(targetValue);
     if (!isNull) {
-      const isOver = commonController.isOverFontCount(targetValue, 500);
+      const isOver = CommonController.isOverFontCount(targetValue, 500);
       if (isOver) {
         return;
       }
@@ -56,7 +49,7 @@ const InputInfoConfig = () => {
     const targetValue = event.target.value;
     const isNull = CommonController.isInputValueNull(targetValue);
     if (!isNull) {
-      const isOver = commonController.isOverFontCount(targetValue, 1000);
+      const isOver = CommonController.isOverFontCount(targetValue, 1000);
       if (isOver) {
         return;
       }
@@ -64,13 +57,6 @@ const InputInfoConfig = () => {
       // if(isOver) return;
     }
     dispatch(updateTaskTips(targetValue));
-  };
-
-  const tijiao = async function () {
-    try {
-      const res: any = submitBasicConfig({ name: taskName, description: taskDescription, tips: taskTips });
-      alert(res.id);
-    } catch (error) {}
   };
 
   return (
@@ -123,10 +109,6 @@ const InputInfoConfig = () => {
           </div>
         </div>
       </div>
-
-      {/*<div onClick = {tijiao}>*/}
-      {/*    提交*/}
-      {/*</div>*/}
     </div>
   );
 };

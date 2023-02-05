@@ -6,12 +6,11 @@ import { Modal } from 'antd';
 import currentStyles from './index.module.scss';
 import { getTask, outputSamples } from '../../services/samples';
 import commonController from '../../utils/common/common';
-import OutputData from '../outputData';
 import currentStyles1 from '../outputData/index.module.scss';
-const SamplesFinished = (props: any) => {
+
+const SamplesFinished = () => {
   const [stat, setStat] = useState<any>({});
   const taskId = parseInt(window.location.pathname.split('/')[2]);
-  const { sampleId } = props;
   useEffect(() => {
     getTask(taskId)
       .then((res: any) => {
@@ -24,7 +23,7 @@ const SamplesFinished = (props: any) => {
       .catch((error) => {
         commonController.notificationErrorMessage(error, 1);
       });
-  }, []);
+  }, [taskId]);
   const navigate = useNavigate();
   const turnToSamples = () => {
     const currentPathnames = window.location.pathname.split('/');
@@ -39,11 +38,9 @@ const SamplesFinished = (props: any) => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal(false);
-    outputSamples(taskId, activeTxt)
-      .then((res) => console.log(res))
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
+    outputSamples(taskId, activeTxt).catch((error) => {
+      commonController.notificationErrorMessage(error, 1);
+    });
   };
 
   const clickCancel = (e: any) => {

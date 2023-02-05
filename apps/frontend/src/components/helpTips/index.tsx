@@ -3,7 +3,7 @@ import currentStyles from './index.module.scss';
 const HelpLink = 'https://github.com/opendatalab/labelU/blob/main/docs/GUIDE.md';
 const LinkColor = 'rgba(0, 0, 0, 0.85)';
 
-const HelpTips = (props: any) => {
+const HelpTips = () => {
   return (
     <div className={currentStyles.outerFrame}>
       <a href={HelpLink} target="_blank" style={{ color: LinkColor }} rel="noreferrer">

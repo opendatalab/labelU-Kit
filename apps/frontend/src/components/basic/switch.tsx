@@ -1,7 +1,8 @@
 import type { FC } from 'react';
 import { Switch } from 'antd';
 
-const BaseSwitch: FC = ({ children, ...props }) => {
+const BaseSwitch: FC = (props) => {
+  // @ts-ignore
   return <Switch {...props} />;
 };
 

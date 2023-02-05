@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Pagination, Progress, Tooltip } from 'antd';
+import React, { useState } from 'react';
+import { Modal, Progress, Tooltip } from 'antd';
 import { useNavigate } from 'react-router';
 import moment from 'moment';
-import { CheckCircleOutlined, UploadOutlined, DeleteOutlined, ExclamationOutlined } from '@ant-design/icons';
+import { ExclamationOutlined } from '@ant-design/icons';
 
 import commonController from '../../utils/common/common';
 import { outputSamples } from '../../services/samples';
@@ -11,14 +11,13 @@ import { deleteTask } from '../../services/createTask';
 import currentStyles1 from '../../pages/outputData/index.module.scss';
 
 const TaskCard = (props: any) => {
+  const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
+
   const { cardInfo } = props;
   const { stats, id, status } = cardInfo;
   const unDoneSample = stats.new;
   const doneSample = stats.done + stats.skipped;
   const total = unDoneSample + doneSample;
-  const createTask = () => {
-    alert('createTask');
-  };
   const navigate = useNavigate();
   const turnToAnnotation = (e: any) => {
     e.stopPropagation();
@@ -29,10 +28,6 @@ const TaskCard = (props: any) => {
     navigate('/tasks/' + id);
   };
   const localUserEmail = localStorage.getItem('username');
-
-  const outputDataLocal = (e: any) => {
-    // outputSamples(id)
-  };
 
   const deleteTaskLocal = (e: any) => {
     e.nativeEvent.stopImmediatePropagation();
@@ -47,11 +42,9 @@ const TaskCard = (props: any) => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal(false);
-    outputSamples(id, activeTxt)
-      .then((res) => console.log(res))
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
+    outputSamples(id, activeTxt).catch((error) => {
+      commonController.notificationErrorMessage(error, 1);
+    });
   };
 
   const clickCancel = (e: any) => {
@@ -66,7 +59,6 @@ const TaskCard = (props: any) => {
     e.preventDefault();
     setActiveTxt(value);
   };
-  const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
   const deleteSingleTaskOk = (e: any) => {
     e.stopPropagation();
     e.nativeEvent.stopPropagation();
@@ -80,7 +72,7 @@ const TaskCard = (props: any) => {
           commonController.notificationErrorMessage({ message: '删除不成功' }, 100);
         }
       })
-      .catch((e) => commonController.notificationErrorMessage(e, 1));
+      .catch((_e) => commonController.notificationErrorMessage(_e, 1));
   };
   const deleteSingleTaskCancel = (e: any) => {
     e.stopPropagation();

@@ -1,9 +1,7 @@
 // import { ETextType, TEXT_TYPE } from '@/constant/store';
-import { Select as SenseSelect, Input as SenseInput } from 'antd';
-import { Select, Switch } from 'antd';
+import { Select as SenseSelect, Input as SenseInput, Switch } from 'antd';
 import React, { useState } from 'react';
 import '../../index.less';
-import { useTranslation } from 'react-i18next';
 
 // 文本标注类型
 export enum ETextType {
@@ -41,11 +39,9 @@ interface IProps {
 }
 
 const TextConfigurable: React.FC<IProps> = ({ value = {}, onChange }) => {
-  // const { textConfigurable, textCheckType, customFormat, isAllReadOnly, updateData } = props;
   const [textConfigurable, setTextConfigurable] = useState(false);
   const [textCheckType, setTextCheckType] = useState(ETextType.AnyString);
   const [customFormat, setCustomFormat] = useState('');
-  const { t } = useTranslation();
 
   const triggerChange = (changeValue: any) => {
     onChange?.({ textConfigurable, textCheckType, customFormat, ...value, ...changeValue });
@@ -83,12 +79,12 @@ const TextConfigurable: React.FC<IProps> = ({ value = {}, onChange }) => {
             onChange={onSelectChange}
           >
             {Object.entries(TEXT_TYPE).map((item) => (
-              <Select.Option value={~~item[0]} key={~~item[0]}>
+              <SenseSelect.Option value={~~item[0]} key={~~item[0]}>
                 {
                   // @ts-ignore
                   translate[item[1]]
                 }
-              </Select.Option>
+              </SenseSelect.Option>
             ))}
           </SenseSelect>
 

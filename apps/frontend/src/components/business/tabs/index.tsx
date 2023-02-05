@@ -14,19 +14,6 @@ export interface MyTabsProps extends TabsProps {
   options: MyTabsOption[];
 }
 
-const BaseTabs: FC<MyTabsProps> = (props) => {
-  const { options, children, ...rest } = props;
-  return (
-    <Tabs {...rest} css={styles}>
-      {options ? options.map((option) => <TabPane {...option} tab={option.label} key={option.value} />) : children}
-    </Tabs>
-  );
-};
-
-const MyTabs = Object.assign(BaseTabs, Tabs);
-
-export default MyTabs;
-
 const styles = css`
   background-color: #fff;
   padding: 0 20px;
@@ -42,3 +29,16 @@ const styles = css`
     }
   }
 `;
+
+const BaseTabs: FC<MyTabsProps> = (props) => {
+  const { options, children, ...rest } = props;
+  return (
+    <Tabs {...rest} css={styles}>
+      {options ? options.map((option) => <TabPane {...option} tab={option.label} key={option.value} />) : children}
+    </Tabs>
+  );
+};
+
+const MyTabs = Object.assign(BaseTabs, Tabs);
+
+export default MyTabs;

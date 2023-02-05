@@ -13,7 +13,7 @@ export const jsonParse = (value: string): any => {
   });
 };
 
-export const jsonStringify = (value: object, type = 2): any => {
+export const jsonStringify = (value: Record<string, unknown>, type = 2): any => {
   return JSON.stringify(
     value,
     (k: any, v: any) => {
@@ -33,9 +33,15 @@ export const jsonStringify = (value: object, type = 2): any => {
  * @param newData 需要比较的值
  * @return {Boolean} 判断后的结果
  */
-export const compare = function (oldData: string | any[], newData: string | any[]) {
-  if (oldData === newData) return true;
-  const arg = Array.prototype.slice.call(arguments);
+export const compare = function (...args: [string | any[], string | any[]]) {
+  const oldData = args[0];
+  const newData = args[1];
+
+  if (oldData === newData) {
+    return true;
+  }
+  // @ts-ignore
+  const arg = Array.prototype.slice.call(...args);
   const objCall = (obj: any, string: string) => Object.prototype.toString.call(obj) === `[object ${string}]`;
   if (arg.every((obj) => objCall(obj, 'Object')) && Object.keys(oldData).length === Object.keys(newData).length) {
     // @ts-ignore

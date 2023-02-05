@@ -2,12 +2,12 @@ export default function uuid(len: number = 8, radix: number = 62) {
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
   const id = [];
   let i;
-  radix = radix || chars.length;
+  const newRadix = radix || chars.length;
 
   if (len) {
     // Compact form
     for (i = 0; i < len; i++) {
-      id[i] = chars[0 | (Math.random() * radix)];
+      id[i] = chars[0 | (Math.random() * newRadix)];
     }
   } else {
     // rfc4122, version 4 form

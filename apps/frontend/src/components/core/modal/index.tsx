@@ -14,16 +14,20 @@ interface MyModalProps<FormValues> extends FilteredModalProps {
   onClose?: (formData?: FormValues) => any;
 }
 
-const BaseModal = <FormValues extends object>(props: MyModalProps<FormValues>) => {
+const BaseModal = <FormValues extends Record<string, unknown>>(props: MyModalProps<FormValues>) => {
   const { form, formProps, children, onClose, ...rest } = props;
   const [formInstance] = useForm<FormValues>();
 
   const onOk = async () => {
     if (form) {
       const data = await formInstance.validateFields();
-      onClose && onClose(data);
+      if (onClose) {
+        onClose(data);
+      }
     } else {
-      onClose && onClose();
+      if (onClose) {
+        onClose();
+      }
     }
   };
 

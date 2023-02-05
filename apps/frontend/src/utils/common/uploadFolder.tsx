@@ -70,7 +70,8 @@ const UploadFolderController = {
         if (childIndex || childIndex === 0) {
           UploadFolderController.confirmFolder(parent.children[childIndex], index + 1, paths, data);
         } else {
-          console.log('数据有问题');
+          // eslint-disable-next-line no-console
+          console.error('数据有问题');
         }
       } else {
         parent.children.push({

@@ -1,7 +1,7 @@
 // import debounce from '@utils/debounce';
 // import { message, Modal, notification } from 'antd';
 import type { AxiosInstance } from 'axios';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios from 'axios';
 // import React from 'react';
 //
 //

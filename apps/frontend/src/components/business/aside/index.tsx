@@ -12,29 +12,6 @@ export interface MyAsideProps extends Omit<TreeProps, 'treeData'> {
   footer?: React.ReactNode;
 }
 
-const MyAside: FC<MyAsideProps> = (props) => {
-  const { options, header, footer, ...rest } = props;
-  return (
-    <div css={styles}>
-      {header && (
-        <div className="header">
-          {header}
-          <Divider />
-        </div>
-      )}
-      <Tree {...rest} treeData={options} blockNode />
-      {footer && (
-        <div className="footer">
-          <Divider />
-          {footer}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default MyAside;
-
 const styles = css`
   padding: 8px;
   background-color: #ffffff;
@@ -57,3 +34,27 @@ const styles = css`
     }
   }
 `;
+
+const MyAside: FC<MyAsideProps> = (props) => {
+  const { options, header, footer, ...rest } = props;
+  return (
+    // eslint-disable-next-line react/no-unknown-property
+    <div css={styles}>
+      {header && (
+        <div className="header">
+          {header}
+          <Divider />
+        </div>
+      )}
+      <Tree {...rest} treeData={options} blockNode />
+      {footer && (
+        <div className="footer">
+          <Divider />
+          {footer}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MyAside;
