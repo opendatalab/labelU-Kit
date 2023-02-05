@@ -5,7 +5,8 @@ import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
 import type { FC, Dispatch, SetStateAction } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { ToolsConfigState } from 'interface/toolConfig';
+
+import type { ToolsConfigState } from '@/interface/toolConfig';
 
 import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';

@@ -1,6 +1,7 @@
-import type { BasicConfig } from 'interface/toolConfig';
 import { isObject } from 'lodash';
 import type { ReactNode } from 'react';
+
+import type { BasicConfig } from '@/interface/toolConfig';
 
 import { toolnameC } from '../../pages/annotationConfig/formConfig/constants';
 

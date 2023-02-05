@@ -1,4 +1,4 @@
-import type { PageData } from 'interface';
+import type { PageData } from '@/interface';
 import Mock from 'mockjs';
 
 import { getTableData } from '../utils/get-table-page-data';
