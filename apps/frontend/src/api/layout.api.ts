@@ -1,5 +1,6 @@
-import type { Notice } from 'interface/layout/notice.interface';
 import type { AxiosRequestConfig } from 'axios';
+
+import type { Notice } from '@/interface/layout/notice.interface';
 
 import { request } from './request';
 import type { MenuList } from '../interface/layout/menu.interface';

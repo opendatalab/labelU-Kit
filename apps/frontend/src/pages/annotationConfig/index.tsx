@@ -2,7 +2,8 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import AnnotationOperation from '@label-u/components';
 import { shallowEqual, useSelector } from 'react-redux';
-import type { ToolsConfigState } from 'interface/toolConfig';
+
+import type { ToolsConfigState } from '@/interface/toolConfig';
 
 import EmptyConfigImg from '../../img/annotationCommon/emptyConfig.png';
 import ConfigTemplate from './configTemplate/index';

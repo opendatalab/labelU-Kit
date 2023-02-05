@@ -1,4 +1,4 @@
-import type { ToolsConfigState } from 'interface/toolConfig';
+import type { ToolsConfigState } from '@/interface/toolConfig';
 
 import type { Item } from './tmplateBox';
 // import RectImg from '../../../img/annotationCommon/configNotMatch.png';
