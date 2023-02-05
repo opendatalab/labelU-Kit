@@ -1,52 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { connect, useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { connect } from 'react-redux';
 import { Table, Pagination, Modal } from 'antd';
 import moment from 'moment';
 
 import currentStyles from './index.module.scss';
-import commonStyles from '../../utils/common/common.module.scss';
 import Statistical from '../../components/statistical';
-import Separator from '../../components/separator';
-import { updateTaskConfig } from '../../services/createTask';
-import constant from '../../constants';
 import GoToEditTask from '../goToEditTask';
 import commonController from '../../utils/common/common';
-import { updateConfigStep } from '../../stores/task.store';
-import { getTask, getSamples, deleteSamples, outputSamples, outputSample } from '../../services/samples';
+import { getTask, getSamples, deleteSamples, outputSample } from '../../services/samples';
 import statisticalStyles from '../../components/statistical/index.module.scss';
 import currentStyles1 from '../outputData/index.module.scss';
-const Samples = (props: any) => {
+const Samples = () => {
   const taskId = parseInt(window.location.pathname.split('/')[2]);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const configStep = useSelector((state) => state.existTask.configStep);
 
-  const steps = [
-    {
-      title: '基础配置',
-      index: 1,
-      contentUrl: './inputInfoConfig',
-    },
-    {
-      title: '数据导入',
-      index: 2,
-      contentUrl: './inputData',
-    },
-    {
-      title: '标注配置',
-      index: 3,
-      contentUrl: './annotationConfig',
-    },
-  ];
-  const [current, setCurrent] = useState(0);
-
+  const [isModalShow, setIsModalShow] = useState(false);
+  const [taskStatus, setTaskStatus] = useState<any>(undefined);
+  const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [deleteSampleIds, setDeleteSampleIds] = useState<any>([]);
+  const [showDatas, setShowDatas] = useState<any[]>([]);
   const [pageInfo, setPageInfo] = useState({ pageNo: 0, pageSize: 10 });
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageSize, setCurrentPageSize] = useState(10);
+
   const deleteSamplesLocal = (sampleIds: number[]) => {
     setDeleteSampleIds(sampleIds);
     setIsModalShow(true);
   };
+
+  const turnToAnnotate = (sampleId: number) => {
+    navigate(`/tasks/${taskId}/samples/${sampleId}`);
+  };
+
+  const getSamplesLocal = (params: any) => {
+    getSamples(taskId, params)
+      .then((res) => {
+        if (res.status === 200) {
+          setShowDatas(res.data.data);
+          setTotal(res.data.meta_data.total);
+          setCurrentPage(params.pageNo + 1);
+          setCurrentPageSize(params.pageSize);
+        } else {
+          commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
+        }
+      })
+      .catch((error) => {
+        commonController.notificationErrorMessage(error, 1);
+      });
+  };
+
   const columns: any = [
     {
       title: '数据ID',
@@ -121,11 +125,11 @@ const Samples = (props: any) => {
           if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
             const tool = resultJson[key];
             if (!tool.result) {
-              let temp = 0;
+              let _temp = 0;
               if (tool.length) {
-                temp = tool.length;
+                _temp = tool.length;
               }
-              result = result + temp;
+              result = result + _temp;
             } else {
               result = result + tool.result.length;
             }
@@ -157,7 +161,7 @@ const Samples = (props: any) => {
       align: 'left',
 
       // width : 310,
-      render: (updated_at: any, record: any) => {
+      render: (updated_at: any) => {
         if (taskStatus === 'DRAFT' || taskStatus === 'IMPORTED') {
           return '';
         }
@@ -194,9 +198,6 @@ const Samples = (props: any) => {
       },
     },
   ];
-  const [showDatas, setShowDatas] = useState<any[]>([]);
-  const [dataLoading, setDataLoading] = useState(false);
-  const [isModalShow, setIsModalShow] = useState(false);
   const clickModalOk = () => {
     deleteSamples(taskId, deleteSampleIds)
       .then((res) => {
@@ -207,7 +208,7 @@ const Samples = (props: any) => {
           commonController.notificationErrorMessage({ message: '删除sample出错' }, 1);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         commonController.notificationErrorMessage({ message: '删除sample出错' }, 1);
       });
     setIsModalShow(false);
@@ -217,11 +218,8 @@ const Samples = (props: any) => {
     setIsModalShow(false);
   };
   const rowSelection = {
-    // renderCell : ()=>{
-    //
-    // },
     columnWidth: 58,
-    onChange: (selectedKeys: any, selectedRows: any) => {
+    onChange: (selectedKeys: any) => {
       setDeleteSampleIds(Object.assign([], deleteSampleIds, selectedKeys));
     },
     getCheckboxProps: (record: any) => {
@@ -231,31 +229,9 @@ const Samples = (props: any) => {
         key: record.packageID,
       };
     },
-    selectedKeys: (selectedKeys: any, selectedRows: any) => {
-      console.log({ selectedKeys, selectedRows });
-    },
+    selectedKeys: () => {},
   };
-  const turnToAnnotate = (sampleId: number) => {
-    navigate(`/tasks/${taskId}/samples/${sampleId}`);
-  };
-  const [total, setTotal] = useState(0);
-  const getSamplesLocal = (params: any) => {
-    getSamples(taskId, params)
-      .then((res) => {
-        if (res.status === 200) {
-          setShowDatas(res.data.data);
-          setTotal(res.data.meta_data.total);
-          setCurrentPage(params.pageNo + 1);
-          setCurrentPageSize(params.pageSize);
-        } else {
-          commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
-        }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
-  };
-  const [taskStatus, setTaskStatus] = useState<any>(undefined);
+
   const getTaskLocal = () => {
     getTask(taskId)
       .then((res: any) => {
@@ -281,10 +257,12 @@ const Samples = (props: any) => {
     //     <div className={ currentStyles.optionItemDelete }>删除</div>
     //   </div>)
     // }])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const changePage = (page: number, pageSize: number) => {
     if (page === 0) {
+      // eslint-disable-next-line no-param-reassign
       page = 1;
     }
     setPageInfo({
@@ -296,16 +274,14 @@ const Samples = (props: any) => {
       pageSize,
     });
   };
-  const [enterRowId, setEnterRowId] = useState<any>(undefined);
+
   const onMouseEnterRow = (rowId: any) => {
     setEnterRowId(rowId);
   };
-  const onRow = (record: any, rowIndex: any) => {
+  const onRow = (record: any) => {
     return {
-      // onMouseEnter : (e: any)=>onMouseEnterRow(record.id),
-      onMouseLeave: (e: any) => setEnterRowId(undefined),
-      // onMouseOn : (e: any)=>{console.log('wa');onMouseEnterRow(record.id)},
-      onMouseOver: (e: any) => {
+      onMouseLeave: () => setEnterRowId(undefined),
+      onMouseOver: () => {
         onMouseEnterRow(record.id);
       },
     };
@@ -327,11 +303,9 @@ const Samples = (props: any) => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal1(false);
-    outputSample(taskId, deleteSampleIds, activeTxt)
-      .then((res) => console.log(res))
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
+    outputSample(taskId, deleteSampleIds, activeTxt).catch((error) => {
+      commonController.notificationErrorMessage(error, 1);
+    });
   };
 
   const clickCancel = (e: any) => {
@@ -347,8 +321,7 @@ const Samples = (props: any) => {
     setActiveTxt(value);
   };
   // const [sortGroup, setSortGroup] = useState({state : 'desc', 'annotated_count' : 'desc'});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [currentPageSize, setCurrentPageSize] = useState(10);
+
   const reactSorter = (p: any, f: any, s: any) => {
     const field = s.field;
     let sortStr = s.order;
@@ -382,7 +355,6 @@ const Samples = (props: any) => {
           columns={columns}
           dataSource={showDatas ? showDatas : []}
           pagination={false}
-          loading={dataLoading}
           rowKey={(record) => record.id}
           rowSelection={rowSelection}
           onRow={onRow}
@@ -499,7 +471,5 @@ const Samples = (props: any) => {
 const mapStateToProps = (state: any) => {
   return state.toolsConfig;
 };
-
-const mapDispatchToProps = () => {};
 
 export default connect(mapStateToProps)(Samples);

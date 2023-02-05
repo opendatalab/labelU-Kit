@@ -1,5 +1,4 @@
 import type { FC, ReactElement } from 'react';
-
 // import { RouteProps } from 'react-router';
 import { useIntl } from 'react-intl';
 

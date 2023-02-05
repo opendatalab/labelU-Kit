@@ -13,8 +13,9 @@ export function checkNumber(v: string) {
 }
 
 export function formatDate(date: Date, fmt: string) {
-  if (/(y+)/.test(fmt)) {
-    fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
+  let format = fmt;
+  if (/(y+)/.test(format)) {
+    format = format.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
   }
   const o = {
     'M+': date.getMonth() + 1,
@@ -26,11 +27,11 @@ export function formatDate(date: Date, fmt: string) {
   for (const k in o) {
     // @ts-ignore
     const str = o[k] + '';
-    if (new RegExp(`(${k})`).test(fmt)) {
-      fmt = fmt.replace(RegExp.$1, RegExp.$1.length === 1 ? str : padLeftZero(str));
+    if (new RegExp(`(${k})`).test(format)) {
+      format = format.replace(RegExp.$1, RegExp.$1.length === 1 ? str : padLeftZero(str));
     }
   }
-  return fmt;
+  return format;
 }
 
 function padLeftZero(str: string) {

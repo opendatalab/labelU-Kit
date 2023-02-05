@@ -1,5 +1,4 @@
 import axiosProxy from './axiosProxy';
-import CommonController from '../utils/common/common';
 const { axiosInstance } = axiosProxy;
 const login = async function (params: { username: string; password: string }) {
   const res = await axiosInstance({

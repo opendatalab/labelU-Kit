@@ -1,10 +1,10 @@
 import React from 'react';
-import { Input as SensebeeInput, Checkbox, Col, Input, Row, Tooltip } from 'antd';
-import './index.less';
-
+import { Input as SensebeeInput, Col, Input, Row, Tooltip } from 'antd';
 import { CloseCircleFilled, PlusCircleFilled, StarFilled } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 const InputGroup = Input.Group;
+
+import './index.less';
 
 interface IProps {
   inputInfo: IInputList;
@@ -72,13 +72,11 @@ const TagInput = (props: IProps) => {
               />
             </Tooltip> */}
             {!isAllReadOnly && (
-              // eslint-disable-next-line jsx-a11y/anchor-is-valid
               <a className="addIcon" onClick={() => addInputInfo(inputIndex)}>
                 <PlusCircleFilled />
               </a>
             )}
             {inputIndex > 0 && !isAllReadOnly && (
-              // eslint-disable-next-line jsx-a11y/anchor-is-valid
               <a
                 className="deleteIcon"
                 onClick={() => {
@@ -130,7 +128,6 @@ const TagInput = (props: IProps) => {
                   </Tooltip>
                 </div>
                 {arr.length > 1 && !isAllReadOnly && (
-                  // eslint-disable-next-line jsx-a11y/anchor-is-valid
                   <a
                     style={{
                       color: '#CCCCCC',

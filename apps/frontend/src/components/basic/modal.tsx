@@ -18,11 +18,11 @@ const DrageModel = (props: Iprops, ref: any) => {
   const [isVisble, setIsVisible] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
-  const handleOk = (e: any) => {
+  const handleOk = () => {
     setIsVisible(false);
   };
 
-  const handleCancel = (e: any) => {
+  const handleCancel = () => {
     setIsVisible(false);
   };
 

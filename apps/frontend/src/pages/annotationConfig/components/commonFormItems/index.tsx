@@ -74,7 +74,7 @@ const CommonFormItem: FC<CommonFormConf & { name: string; toolName: string; isSh
             initialValue={initVal.drawOutsideTarget}
           >
             <Switch
-              onChange={(e) => {
+              onChange={() => {
                 form.submit();
               }}
               disabled={isAllReadOnly}
@@ -89,7 +89,7 @@ const CommonFormItem: FC<CommonFormConf & { name: string; toolName: string; isSh
           >
             <Switch
               disabled={isAllReadOnly}
-              onChange={(e) => {
+              onChange={() => {
                 form.submit();
               }}
               // defaultChecked={false}
@@ -128,7 +128,7 @@ const CommonFormItem: FC<CommonFormConf & { name: string; toolName: string; isSh
             }}
           >
             <TextConfigurable
-              onChange={(e) => {
+              onChange={() => {
                 form.submit();
               }}
             />

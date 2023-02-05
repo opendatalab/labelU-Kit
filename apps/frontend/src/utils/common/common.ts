@@ -1,17 +1,14 @@
 import { message } from 'antd';
-import { util } from 'prettier';
 
 import { ErrorMessages } from '../../services/errorMessage';
 
-import addDanglingComment = util.addDanglingComment;
 const commonController = {
   isNullObject(obj: any) {
-    let result = true;
-    for (const key in obj) {
-      result = false;
-      break;
+    if (typeof obj !== 'object') {
+      return false;
     }
-    return result;
+
+    return Object.keys(obj).length === 0;
   },
   checkEmail(event: any, emailValue?: any) {
     const email: any = event ? event.target.value : emailValue;
@@ -75,7 +72,6 @@ const commonController = {
     return result;
   },
   notificationErrorMessage(error: any, time: number) {
-    console.log(error);
     const errCode = error.err_code;
     if (errCode || errCode === 0) {
       const errorMessage = ErrorMessages[errCode];
@@ -174,8 +170,8 @@ const commonController = {
   transformFileList(data: any, sampleId: number) {
     const id = sampleId;
     let url = data.urls[sampleId];
-    for (const sampleId in data.urls) {
-      url = data.urls[sampleId];
+    for (const _sampleId in data.urls) {
+      url = data.urls[_sampleId];
     }
     // delete
     let newResult: any = '';
@@ -195,13 +191,14 @@ const commonController = {
     return finalResult;
   },
   drawImg(divId: number, src: string) {
+    // eslint-disable-next-line no-console
     console.log(divId + '');
     const img: any = window.document.getElementById(divId + '');
-    img.onload = (e: any) => {};
+    img.onload = () => {};
     // @ts-ignore
     img.src = src;
   },
-  downloadToFile(data: any, fileType: string) {
+  downloadToFile(data: any) {
     const info = new Blob(data.data);
     // @ts-ignore
     const dataTimestamp = new Date().getTime();
@@ -209,6 +206,7 @@ const commonController = {
       // @ts-ignore
       window.saveAs(info, dataTimestamp + '.json');
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log(e);
     }
   },

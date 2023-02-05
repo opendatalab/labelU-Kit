@@ -1,4 +1,3 @@
-import React from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { useDispatch } from 'react-redux';
@@ -13,13 +12,13 @@ const GoToEditTask = (props: any) => {
   const { taskStatus } = props;
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const taskId = parseInt(window.location.pathname.split('/')[2]);
   const turnToEditTask = () => {
     const taskId = parseInt(window.location.pathname.split('/')[2]);
     if (taskId > 0) {
       getTask(taskId)
         .then((res: any) => {
           if (res.status === 200) {
+            // @ts-ignore
             dispatch(updateTask({ data: res.data.data }));
             if (res.data.data.config) {
               dispatch(updateAllConfig(JSON.parse(res.data.data.config)));

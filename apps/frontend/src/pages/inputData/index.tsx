@@ -1,7 +1,5 @@
-import React, { useState, useEffect, createRef } from 'react';
-import type { UploadProps } from 'antd';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { UploadFile } from 'antd/es/upload/interface';
 import { Tree } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -11,44 +9,21 @@ import { UploadStatus } from '../../constants/upload';
 import currentStyles from './index.module.scss';
 import { updateNewSamples } from '../../stores/sample.store';
 import NativeUpload from '../../components/nativeUpload';
-let newFileList: any[] = [];
-const newFileListInfo: any[] = [];
-const newFolder: any = {};
-const saveFolderFiles: any[] = [];
+
 const InputInfoConfig = () => {
   const { DirectoryTree } = Tree;
   const dispatch = useDispatch();
-  const configStep = useSelector((state) => state.existTask.configStep);
-  const haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
-  const taskName = useSelector((state) => state.existTask.taskName);
-  const taskDescription = useSelector((state) => state.existTask.taskDescription);
-  const taskTips = useSelector((state) => state.existTask.taskTips);
+  // @ts-ignore
   const taskId = useSelector((state) => state.existTask.taskId);
-  const [uploadedTotal, setUploadedTotal] = useState(0);
   const [uploadedSuccessful, setUploadedSuccessful] = useState(0);
+  const [startToUpload, setStartToUpload] = useState(1);
+  const [temp, setTemp] = useState<any>([]);
+  const [tempC, setTempC] = useState<any>(0);
+  const [deleteTag, setDeleteTag] = useState(false);
+  const [startUploadFlag, setStartUploadFlag] = useState(false);
   const [uploadedFailed, setUploadedFailed] = useState(0);
 
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-
   const [haveUploadFiles, setHaveUploadFiles] = useState<any[]>([]);
-  const handleChange: UploadProps['onChange'] = (info) => {
-    const newFileList1 = [...info.fileList];
-    newFileList = newFileList1;
-  };
-
-  const inputRef = createRef<any>();
-
-  const [flag, setFlag] = useState(true);
-
-  const customRequest = (v: any) => {};
-  const uploadFileChange = (k: any) => {};
-  const items = [
-    {
-      fileName: 'test1.txt',
-      status: 0,
-      option: () => {},
-    },
-  ];
   const isCorrectFiles = (files: any) => {
     let result = true;
     if (files.length > 100) {
@@ -73,9 +48,9 @@ const InputInfoConfig = () => {
     return result;
   };
   const updateOneOfHaveUplodaedFileList = (uid: any, hasUploaded: any, result: any) => {
-    const temp = haveUploadFiles.concat([]);
-    for (let haveUploadedFilesIndex = 0; haveUploadedFilesIndex < temp.length; haveUploadedFilesIndex++) {
-      const haveUploadedFile = temp[haveUploadedFilesIndex];
+    const _temp = haveUploadFiles.concat([]);
+    for (let haveUploadedFilesIndex = 0; haveUploadedFilesIndex < _temp.length; haveUploadedFilesIndex++) {
+      const haveUploadedFile = _temp[haveUploadedFilesIndex];
       if (uid === haveUploadedFile.uid) {
         haveUploadedFile.hasUploaded = hasUploaded;
         if (result) {
@@ -83,7 +58,7 @@ const InputInfoConfig = () => {
           haveUploadedFile.url = result.data.data.url;
           haveUploadedFile.id = result.data.data.id;
         }
-        setHaveUploadFiles(temp);
+        setHaveUploadFiles(_temp);
         break;
       }
     }
@@ -111,10 +86,7 @@ const InputInfoConfig = () => {
     // saveFolderFiles = saveFolderFiles.concat(currentListContainer);
     setTemp(currentListContainer.concat());
   };
-  const [startToUpload, setStartToUpload] = useState(1);
-  const [temp, setTemp] = useState<any>([]);
-  const [tempC, setTempC] = useState<any>(0);
-  const [startUploadFlag, setStartUploadFlag] = useState(false);
+
   const upLoadFiles = async function () {
     setStartUploadFlag(true);
     let tempSuccessful = 0;
@@ -157,6 +129,7 @@ const InputInfoConfig = () => {
     } else {
       upLoadFiles().catch((error: any) => commonController.notificationErrorMessage(error, 3));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startToUpload]);
 
   const deleteSingleFile = (itemIndex: number) => {
@@ -168,15 +141,15 @@ const InputInfoConfig = () => {
   };
   const renewUpload = async function (item: any, itemIndex: number) {
     const result = await uploadFileService(taskId, item.params);
-    const temp: any = Object.assign([], haveUploadFiles);
+    const _temp: any = Object.assign([], haveUploadFiles);
     if (result?.status === 201) {
-      temp[itemIndex].hasUploaded = UploadStatus.SUCCESS;
+      _temp[itemIndex].hasUploaded = UploadStatus.SUCCESS;
       commonController.notificationSuccessMessage({ message: '一个文件上传成功' }, 2);
     } else {
-      temp[itemIndex].hasUploaded = UploadStatus.FAIL;
+      _temp[itemIndex].hasUploaded = UploadStatus.FAIL;
       commonController.notificationSuccessMessage({ message: '一个文件上传失败' }, 2);
     }
-    setHaveUploadFiles(temp);
+    setHaveUploadFiles(_temp);
   };
   const updateUploadedFiles = () => {
     const result = [];
@@ -194,9 +167,10 @@ const InputInfoConfig = () => {
         result.push(newItem);
       }
     }
+    // @ts-ignore
     dispatch(updateNewSamples(result));
   };
-  const [deleteTag, setDeleteTag] = useState(false);
+
   useEffect(() => {
     updateUploadedFiles();
     if (deleteTag) {
@@ -214,6 +188,7 @@ const InputInfoConfig = () => {
     }
     setUploadedSuccessful(successfulFiles);
     setUploadedFailed(failedFiles);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [haveUploadFiles]);
 
   const inputFolder = (files: any) => {
@@ -351,7 +326,7 @@ const InputInfoConfig = () => {
                   // console.log( item );
                   if (item.children) {
                     return (
-                      <div className={currentStyles.folderItem}>
+                      <div className={currentStyles.folderItem} key={itemIndex}>
                         <DirectoryTree multiple selectable={false} treeData={[item]} />
                       </div>
                     );

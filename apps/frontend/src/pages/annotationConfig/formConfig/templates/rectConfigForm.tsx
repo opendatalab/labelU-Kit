@@ -68,6 +68,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = (props) => {
       };
       setInitVal(initV);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { children } = props;
 

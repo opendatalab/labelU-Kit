@@ -9,7 +9,6 @@ import _ from 'lodash';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import type { ToolsConfigState } from 'interface/toolConfig';
-import { message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 
 import jsonToyam from '../../utils/jsonToyml';

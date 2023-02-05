@@ -6,12 +6,7 @@ import DrageModel from '../../../components/basic/modal';
 import './index.less';
 import { getLabelConfig } from './config';
 import TmplateBox from './tmplateBox';
-
-import { useSelector, useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-
 import { getTask } from '../../../services/samples';
-import { updateStatus } from '../../../stores/task.store';
 import commonController from '../../../utils/common/common';
 type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 
@@ -23,7 +18,6 @@ interface LabelType {
 
 // test
 const ConfigTemplate: FC = () => {
-  const location = useLocation();
   const modalRef = useRef<any>();
   const [labelTypes, setLabelTypes] = useState<LabelType[]>([
     {
@@ -36,9 +30,9 @@ const ConfigTemplate: FC = () => {
 
   // const dispatch = useDispatch();//
   useEffect(() => {
-    new Promise(async (resolve, reject) => {
+    new Promise(async () => {
       const result = await getLabelConfig();
-      const neLabelTypes = labelTypes.map((item, index) => {
+      const neLabelTypes = labelTypes.map((item) => {
         if (item.label === '图片') {
           return {
             ...item,
@@ -56,18 +50,9 @@ const ConfigTemplate: FC = () => {
       });
       setLabelTypes(neLabelTypes);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    // // @ts-ignore
-    // if (!taskStatus && !(window.location.search.indexOf('noConfig=1')>-1)) {
-    //   dispatch(updateStatus('IMPORTED'));
-    //   setIsShowChoose(true);
-    // }else{
-    //   // @ts-ignore
-    //   if(taskStatus !== 'DRAFT' && taskStatus !== 'IMPORTED' && taskStatus !== 'CONFIGURED'){
-    //     setIsShowChoose(false);
-    //   }
-    // }
     const taskId = parseInt(window.location.pathname.split('/')[2]);
     getTask(taskId)
       .then((res: any) => {
@@ -79,7 +64,7 @@ const ConfigTemplate: FC = () => {
         }
       })
       .catch((error) => commonController.notificationErrorMessage(error, 1));
-  }, [window.location.pathname]);
+  }, []);
   const content = () => {
     const tabPosition: TabPosition = 'left';
     return (

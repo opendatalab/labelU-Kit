@@ -48,12 +48,12 @@ const TmplateBox: FC<Iprops> = ({ tempaltes, hideBox }) => {
 
   return (
     <div className="tabContentBox">
-      {tempaltes.map((item, index) => {
+      {tempaltes.map((item) => {
         return (
           <div
             key={item.label}
             className="imgBox"
-            onDoubleClick={(e) => {
+            onDoubleClick={() => {
               updateToolConfig(item);
               hideBox();
             }}

@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { debounceTime, scan } from 'rxjs';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { useSelector, connect, Provider } from 'react-redux';
+import { Provider } from 'react-redux';
 
 import SliderCard from './components/sliderCard';
-import { getPrevSamples, getSample, getPreSample } from '../../services/samples';
+import { getPrevSamples, getSample } from '../../services/samples';
 import commonController from '../../utils/common/common';
 import currentStyles from './index.module.scss';
-import Ob from '../../utils/Observable';
 import store from '../../stores';
-const tempInit: any = [];
+
 const SlideLoader = () => {
   const [prevImgList, setPrevImgList] = useState<any[]>([]);
-  // const t = useSelector(state=>{console.log(state); return state;})
   const taskId = parseInt(window.location.pathname.split('/')[2]);
   const sampleId = parseInt(window.location.pathname.split('/')[4]);
   const [upNoneTipShow, setUpNoneTipShow] = useState(false);
@@ -102,29 +99,6 @@ const SlideLoader = () => {
       });
     }
   };
-  const getSampleLocal = async function () {
-    const sampleRes = await getSample(taskId, sampleId);
-    if (sampleRes.status === 200) {
-      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
-      newSample[0].state = sampleRes.data.data.state;
-      await getSampleLocalNew();
-    } else {
-      commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
-    }
-  };
-  const getSampleLocalNew = async function () {
-    const sampleRes = await getSample(taskId, sampleId);
-    if (sampleRes.status === 200) {
-      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
-      newSample[0].state = sampleRes.data.data.state;
-      const after10 = await get10Samples('after');
-      const before10 = await get10Samples('before');
-      setPrevImgList(Object.assign(before10.concat(newSample, after10)));
-    } else {
-      commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
-    }
-  };
-
   const get10Samples = async function (direction: string) {
     try {
       const samplesRes = await getPrevSamples(taskId, {
@@ -160,7 +134,29 @@ const SlideLoader = () => {
     }
   };
 
-  const getAfter10 = async function () {};
+  const getSampleLocalNew = async function () {
+    const sampleRes = await getSample(taskId, sampleId);
+    if (sampleRes.status === 200) {
+      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
+      newSample[0].state = sampleRes.data.data.state;
+      const after10 = await get10Samples('after');
+      const before10 = await get10Samples('before');
+      setPrevImgList(Object.assign(before10.concat(newSample, after10)));
+    } else {
+      commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
+    }
+  };
+
+  const getSampleLocal = async function () {
+    const sampleRes = await getSample(taskId, sampleId);
+    if (sampleRes.status === 200) {
+      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
+      newSample[0].state = sampleRes.data.data.state;
+      await getSampleLocalNew();
+    } else {
+      commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
+    }
+  };
 
   const navigate = useNavigate();
   const getAfterSampleId = async function (params: any) {
@@ -336,10 +332,8 @@ const SlideLoader = () => {
   };
 
   const updatePrevImageListStateForSkippedAndNew = async function (state: string) {
-    // navigate(window.location.pathname+'?sampleId='+sampleId);
-
     const temp: any = Object.assign([], prevImgList);
-    const nextPageId: any = null;
+
     for (let prevImgIndex = 0; prevImgIndex < temp.length; prevImgIndex++) {
       const prevImg: any = temp[prevImgIndex];
       if (prevImg.id === sampleId) {
@@ -350,12 +344,9 @@ const SlideLoader = () => {
     setPrevImgList(temp);
   };
 
-  const updatePrevImgList = (prevImgList: any) => {
-    setPrevImgList(prevImgList);
-  };
-
   useEffect(() => {
     getSampleLocal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -383,23 +374,8 @@ const SlideLoader = () => {
     if (search.indexOf('POINTER') > -1) {
       updatePrevImageListStatePointer('DONE');
     }
-    // if(search.indexOf('COPYPRE') > -1 ){
-    //   updatePrevImageListResult();
-    // }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [window.location.search]);
-
-  const [initTime, setInitTime] = useState<any>(0);
-  useEffect(() => {
-    if (initTime === 0) return;
-    if (initTime === 1) {
-      requestPreview({
-        before: sampleId,
-        pageSize: 10,
-      }).then(() => {
-        setPrevImgList(tempInit);
-      });
-    }
-  }, [initTime]);
 
   return (
     <Provider store={store}>

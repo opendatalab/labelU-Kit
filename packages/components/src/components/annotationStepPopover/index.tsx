@@ -1,6 +1,5 @@
 // 标注步骤中的 popover 的内容
 
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { componentCls } from '@/constant';

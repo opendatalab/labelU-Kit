@@ -54,8 +54,7 @@ jobs:
         run: |
           echo $RELEASE_VERSION
       - name: Install dependencies
-        run: npm cache clean --force
-      - run: pnpm install
+        run: pnpm install
       - name: Build packages
         run: pnpm run build
       - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}

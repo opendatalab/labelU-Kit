@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const ColorTag = ({ color, style }: any) => (
   <div
     style={{

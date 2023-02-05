@@ -4,7 +4,6 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EToolName } from '@label-u/annotation';
 import { Popconfirm } from 'antd';
-import { useLocation } from 'react-router-dom';
 
 import RectConfigForm from './templates/rectConfigForm';
 import LineConfigForm from './templates/lineConfigForm';
@@ -23,7 +22,6 @@ interface FormEngineProps {
 }
 
 const FormEngine: FC<FormEngineProps> = (props) => {
-  const location = useLocation();
   const { tagList, textConfig, tools } = useSelector((state) => state.toolsConfig);
   const taskStatus = useSelector((state) => state.existTask.status);
   const dispatch = useDispatch();
@@ -32,13 +30,6 @@ const FormEngine: FC<FormEngineProps> = (props) => {
   const ConfigTool = useMemo(() => {
     if (props.toolname) {
       if (props.toolname === EToolName.Rect) {
-        // const result = await new Promise(async (resolve, reject) => {
-        //   const { default: graph } = await import('./templates/rectConfigForm');
-        //   resolve(graph);
-        // });
-        // return result;
-        // return Dynamic(() => import('./templates/rectConfigForm'));
-
         return RectConfigForm;
       }
       if (props.toolname === EToolName.Point) {
@@ -67,7 +58,7 @@ const FormEngine: FC<FormEngineProps> = (props) => {
     } else if (toolName === EToolName.Tag) {
       dispatch(updateTagConfigList([]));
     }
-    const newTools = tools.filter((tool) => {
+    const newTools = tools.filter((tool: any) => {
       return tool.tool !== toolName;
     });
     dispatch(updateToolsConfig(newTools));
@@ -91,6 +82,7 @@ const FormEngine: FC<FormEngineProps> = (props) => {
   const [isShowDelete, setIsShowDelete] = useState(true);
   useEffect(() => {
     if (!taskStatus) {
+      // @ts-ignore
       dispatch(updateStatus('IMPORTED'));
       setIsShowDelete(true);
     } else {
@@ -98,7 +90,7 @@ const FormEngine: FC<FormEngineProps> = (props) => {
         setIsShowDelete(false);
       }
     }
-  }, [window.location.pathname]);
+  }, [dispatch, taskStatus]);
   return (
     <div>
       {ConfigTool && (

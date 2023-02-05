@@ -5,10 +5,10 @@ import { getPathValue } from 'rc-table/lib/utils/valueUtil';
 import type { MyTableColumnProps } from './type';
 import { dateFormatMap, datetimeFormatMap, timeFormatMap } from './type';
 
-const MyTableColumn = <RecordType extends object = object>(props: MyTableColumnProps<RecordType>) => {
+const MyTableColumn = <RecordType extends Record<string, unknown>>(props: MyTableColumnProps<RecordType>) => {
   const { options, date, time, datetime, render, ...rest } = props;
 
-  const renderContent = (value: any, record: RecordType, index: number) => {
+  const renderContent = (value: any, record: RecordType) => {
     if (!value) return '-';
 
     if ('datetime' in props) {
