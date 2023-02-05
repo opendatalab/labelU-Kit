@@ -64,3 +64,19 @@ jobs:
         run: pnpm run build:frontend
       - name: Release frontend
         run: pnpm run release:frontend
+      # - name: Trigger labelU workflow
+      #   uses: actions/github-script@v5
+      #   with:
+      #     script: |
+      #       await github.rest.actions.createWorkflowDispatch({
+      #         owner: 'opendatalab',
+      #         repo: 'labelU',
+      #         workflow_id: 'cicd_pipeline.yml',
+      #         ref: 'main',
+      #         inputs: {
+      #             version: '',
+      #             branch: '${{ env.RELEASE_VERSION }}',
+      #             name: 'frontend',
+      #             assets_url: 'https://github.com/opendatalab/labelU-Kit/archive/refs/tags/@label-u/frontend@1.0.0-alpha.1.zip',
+      #         }
+      #       });

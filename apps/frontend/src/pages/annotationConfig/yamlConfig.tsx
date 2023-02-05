@@ -8,8 +8,9 @@ import 'ace-builds/webpack-resolver';
 import _ from 'lodash';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
-import type { ToolsConfigState } from 'interface/toolConfig';
 import { useDispatch, useSelector } from 'react-redux';
+
+import type { ToolsConfigState } from '@/interface/toolConfig';
 
 import jsonToyam from '../../utils/jsonToyml';
 import ConfigNotMatchImg from '../../img/annotationCommon/configNotMatch.png';
