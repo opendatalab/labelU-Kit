@@ -9,7 +9,11 @@
       }
     ],
     "@semantic-release/release-notes-generator",
-    "@semantic-release/github",
+    ["@semantic-release/github", {
+      "assets": [
+        {"path": "dist/**/*", "label": "dist distribution"}
+      ]
+    }],
     [
       "@semantic-release/git",
       {
@@ -17,13 +21,6 @@
         "message": "chore(release): ${nextRelease.version} [skip ci] \n\n${nextRelease.notes}"
       }
     ],
-    "@semantic-release/release-notes-generator",
-    [
-      "semantic-release-github-pullrequest",
-      {
-        "assets": ["package.json"],
-        "baseRef": "main"
-      }
-    ]
+    "@semantic-release/release-notes-generator"
   ]
 }
