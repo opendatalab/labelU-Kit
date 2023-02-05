@@ -9,11 +9,12 @@
       }
     ],
     "@semantic-release/release-notes-generator",
-    ["@semantic-release/github", {
-      "assets": [
-        {"path": "dist/**/*", "label": "dist distribution"}
-      ]
-    }],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [{ "path": "./*.zip", "label": "frontend app distribution" }]
+      }
+    ],
     [
       "@semantic-release/git",
       {
@@ -21,6 +22,12 @@
         "message": "chore(release): ${nextRelease.version} [skip ci] \n\n${nextRelease.notes}"
       }
     ],
-    "@semantic-release/release-notes-generator"
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "node ./scripts/release.js ${branch.name} ${nextRelease.version} ${Date.now()}"
+      }
+    ]
   ]
 }
