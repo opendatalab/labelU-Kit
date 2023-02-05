@@ -5,9 +5,9 @@ const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const resolve = (dir) => path.resolve(__dirname, dir);
 
-if (process.env.GITHUB_ACTIONS) {
-  process.env.CI = 'true';
-}
+// if (process.env.GITHUB_ACTIONS) {
+//   process.env.CI = 'true';
+// }
 
 module.exports = {
   webpack: {
