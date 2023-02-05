@@ -4,7 +4,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } fro
 
 import type { MyResponse } from '../../../api/request';
 import MyTable from '../../../components/core/table';
-import type { PageData } from '../../../interface';
+import type { PageData } from '../../../types';
 import { useStates } from '../../../utils/use-states';
 import type { MyAsideProps } from '../aside';
 import MyAside from '../aside';

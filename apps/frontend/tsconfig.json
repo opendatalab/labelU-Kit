@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "isolatedModules": true,
     "composite": true,
     "module": "ESNext",
@@ -11,12 +15,22 @@
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "types": ["node", "jest"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "types": [
+      "node",
+      "jest"
+    ]
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }],
-  "exclude": ["dist", "**/*.test.tsx", "**/*.test.ts"]
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "exclude": [
+    "dist",
+    "**/*.test.tsx",
+    "**/*.test.ts"
+  ]
 }

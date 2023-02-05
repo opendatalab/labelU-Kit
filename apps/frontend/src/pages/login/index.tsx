@@ -4,7 +4,7 @@ import './index.less';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
-import type { LoginParams } from '../../interface/user/login';
+import type { LoginParams } from '../../types/user/login';
 import { loginAsync } from '../../stores/user.store';
 import { formatSearch } from '../../utils/formatSearch';
 

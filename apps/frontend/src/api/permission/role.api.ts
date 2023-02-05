@@ -1,4 +1,4 @@
-import type { GetRoleResult } from '@/interface/permission/role.interface';
+import type { GetRoleResult } from '@/types/permission/role.interface';
 
 import { request } from '../request';
 

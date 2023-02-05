@@ -24,6 +24,7 @@ const Homepage = () => {
   }, []);
   return (
     <div className={currentStyles.outerFrame}>
+      {/* @ts-ignore */}
       <Navigate username={username} />
       <div className={currentStyles.content}>
         <Outlet />

@@ -1,5 +1,5 @@
-import type { Device } from '@/interface/layout/index.interface';
-import type { MenuChild } from '@/interface/layout/menu.interface';
+import type { Device } from '@/types/layout/index.interface';
+import type { MenuChild } from '@/types/layout/menu.interface';
 
 import type { Role } from './login';
 
