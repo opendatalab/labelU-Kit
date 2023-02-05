@@ -12,6 +12,7 @@ const Homepage = () => {
     if (window.location.pathname === '/') {
       navigate(constants.urlToTasks);
     }
+
     const token = localStorage.getItem('token');
     const _username = localStorage.getItem('username');
     if (token && _username) {
@@ -19,7 +20,8 @@ const Homepage = () => {
     } else {
       navigate('/login');
     }
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className={currentStyles.outerFrame}>
       <Navigate username={username} />

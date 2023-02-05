@@ -15,7 +15,8 @@ const RootGuard = () => {
     } else {
       navigate('/login');
     }
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <Outlet />;
 };
