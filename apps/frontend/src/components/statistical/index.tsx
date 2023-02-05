@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { Modal } from 'antd';
@@ -37,16 +37,7 @@ const Statistical = () => {
       .catch((error) => {
         commonController.notificationErrorMessage(error, 1);
       });
-  }, []);
-  // const outputSamplesLocal = function(){
-  //   // outputSamples(taskId).then((res:any)=>{
-  //   //   if(res.status === 200){
-  //   //
-  //   //   }else{
-  //   //     commonController.notificationErrorMessage({message:'导出数据出现问题'},1)
-  //   //   }
-  //   // }).catch(error=>commonController.notificationErrorMessage({message:'导出数据出现问题'},1))
-  // }
+  }, [dispatch, taskId]);
   const navigate = useNavigate();
   const getSamplesLocal = (params: any) => {
     getSamples(taskId, params)
@@ -95,11 +86,9 @@ const Statistical = () => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal(false);
-    outputSamples(taskId, activeTxt)
-      .then((res) => console.log(res))
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
+    outputSamples(taskId, activeTxt).catch((error) => {
+      commonController.notificationErrorMessage(error, 1);
+    });
   };
 
   const clickCancel = (e: any) => {

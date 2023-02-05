@@ -1,7 +1,6 @@
 import type { HTMLAttributes, PropsWithChildren } from 'react';
-import React, { createRef, useEffect, useState } from 'react';
+import React, { createRef, useEffect } from 'react';
 import type { RcFile } from 'antd/lib/upload/interface';
-import { UploadFileStatus, UploadFile } from 'antd/lib/upload/interface';
 
 import styles from './index.module.scss';
 
@@ -14,14 +13,11 @@ type IProps = HTMLAttributes<HTMLDivElement> & {
 
 const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
   const inputRef = createRef<any>();
-  const { children, style, className, directory, multiple, ...req } = props;
-  // const d = directory ? { webkitdirectory: 'true' } : {};
-  // const [d, setD] = useState<any>( {  } );
+  const { children, directory, multiple, ...req } = props;
   useEffect(() => {
-    // directory ? inputRef.current.webkitdirectory = true : {}
     inputRef.current.webkitdirectory = directory;
     inputRef.current.multiple = multiple;
-  }, []);
+  }, [directory, inputRef, multiple]);
   return (
     <div className={styles.upload}>
       <input

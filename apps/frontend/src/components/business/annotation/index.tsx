@@ -1,13 +1,8 @@
-import type { TextConfig } from '@label-u/components';
+import type { TextConfig, BasicConfig } from '@label-u/components';
+import type { Attribute, OneTag } from '@label-u/annotation';
 import AnnotationOperation from '@label-u/components';
-
 import '@label-u/components/dist/index.css';
-// import LeftSider from './leftSider';
-import type { BasicConfig, Attribute, OneTag } from 'interface/toolConfig';
-import React, { memo, useEffect, useState } from 'react';
-// import tagConfigList from '../../../config/tagConfigList.json';
-// import attributeList from '../../../config/attributeList.json';
-import { createRef } from 'react';
+import { memo } from 'react';
 
 const Annotation = (props: {
   fileList: any;
@@ -26,7 +21,6 @@ const Annotation = (props: {
 }) => {
   const {
     fileList,
-    goBack,
     tools,
     tagList,
     attribute,
@@ -34,22 +28,9 @@ const Annotation = (props: {
     isPreview,
     leftSiderContent,
     topActionContent,
-    exportData,
-    onSubmit,
     annotationRef,
     commonAttributeConfigurable,
   } = props;
-  // const exportData = (data: any) => {
-  // };
-  // const onSubmit = (data: any) => {
-  //   // 翻页时触发当前页面数据的输出
-  // };
-  // const leftSiderContent = ()=>{
-  //   return (<div>test 22</div>)
-  // };
-  // const topActionContent = ()=>{
-  //   return <div>test action</div>
-  // };
   // @ts-ignore
   return (
     <div style={{ width: '100vw' }}>

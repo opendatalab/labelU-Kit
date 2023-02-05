@@ -6,15 +6,15 @@ import zhCN from 'antd/es/locale/zh_CN';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
 import intl from 'react-intl-universal';
+import 'moment/locale/zh-cn';
 
 import enUS1 from './locales/en-US';
 import zhCN1 from './locales/zh-CN';
-
-import 'moment/locale/zh-cn';
 import RenderRouter from './routes';
 import { history, HistoryRouter } from './routes/history';
 import { localeConfig } from './locales';
 const App: React.FC = () => {
+  // @ts-ignore
   const { locale } = useSelector((state) => state.user);
 
   // set the locale for the user
@@ -61,6 +61,7 @@ const App: React.FC = () => {
 
   return (
     <ConfigProvider locale={getAntdLocale()} componentSize="middle">
+      {/* @ts-ignore */}
       <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
         <HistoryRouter history={history}>
           <RenderRouter />

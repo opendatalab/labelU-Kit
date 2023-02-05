@@ -7,8 +7,8 @@ import { useSelector } from 'react-redux';
 import NoticeSvg from '../../img/header/notice.svg';
 // import SvgIcon from '../../components/basic/svgIcon';
 import { getNoticeList } from '../../api/layout.api';
-import type { Notice } from '../../interface/layout/notice.interface';
-import { EventStatus } from '../../interface/layout/notice.interface';
+import type { Notice } from '../../types/layout/notice.interface';
+import { EventStatus } from '../../types/layout/notice.interface';
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -18,6 +18,7 @@ const HeaderNoticeComponent: FC = () => {
   const [visible, setVisible] = useState(false);
   const [noticeList, setNoticeList] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(false);
+  // @ts-ignore
   const { noticeCount } = useSelector((state) => state.user);
 
   const noticeListFilter = <T extends Notice['type']>(type: T) => {
@@ -30,7 +31,9 @@ const HeaderNoticeComponent: FC = () => {
     setLoading(true);
     const { status, result } = await getNoticeList();
     setLoading(false);
-    status && setNoticeList(result);
+    if (status) {
+      setNoticeList(result);
+    }
   };
 
   useEffect(() => {

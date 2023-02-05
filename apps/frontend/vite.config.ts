@@ -26,10 +26,10 @@ export default defineConfig({
     //   mockPath: 'mock',
     //   localEnabled: true,
     // }),
-    process.env.NODE_ENV !== 'production' &&
-      tsMonoAlias({
-        ignorePackages: ['web-demo', 'server'],
-      }),
+
+    tsMonoAlias({
+      ignorePackages: ['web-demo', 'server'],
+    }),
     vitePluginImp({
       libList: [
         {
@@ -38,7 +38,7 @@ export default defineConfig({
         },
       ],
     }),
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/'),

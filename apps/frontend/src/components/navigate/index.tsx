@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Breadcrumb } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { UserOutlined, PoweroffOutlined } from '@ant-design/icons';
+import { PoweroffOutlined } from '@ant-design/icons';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
@@ -11,79 +10,13 @@ import AnnotationTips from '../../components/annotationTips';
 import { getTask } from '../../services/samples';
 import HelpTips from '../helpTips';
 
-const Homepage = (props: any) => {
-  // const username = useSelector(commonController.getUsername);
+const Homepage = () => {
   const username = localStorage.getItem('username');
   const [isShowHelp, setIsShowHelp] = useState(false);
+  const [isShowAnnotationTips, setIsShowAnnotationTips] = useState(false);
+  const [taskTips, setTaskTips] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  // const crumbs  : any = {
-  //     '/tasks' : (<Breadcrumb.Item>
-  //         <Link to = ''>任务列表</Link>
-  //     </Breadcrumb.Item>),
-  //     '/tasks/0/edit/basic' : (
-  //         <React.Fragment>
-  //             <Breadcrumb.Item>
-  //                 <Link to = '/taskList'>任务列表</Link>
-  //             </Breadcrumb.Item>
-  //         </React.Fragment>
-  //     ),
-  //     '/taskList/task/taskAnnotation' : (
-  //         <React.Fragment>
-  //             <Breadcrumb.Item>
-  //                 <Link to = '/taskList'>任务列表</Link>
-  //             </Breadcrumb.Item>
-  //             <Breadcrumb.Item>
-  //                 <Link to = '/taskList/task'>任务</Link>
-  //             </Breadcrumb.Item>
-  //             <Breadcrumb.Item>
-  //                 开始标注
-  //             </Breadcrumb.Item>
-  //         </React.Fragment>
-  //     ),
-  //     '/taskList/createTask' : (
-  //         <React.Fragment>
-  //             <Breadcrumb.Item>
-  //                 <Link to = '/taskList'>任务列表</Link>
-  //             </Breadcrumb.Item>
-  //             <Breadcrumb.Item>
-  //                新建任务
-  //             </Breadcrumb.Item>
-  //         </React.Fragment>
-  //     ),
-  //     '/taskList/createTask/inputInfoConfig' : (
-  //         <React.Fragment>
-  //             <Breadcrumb.Item>
-  //                 <Link to = '/taskList'>任务列表</Link>
-  //             </Breadcrumb.Item>
-  //             <Breadcrumb.Item>
-  //                 新建任务
-  //             </Breadcrumb.Item>
-  //         </React.Fragment>
-  //     ),
-  //     '/taskList/createTask/inputData' : (
-  //         <React.Fragment>
-  //             <Breadcrumb.Item>
-  //                 <Link to = '/taskList'>任务列表</Link>
-  //             </Breadcrumb.Item>
-  //             <Breadcrumb.Item>
-  //                 新建任务
-  //             </Breadcrumb.Item>
-  //         </React.Fragment>
-  //     ),
-  //     '/taskList/createTask/annotationConfig' : (
-  //         <React.Fragment>
-  //             <Breadcrumb.Item>
-  //                 <Link to = '/taskList'>任务列表</Link>
-  //             </Breadcrumb.Item>
-  //             <Breadcrumb.Item>
-  //                 新建任务
-  //             </Breadcrumb.Item>
-  //         </React.Fragment>
-  //     )
-  // }
-
-  // const [taskName, setTaskName] = useState('');
   const [breadcrumbItems, setBreadcrumbItems] = useState<any>(
     <Breadcrumb.Item>
       <Link to="/tasks">任务列表</Link>
@@ -177,8 +110,7 @@ const Homepage = (props: any) => {
     }
     return result;
   };
-  const [isShowAnnotationTips, setIsShowAnnotationTips] = useState(false);
-  const [taskTips, setTaskTips] = useState('');
+
   useEffect(() => {
     if (location.pathname) {
       const pathnames = window.location.pathname.split('/');
@@ -226,6 +158,7 @@ const Homepage = (props: any) => {
         </div>
       </div>
       <div className={currentStyles.right}>
+        {/* @ts-ignore */}
         {isShowHelp && <HelpTips taskTips={taskTips} />}
         {isShowAnnotationTips && <AnnotationTips />}
         <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>

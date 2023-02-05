@@ -4,7 +4,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } fro
 
 import type { MyResponse } from '../../../api/request';
 import MyTable from '../../../components/core/table';
-import type { PageData } from '../../../interface';
+import type { PageData } from '../../../types';
 import { useStates } from '../../../utils/use-states';
 import type { MyAsideProps } from '../aside';
 import MyAside from '../aside';
@@ -20,11 +20,36 @@ interface SearchApi {
 
 type ParseDataType<S> = S extends (params?: any) => MyResponse<PageData<infer T>> ? T : S;
 
+const styles = css`
+  display: flex;
+  flex-direction: column;
+  .tabs-main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  .search {
+    margin-bottom: 10px;
+  }
+
+  .aside-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    flex-direction: column;
+  }
+
+  .table {
+    flex: 1;
+    overflow: hidden;
+  }
+`;
+
 export type MyPageTableOptions<S> = ColumnsType<S>;
 export interface PageProps<S> {
   searchRender?: React.ReactNode;
   pageApi?: S;
-  pageParams?: Object;
+  pageParams?: Record<string, unknown>;
   tableOptions?: MyPageTableOptions<ParseDataType<S>>;
   tableRender?: (data: MyPageTableOptions<ParseDataType<S>>[]) => React.ReactNode;
   asideData?: MyAsideProps['options'];
@@ -39,7 +64,7 @@ export interface PageProps<S> {
 
 export interface RefPageProps {
   setAsideCheckedKey: (key?: string) => void;
-  load: (data?: object) => Promise<void>;
+  load: (data?: Record<string, unknown>) => Promise<void>;
 }
 
 const BasePage = <S extends SearchApi>(props: PageProps<S>, ref: React.Ref<RefPageProps>) => {
@@ -58,6 +83,7 @@ const BasePage = <S extends SearchApi>(props: PageProps<S>, ref: React.Ref<RefPa
     tabsData,
     tabsValue,
   } = props;
+  // @ts-ignore
   const [pageData, setPageData] = useStates<PageData<ParseDataType<S>>>({
     pageSize: 20,
     pageNum: 1,
@@ -116,10 +142,11 @@ const BasePage = <S extends SearchApi>(props: PageProps<S>, ref: React.Ref<RefPa
 
   useImperativeHandle(ref, () => ({
     setAsideCheckedKey,
-    load: (data?: object) => getPageData(data),
+    load: (data?: Record<string, unknown>) => getPageData(data),
   }));
 
   return (
+    // eslint-disable-next-line react/no-unknown-property
     <div css={styles}>
       {tabsData && <MyTabs className="tabs" options={tabsData} defaultValue={tabsData[0].value || tabsValue} />}
       <div className="tabs-main">
@@ -182,28 +209,3 @@ MyPage.MyTable = MyTable;
 MyPage.MyAside = MyAside;
 
 export default MyPage;
-
-const styles = css`
-  display: flex;
-  flex-direction: column;
-  .tabs-main {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-  }
-  .search {
-    margin-bottom: 10px;
-  }
-
-  .aside-main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-    flex-direction: column;
-  }
-
-  .table {
-    flex: 1;
-    overflow: hidden;
-  }
-`;

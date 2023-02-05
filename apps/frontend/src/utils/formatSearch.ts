@@ -1,15 +1,16 @@
 export function formatSearch(se: string) {
-  se = decodeURIComponent(se);
-  se = se.substr(1); //从起始索引号提取字符串中指定数目的字符
-  let arr = se.split('&'), //把字符串分割为字符串数组
-    obj: Record<string, string> = {},
-    newarr = [];
-  arr.forEach((v, i) => {
+  let search = decodeURIComponent(se);
+  search = search.substr(1); //从起始索引号提取字符串中指定数目的字符
+  const arr = search.split('&'); //把字符串分割为字符串数组
+  const result: Record<string, string> = {};
+  let temp = [];
+
+  arr.forEach((v) => {
     //数组遍历
-    newarr = v.split('=');
-    if (typeof obj[newarr[0]] === 'undefined') {
-      obj[newarr[0]] = newarr[1];
+    temp = v.split('=');
+    if (typeof result[temp[0]] === 'undefined') {
+      result[temp[0]] = temp[1];
     }
   });
-  return obj;
+  return result;
 }

@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useState, useEffect } from 'react';
-import { Breadcrumb, Modal, Steps } from 'antd';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Modal } from 'antd';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { connect, useSelector, useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,8 +9,7 @@ import currentStyles from './index.module.scss';
 import commonStyles from '../../utils/common/common.module.scss';
 import Step from '../../components/step';
 import Separator from '../../components/separator';
-import { submitBasicConfig, updateTaskConfig, deleteTask } from '../../services/createTask';
-import constant from '../../constants';
+import { submitBasicConfig, updateTaskConfig } from '../../services/createTask';
 import {
   updateHaveConfigedStep,
   updateTask,
@@ -22,19 +21,28 @@ import commonController from '../../utils/common/common';
 import { createSamples, getTask } from '../../services/samples';
 import { updateAllConfig } from '../../stores/toolConfig.store';
 
-const CreateTask = (props: any) => {
+const CreateTask = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  // @ts-ignore
   const configStep = useSelector((state) => state.existTask.configStep);
+  // @ts-ignore
   const haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
+  // @ts-ignore
   const taskName = useSelector((state) => state.existTask.taskName);
+  // @ts-ignore
   const taskDescription = useSelector((state) => state.existTask.taskDescription);
+  // @ts-ignore
   const taskTips = useSelector((state) => state.existTask.taskTips);
+  // @ts-ignore
   const taskId = useSelector((state) => state.existTask.taskId);
-
+  // @ts-ignore
   const newSamples = useSelector((state) => state.samples.newSamples);
+  // @ts-ignore
   const toolsConfig = useSelector((state) => state.toolsConfig);
+  // @ts-ignore
   const taskStatus = useSelector((state) => state.existTask.status);
+
   const steps = [
     {
       title: '基础配置',
@@ -52,35 +60,27 @@ const CreateTask = (props: any) => {
       contentUrl: `/tasks/${taskId}/edit/config`,
     },
   ];
-  const [current, setCurrent] = useState(0);
-
-  const next = () => {
-    setCurrent(current + 1);
-  };
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-  const items = steps.map((item) => ({ key: item.title, title: item.title }));
-  const tempBao = true;
 
   const finallySave = async function () {
     if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length === 0) {
       commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
       return;
     }
-    if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length > 0) {
-      const currentTools = toolsConfig.tools;
-      for (let toolIndex = 0; toolIndex < currentTools.length; toolIndex++) {
-        const currentConfig = currentTools[toolIndex];
-        // if (currentConfig.tool === 'pointTool') {
-        //     // @ts-ignore
-        //     if (!currentConfig?.config?.upperLimit) {
-        //         commonController.notificationErrorMessage({message : '请输入上限点数'},1)
-        //         return;
-        //     }
-        // }
-      }
-    }
+
+    // TODO: dead code
+    // if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length > 0) {
+    //   const currentTools = toolsConfig.tools;
+    //   for (let toolIndex = 0; toolIndex < currentTools.length; toolIndex++) {
+    //     const currentConfig = currentTools[toolIndex];
+    //     if (currentConfig.tool === 'pointTool') {
+    //         // @ts-ignore
+    //         if (!currentConfig?.config?.upperLimit) {
+    //             commonController.notificationErrorMessage({message : '请输入上限点数'},1)
+    //             return;
+    //         }
+    //     }
+    //   }
+    // }
     const res = await updateTaskConfig(taskId, {
       config: JSON.stringify(toolsConfig),
       media_type: 'IMAGE',
@@ -90,7 +90,6 @@ const CreateTask = (props: any) => {
       return;
     } else {
       if (res.status === 200) {
-        // navigate(constant.urlTurnToTaskList);
         navigate('/tasks/' + taskId);
       }
     }
@@ -109,9 +108,11 @@ const CreateTask = (props: any) => {
         result = 3;
         break;
     }
+    // @ts-ignore
     dispatch(updateHaveConfigedStep(result));
   };
   const updateTaskIdLocal = (id: number) => {
+    // @ts-ignore
     dispatch(updateTaskId(id));
   };
   const nextWhen0 = async function () {
@@ -167,7 +168,7 @@ const CreateTask = (props: any) => {
     try {
       const res: any = await createSamples(taskId, newSamples);
       if (res.status === 201) {
-        const { status, id } = res.data.data;
+        const { status } = res.data.data;
         updateStep('IMPORTED');
         dispatch(updateStatus(status));
       } else {
@@ -199,12 +200,13 @@ const CreateTask = (props: any) => {
       case 1:
         break;
     }
+    // @ts-ignore
     dispatch(updateConfigStep(currentStep));
     navigate(childOutlet);
   };
 
   useEffect(() => {
-    const taskId = parseInt(window.location.pathname.split('/')[2]);
+    const _taskId = parseInt(window.location.pathname.split('/')[2]);
     const searchString = window.location.search;
     // bad name
     let currentStatus = 1;
@@ -214,10 +216,11 @@ const CreateTask = (props: any) => {
     if (searchString.indexOf('currentStatus=3') > -1) {
       currentStatus = 3;
     }
-    if (taskId > 0) {
-      getTask(taskId)
+    if (_taskId > 0) {
+      getTask(_taskId)
         .then((res: any) => {
           if (res.status === 200) {
+            // @ts-ignore
             dispatch(updateTask({ data: res.data.data, configStatus: currentStatus }));
             if (res.data.data.config) {
               dispatch(updateAllConfig(JSON.parse(res.data.data.config)));
@@ -232,6 +235,7 @@ const CreateTask = (props: any) => {
     } else {
       // new created task
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [isShowCancelModal, setIsShowCancelModal] = useState(false);
   const cancelOption = () => {
@@ -266,8 +270,7 @@ const CreateTask = (props: any) => {
         if (isNullToolConfigResult) {
           return;
         }
-        const isSuccess2 = await finallySave();
-        // if (!isSuccess2) return;
+        await finallySave();
         break;
     }
     navigate('/tasks');
@@ -299,7 +302,7 @@ const CreateTask = (props: any) => {
               return <Step ordinalNumber={step.index} title={step.title} contentUrl={step.contentUrl} key={uuidv4()} />;
             } else {
               return (
-                <React.Fragment>
+                <React.Fragment key={stepIndex}>
                   <Step key={uuidv4()} ordinalNumber={step.index} title={step.title} contentUrl={step.contentUrl} />
                   <Separator />
                 </React.Fragment>
@@ -352,7 +355,5 @@ const CreateTask = (props: any) => {
 const mapStateToProps = (state: any) => {
   return state.toolsConfig;
 };
-
-const mapDispatchToProps = () => {};
 
 export default connect(mapStateToProps)(CreateTask);

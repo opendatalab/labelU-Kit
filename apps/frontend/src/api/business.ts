@@ -1,5 +1,5 @@
-import type { PageData } from 'interface';
-import type { BuniesssUser } from 'interface/business';
+import type { PageData } from '@/types';
+import type { BuniesssUser } from '@/types/business';
 
 import { request } from './request';
 

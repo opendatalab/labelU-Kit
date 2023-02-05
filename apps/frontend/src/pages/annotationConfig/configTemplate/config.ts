@@ -1,20 +1,12 @@
-import type { ToolsConfigState } from 'interface/toolConfig';
+import type { ToolsConfigState } from '@/types/toolConfig';
 
 import type { Item } from './tmplateBox';
 // import RectImg from '../../../img/annotationCommon/configNotMatch.png';
-interface configItem {
+interface ConfigItem {
   label: string;
   img: any;
   tmplateName: any;
 }
-
-const defaultLabelConfig: configItem[] = [
-  {
-    label: '',
-    img: '',
-    tmplateName: '',
-  },
-];
 
 const imgLebalConfig: Item[] = [
   {
@@ -49,9 +41,9 @@ const imgLebalConfig: Item[] = [
   },
 ];
 
-export const getLabelConfig: () => Promise<configItem[]> = async () => {
-  return new Promise(async (resolve, reject) => {
-    const reuslt: configItem[] = [];
+export const getLabelConfig: () => Promise<ConfigItem[]> = async () => {
+  return new Promise(async (resolve) => {
+    const reuslt: ConfigItem[] = [];
     if (imgLebalConfig.length > 0) {
       for (const item of imgLebalConfig) {
         const { default: imgSrc } = await import(`../frontCoverImg/${item.img}.png`);

@@ -1,5 +1,5 @@
 // @ts-ignore
-import { createSlice, PayloadAction, Dispatch } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 const annotationSlice = createSlice({
   name: 'annotation',

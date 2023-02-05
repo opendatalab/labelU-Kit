@@ -8,15 +8,16 @@ interface HistoryRouterProps {
   history: typeof history;
 }
 
-export const HistoryRouter: React.FC<HistoryRouterProps> = ({ history, children }) => {
+// @ts-ignore
+export const HistoryRouter: React.FC<HistoryRouterProps> = ({ history: _history, children }) => {
   const [state, setState] = React.useState({
-    action: history.action,
-    location: history.location,
+    action: _history.action,
+    location: _history.location,
   });
 
   React.useLayoutEffect(() => {
     history.listen(setState);
-  }, [history]);
+  }, [_history]);
 
   return React.createElement(Router, Object.assign({ children, navigator: history }, state));
 };

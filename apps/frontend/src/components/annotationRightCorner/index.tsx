@@ -1,23 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { Observable, fromEvent, Subject } from 'rxjs';
-import { useSelector } from 'react-redux';
 
 import currentStyles from './index.module.scss';
 import { updateSampleState, updateSampleAnnotationResult, getSample } from '../../services/samples';
 import commonController from '../../utils/common/common';
-import Ob from '../../utils/Observable/index';
-import { updateAnnotationDatas } from '../../stores/annotation.store';
 import { annotationRef } from '../../pages/annotation2';
 import TempStore from './tempStore';
+
 const AnnotationRightCorner = () => {
   const navigate = useNavigate();
-  const annotationDatas = useSelector((state) => state.annotation.annotationDatas);
   const taskId = parseInt(window.location.pathname.split('/')[2]);
   const sampleId = parseInt(window.location.pathname.split('/')[4]);
   const [isSkippedShow, setIsSkippedShow] = useState('');
-  // const [currentSampleId, setCurrentSampleId] = useState(0);
-  const currentSampleId = 0;
+
   const skipSample = () => {
     setIsSkippedShow('SKIPPED');
     getSample(taskId, sampleId)
@@ -62,9 +57,8 @@ const AnnotationRightCorner = () => {
       })
       .catch((error) => commonController.notificationErrorMessage(error, 1));
   };
-  // let timestamp = new Date().getTime();
   const [timestamp, setTimestamp] = useState(new Date().getTime());
-  const [oldCurrentSampleId, setOldCurrentSampleId] = useState(0);
+  let timestampNew = new Date().getTime();
   // @ts-ignore
   const nextPage = async function () {
     // if (new Date().getTime() - timestamp <= 2000) {
@@ -74,35 +68,18 @@ const AnnotationRightCorner = () => {
     // setTimestamp(new Date().getTime());
     timestampNew = new Date().getTime();
     // @ts-ignore
-    const sampleId = parseInt(window.location.pathname.split('/')[4]);
-
-    // if (sampleId === currentSampleId || currentSampleId === oldCurrentSampleId){
-    //   // currentSampleId
-    //   setOldCurrentSampleId(currentSampleId);
-    //   return;
-    // }
-    // setOldCurrentSampleId(sampleId);
-    // currentSampleId = sampleId;
+    const _sampleId = parseInt(window.location.pathname.split('/')[4]);
     // @ts-ignore
     const cResult = await annotationRef?.current?.getResult();
     const rResult = cResult[0].result;
-    console.log(rResult);
-    getSample(taskId, sampleId)
+    getSample(taskId, _sampleId)
       .then((res) => {
-        //   setOldCurrentSampleId(sampleId);
-        //   if (oldCurrentSampleId === sampleId) return;
         if (res.status === 200) {
           const sampleResData = res.data.data.data;
           let annotated_count = 0;
-          // @ts-ignore
-          console.log(annotationRef?.current?.getResult()[0]);
-
-          // @ts-ignore
-          // @ts-ignore
-          // let  dataParam = Object.assign({},sampleResData,{ result :  annotationRef?.current?.getResult()[0].result});
           const dataParam = Object.assign({}, sampleResData, { result: rResult });
+
           if (res.data.data.state !== 'SKIPPED') {
-            console.log(dataParam);
             const resultJson = JSON.parse(dataParam.result);
             for (const key in resultJson) {
               if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
@@ -118,11 +95,11 @@ const AnnotationRightCorner = () => {
                 }
               }
             }
-            console.log(annotated_count);
+
             // @ts-ignore
-            updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam })
-              .then((res) => {
-                if (res.status === 200) {
+            updateSampleAnnotationResult(taskId, _sampleId, { annotated_count, state: 'DONE', data: dataParam })
+              .then((_res) => {
+                if (_res.status === 200) {
                   // Ob.nextPageS.next('DONE');
                   navigate(window.location.pathname + '?DONE' + new Date().getTime());
                 } else {
@@ -155,13 +132,12 @@ const AnnotationRightCorner = () => {
     }
     setTimestamp(new Date().getTime());
     // @ts-ignore
-    const sampleId = parseInt(window.location.pathname.split('/')[4]);
+    const _sampleId = parseInt(window.location.pathname.split('/')[4]);
     // @ts-ignore
     const cResult = await annotationRef?.current?.getResult();
     const rResult = cResult[0].result;
-    console.log(rResult);
 
-    getSample(taskId, sampleId)
+    getSample(taskId, _sampleId)
       .then((res) => {
         if (res.status === 200) {
           const sampleResData = res.data.data.data;
@@ -185,11 +161,10 @@ const AnnotationRightCorner = () => {
                 }
               }
             }
-            console.log(annotated_count);
             // @ts-ignore
             updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam })
-              .then((res) => {
-                if (res.status === 200) {
+              .then((_res) => {
+                if (_res.status === 200) {
                   // Ob.nextPageS.next('DONE');
                   navigate(window.location.pathname + '?PREV' + new Date().getTime());
                 } else {
@@ -209,13 +184,9 @@ const AnnotationRightCorner = () => {
         commonController.notificationErrorMessage(error, 1);
       });
   };
-  const copyPre = () => {
-    navigate(window.location.pathname + '?COPYPRE' + new Date().getTime());
-  };
   useEffect(() => {
     getSample(taskId, sampleId)
       .then((sampleRes: any) => {
-        console.log(sampleRes);
         if (sampleRes.status === 200) {
           if (!sampleRes.data.data.state) {
             setIsSkippedShow('NEW');
@@ -227,32 +198,17 @@ const AnnotationRightCorner = () => {
         }
       })
       .catch((error) => commonController.notificationSuccessMessage(error, 1));
-  }, [window.location.pathname]);
+  }, [sampleId, taskId]);
 
-  let timestampNew = new Date().getTime();
-  let oldTimestampNew = 0;
-  const count = 1;
-  const onKeyDown = (e: any) => {
-    // count = count + 1;
-
-    // e.nativeEvent.stopPropagation();
-    // e.stopPropagation();
-    // e.preventDefault();
+  const onKeyDown = useCallback((e: any) => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     timestampNew = new Date().getTime();
-    console.log({
-      timestampNew,
-      now: new Date().getTime(),
-      diff: timestampNew - TempStore.old,
-      old: TempStore.old,
-    });
     if (TempStore.old != 0 && timestampNew - TempStore.old <= 500) {
       timestampNew = new Date().getTime();
       TempStore.old = new Date().getTime();
       return;
     }
-    oldTimestampNew = new Date().getTime();
     TempStore.old = new Date().getTime();
-    console.log(e);
     const keyCode = e.keyCode;
     if (keyCode === 65) {
       // prevPage();
@@ -262,13 +218,15 @@ const AnnotationRightCorner = () => {
       nextPage();
       // commonController.debounce(nextPage, 1000)('');
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // @ts-ignore
-    // document.addEventListener('keyup', commonController.debounce(onKeyDown,1000));
     document.addEventListener('keyup', onKeyDown);
-  }, []);
+
+    return () => {
+      document.removeEventListener('keyup', onKeyDown);
+    };
+  }, [onKeyDown]);
 
   return (
     <div className={currentStyles.outerFrame} id="rightCorner">

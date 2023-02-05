@@ -1,15 +1,13 @@
 import type { BasicConfig } from '@label-u/components';
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Form, Input } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 
 import { MapStateJSONTab } from '../../components/AttributeConfig';
-// import SvgIcon from '../../../../components/basic/svgIcon';
 import type { AttributeItem } from './rectConfigForm';
-// const { Option } = Select;
 import { delayTime } from '../constants';
-import commonController from '../../../../utils/common/common';
+
 interface FormPointConfig {
   upperLimit: number;
   attributeList: AttributeItem[];
@@ -67,28 +65,13 @@ const PointConfigForm: FC<BasicConfig & { name: string }> = (props) => {
       };
       setInitVal(initV);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // @ts-ignore
   const formSubmitThrottle = window.throttle(() => {
     form.submit();
   }, delayTime);
-
-  const changeUpperLimit = (e: any) => {
-    const value = parseInt(e.target.value);
-    if (isNaN(value)) {
-      commonController.notificationErrorMessage({ message: '请输入数字' }, 1);
-    } else {
-      if (value === 0) {
-        commonController.notificationErrorMessage({ message: '请输入有效数字' }, 1);
-      } else {
-        setInitVal({
-          ...initVal,
-          upperLimit: value,
-        });
-      }
-    }
-  };
 
   return (
     <div>

@@ -20,7 +20,7 @@ export const addInputList = (
     lang: 'cn' | 'en';
   },
 ) => {
-  inputList = cloneDeep(inputList);
+  const newInputList = cloneDeep(inputList);
   // TODO：声明了但是没用到
   // let baseClassName = '类别';
   let baseOptionName = '选项';
@@ -37,18 +37,20 @@ export const addInputList = (
   }
 
   if (i !== undefined) {
-    if (inputList[i].subSelected) {
-      const len = inputList[i].subSelected.length + 1;
-      inputList[i].subSelected.push({
+    if (newInputList[i].subSelected) {
+      const len = newInputList[i].subSelected.length + 1;
+      newInputList[i].subSelected.push({
         key: `${baseOptionName}${i + 1}-${len}`,
         value: `option${i + 1}-${len}`,
         isDefault: false,
       });
     } else {
-      inputList[i].subSelected = [{ key: `${baseOptionName}${i + 1}-1`, value: `option${i + 1}-1`, isDefault: false }];
+      newInputList[i].subSelected = [
+        { key: `${baseOptionName}${i + 1}-1`, value: `option${i + 1}-1`, isDefault: false },
+      ];
     }
   } else {
-    const len = inputList.length + 1;
+    const len = newInputList.length + 1;
     // TODO：声明了但是没用到
     // const id = uuid(2, 62);
     const newData = {
@@ -71,16 +73,16 @@ export const addInputList = (
         subSelected: [{ key: `${baseOptionName}${len}-1`, value: `option${len}-1`, isMulti: true }],
       });
     }
-    inputList.push(newData);
+    newInputList.push(newData);
   }
   for (let inputListIndex = 0; inputListIndex < inputList.length; inputListIndex++) {
-    const unit = inputList[inputListIndex];
+    const unit = newInputList[inputListIndex];
     if (unit.subSelected && unit.subSelected.length > 0) {
       unit.key = unit.subSelected[0].key.split('-')[0];
       unit.value = unit.subSelected[0].value.split('-')[0];
     }
   }
-  return inputList;
+  return newInputList;
 };
 
 /**
@@ -92,18 +94,18 @@ export const addInputList = (
  * @return
  */
 export function clearTagDefault(inputList: any[], index: number) {
-  inputList = cloneDeep(inputList);
+  const newInputList = cloneDeep(inputList);
 
-  if (!inputList[index]?.subSelected) {
-    return inputList;
+  if (!newInputList[index]?.subSelected) {
+    return newInputList;
   }
 
-  inputList[index].subSelected = inputList[index].subSelected?.map((v: any) => ({
+  newInputList[index].subSelected = newInputList[index].subSelected?.map((v: any) => ({
     ...v,
     isDefault: false,
   }));
 
-  return inputList;
+  return newInputList;
 }
 
 // 更改标签工具里面的对应值
@@ -114,73 +116,74 @@ export const changeInputList = (
   index: number,
   subIndex?: number,
 ) => {
-  inputList = cloneDeep(inputList);
+  let newInputList = cloneDeep(inputList);
+
   switch (target) {
     case 'key':
-      if (subIndex !== undefined && inputList[index].subSelected) {
-        inputList[index].subSelected[subIndex].key = e.target.value;
+      if (subIndex !== undefined && newInputList[index].subSelected) {
+        newInputList[index].subSelected[subIndex].key = e.target.value;
       } else {
-        inputList[index].key = e.target.value;
+        newInputList[index].key = e.target.value;
       }
       break;
 
     case 'value':
-      if (subIndex !== undefined && inputList[index].subSelected) {
-        inputList[index].subSelected[subIndex].value = e.target.value;
+      if (subIndex !== undefined && newInputList[index].subSelected) {
+        newInputList[index].subSelected[subIndex].value = e.target.value;
       } else {
-        inputList[index].value = e.target.value;
+        newInputList[index].value = e.target.value;
       }
       break;
 
     case 'isMulti': {
-      const isMulti = !inputList[index].isMulti;
-      inputList[index].isMulti = isMulti;
+      const isMulti = !newInputList[index].isMulti;
+      newInputList[index].isMulti = isMulti;
 
       // 初始化所有 subSelected 的值
       if (isMulti === false) {
-        inputList = clearTagDefault(inputList, index);
+        newInputList = clearTagDefault(newInputList, index);
       }
       break;
     }
 
     case 'isDefault':
-      if (subIndex !== undefined && inputList[index].subSelected) {
-        const isDefault = !inputList[index].subSelected[subIndex].isDefault;
+      if (subIndex !== undefined && newInputList[index].subSelected) {
+        const isDefault = !newInputList[index].subSelected[subIndex].isDefault;
 
-        if (isDefault === true && inputList[index].isMulti !== true) {
+        if (isDefault === true && newInputList[index].isMulti !== true) {
           // 仅为一个 isDefault
-          inputList = clearTagDefault(inputList, index);
+          newInputList = clearTagDefault(newInputList, index);
         }
 
-        inputList[index].subSelected[subIndex].isDefault = isDefault;
+        newInputList[index].subSelected[subIndex].isDefault = isDefault;
       } else {
-        const newIsDefault = !inputList[index].isDefault;
+        const newIsDefault = !newInputList[index].isDefault;
 
         // 顶层更新数据更新
-        inputList = inputList.map((v) => ({ ...v, isDefault: false }));
-        inputList[index].isDefault = newIsDefault;
+        newInputList = newInputList.map((v) => ({ ...v, isDefault: false }));
+        newInputList[index].isDefault = newIsDefault;
       }
       break;
   }
-  return inputList;
+  return newInputList;
 };
 
 // 删除对应输入
 export const deleteInputList = (inputList: any[], i: number, subIndex?: number) => {
-  inputList = cloneDeep(inputList);
+  let newInputList = cloneDeep(inputList);
   if (subIndex !== undefined) {
-    if (inputList[i].subSelected.length <= 1) {
-      return inputList;
+    if (newInputList[i].subSelected.length <= 1) {
+      return newInputList;
     }
 
-    inputList[i].subSelected = [
-      ...inputList[i].subSelected.slice(0, subIndex),
-      ...inputList[i].subSelected.slice(subIndex + 1, inputList[i].subSelected.length),
+    newInputList[i].subSelected = [
+      ...newInputList[i].subSelected.slice(0, subIndex),
+      ...newInputList[i].subSelected.slice(subIndex + 1, newInputList[i].subSelected.length),
     ];
   } else {
-    inputList = [...inputList.slice(0, i), ...inputList.slice(i + 1, inputList.length)];
+    newInputList = [...newInputList.slice(0, i), ...newInputList.slice(i + 1, newInputList.length)];
   }
-  return inputList;
+  return newInputList;
 };
 
 /**

@@ -1,13 +1,23 @@
-import type { MyFormProps } from 'components/core/form';
-import MyForm from 'components/core/form';
-import MyButton from 'components/basic/button';
 import { css } from '@emotion/react';
+
+import type { MyFormProps } from '@/components/core/form';
+import MyForm from '@/components/core/form';
+import MyButton from '@/components/basic/button';
 
 interface SearchProps<T> extends MyFormProps<T> {
   onSearch: (values: T) => void;
 }
 
-const BaseSearch = <T extends object>(props: SearchProps<T>) => {
+const styles = css`
+  padding: 20px;
+  background-color: #ffffff;
+  .ant-form-item {
+    margin-bottom: 20px;
+  }
+`;
+
+// @ts-ignore
+const BaseSearch = <T extends Record<string, unknown>>(props: SearchProps<T>) => {
   const { children, onSearch, ...rest } = props;
   const [form] = MyForm.useForm<T>();
 
@@ -19,6 +29,7 @@ const BaseSearch = <T extends object>(props: SearchProps<T>) => {
   };
 
   return (
+    // eslint-disable-next-line react/no-unknown-property
     <div css={styles}>
       <MyForm {...rest} form={form} layout="inline">
         {children}
@@ -34,16 +45,6 @@ const BaseSearch = <T extends object>(props: SearchProps<T>) => {
   );
 };
 
-const MySearch = Object.assign(BaseSearch, {
-  Item: MyForm.Item,
-});
+BaseSearch.Item = MyForm.Item;
 
-export default MySearch;
-
-const styles = css`
-  padding: 20px;
-  background-color: #ffffff;
-  .ant-form-item {
-    margin-bottom: 20px;
-  }
-`;
+export default BaseSearch;

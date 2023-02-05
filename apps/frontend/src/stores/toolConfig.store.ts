@@ -1,6 +1,9 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type { Attribute, OneTag, BasicConfig, ToolsConfigState, TextConfig } from 'interface/toolConfig';
+import type { BasicConfig, TextConfig } from '@label-u/components';
+import type { Attribute, OneTag } from '@label-u/annotation';
+
+import type { ToolsConfigState } from '@/types/toolConfig';
 
 const initialState: ToolsConfigState = {
   tools: [],

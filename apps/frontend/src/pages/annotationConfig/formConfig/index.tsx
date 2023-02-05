@@ -5,7 +5,8 @@ import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
 import type { FC, Dispatch, SetStateAction } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { ToolsConfigState } from 'interface/toolConfig';
+
+import type { ToolsConfigState } from '@/types/toolConfig';
 
 import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
@@ -37,9 +38,9 @@ interface IProps {
   setConfig: Dispatch<SetStateAction<ToolsConfigState>>;
 }
 
-const FormConfig: FC<IProps> = (props: IProps) => {
-  // const { config, setConfig } = props;
+const FormConfig: FC<IProps> = () => {
   const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = useSelector(
+    // @ts-ignore
     (state) => state.toolsConfig,
   );
   const dispatch = useDispatch();
@@ -53,16 +54,46 @@ const FormConfig: FC<IProps> = (props: IProps) => {
     children.push(<Option key={types[i]}>{types[i]}</Option>);
   }
   const [force, forceSet] = useState(0);
-  useEffect(() => {
-    return () => {
-      console.log('umounted');
-    };
-  }, []);
+
+  const updateSelectTools = (toolname: string) => {
+    const tmp = selectTools;
+    if (tmp.indexOf(toolname) >= 0) {
+      tmp.splice(tmp.indexOf(toolname), 1);
+    } else {
+      tmp.push(toolname);
+    }
+    setSelectTools(tmp);
+  };
+
+  const loadInitConfig = async (toolname: string, _tools: BasicConfig[]) => {
+    setIsConfigLoad(false);
+    await new Promise(async (resolve) => {
+      if (toolname) {
+        const config = await LoadInitConfig(toolname);
+        const keys = Object.keys(config);
+        for (const key of keys) {
+          if (key === 'attribute' && attribute.length === 0) {
+            dispatch(updateAllAttributeConfigList(config[key]));
+          } else if (key === 'tagList' && tagList.length === 0) {
+            dispatch(updateTagConfigList(config[key]));
+          } else if (key === 'textConfig' && textConfig.length === 0) {
+            dispatch(updateTextConfig(config[key]));
+          } else if (key === 'tools') {
+            const newTools = [..._tools].concat(config[key]);
+            dispatch(updateToolsConfig(newTools));
+          }
+        }
+        resolve(config);
+      }
+    });
+    setIsConfigLoad(true);
+  };
+
   const items = useMemo(() => {
-    const items = [];
+    const _items = [];
     for (let i = 0; i < toolnames.length; i++) {
       if (selectTools.indexOf(toolnameT[toolnames[i]]) < 0) {
-        items.push({
+        _items.push({
           key: toolnameT[toolnames[i]],
           label: (
             <div
@@ -79,32 +110,9 @@ const FormConfig: FC<IProps> = (props: IProps) => {
         });
       }
     }
-    return items;
+    return _items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectTools, tools]);
-
-  const loadInitConfig = async (toolname: string, tools: BasicConfig[]) => {
-    setIsConfigLoad(false);
-    await new Promise(async (resolve, reject) => {
-      if (toolname) {
-        const config = await LoadInitConfig(toolname);
-        const keys = Object.keys(config);
-        for (const key of keys) {
-          if (key === 'attribute' && attribute.length === 0) {
-            dispatch(updateAllAttributeConfigList(config[key]));
-          } else if (key === 'tagList' && tagList.length === 0) {
-            dispatch(updateTagConfigList(config[key]));
-          } else if (key === 'textConfig' && textConfig.length === 0) {
-            dispatch(updateTextConfig(config[key]));
-          } else if (key === 'tools') {
-            const newTools = [...tools].concat(config[key]);
-            dispatch(updateToolsConfig(newTools));
-          }
-        }
-        resolve(config);
-      }
-    });
-    setIsConfigLoad(true);
-  };
 
   useEffect(() => {
     const toolArr = [];
@@ -127,33 +135,23 @@ const FormConfig: FC<IProps> = (props: IProps) => {
       }
       setSelectTools(newTools);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tools, tagList, textConfig]);
-
-  const updateSelectTools = (toolname: string) => {
-    const tmp = selectTools;
-    if (tmp.indexOf(toolname) >= 0) {
-      tmp.splice(tmp.indexOf(toolname), 1);
-    } else {
-      tmp.push(toolname);
-      // setCurrentTool(toolname);
-    }
-    setSelectTools(tmp);
-  };
 
   const [height, setHeight] = useState<number>(0);
 
   useEffect(() => {
     const leftSiderDom = document.getElementById('lefeSiderId');
-    const height = leftSiderDom?.getBoundingClientRect().height as number;
-    setHeight(height - 128);
+    const _height = leftSiderDom?.getBoundingClientRect().height as number;
+    setHeight(_height - 128);
   }, []);
 
   const handleChange = (e: React.SetStateAction<string>) => {
     setMedia(e);
   };
 
-  const updateCombineToolsConfig = (tools: BasicConfig[], config: object, toolname: string) => {
-    const newTools = tools.reduce((res, item) => {
+  const updateCombineToolsConfig = (_tools: BasicConfig[], config: Record<string, unknown>, toolname: string) => {
+    const newTools = _tools.reduce((res, item) => {
       if (item.tool === toolname || toolname === 'commonForm') {
         const copyItem = { ...item };
         const newConfig = {
@@ -226,7 +224,7 @@ const FormConfig: FC<IProps> = (props: IProps) => {
               let initC = {} as BasicConfig;
               let configArr = [];
               let isShow = true;
-              configArr = tools.filter((item) => {
+              configArr = tools.filter((item: any) => {
                 return item.tool === _;
               });
               initC = configArr[0];

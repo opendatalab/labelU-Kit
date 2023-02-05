@@ -8,9 +8,9 @@ import 'ace-builds/webpack-resolver';
 import _ from 'lodash';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
-import type { ToolsConfigState } from 'interface/toolConfig';
-import { message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
+
+import type { ToolsConfigState } from '@/types/toolConfig';
 
 import jsonToyam from '../../utils/jsonToyml';
 import ConfigNotMatchImg from '../../img/annotationCommon/configNotMatch.png';
@@ -31,6 +31,7 @@ interface YamlConfigProps {
 const YamlConfig: FC<YamlConfigProps> = (props) => {
   const [xmlValue, setXmlValue] = useState<string>('');
   const dispatch = useDispatch();
+  // @ts-ignore
   const { tools, tagList, attribute, textConfig } = useSelector((state) => state.toolsConfig);
   const onLoad = () => {};
 

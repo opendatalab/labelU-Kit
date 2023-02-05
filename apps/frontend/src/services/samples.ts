@@ -209,8 +209,7 @@ const outputSamples = async function (taskId: number, activeTxt: string) {
       commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
       return;
     }
-    const outputSamplesRes = await outputSample(taskId, sampleIds, activeTxt);
-    console.log(outputSamplesRes);
+    await outputSample(taskId, sampleIds, activeTxt);
     return true;
   } catch (error) {
     commonController.notificationErrorMessage({ message: error }, 1);

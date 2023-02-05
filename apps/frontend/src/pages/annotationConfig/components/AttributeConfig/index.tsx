@@ -1,16 +1,10 @@
-// import { COLORS_ARRAY } from '@/constant/style';
-import { COLORS_ARRAY } from '@label-u/annotation';
-
-import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
-
 import { CloseCircleFilled } from '@ant-design/icons';
 import { Button, Input as SenseInput } from 'antd';
-import React, { useRef, useState } from 'react';
-// import MonacoEditor from 'react-monaco-editor';
-// import styles from '../../index.module.scss';
+import { useRef, useState } from 'react';
 import './index.less';
 import { useTranslation } from 'react-i18next';
-// const { COLORS_ARRAY } = cStyle;
+
+import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 
 interface IJsonTabProps {
   value?: any[];
@@ -53,7 +47,6 @@ const JSONTab = (props: IJsonTabProps) => {
     readonly,
     onChange,
     onSubmitAction,
-    isAttributeList,
   } = props;
 
   // useEffect(() => {

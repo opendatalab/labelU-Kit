@@ -1,12 +1,12 @@
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Form } from 'antd';
 import { useForm } from 'antd/es/form/Form';
+import type { OneTag } from '@label-u/annotation';
 
 import TagInput from '../../components/TagInput';
-import type { OneTag } from '../../../../interface/toolConfig';
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
-import { delayTime } from '../constants';
+
 export interface AttributeItem {
   key: string;
   value: string;
@@ -70,7 +70,13 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
       };
       setInitVal(initV);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // @ts-ignore
+  const formSubmitThrottle = window.throttle(() => {
+    form.submit();
+  }, 1);
 
   // 更改标签工具里面的对应值
   const changeInputInfo = (
@@ -119,15 +125,6 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
     formSubmitThrottle();
   };
 
-  // @ts-ignore
-  const formSubmitThrottle = window.throttle(() => {
-    form.submit();
-  }, 1);
-
-  // 表单提交处理
-  // useEffect(() => {
-  //   formSubmitThrottle();
-  // }, [initVal]);
   const { children } = props;
 
   return (
@@ -136,6 +133,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
         <Form.Item label="" name="tagList" shouldUpdate initialValue={initVal.tagList}>
           {initVal.tagList?.map((info, i) => (
             <TagInput
+              key={i}
               inputInfo={info}
               isAllReadOnly={false}
               changeInputInfo={changeInputInfo}
