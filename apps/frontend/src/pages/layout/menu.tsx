@@ -4,7 +4,7 @@ import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { MenuList } from '../../interface/layout/menu.interface';
+import type { MenuList } from '../../types/layout/menu.interface';
 import { CustomIcon } from './customIcon';
 import { setUserItem } from '../../stores/user.store';
 
@@ -17,6 +17,7 @@ interface MenuProps {
 const MenuComponent: FC<MenuProps> = ({ menuList }) => {
   const [openKeys, setOpenkeys] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  // @ts-ignore
   const { collapsed, device, locale } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const MenuComponent: FC<MenuProps> = ({ menuList }) => {
     return (
       <span style={{ display: 'flex', alignItems: 'center' }}>
         <CustomIcon type={menu.icon!} />
+        {/* @ts-ignore */}
         <span>{menu.label[locale]}</span>
       </span>
     );
@@ -66,6 +68,7 @@ const MenuComponent: FC<MenuProps> = ({ menuList }) => {
           <SubMenu key={menu.path} title={getTitie(menu)}>
             {menu.children.map((child) => (
               <Item key={child.path} onClick={() => onMenuClick(child)}>
+                {/* @ts-ignore */}
                 {child.label[locale]}
               </Item>
             ))}

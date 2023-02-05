@@ -1,9 +1,8 @@
-import type { TextConfig } from '@label-u/components';
+import type { TextConfig, BasicConfig } from '@label-u/components';
+import type { Attribute, OneTag } from '@label-u/annotation';
 import AnnotationOperation from '@label-u/components';
 import '@label-u/components/dist/index.css';
 import { memo } from 'react';
-
-import type { BasicConfig, Attribute, OneTag } from '@/interface/toolConfig';
 
 const Annotation = (props: {
   fileList: any;

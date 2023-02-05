@@ -158,6 +158,7 @@ const Homepage = () => {
         </div>
       </div>
       <div className={currentStyles.right}>
+        {/* @ts-ignore */}
         {isShowHelp && <HelpTips taskTips={taskTips} />}
         {isShowAnnotationTips && <AnnotationTips />}
         <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>

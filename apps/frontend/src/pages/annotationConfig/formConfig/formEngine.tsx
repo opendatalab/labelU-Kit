@@ -22,7 +22,9 @@ interface FormEngineProps {
 }
 
 const FormEngine: FC<FormEngineProps> = (props) => {
+  // @ts-ignore
   const { tagList, textConfig, tools } = useSelector((state) => state.toolsConfig);
+  // @ts-ignore
   const taskStatus = useSelector((state) => state.existTask.status);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);

@@ -6,6 +6,7 @@ const BaseSwitch: FC = (props) => {
   return <Switch {...props} />;
 };
 
+// @ts-ignore
 const MySwitch = Object.assign(Switch, BaseSwitch);
 
 export default MySwitch;

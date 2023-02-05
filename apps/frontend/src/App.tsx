@@ -14,6 +14,7 @@ import RenderRouter from './routes';
 import { history, HistoryRouter } from './routes/history';
 import { localeConfig } from './locales';
 const App: React.FC = () => {
+  // @ts-ignore
   const { locale } = useSelector((state) => state.user);
 
   // set the locale for the user
@@ -60,6 +61,7 @@ const App: React.FC = () => {
 
   return (
     <ConfigProvider locale={getAntdLocale()} componentSize="middle">
+      {/* @ts-ignore */}
       <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
         <HistoryRouter history={history}>
           <RenderRouter />

@@ -10,7 +10,7 @@ import HeaderComponent from './header';
 import { getGlobalState } from '../../utils/getGloabal';
 import SuspendFallbackLoading from './suspendFallbackLoading';
 import { getMenuList } from '../../api/layout.api';
-import type { MenuList, MenuChild } from '../../interface/layout/menu.interface';
+import type { MenuList, MenuChild } from '../../types/layout/menu.interface';
 import { setUserItem } from '../../stores/user.store';
 
 const { Sider, Content } = Layout;

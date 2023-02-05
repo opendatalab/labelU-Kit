@@ -24,14 +24,23 @@ import { updateAllConfig } from '../../stores/toolConfig.store';
 const CreateTask = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  // @ts-ignore
   const configStep = useSelector((state) => state.existTask.configStep);
+  // @ts-ignore
   const haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
+  // @ts-ignore
   const taskName = useSelector((state) => state.existTask.taskName);
+  // @ts-ignore
   const taskDescription = useSelector((state) => state.existTask.taskDescription);
+  // @ts-ignore
   const taskTips = useSelector((state) => state.existTask.taskTips);
+  // @ts-ignore
   const taskId = useSelector((state) => state.existTask.taskId);
+  // @ts-ignore
   const newSamples = useSelector((state) => state.samples.newSamples);
+  // @ts-ignore
   const toolsConfig = useSelector((state) => state.toolsConfig);
+  // @ts-ignore
   const taskStatus = useSelector((state) => state.existTask.status);
 
   const steps = [
