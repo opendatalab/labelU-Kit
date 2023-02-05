@@ -170,7 +170,7 @@ export const changeInputList = (
 
 // 删除对应输入
 export const deleteInputList = (inputList: any[], i: number, subIndex?: number) => {
-  const newInputList = cloneDeep(inputList);
+  let newInputList = cloneDeep(inputList);
   if (subIndex !== undefined) {
     if (newInputList[i].subSelected.length <= 1) {
       return newInputList;

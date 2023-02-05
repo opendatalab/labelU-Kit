@@ -9,7 +9,7 @@ interface HistoryRouterProps {
 }
 
 // @ts-ignore
-export const HistoryRouter: React.FC<HistoryRouterProps> = ({ _history, children }) => {
+export const HistoryRouter: React.FC<HistoryRouterProps> = ({ history: _history, children }) => {
   const [state, setState] = React.useState({
     action: _history.action,
     location: _history.location,

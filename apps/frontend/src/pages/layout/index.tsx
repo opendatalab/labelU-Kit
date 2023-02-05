@@ -73,7 +73,7 @@ const LayoutPage: FC = () => {
   useEffect(() => {
     window.onresize = () => {
       // @ts-ignore
-      const { _device } = getGlobalState();
+      const { device: _device } = getGlobalState();
       const rect = document.body.getBoundingClientRect();
       const needCollapse = rect.width < WIDTH;
       dispatch(
