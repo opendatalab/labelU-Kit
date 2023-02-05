@@ -2,9 +2,9 @@ import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { Button, Form } from 'antd';
 import { useForm } from 'antd/es/form/Form';
+import type { OneTag } from '@label-u/annotation';
 
 import TagInput from '../../components/TagInput';
-import type { OneTag } from '../../../../interface/toolConfig';
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 
 export interface AttributeItem {

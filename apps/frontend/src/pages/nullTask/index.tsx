@@ -10,9 +10,12 @@ const NullTask = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const createTask = () => {
+    // @ts-ignore
     dispatch(updateConfigStep(-1));
+    // @ts-ignore
     dispatch(updateHaveConfigedStep(0));
     dispatch(
+      // @ts-ignore
       updateTask({
         data: {
           name: '',

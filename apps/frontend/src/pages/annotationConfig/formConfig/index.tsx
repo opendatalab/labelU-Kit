@@ -6,7 +6,7 @@ import type { FC, Dispatch, SetStateAction } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { ToolsConfigState } from '@/interface/toolConfig';
+import type { ToolsConfigState } from '@/types/toolConfig';
 
 import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
@@ -39,8 +39,8 @@ interface IProps {
 }
 
 const FormConfig: FC<IProps> = () => {
-  // const { config, setConfig } = props;
   const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = useSelector(
+    // @ts-ignore
     (state) => state.toolsConfig,
   );
   const dispatch = useDispatch();

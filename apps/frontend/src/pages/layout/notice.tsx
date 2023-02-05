@@ -7,8 +7,8 @@ import { useSelector } from 'react-redux';
 import NoticeSvg from '../../img/header/notice.svg';
 // import SvgIcon from '../../components/basic/svgIcon';
 import { getNoticeList } from '../../api/layout.api';
-import type { Notice } from '../../interface/layout/notice.interface';
-import { EventStatus } from '../../interface/layout/notice.interface';
+import type { Notice } from '../../types/layout/notice.interface';
+import { EventStatus } from '../../types/layout/notice.interface';
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 

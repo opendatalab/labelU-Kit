@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { useLocale } from '../locales';
 
 const PrivateRoute: FC<RouteProps> = (props) => {
+  // @ts-ignore
   const { logged } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const { formatMessage } = useLocale();
