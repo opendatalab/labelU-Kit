@@ -65,6 +65,7 @@ jobs:
         run: pnpm run build:frontend
       - name: Release frontend
         run: pnpm run release:frontend
+      - run: node ./apps/frontend/scripts/release.js
       # - name: Trigger labelU workflow
       #   uses: actions/github-script@v5
       #   with:
