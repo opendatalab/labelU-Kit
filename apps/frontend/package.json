@@ -107,6 +107,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "minimist": "^1.2.7",
     "prettier": "^2.0.1",
+    "@octokit/rest": "^19.0.7",
     "rc-tree": "^5.7.2",
     "require.js": "^1.0.0",
     "sass": "^1.56.1",
