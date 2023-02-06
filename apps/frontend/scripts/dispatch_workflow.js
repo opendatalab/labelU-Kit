@@ -4,13 +4,24 @@ const { Octokit } = require("@octokit/rest");
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
 });
-function main() {
+
+function findLatestVersion(versions) {
+  const versionNumbers = versions.map((version) => {
+    const versionParts = version.split('.');
+    return versionParts.reduce((total, part, index) => {
+      return total + parseInt(part.replace('release/v', '')) * Math.pow(10, (versionParts.length - index - 1) * 3);
+    }, 0);
+  });
+
+  return versions[versionNumbers.indexOf(Math.max(...versionNumbers))];
+}
+
+async function main() {
   const args = minimist(process.argv.slice(2));
   const [branch, nextVersion] = args._;
-  console.log(branch, nextVersion);
   const version = `v${nextVersion}`
   const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${version}/frontend.zip`;
-  console.log('trigger labelu workflow', url);
+
   const inputs = {
     version: version,
     branch,
@@ -19,11 +30,24 @@ function main() {
   };
 
   console.log('inputs', inputs);
+
+  const labelUBranches = await octokit.request('GET /repos/opendatalab/labelU/branches', {
+    owner: 'opendatalab',
+    repo: 'labelU'
+  });
+
+  const releaseBranches = (labelUBranches.data || [])
+    .filter(branch => branch.name.startsWith('release/'))
+    .map(branch => branch.name);
+  const latestReleaseVersion = findLatestVersion(releaseBranches);
+
+  console.log('labelu latest release version is', latestReleaseVersion);
+
   octokit.actions.createWorkflowDispatch({
     owner: 'opendatalab',
     repo: 'labelU',
-    workflow_id: `${branch === 'release' ? 'main_' : ''}cicd_pipeline.yml`,
-    ref: branch === 'release' ? 'main' : 'dev',
+    workflow_id: `${branch === 'release' ? 'release_' : 'main_'}cicd_pipeline.yml`,
+    ref: branch === 'release' ? latestReleaseVersion : 'main',
     inputs,
   }).then((res) => {
     console.log(res)
