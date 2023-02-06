@@ -12,7 +12,7 @@ function main() {
   octokit.actions.createWorkflowDispatch({
     owner: 'opendatalab',
     repo: 'labelU',
-    workflow_id: `main_cicd_pipeline.yml`,
+    workflow_id: `${branch === 'release' ? 'main_' : ''}cicd_pipeline.yml`,
     ref: 'main',
     inputs: {
         version: nextVersion,
