@@ -8,10 +8,11 @@ function main() {
   const args = minimist(process.argv.slice(2));
   const [branch, nextVersion] = args._;
   console.log(branch, nextVersion);
-  const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${nextVersion}/frontend.zip`;
+  const version = `v${nextVersion}`
+  const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${version}/frontend.zip`;
   console.log('trigger labelu workflow', url);
   const inputs = {
-    version: nextVersion,
+    version: version,
     branch,
     name: 'frontend',
     assets_url: url,
