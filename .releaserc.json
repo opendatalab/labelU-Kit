@@ -22,7 +22,7 @@
     [
       "@semantic-release/exec",
       {
-        "successCmd": "node ../../scripts/post-publish.js ${branch.name} ${nextRelease.notes}"
+        "successCmd": "node ../../scripts/post-publish.js ${branch.name} '${nextRelease.notes}'"
       }
     ]
   ]
