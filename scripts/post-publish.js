@@ -1,5 +1,6 @@
 const minimist = require('minimist');
 const { Octokit } = require("@octokit/rest");
+const nodeFetch = require('node-fetch');
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
@@ -21,7 +22,7 @@ async function main() {
     return;
   }
 
-  fetch(wechatRobotUrl, {
+  nodeFetch(wechatRobotUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
