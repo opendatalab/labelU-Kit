@@ -11,8 +11,6 @@ on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
     branches: ["release", "beta", "alpha"]
-  pull_request:
-    branches: ["release", "beta", "alpha"]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -54,8 +52,7 @@ jobs:
         run: |
           echo $RELEASE_VERSION
       - name: Install dependencies
-        run: npm cache clean -f
-      - run: pnpm install
+        run: pnpm install
       - name: Build packages
         run: pnpm run build
       - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
