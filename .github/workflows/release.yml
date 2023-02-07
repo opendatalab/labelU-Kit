@@ -58,6 +58,8 @@ jobs:
       - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
       - name: Publish packages
         run: pnpm run release
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
       - name: Build frontend
         run: pnpm run build:frontend
       - name: Release frontend
