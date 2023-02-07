@@ -565,7 +565,7 @@ const AttributeRusult: FC<IProps> = ({
   }
   return (
     <div
-      style={{ height: (boxHeight as number) - 220 }}
+      style={{ height: (boxHeight as number) - 220, paddingBottom: 40 }}
       className={classNames({
         attributeResult: true,
       })}
