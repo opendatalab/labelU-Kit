@@ -228,9 +228,6 @@ const PointCloud3D: React.FC<
       pointCloudViews.topViewAddBox(polygon, size, box.attribute);
       ptCtx.setSelectedIDs([selectedIDs]);
     });
-    // return () => {
-    //   TopView2dOperation.unbind('validUpdate', validUpdate);
-    // };
   }, [ptCtx, size, currentData, pointCloudViews]);
 
   /**
