@@ -7,7 +7,7 @@ import {
 } from '@label-u/annotation';
 import { EPerspectiveView, IPointCloudBox, PointCloudUtils } from '@label-u/utils';
 import classNames from 'classnames';
-import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
@@ -25,6 +25,8 @@ import { BasicConfig } from '@/interface/toolConfig';
 import { AppState } from '@/store';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { PointCloudConfig } from '@label-u/annotation/es/types/interface/conbineTool';
+import DrageModel from '@/components/dragModal';
+import { useAttributes } from '@/views/hooks/useAttribute';
 
 const pointCloudID = 'LABELU-POINTCLOUD';
 const PointCloud3DContext = React.createContext<{
@@ -83,11 +85,16 @@ const PointCloud3DSideBar = () => {
 };
 
 const PointCloud3D: React.FC<
-  IAnnotationStateProps & { config: BasicConfig & {
-    config:PointCloudConfig
-  }; showSettingConfig: ShowSettingConfig }
+  IAnnotationStateProps & {
+    config: BasicConfig & {
+      config: PointCloudConfig;
+    };
+    showSettingConfig: ShowSettingConfig;
+  }
 > = ({ currentData, config, showSettingConfig }) => {
   const dispatch = useDispatch();
+  const dragModalRef = useRef<any>();
+  const [content, setContent] = useState<ReactElement>(<div />);
   const ptCtx = useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const { initPointCloud3d } = usePointCloudViews();
@@ -96,6 +103,9 @@ const PointCloud3D: React.FC<
   const toolStyle = useSelector((state: AppState) => {
     return { ...state.toolStyle };
   });
+
+  const { generateContent } = useAttributes();
+
 
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
@@ -157,7 +167,7 @@ const PointCloud3D: React.FC<
 
     mainViewInstance.singleOn(
       'boxAdded',
-      (pointList: ICoordinate[], attribute: string, id: string) => {
+      (pointList: ICoordinate[],screenPoints:ICoordinate[], attribute: string, id: string,order:number,textAttribute:string) => {
         // const currentPolygonList = TopView2dOperation.polygonList;
         const cavasPointList = pointList.map((point) => {
           return MathUtils.transerWord2Canvas(point, sizeTop);
@@ -170,6 +180,20 @@ const PointCloud3D: React.FC<
         TopView2dOperation.setSelectedIDs([id]);
         TopView2dOperation.render();
         ptCtx.setSelectedIDs([id]);
+
+        const topRitghtPoint = MathUtils.getRightTopPoints(screenPoints);
+        const bounds = {
+          left: topRitghtPoint.x,
+          top: topRitghtPoint.y,
+        };
+
+        dragModalRef.current.switchSetBounds(bounds);
+        dragModalRef.current.switchModal(true);
+        setContent(generateContent({
+          toolName: 'pointCloudTool',
+          order: order,
+          textAttribute: textAttribute
+        }, {attributeName:attribute}));
       },
     );
 
@@ -199,7 +223,7 @@ const PointCloud3D: React.FC<
         height: TopView2dOperation.container.clientHeight,
       };
       let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
-      let [box] = mainViewInstance.boxList.filter((p) => p.id === selectedIDs);
+      let [box] = mainViewInstance.boxList.filter((p: { id: string; }) => p.id === selectedIDs);
       ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
       pointCloudViews.topViewAddBox(polygon, size, box.attribute);
       ptCtx.setSelectedIDs([selectedIDs]);
@@ -296,24 +320,35 @@ const PointCloud3D: React.FC<
   // );
 
   return (
-    <PointCloudContainer
-      className={getClassName('point-cloud-3d-container')}
-      // title={t('3DView')}
-      // toolbar={PointCloud3DTitle}
-      style={{
-        height:
-          // currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
-          '100%',
-      }}
-    >
+    <>
+      <DrageModel
+        ref={dragModalRef}
+        width={333}
+        title='详细信息'
+        okWord='确认'
+        isSetPosition={true}
+        cancelWord='取消'
+        content={content}
+      />
+      <PointCloudContainer
+        className={getClassName('point-cloud-3d-container')}
+        // title={t('3DView')}
+        // toolbar={PointCloud3DTitle}
+        style={{
+          height:
+            // currentData.mappingImgList && currentData.mappingImgList?.length > 0 ? '55%' : '100%',
+            '100%',
+        }}
+      >
       <div className={getClassName('point-cloud-3d-content')} style={{ position: 'relative' }}>
-        <PointCloud3DContext.Provider value={ptCloud3DCtx}>
-          {/* <PointCloud3DSideBar /> */}
-        </PointCloud3DContext.Provider>
-        <BoxInfos />
-        <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />
-      </div>
-    </PointCloudContainer>
+          <PointCloud3DContext.Provider value={ptCloud3DCtx}>
+            {/* <PointCloud3DSideBar /> */}
+          </PointCloud3DContext.Provider>
+          <BoxInfos />
+          <div className={getClassName('point-cloud-3d-view')} id={pointCloudID} ref={ref} />
+        </div>
+      </PointCloudContainer>
+    </>
   );
 };
 

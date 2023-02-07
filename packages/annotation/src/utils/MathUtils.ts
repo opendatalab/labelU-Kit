@@ -61,20 +61,19 @@ export default class MathUtils {
 
   public static hexify(color: string) {
     var values = color
-    .replace(/rgba?\(/, '')
-    .replace(/\)/, '')
-    .replace(/[\s+]/g, '')
-    .split(',');
+      .replace(/rgba?\(/, '')
+      .replace(/\)/, '')
+      .replace(/[\s+]/g, '')
+      .split(',');
     // @ts-ignore
     var a = parseFloat(values[3] || 1),
-    r = Math.floor(a * parseInt(values[0]) + (1 - a) * 255),
-    g = Math.floor(a * parseInt(values[1]) + (1 - a) * 255),
-    b = Math.floor(a * parseInt(values[2]) + (1 - a) * 255);
-    return "0X" +
-    ("0" + r.toString(16)).slice(-2) +
-    ("0" + g.toString(16)).slice(-2) +
-    ("0" + b.toString(16)).slice(-2);
-    }
+      r = Math.floor(a * parseInt(values[0]) + (1 - a) * 255),
+      g = Math.floor(a * parseInt(values[1]) + (1 - a) * 255),
+      b = Math.floor(a * parseInt(values[2]) + (1 - a) * 255);
+    return (
+      '0X' + ('0' + r.toString(16)).slice(-2) + ('0' + g.toString(16)).slice(-2) + ('0' + b.toString(16)).slice(-2)
+    );
+  }
 
   /**
    *
@@ -528,29 +527,54 @@ export default class MathUtils {
   }
 
   /**
-   * 
-   * @param vector1 
-   * @param vector2 
-   * @returns 
+   * 获取右上角
+   * @param coordinate
+   * @returns
+   */
+  public static getRightTopPoints(coordinate: ICoordinate[]) {
+    let maxX, minY;
+    if (Array.isArray(coordinate) && coordinate.length > 0) {
+      maxX = coordinate[0].x;
+      minY = coordinate[0].y;
+      for (let i = 1; i < coordinate.length; i++) {
+        if (coordinate[i].x > maxX) {
+          maxX = coordinate[i].x;
+        }
+        if (coordinate[i].y < minY) {
+          minY = coordinate[i].y;
+        }
+      }
+    }
+    return {
+      x: maxX,
+      y: minY,
+    };
+  }
+
+  /**
+   *
+   * @param vector1
+   * @param vector2
+   * @returns
    */
 
-  public static getAngelByVectors(vector1: ICoordinate, vector2: ICoordinate){
-     let vector1Lenght = this.getLineLength({x:0,y:0},vector1);
-     let vector2Lenght = this.getLineLength({x:0,y:0},vector2);
-     let cosAangle =(vector1.x * vector2.x + vector1.y * vector2.y)/(vector1Lenght*vector2Lenght) 
-     
+  public static getAngelByVectors(vector1: ICoordinate, vector2: ICoordinate) {
+    let vector1Lenght = this.getLineLength({ x: 0, y: 0 }, vector1);
+    let vector2Lenght = this.getLineLength({ x: 0, y: 0 }, vector2);
+    let cosAangle = (vector1.x * vector2.x + vector1.y * vector2.y) / (vector1Lenght * vector2Lenght);
+
     const radius = Math.acos(cosAangle);
 
     return radius;
   }
 
   public static getAngle = (vector1: ICoordinate, vector2: ICoordinate) => {
-    const dot = vector1.x * vector2.x + vector1.y * vector2.y
-    const det = vector1.x * vector2.y - vector1.y * vector2.x
-    return  Math.atan2(det, dot)
+    const dot = vector1.x * vector2.x + vector1.y * vector2.y;
+    const det = vector1.x * vector2.y - vector1.y * vector2.x;
+    return Math.atan2(det, dot);
     // const angle = Math.atan2(det, dot) / Math.PI * 180
     // return (angle + 360) % 360
-}
+  };
 
   /**
    * Get the radius from quadrangle under top-view

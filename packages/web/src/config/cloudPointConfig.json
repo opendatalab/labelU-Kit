@@ -12,19 +12,43 @@
   "attribute": [
     {
       "key": "奥迪",
-      "value": "奥迪"
+      "value": "奥迪",
+      "text": [
+        {
+          "key": "aodi text",
+          "value": "aodi text value"
+        }
+      ]
     },
     {
       "key": "宝马",
-      "value": "宝马"
+      "value": "宝马",
+      "text": [
+        {
+          "key": "BMW text",
+          "value": "BMW text value"
+        }
+      ]
     },
     {
       "key": "奔驰",
-      "value": "奔驰"
+      "value": "奔驰",
+      "text": [
+        {
+          "key": "benchi text",
+          "value": "benchi text value"
+        }
+      ]
     },
     {
       "key": "大众",
-      "value": "大众"
+      "value": "大众",
+      "text": [
+        {
+          "key": "DAZHONG text",
+          "value": "DAZHONG text value"
+        }
+      ]
     }
   ]
 }

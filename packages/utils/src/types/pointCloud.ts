@@ -73,6 +73,7 @@ export interface I3DSpaceCoord {
 }
 
 export interface IPointCloudBox extends IVolume {
+  textAttribute: string;
   attribute: string;
   center: I3DSpaceCoord;
   id: string;
