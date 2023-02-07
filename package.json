@@ -19,6 +19,7 @@
     "lint:style": "stylelint --fix '**/*.less'",
     "clean": "lerna clean && rimraf ./packages/**/package-lock.json",
     "commit": "cz",
+    "release-dry": "multi-semantic-release --dry-run --ignore-private-packages --no-ci",
     "release": "multi-semantic-release --ignore-private-packages"
   },
   "author": "wuhui",
