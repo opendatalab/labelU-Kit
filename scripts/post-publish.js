@@ -44,7 +44,7 @@ async function main() {
   octokit.rest.pulls.create({
     owner: 'opendatalab',
     repo: 'labelU-Kit',
-    ref: branchName,
+    head: branchName,
     base: 'main',
     body: releaseNotes,
   }).then(() => {
