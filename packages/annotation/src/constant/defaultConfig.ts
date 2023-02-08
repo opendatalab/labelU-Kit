@@ -56,7 +56,7 @@ const lineToolConfig = {
   lineType: 0,
   lineColor: 0,
   edgeAdsorption: false,
-  outOfTarget: true,
+  enableOutOfTarget: true,
   copyBackwardResult: false,
   isShowOrder: false,
   attributeConfigurable: false,
