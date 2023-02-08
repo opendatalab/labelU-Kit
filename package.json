@@ -8,17 +8,18 @@
   "version": "1.7.0",
   "scripts": {
     "prepare": "husky install",
-    "lint-staged": "lint-staged",
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
     "build": "lerna run --scope=@label-u/utils --scope=@label-u/annotation --scope=@label-u/components build",
-    "build:type": "lerna run build:type",
+    "build:frontend": "lerna run --scope=@label-u/frontend build",
+    "release:frontend": "cd apps/frontend && npm run release",
     "lint": "lerna run --parallel --stream lint",
-    "lint:script": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
+    "lint:frontend": "eslint ./apps/frontend --ext .js,.jsx,.ts,.tsx --fix",
+    "lint:packages": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
     "lint:style": "stylelint --fix '**/*.less'",
     "clean": "lerna clean && rimraf ./node_modules && rimraf ./packages/**/package-lock.json",
     "commit": "cz",
-    "bootstrap": "lerna bootstrap --no-ci",
+    "release-dry": "multi-semantic-release --dry-run --ignore-private-packages --no-ci",
     "release": "multi-semantic-release --ignore-private-packages"
   },
   "keywords": [
@@ -36,21 +37,20 @@
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
     "@commitlint/config-conventional": "8.3.4",
+    "@octokit/rest": "^19.0.7",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.7",
     "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "@shlab/fabric": "^1.2.1",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.0.1",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^8.0.0",
     "lerna": "^4.0.0",
     "lint-staged": "^10.5.4",
     "multi-semantic-release": "^3.0.1",
+    "node-fetch": "2.6.7",
     "semantic-release": "^19.0.3",
     "semantic-release-github-pullrequest": "^1.3.0",
     "stylelint": "^14.16.1",
@@ -70,11 +70,16 @@
     "**/*.less": [
       "stylelint --fix"
     ],
-    "packages/**/src/**/*.ts": "tsc-files --noEmit",
+    "packages/**/src/**/*.{ts,tsx}": "tsc-files --noEmit",
+    "apps/frontend/src/**/*.{ts,tsx}": "tsc-files --noEmit",
     "packages/**/src/**/*.{js,jsx,ts,tsx,json,css,scss,less,md}": [
       "prettier --check --write"
     ],
-    "packages/**/src/**/*.{js,ts,jsx,tsx}": "eslint --ext .js,.jsx,.ts,.tsx"
+    "apps/frontend/src/**/*.{js,jsx,ts,tsx,json,css,scss,less,md}": [
+      "prettier --check --write"
+    ],
+    "packages/**/src/**/*.{js,ts,jsx,tsx}": "eslint",
+    "apps/frontend/src/**/*.{js,ts,jsx,tsx}": "eslint"
   },
   "config": {
     "commitizen": {

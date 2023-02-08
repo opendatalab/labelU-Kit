@@ -1,0 +1,74 @@
+//&__left_sider {
+//  // max-width: 232px;
+//  background: #eeeeee;
+//  overflow-y: scroll;
+//  overflow-x: hidden;
+//  position: relative;
+//  z-index: 10;
+//  border-top: 1px solid #e2e2e2;
+//  height: calc(100vh - 99px);
+//  padding: 16px 0px;
+
+.item {
+  display: flex;
+  // align-items: center;
+  justify-content: center;
+  width: 232px;
+  height: 165px;
+  position: relative;
+  .imgItem {
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 120px;
+    background-color: #fff;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  .leftSiderImg {
+    border-radius: 4px;
+    max-width: 200px;
+    height: 120px;
+  }
+
+  .chooseImg {
+    overflow: hidden;
+    border-radius: 4px;
+    border: 3px solid #1b67ff;
+  }
+
+  .chooseNumber {
+    width: 6.99px;
+    height: 10.39px;
+
+    color: #ffffff;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    background: #1b67ff;
+    border-radius: 2px;
+  }
+
+  .pageNumber {
+    text-align: center;
+    width: 13px;
+    line-height: 17px;
+    height: 17px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 16px;
+  }
+}
+//}
+
+.annotationPage {
+  overflow-y: scroll;
+  height: calc(100vh - 70px);
+  height: calc(100vh - 58px);
+  width: 100%;
+}
