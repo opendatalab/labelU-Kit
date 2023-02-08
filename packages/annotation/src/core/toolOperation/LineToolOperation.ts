@@ -1306,7 +1306,7 @@ class LineToolOperation extends BasicToolOperation {
     const nextAxis = this.getNextPoint(e, coord)!;
 
     if (this.isCreate || this.isNone) {
-      if (this.enableOutOfTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 })) {
+      if (!this.enableOutOfTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 })) {
         return;
       }
 
