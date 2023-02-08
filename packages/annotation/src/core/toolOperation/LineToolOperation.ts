@@ -260,8 +260,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   get enableOutOfTarget() {
-    // 兼容旧的目标外标注
-    return this.config.drawOutSideTarget ?? this.config.enableOutOfTarget ?? this.config.outOfTarget;
+    return this.config.drawOutSideTarget ?? this.config.enableOutOfTarget;
   }
 
   get showOrder() {
