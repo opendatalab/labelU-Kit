@@ -60,8 +60,10 @@ jobs:
         run: pnpm run release
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      - name: Execute before release script
+        run: node ./scripts/before-release-frontend.js
       - name: Update frontend dependencies
-        run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - name: Build frontend
         run: pnpm run build:frontend
       - name: Release frontend

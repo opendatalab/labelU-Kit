@@ -1,15 +1,10 @@
 const minimist = require('minimist');
 const { Octokit } = require('@octokit/rest');
 const nodeFetch = require('node-fetch');
-const path = require('path');
-const fs = require('fs');
-const { getPackagesSync } = require('@manypkg/get-packages');
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
 });
-
-const workspace = path.join(__dirname, '../');
 
 function sendMessageToWechat(content) {
   const wechatRobotUrl = process.env.WEBHOOK_URL;
@@ -55,28 +50,6 @@ function createPullRequest({ branchName, body, title = branchName, base = 'main'
     });
 }
 
-function updateAppDepsVersion() {
-  const appPkgJson = require(path.join(workspace, 'apps/frontend/package.json'));
-  const { packages } = getPackagesSync(workspace);
-
-  let isNotChanged = true;
-
-  packages.forEach((pkg) => {
-    const pkgInFrontend = appPkgJson.dependencies[pkg.packageJson.name];
-    if (pkgInFrontend && pkgInFrontend !== pkg.packageJson.version) {
-      isNotChanged = false;
-      console.log(`update ${pkg.packageJson.name} version from ${pkgInFrontend} to ${pkg.packageJson.version}`);
-      appPkgJson.dependencies[pkg.packageJson.name] = pkg.packageJson.version;
-    }
-  });
-
-  if (isNotChanged) {
-    console.log('app deps version is not changed');
-  } else {
-    fs.writeFileSync(path.join(workspace, 'apps/frontend/package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
-  }
-}
-
 async function main() {
   const args = minimist(process.argv.slice(2));
   const [branchName, releaseNotes] = args._;
@@ -92,8 +65,6 @@ async function main() {
     });
   } catch (err) {
     console.log(err);
-  } finally {
-    updateAppDepsVersion();
   }
 }
 
