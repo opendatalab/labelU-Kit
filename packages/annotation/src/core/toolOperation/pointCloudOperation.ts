@@ -23,6 +23,7 @@ interface PointCloudOperationProps {
 class PointCloudOperation extends PointCloud {
   public boxList!: IPointCloudBox[]; // 已标注的立体框
   public attribute: string; // 当前标签
+  public textAttribute!:string; // 当前文本
   public backgroundColorOp: number = 0x000000; // 背景色
   public config: any; // 配置
   public style: any;
@@ -58,6 +59,10 @@ class PointCloudOperation extends PointCloud {
 
   public setSelectedId(selectedId: string) {
     this.selectedId = selectedId;
+  }
+
+  public setDefaultTextAttributes(textAttributes:string):void {
+    this.textAttribute = textAttributes
   }
 
   public setDefaultAttribute(attribute: string) {
@@ -256,6 +261,7 @@ class PointCloudOperation extends PointCloud {
     const rotation = MathUtils.getRadiusFromQuadrangle(points);
 
     return {
+      textAttribute:this.textAttribute,
       attribute: this.attribute,
       center: {
         x: (points[0].x + points[2].x) / 2,
@@ -496,7 +502,7 @@ class PointCloudOperation extends PointCloud {
     }
   }
 
-  public getFooterRect(points: THREE.Vector3[], clickPoint: ICoordinate) {
+  public getFooterRect(points: ICoordinate[], clickPoint: ICoordinate) {
     const rect = MathUtils.getRectangleByRightAngle({ x: clickPoint.x, y: clickPoint.y }, [
       {
         x: points[0].x,
@@ -524,27 +530,35 @@ class PointCloudOperation extends PointCloud {
     let points: Vector3[] = [] as unknown as THREE.Vector3[];
     let firstlineName = '';
     let secondlineName = '';
-
+    let screenPoints: { x: number; y: number }[] = [];
     // add box in scene
     this.container.addEventListener('mousedown', function (event) {
-      if (!self.attribute || event.ctrlKey) {
+      if (!self.attribute || event.ctrlKey || event.shiftKey) {
         return;
       }
       if (event.button === MOUSE.LEFT) {
-        let color = self.color;
         // 鼠标移动事件
         self.container.addEventListener('pointermove', handleMouseMove.bind(self));
         let clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
         points = [...points, clickPoint];
+        screenPoints = [
+          ...screenPoints,
+          {
+            x: event.clientX,
+            y: event.clientY,
+          },
+        ];
         if (points.length === 3) {
           let { rect } = self.getFooterRect(points.slice(0, 2), clickPoint);
+          let eventClickPoints = self.getFooterRect(screenPoints.slice(0, 2), screenPoints[2]);
           let zInfo = self.getSensesPointZAxisInPolygon(rect);
           if (zInfo.zCount > 0) {
             let box = self.addBoxInSense(rect, zInfo, self.attribute);
-            self.emit('boxAdded', rect, box.attribute, box.id);
+            self.emit('boxAdded', rect, eventClickPoints.rect, box.attribute, box.id, box.order,box.textAttribute);
           }
           // 清除点数据
           points = [];
+          screenPoints = [];
           // 清除辅助线
           self.removeObjectByName(secondlineName);
           self.removeObjectByName(firstlineName);

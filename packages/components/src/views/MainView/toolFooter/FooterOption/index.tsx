@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useSelector } from '@/store/ctx';
 import { AppState } from '../../../../store';
 import rotateSvg from '../../../../assets/annotation/common/icon_r.svg';
 
 import rotateHighlightSvg from '../../../../assets/annotation/common/icon_rA.svg';
+import topViewSvg from '../../../../assets/annotation/common/icon_topv.svg';
 
 import { prefix } from '../../../../constant';
 import { EToolName } from '../../../../data/enums/ToolType';
@@ -15,6 +16,7 @@ import { store } from '@/index';
 const { EVideoToolName } = cTool;
 import ImgAttribute from '@/store/imgAttribute/actionCreators';
 import { ImgAttributeState } from '@/store/imgAttribute/types';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 
 interface IProps {
   isBegin?: boolean;
@@ -28,34 +30,28 @@ enum EColor {
 
 const FooterOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');
-  const { stepInfo } = props;
   // const dispatch = useDispatch();
   const {
-    annotation: { toolInstance },
+    annotation: { toolInstance, currentToolName },
   } = useSelector((state: AppState) => ({
     annotation: state.annotation,
     imgAttribute: state.imgAttribute,
   }));
   const { t } = useTranslation();
 
-  const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
-  const isVideo = [EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
+  console.log(currentToolName);
+  const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(currentToolName);
+  const isVideo = [EVideoToolName.VideoTagTool].includes(currentToolName);
+  const isPcTool = [EToolName.PointCloud].includes(currentToolName);
+  const ptCtx = useContext(PointCloudContext);
 
   const isBegin = props.isBegin || isTagTool;
 
   const updateRotate = () => {
-    /**
-     * 1. 非第一步无法旋转
-     * 2. 单步骤不存在 dataSourceStep
-     */
-    if (stepInfo.dataSourceStep !== 0 && stepInfo.dataSourceStep !== undefined) {
-      return;
-    }
-
     toolInstance?.updateRotate();
   };
 
-  const commonOptionList: any = [
+  const imgOptionList: any = [
     {
       toolName: 'OriginalScaleSet',
       title: 'OriginalScaleSet',
@@ -98,6 +94,28 @@ const FooterOption: React.FC<IProps> = (props) => {
       },
     },
   ];
+
+  const pcOptionList = [
+    {
+      toolName: 'TopLook',
+      title: 'TopLook',
+      show: true,
+      selectedSvg: topViewSvg,
+      commonSvg: topViewSvg,
+      click: () => {
+        ptCtx?.mainViewInstance.resetCamera();
+      },
+      style: {
+        marginRight: '4px',
+        opacity: isVideo === true ? 0.4 : 1,
+        fontSize: '14px',
+        color: !isBegin && toolHover === 'OriginalScaleSet' ? EColor.Hover : EColor.Normal,
+      },
+    },
+  ];
+
+  const commonOptionList = isPcTool ? pcOptionList : imgOptionList;
+
   return (
     <div className={`${prefix}-footer__option`}>
       {commonOptionList.map((info: any) => {

@@ -1,0 +1,5 @@
+@import '../../utils/common/common.module';
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+}

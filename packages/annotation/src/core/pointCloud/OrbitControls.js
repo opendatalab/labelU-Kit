@@ -688,7 +688,7 @@ class OrbitControls extends EventDispatcher {
       let mouseAction;
 
       switch (event.button) {
-        case 0:
+        case 2:
           mouseAction = scope.mouseButtons.LEFT;
           break;
 
@@ -696,14 +696,13 @@ class OrbitControls extends EventDispatcher {
           mouseAction = scope.mouseButtons.MIDDLE;
           break;
 
-        case 2:
+        case 0:
           mouseAction = scope.mouseButtons.RIGHT;
           break;
 
         default:
           mouseAction = -1;
       }
-
       switch (mouseAction) {
         case MOUSE.DOLLY:
           if (scope.enableZoom === false) return;
@@ -715,19 +714,11 @@ class OrbitControls extends EventDispatcher {
           break;
 
         case MOUSE.ROTATE:
-          if (event.ctrlKey || event.metaKey || event.shiftKey) {
-            if (scope.enablePan === false) return;
+          if (scope.enablePan === false) return;
 
-            handleMouseDownPan(event);
+          handleMouseDownPan(event);
 
-            state = STATE.PAN;
-          } else {
-            if (scope.enableRotate === false) return;
-
-            // handleMouseDownRotate(event);
-
-            // state = STATE.ROTATE;
-          }
+          state = STATE.PAN;
 
           break;
 
@@ -763,24 +754,17 @@ class OrbitControls extends EventDispatcher {
         switch (state) {
           case STATE.ROTATE:
             if (scope.enableRotate === false) return;
-
             handleMouseMoveRotate(event);
-
             break;
-
           case STATE.DOLLY:
             if (scope.enableZoom === false) return;
-
             handleMouseMoveDolly(event);
-
             break;
-
-          case STATE.PAN:
-            if (scope.enablePan === false) return;
-
-            handleMouseMovePan(event);
-
-            break;
+        }
+      } else {
+        if (state === STATE.PAN) {
+          if (scope.enablePan === false) return;
+          handleMouseMovePan(event);
         }
       }
     }

@@ -1,5 +1,5 @@
 import React, { FC, ReactElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Collapse, Form, Input, Select } from 'antd';
+import { Collapse } from 'antd';
 import { AppState } from '../../../../store';
 import { connect } from 'react-redux';
 import { useDispatch } from '@/store/ctx';
@@ -14,15 +14,15 @@ import AttributeHideIcon from '@/assets/common/attribute_hide.svg';
 // import AttributeShowHoverIcon from '@/assets/common/attribute_show_hover.svg';
 import { ChangeCurrentTool, UpdateImgList } from '@/store/annotation/actionCreators';
 import { ToolInstance } from '@/store/annotation/types';
-import { PrevResult, Attribute, EToolName } from '@label-u/annotation';
+import { Attribute, EToolName } from '@label-u/annotation';
 import DrageModel from '@/components/dragModal';
 import classNames from 'classnames';
 import { expandIconFuc } from '../TagSidebar';
 import { LabelUContext } from '@/store/ctx';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import { useAttributes } from '../../../hooks/useAttribute';
 
 const { Panel } = Collapse;
-const { Option } = Select;
 
 const LableTools = [
   EToolName.Rect,
@@ -82,6 +82,7 @@ const AttributeRusult: FC<IProps> = ({
   });
   const ptCtx = useContext(PointCloudContext);
 
+  const {generateContent,updateCanvasView} = useAttributes();
   const dragModalRef = useRef<any>();
   useEffect(() => {
     initToolInfo();
@@ -366,60 +367,6 @@ const AttributeRusult: FC<IProps> = ({
     updateCanvasView(newImageResult);
   };
 
-  // 更新pre 标注结果
-  const updateCanvasView = (newLabelResult: any) => {
-    if (currentToolName === 'pointCloudTool') {
-      return;
-    }
-    const prevResult: PrevResult[] = [];
-    for (let oneTool of toolList) {
-      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
-        let onePrevResult = {
-          toolName: oneTool.toolName,
-          result: newLabelResult[oneTool.toolName].result,
-        };
-        prevResult.push(onePrevResult);
-      }
-      if (oneTool.toolName === currentToolName) {
-        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
-      }
-    }
-    toolInstance.setPrevResultList(prevResult);
-    toolInstance.render();
-  };
-
-  // 根据标签及工具 修改标签及描述
-  const updateLabelResultByOrderAndToolName = (
-    order: number,
-    fromToolName: string,
-    toAttributeName: string,
-    toAttributeText: string,
-  ) => {
-    let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-    // 更新结果
-    if (oldImgResult[fromToolName].result && oldImgResult[fromToolName].result.length > 0) {
-      let newToolLabelItems = oldImgResult[fromToolName].result.map(
-        (item: { order: number; isVisible: boolean; attribute: string; textAttribute: string }) => {
-          if (item.order === order) {
-            return {
-              ...item,
-              attribute: toAttributeName,
-              textAttribute: toAttributeText,
-            };
-          }
-          return item;
-        },
-      );
-      oldImgResult[fromToolName].result = newToolLabelItems;
-    }
-    imgList[imgIndex].result = JSON.stringify(oldImgResult);
-    dispatch(UpdateImgList(imgList));
-    setTimeout(() => {
-      ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
-    }, 100);
-    updateCanvasView(oldImgResult);
-  };
-
   // 设置选中项
   const setSelectedLabel = (toolInfo: ToolInfo) => {
     // 选中当前标注
@@ -491,62 +438,6 @@ const AttributeRusult: FC<IProps> = ({
     });
     return keys;
   }, [attributeResultList]);
-
-  const generateContent = (toolInfo: ToolInfo, attributeResult: AttributeResult) => {
-    let children = [];
-    for (let item of attributeList) {
-      // eslint-disable-next-line react/jsx-no-undef
-      children.push(<Option key={item.key}>{item.value}</Option>);
-    }
-    return (
-      <Form
-        name='basic'
-        layout='vertical'
-        initialValues={{
-          changeAttribute: attributeResult.attributeName,
-          description: toolInfo.textAttribute,
-        }}
-        autoComplete='off'
-        onFieldsChange={(_, allFields) => {
-          updateLabelResultByOrderAndToolName(
-            toolInfo.order,
-            toolInfo.toolName,
-            allFields[0].value,
-            allFields[1].value,
-          );
-        }}
-      >
-        <Form.Item
-          label='标签'
-          name='changeAttribute'
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select
-            style={{
-              width: '100%',
-            }}
-          >
-            {children}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          label='描述'
-          name='description'
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input.TextArea />
-        </Form.Item>
-      </Form>
-    );
-  };
 
   if (!attributeResultList || attributeResultList.length === 0) {
     return (

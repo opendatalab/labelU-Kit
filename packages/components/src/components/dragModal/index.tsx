@@ -12,6 +12,7 @@ interface Iprops {
   okEvent?: () => void;
   cancelEvent?: () => void;
   closable?: boolean;
+  isSetPosition?: boolean;
 }
 
 interface Bounds {
@@ -115,7 +116,7 @@ const DrageModel = (props: Iprops, ref: any) => {
       footer={null}
       style={{
         top: `${bounds.top}px`,
-        left: `${bounds.left - props.width - 150}px`,
+        left: `${props.isSetPosition ? bounds.left + 20 : bounds.left - props.width - 150}px`,
         margin: '0px 0px',
         maxWidth: props.width,
       }}

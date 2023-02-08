@@ -8,6 +8,7 @@
         }
       }
     ],
+    "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     "@semantic-release/npm",
     "@semantic-release/github",
@@ -19,10 +20,9 @@
       }
     ],
     [
-      "semantic-release-github-pullrequest",
+      "@semantic-release/exec",
       {
-        "assets": [],
-        "baseRef": "main"
+        "successCmd": "node ../../scripts/post-publish.js ${branch.name} '${nextRelease.notes}'"
       }
     ]
   ]

@@ -1,0 +1,156 @@
+.select {
+  display: flex;
+  align-items: center;
+
+  a {
+    display: none;
+    width: 5%;
+    color: #ccc;
+    position: relative;
+  }
+
+  .inputSerial {
+    width: 10%;
+    display: inline-block;
+  }
+
+  .inputGroup {
+    width: 100%;
+    display: inline-block;
+    padding-bottom: 13px;
+    padding-top: 13px;
+
+    .input_single {
+      width: 45%;
+      margin-right: 5px;
+      padding: 4px 8px;
+      border: 0;
+      border-bottom: 1px solid #ccc;
+      border-radius: 0;
+    }
+  }
+
+  .addIcon {
+    margin-right: 14px;
+  }
+
+  .deleteIcon {
+    margin-right: 10px;
+  }
+
+  .checkboxUnselected {
+    display: block;
+
+    :global {
+      .ant-checkbox-checked .ant-checkbox-inner {
+        background-color: rgb(153 153 153 / 100%);
+        border-color: rgb(153 153 153 / 100%);
+      }
+
+      .ant-checkbox-checked::after {
+        border-color: rgb(153 153 153 / 100%);
+      }
+    }
+  }
+
+  .checkboxSelected {
+    display: block;
+
+    :global {
+      .ant-checkbox-checked .ant-checkbox-inner {
+        background-color: rgb(255 179 102 / 100%);
+        border-color: rgb(255 179 102 / 100%);
+      }
+
+      .ant-checkbox-checked::after {
+        border-color: rgb(255 179 102 / 100%);
+      }
+    }
+  }
+}
+
+.select:hover {
+  a {
+    display: inline-block;
+  }
+}
+
+.headerOption {
+  display: flex;
+  justify-content: flex-start;
+  height: 20px;
+
+  :global {
+    .ant-checkbox-checked::after {
+      display: none;
+    }
+  }
+
+  .icon {
+    margin-right: 9px;
+  }
+
+  .star {
+    display: block;
+    margin-right: 6px;
+    cursor: pointer;
+  }
+
+  .starSelected {
+    color: rgb(255 179 102 / 100%);
+  }
+
+  .starUnselected {
+    color: rgb(153 153 153 / 100%);
+  }
+}
+
+.subMain {
+  //margin-left: 26px;
+  //width: 90%;
+
+  .subSelect {
+    margin-top: 2px;
+    padding-bottom: 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    a {
+      display: none;
+    }
+
+    .sub_input_box {
+      width: 100%;
+    }
+
+    .sub_input {
+      width: 45%;
+      margin-right: 5px;
+      padding: 4px 8px;
+      border: 0;
+      border-bottom: 1px solid #ccc;
+      border-radius: 0;
+    }
+
+    .firstItem {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .subSelect:hover {
+    a {
+      display: inline-block;
+    }
+  }
+}
+
+.firstItem::before {
+  content: '';
+  margin-left: 10px;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  width: 6px;
+  height: 25px;
+}
