@@ -45,6 +45,7 @@
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
     "@commitlint/config-conventional": "8.3.4",
+    "@manypkg/get-packages": "^2.1.0",
     "@octokit/rest": "^19.0.7",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
