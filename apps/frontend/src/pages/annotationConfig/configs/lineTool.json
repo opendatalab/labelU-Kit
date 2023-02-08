@@ -13,7 +13,7 @@
         "lineType": 0,
         "lineColor": 1,
         "edgeAdsorption": false,
-        "enableOutOfTarget": true,
+        "drawOutsideTarget": true,
         "copyBackwardResult": false,
         "attributeConfigurable": true,
         "textConfigurable": false,

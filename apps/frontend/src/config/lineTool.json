@@ -6,7 +6,7 @@
     "lineType": 0,
     "lineColor": 1,
     "edgeAdsorption": false,
-    "enableOutOfTarget": true,
+    "drawOutsideTarget": true,
     "attributeConfigurable": true,
     "textConfigurable": false,
     "textCheckType": 4,

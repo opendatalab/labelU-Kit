@@ -71,7 +71,7 @@ const lineToolConfig = {
   lineType: 0, // 配置拉线类型 0 为普通拉线，2为贝塞尔曲线
   lineColor: 1, // 配置拉线颜色，0为单一色，1 为多色（暂未生效）
   edgeAdsorption: false, //多线条情况下是否支持 点吸附
-  enableOutOfTarget: true,
+  drawOutsideTarget: true,
   copyBackwardResult: false, //无效配置
   attributeConfigurable: true, //是否显示划线标签配置选项
   attributeList: [
