@@ -60,6 +60,8 @@ jobs:
         run: pnpm run release
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      - name: Update frontend dependencies
+        run: pnpm install
       - name: Build frontend
         run: pnpm run build:frontend
       - name: Release frontend

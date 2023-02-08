@@ -65,14 +65,15 @@ function updateAppDepsVersion() {
     const pkgInFrontend = appPkgJson.dependencies[pkg.packageJson.name];
     if (pkgInFrontend && pkgInFrontend !== pkg.packageJson.version) {
       isNotChanged = false;
+      console.log(`update ${pkg.packageJson.name} version from ${pkgInFrontend} to ${pkg.packageJson.version}`);
       appPkgJson.dependencies[pkg.packageJson.name] = pkg.packageJson.version;
     }
   });
 
-  if (!isNotChanged) {
-    fs.writeFileSync(path.join(workspace, 'apps/frontend/package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
-  } else {
+  if (isNotChanged) {
     console.log('app deps version is not changed');
+  } else {
+    fs.writeFileSync(path.join(workspace, 'apps/frontend/package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
   }
 }
 
