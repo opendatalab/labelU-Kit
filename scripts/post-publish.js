@@ -2,6 +2,7 @@ const minimist = require('minimist');
 const { Octokit } = require('@octokit/rest');
 const nodeFetch = require('node-fetch');
 const path = require('path');
+const fs = require('fs');
 const { getPackagesSync } = require('@manypkg/get-packages');
 
 const octokit = new Octokit({
@@ -28,13 +29,9 @@ function sendMessageToWechat(content) {
         content,
       },
     }),
-  })
-    .then(() => {
-      console.log('send wechat robot success');
-    })
-    .catch((err) => {
-      console.log('send wechat robot failed', err);
-    });
+  }).then(() => {
+    console.log('send wechat robot success');
+  });
 }
 
 function createPullRequest({ branchName, body, title = branchName, base = 'main' }) {
@@ -55,35 +52,48 @@ function createPullRequest({ branchName, body, title = branchName, base = 'main'
     })
     .then(() => {
       console.log('Create a pull request success');
-    })
-    .catch((err) => {
-      console.log('Create a pull request failed', err);
     });
 }
 
 function updateAppDepsVersion() {
   const appPkgJson = require(path.join(workspace, 'apps/frontend/package.json'));
-  const packages = getPackagesSync(workspace);
+  const { packages } = getPackagesSync(workspace);
+
+  let isNotChanged = true;
 
   packages.forEach((pkg) => {
-    if (appPkgJson.dependencies[pkg.packageJson.name]) {
+    const pkgInFrontend = appPkgJson.dependencies[pkg.packageJson.name];
+    if (pkgInFrontend && pkgInFrontend !== pkg.packageJson.version) {
+      isNotChanged = false;
       appPkgJson.dependencies[pkg.packageJson.name] = pkg.packageJson.version;
     }
   });
+
+  if (!isNotChanged) {
+    fs.writeFileSync(path.join(workspace, 'apps/frontend/package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
+  } else {
+    console.log('app deps version is not changed');
+  }
 }
 
 async function main() {
   const args = minimist(process.argv.slice(2));
   const [branchName, releaseNotes] = args._;
 
-  sendMessageToWechat(releaseNotes);
+  try {
+    await sendMessageToWechat(releaseNotes);
 
-  createPullRequest({
-    branchName,
-    body: releaseNotes,
-    base: 'main',
-    title: 'Update package version',
-  });
+    await createPullRequest({
+      branchName,
+      body: releaseNotes,
+      base: 'main',
+      title: 'Update package version',
+    });
+  } catch (err) {
+    console.log(err);
+  } finally {
+    updateAppDepsVersion();
+  }
 }
 
 main();
