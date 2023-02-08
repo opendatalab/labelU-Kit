@@ -71,15 +71,10 @@
       "stylelint --fix"
     ],
     "packages/**/src/**/*.{ts,tsx}": "tsc-files --noEmit",
-    "apps/frontend/src/**/*.{ts,tsx}": "tsc-files --noEmit",
     "packages/**/src/**/*.{js,jsx,ts,tsx,json,css,scss,less,md}": [
       "prettier --check --write"
     ],
-    "apps/frontend/src/**/*.{js,jsx,ts,tsx,json,css,scss,less,md}": [
-      "prettier --check --write"
-    ],
-    "packages/**/src/**/*.{js,ts,jsx,tsx}": "eslint",
-    "apps/frontend/src/**/*.{js,ts,jsx,tsx}": "eslint"
+    "packages/**/src/**/*.{js,ts,jsx,tsx}": "eslint"
   },
   "config": {
     "commitizen": {
