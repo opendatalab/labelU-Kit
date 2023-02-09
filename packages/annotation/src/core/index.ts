@@ -74,7 +74,11 @@ export default class AnnotationEngine {
     this.isShowOrder = props.isShowOrder;
     this.tagConfigList = props.tagConfigList;
     this.attributeList = props.attributeList;
-    this.allAttributesList = props.allAttributesList;
+    /**
+     * TODO: 为了兼容历史配置数据，此处过滤掉空的属性；但是后续应该在保存配置的时候就过滤掉，或者校验空值。
+     * 修正：https://project.feishu.cn/bigdata_03/issue/detail/3877218?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+     **/
+    this.allAttributesList = (props.allAttributesList || []).filter((item) => item.key !== '' && item.value !== '');
     this.container = props.container;
     this.size = props.size;
     this.toolName = props.toolName;
