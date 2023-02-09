@@ -1,22 +1,18 @@
-/*eslint import/no-unresolved: 0*/
-import * as THREE from 'three';
-import {
-  PerspectiveShiftUtils,
+import type {
   TMatrix4Tuple,
-  MatrixUtils,
-  EPerspectiveView,
   IVolume,
   IPointCloudBox,
   I3DSpaceCoord,
-  PointCloudUtils,
   TMatrix14Tuple,
   TMatrix13Tuple,
 } from '@label-u/utils';
-import { MOUSE, PointsMaterial, Shader, Vector3 } from 'three';
-// import HighlightWorker from 'web-worker:./highlightWorker.js';
+import { PerspectiveShiftUtils, MatrixUtils, EPerspectiveView, PointCloudUtils } from '@label-u/utils';
+import * as THREE from 'three';
+import type { PointsMaterial, Shader, Vector3 } from 'three';
+// eslint-disable-next-line import/no-unresolved
 import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
-import { IPolygonPoint } from '@/types/tool/polygon';
+import type { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
 import { PCDLoader } from './PCDLoader';
 import { OrbitControls } from './OrbitControls';
@@ -64,6 +60,7 @@ export class PointCloud extends EventListener {
   /**
    * zAxis Limit for filter point over a value
    */
+
   public zAxisLimit: number = 10;
 
   public initCameraPosition = this.DEFAULT_INIT_CAMERA_POSITION; // It will init when the camera position be set
@@ -716,7 +713,6 @@ export class PointCloud extends EventListener {
     this.renderPointCloud(points, radius);
   };
 
-
   /**
    * Load PCD File by box
    * @param src
@@ -1024,6 +1020,7 @@ export class PointCloud extends EventListener {
     }
   }
 
+  // todo: get more properly element of zoom
   public getBoxPolygon2DCoordinate(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const vectorList = this.boxParams2ViewPolygon(boxParams, perspectiveView);
     const { width, height } = boxParams;
@@ -1043,10 +1040,9 @@ export class PointCloud extends EventListener {
 
     const wZoom = this.containerWidth / width;
     const hZoom = this.containerHeight / height;
-
     return {
       polygon2d,
-      zoom: Math.min(wZoom, hZoom) / 2,
+      zoom: Math.min(wZoom, hZoom) / 1.2,
     };
   }
 
@@ -1267,9 +1263,10 @@ export class PointCloud extends EventListener {
     this.render();
   };
 
-  public shaderForPoints = (geometry:THREE.BufferGeometry) => {
-    var material = new THREE.ShaderMaterial({
-      vertexShader:`
+  public shaderForPoints = (geometry: THREE.BufferGeometry) => {
+    const material = new THREE.ShaderMaterial({
+      vertexShader: `
+
         attribute vec3 customColor;
         varying vec3 color;
         void main(){
@@ -1277,25 +1274,25 @@ export class PointCloud extends EventListener {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
         }
       `,
-      fragmentShader:`
+      fragmentShader: `
         varying vec3 color;
         void main(){
           gl_FragColor = vec4(color, 1.0);
         }
-      `
-    })
+      `,
+    });
 
-    let color = new THREE.Color();
-    color.setRGB(255,255,255);
-    let numberVertex = geometry.getAttribute('position').count;
-    let itemCount = 3;
-    const colors = new Uint8Array(numberVertex*itemCount)
-    let colorAttribute = new THREE.BufferAttribute(colors,itemCount,true);
-    geometry.setAttribute('customColor',colorAttribute);
-    for(let i = 0; i <numberVertex; i++){
-      colorAttribute.setXYZ(i,color.r,color.g,color.b);
+    const color = new THREE.Color();
+    color.setRGB(255, 255, 255);
+    const numberVertex = geometry.getAttribute('position').count;
+    const itemCount = 3;
+    const colors = new Uint8Array(numberVertex * itemCount);
+    const colorAttribute = new THREE.BufferAttribute(colors, itemCount, true);
+    geometry.setAttribute('customColor', colorAttribute);
+    for (let i = 0; i < numberVertex; i++) {
+      colorAttribute.setXYZ(i, color.r, color.g, color.b);
     }
-    var mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(geometry, material);
     return mesh;
   };
 

@@ -23,6 +23,7 @@ import { jsonParser } from '@/utils';
 import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
+import * as THREE from 'three';
 
 const DEFAULT_SCOPE = 5;
 const DEFAULT_RADIUS = 90;
@@ -103,6 +104,7 @@ export const topViewPolygon2PointCloud = (
         rect: [point1, point2, point3, point4],
         zInfo: zInfo,
         isVisible: true,
+        textAttribute: '',
       };
 
   if (defaultValue) {
@@ -374,7 +376,12 @@ export const usePointCloudViews = () => {
     if (polygon.id) {
       let zInfo = mainViewInstance?.getSensesPointZAxisInPolygon(polygon.pointList);
       if (zInfo) {
-        mainViewInstance?.doUpateboxInScene(polygon.pointList, zInfo, polygon.attribute, polygon.id);
+        mainViewInstance?.doUpateboxInScene(
+          polygon.pointList,
+          zInfo,
+          polygon.attribute,
+          polygon.id,
+        );
         mainViewInstance?.controls.update();
         mainViewInstance?.render();
       }
@@ -489,12 +496,16 @@ export const usePointCloudViews = () => {
         };
         let box = mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
           .polygonPointList as IPolygonPoint[];
-        let topPolygon = {
-          ...newPolygon,
-          pointList: box,
-        };
+
+        mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
         updateSelectedBox(newBoxParams);
-        syncPointCloudViewsFromSideOrBackView(fromView, newPolygon, newBoxParams, topPolygon);
+
+        // Todo: sycn data by sade view
+        // let topPolygon = {
+        //   ...newPolygon,
+        //   pointList: box,
+        // };
+        // syncPointCloudViewsFromSideOrBackView(fromView, newPolygon, newBoxParams, topPolygon);
       }
     }
   };
