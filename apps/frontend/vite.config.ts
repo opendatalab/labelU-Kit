@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 // import { viteMockServe } from 'vite-plugin-mock';
+import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import vitePluginImp from 'vite-plugin-imp';
 
@@ -26,7 +27,9 @@ export default defineConfig({
     //   mockPath: 'mock',
     //   localEnabled: true,
     // }),
-
+    svgr({
+      exportAsDefault: false,
+    }),
     tsMonoAlias({
       ignorePackages: ['web-demo', 'server'],
     }),

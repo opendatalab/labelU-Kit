@@ -1,5 +1,7 @@
 import path from 'path';
 
+import svgr from '@svgr/rollup';
+import url from 'rollup-plugin-url';
 import esbuild from 'rollup-plugin-esbuild';
 import image from '@rollup/plugin-image';
 import alias from '@rollup/plugin-alias';
@@ -71,7 +73,14 @@ export default () => {
         preserveModules: true,
         preserveModulesRoot: 'src',
       },
-      plugins: [...commonPlugin, esbuildPlugin()],
+      plugins: [
+        ...commonPlugin,
+        esbuildPlugin(),
+        url(),
+        svgr({
+          svgo: false,
+        }),
+      ],
       external: ['react', 'antd'],
     },
   ];
