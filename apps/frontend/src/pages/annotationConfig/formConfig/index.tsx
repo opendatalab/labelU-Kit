@@ -47,8 +47,6 @@ const FormConfig: FC<IProps> = () => {
   const children = [];
   const [media, setMedia] = useState<string>('图片');
   const [selectTools, setSelectTools] = useState<string[]>([]);
-  // const [curentTool, setCurrentTool] = useState<string>();
-  // const [activeTabKey, setActiveTabKey] = useState<string>("1");
   const [isConfigLoad, setIsConfigLoad] = useState<boolean>(true);
   for (let i = 0; i < types.length; i++) {
     children.push(<Option key={types[i]}>{types[i]}</Option>);

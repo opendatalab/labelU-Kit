@@ -4,6 +4,8 @@ import { Button, Form } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import type { OneTag } from '@label-u/annotation';
 
+import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
+
 import TagInput from '../../components/TagInput';
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 
@@ -97,7 +99,7 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
     });
   };
   // add inputList
-  const addInputInfo = (i?: number) => {
+  const addInputInfo = (i: number | undefined, e: React.MouseEvent) => {
     const tagList = form?.getFieldValue('tagList');
     form?.setFieldsValue({
       tagList: addInputList(tagList, EDIT_SUBSELECTED, i, {
@@ -112,6 +114,8 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
       }),
     });
     formSubmitThrottle();
+    // fix: https://project.feishu.cn/bigdata_03/issue/detail/3528090?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+    scrollIntoEventTarget(e, 'button', '#lefeSiderId');
   };
   // 删除对应输入
   const deleteInputInfo = (i: number, subIndex?: number) => {
@@ -144,7 +148,12 @@ const TagConfigForm: FC<FormTagConfig & { name: string }> = (props) => {
             />
           ))}
 
-          <Button type="primary" style={{ marginTop: 16, borderRadius: 4 }} onClick={() => addInputInfo()} ghost>
+          <Button
+            type="primary"
+            style={{ marginTop: 16, borderRadius: 4 }}
+            onClick={(e) => addInputInfo(undefined, e)}
+            ghost
+          >
             新建
           </Button>
         </Form.Item>
