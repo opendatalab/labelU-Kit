@@ -13,7 +13,7 @@ const MemoToolIcon = React.memo(
     return <Icon className={className} component={icon} style={style} />;
   },
   (props, nextProps) => {
-    return isEqual(props.style, nextProps.style);
+    return isEqual(props.style, nextProps.style) && props.className === nextProps.className;
   },
 );
 
