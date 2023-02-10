@@ -4,20 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { cTool } from '@label-u/annotation';
 
-import sLineASvg from '@/assets/annotation/lineTool/icon_line_a.svg';
-import sPointASvg from '@/assets/annotation/pointTool/icon_point_a.svg';
-import sIconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon_a.svg';
-import sIconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern_a.svg';
-import lineASvg from '@/assets/annotation/lineTool/icon_line.svg';
-import pointASvg from '@/assets/annotation/pointTool/icon_point.svg';
-import iconPolygonPatternASvg from '@/assets/annotation/polygonTool/icon_polygon.svg';
-import iconRectPatternSvg from '@/assets/annotation/rectTool/icon_rectPattern.svg';
-import icon_tag from '@/assets/annotation/icon_tag.svg';
+import { ReactComponent as IconTag } from '@/assets/annotation/icon_tag.svg';
+import { ReactComponent as LineASvg } from '@/assets/annotation/lineTool/icon_line.svg';
+import { ReactComponent as PointASvg } from '@/assets/annotation/pointTool/icon_point.svg';
+import { ReactComponent as IconPolygonPatternASvg } from '@/assets/annotation/polygonTool/icon_polygon.svg';
+import { ReactComponent as IconRectPatternSvg } from '@/assets/annotation/rectTool/icon_rectPattern.svg';
 import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 import type { AppState } from '@/store';
 import type { Sider } from '@/types/main';
 import StepUtils from '@/utils/StepUtils';
+import MemoToolIcon from '@/components/ToolIcon';
 
 import AnnotationText from './AnnotationText';
 import ClearIcon from './ClearIcon';
@@ -39,31 +36,26 @@ interface IProps {
 export const toolList = [
   {
     toolName: EToolName.Rect,
-    commonSvg: iconRectPatternSvg,
-    selectedSvg: sIconRectPatternSvg,
+    Icon: IconRectPatternSvg,
   },
   // 多边形工具
   {
     toolName: EToolName.Polygon,
-    commonSvg: iconPolygonPatternASvg,
-    selectedSvg: sIconPolygonPatternASvg,
+    Icon: IconPolygonPatternASvg,
   },
   {
     toolName: EToolName.Line,
-    commonSvg: lineASvg,
-    selectedSvg: sLineASvg,
+    Icon: LineASvg,
     pattern: EToolName.Line,
   },
   {
     toolName: EToolName.Point,
-    commonSvg: pointASvg,
-    selectedSvg: sPointASvg,
+    Icon: PointASvg,
     pattern: 'drawPoint',
   },
   {
     toolName: EToolName.Tag,
-    commonSvg: icon_tag,
-    selectedSvg: icon_tag,
+    Icon: IconTag,
     pattern: EToolName.Tag,
   },
 ];
@@ -98,9 +90,7 @@ const Sidebar: React.FC<IProps> = ({ sider }) => {
     <div className={`${sidebarCls}__level`}>
       <Row className={`${sidebarCls}__toolsOption`}>
         {renderTool && (
-          <a>
-            <img className={`${sidebarCls}__singleTool`} src={renderTool?.selectedSvg} />
-          </a>
+          <MemoToolIcon className={`${sidebarCls}__singleTool`} icon={renderTool.Icon} style={{ color: '#1B67FF' }} />
         )}
       </Row>
     </div>
