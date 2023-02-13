@@ -43,7 +43,7 @@ const TransferCanvas2WorldOffset = (
     offsetY: -(worldCenterPoint.y - canvasCenterPoint.y) / zoom,
   };
 };
-// todo: make the positon of plygon stable
+// TODO: make the positon of plygon stable
 const updateBackViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
