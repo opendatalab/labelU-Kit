@@ -196,9 +196,6 @@ const App: React.FC<AppProps> = (props) => {
     initImgList();
     // 初始化国际化语言
     i18n.changeLanguage(defaultLang);
-
-    // 记录初始化状态
-    initializedRef.current = true;
   }, [
     defaultLang,
     dispatch,

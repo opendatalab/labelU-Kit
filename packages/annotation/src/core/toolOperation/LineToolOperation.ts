@@ -11,7 +11,7 @@ import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
-import type { LineToolConfig } from '@/interface/conbineTool';
+import type { Attribute, LineToolConfig } from '@/interface/conbineTool';
 import type { ICoordinate, IPoint, IRectArea } from '@/types/tool/common';
 import type { ILine, ILinePoint } from '@/types/tool/lineTool';
 
@@ -1895,6 +1895,10 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public setDefaultAttribute(attribute: string = '') {
+    if (!this.config.attributeList.find((v: Attribute) => v.key === attribute)) {
+      return;
+    }
+
     if (this.attributeConfigurable) {
       this.defaultAttribute = attribute;
       this.setLineAttribute('attribute', attribute);

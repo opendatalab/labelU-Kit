@@ -386,6 +386,11 @@ class PolygonOperation extends BasicToolOperation {
 
   public setDefaultAttribute(defaultAttribute: string = '') {
     const oldDefault = this.defaultAttribute;
+
+    if (!this.config.attributeList.find((v) => v.key === defaultAttribute)) {
+      return;
+    }
+
     this.defaultAttribute = defaultAttribute;
 
     if (oldDefault !== defaultAttribute) {
