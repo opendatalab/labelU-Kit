@@ -441,6 +441,7 @@ const AttributeRusult: FC<IProps> = ({
     // 切换工具
     dispatch(ChangeCurrentTool(toolInfo.toolName));
     setChooseToolInfo(toolInfo);
+    // NOTE: 加setTimeout是为了解决：右侧不同工具标签切换时，会将上一个工具的标签设置为下一个工具的标签
     setTimeout(() => {
       document.dispatchEvent(new CustomEvent('attribute::change', { detail: attributeInfo.attributeName }));
     });
@@ -648,7 +649,6 @@ const AttributeRusult: FC<IProps> = ({
                 {item.toolInfo &&
                   item.toolInfo.length > 0 &&
                   item.toolInfo.map((tItem) => {
-                    console.log(item);
                     return (
                       <div
                         // key={item.attributeName}

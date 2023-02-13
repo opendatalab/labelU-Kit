@@ -100,10 +100,6 @@ const App: React.FC<AppProps> = (props) => {
     loadFileList,
     defaultLang = 'cn',
   } = props;
-
-  // Fix: https://project.feishu.cn/bigdata_03/issue/detail/4136170?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
-  const initializedRef = React.useRef(false);
-
   //@ts-ignore
   if (props.imgList && props.imgList.length > 0) {
     console.info('result', props.imgList[0].result);
@@ -161,10 +157,6 @@ const App: React.FC<AppProps> = (props) => {
   }, [imgList, props.toolsBasicConfig]);
 
   useEffect(() => {
-    if (!shouldInitial || initializedRef.current) {
-      return;
-    }
-
     let initToolName = currentToolName;
     const findToolConfigByToolName = toolsBasicConfig.filter((item) => {
       return item.tool === currentToolName;
@@ -174,10 +166,18 @@ const App: React.FC<AppProps> = (props) => {
       initToolName = toolsBasicConfig[0].tool;
       dispatch(ChangeCurrentTool(initToolName));
     }
+  }, [currentToolName, dispatch, toolsBasicConfig]);
+
+  useEffect(() => {
+    if (!shouldInitial) {
+      return;
+    }
+
     store.dispatch(
       InitTaskData({
         toolStyle,
-        initToolName,
+        // NOTE: 切换工具必须重新初始化AnnotationEngine
+        initToolName: currentToolName,
         onSubmit,
         stepList: stepList || [],
         tagConfigList,
@@ -202,6 +202,7 @@ const App: React.FC<AppProps> = (props) => {
     getFileData,
     initImgList,
     loadFileList,
+    currentToolName,
     onPageChange,
     onSave,
     onStepChange,
@@ -212,7 +213,6 @@ const App: React.FC<AppProps> = (props) => {
     shouldInitial,
     // ====
     attributeList,
-    currentToolName,
     tagConfigList,
     textConfig,
     toolStyle,
