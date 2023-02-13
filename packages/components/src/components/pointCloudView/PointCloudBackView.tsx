@@ -184,7 +184,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         let box = ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
           .polygonPointList as IPolygonPoint[];
 
-        // Todo: sync by sideview or back view
+        // TODO: sync by sideview or back view
         // syncPointCloudViewsFromSideOrBackView?.(
         //   PointCloudView.Back,
         //   newPolygon,
