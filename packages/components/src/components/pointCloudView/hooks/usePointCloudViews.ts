@@ -500,7 +500,7 @@ export const usePointCloudViews = () => {
         mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
         updateSelectedBox(newBoxParams);
 
-        // Todo: sycn data by sade view
+        // TODO: sycn data by sade view
         // let topPolygon = {
         //   ...newPolygon,
         //   pointList: box,
