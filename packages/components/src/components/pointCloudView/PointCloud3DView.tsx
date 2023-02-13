@@ -12,14 +12,13 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudContext } from './PointCloudContext';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import { useDispatch } from '@/store/ctx';
 import { jsonParser } from '@/utils';
 import { useSingleBox } from './hooks/useSingleBox';
 // import { Switch } from 'antd';
 import useSize from '@/hooks/useSize';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 // import { useTranslation } from 'react-i18next';
-import { LabelUContext, useSelector } from '@/store/ctx';
+import { LabelUContext, useSelector, useDispatch } from '@/store/ctx';
 import { BoxInfos } from './PointCloudInfos';
 import { BasicConfig } from '@/interface/toolConfig';
 import { AppState } from '@/store';
@@ -106,7 +105,6 @@ const PointCloud3D: React.FC<
 
   const { generateContent } = useAttributes();
 
-
   useEffect(() => {
     if (!ptCtx.mainViewInstance) {
       return;
@@ -156,9 +154,9 @@ const PointCloud3D: React.FC<
     mainViewInstance.singleOn('setSelectedBoxByOrder', (order: number) => {
       let boxList = mainViewInstance.boxList;
       if (Array.isArray(boxList) && boxList.length > 0) {
-        for (let i = 0; i < boxList.length; i++) {
-          if (boxList[i].order === order) {
-            mainViewInstance.emit('updateSelectedBox', boxList[i].id);
+        for (let box of boxList) {
+          if (box.order === order) {
+            mainViewInstance.emit('updateSelectedBox', box.id);
             break;
           }
         }
@@ -167,7 +165,14 @@ const PointCloud3D: React.FC<
 
     mainViewInstance.singleOn(
       'boxAdded',
-      (pointList: ICoordinate[],screenPoints:ICoordinate[], attribute: string, id: string,order:number,textAttribute:string) => {
+      (
+        pointList: ICoordinate[],
+        screenPoints: ICoordinate[],
+        attribute: string,
+        id: string,
+        order: number,
+        textAttribute: string,
+      ) => {
         // const currentPolygonList = TopView2dOperation.polygonList;
         const cavasPointList = pointList.map((point) => {
           return MathUtils.transerWord2Canvas(point, sizeTop);
@@ -189,11 +194,16 @@ const PointCloud3D: React.FC<
 
         dragModalRef.current.switchSetBounds(bounds);
         dragModalRef.current.switchModal(true);
-        setContent(generateContent({
-          toolName: 'pointCloudTool',
-          order: order,
-          textAttribute: textAttribute
-        }, {attributeName:attribute}));
+        setContent(
+          generateContent(
+            {
+              toolName: 'pointCloudTool',
+              order: order,
+              textAttribute: textAttribute,
+            },
+            { attributeName: attribute },
+          ),
+        );
       },
     );
 
@@ -223,11 +233,40 @@ const PointCloud3D: React.FC<
         height: TopView2dOperation.container.clientHeight,
       };
       let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
-      let [box] = mainViewInstance.boxList.filter((p: { id: string; }) => p.id === selectedIDs);
+      let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
       ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
       pointCloudViews.topViewAddBox(polygon, size, box.attribute);
       ptCtx.setSelectedIDs([selectedIDs]);
     });
+
+    mainViewInstance.singleOn(
+      'changeSelectedBox',
+      (pointListOfBox: ICoordinate[], selectedIDs: string) => {
+        let size = {
+          width: TopView2dOperation.container.clientWidth,
+          height: TopView2dOperation.container.clientHeight,
+        };
+
+        const topPolygonPointList = pointListOfBox.map((point) => {
+          return MathUtils.transerWord2Canvas(point, sizeTop);
+        });
+
+        let prevPolygon;
+        let newPolygonList = TopView2dOperation.polygonList.map((p) => {
+          if (p.id === selectedIDs) {
+            p.pointList = topPolygonPointList;
+            prevPolygon = p;
+          }
+          return p;
+        });
+
+        TopView2dOperation.setPolygonList(newPolygonList);
+        let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
+        ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
+        pointCloudViews.topViewAddBox(prevPolygon, size, box.attribute);
+        ptCtx.setSelectedIDs([selectedIDs]);
+      },
+    );
   }, [ptCtx, size, currentData, pointCloudViews]);
 
   /**
@@ -337,7 +376,7 @@ const PointCloud3D: React.FC<
             '100%',
         }}
       >
-      <div className={getClassName('point-cloud-3d-content')} style={{ position: 'relative' }}>
+        <div className={getClassName('point-cloud-3d-content')} style={{ position: 'relative' }}>
           <PointCloud3DContext.Provider value={ptCloud3DCtx}>
             {/* <PointCloud3DSideBar /> */}
           </PointCloud3DContext.Provider>

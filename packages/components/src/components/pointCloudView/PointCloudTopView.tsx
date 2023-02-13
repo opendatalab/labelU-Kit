@@ -9,17 +9,16 @@ import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useSingleBox } from './hooks/useSingleBox';
 import { PointCloudContainer } from './PointCloudLayout';
-import { BoxInfos, PointCloudValidity } from './PointCloudInfos';
+import { PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
 import { useZoom } from './hooks/useZoom';
 import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import { useSelector } from '@/store/ctx';
+import { useSelector, LabelUContext } from '@/store/ctx';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
-import { LabelUContext } from '@/store/ctx';
 import { AppState } from '@/store';
 import { BasicConfig } from '@/interface/toolConfig';
 
@@ -107,28 +106,28 @@ const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 /**
  * Slider for filtering Z-axis points
  */
-// const ZAxisSlider = ({
-//   setZAxisLimit,
-//   zAxisLimit,
-// }: {
-//   setZAxisLimit: (value: number) => void;
-//   zAxisLimit: number;
-// }) => {
-//   return (
-//     <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
-//       <Slider
-//         vertical
-//         step={0.5}
-//         max={10}
-//         min={0.5}
-//         defaultValue={zAxisLimit}
-//         onAfterChange={(v: number) => {
-//           setZAxisLimit(v);
-//         }}
-//       />
-//     </div>
-//   );
-// };
+const ZAxisSlider = ({
+  setZAxisLimit,
+  zAxisLimit,
+}: {
+  setZAxisLimit: (value: number) => void;
+  zAxisLimit: number;
+}) => {
+  return (
+    <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
+      <Slider
+        vertical
+        step={0.5}
+        max={10}
+        min={0.5}
+        defaultValue={zAxisLimit}
+        onAfterChange={(v: number) => {
+          setZAxisLimit(v);
+        }}
+      />
+    </div>
+  );
+};
 
 const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
   currentData,
@@ -142,7 +141,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
 
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
-  // const [zAxisLimit, setZAxisLimit] = useState<number>(10);
+  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
   const toolStyle = useSelector((state: AppState) => {
@@ -309,7 +308,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
         <div style={{ position: 'relative', flex: 1 }}>
           <div id='mytool' style={{ width: '100%', height: '100%' }} ref={ref} />
           {/* <BoxInfos /> */}
-          {/* <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} /> */}
+          <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
           <PointCloudValidity />
         </div>
       </PointCloudContainer>

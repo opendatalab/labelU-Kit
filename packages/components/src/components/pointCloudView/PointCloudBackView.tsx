@@ -8,12 +8,6 @@ import { IPointCloudBox, IPolygonPoint } from '@label-u/utils';
 // import { SizeInfoForView } from './PointCloudInfos';
 import { connect } from 'react-redux';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
-import {
-  PointCloudView,
-  synchronizeSideView,
-  synchronizeTopView,
-  usePointCloudViews,
-} from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
@@ -49,6 +43,7 @@ const TransferCanvas2WorldOffset = (
     offsetY: -(worldCenterPoint.y - canvasCenterPoint.y) / zoom,
   };
 };
+// TODO: make the positon of plygon stable
 const updateBackViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
@@ -84,7 +79,6 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   const size = useSize(ref);
   const { updateSelectedBox, selectedBox } = useSingleBox();
   const { t } = useTranslation();
-  const { syncPointCloudViewsFromSideOrBackView } = usePointCloudViews();
 
   useEffect(() => {
     if (ref.current) {
@@ -147,13 +141,8 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         const newCenterPoint = MathUtils.getLineCenterPoint([point1, point3]);
         const oldCenterPoint = MathUtils.getLineCenterPoint([op1, op3]);
 
-        const offset = {
-          x: newCenterPoint.x - oldCenterPoint.x,
-          y: newCenterPoint.y - oldCenterPoint.y,
-        };
-
         const offsetCenterPoint = {
-          x: offset.x,
+          x: newCenterPoint.x - oldCenterPoint.x,
           y: 0, // Not be used.
           z: newCenterPoint.y - oldCenterPoint.y,
         };
@@ -191,22 +180,18 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
             count,
           };
         }
+        // box in 3d scene
         let box = ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
           .polygonPointList as IPolygonPoint[];
-        let topPolygon = {
-          ...newPolygon,
-          pointList: box,
-          attribute:ptCtx.topViewInstance?.pointCloud2dOperation.defaultAttribute
-        };
-        // synchronizeTopView(newBoxParams, newPolygon, ptCtx.topViewInstance, ptCtx.mainViewInstance);
-        syncPointCloudViewsFromSideOrBackView?.(
-          PointCloudView.Back,
-          newPolygon,
-          newBoxParams,
-          topPolygon,
-        );
-        // synchronizeSideView(newBoxParams, newPolygon, ptCtx.sideViewInstance, currentData.url);
-        // ptCtx.mainViewInstance.highlightOriginPointCloud(newBoxParams);
+
+        // TODO: sync by sideview or back view
+        // syncPointCloudViewsFromSideOrBackView?.(
+        //   PointCloudView.Back,
+        //   newPolygon,
+        //   newBoxParams,
+        //   topPolygon,
+        // );
+        ptCtx.mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
         updateSelectedBox(newBoxParams);
       },
     );
