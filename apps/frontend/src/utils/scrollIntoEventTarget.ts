@@ -41,7 +41,7 @@ export default function scrollIntoEventTarget(
   }
 
   const targetHeight = target.clientHeight;
-  // 元素距离页面底部的距离不变
+  // 元素距离页面底部的距离不变，target重新渲染了，在setTimeout会丢失其dom引用，所以在重新渲染前获取其距离。
   const distanceFromContainerBottom = wrapper.scrollHeight - getOffsetTopOfElement(target, wrapper as HTMLElement);
 
   setTimeout(() => {
