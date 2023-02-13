@@ -1,5 +1,5 @@
 import type { FC, ReactElement } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Collapse, Form, Input, Popconfirm, Select } from 'antd';
 import { connect, useDispatch } from 'react-redux';
 import type { PrevResult, Attribute } from '@label-u/annotation';
@@ -15,6 +15,7 @@ import { ChangeCurrentTool, UpdateImgList } from '@/store/annotation/actionCreat
 import type { ToolInstance } from '@/store/annotation/types';
 import DrageModel from '@/components/dragModal';
 import type { IFileItem } from '@/types/data';
+import MemoToolIcon from '@/components/ToolIcon';
 
 import { toolList } from '../../toolHeader/ToolOperation';
 import type { AppState } from '../../../../store';
@@ -32,6 +33,7 @@ interface AttributeResult {
   isVisible: boolean;
   attributeName: string;
   toolInfo: ToolInfo[];
+  color: string;
 }
 
 interface ToolInfo {
@@ -195,6 +197,7 @@ const AttributeRusult: FC<IProps> = ({
             for (const oneLabel of result) {
               // eslint-disable-next-line max-depth
               let isExistInTmpToolInfo = false;
+
               if (attributeMap.has(oneLabel.attribute)) {
                 const tmpToolInfo = attributeMap.get(oneLabel.attribute);
                 // 去重
@@ -208,7 +211,7 @@ const AttributeRusult: FC<IProps> = ({
                   tmpToolInfo.push({
                     toolName: item.toolName,
                     order: oneLabel.order,
-                    icon: item.commonSvg,
+                    icon: item.Icon,
                     isVisible: oneLabel.isVisible,
                     textAttribute: oneLabel.textAttribute,
                   });
@@ -218,7 +221,7 @@ const AttributeRusult: FC<IProps> = ({
                   {
                     toolName: item.toolName,
                     order: oneLabel.order,
-                    icon: item.commonSvg,
+                    icon: item.Icon,
                     isVisible: oneLabel.isVisible,
                     textAttribute: oneLabel.textAttribute,
                   },
@@ -244,11 +247,12 @@ const AttributeRusult: FC<IProps> = ({
           isVisible: isVisible,
           attributeName: key,
           toolInfo: attributeMap.get(key),
+          color: toolInstance.getColor(key)?.valid.stroke,
         });
       }
       setAttributeResultList(tmpAttributeResult);
     }
-  }, [imgList, imgIndex]);
+  }, [imgList, imgIndex, toolInstance]);
 
   // 修改标注描述信息 || 修改是否可以显示
   const updateLabelResult = (toolInfo: ToolInfo) => {
@@ -655,7 +659,8 @@ const AttributeRusult: FC<IProps> = ({
                         }}
                       >
                         <span>{tItem.order}.</span>
-                        <img src={tItem.icon} style={{ marginLeft: '5px', marginRight: '5px' }} />
+
+                        <MemoToolIcon icon={tItem.icon} style={{ color: item.color, width: 20 }} />
                         <span
                           title={item.attributeName}
                           style={{
