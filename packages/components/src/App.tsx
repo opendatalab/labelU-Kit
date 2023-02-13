@@ -101,6 +101,9 @@ const App: React.FC<AppProps> = (props) => {
     defaultLang = 'cn',
   } = props;
 
+  // Fix: https://project.feishu.cn/bigdata_03/issue/detail/4136170?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+  const initializedRef = React.useRef(false);
+
   //@ts-ignore
   if (props.imgList && props.imgList.length > 0) {
     console.info('result', props.imgList[0].result);
@@ -158,7 +161,7 @@ const App: React.FC<AppProps> = (props) => {
   }, [imgList, props.toolsBasicConfig]);
 
   useEffect(() => {
-    if (!shouldInitial) {
+    if (!shouldInitial || initializedRef.current) {
       return;
     }
 
@@ -193,6 +196,9 @@ const App: React.FC<AppProps> = (props) => {
     initImgList();
     // 初始化国际化语言
     i18n.changeLanguage(defaultLang);
+
+    // 记录初始化状态
+    initializedRef.current = true;
   }, [
     defaultLang,
     dispatch,

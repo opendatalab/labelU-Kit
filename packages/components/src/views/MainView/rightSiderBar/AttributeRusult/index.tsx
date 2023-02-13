@@ -434,13 +434,16 @@ const AttributeRusult: FC<IProps> = ({
   };
 
   // 设置选中线条
-  const setSelectedLabel = (toolInfo: ToolInfo) => {
+  const setSelectedLabel = (toolInfo: ToolInfo, attributeInfo: AttributeResult) => {
     // 选中当前标注
     const toolInfoStr = JSON.stringify(toolInfo);
     localStorage.setItem('toolInfo', toolInfoStr);
     // 切换工具
     dispatch(ChangeCurrentTool(toolInfo.toolName));
     setChooseToolInfo(toolInfo);
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent('attribute::change', { detail: attributeInfo.attributeName }));
+    });
   };
 
   useEffect(() => {
@@ -645,6 +648,7 @@ const AttributeRusult: FC<IProps> = ({
                 {item.toolInfo &&
                   item.toolInfo.length > 0 &&
                   item.toolInfo.map((tItem) => {
+                    console.log(item);
                     return (
                       <div
                         // key={item.attributeName}
@@ -655,7 +659,7 @@ const AttributeRusult: FC<IProps> = ({
                         })}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedLabel(tItem);
+                          setSelectedLabel(tItem, item);
                         }}
                       >
                         <span>{tItem.order}.</span>

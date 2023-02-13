@@ -38,6 +38,22 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     }
   }, [copytoolInstance]);
 
+  useEffect(() => {
+    const handleAttributeChange = ({ detail }: CustomEvent<any>) => {
+      setChoseAttribute(detail);
+      toolInstance.setDefaultAttribute(detail);
+      forceRender((s) => s + 1);
+    };
+
+    // @ts-ignore
+    document.addEventListener('attribute::change', handleAttributeChange);
+
+    return () => {
+      // @ts-ignore
+      document.removeEventListener('attribute::change', handleAttributeChange);
+    };
+  }, [toolInstance]);
+
   // useEffect(() => {
   //   if (toolInstance) {
   //     toolInstance.singleOn('changeAttributeSidebar', (index: number) => {
