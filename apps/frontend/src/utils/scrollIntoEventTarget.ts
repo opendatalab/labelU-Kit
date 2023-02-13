@@ -49,7 +49,7 @@ export default function scrollIntoEventTarget(
       left: 0,
       /**
        * 将元素居中在滚动容器中间
-       * 新的元素距离滚动容器顶部的距离为：wrapper.scrollHeight - distanceFromContainerBottom
+       * 元素距离滚动容器顶部的新距离为：wrapper.scrollHeight - distanceFromContainerBottom
        * 滚动容器的高度为：wrapper.clientHeight
        **/
       top: wrapper.scrollHeight - distanceFromContainerBottom - (wrapper.clientHeight - targetHeight) / 2,
