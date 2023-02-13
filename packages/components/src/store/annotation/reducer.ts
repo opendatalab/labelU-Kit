@@ -1,5 +1,5 @@
 import type { Attribute } from '@label-u/annotation';
-import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@label-u/annotation';
+import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool, BasicToolOperation } from '@label-u/annotation';
 import type { EToolName } from '@label-u/annotation/es/types/constant/tool';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
@@ -116,7 +116,12 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     attributeList,
     allAttributesList,
   });
-  // annotationEngine.toolInstance.setResult()
+
+  // 切换工具时，高亮上一个工具且本工具也存在的标签
+  const lastActiveAttribute = BasicToolOperation.Cache.get('activeAttribute');
+  if (annotationEngine?.toolInstance.config.attributeList.find((v: Attribute) => v.key === lastActiveAttribute)) {
+    annotationEngine.toolInstance.setDefaultAttribute(BasicToolOperation.Cache.get('activeAttribute'));
+  }
 
   return { toolInstance: annotationEngine?.toolInstance, annotationEngine };
 };

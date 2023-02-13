@@ -1,5 +1,5 @@
 import type { Attribute } from '@label-u/annotation';
-import { AttributeUtils } from '@label-u/annotation';
+import { BasicToolOperation, AttributeUtils } from '@label-u/annotation';
 import type { FC } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
@@ -32,15 +32,20 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
   const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
 
+  const setActiveAttribute = (attributeName: string) => {
+    BasicToolOperation.Cache.set('activeAttribute', attributeName);
+    setChoseAttribute(attributeName);
+  };
+
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
-      setChoseAttribute(copytoolInstance?.defaultAttribute);
+      setActiveAttribute(copytoolInstance?.defaultAttribute);
     }
   }, [copytoolInstance]);
 
   useEffect(() => {
     const handleAttributeChange = ({ detail }: CustomEvent<any>) => {
-      setChoseAttribute(detail);
+      setActiveAttribute(detail);
       toolInstance.setDefaultAttribute(detail);
       forceRender((s) => s + 1);
     };
@@ -116,7 +121,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               })}
               onClick={(e) => {
                 e.stopPropagation();
-                setChoseAttribute(item.key);
+                setActiveAttribute(item.key);
                 toolInstance.setDefaultAttribute(item.key);
                 forceRender((s) => s + 1);
               }}
@@ -211,7 +216,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                setChoseAttribute(attribute.key);
+                setActiveAttribute(attribute.key);
                 toolInstance.setDefaultAttribute(attribute.key);
                 forceRender((s) => s + 1);
                 // alert(attribute.key)
