@@ -1,10 +1,11 @@
-// cl 2021/9/8 09:51
 import React, { useState } from 'react';
 import { Input, Button, Tooltip, Modal, Form } from 'antd';
 import { cloneDeep } from 'lodash';
 import { SettingOutlined, CloseCircleFilled } from '@ant-design/icons';
 import classnames from 'classnames';
 import { useTranslation } from 'react-i18next';
+
+import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
 
 import TextConfig from './textConfig';
 
@@ -56,7 +57,7 @@ const TextList: React.FC<IProps> = ({ value, onChange, onDelete, onAdd }) => {
     triggerChange(textConfigListArray);
   };
 
-  const addTextConfigItem = () => {
+  const addTextConfigItem = (e: React.MouseEvent) => {
     const len = (value || configs).length;
     const newConfig = { ...defaultValue };
     newConfig.label += len + 1;
@@ -66,6 +67,9 @@ const TextList: React.FC<IProps> = ({ value, onChange, onDelete, onAdd }) => {
     }
     onAdd?.([...(value || configs), newConfig]);
     // triggerChange([...(value || configs), newConfig]);
+
+    // fix: https://project.feishu.cn/bigdata_03/issue/detail/3528090?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+    scrollIntoEventTarget(e, 'button', '#lefeSiderId');
   };
   const deleteConfig = (index: number) => {
     const tmpValue = value || configs;

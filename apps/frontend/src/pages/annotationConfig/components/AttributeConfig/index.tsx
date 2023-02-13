@@ -4,6 +4,8 @@ import { useRef, useState } from 'react';
 import './index.less';
 import { useTranslation } from 'react-i18next';
 
+import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
+
 import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 
 interface IJsonTabProps {
@@ -49,20 +51,11 @@ const JSONTab = (props: IJsonTabProps) => {
     onSubmitAction,
   } = props;
 
-  // useEffect(() => {
-  //   setJsonCode(JSON.stringify(value, null, 2));
-  //   const inputListLastDom: any = attributeListDom?.current;
-  //   if (inputListLastDom) {
-  //     inputListLastDom?.scrollIntoView({
-  //       behavior: 'smooth',
-  //       block: 'end'
-  //     });
-  //   }
-  // }, [value]);
-
-  const addInputInfo = () => {
+  const addInputInfo = (e: React.MouseEvent) => {
     onChange?.(addInputList(value, EDIT_SUBSELECTED));
     onSubmitAction?.();
+    // fix: https://project.feishu.cn/bigdata_03/issue/detail/3528090?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+    scrollIntoEventTarget(e, 'button', '#lefeSiderId');
   };
 
   // const changeTagType = (v: any) => {};
@@ -121,7 +114,7 @@ const JSONTab = (props: IJsonTabProps) => {
         ))}
 
       {!readonly && (
-        <Button type="primary" className="addButton" onClick={() => addInputInfo()} ref={attributeListDom} ghost>
+        <Button type="primary" className="addButton" onClick={(e) => addInputInfo(e)} ref={attributeListDom} ghost>
           新建
         </Button>
       )}
