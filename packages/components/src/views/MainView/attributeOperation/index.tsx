@@ -50,12 +50,10 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       forceRender((s) => s + 1);
     };
 
-    // @ts-ignore
-    document.addEventListener('attribute::change', handleAttributeChange);
+    document.addEventListener('attribute::change', handleAttributeChange as EventListener);
 
     return () => {
-      // @ts-ignore
-      document.removeEventListener('attribute::change', handleAttributeChange);
+      document.removeEventListener('attribute::change', handleAttributeChange as EventListener);
     };
   }, [currentAttributeList, toolInstance]);
 
