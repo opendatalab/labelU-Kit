@@ -1020,7 +1020,7 @@ export class PointCloud extends EventListener {
     }
   }
 
-  // todo: get more properly element of zoom
+  // TODO: get more properly element of zoom
   public getBoxPolygon2DCoordinate(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const vectorList = this.boxParams2ViewPolygon(boxParams, perspectiveView);
     const { width, height } = boxParams;
