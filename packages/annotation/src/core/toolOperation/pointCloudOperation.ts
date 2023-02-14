@@ -1,17 +1,20 @@
-import { PointCloud, PointCloudIProps } from '../pointCloud';
 import * as THREE from 'three';
+import type { Object3D, Vector3 } from 'three';
+import { MOUSE } from 'three';
+import type { IPointCloudBox } from '@label-u/utils';
+// eslint-disable-next-line import/no-unresolved
+import HighlightBoxesWorker from 'web-worker:../pointCloud/highlightBoxesWorkder.js';
+import type { PointCloudIProps } from '../pointCloud';
+import { PointCloud } from '../pointCloud';
 import utils from '../pointCloud/uitils';
-import { MOUSE, Object3D, Vector3 } from 'three';
 import MathUtils from '@/utils/MathUtils';
-import { IPointCloudBox } from '@label-u/utils';
 import uuid from '@/utils/uuid';
-import { ShowSettingConfig, ToolConfig } from '@/interface/conbineTool';
+import type { ShowSettingConfig, ToolConfig } from '@/interface/conbineTool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { COLORS_ARRAY } from '@/constant/style';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
-import HighlightOneBoxWorker from 'web-worker:../pointCloud/highlightOneBoxWorker.js';
-import HighlightBoxesWorker from 'web-worker:../pointCloud/highlightBoxesWorkder.js';
+
 const DEFAULT_RADIUS = 90;
 
 interface PointCloudOperationProps {
@@ -22,14 +25,23 @@ interface PointCloudOperationProps {
 
 class PointCloudOperation extends PointCloud {
   public boxList!: IPointCloudBox[]; // 已标注的立体框
+
   public attribute: string; // 当前标签
-  public textAttribute!:string; // 当前文本
+
+  public textAttribute!: string; // 当前文本
+
   public backgroundColorOp: number = 0x000000; // 背景色
+
   public config: any; // 配置
+
   public style: any;
+
   public color: number; // 当前颜色
+
   public selectedId?: string; // 选中框id
+
   public showSetting: ShowSettingConfig; // 显示设置项
+
   public allAttributes?: Attribute[]; // 全量标签
 
   constructor(props: PointCloudIProps & PointCloudOperationProps) {
@@ -61,8 +73,8 @@ class PointCloudOperation extends PointCloud {
     this.selectedId = selectedId;
   }
 
-  public setDefaultTextAttributes(textAttributes:string):void {
-    this.textAttribute = textAttributes
+  public setDefaultTextAttributes(textAttributes: string): void {
+    this.textAttribute = textAttributes;
   }
 
   public setDefaultAttribute(attribute: string) {
@@ -110,16 +122,44 @@ class PointCloudOperation extends PointCloud {
     return styleDefaultConfig.toolColor['1'];
   }
 
+  public updateOneBoxList(box: IPointCloudBox) {
+    if (Array.isArray(this.boxList)) {
+      if (this.boxList.length === 0) {
+        this.boxList = [box];
+      } else {
+        const newBoxList = this.boxList.map((oneBox) => {
+          if (oneBox.id === box.id) {
+            return box;
+          }
+          return oneBox;
+        });
+        this.boxList = newBoxList;
+      }
+    }
+  }
+
+  public deleteBox(id: string) {
+    if (Array.isArray(this.boxList) && this.boxList.length > 0) {
+      const newBoxList = this.boxList.reduce((res, oneBox) => {
+        if (oneBox.id !== id) {
+          res.push(oneBox);
+        }
+        return res;
+      }, [] as IPointCloudBox[]);
+      this.boxList = newBoxList;
+    }
+  }
+
   public initGroundMesh() {
-    let groundGeometry = new THREE.PlaneGeometry(this.containerWidth, this.containerHeight);
-    let groundMaterial = new THREE.MeshBasicMaterial({
+    const groundGeometry = new THREE.PlaneGeometry(this.containerWidth, this.containerHeight);
+    const groundMaterial = new THREE.MeshBasicMaterial({
       color: this.backgroundColorOp,
       wireframe: true,
       transparent: true,
       opacity: 0,
       depthTest: false,
     });
-    let groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+    const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
     groundMesh.name = 'ground';
     this.scene.add(groundMesh);
   }
@@ -127,9 +167,9 @@ class PointCloudOperation extends PointCloud {
   public clearBoxList() {
     if (this.boxList && this.boxList.length > 0) {
       for (let i = 0; i < this.boxList.length; i++) {
-        this.removeObjectByName(this.boxList[i].id + 'boxArrow');
-        this.removeObjectByName(this.boxList[i].id + 'box');
-        this.removeObjectByName(this.boxList[i].id + 'attribute');
+        this.removeObjectByName(`${this.boxList[i].id}boxArrow`);
+        this.removeObjectByName(`${this.boxList[i].id}box`);
+        this.removeObjectByName(`${this.boxList[i].id}attribute`);
       }
     }
     // this.render();
@@ -137,9 +177,9 @@ class PointCloudOperation extends PointCloud {
 
   public clearBoxInSceneById(id: string) {
     if (id) {
-      this.removeObjectByName(id + 'boxArrow');
-      this.removeObjectByName(id + 'box');
-      this.removeObjectByName(id + 'attribute');
+      this.removeObjectByName(`${id}boxArrow`);
+      this.removeObjectByName(`${id}box`);
+      this.removeObjectByName(`${id}attribute`);
     }
   }
 
@@ -151,23 +191,23 @@ class PointCloudOperation extends PointCloud {
     },
     color: number = 0xffffff,
   ) {
-    let triangleWidthRite = 0.3;
-    let triangleHeightRite = 0.3;
-    let arrowLenghtRate = 0.2;
-    let object3d = new THREE.Object3D();
-    let zMiddle = (zInfo.maxZ + zInfo.minZ) / 2;
-    let centerPoint = new THREE.Vector3((rect[2].x + rect[3].x) / 2, (rect[2].y + rect[3].y) / 2, zMiddle);
-    let arrowVector = new THREE.Vector3(
+    const triangleWidthRite = 0.3;
+    const triangleHeightRite = 0.3;
+    const arrowLenghtRate = 0.2;
+    const object3d = new THREE.Object3D();
+    const zMiddle = (zInfo.maxZ + zInfo.minZ) / 2;
+    const centerPoint = new THREE.Vector3((rect[2].x + rect[3].x) / 2, (rect[2].y + rect[3].y) / 2, zMiddle);
+    const arrowVector = new THREE.Vector3(
       (rect[2].x - rect[1].x) * arrowLenghtRate,
       (rect[2].y - rect[1].y) * arrowLenghtRate,
       0,
     );
-    let parallelVector = new THREE.Vector3(
+    const parallelVector = new THREE.Vector3(
       (rect[0].x - rect[1].x) * triangleWidthRite,
       (rect[0].y - rect[1].y) * triangleWidthRite,
       0,
     );
-    let trianglePoints = [
+    const trianglePoints = [
       new THREE.Vector3(centerPoint.x + parallelVector.x, centerPoint.y + parallelVector.y, 0),
       new THREE.Vector3(centerPoint.x - parallelVector.x, centerPoint.y - parallelVector.y, 0),
       new THREE.Vector3(
@@ -176,7 +216,7 @@ class PointCloudOperation extends PointCloud {
         0,
       ),
     ];
-    let points = [
+    const points = [
       centerPoint,
       {
         x: centerPoint.x + arrowVector.x,
@@ -184,28 +224,28 @@ class PointCloudOperation extends PointCloud {
         z: centerPoint.z + arrowVector.z,
       },
     ];
-    let sharpPoints = trianglePoints.map((item) => {
+    const sharpPoints = trianglePoints.map((item) => {
       return {
         0: item.x,
         1: item.y,
       };
     });
-    let sharpGeo = utils.makeShapeGeometry([...sharpPoints, sharpPoints[0]]);
-    let triangleMaterail = new THREE.MeshBasicMaterial({
-      color: color,
+    const sharpGeo = utils.makeShapeGeometry([...sharpPoints, sharpPoints[0]]);
+    const triangleMaterail = new THREE.MeshBasicMaterial({
+      color,
     });
-    let triangleMesh = new THREE.Mesh(sharpGeo, triangleMaterail);
+    const triangleMesh = new THREE.Mesh(sharpGeo, triangleMaterail);
     triangleMesh.translateX(arrowVector.x);
     triangleMesh.translateY(arrowVector.y);
     triangleMesh.position.z = centerPoint.z;
-    let meshLine = utils.getMeshLine(points, color, 10);
+    const meshLine = utils.getMeshLine(points, color, 10);
     object3d.add(meshLine);
     object3d.add(triangleMesh);
     return object3d;
   }
 
   public setTransparencyByName(name: string, opacity: number) {
-    let objectMesh = this.scene.getObjectByName(name) as THREE.Mesh;
+    const objectMesh = this.scene.getObjectByName(name) as THREE.Mesh;
     if (objectMesh) {
       //@ts-ignore
       objectMesh.children[0].material.opacity = opacity;
@@ -222,23 +262,23 @@ class PointCloudOperation extends PointCloud {
     color: number = 0xffffff,
     opacity: number = 0,
   ) {
-    let object3d = new THREE.Object3D();
-    let deep = zInfo.maxZ - zInfo.minZ;
-    let zMiddle = (zInfo.maxZ + zInfo.minZ) / 2;
-    let sharp = utils.makeShape([...sharpRect, sharpRect[0]]);
-    let sharpGeometry = utils.makeExtrudeGeometry(sharp, deep, false);
-    let boxMaterial = new THREE.MeshBasicMaterial({
-      color: color,
+    const object3d = new THREE.Object3D();
+    const deep = zInfo.maxZ - zInfo.minZ;
+    const zMiddle = (zInfo.maxZ + zInfo.minZ) / 2;
+    const sharp = utils.makeShape([...sharpRect, sharpRect[0]]);
+    const sharpGeometry = utils.makeExtrudeGeometry(sharp, deep, false);
+    const boxMaterial = new THREE.MeshBasicMaterial({
+      color,
       transparent: true,
-      opacity: opacity,
+      opacity,
     });
-    let boxEdgeGeometry = new THREE.EdgesGeometry(sharpGeometry, 1);
-    let boxEdgeMaterial = new THREE.LineBasicMaterial({ color: color });
+    const boxEdgeGeometry = new THREE.EdgesGeometry(sharpGeometry, 1);
+    const boxEdgeMaterial = new THREE.LineBasicMaterial({ color });
 
-    let boxEdgeMesh = new THREE.LineSegments(boxEdgeGeometry, boxEdgeMaterial);
+    const boxEdgeMesh = new THREE.LineSegments(boxEdgeGeometry, boxEdgeMaterial);
     boxEdgeMesh.translateZ(zMiddle - deep / 2);
 
-    let boxMesh = new THREE.Mesh(sharpGeometry, boxMaterial);
+    const boxMesh = new THREE.Mesh(sharpGeometry, boxMaterial);
     boxMesh.translateZ(zMiddle - deep / 2);
     object3d.add(boxMesh);
     object3d.add(boxEdgeMesh);
@@ -254,27 +294,27 @@ class PointCloudOperation extends PointCloud {
     },
     paramsId?: string,
   ): IPointCloudBox {
-    let id = paramsId ? paramsId : uuid(8, 62);
+    const id = paramsId || uuid(8, 62);
     // const centerPoint = MathUtils.getLineCenterPoint([points[0], points[2]]);
     const height = MathUtils.getLineLength(points[0], points[1]);
     const width = MathUtils.getLineLength(points[1], points[2]);
     const rotation = MathUtils.getRadiusFromQuadrangle(points);
 
     return {
-      textAttribute:this.textAttribute,
+      textAttribute: this.textAttribute,
       attribute: this.attribute,
       center: {
         x: (points[0].x + points[2].x) / 2,
         y: (points[0].y + points[2].y) / 2,
         z: (zInfo.maxZ + zInfo.minZ) / 2,
       },
-      id: id,
-      rotation: rotation,
+      id,
+      rotation,
       valid: true,
-      width: width,
-      height: height,
+      width,
+      height,
       depth: zInfo.maxZ - zInfo.minZ,
-      zInfo: zInfo,
+      zInfo,
       rect: points,
       order: 1,
       isVisible: true,
@@ -287,43 +327,52 @@ class PointCloudOperation extends PointCloud {
     zInfo: { maxZ: number; minZ: number; paramId?: string },
     attribute: string,
   ) => {
-    let boxList: IPointCloudBox[] = this.boxList;
+    const { boxList } = this;
     let boxInfo = this.getBoxFormmat(rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate], zInfo);
-    let order = this.getOrder(boxList, boxInfo);
+    const order = this.getOrder(boxList, boxInfo);
     boxInfo = {
       ...boxInfo,
-      order: order,
+      order,
       isVisible: true,
-      attribute: attribute,
+      attribute,
     };
-    let newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
+    const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
+    console.log('newBoxList', newBoxList);
     this.emit('savePcResult', newBoxList);
     return boxInfo;
   };
 
   // add attributes to scene
   public addAttributeAndOrder = (boxInfo: IPointCloudBox, attribute: string, color: number) => {
-    if (this.showSetting.isShowAttribute) {
-      utils
-        .getSvgTextMesh(this.showSetting.isShowOrder ? `${boxInfo.order} - ${attribute}` : attribute, color)
-        .then((fmesh) => {
-          let position = { ...fmesh.position };
-          const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
-          const Tt = new THREE.Matrix4().makeTranslation(
-            boxInfo.center.x + position.x,
-            boxInfo.center.y + position.y,
-            0,
-          );
-          const Tb = new THREE.Matrix4().makeTranslation(-position.x, -position.y, boxInfo.zInfo.maxZ + 2);
-          const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
-          fmesh.applyMatrix4(Rz);
-          fmesh.applyMatrix4(tranlateMatrix);
-          fmesh.name = boxInfo.id + 'attribute';
-          this.removeObjectByName(fmesh.name);
-          this.scene.add(fmesh);
-          this.render();
-        });
+    if (this.showSetting.isShowAttribute || this.showSetting.isShowOrder || this.showSetting.isShowAttributeText) {
+      let text = '';
+
+      if (this.showSetting.isShowOrder) {
+        text += boxInfo.order;
+      }
+
+      if (this.showSetting.isShowAttribute) {
+        text = this.showSetting.isShowOrder ? `${boxInfo.order} - ${attribute}` : attribute;
+      }
+
+      if (this.showSetting.isShowAttributeText) {
+        text = `${text} \n ${boxInfo.textAttribute}`;
+      }
+
+      utils.getSvgTextMesh(text, color).then((fmesh) => {
+        const position = { ...fmesh.position };
+        const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
+        const Tt = new THREE.Matrix4().makeTranslation(boxInfo.center.x + position.x, boxInfo.center.y + position.y, 0);
+        const Tb = new THREE.Matrix4().makeTranslation(-position.x, -position.y, boxInfo.zInfo.maxZ + 2);
+        const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
+        fmesh.applyMatrix4(Rz);
+        fmesh.applyMatrix4(tranlateMatrix);
+        fmesh.name = `${boxInfo.id}attribute`;
+        this.removeObjectByName(fmesh.name);
+        this.scene.add(fmesh);
+        this.render();
+      });
     }
   };
 
@@ -333,11 +382,13 @@ class PointCloudOperation extends PointCloud {
     zInfo: { maxZ: number; minZ: number },
     attribute: string,
     paramId: string,
+    textAttribute: string,
   ) => {
+    console.log('zInfodoUpateboxInScene', zInfo);
     const color = new THREE.Color(this.getColor(attribute).valid.stroke).getHex();
     let opacity = 0.3;
     // delete prevOne
-    let boxList: IPointCloudBox[] = this.boxList;
+    const { boxList } = this;
     let prevBox;
     if (paramId) {
       this.clearBoxInSceneById(paramId);
@@ -346,46 +397,46 @@ class PointCloudOperation extends PointCloud {
       });
     }
     // add new one
-    let boxInfo = this.getBoxFormmat(
+    const boxInfo = this.getBoxFormmat(
       rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
       zInfo,
       paramId,
     );
     boxInfo.attribute = attribute;
-    let order = this.getOrder(boxList, boxInfo);
+    boxInfo.textAttribute = textAttribute;
+    const order = this.getOrder(boxList, boxInfo);
     if (Array.isArray(prevBox) && prevBox.length > 0) {
       boxInfo.isVisible = prevBox[0].isVisible;
     } else {
       boxInfo.isVisible = true;
     }
     boxInfo.order = order;
-    let newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
+    const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
     if (rectPoints.length > 0) {
-      let sharpRect = rectPoints.map((item) => {
+      const sharpRect = rectPoints.map((item) => {
         return {
           0: item.x,
           1: item.y,
         };
       });
       if (this.selectedId) {
-        this.setTransparencyByName(this.selectedId + 'box', 0);
+        this.setTransparencyByName(`${this.selectedId}box`, 0);
       } else {
         opacity = 0;
       }
-      let boxMesh = this.createBox(sharpRect, zInfo, color, opacity);
-      boxMesh.name = boxInfo.id + 'box';
+      const boxMesh = this.createBox(sharpRect, zInfo, color, opacity);
+      boxMesh.name = `${boxInfo.id}box`;
       this.setSelectedId(boxInfo.id);
       this.scene.add(boxMesh);
       if (this.showSetting.isShowDirection) {
-        let boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
-        boxArrowMesh.name = boxInfo.id + 'boxArrow';
+        const boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
+        boxArrowMesh.name = `${boxInfo.id}boxArrow`;
         this.scene.add(boxArrowMesh);
       }
       this.addAttributeAndOrder(boxInfo, attribute, color);
     }
     this.emit('savePcResult', newBoxList);
-    this.emit('selectPolygonChange', boxInfo.id, rectPoints);
     this.render();
   };
 
@@ -412,7 +463,7 @@ class PointCloudOperation extends PointCloud {
   // add box into boxList
   public addBoxInfoIntoBoxList(boxList: IPointCloudBox[], boxInfo: IPointCloudBox) {
     let isExist = false;
-    let newBoxList = [];
+    const newBoxList = [];
     if (Array.isArray(boxList) && boxList.length > 0) {
       for (let i = 0; i < boxList.length; i++) {
         if (boxList[i].id !== boxInfo.id) {
@@ -436,19 +487,19 @@ class PointCloudOperation extends PointCloud {
     scene: THREE.Scene,
     event: THREE.Event,
   ) {
-    let mouseWord: {
+    const mouseWord: {
       x: number;
       y: number;
     } = { x: 0, y: 0 };
-    let raycaster = new THREE.Raycaster();
-    let containerInfo = container.getBoundingClientRect();
-    let containerWidth = container.offsetWidth;
-    let containerHeight = container.offsetHeight;
+    const raycaster = new THREE.Raycaster();
+    const containerInfo = container.getBoundingClientRect();
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
     mouseWord.x = ((event.clientX - containerInfo.left) / containerWidth) * 2 - 1;
     mouseWord.y = -((event.clientY - containerInfo.top) / containerHeight) * 2 + 1;
     raycaster.setFromCamera(mouseWord, camera);
-    let groundMesh = scene.getObjectByName('ground') as THREE.Object3D<THREE.Event>;
-    var raycasters = raycaster.intersectObject(groundMesh);
+    const groundMesh = scene.getObjectByName('ground') as THREE.Object3D<THREE.Event>;
+    const raycasters = raycaster.intersectObject(groundMesh);
     return raycasters[0].point;
   }
 
@@ -456,14 +507,14 @@ class PointCloudOperation extends PointCloud {
     if (this.boxList.length === 0) {
       return;
     }
-    let mouseWord: {
+    const mouseWord: {
       x: number;
       y: number;
     } = { x: 0, y: 0 };
-    let raycaster = new THREE.Raycaster();
-    let containerInfo = container.getBoundingClientRect();
-    let containerWidth = container.offsetWidth;
-    let containerHeight = container.offsetHeight;
+    const raycaster = new THREE.Raycaster();
+    const containerInfo = container.getBoundingClientRect();
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
 
     mouseWord.x = ((event.clientX - containerInfo.left) / containerWidth) * 2 - 1;
     mouseWord.y = -((event.clientY - containerInfo.top) / containerHeight) * 2 + 1;
@@ -471,16 +522,16 @@ class PointCloudOperation extends PointCloud {
     let boxMeshList: Object3D[] = [];
     if (this.boxList && this.boxList.length > 0) {
       for (let i = 0; i < this.boxList.length; i++) {
-        let tmpBox = this.scene.getObjectByName(this.boxList[i].id + 'box');
+        const tmpBox = this.scene.getObjectByName(`${this.boxList[i].id}box`);
         if (tmpBox) {
           boxMeshList = [...boxMeshList, tmpBox];
         }
       }
     }
-    let raycasterMeshs = raycaster.intersectObjects(boxMeshList);
+    const raycasterMeshs = raycaster.intersectObjects(boxMeshList);
 
     if (this.selectedId) {
-      this.setTransparencyByName(this.selectedId + 'box', 0);
+      this.setTransparencyByName(`${this.selectedId}box`, 0);
     }
     if (raycasterMeshs[0].object.parent?.name) {
       this.setSelectedId(
@@ -497,7 +548,7 @@ class PointCloudOperation extends PointCloud {
         }
       });
 
-      this.setTransparencyByName(this.selectedId + 'box', 0.3);
+      this.setTransparencyByName(`${this.selectedId}box`, 0.3);
       this.emit('updateSelectedBox', this.selectedId);
     }
   }
@@ -514,32 +565,33 @@ class PointCloudOperation extends PointCloud {
       },
     ]);
 
-    let sharpRect = rect.map((item) => {
+    const sharpRect = rect.map((item) => {
       return {
         0: item.x,
         1: item.y,
       };
     });
 
-    return { sharpRect: sharpRect, rect: rect };
+    return { sharpRect, rect };
   }
 
   // init screen events when the instance is created
   public initChooseEvent() {
-    let self = this;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
     let points: Vector3[] = [] as unknown as THREE.Vector3[];
     let firstlineName = '';
     let secondlineName = '';
     let screenPoints: { x: number; y: number }[] = [];
     // add box in scene
-    this.container.addEventListener('mousedown', function (event) {
+    this.container.addEventListener('mousedown', (event) => {
       if (!self.attribute || event.ctrlKey || event.shiftKey) {
         return;
       }
       if (event.button === MOUSE.LEFT) {
         // 鼠标移动事件
         self.container.addEventListener('pointermove', handleMouseMove.bind(self));
-        let clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
+        const clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
         points = [...points, clickPoint];
         screenPoints = [
           ...screenPoints,
@@ -549,12 +601,12 @@ class PointCloudOperation extends PointCloud {
           },
         ];
         if (points.length === 3) {
-          let { rect } = self.getFooterRect(points.slice(0, 2), clickPoint);
-          let eventClickPoints = self.getFooterRect(screenPoints.slice(0, 2), screenPoints[2]);
-          let zInfo = self.getSensesPointZAxisInPolygon(rect);
+          const { rect } = self.getFooterRect(points.slice(0, 2), clickPoint);
+          const eventClickPoints = self.getFooterRect(screenPoints.slice(0, 2), screenPoints[2]);
+          const zInfo = self.getSensesPointZAxisInPolygon(rect);
           if (zInfo.zCount > 0) {
-            let box = self.addBoxInSense(rect, zInfo, self.attribute);
-            self.emit('boxAdded', rect, eventClickPoints.rect, box.attribute, box.id, box.order,box.textAttribute);
+            const box = self.addBoxInSense(rect, zInfo, self.attribute);
+            self.emit('boxAdded', rect, eventClickPoints.rect, box.attribute, box.id, box.order, box.textAttribute);
           }
           // 清除点数据
           points = [];
@@ -572,34 +624,34 @@ class PointCloudOperation extends PointCloud {
 
     // draw a line bye moving the mouse
     function handleMouseMove(event: THREE.Event) {
-      let clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
+      const clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
       if (points.length === 1) {
-        let tmpPoint = [...points, clickPoint];
+        const tmpPoint = [...points, clickPoint];
         if (!firstlineName) {
-          firstlineName = new Date().getTime() + 'firstLine';
+          firstlineName = `${new Date().getTime()}firstLine`;
         }
         if (self.scene.getObjectByName(firstlineName)) {
-          let lineInScene = self.scene.getObjectByName(firstlineName);
+          const lineInScene = self.scene.getObjectByName(firstlineName);
           self.scene.remove(lineInScene as THREE.Object3D);
         }
 
-        let meshLine = utils.getMeshLine(tmpPoint, this.color, 10);
+        const meshLine = utils.getMeshLine(tmpPoint, self.color, 10);
         meshLine.name = firstlineName;
         self.scene.add(meshLine);
       }
 
       if (points.length === 2) {
         if (!secondlineName) {
-          secondlineName = new Date().getTime() + 'secondLine';
+          secondlineName = `${new Date().getTime()}secondLine`;
         }
         if (self.scene.getObjectByName(secondlineName)) {
-          let lineInScene = self.scene.getObjectByName(secondlineName);
+          const lineInScene = self.scene.getObjectByName(secondlineName);
           self.scene.remove(lineInScene as THREE.Object3D);
         }
-        let sharpRect = self.getFooterRect(points, clickPoint).sharpRect;
-        let reactanglePoint = { x: sharpRect[2][0], y: sharpRect[2][1], z: 0 };
-        let tmpPoint = [points[1], reactanglePoint];
-        let meshLine = utils.getMeshLine(tmpPoint, this.color, 10);
+        const { sharpRect } = self.getFooterRect(points, clickPoint);
+        const reactanglePoint = { x: sharpRect[2][0], y: sharpRect[2][1], z: 0 };
+        const tmpPoint = [points[1], reactanglePoint];
+        const meshLine = utils.getMeshLine(tmpPoint, self.color, 10);
         meshLine.name = secondlineName;
         self.scene.add(meshLine);
       }
@@ -625,14 +677,14 @@ class PointCloudOperation extends PointCloud {
       points = originPoints as THREE.Points;
     }
     if (window.Worker) {
-      let boxesArr = [];
+      const boxesArr = [];
       let params = {};
       const position = points.geometry.attributes.position.array;
       const color = points.geometry.attributes.color.array;
       if (Array.isArray(boxParamsArr) && boxParamsArr.length > 0) {
         for (let i = 0; i < boxParamsArr.length; i++) {
-          let inColor = new THREE.Color(this.getColor(boxParamsArr[i].attribute).valid.stroke);
-          let rgbArr = [inColor.r, inColor.g, inColor.b];
+          const inColor = new THREE.Color(this.getColor(boxParamsArr[i].attribute).valid.stroke);
+          const rgbArr = [inColor.r, inColor.g, inColor.b];
           boxesArr.push({
             ...boxParamsArr[i],
             inColorArr: rgbArr,
@@ -684,11 +736,11 @@ class PointCloudOperation extends PointCloud {
   };
 
   public textLookAtCamera() {
-    let boxList = this.boxList;
-    let camaraPostion = this.camera.position;
+    const { boxList } = this;
+    const camaraPostion = this.camera.position;
     if (Array.isArray(boxList) && boxList.length > 0) {
       for (let i = 0; i < boxList.length; i++) {
-        let tmpTextMesh = this.scene.getObjectByName(boxList[i].id + 'attribute');
+        const tmpTextMesh = this.scene.getObjectByName(`${boxList[i].id}attribute`);
         tmpTextMesh?.lookAt(camaraPostion);
       }
     }

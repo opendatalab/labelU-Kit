@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-abusive-eslint-disable */
 /* eslint-disable */
 
 /**
@@ -110,7 +111,6 @@ class PCDLoader extends Loader {
       PCDheader.height = /height (.*)/i.exec(PCDheader.str);
       PCDheader.viewpoint = /viewpoint (.*)/i.exec(PCDheader.str);
       PCDheader.points = /points (.*)/i.exec(PCDheader.str);
-      console.log(PCDheader);
 
       // evaluate
 

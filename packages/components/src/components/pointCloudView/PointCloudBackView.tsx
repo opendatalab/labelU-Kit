@@ -12,6 +12,7 @@ import useSize from '@/hooks/useSize';
 import EmptyPage from './components/EmptyPage';
 import { useTranslation } from 'react-i18next';
 import { LabelUContext } from '@/store/ctx';
+import { usePointCloudViews } from './hooks/usePointCloudViews';
 
 /**
  * 统一一下，将其拓展为 二维转换为 三维坐标的转换
@@ -79,6 +80,8 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
   const size = useSize(ref);
   const { updateSelectedBox, selectedBox } = useSingleBox();
   const { t } = useTranslation();
+
+  const { syncPointCloudViewsFromSideOrBackView } = usePointCloudViews();
 
   useEffect(() => {
     if (ref.current) {
@@ -163,6 +166,16 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
           offsetHeight,
           ptCtx.selectedPointCloudBox,
         );
+        // box in 3d scene
+        let box = ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
+          .polygonPointList as [IPolygonPoint, IPolygonPoint, IPolygonPoint, IPolygonPoint];
+
+        // set new box
+        newBoxParams.rect = box;
+        newBoxParams.zInfo = {
+          maxZ: newBoxParams.center.z + newBoxParams.depth / 2,
+          minZ: newBoxParams.center.z - newBoxParams.depth / 2,
+        };
 
         // Update count
         if (ptCtx.mainViewInstance) {
@@ -180,18 +193,16 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
             count,
           };
         }
-        // box in 3d scene
-        let box = ptCtx.mainViewInstance.getCuboidFromPointCloudBox(newBoxParams)
-          .polygonPointList as IPolygonPoint[];
+        ptCtx.mainViewInstance?.updateOneBoxList(newBoxParams);
 
-        // Todo: sync by sideview or back view
-        // syncPointCloudViewsFromSideOrBackView?.(
-        //   PointCloudView.Back,
-        //   newPolygon,
-        //   newBoxParams,
-        //   topPolygon,
-        // );
-        ptCtx.mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
+        // Todo: update view by change selected box
+        // ptCtx.mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
+        syncPointCloudViewsFromSideOrBackView?.(newBoxParams);
+
+        // save new Boxlist
+        const newBoxList = ptCtx.mainViewInstance?.boxList;
+        ptCtx.mainViewInstance.emit('savePcResult', newBoxList);
+
         updateSelectedBox(newBoxParams);
       },
     );

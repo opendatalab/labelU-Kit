@@ -2,7 +2,7 @@ import React, { FC, ReactElement, useContext, useEffect, useMemo, useRef, useSta
 import { Collapse } from 'antd';
 import { AppState } from '../../../../store';
 import { connect } from 'react-redux';
-import { useDispatch } from '@/store/ctx';
+import { useDispatch, LabelUContext } from '@/store/ctx';
 import { IFileItem } from '@/types/data';
 import _ from 'lodash';
 import { toolList } from '../../toolHeader/ToolOperation';
@@ -18,7 +18,6 @@ import { Attribute, EToolName } from '@label-u/annotation';
 import DrageModel from '@/components/dragModal';
 import classNames from 'classnames';
 import { expandIconFuc } from '../TagSidebar';
-import { LabelUContext } from '@/store/ctx';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { useAttributes } from '../../../hooks/useAttribute';
 
@@ -82,7 +81,7 @@ const AttributeRusult: FC<IProps> = ({
   });
   const ptCtx = useContext(PointCloudContext);
 
-  const {generateContent,updateCanvasView} = useAttributes();
+  const { generateContent, updateCanvasView } = useAttributes();
   const dragModalRef = useRef<any>();
   useEffect(() => {
     initToolInfo();
@@ -115,6 +114,7 @@ const AttributeRusult: FC<IProps> = ({
       const toolInfoStr = localStorage.getItem('toolInfo');
       if (toolInfoStr && toolInfoStr.length > 0) {
         let imgResult = JSON.parse(imgList[imgIndex].result as string);
+        // eslint-disable-next-line no-unsafe-optional-chaining
         for (let item of imgResult[currentToolName]?.result) {
           if (item.id === activeId) {
             setActiveOrder(item.order);
@@ -282,7 +282,7 @@ const AttributeRusult: FC<IProps> = ({
       return p;
     };
 
-    if (attributeResult && attributeResult.toolInfo && attributeResult.toolInfo.length > 0) {
+    if (attributeResult?.toolInfo && attributeResult.toolInfo.length > 0) {
       // 获取删除标注结果order 数组
       const deleteResult = attributeResult.toolInfo
         .map((item) => {
@@ -298,17 +298,17 @@ const AttributeRusult: FC<IProps> = ({
         return LableTools.indexOf(item as EToolName) >= 0;
       });
 
-      for (let i = 0; i < toolList.length; i++) {
-        newImgResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
+      for (let tool of toolList) {
+        newImgResult[tool].result = oldImgResult[tool].result.reduce(
           (
-            res: { order: number; isVisible: boolean; id?: string }[],
-            item: { order: number; isVisible: boolean; id?: string },
+            res: { order: number; isVisible: boolean; id: string }[],
+            item: { order: number; isVisible: boolean; id: string },
           ) => {
             if (deleteResult.indexOf(item.order) < 0) {
               item.order = item.order - getPositionIndexInArr(deleteResult, item.order);
               res.push(item);
             } else {
-              item.id ? deleteBoxArray.push(item.id) : '';
+              item.id ?? deleteBoxArray.push(item.id);
             }
             return res;
           },
@@ -339,11 +339,11 @@ const AttributeRusult: FC<IProps> = ({
       let toolList = keys.filter((item) => {
         return LableTools.indexOf(item as EToolName) >= 0;
       });
-      for (let i = 0; i < toolList.length; i++) {
-        newImageResult[toolList[i]].result = oldImgResult[toolList[i]].result.reduce(
+      for (let tool of toolList) {
+        newImageResult[tool].result = oldImgResult[tool].result.reduce(
           (
-            res: { order: number; isVisible: boolean; id?: string }[],
-            item: { order: number; isVisible: boolean; id?: string },
+            res: { order: number; isVisible: boolean; id: string }[],
+            item: { order: number; isVisible: boolean; id: string },
           ) => {
             if (item.order !== toolInfo.order) {
               if (item.order > toolInfo.order) {
@@ -351,7 +351,7 @@ const AttributeRusult: FC<IProps> = ({
               }
               res.push(item);
             } else {
-              item?.id ? deleteBoxArray.push(item.id) : '';
+              item?.id ?? deleteBoxArray.push(item.id);
             }
             return res;
           },

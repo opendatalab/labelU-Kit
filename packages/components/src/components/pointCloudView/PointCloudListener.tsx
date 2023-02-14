@@ -10,7 +10,6 @@ import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map'
 import { useCustomToolInstance } from '@/hooks/annotation';
 import { useStatus } from './hooks/useStatus';
 import { jsonParser } from '@/utils';
-import { usePointCloudViews } from './hooks/usePointCloudViews';
 import { LabelUContext } from '@/store/ctx';
 
 const { EPolygonPattern } = cTool;
@@ -24,7 +23,6 @@ const PointCloudListener: React.FC<IAnnotationStateProps> = ({ currentData }) =>
   const { copySelectedBoxes, pasteSelectedBoxes, copiedBoxes } = useBoxes();
   const { toolInstanceRef } = useCustomToolInstance({ basicInfo });
   const { updateRotate } = useRotate({ currentData });
-  const { updatePointCloudData } = usePointCloudViews();
 
   const keydownEvents = (lowerCaseKey: string, e: KeyboardEvent) => {
     const { topViewInstance, mainViewInstance } = ptCtx;

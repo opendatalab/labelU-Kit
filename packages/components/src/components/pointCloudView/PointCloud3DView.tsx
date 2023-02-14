@@ -235,38 +235,9 @@ const PointCloud3D: React.FC<
       let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
       let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
       ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
-      pointCloudViews.topViewAddBox(polygon, size, box.attribute);
+      pointCloudViews.topViewAddBox(polygon, size, box.attribute, box.zInfo);
       ptCtx.setSelectedIDs([selectedIDs]);
     });
-
-    mainViewInstance.singleOn(
-      'changeSelectedBox',
-      (pointListOfBox: ICoordinate[], selectedIDs: string) => {
-        let size = {
-          width: TopView2dOperation.container.clientWidth,
-          height: TopView2dOperation.container.clientHeight,
-        };
-
-        const topPolygonPointList = pointListOfBox.map((point) => {
-          return MathUtils.transerWord2Canvas(point, sizeTop);
-        });
-
-        let prevPolygon;
-        let newPolygonList = TopView2dOperation.polygonList.map((p) => {
-          if (p.id === selectedIDs) {
-            p.pointList = topPolygonPointList;
-            prevPolygon = p;
-          }
-          return p;
-        });
-
-        TopView2dOperation.setPolygonList(newPolygonList);
-        let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
-        ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
-        pointCloudViews.topViewAddBox(prevPolygon, size, box.attribute);
-        ptCtx.setSelectedIDs([selectedIDs]);
-      },
-    );
   }, [ptCtx, size, currentData, pointCloudViews]);
 
   /**
@@ -328,7 +299,7 @@ const PointCloud3D: React.FC<
         boxParamsList.forEach((v: IPointCloudBox) => {
           // to do change color by attribute
           if (v.isVisible) {
-            pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id);
+            pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id, v.textAttribute);
           } else {
             pointCloud?.clearBoxInSceneById(v.id);
           }

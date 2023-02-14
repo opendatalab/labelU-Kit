@@ -3,7 +3,7 @@
  */
 
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
-import { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
+import type { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
 import PolygonUtils from './tool/PolygonUtils';
 import Vector from './VectorUtils';
@@ -58,21 +58,18 @@ export default class MathUtils {
     return value;
   };
 
-
   public static hexify(color: string) {
-    var values = color
+    const values = color
       .replace(/rgba?\(/, '')
       .replace(/\)/, '')
       .replace(/[\s+]/g, '')
       .split(',');
     // @ts-ignore
-    var a = parseFloat(values[3] || 1),
-      r = Math.floor(a * parseInt(values[0]) + (1 - a) * 255),
-      g = Math.floor(a * parseInt(values[1]) + (1 - a) * 255),
-      b = Math.floor(a * parseInt(values[2]) + (1 - a) * 255);
-    return (
-      '0X' + ('0' + r.toString(16)).slice(-2) + ('0' + g.toString(16)).slice(-2) + ('0' + b.toString(16)).slice(-2)
-    );
+    const a = parseFloat(values[3] || 1);
+    const r = Math.floor(a * parseInt(values[0], 10) + (1 - a) * 255);
+    const g = Math.floor(a * parseInt(values[1], 10) + (1 - a) * 255);
+    const b = Math.floor(a * parseInt(values[2], 10) + (1 - a) * 255);
+    return `0X${`0${r.toString(16)}`.slice(-2)}${`0${g.toString(16)}`.slice(-2)}${`0${b.toString(16)}`.slice(-2)}`;
   }
 
   /**
@@ -532,7 +529,8 @@ export default class MathUtils {
    * @returns
    */
   public static getRightTopPoints(coordinate: ICoordinate[]) {
-    let maxX, minY;
+    let maxX;
+    let minY;
     if (Array.isArray(coordinate) && coordinate.length > 0) {
       maxX = coordinate[0].x;
       minY = coordinate[0].y;
@@ -559,9 +557,9 @@ export default class MathUtils {
    */
 
   public static getAngelByVectors(vector1: ICoordinate, vector2: ICoordinate) {
-    let vector1Lenght = this.getLineLength({ x: 0, y: 0 }, vector1);
-    let vector2Lenght = this.getLineLength({ x: 0, y: 0 }, vector2);
-    let cosAangle = (vector1.x * vector2.x + vector1.y * vector2.y) / (vector1Lenght * vector2Lenght);
+    const vector1Lenght = this.getLineLength({ x: 0, y: 0 }, vector1);
+    const vector2Lenght = this.getLineLength({ x: 0, y: 0 }, vector2);
+    const cosAangle = (vector1.x * vector2.x + vector1.y * vector2.y) / (vector1Lenght * vector2Lenght);
 
     const radius = Math.acos(cosAangle);
 
@@ -627,7 +625,7 @@ export default class MathUtils {
         return annotation;
       });
 
-    const judgeIsConnectPoint = (point: ICoordinate, polygonList: Array<any | IPolygonData>) => {
+    const judgeIsConnectPoint = (point: ICoordinate, polygonList: (any | IPolygonData)[]) => {
       const { dropFoot } = PolygonUtils.getClosestPoint(point, polygonList, ELineTypes.Line, 1, { isClose: false });
 
       if (dropFoot !== point) {

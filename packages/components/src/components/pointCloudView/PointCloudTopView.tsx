@@ -2,8 +2,8 @@ import { getClassName } from '@/utils/dom';
 // import { FooterDivider } from '@/views/MainView/toolFooter';
 // import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
 import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
-import { cTool, PointCloudAnnotation, ToolConfig } from '@label-u/annotation';
-import { IPolygonData } from '@label-u/utils';
+import { cTool, MathUtils, PointCloudAnnotation, ToolConfig } from '@label-u/annotation';
+import { IPointCloudBox, IPolygonData } from '@label-u/utils';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -232,6 +232,51 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
     const {
       topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },
     } = ptCtx;
+
+    polygonOperation.singleOn('resetView', (box: IPointCloudBox) => {
+      if (!ptCtx.topViewInstance) {
+        return;
+      }
+      const polygonOperation = ptCtx.topViewInstance.pointCloud2dOperation;
+      const pointCloud = ptCtx.topViewInstance?.pointCloudInstance;
+      const { zoom } = pointCloud.getBoxTopPolygon2DCoordinate(box);
+      const size = {
+        width: polygonOperation.container.clientWidth,
+        height: polygonOperation.container.clientHeight,
+      };
+      const polygonPointList = box.rect.map((v: any) => MathUtils.transerWord2Canvas(v, size));
+
+      polygonOperation.initImgPos();
+      let centerCoordinate = polygonOperation.getGetCenterCoordinate();
+      // 视图中心点 在 图片中的坐标
+      let centerPositionInImageWithOutZoom = {
+        x: (centerCoordinate.x - polygonOperation.currentPos.x) / polygonOperation.zoom,
+        y: (centerCoordinate.y - polygonOperation.currentPos.y) / polygonOperation.zoom,
+      };
+      // polygon 中心坐标
+      let polygonCenter = {
+        x: (polygonPointList[0].x + polygonPointList[2].x) / 2,
+        y: (polygonPointList[0].y + polygonPointList[2].y) / 2,
+      };
+
+      // 将polygon 中心 移动至屏幕中心
+      let offsetBetweenPolygonCenterAndViewCenter = {
+        x: polygonCenter.x - centerPositionInImageWithOutZoom.x,
+        y: polygonCenter.y - centerPositionInImageWithOutZoom.y,
+      };
+
+      let newCurrentPros = {
+        x: polygonOperation.currentPos.x - offsetBetweenPolygonCenterAndViewCenter.x,
+        y: polygonOperation.currentPos.y - offsetBetweenPolygonCenterAndViewCenter.y,
+      };
+      polygonOperation.setCurrentPos(newCurrentPros);
+
+      pointCloud.camera.zoom = zoom;
+      pointCloud.camera.updateProjectionMatrix();
+      pointCloud.render();
+      polygonOperation.zoomChangeOnCenter(zoom);
+      polygonOperation.setSelectedID(box.id);
+    });
 
     /**
      * Synchronized 3d point cloud view displacement operations

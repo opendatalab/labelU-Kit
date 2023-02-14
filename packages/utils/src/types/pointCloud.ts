@@ -44,17 +44,7 @@ export type TMatrix43Tuple = [
   number,
 ];
 
-export type TMatrix3Tuple = [
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-];
+export type TMatrix3Tuple = [number, number, number, number, number, number, number, number, number];
 
 export interface IVolume {
   /** 目标朝向垂直方向的长度 */
@@ -63,7 +53,6 @@ export interface IVolume {
   height: number;
   /** Z轴方向的长度 */
   depth: number;
-
 }
 
 export interface I3DSpaceCoord {
@@ -81,18 +70,14 @@ export interface IPointCloudBox extends IVolume {
   valid: boolean;
   isVisible: boolean;
   trackID?: number; // It can be deleted.
-  subAttribute?: {
-    [k: string]: string;
-  };
+  subAttribute?: Record<string, string>;
   count?: number;
-  order:number;
-  zInfo:{
-    maxZ:number;
-    minZ:number;
+  order: number;
+  zInfo: {
+    maxZ: number;
+    minZ: number;
   };
-  rect:[{x:number,y:number},{x:number,y:number},{x:number,y:number},{x:number,y:number}]
+  rect: [{ x: number; y: number }, { x: number; y: number }, { x: number; y: number }, { x: number; y: number }];
 }
-
-
 
 export type IPointCloudBoxList = IPointCloudBox[];
