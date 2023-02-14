@@ -1,19 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { message } from 'antd/es';
-import type { AppState } from 'src/store';
-import { connect, useDispatch } from 'react-redux';
-import type { ImgAttributeState } from 'src/store/imgAttribute/types';
-import _ from 'lodash';
 import type { AnnotationEngine } from '@label-u/annotation';
 import { ImgUtils } from '@label-u/annotation';
 import { i18n } from '@label-u/utils';
+import { message } from 'antd/es';
+import _ from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
+import { connect, useDispatch } from 'react-redux';
+import type { AppState } from 'src/store';
+import type { ImgAttributeState } from 'src/store/imgAttribute/types';
 
-import { store } from '@/index';
-import useSize from '@/hooks/useSize';
-import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
-import FileError from '@/components/fileException/FileError';
 import type { AppProps } from '@/App';
+import FileError from '@/components/fileException/FileError';
+import useSize from '@/hooks/useSize';
+import { store } from '@/index';
 import { ChangeSave } from '@/store/annotation/actionCreators';
+import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 
 interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;

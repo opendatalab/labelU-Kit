@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 import { cTool } from '@label-u/annotation';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import { store } from '@/index';
 import ImgAttribute from '@/store/imgAttribute/actionCreators';
 import type { ImgAttributeState } from '@/store/imgAttribute/types';
 
-import type { AppState } from '../../../../store';
 import rotateSvg from '../../../../assets/annotation/common/icon_r.svg';
 import rotateHighlightSvg from '../../../../assets/annotation/common/icon_rA.svg';
 import { prefix } from '../../../../constant';
 import { EToolName } from '../../../../data/enums/ToolType';
+import type { AppState } from '../../../../store';
 // import { ChangeSave } from '@/store/annotation/actionCreators';
 import type { IStepInfo } from '../../../../types/step';
 

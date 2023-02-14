@@ -1,18 +1,18 @@
+import { cTool } from '@label-u/annotation';
 import { Popover } from 'antd/es';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cTool } from '@label-u/annotation';
 
 import { EToolName } from '@/data/enums/ToolType';
 
-import rectToolShortcutTable from './rectToolShortCutTable';
+import { footerCls } from '../index';
+import lineToolShortCutTable from './line';
 import pointToolShortcutTable from './point';
 import polygonToolShortcutTable from './polygon';
-import lineToolShortCutTable from './line';
+import rectToolShortcutTable from './rectToolShortCutTable';
 import tagToolSingleShortCutTable from './tag';
 import textToolShortCutTable from './text';
 import videoToolShortCutTable from './videoTag';
-import { footerCls } from '../index';
 
 const { EVideoToolName } = cTool;
 
@@ -172,6 +172,9 @@ const ToolHotKey: React.FC<IProps> = ({ style, toolName }) => {
       onMouseMove={() => setFlag(true)}
       onMouseLeave={() => {
         setFlag(false);
+      }}
+      align={{
+        offset: [20, 0],
       }}
       overlayClassName="tool-hotkeys-popover"
       // visible={svgFlag}

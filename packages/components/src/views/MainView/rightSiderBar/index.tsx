@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import { Tabs } from 'antd';
-import { connect, useSelector } from 'react-redux';
 import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
+import { connect, useSelector } from 'react-redux';
 
 import type { IFileItem } from '@/types/data';
 
@@ -10,10 +10,10 @@ import type { EToolName } from '../../../data/enums/ToolType';
 import type { AppState } from '../../../store';
 import type { Sider } from '../../../types/main';
 import StepUtils from '../../../utils/StepUtils';
-import TextToolSidebar from './TextToolSidebar';
-import TagSidebar from './TagSidebar';
-import AttributeRusult from './AttributeRusult';
 import { toolList } from '../toolHeader/ToolOperation';
+import AttributeRusult from './AttributeRusult';
+import TagSidebar from './TagSidebar';
+import TextToolSidebar from './TextToolSidebar';
 
 interface IProps {
   toolName?: EToolName;

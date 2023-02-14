@@ -2,7 +2,6 @@
 @import './styles/reset-antd.scss';
 @import 'antd/dist/antd.min.css';
 
-
 $headerHeight: 60px;
 $menuWidth: 240px;
 $sidebarHeaderHeight: 75px;
@@ -67,7 +66,6 @@ body {
   color: #ffffff !important;
 }
 
-
 .#{$prefix}-layout-preview {
   height: 89vh !important;
 }
@@ -121,7 +119,7 @@ body {
     position: relative;
     z-index: 10;
     border-top: 1px solid #e2e2e2;
-    height: calc(100vh - 99px);
+    // height: calc(100vh - 99px);
     padding: 16px 0px;
 
     .item {
@@ -253,6 +251,9 @@ body {
       transform: translate(-50%, -50%);
       left: 50%;
       font-size: 12px;
+    }
+    .label-number {
+      min-width: 24px;
     }
   }
   .finish {
@@ -541,7 +542,7 @@ body {
   user-select: none;
   text-align: left;
 
-  .rightBarFooter{
+  .rightBarFooter {
     position: absolute;
     bottom: 5px;
     width: 100%;
@@ -602,7 +603,7 @@ body {
     }
 
     .ant-tabs-nav-list {
-      border-top:1px solid rgba(0, 0, 0, 0.1);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       height: 64px !important;
       align-items: center;
@@ -662,6 +663,9 @@ body {
           padding: 0px;
           .attributeResultLi {
             display: flex;
+            & > span:first-child {
+              min-width: 20px;
+            }
             .attributeResultRightImgBox {
               // display: flex;
               width: 60px;
@@ -1288,7 +1292,6 @@ $hotkey-container-padding: 7px;
   // height: calc(89vh - 180px);
   overflow-y: scroll;
 
-
   .main {
     padding: 8px 8px;
     overflow: auto;
@@ -1354,10 +1357,7 @@ $hotkey-container-padding: 7px;
     padding: 0 3px 0 8px;
   }
 
-  .ant-collapse-borderless
-    > .ant-collapse-item
-    > .ant-collapse-content
-    > .ant-collapse-content-box {
+  .ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
     padding-top: 4px;
   }
 
@@ -1373,10 +1373,9 @@ $hotkey-container-padding: 7px;
     border-bottom: 0px;
   }
 }
-.tagOperationMenuPreview{
+.tagOperationMenuPreview {
   height: calc(89vh - 220px) !important;
 }
-
 
 .labelu-checkbox-group .ant-checkbox-group {
   display: flex;

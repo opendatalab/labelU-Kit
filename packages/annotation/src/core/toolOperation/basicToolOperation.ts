@@ -1,24 +1,26 @@
 import { isNumber } from 'lodash';
 
-import CanvasUtils from '@/utils/tool/CanvasUtils';
-import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
-import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
-import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
-import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
-import TagUtils from '@/utils/tool/TagUtils';
 import type { Attribute, PrevResult, ToolConfig } from '@/interface/conbineTool';
+import type { IImageAttribute } from '@/types/imgAttributeStore';
+import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
 import type { ICoordinate, ISize } from '@/types/tool/common';
 import type { ILinePoint } from '@/types/tool/lineTool';
-import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
-import type { IImageAttribute } from '@/types/imgAttributeStore';
+import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import type { IRectConfig } from '@/types/tool/rectTool';
+import MathUtils from '@/utils/MathUtils';
+import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
+import CanvasUtils from '@/utils/tool/CanvasUtils';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
+import TagUtils from '@/utils/tool/TagUtils';
 
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
@@ -27,8 +29,6 @@ import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
-import locale from '../../locales';
-import { EMessage } from '../../locales/constants';
 
 interface IBasicToolOperationProps {
   container: HTMLElement;
@@ -581,10 +581,12 @@ class BasicToolOperation extends EventListener {
   }
 
   /** 用于初始化图片的位置 */
-  public initImgPos = async () => {
+  public initImgPos = async (options?: { useCacheData?: boolean }) => {
     if (!this.imgNode || this.imgNode.width === 0) {
       return;
     }
+    // 初始化图片位置信息时，优先从持久化记录中获取
+    const { useCacheData } = options || { useCacheData: true };
     const zoomRatio = this._imgAttribute?.zoomRatio;
     const isOriginalSize = this._imgAttribute?.isOriginalSize;
     const { currentPos, zoom } = ImgPosUtils.getInitImgPos(
@@ -596,8 +598,8 @@ class BasicToolOperation extends EventListener {
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
     const cachedCoordinate = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
-    this.setCurrentPos(cachedCoordinate || currentPos);
-    this.currentPosStorage = cachedCoordinate || currentPos;
+    this.setCurrentPos(useCacheData ? cachedCoordinate || currentPos : currentPos);
+    this.currentPosStorage = useCacheData ? cachedCoordinate : currentPos;
     let cachedZoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
@@ -1085,11 +1087,8 @@ class BasicToolOperation extends EventListener {
   public setImgAttribute(imgAttribute: IImageAttribute) {
     const oldImgAttribute = this._imgAttribute;
     this._imgAttribute = imgAttribute;
-    if (
-      oldImgAttribute?.zoomRatio !== imgAttribute.zoomRatio ||
-      oldImgAttribute.isOriginalSize !== imgAttribute.isOriginalSize
-    ) {
-      this.initImgPos();
+    if (oldImgAttribute?.zoomRatio !== imgAttribute.zoomRatio || imgAttribute.isOriginalSize) {
+      this.initImgPos({ useCacheData: false });
       return;
     }
     this.renderBasicCanvas();
@@ -1175,7 +1174,7 @@ class BasicToolOperation extends EventListener {
     // 更改当前图片的旋转方式
     const rotate = MathUtils.getRotate(this.basicImgInfo.rotate);
     this.basicImgInfo.rotate = rotate;
-    this.initImgPos();
+    this.initImgPos({ useCacheData: false });
 
     // 触发外层 result 的更改
     this.emit('updateResult');
