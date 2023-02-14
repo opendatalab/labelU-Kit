@@ -1,4 +1,4 @@
-import type { TagToolConfig } from '@/interface/conbineTool';
+import type { TagToolConfig } from '@/interface/combineTool';
 import type { ITagConfig, ITagResult } from '@/types/tool/tagTool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 

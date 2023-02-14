@@ -25,6 +25,7 @@ export interface RectStyle {
 }
 
 export interface IRectConfig extends IToolConfig {
+  attributeMap: Map<string, string>;
   attributeList: IInputList[];
   attributeConfigurable: boolean;
   drawOutsideTarget: boolean;

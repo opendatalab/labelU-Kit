@@ -9,7 +9,7 @@ import { DEFAULT_FONT, EToolName } from '@/constant/tool';
 import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
 import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import TagUtils from '@/utils/tool/TagUtils';
-import type { Attribute, PrevResult, ToolConfig } from '@/interface/conbineTool';
+import type { Attribute, PrevResult, ToolConfig } from '@/interface/combineTool';
 import type { ICoordinate, ISize } from '@/types/tool/common';
 import type { ILinePoint } from '@/types/tool/lineTool';
 import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
