@@ -53,7 +53,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     return () => {
       document.removeEventListener('attribute::change', handleAttributeChange as EventListener);
     };
-  }, [currentAttributeList, toolInstance]);
+  }, [toolInstance]);
 
   // useEffect(() => {
   //   if (toolInstance) {
