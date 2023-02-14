@@ -120,7 +120,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   // 切换工具时，高亮上一个工具且本工具也存在的标签
   const lastActiveAttribute = BasicToolOperation.Cache.get('activeAttribute');
   if (annotationEngine?.toolInstance.config.attributeList.find((v: Attribute) => v.key === lastActiveAttribute)) {
-    annotationEngine.toolInstance.setDefaultAttribute(BasicToolOperation.Cache.get('activeAttribute'));
+    annotationEngine.toolInstance.setDefaultAttribute(lastActiveAttribute);
   }
 
   return { toolInstance: annotationEngine?.toolInstance, annotationEngine };
