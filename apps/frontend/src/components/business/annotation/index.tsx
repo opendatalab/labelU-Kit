@@ -33,7 +33,7 @@ const Annotation = (props: {
   } = props;
   // @ts-ignore
   return (
-    <div style={{ width: '100vw' }}>
+    <div style={{ height: '100%' }}>
       <AnnotationOperation
         leftSiderContent={leftSiderContent}
         topActionContent={topActionContent}
