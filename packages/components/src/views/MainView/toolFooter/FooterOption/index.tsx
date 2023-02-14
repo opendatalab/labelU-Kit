@@ -3,10 +3,6 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { cTool } from '@label-u/annotation';
 
-import { store } from '@/index';
-import ImgAttribute from '@/store/imgAttribute/actionCreators';
-import type { ImgAttributeState } from '@/store/imgAttribute/types';
-
 import type { AppState } from '../../../../store';
 import rotateSvg from '../../../../assets/annotation/common/icon_r.svg';
 import rotateHighlightSvg from '../../../../assets/annotation/common/icon_rA.svg';
@@ -68,8 +64,9 @@ const FooterOption: React.FC<IProps> = (props) => {
           // VideoTool don't need to rotate
           return;
         }
-        const payload = { isOriginalSize: true };
-        store.dispatch(ImgAttribute.UpdateImgAttribute(payload as ImgAttributeState));
+        toolInstance.initImgPos();
+        toolInstance.setZoom(1);
+        toolInstance.innerZoom = 1;
       },
       style: {
         marginRight: '4px',
