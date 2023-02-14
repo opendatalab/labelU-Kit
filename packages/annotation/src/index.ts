@@ -32,7 +32,7 @@ import AttributeUtils from './utils/tool/AttributeUtils';
 const toolUtils = CommonToolUtils;
 
 // 工具对外暴露配置统一定义
-export * from './interface/conbineTool';
+export * from './interface/combineTool';
 
 export {
   // 各类图形操作

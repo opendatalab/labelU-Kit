@@ -13,6 +13,7 @@ export interface IPointUnit extends IPoint {
 }
 
 export interface IPointToolConfig extends IToolConfig {
+  attributeMap: Map<string, string>;
   // 目标外标注
   drawOutsideTarget: boolean;
   // 显示标注顺序

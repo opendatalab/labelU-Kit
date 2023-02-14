@@ -1591,7 +1591,7 @@ class RectOperation extends BasicToolOperation {
   public setDefaultAttribute(defaultAttribute?: string) {
     const oldDefault = this.defaultAttribute;
 
-    if (!this.config.attributeList.find((v) => v.key === defaultAttribute)) {
+    if (!this.config.attributeMap.has(defaultAttribute!)) {
       return;
     }
 
