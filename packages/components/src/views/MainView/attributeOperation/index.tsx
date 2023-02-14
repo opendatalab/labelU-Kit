@@ -1,5 +1,5 @@
 import type { Attribute } from '@label-u/annotation';
-import { AttributeUtils } from '@label-u/annotation';
+import { BasicToolOperation, AttributeUtils } from '@label-u/annotation';
 import type { FC } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
@@ -23,7 +23,6 @@ interface AttributeOperationProps {
 }
 
 const AttributeOperation: FC<AttributeOperationProps> = (props) => {
-  const [, forceRender] = useState(0);
   const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance, toolStyle } = props;
   const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
@@ -32,11 +31,29 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
   const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
 
+  const setActiveAttribute = (attributeName: string) => {
+    BasicToolOperation.Cache.set('activeAttribute', attributeName);
+    setChoseAttribute(attributeName);
+  };
+
   useEffect(() => {
     if (copytoolInstance && copytoolInstance?.defaultAttribute) {
-      setChoseAttribute(copytoolInstance?.defaultAttribute);
+      setActiveAttribute(copytoolInstance?.defaultAttribute);
     }
   }, [copytoolInstance]);
+
+  useEffect(() => {
+    const handleAttributeChange = ({ detail }: CustomEvent<any>) => {
+      toolInstance.setDefaultAttribute(detail);
+      setActiveAttribute(detail);
+    };
+
+    document.addEventListener('attribute::change', handleAttributeChange as EventListener);
+
+    return () => {
+      document.removeEventListener('attribute::change', handleAttributeChange as EventListener);
+    };
+  }, [toolInstance]);
 
   // useEffect(() => {
   //   if (toolInstance) {
@@ -100,9 +117,8 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               })}
               onClick={(e) => {
                 e.stopPropagation();
-                setChoseAttribute(item.key);
                 toolInstance.setDefaultAttribute(item.key);
-                forceRender((s) => s + 1);
+                setActiveAttribute(item.key);
               }}
             >
               <div
@@ -195,10 +211,8 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                setChoseAttribute(attribute.key);
                 toolInstance.setDefaultAttribute(attribute.key);
-                forceRender((s) => s + 1);
-                // alert(attribute.key)
+                setActiveAttribute(attribute.key);
               }}
               // className={classNames({
               //   chooseAttribute: attribute.key === chooseAttribute,

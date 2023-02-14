@@ -7,7 +7,7 @@ import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import type { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
-import type { Attribute, OneTag, PrevResult, ToolConfig } from '@/interface/conbineTool';
+import type { Attribute, OneTag, PrevResult, ToolConfig } from '@/interface/combineTool';
 import type { ISize } from '@/types/tool/common';
 import type { IRect } from '@/types/tool/rectTool';
 import type { IRenderEnhance } from '@/types/tool/annotation';
@@ -74,11 +74,20 @@ export default class AnnotationEngine {
     this.isShowOrder = props.isShowOrder;
     this.tagConfigList = props.tagConfigList;
     this.attributeList = props.attributeList;
+    this.allAttributesList = [];
+
     /**
      * TODO: 为了兼容历史配置数据，此处过滤掉空的属性；但是后续应该在保存配置的时候就过滤掉，或者校验空值。
      * 修正：https://project.feishu.cn/bigdata_03/issue/detail/3877218?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
      **/
-    this.allAttributesList = (props.allAttributesList || []).filter((item) => item.key !== '' && item.value !== '');
+    for (const attribute of props.allAttributesList) {
+      if (attribute.key === '' || attribute.value === '') {
+        continue;
+      }
+
+      this.allAttributesList.push(attribute);
+    }
+
     this.container = props.container;
     this.size = props.size;
     this.toolName = props.toolName;
@@ -97,9 +106,17 @@ export default class AnnotationEngine {
       // @ts-ignore
       attributeArr = [...attributeArr, ...props.config?.attributeList];
     }
+
+    const attributeMap = new Map();
+
+    for (const attribute of attributeArr) {
+      attributeMap.set(attribute.key, attribute.value);
+    }
+
     this.config = {
       ...tmpObjectConfig,
       attributeList: attributeArr,
+      attributeMap,
       tagConfigList: props.tagConfigList,
     } as unknown as ToolConfig;
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作

@@ -75,13 +75,7 @@ export const addInputList = (
     }
     newInputList.push(newData);
   }
-  for (let inputListIndex = 0; inputListIndex < inputList.length; inputListIndex++) {
-    const unit = newInputList[inputListIndex];
-    if (unit.subSelected && unit.subSelected.length > 0) {
-      unit.key = unit.subSelected[0].key.split('-')[0];
-      unit.value = unit.subSelected[0].value.split('-')[0];
-    }
-  }
+
   return newInputList;
 };
 

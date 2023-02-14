@@ -2,9 +2,11 @@ import { isNumber } from 'lodash';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
+
 import type { Attribute, PrevResult, ToolConfig } from '@/interface/conbineTool';
 import type { IImageAttribute } from '@/types/imgAttributeStore';
 import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
+
 import type { ICoordinate, ISize } from '@/types/tool/common';
 import type { ILinePoint } from '@/types/tool/lineTool';
 import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
