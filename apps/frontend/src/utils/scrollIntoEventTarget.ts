@@ -1,3 +1,15 @@
+function getOffsetTopOfElement(element: HTMLElement, container: HTMLElement) {
+  let offsetTop = element.offsetTop;
+  let parent = element.offsetParent as HTMLElement | null;
+
+  while (parent !== container && parent) {
+    offsetTop += parent.offsetTop;
+    parent = parent.offsetParent as HTMLElement;
+  }
+
+  return offsetTop;
+}
+
 /**
  * 自动滚动到事件触发的元素
  **/
@@ -28,13 +40,20 @@ export default function scrollIntoEventTarget(
     }
   }
 
-  const rect = target.getBoundingClientRect();
-  const bottom = wrapper.scrollHeight - wrapper.scrollTop - rect.bottom;
+  const targetHeight = target.clientHeight;
+  // 元素距离页面底部的距离不变，target重新渲染了，在setTimeout会丢失其dom引用，所以在重新渲染前获取其距离。
+  const distanceFromContainerBottom = wrapper.scrollHeight - getOffsetTopOfElement(target, wrapper as HTMLElement);
+
 
   setTimeout(() => {
     wrapper.scrollTo({
       left: 0,
-      top: wrapper.scrollHeight - bottom - wrapper.clientHeight,
+      /**
+       * 将元素居中在滚动容器中间
+       * 元素距离滚动容器顶部的新距离为：wrapper.scrollHeight - distanceFromContainerBottom
+       * 滚动容器的高度为：wrapper.clientHeight
+       **/
+      top: wrapper.scrollHeight - distanceFromContainerBottom - (wrapper.clientHeight - targetHeight) / 2,
       behavior: 'smooth',
     });
   });
