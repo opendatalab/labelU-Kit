@@ -92,18 +92,29 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
 
   let allAttributesList: Attribute[] = [];
-  if (attributeList && attributeList.length > 0) {
-    allAttributesList = [...allAttributesList, ...attributeList];
+  /**
+   * TODO: 为了兼容历史配置数据，此处过滤掉空的属性；但是后续应该在保存配置的时候就过滤掉，或者校验空值。
+   * 修正：https://project.feishu.cn/bigdata_03/issue/detail/3877218?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+   **/
+  const noneEmptyAttributeList = attributeList.filter((i) => i.key !== '' && i.value !== '');
+  if (noneEmptyAttributeList && noneEmptyAttributeList.length > 0) {
+    allAttributesList = [...allAttributesList, ...noneEmptyAttributeList];
   }
   if (toolsBasicConfig && toolsBasicConfig.length > 0) {
     for (let i = 0; i < toolsBasicConfig.length; i++) {
       // @ts-ignore
       if (toolsBasicConfig[i].config?.attributeList) {
-        // @ts-ignore
-        allAttributesList = [...allAttributesList, ...toolsBasicConfig[i].config?.attributeList];
+        allAttributesList = [
+          ...allAttributesList,
+          // @ts-ignore
+          ...toolsBasicConfig[i].config?.attributeList.filter(
+            (item: Attribute) => item.key !== '' && item.value !== '',
+          ),
+        ];
       }
     }
   }
+
   const annotationEngine = new AnnotationEngine({
     container,
     isShowOrder: isShowOrder,
@@ -113,7 +124,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     config,
     style: toolStyle,
     tagConfigList,
-    attributeList,
+    attributeList: noneEmptyAttributeList,
     allAttributesList,
   });
 
@@ -121,6 +132,8 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const lastActiveAttribute = BasicToolOperation.Cache.get('activeAttribute');
   if (annotationEngine?.toolInstance.config.attributeMap.has(lastActiveAttribute)) {
     annotationEngine.toolInstance.setDefaultAttribute(lastActiveAttribute);
+  } else {
+    annotationEngine.toolInstance.setDefaultAttribute(annotationEngine.toolInstance.NoneAttribute);
   }
 
   return { toolInstance: annotationEngine?.toolInstance, annotationEngine };

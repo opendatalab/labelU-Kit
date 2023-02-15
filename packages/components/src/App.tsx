@@ -157,6 +157,10 @@ const App: React.FC<AppProps> = (props) => {
   }, [imgList, props.toolsBasicConfig]);
 
   useEffect(() => {
+    if (!shouldInitial) {
+      return;
+    }
+
     let initToolName = currentToolName;
     const findToolConfigByToolName = toolsBasicConfig.filter((item) => {
       return item.tool === currentToolName;
@@ -165,12 +169,6 @@ const App: React.FC<AppProps> = (props) => {
     if (findToolConfigByToolName && findToolConfigByToolName.length === 0) {
       initToolName = toolsBasicConfig[0].tool;
       dispatch(ChangeCurrentTool(initToolName));
-    }
-  }, [currentToolName, dispatch, toolsBasicConfig]);
-
-  useEffect(() => {
-    if (!shouldInitial) {
-      return;
     }
 
     store.dispatch(

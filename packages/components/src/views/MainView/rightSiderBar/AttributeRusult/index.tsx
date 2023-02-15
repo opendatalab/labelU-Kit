@@ -443,7 +443,11 @@ const AttributeRusult: FC<IProps> = ({
     setChooseToolInfo(toolInfo);
     // NOTE: 加setTimeout是为了解决：右侧不同工具标签切换时，会将上一个工具的标签设置为下一个工具的标签
     setTimeout(() => {
-      document.dispatchEvent(new CustomEvent('attribute::change', { detail: attributeInfo.attributeName }));
+      document.dispatchEvent(
+        new CustomEvent('attribute::change', {
+          detail: attributeInfo.attributeName,
+        }),
+      );
     });
   };
 
