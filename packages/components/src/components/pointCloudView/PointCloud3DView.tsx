@@ -105,12 +105,6 @@ const PointCloud3D: React.FC<
 
   const { generateContent } = useAttributes();
 
-  useEffect(() => {
-    if (!ptCtx.mainViewInstance) {
-      return;
-    }
-    initPointCloud3d?.();
-  }, [size]);
   const { selectedBox } = useSingleBox();
 
   const setTarget3DView = (perspectiveView: EPerspectiveView) => {
@@ -124,6 +118,13 @@ const PointCloud3D: React.FC<
   const reset3DView = () => {
     ptCtx.mainViewInstance?.resetCamera();
   };
+
+  useEffect(() => {
+    if (!ptCtx.mainViewInstance) {
+      return;
+    }
+    initPointCloud3d?.();
+  }, [size]);
 
   useEffect(() => {
     refreshtPointCloud3DView();

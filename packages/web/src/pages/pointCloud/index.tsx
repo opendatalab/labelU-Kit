@@ -2,12 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import Annotation from '../../components/business/annotation';
 import { cloudMockFileList } from '../../mock/annotationMock';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  updateToolsConfig,
-  updateTagConfigList,
-  updateAllAttributeConfigList,
-  updateTextConfig
-} from '../../stores/toolConfig.store';
+import { updateToolsConfig, updateAllAttributeConfigList } from '../../stores/toolConfig.store';
 
 import cloudToolConfig from '../../config/cloudPointConfig.json';
 const AnnotationPage: FC = () => {
@@ -31,44 +26,44 @@ const AnnotationPage: FC = () => {
           toolName: 'pointCloudTool',
           result: [
             {
-              attribute: '奥迪',
+              attribute: '大众',
               center: {
-                x: 32.56179434072837,
-                y: 6.2644789567587615,
-                z: -1.0284804105758667
+                x: -3.667189431770466,
+                y: 9.819609371447392,
+                z: -0.28502941131591797
               },
-              id: '0WZFG7wo',
-              rotation: 2.7999520289599724,
+              id: 'go7JhqDF',
+              rotation: 3.141512743038566,
               valid: true,
-              width: 23.686486683557717,
-              height: 10.738504347208883,
-              depth: 2.0569608211517334,
-              order: 1,
-              isVisible: true,
+              width: 20.315630577533675,
+              height: 13.318114349281112,
+              depth: 11.110329627990723,
               zInfo: {
-                maxZ: 0,
-                minZ: -2.0569608211517334,
+                maxZ: 5.270135402679443,
+                minZ: -5.840194225311279,
                 count: 0,
-                zCount: 816
+                zCount: 17212
               },
               rect: [
                 {
-                  x: 33.652855921462326,
-                  y: 19.222135626982418
+                  x: 2.9910560049913646,
+                  y: 19.977956756710284
                 },
                 {
-                  x: 23.53496979666152,
-                  y: 15.624378550610054
+                  x: -10.327058301767032,
+                  y: 19.976892498853452
                 },
                 {
-                  x: 31.47073275999442,
-                  y: -6.693177713464895
+                  x: -10.325434868532296,
+                  y: -0.33873801381550095
                 },
                 {
-                  x: 41.58861888479522,
-                  y: -3.0954206370925306
+                  x: 2.9926794382260997,
+                  y: -0.33767375595866866
                 }
-              ]
+              ],
+              order: 2,
+              isVisible: true
             }
           ]
         }

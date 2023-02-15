@@ -338,7 +338,6 @@ class PointCloudOperation extends PointCloud {
     };
     const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
-    console.log('newBoxList', newBoxList);
     this.emit('savePcResult', newBoxList);
     return boxInfo;
   };
@@ -384,9 +383,9 @@ class PointCloudOperation extends PointCloud {
     paramId: string,
     textAttribute: string,
   ) => {
-    console.log('zInfodoUpateboxInScene', zInfo);
     const color = new THREE.Color(this.getColor(attribute).valid.stroke).getHex();
     let opacity = 0.3;
+
     // delete prevOne
     const { boxList } = this;
     let prevBox;
@@ -396,6 +395,7 @@ class PointCloudOperation extends PointCloud {
         return item.id === paramId;
       });
     }
+
     // add new one
     const boxInfo = this.getBoxFormmat(
       rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
@@ -413,6 +413,7 @@ class PointCloudOperation extends PointCloud {
     boxInfo.order = order;
     const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
+
     if (rectPoints.length > 0) {
       const sharpRect = rectPoints.map((item) => {
         return {

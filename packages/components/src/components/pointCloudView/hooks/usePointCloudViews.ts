@@ -432,7 +432,7 @@ export const usePointCloudViews = () => {
     }
 
     setSelectedIDs([boxParams.id]);
-    syncPointCloudViews(PointCloudView.Top, boxParams, true);
+    syncPointCloudViews(PointCloudView.Top, boxParams);
     addPointCloudBox(boxParams);
   };
 
@@ -490,7 +490,6 @@ export const usePointCloudViews = () => {
         };
         // Todo: sycn data by sade view
         // mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
-
         syncPointCloudViewsFromSideOrBackView(newBoxParams);
         updateSelectedBox(newBoxParams);
       }
@@ -578,11 +577,7 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param boxParams
    */
-  const syncPointCloudViews = async (
-    omitView: string,
-    boxParams: IPointCloudBox,
-    is3DToOther?: boolean,
-  ) => {
+  const syncPointCloudViews = async (omitView: string, boxParams: IPointCloudBox) => {
     const dataUrl = currentData?.url;
     const newPoints = (await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
       width: DEFAULT_SCOPE,
@@ -608,10 +603,7 @@ export const usePointCloudViews = () => {
         viewToBeUpdated[key]();
       }
     });
-    // is add box from point Cloud
-    if (!is3DToOther) {
-      updateMainViewGenBox(boxParams);
-    }
+    updateMainViewGenBox(boxParams);
   };
 
   const pointCloudBoxListUpdated = (newBoxes: IPointCloudBox[]) => {

@@ -181,7 +181,15 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
         addPolygon(polygon);
         return;
       }
-      pointCloudViews.topViewAddBox(polygon, size, polygon.attribute);
+      if (ptCtx.selectedPointCloudBox) {
+        pointCloudViews.topViewAddBox(
+          polygon,
+          size,
+          ptCtx.selectedPointCloudBox.attribute,
+          ptCtx.selectedPointCloudBox.zInfo,
+        );
+        return;
+      }
     });
 
     TopView2dOperation.singleOn('deletedObject', ({ id }: { id: string }) => {
@@ -311,37 +319,27 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
     ptCtx.topViewInstance.pointCloud2dOperation.setStyle(toolStyle);
   }, [size, ptCtx.topViewInstance]);
 
-  // useEffect(()=>{
-  //   if ( !ptCtx.topViewInstance) {
-  //     return;
-  //   }
-  //   const {
-  //     topViewInstance: { pointCloudInstance: pointCloud }
-  //   } = ptCtx;
-  //   pointCloud.camera.position.set(0, -1, 10);
-  //   pointCloud.camera.updateProjectionMatrix();
-  //   pointCloud.render();
-  //   setZoom(1);
-  // },[size])
-
-  // useEffect(() => {
-  //   ptCtx.topViewInstance?.pointCloudInstance?.applyZAxisPoints(zAxisLimit);
-  // }, [zAxisLimit]);
+  useEffect(() => {
+    if (!ptCtx.topViewInstance) {
+      return;
+    }
+    const {
+      topViewInstance: { pointCloudInstance: pointCloud },
+    } = ptCtx;
+    pointCloud.camera.position.set(0, -1, 10);
+    pointCloud.camera.updateProjectionMatrix();
+    pointCloud.render();
+    setZoom(1);
+  }, [size]);
 
   useEffect(() => {
-    pointCloudViews.topViewSelectedChanged();
-  }, [ptCtx.selectedIDs]);
+    ptCtx.mainViewInstance?.applyZAxisPoints(zAxisLimit);
+  }, [zAxisLimit]);
 
-  // const moveCp = ()=>{
-  //   if(ptCtx&&ptCtx.topViewInstance){
-  //     const pointCloud = ptCtx?.topViewInstance.pointCloudInstance
-
-  //     const { x, y, z } = pointCloud.initCameraPosition;
-  //     pointCloud.camera.position.set(x + 100, y - 100, z);
-  //     pointCloud.render();
-  //   }
-
-  // }
+  // Todo: select box from topview
+  // useEffect(() => {
+  // pointCloudViews.topViewSelectedChanged();
+  // }, [ptCtx.selectedIDs]);
 
   return (
     currentData && (
