@@ -383,12 +383,20 @@ class PointCloudOperation extends PointCloud {
     paramId: string,
     textAttribute: string,
   ) => {
+    let prevBox;
     const color = new THREE.Color(this.getColor(attribute).valid.stroke).getHex();
     let opacity = 0.3;
-
-    // delete prevOne
     const { boxList } = this;
-    let prevBox;
+    const boxInfo = this.getBoxFormmat(
+      rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+      zInfo,
+      paramId,
+    );
+    const order = this.getOrder(boxList, boxInfo);
+    boxInfo.attribute = attribute;
+    boxInfo.textAttribute = textAttribute;
+    boxInfo.order = order;
+    // delete prevOne
     if (paramId) {
       this.clearBoxInSceneById(paramId);
       prevBox = this.boxList.filter((item) => {
@@ -397,20 +405,12 @@ class PointCloudOperation extends PointCloud {
     }
 
     // add new one
-    const boxInfo = this.getBoxFormmat(
-      rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
-      zInfo,
-      paramId,
-    );
-    boxInfo.attribute = attribute;
-    boxInfo.textAttribute = textAttribute;
-    const order = this.getOrder(boxList, boxInfo);
     if (Array.isArray(prevBox) && prevBox.length > 0) {
       boxInfo.isVisible = prevBox[0].isVisible;
     } else {
       boxInfo.isVisible = true;
     }
-    boxInfo.order = order;
+
     const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
 
@@ -438,7 +438,6 @@ class PointCloudOperation extends PointCloud {
       this.addAttributeAndOrder(boxInfo, attribute, color);
     }
     this.emit('savePcResult', newBoxList);
-    this.render();
   };
 
   // get box order

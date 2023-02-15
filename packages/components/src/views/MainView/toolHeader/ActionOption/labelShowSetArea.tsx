@@ -72,9 +72,13 @@ const LabelShowSetArea: FC = () => {
     <Form name='basic' layout='vertical' autoComplete='off' initialValues={initValue}>
       {labelShowFormConfig &&
         labelShowFormConfig.length > 0 &&
-        labelShowFormConfig.map((item) => {
+        labelShowFormConfig.map((item, index) => {
+          const ItemStyle =
+            index < labelShowFormConfig.length - 1
+              ? { marginBottom: '16px', marginTop: '0px' }
+              : { marginBottom: '0px', marginTop: '0px' };
           return (
-            <Form.Item key={item.key} valuePropName='checked' name={item.key}>
+            <Form.Item style={ItemStyle} key={item.key} valuePropName='checked' name={item.key}>
               <Checkbox onChange={item.onChange}>{item.name}</Checkbox>
             </Form.Item>
           );
