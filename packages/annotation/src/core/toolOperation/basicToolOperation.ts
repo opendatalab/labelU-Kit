@@ -2,11 +2,9 @@ import { isNumber } from 'lodash';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
-
 import type { Attribute, PrevResult, ToolConfig } from '@/interface/conbineTool';
 import type { IImageAttribute } from '@/types/imgAttributeStore';
 import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
-
 import type { ICoordinate, ISize } from '@/types/tool/common';
 import type { ILinePoint } from '@/types/tool/lineTool';
 import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -583,12 +581,12 @@ class BasicToolOperation extends EventListener {
   }
 
   /** 用于初始化图片的位置 */
-  public initImgPos = async (options?: { useCacheData?: boolean }) => {
+  public initImgPos = async (options?: { useCachedPosition?: boolean }) => {
     if (!this.imgNode || this.imgNode.width === 0) {
       return;
     }
     // 初始化图片位置信息时，优先从持久化记录中获取
-    const { useCacheData } = options || { useCacheData: true };
+    const { useCachedPosition } = options || { useCachedPosition: true };
     const zoomRatio = this._imgAttribute?.zoomRatio;
     const isOriginalSize = this._imgAttribute?.isOriginalSize;
     const { currentPos, zoom } = ImgPosUtils.getInitImgPos(
@@ -600,8 +598,8 @@ class BasicToolOperation extends EventListener {
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
     const cachedCoordinate = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
-    this.setCurrentPos(useCacheData ? cachedCoordinate || currentPos : currentPos);
-    this.currentPosStorage = useCacheData ? cachedCoordinate : currentPos;
+    this.setCurrentPos(useCachedPosition ? cachedCoordinate || currentPos : currentPos);
+    this.currentPosStorage = useCachedPosition ? cachedCoordinate : currentPos;
     let cachedZoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
@@ -1090,7 +1088,7 @@ class BasicToolOperation extends EventListener {
     const oldImgAttribute = this._imgAttribute;
     this._imgAttribute = imgAttribute;
     if (oldImgAttribute?.zoomRatio !== imgAttribute.zoomRatio || imgAttribute.isOriginalSize) {
-      this.initImgPos({ useCacheData: false });
+      this.initImgPos({ useCachedPosition: false });
       return;
     }
     this.renderBasicCanvas();
@@ -1176,7 +1174,7 @@ class BasicToolOperation extends EventListener {
     // 更改当前图片的旋转方式
     const rotate = MathUtils.getRotate(this.basicImgInfo.rotate);
     this.basicImgInfo.rotate = rotate;
-    this.initImgPos({ useCacheData: false });
+    this.initImgPos({ useCachedPosition: false });
 
     // 触发外层 result 的更改
     this.emit('updateResult');

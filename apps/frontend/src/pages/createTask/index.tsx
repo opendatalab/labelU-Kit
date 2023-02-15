@@ -5,8 +5,6 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { connect, useSelector, useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { formatToolsConfigAttrList } from '@/utils/tool/task';
-
 import currentStyles from './index.module.scss';
 import commonStyles from '../../utils/common/common.module.scss';
 import Step from '../../components/step';
@@ -84,7 +82,7 @@ const CreateTask = () => {
     //   }
     // }
     const res = await updateTaskConfig(taskId, {
-      config: JSON.stringify(formatToolsConfigAttrList(toolsConfig)),
+      config: JSON.stringify(toolsConfig),
       media_type: 'IMAGE',
     });
     if (!res) {

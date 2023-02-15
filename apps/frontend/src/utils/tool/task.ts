@@ -1,5 +1,3 @@
-import type { ToolsConfigState } from '@/types/toolConfig';
-
 import { jsonParser } from './common';
 
 export function findAllDependStep(step: number, stepList: any[]) {
@@ -59,24 +57,4 @@ export function reloadStepListReferenceStep(step: number, stepList: any[]) {
     }
     return v;
   });
-}
-
-/**
- * 过滤toolsConfig里面的attributeList的假值
- */
-
-export function formatToolsConfigAttrList(config: ToolsConfigState) {
-  return {
-    ...config,
-    tools: config.tools.map((item) => {
-      const toolConfig = item.config;
-      return {
-        tool: item.tool,
-        config: {
-          ...toolConfig,
-          attributeList: toolConfig.attributeList.filter((attr) => attr?.key !== '' && attr?.value !== ''),
-        },
-      };
-    }),
-  };
 }
