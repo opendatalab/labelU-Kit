@@ -1,24 +1,25 @@
-import { Spin, Layout } from 'antd';
-import React, { useEffect, useState } from 'react';
 import { cTool } from '@label-u/annotation';
-import { connect } from 'react-redux';
+import { Layout, Spin } from 'antd';
 import classNames from 'classnames';
+import _ from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
 
 import type { AppProps } from '@/App';
 import { ViewportProvider } from '@/components/customResizeHook';
-import { prefix } from '@/constant';
 import VideoAnnotate from '@/components/videoAnnotate';
+import { prefix } from '@/constant';
 import type { AppState } from '@/store';
 import type { IFileItem } from '@/types/data';
 
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 // import Sidebar from './sidebar';
+import AttributeOperation from './attributeOperation';
+import LeftSider from './leftSiderBar';
 import RightSiderbar from './rightSiderBar';
 import ToolFooter from './toolFooter';
 import ToolHeader from './toolHeader';
-import AttributeOperation from './attributeOperation';
-import LeftSider from './leftSiderBar';
 
 const { EVideoToolName } = cTool;
 
@@ -29,6 +30,7 @@ interface IProps {
   currentToolName: string;
   imgIndex: string;
   imgListCollapse: boolean;
+  style?: React.CSSProperties;
 }
 
 const { Sider, Content } = Layout;
@@ -90,11 +92,15 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
           </header>
           <AttributeOperation />
           <Layout>
-            {<LeftSider {...props} />}
+            {<LeftSider {...props} style={{ height: '100%' }} />}
             <Content className={`${layoutCls}__content`} style={{ height: (boxHeight as number) - 111 }}>
               <AnnotatedArea {...props} currentToolName={currentToolName} />
             </Content>
-            <Sider className={`${layoutCls}__side`} width="auto" style={props.style?.sider}>
+            <Sider
+              className={`${layoutCls}__side`}
+              width="auto"
+              style={_.assign({}, props.style?.sider, { height: 'max-content' })}
+            >
               {/* <Sidebar sider={props?.sider} /> */}
               <RightSiderbar isPreview={props?.isPreview as boolean} />
             </Sider>
