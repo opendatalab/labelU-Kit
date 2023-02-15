@@ -243,7 +243,7 @@ class BasicToolOperation extends EventListener {
     this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
-    this.defaultAttribute = props?.defaultAttribute ?? '无标签';
+    this.defaultAttribute = props?.defaultAttribute ?? this.NoneAttribute;
     this.forbidCursorLine = !!props.forbidCursorLine;
     this.lang = ELang.Zh;
 
@@ -273,6 +273,10 @@ class BasicToolOperation extends EventListener {
     return this._ctx || this.canvas?.getContext('2d');
   }
 
+  get NoneAttribute() {
+    return locale.getMessagesByLocale(EMessage.NoneAttribute, this.lang);
+  }
+
   get basicCtx() {
     return this.basicCanvas?.getContext('2d');
   }
@@ -297,6 +301,18 @@ class BasicToolOperation extends EventListener {
   /** 数据列表，根据其判断是否可以旋转 */
   get dataList(): any[] {
     return [];
+  }
+
+  hasAttributeInConfig(attribute: string) {
+    if (attribute === '') {
+      return false;
+    }
+
+    if (attribute === this.NoneAttribute) {
+      return true;
+    }
+
+    return this.config.attributeMap.has(attribute);
   }
 
   /**

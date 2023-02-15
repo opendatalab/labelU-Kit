@@ -12,6 +12,7 @@ const message: Record<string, string> = {
   [EMessage.DisableDelete]: 'Disable delete',
   [EMessage.ClearPartialData]: 'Clear partial data',
   [EMessage.MarkerFinish]: 'ListAnnotation is finished',
+  [EMessage.NoneAttribute]: 'Unnamed attribute',
   [EMessage.LowerLimitPoint]: 'The maximum number of points has been reached', // 缺少国际化
   [EMessage.NoRotateInDependence]: 'Disallow rotation in dependent cases',
   [EMessage.UnableToReannotation]: 'Unabled to reannotation',

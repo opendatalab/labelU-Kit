@@ -1895,7 +1895,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public setDefaultAttribute(attribute: string = '') {
-    if (!this.config.attributeMap.has(attribute)) {
+    if (!this.hasAttributeInConfig(attribute)) {
       return;
     }
 

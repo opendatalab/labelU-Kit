@@ -18,6 +18,7 @@ const message: Record<string, string> = {
   [EMessage.DisableDelete]: '该数据禁止删除',
   [EMessage.ClearPartialData]: '存在部分数据无法清除',
   [EMessage.MarkerFinish]: '列表标注已完成',
+  [EMessage.NoneAttribute]: '无标签',
   [EMessage.LowerLimitPoint]: '已到达标点数量上限',
   [EMessage.NoRotateInDependence]: '依赖情况下无法进行旋转',
   [EMessage.UnableToReannotation]: '无法进行续标操作',
