@@ -1,3 +1,11 @@
+const EXTRA_SPACE = 10;
+
+/**
+ * 获取元素距离滚动容器顶部的距离
+ * @param element
+ * @param container
+ * @returns
+ */
 function getOffsetTopOfElement(element: HTMLElement, container: HTMLElement) {
   let offsetTop = element.offsetTop;
   let parent = element.offsetParent as HTMLElement | null;
@@ -12,7 +20,11 @@ function getOffsetTopOfElement(element: HTMLElement, container: HTMLElement) {
 
 /**
  * 自动滚动到事件触发的元素
- **/
+ * @param e event
+ * @param delegateTag tag name of the element to be scrolled to
+ * @param overflowWrapperSelector overflow wrapper selector
+ * @returns
+ */
 export default function scrollIntoEventTarget(
   e: React.MouseEvent,
   delegateTag: string | undefined,
@@ -44,8 +56,14 @@ export default function scrollIntoEventTarget(
   // 元素距离页面底部的距离不变，target重新渲染了，在setTimeout会丢失其dom引用，所以在重新渲染前获取其距离。
   const distanceFromContainerBottom = wrapper.scrollHeight - getOffsetTopOfElement(target, wrapper as HTMLElement);
 
-
   setTimeout(() => {
+    const newTop =
+      wrapper.scrollHeight - distanceFromContainerBottom - wrapper.clientHeight + targetHeight + EXTRA_SPACE;
+    // 如果元素在视口内，不需要滚动
+    if (wrapper.scrollTop >= newTop) {
+      return;
+    }
+
     wrapper.scrollTo({
       left: 0,
       /**
@@ -53,7 +71,7 @@ export default function scrollIntoEventTarget(
        * 元素距离滚动容器顶部的新距离为：wrapper.scrollHeight - distanceFromContainerBottom
        * 滚动容器的高度为：wrapper.clientHeight
        **/
-      top: wrapper.scrollHeight - distanceFromContainerBottom - (wrapper.clientHeight - targetHeight) / 2,
+      top: newTop,
       behavior: 'smooth',
     });
   });
