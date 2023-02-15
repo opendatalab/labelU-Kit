@@ -2,7 +2,7 @@ import { isNumber } from 'lodash';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
-import type { Attribute, PrevResult, ToolConfig } from '@/interface/conbineTool';
+import type { Attribute, PrevResult, ToolConfig } from '@/interface/combineTool';
 import type { IImageAttribute } from '@/types/imgAttributeStore';
 import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
 import type { ICoordinate, ISize } from '@/types/tool/common';
