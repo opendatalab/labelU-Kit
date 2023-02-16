@@ -175,7 +175,7 @@ const App: React.FC<AppProps> = (props) => {
       InitTaskData({
         toolStyle,
         // NOTE: 切换工具必须重新初始化AnnotationEngine
-        initToolName: currentToolName,
+        initToolName,
         onSubmit,
         stepList: stepList || [],
         tagConfigList,
