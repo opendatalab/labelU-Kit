@@ -132,7 +132,7 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const lastActiveAttribute = BasicToolOperation.Cache.get('activeAttribute');
   if (annotationEngine?.toolInstance.config.attributeMap.has(lastActiveAttribute)) {
     annotationEngine.toolInstance.setDefaultAttribute(lastActiveAttribute);
-  } else {
+  } else if (typeof annotationEngine.toolInstance.setDefaultAttribute === 'function') {
     annotationEngine.toolInstance.setDefaultAttribute(annotationEngine.toolInstance.NoneAttribute);
   }
 
