@@ -1,6 +1,6 @@
 {
   "name": "@label-u/components",
-  "version": "1.0.0-alpha.16",
+  "version": "1.0.0-alpha.17",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@label-u/annotation": "1.0.0-alpha.13",
+    "@label-u/annotation": "1.0.0-alpha.14",
     "@label-u/utils": "1.0.0-alpha.1",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
