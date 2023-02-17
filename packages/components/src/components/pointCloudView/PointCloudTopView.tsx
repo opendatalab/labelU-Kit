@@ -50,7 +50,7 @@ const TransferCanvas2WorldOffset = (
   };
 };
 
-// Todo: set topview bar for top view
+// TODO: set topview bar for top view
 // const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
 //   const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
 //   const { selectNextBox, selectPrevBox } = useSingleBox();
@@ -301,7 +301,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
     setZoom(1);
   }, [size]);
 
-  // Todo: select box from topview
+  // TODO: select box from topview
   // useEffect(() => {
   // pointCloudViews.topViewSelectedChanged();
   // }, [ptCtx.selectedIDs]);

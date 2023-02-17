@@ -44,7 +44,7 @@ const TransferCanvas2WorldOffset = (
     offsetY: -(worldCenterPoint.y - canvasCenterPoint.y) / zoom,
   };
 };
-// Todo: make the positon of plygon stable
+// TODO: make the positon of plygon stable
 const updateBackViewByCanvas2D = (
   currentPos: { x: number; y: number },
   zoom: number,
@@ -195,7 +195,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         }
         ptCtx.mainViewInstance?.updateOneBoxList(newBoxParams);
 
-        // Todo: update view by change selected box
+        // TODO: update view by change selected box
         // ptCtx.mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
         syncPointCloudViewsFromSideOrBackView?.(newBoxParams);
 

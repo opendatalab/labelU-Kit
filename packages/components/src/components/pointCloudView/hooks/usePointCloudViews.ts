@@ -488,7 +488,7 @@ export const usePointCloudViews = () => {
           maxZ: newBoxParams.center.z + newBoxParams.depth / 2,
           minZ: newBoxParams.center.z - newBoxParams.depth / 2,
         };
-        // Todo: sycn data by sade view
+        // TODO: sycn data by sade view
         // mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
         syncPointCloudViewsFromSideOrBackView(newBoxParams);
         updateSelectedBox(newBoxParams);
@@ -561,7 +561,7 @@ export const usePointCloudViews = () => {
       },
     };
     Object.keys(viewToBeUpdated).forEach((key) => {
-      // Todo: reset all views
+      // TODO: reset all views
       // if (key !== omitView) {
       viewToBeUpdated[key]();
       // }
