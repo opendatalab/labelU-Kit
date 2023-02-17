@@ -15,8 +15,6 @@ import { COLORS_ARRAY } from '@/constant/style';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 
-const DEFAULT_RADIUS = 90;
-
 interface PointCloudOperationProps {
   BoxList?: IPointCloudBox[];
   attribute: string;
@@ -729,7 +727,7 @@ class PointCloudOperation extends PointCloud {
       // this.cacheInstance.setInstance(src, newPoints);
       newPoints.name = this.pointCloudObjectName;
       this.pointsUuid = newPoints.uuid;
-      this.renderPointCloud(newPoints, this.config?.radius ?? DEFAULT_RADIUS);
+      this.renderPointCloud(newPoints);
     };
     const points = await this.cacheInstance.loadPCDFile(src);
     cb(points);

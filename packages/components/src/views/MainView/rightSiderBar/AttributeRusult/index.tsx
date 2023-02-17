@@ -28,7 +28,7 @@ const LableTools = [
   EToolName.Point,
   EToolName.Line,
   EToolName.Polygon,
-  EToolName.pointCloud,
+  EToolName.PointCloud,
 ];
 
 interface AttributeResult {

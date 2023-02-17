@@ -19,6 +19,7 @@ import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
 import EventListener from '../toolOperation/eventListener';
 import MathUtils from '@/utils/MathUtils';
+import { PcZRange, PointSize, Radiuses } from '@/constant/tool';
 
 interface IOrthographicCamera {
   left: number;
@@ -61,7 +62,7 @@ export class PointCloud extends EventListener {
    * zAxis Limit for filter point over a value
    */
 
-  public zAxisLimit: number = 10;
+  public zAxisLimit: [number, number] = PcZRange as [number, number];
 
   public initCameraPosition = this.DEFAULT_INIT_CAMERA_POSITION; // It will init when the camera position be set
 
@@ -84,6 +85,10 @@ export class PointCloud extends EventListener {
   private showDirection: boolean = true; // Whether to display the direction of box
 
   public selectedPointCloud!: THREE.Points; // Selected point cloud
+
+  public pointSize: number = PointSize; // size of point
+
+  public radiuses: number[] = [Radiuses];
 
   constructor({
     container,
@@ -622,7 +627,7 @@ export class PointCloud extends EventListener {
   }
 
   public createRange(radius: number) {
-    this.removeObjectByName(this.rangeObjectName);
+    this.removeObjectByName(this.rangeObjectName + radius);
     const curve = new THREE.EllipseCurve(
       0,
       0,
@@ -641,7 +646,7 @@ export class PointCloud extends EventListener {
 
     // Create the final object to add to the scene
     const ellipse = new THREE.Line(geometry, material);
-    ellipse.name = this.rangeObjectName;
+    ellipse.name = this.rangeObjectName + radius;
     return ellipse;
   }
 
@@ -666,20 +671,18 @@ export class PointCloud extends EventListener {
     );
   };
 
-  public renderPointCloud(points: THREE.Points, radius?: number) {
-    // @ts-ignore
-    points.material.size = 1;
+  public renderPointCloud(points: THREE.Points) {
     points.name = this.pointCloudObjectName;
     const pointsMaterial = new THREE.PointsMaterial({
       vertexColors: true,
+      size: this.pointSize,
     });
-
     pointsMaterial.onBeforeCompile = this.overridePointShader;
-
-    if (radius) {
-      // @ts-ignore
-      const circle = this.createRange(radius);
-      this.scene.add(circle);
+    if (Array.isArray(this.radiuses)) {
+      for (const redius of this.radiuses) {
+        const circle = this.createRange(redius);
+        this.scene.add(circle);
+      }
     }
 
     this.pointsUuid = points.uuid;
@@ -704,13 +707,12 @@ export class PointCloud extends EventListener {
   /**
    *
    * @param src
-   * @param radius Render the range of circle
    */
-  public loadPCDFile = async (src: string, radius?: number) => {
+  public loadPCDFile = async (src: string) => {
     this.clearPointCloud();
     const points = (await this.cacheInstance.loadPCDFile(src)) as THREE.Points;
     points.name = this.pointCloudObjectName;
-    this.renderPointCloud(points, radius);
+    this.renderPointCloud(points);
   };
 
   /**
@@ -1227,7 +1229,7 @@ export class PointCloud extends EventListener {
 
       for (let i = 0; i < count; i++) {
         const z = position.getZ(i);
-        visibility.push(z > this.zAxisLimit ? 0 : 1);
+        visibility.push(z < this.zAxisLimit[0] || z > this.zAxisLimit[1] ? 0 : 1);
       }
 
       points.geometry.setAttribute('visibility', new THREE.Float32BufferAttribute(visibility, 1));
@@ -1235,10 +1237,22 @@ export class PointCloud extends EventListener {
     }
   }
 
-  public applyZAxisPoints = (zAxisLimit: number) => {
+  public applyZAxisPoints = (zAxisLimit: [number, number]) => {
     this.zAxisLimit = zAxisLimit;
     this.filterZAxisPoints();
     this.render();
+  };
+
+  public applySizePoints = (size: number) => {
+    const points: any = this.scene.children.find((i) => i.uuid === this.pointsUuid);
+    this.pointSize = size;
+    this.renderPointCloud(points);
+  };
+
+  public applyCircle = (radiuses: number[]) => {
+    const points: any = this.scene.children.find((i) => i.uuid === this.pointsUuid);
+    this.radiuses = radiuses;
+    this.renderPointCloud(points);
   };
 
   /**

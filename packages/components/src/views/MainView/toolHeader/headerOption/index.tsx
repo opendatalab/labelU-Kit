@@ -1,24 +1,17 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
-// import rotateSvg from '@/assets/annotation/common/icon_r.svg';
 import revocationSvg from '@/assets/annotation/common/icon_next.svg';
 import restoreSvg from '@/assets/annotation/common/icon_back.svg';
-// import rotateHighlightSvg from '@/assets/annotation/common/icon_rA.svg';
 import revocationHighlightSvg from '@/assets/annotation/common/icon_nextA.svg';
 import restoreHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
-// import saveSvg from '@/assets/annotation/common/icon_save.svg';
-// import saveLightSvg from '@/assets/annotation/common/icon_saveA.svg';
 import { prefix } from '@/constant';
-import { EToolName } from '@/data/enums/ToolType';
-// import { ChangeSave } from '@/store/annotation/actionCreators';
 import { IStepInfo } from '@/types/step';
 import { useTranslation } from 'react-i18next';
-import { cTool, PrevResult } from '@label-u/annotation';
+import { cTool, PrevResult, EKeyCode, EToolName, ImageLabelTool } from '@label-u/annotation';
 import { Popover } from 'antd';
 import { UpdateImgList } from '@/store/annotation/actionCreators';
 import { toolList } from '../ToolOperation';
-import { EKeyCode } from '@label-u/annotation';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import { IFileItem } from '@/types/data';
 const { EVideoToolName } = cTool;
@@ -33,13 +26,7 @@ enum EColor {
   Normal = '#cccccc',
 }
 
-export const labelTool = [
-  EToolName.Rect,
-  EToolName.Point,
-  EToolName.Line,
-  EToolName.Polygon,
-  EToolName.PointCloud,
-];
+export const labelTool = [EToolName.PointCloud, ...ImageLabelTool];
 
 const HeaderOption: React.FC<IProps> = (props) => {
   const [toolHover, setToolHover] = useState('');

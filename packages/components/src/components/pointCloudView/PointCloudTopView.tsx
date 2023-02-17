@@ -1,10 +1,7 @@
 import { getClassName } from '@/utils/dom';
-// import { FooterDivider } from '@/views/MainView/toolFooter';
-// import { ZoomController } from '@/views/MainView/toolFooter/ZoomController';
-import { DownSquareOutlined, UpSquareOutlined } from '@ant-design/icons';
 import { cTool, MathUtils, PointCloudAnnotation, ToolConfig } from '@label-u/annotation';
 import { IPointCloudBox, IPolygonData } from '@label-u/utils';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
 import { useSingleBox } from './hooks/useSingleBox';
@@ -12,7 +9,6 @@ import { PointCloudContainer } from './PointCloudLayout';
 import { PointCloudValidity } from './PointCloudInfos';
 import { usePolygon } from './hooks/usePolygon';
 import { useZoom } from './hooks/useZoom';
-import { Slider } from 'antd';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
 import { useSelector, LabelUContext } from '@/store/ctx';
@@ -54,94 +50,68 @@ const TransferCanvas2WorldOffset = (
   };
 };
 
-const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
-  // const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
-  const { selectNextBox, selectPrevBox } = useSingleBox();
-  const { updateRotate } = useRotate({ currentData });
-  const ratio = 2;
+// Todo: set topview bar for top view
+// const TopViewToolbar = ({ currentData }: IAnnotationStateProps) => {
+//   const { zoom, zoomIn, zoomOut, initialPosition } = useZoom();
+//   const { selectNextBox, selectPrevBox } = useSingleBox();
+//   const { updateRotate } = useRotate({ currentData });
+//   const ratio = 2;
 
-  const clockwiseRotate = () => {
-    updateRotate(-ratio);
-  };
-  const anticlockwiseRotate = () => {
-    updateRotate(ratio);
-  };
+//   const clockwiseRotate = () => {
+//     updateRotate(-ratio);
+//   };
+//   const anticlockwiseRotate = () => {
+//     updateRotate(ratio);
+//   };
 
-  const reverseRotate = () => {
-    updateRotate(180);
-  };
+//   const reverseRotate = () => {
+//     updateRotate(180);
+//   };
 
-  return (
-    <>
-      <span
-        onClick={anticlockwiseRotate}
-        className={getClassName('point-cloud', 'rotate-reserve')}
-      />
-      <span onClick={clockwiseRotate} className={getClassName('point-cloud', 'rotate')} />
-      <span onClick={reverseRotate} className={getClassName('point-cloud', 'rotate-180')} />
-      {/* <FooterDivider /> */}
-      <UpSquareOutlined
-        onClick={() => {
-          selectPrevBox();
-        }}
-        className={getClassName('point-cloud', 'prev')}
-      />
-      <DownSquareOutlined
-        onClick={() => {
-          selectNextBox();
-        }}
-        className={getClassName('point-cloud', 'next')}
-      />
-      {/* <FooterDivider />
-      <ZoomController
-        initialPosition={initialPosition}
-        zoomIn={zoomIn}
-        zoomOut={zoomOut}
-        zoom={zoom}
-      /> */}
-    </>
-  );
-};
+//   return (
+//     <>
+//       <span
+//         onClick={anticlockwiseRotate}
+//         className={getClassName('point-cloud', 'rotate-reserve')}
+//       />
+//       <span onClick={clockwiseRotate} className={getClassName('point-cloud', 'rotate')} />
+//       <span onClick={reverseRotate} className={getClassName('point-cloud', 'rotate-180')} />
+//       {/* <FooterDivider /> */}
+//       <UpSquareOutlined
+//         onClick={() => {
+//           selectPrevBox();
+//         }}
+//         className={getClassName('point-cloud', 'prev')}
+//       />
+//       <DownSquareOutlined
+//         onClick={() => {
+//           selectNextBox();
+//         }}
+//         className={getClassName('point-cloud', 'next')}
+//       />
 
-/**
- * Slider for filtering Z-axis points
- */
-const ZAxisSlider = ({
-  setZAxisLimit,
-  zAxisLimit,
-}: {
-  setZAxisLimit: (value: number) => void;
-  zAxisLimit: number;
-}) => {
-  return (
-    <div style={{ position: 'absolute', top: 128, right: 8, height: '50%', zIndex: 20 }}>
-      <Slider
-        vertical
-        step={0.5}
-        max={10}
-        min={0.5}
-        defaultValue={zAxisLimit}
-        onAfterChange={(v: number) => {
-          setZAxisLimit(v);
-        }}
-      />
-    </div>
-  );
-};
+//       <FooterDivider />
+//       <ZoomController
+//         initialPosition={initialPosition}
+//         zoomIn={zoomIn}
+//         zoomOut={zoomOut}
+//         zoom={zoom}
+//       />
+//     </>
+//   );
+// };
 
 const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
   currentData,
   config,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  // const polygonRef = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
   const { setZoom } = useZoom();
 
   const { addPolygon, deletePolygon } = usePolygon();
   const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
-  const [zAxisLimit, setZAxisLimit] = useState<number>(10);
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
   const toolStyle = useSelector((state: AppState) => {
@@ -161,7 +131,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
       const pointCloudAnnotation = new PointCloudAnnotation({
         container: ref.current,
         config: config.config as ToolConfig,
-        // polygonContainer: polygonRef.current,
         size,
         pcdPath: currentData.url,
       });
@@ -332,10 +301,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
     setZoom(1);
   }, [size]);
 
-  useEffect(() => {
-    ptCtx.mainViewInstance?.applyZAxisPoints(zAxisLimit);
-  }, [zAxisLimit]);
-
   // Todo: select box from topview
   // useEffect(() => {
   // pointCloudViews.topViewSelectedChanged();
@@ -350,8 +315,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
       >
         <div style={{ position: 'relative', flex: 1 }}>
           <div id='mytool' style={{ width: '100%', height: '100%' }} ref={ref} />
-          {/* <BoxInfos /> */}
-          <ZAxisSlider zAxisLimit={zAxisLimit} setZAxisLimit={setZAxisLimit} />
           <PointCloudValidity />
         </div>
       </PointCloudContainer>

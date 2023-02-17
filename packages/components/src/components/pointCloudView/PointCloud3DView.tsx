@@ -127,6 +127,22 @@ const PointCloud3D: React.FC<
   }, [size]);
 
   useEffect(() => {
+    ptCtx.mainViewInstance?.applyZAxisPoints(ptCtx.zRange);
+  }, [ptCtx.zRange]);
+
+  useEffect(() => {
+    ptCtx.mainViewInstance?.applySizePoints(ptCtx.pointSize);
+  }, [ptCtx.pointSize]);
+
+  useEffect(() => {
+    const radiuses = ptCtx.radiuses.split('；').map((r) => {
+      return Number(r);
+    });
+
+    ptCtx.mainViewInstance?.applyCircle(radiuses);
+  }, [ptCtx.radiuses]);
+
+  useEffect(() => {
     refreshtPointCloud3DView();
   }, [currentData?.url, showSettingConfig]);
 
