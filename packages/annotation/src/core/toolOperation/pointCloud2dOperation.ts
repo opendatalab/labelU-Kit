@@ -159,7 +159,7 @@ class PointCloud2dOperation extends PolygonOperation {
    * Right click event
    * @override
    */
-  // Todo: set rightmouse event for polygon
+  // TODO: set rightmouse event for polygon
   public rightMouseUp = () => {
     // if (this.drawingPointList.length > 0) {
     //   this.addDrawingPointToPolygonList();
