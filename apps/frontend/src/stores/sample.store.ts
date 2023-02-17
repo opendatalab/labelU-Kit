@@ -6,6 +6,7 @@ const samplesSlice = createSlice({
   initialState: {
     newSamples: [],
     currentSampleId: undefined,
+    list: [],
   },
   reducers: {
     updateNewSamples: (state: any, action: any) => {
@@ -14,9 +15,13 @@ const samplesSlice = createSlice({
     updateCurrentSampleId: (state: any, action: any) => {
       state.currentSampleId = action.payload;
     },
+
+    setSamples: (state: any, action: any) => {
+      state.list = action.payload;
+    },
   },
 });
 
-export const { updateNewSamples, updateCurrentSampleId } = samplesSlice.actions;
+export const { updateNewSamples, updateCurrentSampleId, setSamples } = samplesSlice.actions;
 
 export default samplesSlice.reducer;

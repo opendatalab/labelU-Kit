@@ -1,6 +1,7 @@
 import { useState, useEffect, createRef } from 'react';
 import { useLocation } from 'react-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
 
 import Annotation from '../../components/business/annotation';
 import currentStyles from './index.module.scss';
@@ -19,6 +20,7 @@ const AnnotationPage = () => {
   const dispatch = useDispatch();
   const [taskConfig, setTaskConfig] = useState<any>({});
   const [taskSample, setTaskSample] = useState<any>([]);
+
   const getDatas = async function (taskId: number, sampleId: number) {
     try {
       const taskRes = await getTask(taskId);
@@ -41,24 +43,28 @@ const AnnotationPage = () => {
       commonController.notificationErrorMessage(err, 1);
     }
   };
+  const sampleId = parseInt(window.location.pathname.split('/')[4]);
 
   useEffect(() => {
     const taskId = parseInt(window.location.pathname.split('/')[2]);
-    const sampleId = parseInt(window.location.pathname.split('/')[4]);
 
     getDatas(taskId, sampleId)
       // eslint-disable-next-line no-console
       .catch((err) => console.error(err));
     // @ts-ignore
     dispatch(updateCurrentSampleId(sampleId));
-  }, [dispatch, location]);
+  }, [dispatch, location, sampleId]);
+
+  // @ts-ignore
+  const samples = useSelector((state) => state.samples?.list || []);
+  const isLastSample = _.findIndex(samples, { id: sampleId }) === samples.length - 1;
 
   const goBack = () => {};
   const leftSiderContent = <SlideLoader />;
-  const topActionContent = <AnnotationRightCorner />;
+  // NOTE: labelu/components包裹了store，在AnnotationRightCorner里获取store不是应用的store！有冲突！
+  const topActionContent = <AnnotationRightCorner isLastSample={isLastSample} />;
   const updatePrevImageListResult = async function () {
     const taskId = parseInt(window.location.pathname.split('/')[2]);
-    const sampleId = parseInt(window.location.pathname.split('/')[4]);
 
     getPreSample(taskId, sampleId)
       .then((res: any) => {

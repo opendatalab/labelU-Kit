@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { Table, Pagination, Modal } from 'antd';
 import moment from 'moment';
+
+import { setSamples } from '@/stores/sample.store';
 
 import currentStyles from './index.module.scss';
 import Statistical from '../../components/statistical';
@@ -14,6 +16,7 @@ import currentStyles1 from '../outputData/index.module.scss';
 const Samples = () => {
   const taskId = parseInt(window.location.pathname.split('/')[2]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [isModalShow, setIsModalShow] = useState(false);
   const [taskStatus, setTaskStatus] = useState<any>(undefined);
@@ -42,6 +45,7 @@ const Samples = () => {
           setTotal(res.data.meta_data.total);
           setCurrentPage(params.pageNo + 1);
           setCurrentPageSize(params.pageSize);
+          dispatch(setSamples(res.data.data));
         } else {
           commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
         }

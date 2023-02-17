@@ -7,7 +7,11 @@ import commonController from '../../utils/common/common';
 import { annotationRef } from '../../pages/annotation2';
 import TempStore from './tempStore';
 
-const AnnotationRightCorner = () => {
+interface AnnotationRightCornerProps {
+  isLastSample: boolean;
+}
+
+const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => {
   const navigate = useNavigate();
   const taskId = parseInt(window.location.pathname.split('/')[2]);
   const sampleId = parseInt(window.location.pathname.split('/')[4]);
@@ -255,7 +259,7 @@ const AnnotationRightCorner = () => {
           </div>
         )}
         <div className={currentStyles.rightRight} id={'nextPage'} onClick={commonController.debounce(nextPage, 100)}>
-          下一页
+          {isLastSample ? '完成' : '下一页'}
         </div>
       </div>
     </div>
