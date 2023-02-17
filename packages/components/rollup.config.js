@@ -50,7 +50,7 @@ const commonPlugin = [
   }),
   image(),
   postcss({
-    extract: false,
+    inject: false,
   }),
 ];
 
