@@ -561,7 +561,7 @@ export const usePointCloudViews = () => {
       },
     };
     Object.keys(viewToBeUpdated).forEach((key) => {
-      // Todo: reset all views
+      // TODO: reset all views
       // if (key !== omitView) {
       viewToBeUpdated[key]();
       // }
