@@ -24,7 +24,8 @@ declare interface IBasicAnnotationInfo {
 declare interface IDrawingCuboid extends IBasicAnnotationInfo {
   // Front Plane;
   frontPoints: IPlanePoints;
-
+  // Direction of cuboid
+  direction?: ECuboidDirection;
   // Back Plane;
   backPoints?: IPlanePoints;
 }

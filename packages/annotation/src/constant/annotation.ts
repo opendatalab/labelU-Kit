@@ -79,8 +79,8 @@ export enum ECuboidPosition {
 export enum ECuboidDirection {
   Front = 'front',
   Back = 'back',
-  left = 'left',
-  right = 'right',
+  Left = 'left',
+  Right = 'right',
   Top = 'top',
 }
 

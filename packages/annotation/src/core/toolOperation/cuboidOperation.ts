@@ -11,8 +11,11 @@ import {
   getHighlightPoints,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
-import { EDragStatus, EDragTarget } from '@/constant/annotation';
-import { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
+import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
+import { ICuboid, ICuboidPosition, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
+import MarkerUtils from '@/utils/tool/MarkerUtils';
+import AttributeUtils from '@/utils/tool/AttributeUtils';
+import CuboidToggleButtonClass from './cuboidToggleButtonClass';
 
 interface ICuboidOperationProps extends IBasicToolOperationProps {}
 
@@ -23,6 +26,8 @@ enum EDrawingStatus {
 }
 
 class CuboidOperation extends BasicToolOperation {
+  private toggleButtonInstance?: CuboidToggleButtonClass;
+
   public drawingCuboid?: IDrawingCuboid;
 
   // First Click
@@ -404,6 +409,7 @@ class CuboidOperation extends BasicToolOperation {
     // 1. Create New Cuboid.
     this.drawingCuboid = {
       attribute: this.defaultAttribute,
+      direction: ECuboidDirection.Front,
       valid: !e.ctrlKey,
       id: uuid(8, 62),
       sourceID: basicSourceID,
@@ -461,7 +467,8 @@ class CuboidOperation extends BasicToolOperation {
       color: strokeColor,
       thickness: lineWidth,
     };
-    const { backPoints } = transformCuboid;
+    const { backPoints, direction, frontPoints } = transformCuboid;
+
     if (backPoints) {
       const sideLine = getCuboidAllSideLine(transformCuboid as ICuboid);
       sideLine?.forEach((line) => {
@@ -473,8 +480,14 @@ class CuboidOperation extends BasicToolOperation {
 
       DrawUtils.drawPolygon(this.canvas, backPointList, { ...defaultStyle, isClose: true });
     }
-    const pointList = AxisUtils.transformPlain2PointList(transformCuboid.frontPoints);
-    DrawUtils.drawPolygonWithFill(this.canvas, pointList, { color: toolColor.valid.fill });
+
+    const pointList = AxisUtils.transformPlain2PointList(frontPoints);
+    if (direction && backPoints && frontPoints) {
+      const points = this.getPointListsByDirection(direction, frontPoints, backPoints);
+      if (points) {
+        DrawUtils.drawPolygonWithFill(this.canvas, points, { color: toolColor.valid.fill });
+      }
+    }
     DrawUtils.drawPolygon(this.canvas, pointList, { ...defaultStyle, isClose: true });
 
     // Hover Highlight
@@ -489,23 +502,101 @@ class CuboidOperation extends BasicToolOperation {
         });
       }
     }
-
     let showText = '';
     if (this.isShowOrder && transformCuboid.order && transformCuboid?.order > 0) {
       showText = `${transformCuboid.order}`;
     }
-    if (!hiddenText) {
-      // DrawingText under the frontPlane.
-      DrawUtils.drawText(
-        this.canvas,
-        { x: transformCuboid.frontPoints.tl.x, y: transformCuboid.frontPoints.tl.y - 5 },
-        showText,
-        {
-          color: strokeColor,
-          textMaxWidth: 300,
-        },
-      );
+    if (transformCuboid?.label && this.hasMarkerConfig) {
+      const order = CommonToolUtils.getAllToolsMaxOrder(this.cuboidList, this.prevResultList);
+      showText = `${order}_${MarkerUtils.getMarkerShowText(transformCuboid?.label, this.config.markerList)}`;
     }
+
+    if (transformCuboid.attribute) {
+      showText = `${showText}  ${AttributeUtils.getAttributeShowText(
+        transformCuboid.attribute,
+        this.config?.attributeList,
+      )}`;
+    }
+
+    if (!hiddenText && backPoints) {
+      DrawUtils.drawText(this.canvas, { x: backPoints.tl.x, y: backPoints.tl.y - 5 }, showText, {
+        color: strokeColor,
+        textMaxWidth: 300,
+      });
+    }
+  }
+
+  public setDefaultAttribute(defaultAttribute?: string) {
+    const oldDefault = this.defaultAttribute;
+    this.defaultAttribute = defaultAttribute ?? '';
+
+    if (oldDefault !== defaultAttribute) {
+      // If chang attribute, need to change the styles in parallel
+      this.changeStyle(defaultAttribute);
+
+      //  Trigger sidebar synchronisation
+      this.emit('changeAttributeSidebar');
+
+      // If this target is selected, the currently selected property needs to be changed
+      const { selectedCuboid } = this;
+
+      if (selectedCuboid) {
+        this.setCuboidList(
+          this.cuboidList.map((v) => {
+            if (v.id === this.selectedID) {
+              return {
+                ...v,
+                attribute: this.defaultAttribute,
+              };
+            }
+
+            return v;
+          }),
+        );
+
+        this.history.pushHistory(this.cuboidList);
+        this.render();
+      }
+
+      if (this.drawingCuboid) {
+        this.drawingCuboid = {
+          ...this.drawingCuboid,
+          attribute: this.defaultAttribute,
+        };
+        this.render();
+      }
+    }
+  }
+
+  public renderToggleButton() {
+    const { selectedCuboid } = this;
+    if (!this.ctx || this.config.textConfigurable !== true || !selectedCuboid) {
+      return;
+    }
+    const { frontPoints, attribute, valid } = selectedCuboid;
+
+    const { x } = frontPoints.bl;
+    const { y } = frontPoints.bl;
+
+    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
+    const toolColor = this.getColor(attribute);
+
+    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const distance = 4;
+
+    if (!this.toggleButtonInstance) {
+      this.toggleButtonInstance = new CuboidToggleButtonClass({
+        container: this.container,
+        cuboidButtonMove: (type: 'in' | 'out') => this.updateMouseOperation(type),
+        toggleGlossySide: (direction: ECuboidDirection) => this.toggleGlossySide(direction),
+      });
+    }
+
+    this.toggleButtonInstance.update({
+      left: coordinate.x,
+      top: coordinate.y + distance,
+      color,
+    });
   }
 
   public renderDrawing() {
@@ -522,6 +613,73 @@ class CuboidOperation extends BasicToolOperation {
     const { selectedCuboid } = this;
     if (selectedCuboid) {
       this.renderSingleCuboid(selectedCuboid);
+      this.renderToggleButton();
+    } else {
+      this.toggleButtonInstance?.clearCuboidButtonDOM();
+      this.toggleButtonInstance = undefined;
+    }
+  }
+
+  // Executed when the mouse is moved in and out to toggle the glossy button
+  public updateMouseOperation(type: 'in' | 'out') {
+    if (type === 'in') {
+      // Show crosshairs
+      this.setForbidCursorLine(true);
+      // Restricted mouse action
+      this.setForbidOperation(true);
+      this.setShowDefaultCursor(true);
+    } else {
+      this.setForbidCursorLine(false);
+      this.setShowDefaultCursor(false);
+      this.setForbidOperation(false);
+    }
+  }
+
+  // Switching glossy surfaces
+  public toggleGlossySide(direction: ECuboidDirection) {
+    if (this.cuboidList && this.selectedCuboid) {
+      this.cuboidList = this.cuboidList.map((i) => (i.id === this.selectedCuboid?.id ? { ...i, direction } : i));
+      this.render();
+    }
+  }
+
+  // Get the points of the corresponding faces by direction
+  public getPointListsByDirection(direction: ECuboidDirection, frontPoints: IPlanePoints, backPoints: IPlanePoints) {
+    if (direction && frontPoints && backPoints) {
+      let points: IPlanePoints = frontPoints;
+      switch (direction) {
+        case ECuboidDirection.Back:
+          points = backPoints;
+          break;
+        case ECuboidDirection.Left:
+          points = {
+            bl: backPoints.bl,
+            br: frontPoints.bl,
+            tl: backPoints.tl,
+            tr: frontPoints.tl,
+          };
+          break;
+        case ECuboidDirection.Right:
+          points = {
+            bl: backPoints.br,
+            br: frontPoints.br,
+            tl: backPoints.tr,
+            tr: frontPoints.tr,
+          };
+          break;
+        case ECuboidDirection.Top:
+          points = {
+            bl: backPoints.tl,
+            br: frontPoints.tl,
+            tl: backPoints.tr,
+            tr: frontPoints.tr,
+          };
+          break;
+        default:
+          points = frontPoints;
+          break;
+      }
+      return AxisUtils.transformPlain2PointList(points);
     }
   }
 
