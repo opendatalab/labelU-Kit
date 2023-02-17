@@ -2,6 +2,7 @@ import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import { connect, useSelector } from 'react-redux';
+import _ from 'lodash';
 
 import type { IFileItem } from '@/types/data';
 
@@ -82,8 +83,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         </div>,
       );
       // 设置分类结果
-      // if (currentImgResult?.tagTool?.toolName) {
-      const tagResultKeys = currentImgResult?.tagTool ? Object.keys(currentImgResult?.tagTool.result[0]?.result) : [];
+      const tagResultKeys = Object.keys(_.get(currentImgResult, 'tagTool.result[0].result', {}));
       setTagTab(
         <div className="rightTab">
           <p>分类</p>
