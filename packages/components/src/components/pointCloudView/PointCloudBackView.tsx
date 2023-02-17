@@ -195,7 +195,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         }
         ptCtx.mainViewInstance?.updateOneBoxList(newBoxParams);
 
-        // Todo: update view by change selected box
+        // TODO: update view by change selected box
         // ptCtx.mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
         syncPointCloudViewsFromSideOrBackView?.(newBoxParams);
 
