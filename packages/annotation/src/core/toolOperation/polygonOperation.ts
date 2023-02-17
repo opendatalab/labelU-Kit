@@ -13,7 +13,7 @@ import EKeyCode from '../../constant/keyCode';
 import { edgeAdsorptionScope, ELineTypes, EPolygonPattern, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
@@ -23,12 +23,13 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import PolygonUtils from '../../utils/tool/PolygonUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
-export interface IPolygonOperationProps extends IBasicToolOperationProps {}
+export type IPolygonOperationProps = IBasicToolOperationProps;
 
 class PolygonOperation extends BasicToolOperation {
   public config: IPolygonConfig;
@@ -503,7 +504,7 @@ class PolygonOperation extends BasicToolOperation {
       samePolygon.pointList = this.drawingPointList;
       this.editPolygonID = '';
     } else {
-      const id = paramId ? paramId : uuid(8, 62);
+      const id = paramId || uuid(8, 62);
       let newPolygon: IPolygonData = {
         id,
         sourceID: basicSourceID,

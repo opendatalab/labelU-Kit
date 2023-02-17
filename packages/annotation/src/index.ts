@@ -37,14 +37,14 @@ import { PointCloudAnnotation } from './core/pointCloud/annotation';
 import { PointCloud } from './core/pointCloud';
 import UnitUtils from './utils/tool/UnitUtils';
 import PointCloudOperation from './core/toolOperation/pointCloudOperation';
-
-export { EToolName, TOOL_NAME } from './constant/tool';
-
-export { COLORS_ARRAY } from './constant/style';
 import EKeyCode from './constant/keyCode';
 import AttributeUtils from './utils/tool/AttributeUtils';
 
 const toolUtils = CommonToolUtils;
+
+export { EToolName, TOOL_NAME, ImageLabelTool, PcZRange, PointSize, Radiuses } from './constant/tool';
+
+export { COLORS_ARRAY } from './constant/style';
 
 // 工具对外暴露配置统一定义
 export * from './interface/conbineTool';
@@ -86,6 +86,6 @@ export {
   ScribbleTool,
   PointCloud,
   UnitUtils,
-    // constants
-    EKeyCode
+  // constants
+  EKeyCode,
 };

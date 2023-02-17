@@ -99,6 +99,7 @@ const ToolOperation: React.FC<IProps> = (props) => {
               </Popover>
             );
           }
+          return <div key={item.tool} />;
         })}
       <ImageStyle />
     </div>

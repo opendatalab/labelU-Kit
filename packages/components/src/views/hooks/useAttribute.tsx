@@ -1,12 +1,11 @@
 import React, { useContext } from 'react';
 import { Form, Input, Select } from 'antd';
 import { PrevResult, Attribute } from '@label-u/annotation';
-import { useSelector } from '../../store/ctx';
+import { useSelector, useDispatch } from '../../store/ctx';
 import { UpdateImgList } from '../../store/annotation/actionCreators';
 const { Option } = Select;
 import { AppState } from '../../store';
 import { IFileItem } from '../../types/data';
-import { useDispatch } from '../../store/ctx';
 import { PointCloudContext } from '../../components/pointCloudView/PointCloudContext';
 import { toolList } from '../../views/MainView/toolHeader/ToolOperation';
 
@@ -36,12 +35,11 @@ export const useAttributes = () => {
     for (let item of attributeList) {
       children.push(<Option key={item.key}>{item.value}</Option>);
     }
-
     return (
       <Form
         name='basic'
         layout='vertical'
-        key={attributeResult.attributeName}
+        key={attributeResult.attributeName + toolInfo.textAttribute}
         initialValues={{
           changeAttribute: attributeResult.attributeName,
           description: toolInfo.textAttribute,

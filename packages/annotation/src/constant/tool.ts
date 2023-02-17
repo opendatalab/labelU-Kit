@@ -1,7 +1,7 @@
 // 编辑步骤的侧边栏宽度
 export const editStepWidth = 320;
 
-export type toolNameType =
+export type ToolNameType =
   | `rectTool`
   | `tagTool`
   | `polygonTool`
@@ -68,7 +68,7 @@ export enum EToolName {
   /** 算法分割辅助工具 */
   SegmentByRect = 'segmentByRectTool',
   /** 点云工具 */
-  pointCloud = 'pointCloudTool',
+  PointCloud = 'pointCloudTool',
 }
 
 export enum ECheckModel {
@@ -83,7 +83,7 @@ export enum ERectPattern {
 
 export type ToolName = EToolName | EVideoToolName | EPointCloudName;
 
-export const TOOL_NAME: { [a: string]: string } = {
+export const TOOL_NAME: Record<string, string> = {
   [EToolName.Rect]: '拉框',
   [EToolName.Tag]: '标签分类',
   [EToolName.Point]: '标点',
@@ -217,14 +217,14 @@ export enum EThumbnailOption {
   ImgSearch,
 }
 
-export const CLIENT_TOOL_HEAD_TYPE: { [a: string]: string } = {
+export const CLIENT_TOOL_HEAD_TYPE: Record<string, string> = {
   [EPointCloudName.PointCloud]: 'sensebeepc',
   [EToolName.ClientAttribute]: 'sensebeepc-EnumAttributeTool',
   [EToolName.Face]: 'sensebeepc-FacePointsLabellingTool',
   [EToolName.OCRRelation]: 'sensebeepc-OCRRelationTool',
 };
 
-export const CLIENT_TOOL_NAME: { [a: string]: string } = {
+export const CLIENT_TOOL_NAME: Record<string, string> = {
   [EPointCloudName.PointCloud]: '点云客户端',
   [EToolName.ClientAttribute]: '客户端属性工具',
   [EToolName.Face]: '人脸106点工具',
@@ -249,3 +249,11 @@ export enum EScribblePattern {
   Scribble = 1, // 涂抹操作
   Erase = 2, // 橡皮刷
 }
+
+export const ImageLabelTool = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];
+
+export const PcZRange = [-5, 10];
+
+export const PointSize = 1;
+
+export const Radiuses = 80;

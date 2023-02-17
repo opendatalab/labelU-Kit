@@ -39,7 +39,6 @@ const FooterOption: React.FC<IProps> = (props) => {
   }));
   const { t } = useTranslation();
 
-  console.log(currentToolName);
   const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(currentToolName);
   const isVideo = [EVideoToolName.VideoTagTool].includes(currentToolName);
   const isPcTool = [EToolName.PointCloud].includes(currentToolName);
@@ -103,7 +102,7 @@ const FooterOption: React.FC<IProps> = (props) => {
       selectedSvg: topViewSvg,
       commonSvg: topViewSvg,
       click: () => {
-        ptCtx?.mainViewInstance.resetCamera();
+        ptCtx?.mainViewInstance?.resetCamera();
       },
       style: {
         marginRight: '4px',

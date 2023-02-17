@@ -36,13 +36,13 @@ const LabelShowSetArea: FC = () => {
         dispatch(UpdateIsShowAttribute(value.target.checked));
       },
     },
-    // {
-    //   name: '显示属性信息',
-    //   key: 'isShowAttribute',
-    //   onChange: (value: CheckboxChangeEvent) => {
-    //     dispatch(UpdateIsShowAttributeText(value.target.checked));
-    //   },
-    // },
+    {
+      name: '显示属性信息',
+      key: 'isShowAttribute',
+      onChange: (value: CheckboxChangeEvent) => {
+        dispatch(UpdateIsShowAttributeText(value.target.checked));
+      },
+    },
     {
       name: '显示标记顺序',
       key: 'isShowOrder',
@@ -72,13 +72,13 @@ const LabelShowSetArea: FC = () => {
     <Form name='basic' layout='vertical' autoComplete='off' initialValues={initValue}>
       {labelShowFormConfig &&
         labelShowFormConfig.length > 0 &&
-        labelShowFormConfig.map((item) => {
+        labelShowFormConfig.map((item, index) => {
+          const ItemStyle =
+            index < labelShowFormConfig.length - 1
+              ? { marginBottom: '16px', marginTop: '0px' }
+              : { marginBottom: '0px', marginTop: '0px' };
           return (
-            <Form.Item
-              key={item.key}
-              valuePropName='checked'
-              name={item.key}
-            >
+            <Form.Item style={ItemStyle} key={item.key} valuePropName='checked' name={item.key}>
               <Checkbox onChange={item.onChange}>{item.name}</Checkbox>
             </Form.Item>
           );

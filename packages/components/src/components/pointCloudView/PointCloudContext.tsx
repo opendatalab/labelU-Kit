@@ -1,5 +1,11 @@
 import { IPointCloudBox, IPointCloudBoxList, IPolygonData } from '@label-u/utils';
-import { PointCloudAnnotation, PointCloudOperation } from '@label-u/annotation';
+import {
+  PointCloudAnnotation,
+  PointCloudOperation,
+  PcZRange,
+  PointSize,
+  Radiuses,
+} from '@label-u/annotation';
 import React, { useMemo, useState } from 'react';
 
 interface IPointCloudContextInstances {
@@ -31,6 +37,12 @@ export interface IPointCloudContext extends IPointCloudContextInstances {
 
   zoom: number;
   setZoom: (zoom: number) => void;
+  radiuses: string;
+  zRange: [number, number];
+  pointSize: number;
+  setRadiuses: (radiuses: string) => void;
+  setZrange: (zRange: [number, number]) => void;
+  setPointSize: (pointSize: number) => void;
 }
 
 export const PointCloudContext = React.createContext<IPointCloudContext>({
@@ -39,6 +51,10 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedID: '',
   selectedIDs: [],
   valid: true,
+  radiuses: `${Radiuses}`,
+  zRange: PcZRange as [number, number],
+  pointSize: PointSize,
+  zoom: 1,
   setSelectedIDs: () => {},
   setPointCloudResult: () => {},
   setPointCloudValid: () => {},
@@ -50,8 +66,9 @@ export const PointCloudContext = React.createContext<IPointCloudContext>({
   selectedAllBoxes: () => {},
   addPointCloudBox: () => {},
   setPolygonList: () => {},
-
-  zoom: 1,
+  setRadiuses: () => {},
+  setZrange: () => {},
+  setPointSize: () => {},
   setZoom: () => {},
 });
 
@@ -65,6 +82,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloudOperation>();
+  const [radiuses, setRadiuses] = useState<string>('80');
+  const [zRange, setZrange] = useState<[number, number]>([-5, 10]);
+  const [pointSize, setPointSize] = useState<number>(1);
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';
@@ -74,18 +94,15 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     const selectedPointCloudBox = pointCloudBoxList.find((v) => v.id === selectedID);
 
     const addPointCloudBox = (box: IPointCloudBox) => {
-      if(pointCloudBoxList){
-        let newPointCloudBoxList  = []
-        for(let i = 0; i < pointCloudBoxList.length; i++){
-          if(pointCloudBoxList[i].id !== box.id){
-            newPointCloudBoxList.push(pointCloudBoxList[i])
+      if (pointCloudBoxList) {
+        let newPointCloudBoxList = [];
+        for (let pcBox of pointCloudBoxList) {
+          if (pcBox.id !== box.id) {
+            newPointCloudBoxList.push(pcBox);
           }
         }
         setPointCloudResult(newPointCloudBoxList.concat(box));
       }
-
-
-
     };
 
     const setPointCloudValid = (valid?: boolean) => {
@@ -147,6 +164,12 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
       setPolygonList,
       zoom,
       setZoom,
+      radiuses,
+      setRadiuses,
+      zRange,
+      setZrange,
+      pointSize,
+      setPointSize,
     };
   }, [
     valid,
@@ -158,6 +181,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
     backViewInstance,
     mainViewInstance,
     zoom,
+    zRange,
+    pointSize,
+    radiuses,
   ]);
 
   return <PointCloudContext.Provider value={ptCtx}>{children}</PointCloudContext.Provider>;

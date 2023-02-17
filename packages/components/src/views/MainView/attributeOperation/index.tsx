@@ -31,14 +31,14 @@ export const getCombineAttributes = (
     tmpAttributesList = [...tmpAttributesList, ...attributeList];
   }
   if (toolsBasicConfig && toolsBasicConfig.length > 0) {
-    for (let i = 0; i < toolsBasicConfig.length; i++) {
-      //@ts-ignore
-      if (toolsBasicConfig[i].config?.attributeList) {
+    for (let toolConfig of toolsBasicConfig) {
+      // @ts-ignore
+      if (toolConfig.config?.attributeList) {
         // @ts-ignore
         tmpAttributesList = [
           ...tmpAttributesList,
           // @ts-ignore
-          ...toolsBasicConfig[i].config?.attributeList,
+          ...toolConfig.config.attributeList,
         ];
       }
     }
@@ -66,9 +66,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const { updateMainViewAttribute } = UseAttributes();
 
   useEffect(() => {
-    if (copytoolInstance && copytoolInstance?.defaultAttribute) {
+    if (copytoolInstance?.defaultAttribute) {
       setChoseAttribute(copytoolInstance?.defaultAttribute);
-    } else if (ptCtx.mainViewInstance && ptCtx.mainViewInstance?.attribute) {
+    } else if (ptCtx.mainViewInstance?.attribute) {
       setChoseAttribute(ptCtx.mainViewInstance?.attribute);
     }
   }, [copytoolInstance, ptCtx.mainViewInstance?.attribute]);

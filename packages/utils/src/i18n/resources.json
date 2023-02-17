@@ -170,7 +170,10 @@
     "updateValidFromValidToInValid": "Confirm update as invalid page？",
     "updateValidFromInValidToValid": "Confirm update as valid page？",
     "OriginalScaleSet": "Original scale set",
-    "TopLook": "Top view"
+    "TopLook": "Top view",
+    "pointSize": "size of point",
+    "rangeHeight": "range of height",
+    "labelRedius": "radius of label"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -343,6 +346,9 @@
     "updateValidFromValidToInValid": "是否确认标为无效文件？",
     "updateValidFromInValidToValid": "是否确认取消无效文件？",
     "OriginalScaleSet": "按原始比例显示",
-    "TopLook": "俯视视角"
+    "TopLook": "俯视视角",
+    "pointSize": "点大小",
+    "rangeHeight": "高度显示范围",
+    "labelRedius": "标注范围半径"
   }
 }

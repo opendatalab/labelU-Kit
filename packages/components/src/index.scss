@@ -2,7 +2,6 @@
 @import './styles/reset-antd.scss';
 @import 'antd/dist/antd.min.css';
 
-
 $headerHeight: 60px;
 $menuWidth: 240px;
 $sidebarHeaderHeight: 75px;
@@ -588,7 +587,7 @@ body {
     }
 
     .ant-tabs-nav-list {
-      border-top:1px solid rgba(0, 0, 0, 0.1);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       height: 64px !important;
       align-items: center;
@@ -806,6 +805,12 @@ body {
         overflow: hidden;
         text-overflow: ellipsis;
       }
+    }
+  }
+
+  #popover-with-slider {
+    .ant-slider-track {
+      background-color: #1b67ff;
     }
   }
 
@@ -1863,7 +1868,6 @@ $hotkey-container-padding: 7px;
 
 /** VideoPlayer样式 end */
 
-
 /** PointCloud样式 start */
 
 @mixin icon($size: 36px) {
@@ -2077,7 +2081,6 @@ $hotkey-container-padding: 7px;
       display: flex;
       flex-direction: column;
     }
-
 
     .#{$ptPrefix}-container__side-view,
     .#{$ptPrefix}-container__back-view {

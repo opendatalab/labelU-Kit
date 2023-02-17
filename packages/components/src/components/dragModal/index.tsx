@@ -98,6 +98,9 @@ const DrageModel = (props: Iprops, ref: any) => {
           maxWidth: props.width,
           height: props.height,
         }}
+        bodyStyle={{
+          padding: '16px 12px',
+        }}
         closable={closable}
         visible={isVisble}
         okText={okWord}

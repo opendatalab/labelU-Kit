@@ -1,4 +1,4 @@
-import { Col, Row, Slider, Switch, Input } from 'antd/es';
+import { Col, Row, Slider, Input } from 'antd/es';
 import { connect } from 'react-redux';
 import { throttle } from 'lodash';
 import React, { useEffect } from 'react';
@@ -9,17 +9,16 @@ import { store } from '@/index';
 import saturationSvg from '@/assets/annotation/image/saturation.svg';
 import contrastSvg from '@/assets/annotation/image/contrast.svg';
 import brightnessSvg from '@/assets/annotation/image/brightness.svg';
-import ZoomUpSvg from '@/assets/attributeIcon/zoomUp.svg';
-import originalPic from '@/assets/annotation/image/icon_yuantu.svg';
+import { LabelUContext } from '@/store/ctx';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {
   imgAttribute: ImgAttributeState;
 }
 
-const ImgAttributeInfo = (props: IProps) => {
+const ImgStyleSet = (props: IProps) => {
   const {
-    imgAttribute: { contrast, saturation, brightness, zoomRatio, isOriginalSize },
+    imgAttribute: { contrast, saturation, brightness },
   } = props;
 
   const { t } = useTranslation();
@@ -60,15 +59,6 @@ const ImgAttributeInfo = (props: IProps) => {
       value: brightness,
       svg: brightnessSvg,
     },
-    // {
-    //   name: 'ScreenRatio',
-    //   min: 0.1,
-    //   max: 10,
-    //   step: 0.1,
-    //   onChange: (v: number) => imgAttributeChange({ zoomRatio: v }),
-    //   value: zoomRatio,
-    //   svg: ZoomUpSvg,
-    // },
   ];
 
   useEffect(() => {
@@ -115,22 +105,6 @@ const ImgAttributeInfo = (props: IProps) => {
           </Row>
         </div>
       ))}
-      {/* <div className='imgAttributeController'>
-        <Row className='tools' style={{ padding: '10px 0' }}>
-          <Col span={18}>
-            <span className='singleTool'>
-              <img src={originalPic} width={16} style={{ marginTop: '-2px' }} />
-              <span className='toolName'>{t('OriginalScale')}</span>
-            </span>
-          </Col>
-          <Col>
-            <Switch
-              checked={isOriginalSize}
-              onChange={(v: boolean) => imgAttributeChange({ isOriginalSize: v })}
-            />
-          </Col>
-        </Row>
-      </div> */}
     </div>
   );
 };
@@ -139,4 +113,4 @@ function mapStateToProps({ imgAttribute }: any) {
   return { imgAttribute };
 }
 
-export default connect(mapStateToProps)(ImgAttributeInfo);
+export default connect(mapStateToProps, null, null, { context: LabelUContext })(ImgStyleSet);
