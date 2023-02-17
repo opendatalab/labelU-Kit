@@ -336,7 +336,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
     ptCtx.mainViewInstance?.applyZAxisPoints(zAxisLimit);
   }, [zAxisLimit]);
 
-  // Todo: select box from topview
+  // TODO: select box from topview
   // useEffect(() => {
   // pointCloudViews.topViewSelectedChanged();
   // }, [ptCtx.selectedIDs]);
