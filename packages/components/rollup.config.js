@@ -49,7 +49,9 @@ const commonPlugin = [
     customResolver,
   }),
   image(),
-  postcss(),
+  postcss({
+    inject: false,
+  }),
 ];
 
 export default () => {
