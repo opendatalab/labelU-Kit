@@ -71,6 +71,12 @@ const AnnotationConfig: FC = () => {
   const [rightImg, setRightImg] = useState<any>();
   const [isConfigError] = useState<boolean>(false);
 
+  const [force, forceSet] = useState(0);
+  useEffect(() => {
+    // 配置更新表单刷新
+    forceSet(new Date().getTime());
+  }, [attribute, tagList, textConfig, tools, commonAttributeConfigurable]);
+
   useEffect(() => {
     // 初始化配置防抖方法
     const throttle = (fun: () => void, time: number) => {
@@ -101,7 +107,7 @@ const AnnotationConfig: FC = () => {
             <ConfigTemplate />
           </div>
           <div className="leftPane">
-            <FormConfig config={config} setConfig={setConfig} />
+            <FormConfig key={force} config={config} setConfig={setConfig} />
           </div>
         </div>
         <div className="rightSider">

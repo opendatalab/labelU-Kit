@@ -72,7 +72,7 @@ export default function scrollIntoEventTarget(
        * 滚动容器的高度为：wrapper.clientHeight
        **/
       top: newTop,
-      behavior: 'smooth',
+      behavior: 'auto',
     });
   });
 }
