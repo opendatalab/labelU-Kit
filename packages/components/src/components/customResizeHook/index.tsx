@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { AppState } from '@/store';
 import { UpdateRotate, PageBackward, PageForward } from '@/store/annotation/actionCreators';
 import { ISize } from '@/types/main';
+import { LabelUContext } from '@/store/ctx';
 
 const EKeyCode = cKeyCode.default;
 
@@ -57,10 +58,6 @@ export const ViewportProviderComponent = (props: any) => {
   return <viewportContext.Provider value={size}>{children}</viewportContext.Provider>;
 };
 
-export const ViewportProvider = connect((state: AppState) => ({
-  annotation: state.annotation,
-}))(ViewportProviderComponent);
-
 export const useViewport = () => {
   const { width, height } = useContext(viewportContext);
   return { width, height };
@@ -100,3 +97,11 @@ export const getFormatSize = (windowSize: ISize, isEdit = false, isTips = false)
     height: height - placeholderHeight,
   };
 };
+
+const mapStateToProps = (state: AppState) => ({
+  annotation: state.annotation,
+});
+
+export const ViewportProvider = connect(mapStateToProps, null, null, { context: LabelUContext })(
+  ViewportProviderComponent,
+);

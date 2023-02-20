@@ -2,7 +2,12 @@ import { ESubmitType, prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 // import useSize from '@/hooks/useSize';
 import { AppState } from '@/store';
-import { loadImgList, PageForward, ToNextStep, ToSubmitFileData } from '@/store/annotation/actionCreators';
+import {
+  loadImgList,
+  PageForward,
+  ToNextStep,
+  ToSubmitFileData,
+} from '@/store/annotation/actionCreators';
 import { IFileItem } from '@/types/data';
 import { Header } from '@/types/main';
 import { IStepInfo } from '@/types/step';
@@ -15,7 +20,7 @@ import { last } from 'lodash';
 import React, { useReducer, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import { useDispatch } from '@/store/ctx';
+import { useDispatch, LabelUContext } from '@/store/ctx';
 import { store } from 'src';
 // import ExportData from './ExportData';
 import HeaderOption from './headerOption';
@@ -24,7 +29,6 @@ import ActionOption from './ActionOption';
 // import { BasicConfig } from '@/types/tool';
 import ToolOperation from './ToolOperation';
 import { BasicConfig } from '@/types/tool';
-import { LabelUContext } from '@/store/ctx';
 interface INextStep {
   stepProgress: number;
   stepList: IStepInfo[];
@@ -91,7 +95,7 @@ const NextStep: React.FC<INextStep> = ({ step, stepProgress, stepList, imgList }
 };
 
 interface IToolHeaderProps {
-  isPreview?:boolean;
+  isPreview?: boolean;
   goBack?: (imgList?: IFileItem[]) => void;
   exportData?: (data: any[]) => void;
   header?: Header;
@@ -183,10 +187,15 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   const NextImageOption = (
     <div className='nextImageOption'>
       <Button>跳过</Button>
-      <Button type='primary' onClick={(e)=>{
-        e.stopPropagation();
-        dispatch(PageForward());
-      }}>下一页</Button>
+      <Button
+        type='primary'
+        onClick={(e) => {
+          e.stopPropagation();
+          dispatch(PageForward());
+        }}
+      >
+        下一页
+      </Button>
     </div>
   );
 
@@ -224,7 +233,7 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
         {/* <div className={`${prefix}-header__titlePlacement`} /> */}
         {/* {langNode} */}
         <ActionOption />
-        {!isPreview&&NextImageOption}
+        {!isPreview && NextImageOption}
       </div>
     </div>
   );

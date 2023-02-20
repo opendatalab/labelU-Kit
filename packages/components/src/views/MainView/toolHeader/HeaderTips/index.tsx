@@ -1,21 +1,19 @@
 import React from 'react';
 import ToolHotKey from './ToolHotKey';
 import { useSelector } from '@/store/ctx';
-import StepUtils from '../../../../utils/StepUtils';
 import { prefix } from '@/constant';
+import { AppState } from '@/store';
 
 export const footerCls = `${prefix}-footer`;
 
 const HeaderTips: React.FC = () => {
-  // @ts-ignore
-  const stepInfo = useSelector((state) =>
-    // @ts-ignore
-    StepUtils.getCurrentStepInfo(state?.annotation?.step, state.annotation?.stepList),
-  );
+  const { currentToolName } = useSelector((state: AppState) => ({
+    currentToolName: state.annotation.currentToolName,
+  }));
 
   return (
     <div className='tipsBar'>
-      <ToolHotKey toolName={stepInfo?.tool} />
+      <ToolHotKey toolName={currentToolName} />
     </div>
   );
 };
