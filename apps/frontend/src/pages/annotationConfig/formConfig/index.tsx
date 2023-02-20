@@ -36,6 +36,15 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
   const [media, setMedia] = useState<string>('图片');
   const [selectTools, setSelectTools] = useState<string[]>([]);
   const [isConfigLoad, setIsConfigLoad] = useState<boolean>(true);
+
+  const updateTagTool = useMemo(() => updateConfig('tagTool'), [updateConfig]);
+  const updateTextTool = useMemo(() => updateConfig('textTool'), [updateConfig]);
+  const updateTools = useMemo(() => updateConfig('tools'), [updateConfig]);
+  const updateTagList = useMemo(() => updateConfig('tagList'), [updateConfig]);
+  const updateTextConfig = useMemo(() => updateConfig('textConfig'), [updateConfig]);
+  const updateAttribute = useMemo(() => updateConfig('attribute'), [updateConfig]);
+  const updateCommonAttributeConfigurable = useMemo(() => updateConfig('commonAttributeConfigurable'), [updateConfig]);
+
   for (let i = 0; i < types.length; i++) {
     children.push(<Option key={types[i]}>{types[i]}</Option>);
   }
@@ -104,13 +113,11 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
   // 删除工具后，selectTools中的工具也要更新
   useEffect(() => {
     const toolNames = _.map(tools, 'tool');
-    if (_.isEmpty(tools)) {
+    if (_.isEmpty(tools) || _.isEqual(toolNames, selectTools)) {
       return;
     }
 
-    if (!_.isEqual(toolNames, selectTools)) {
-      setSelectTools(toolNames);
-    }
+    setSelectTools(toolNames);
   }, [selectTools, tagList.length, textConfig.length, tools]);
 
   const [height, setHeight] = useState<number>(0);
@@ -140,25 +147,25 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
       }
       return res;
     }, [] as BasicConfig[]);
-    updateConfig('tools')(newTools);
+    updateTools(newTools);
   };
 
   const actUpdateToolsConfig = (name: string, info: any) => {
     if (name && Object.keys(toolnameC).indexOf(name) >= 0) {
       if (name === 'tagTool') {
-        updateConfig('tagTool')(info.values.tagList as OneTag[]);
+        updateTagTool(info.values.tagList as OneTag[]);
       } else if (name === 'textTool') {
-        updateConfig('textTool')(info.values.textConfig);
+        updateTextTool(info.values.textConfig);
       } else {
         updateCombineToolsConfig(tools, info.values, name);
       }
     }
     if (name === 'commonForm') {
       if (info.values.attribute !== undefined) {
-        updateConfig('attribute')(info.values.attribute);
+        updateAttribute(info.values.attribute);
       }
 
-      updateConfig('commonAttributeConfigurable')(info.values.commonAttributeConfigurable);
+      updateCommonAttributeConfigurable(info.values.commonAttributeConfigurable);
       let commonToolConfig = {};
       if (info.values.drawOutsideTarget !== undefined) {
         commonToolConfig = Object.assign(commonToolConfig, { drawOutsideTarget: info.values.drawOutsideTarget });
@@ -248,7 +255,11 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
                         <FormEngine
                           toolName={tool}
                           toolConfig={initC || {}}
-                          updateConfig={updateConfig}
+                          {...{
+                            updateTagList,
+                            updateTextConfig,
+                            updateTools,
+                          }}
                           config={config}
                         />
                       }
@@ -276,4 +287,4 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
   );
 };
 
-export default FormConfig;
+export default React.memo(FormConfig);

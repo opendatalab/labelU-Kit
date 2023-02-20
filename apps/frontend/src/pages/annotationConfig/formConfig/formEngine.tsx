@@ -19,10 +19,12 @@ interface FormEngineProps {
   toolName: string;
   toolConfig: BasicConfig;
   config: ToolsConfigState;
-  updateConfig: (field: string) => (value: any) => void;
+  updateTagList: (value: any) => void;
+  updateTextConfig: (value: any) => void;
+  updateTools: (value: any) => void;
 }
 
-const FormMapping: Record<string, React.ReactNode> = {
+const FormMapping: Record<string, React.FC<any>> = {
   [EToolName.Rect]: RectConfigForm,
   [EToolName.Point]: PointConfigForm,
   [EToolName.Line]: LineConfigForm,
@@ -32,28 +34,29 @@ const FormMapping: Record<string, React.ReactNode> = {
 };
 
 const FormEngine: FC<FormEngineProps> = (props) => {
-  const { updateConfig, toolName, config, toolConfig } = props;
+  const { updateTextConfig, updateTagList, updateTools, toolName, config, toolConfig } = props;
   // @ts-ignore
   const { tagList, textConfig, tools } = config;
   // @ts-ignore
   const taskStatus = useSelector((state) => state.existTask.status);
   const dispatch = useDispatch();
   const ConfigTool = useMemo(() => {
-    if (toolName) {
-      return FormMapping[toolName];
+    if (!toolName) {
+      return null;
     }
-    return null;
+
+    return FormMapping[toolName];
   }, [toolName]);
 
   // 删除工具
   const deleteTool = (_toolName: string) => {
     if (_toolName === EToolName.Text) {
-      updateConfig('textConfig')([]);
+      updateTextConfig([]);
     } else if (_toolName === EToolName.Tag) {
-      updateConfig('tagList')([]);
+      updateTagList([]);
     }
 
-    updateConfig('tools')(
+    updateTools(
       tools.filter((tool: any) => {
         return tool.tool !== _toolName;
       }),
@@ -88,4 +91,4 @@ const FormEngine: FC<FormEngineProps> = (props) => {
     </div>
   );
 };
-export default FormEngine;
+export default React.memo(FormEngine);

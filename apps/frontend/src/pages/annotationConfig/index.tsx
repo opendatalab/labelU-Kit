@@ -57,7 +57,6 @@ const AnnotationConfig: FC = () => {
     loadFirstSample();
   }, [taskId]);
 
-  // for future test only
   const [config, setConfig] = useState<ToolsConfigState>({
     tools: [],
     tagList: [],
