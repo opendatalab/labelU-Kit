@@ -408,7 +408,6 @@ class PointCloudOperation extends PointCloud {
     } else {
       boxInfo.isVisible = true;
     }
-
     const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
 
