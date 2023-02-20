@@ -4,13 +4,7 @@ import {
   PointCloudOperation,
   MathUtils,
 } from '@label-u/annotation';
-import {
-  IPointCloudBox,
-  EPerspectiveView,
-  PointCloudUtils,
-  IPolygonPoint,
-  IPolygonData,
-} from '@label-u/utils';
+import { IPointCloudBox, EPerspectiveView, PointCloudUtils, IPolygonPoint } from '@label-u/utils';
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
@@ -26,7 +20,6 @@ import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 
 const DEFAULT_SCOPE = 5;
-const DEFAULT_RADIUS = 90;
 
 export const PointCloudView = {
   '3D': '3D',
@@ -643,7 +636,7 @@ export const usePointCloudViews = () => {
       return;
     }
     SetPointCloudLoading(dispatch, true);
-    await mainViewInstance.loadPCDFile(currentData.url, config?.radius ?? DEFAULT_RADIUS);
+    await mainViewInstance.loadPCDFile(currentData.url);
 
     // Clear All Data
     pointCloudBoxList.forEach((v: { id: any }) => {
@@ -683,9 +676,7 @@ export const usePointCloudViews = () => {
      * 2. Reload PointCloud
      * 3. Clear Polygon
      */
-    topViewInstance.updateData(currentData.url, currentData.result, {
-      radius: config?.radius ?? DEFAULT_RADIUS,
-    });
+    topViewInstance.updateData(currentData.url, currentData.result);
     SetPointCloudLoading(dispatch, false);
   };
 

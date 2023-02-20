@@ -159,6 +159,10 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
         );
         return;
       }
+
+      if (!ptCtx.selectedPointCloudBox) {
+        pointCloudViews.topViewAddBox(polygon, size, ptCtx.mainViewInstance?.attribute as string);
+      }
     });
 
     TopView2dOperation.singleOn('deletedObject', ({ id }: { id: string }) => {
