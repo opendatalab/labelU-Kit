@@ -97,6 +97,7 @@ const JSONTab = (props: IJsonTabProps) => {
                 placeholder={t('中文（前端显示）')}
                 onChange={(e: any) => changeInputInfo(e, 'key', i)}
                 disabled={readonly}
+                onBlur={onSubmitAction}
                 // addonBefore={isAttributeList && <ColorTag color={COLORS_ARRAY[i % 8]} />}
               />
               <SenseInput
@@ -104,6 +105,7 @@ const JSONTab = (props: IJsonTabProps) => {
                 value={info.value}
                 placeholder={t('英文（保存结果）')}
                 onChange={(e: any) => changeInputInfo(e, 'value', i)}
+                onBlur={onSubmitAction}
                 disabled={readonly}
               />
             </div>
