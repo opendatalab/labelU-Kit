@@ -1,8 +1,8 @@
 import React from 'react';
-import { createBrowserHistory } from 'history';
+import { createHashHistory } from 'history';
 import { Router } from 'react-router-dom';
 
-export const history = createBrowserHistory();
+export const history = createHashHistory();
 
 interface HistoryRouterProps {
   history: typeof history;
