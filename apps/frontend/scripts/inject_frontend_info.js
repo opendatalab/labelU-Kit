@@ -4,20 +4,18 @@ const fs = require('fs');
 const prettier = require('prettier');
 const { getPackagesSync } = require('@manypkg/get-packages');
 
-async function main() {
+async function main(nextFrontendVersion) {
   const appPkgJson = require('../package.json');
   const workspace = path.join(__dirname, '../../../');
   const versions = {
-    frontend: {
-      version: appPkgJson.version,
-      deps: {},
-    },
+    version: nextFrontendVersion || appPkgJson.version,
+    deps: {},
   };
 
   const getCode = (info) => {
     return `
     (function () {
-      window.__version = ${JSON.stringify(info, null, 2)};
+      window.__frontend = ${JSON.stringify(info, null, 2)};
     })();
     `;
   };
@@ -27,7 +25,7 @@ async function main() {
   packages.forEach((pkg) => {
     const pkgInFrontend = appPkgJson.dependencies[pkg.packageJson.name];
     if (pkgInFrontend) {
-      versions.frontend.deps[pkg.packageJson.name] = pkg.packageJson.version;
+      versions.deps[pkg.packageJson.name] = pkg.packageJson.version;
     }
   });
 
@@ -47,4 +45,4 @@ async function main() {
   console.log('inject frontend info success!');
 }
 
-main();
+module.exports = main;

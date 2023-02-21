@@ -59,7 +59,7 @@ async function main() {
       console.log('trigger labelu workflow failed', err);
     });
 
-  require('./inject_frontend_info');
+  require('./inject_frontend_info')(nextVersion);
 }
 
 main();
