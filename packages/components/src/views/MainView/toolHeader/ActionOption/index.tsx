@@ -1,11 +1,11 @@
 import React, { FC, ReactElement, useRef, useState } from 'react';
 import HeaderTips from '../HeaderTips';
 import GeneralOperation from '../GeneralOperation';
-import LabelShowSetArea from './LabelShowSetArea';
+// import LabelShowSetArea from './LabelShowSetArea';
 import DrageModel from '@/components/dragModal';
 
 const ActionOption: FC = () => {
-  const [content, setContent] = useState<ReactElement>(<div />);
+  const [content] = useState<ReactElement>(<div />);
   const dragModalRef = useRef<any>();
   return (
     <div className='lbc-left-sider'>
@@ -33,7 +33,7 @@ const ActionOption: FC = () => {
           };
           dragModalRef.current.switchModal(true);
           dragModalRef.current.switchSetBounds(tmpBounds);
-          setContent(<LabelShowSetArea />);
+          // setContent(<LabelShowSetArea />);
         }}
       >
         显示设置
