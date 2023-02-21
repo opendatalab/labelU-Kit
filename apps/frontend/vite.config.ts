@@ -26,17 +26,9 @@ export default defineConfig({
   },
 
   plugins: [
-    react({
-      jsxRuntime: 'automatic',
-    }),
-    // viteMockServe({
-    //   mockPath: 'mock',
-    //   localEnabled: true,
-    // }),
+    react(),
     svgr(),
-    // tsMonoAlias({
-    //   ignorePackages: ['web-demo', 'server'],
-    // }),
+    // tsMonoAlias(),
     vitePluginImp({
       libList: [
         {
@@ -49,7 +41,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/'),
-      components: resolve(__dirname, 'src/components/'),
     },
   },
   css: {

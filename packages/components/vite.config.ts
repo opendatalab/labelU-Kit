@@ -16,11 +16,6 @@ export default defineConfig({
       fileName: 'index',
     },
   },
-  css: {
-    postcss: {
-      inject: false,
-    },
-  },
   resolve: {
     alias: {
       '@/': resolve(__dirname, 'src'),
