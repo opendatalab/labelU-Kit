@@ -4,18 +4,6 @@
   "description": "utils for label-bee",
   "author": "Glenfiddish <edwinlee0927@hotmail.com>",
   "license": "Apache-2.0",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.mjs"
-      }
-    }
-  },
   "homepage": "",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -28,16 +16,14 @@
     "url": "git@github.com:opendatalab/labelU-Kit.git"
   },
   "scripts": {
-    "start": "npm run dev",
     "test": "echo \"Error: run tests from root\" && exit 1",
-    "dev": "rollup -c rollup.config.js -w ",
     "build": "rimraf -rf dist && rimraf -rf es && cross-env NODE_ENV=production vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "i18next": "^22.0.5",
-    "react-i18next": "^11.12.0",
+    "i18next": "^22.4.10",
+    "react-i18next": "^12.1.5",
     "rimraf": "^3.0.2",
     "shx": "^0.3.4"
   },

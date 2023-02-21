@@ -59,8 +59,8 @@
   },
   "scripts": {
     "start": "vite",
-    "buildv": "vite build",
-    "build": "cross-env REACT_APP_ENV=production CI=false craco build",
+    "build": "cross-env CI=false vite build",
+    "package:dist": "cross-env DIST=true vite",
     "release": "semantic-release",
     "type-check": "tsc --noEmit",
     "test": "craco test"

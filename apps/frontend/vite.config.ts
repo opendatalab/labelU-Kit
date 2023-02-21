@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import vitePluginImp from 'vite-plugin-imp';
+import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -28,7 +29,8 @@ export default defineConfig({
   plugins: [
     react(),
     svgr(),
-    // tsMonoAlias(),
+    ViteEjsPlugin(),
+    !process.env.DIST && process.env.NODE_ENV !== 'production' && tsMonoAlias({}),
     vitePluginImp({
       libList: [
         {
