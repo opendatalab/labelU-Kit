@@ -3,7 +3,7 @@ import type { BasicConfig } from '@label-u/components';
 import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 

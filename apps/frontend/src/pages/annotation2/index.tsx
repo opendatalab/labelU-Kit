@@ -1,7 +1,7 @@
 import { useState, useEffect, createRef } from 'react';
 import { useLocation } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import Annotation from '../../components/business/annotation';
 import currentStyles from './index.module.scss';

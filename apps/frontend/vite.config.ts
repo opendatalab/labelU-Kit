@@ -21,18 +21,22 @@ export default defineConfig({
     },
   },
 
+  optimizeDeps: {
+    include: ['react/jsx-runtime'],
+  },
+
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+    }),
     // viteMockServe({
     //   mockPath: 'mock',
     //   localEnabled: true,
     // }),
-    svgr({
-      exportAsDefault: false,
-    }),
-    tsMonoAlias({
-      ignorePackages: ['web-demo', 'server'],
-    }),
+    svgr(),
+    // tsMonoAlias({
+    //   ignorePackages: ['web-demo', 'server'],
+    // }),
     vitePluginImp({
       libList: [
         {

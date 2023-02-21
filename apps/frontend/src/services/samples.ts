@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import axiosProxy from './axiosProxy';
 import commonController from '../utils/common/common';
