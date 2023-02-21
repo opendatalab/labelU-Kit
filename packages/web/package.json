@@ -65,7 +65,7 @@
     "canvas",
     "react"
   ],
-  "homepage": "/",
+  "homepage": "./labelU-Kit/",
   "browserslist": {
     "production": [
       ">0.2%",
