@@ -1,9 +1,10 @@
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import AnnotationOperation from '@label-u/components';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
+import { updateAllConfig } from '@/stores/toolConfig.store';
 
 import EmptyConfigImg from '../../img/annotationCommon/emptyConfig.png';
 import ConfigTemplate from './configTemplate/index';
@@ -23,7 +24,9 @@ const defaultFile: OneFile = {
   result: '{}',
 };
 
+// 配置页的config统一使用此组件的state
 const AnnotationConfig: FC = () => {
+  const dispatch = useDispatch();
   const taskId = parseInt(window.location.pathname.split('/')[2]);
 
   const [fileList, setFileList] = useState<OneFile[]>([defaultFile]);
@@ -54,7 +57,6 @@ const AnnotationConfig: FC = () => {
     loadFirstSample();
   }, [taskId]);
 
-  // for future test only
   const [config, setConfig] = useState<ToolsConfigState>({
     tools: [],
     tagList: [],
@@ -62,12 +64,31 @@ const AnnotationConfig: FC = () => {
     textConfig: [],
     commonAttributeConfigurable: false,
   });
+  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = config;
 
-  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = useSelector(
+  const updateConfig = useCallback(
+    (field: string) => (value: any) => {
+      const newConfig = {
+        ...config,
+        [field]: value,
+      };
+      setConfig(newConfig);
+
+      // 将config更新到store，以便其他组件使用，但本页面下的组件不要使用store中的数据而使用state中的数据
+      dispatch(updateAllConfig(newConfig));
+    },
+    [config, dispatch],
+  );
+
+  const configFromStore = useSelector(
     // @ts-ignore
     (state) => state.toolsConfig,
-    shallowEqual,
   );
+
+  useEffect(() => {
+    setConfig(configFromStore);
+  }, [configFromStore]);
+
   const [rightImg, setRightImg] = useState<any>();
   const [isConfigError] = useState<boolean>(false);
 
@@ -101,7 +122,7 @@ const AnnotationConfig: FC = () => {
             <ConfigTemplate />
           </div>
           <div className="leftPane">
-            <FormConfig config={config} setConfig={setConfig} />
+            <FormConfig config={config} updateConfig={updateConfig} />
           </div>
         </div>
         <div className="rightSider">

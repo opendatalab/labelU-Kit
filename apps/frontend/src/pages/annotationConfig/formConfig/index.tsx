@@ -1,10 +1,9 @@
 import type { OneTag } from '@label-u/annotation';
-import { EToolName } from '@label-u/annotation';
 import type { BasicConfig } from '@label-u/components';
 import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
-import type { FC, Dispatch, SetStateAction } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import _ from 'lodash';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 
@@ -12,13 +11,6 @@ import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
 import CommonFormItem from '../components/commonFormItems';
 import { LoadInitConfig } from '../configTemplate/config';
-import {
-  updateAllAttributeConfigList,
-  updatecCommonAttributeConfigurable,
-  updateTagConfigList,
-  updateTextConfig,
-  updateToolsConfig,
-} from '../../../stores/toolConfig.store';
 import '../index.less';
 import { validateTools } from '../../../utils/tool/common';
 
@@ -35,59 +27,66 @@ function setActiveTabKey(value: string) {
 
 interface IProps {
   config: ToolsConfigState;
-  setConfig: Dispatch<SetStateAction<ToolsConfigState>>;
+  updateConfig: (field: string) => (value: any) => void;
 }
 
-const FormConfig: FC<IProps> = () => {
-  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = useSelector(
-    // @ts-ignore
-    (state) => state.toolsConfig,
-  );
-  const dispatch = useDispatch();
+const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
+  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = config;
   const children = [];
   const [media, setMedia] = useState<string>('图片');
   const [selectTools, setSelectTools] = useState<string[]>([]);
   const [isConfigLoad, setIsConfigLoad] = useState<boolean>(true);
+
+  const updateTagTool = useMemo(() => updateConfig('tagTool'), [updateConfig]);
+  const updateTextTool = useMemo(() => updateConfig('textTool'), [updateConfig]);
+  const updateTools = useMemo(() => updateConfig('tools'), [updateConfig]);
+  const updateTagList = useMemo(() => updateConfig('tagList'), [updateConfig]);
+  const updateTextConfig = useMemo(() => updateConfig('textConfig'), [updateConfig]);
+  const updateAttribute = useMemo(() => updateConfig('attribute'), [updateConfig]);
+  const updateCommonAttributeConfigurable = useMemo(() => updateConfig('commonAttributeConfigurable'), [updateConfig]);
+
   for (let i = 0; i < types.length; i++) {
     children.push(<Option key={types[i]}>{types[i]}</Option>);
   }
   const [force, forceSet] = useState(0);
 
-  const updateSelectTools = (toolname: string) => {
-    const tmp = selectTools;
-    if (tmp.indexOf(toolname) >= 0) {
-      tmp.splice(tmp.indexOf(toolname), 1);
-    } else {
-      tmp.push(toolname);
-    }
-    setSelectTools(tmp);
-  };
-
-  const loadInitConfig = async (toolname: string, _tools: BasicConfig[]) => {
-    setIsConfigLoad(false);
-    await new Promise(async (resolve) => {
-      if (toolname) {
-        const config = await LoadInitConfig(toolname);
-        const keys = Object.keys(config);
-        for (const key of keys) {
-          if (key === 'attribute' && attribute.length === 0) {
-            dispatch(updateAllAttributeConfigList(config[key]));
-          } else if (key === 'tagList' && tagList.length === 0) {
-            dispatch(updateTagConfigList(config[key]));
-          } else if (key === 'textConfig' && textConfig.length === 0) {
-            dispatch(updateTextConfig(config[key]));
-          } else if (key === 'tools') {
-            const newTools = [..._tools].concat(config[key]);
-            dispatch(updateToolsConfig(newTools));
-          }
-        }
-        resolve(config);
+  const updateSelectTools = useCallback(
+    (toolname: string) => {
+      const tmp = selectTools;
+      if (tmp.indexOf(toolname) >= 0) {
+        tmp.splice(tmp.indexOf(toolname), 1);
+      } else {
+        tmp.push(toolname);
       }
-    });
-    setIsConfigLoad(true);
-  };
+      setSelectTools(tmp);
+    },
+    [selectTools],
+  );
 
-  const items = useMemo(() => {
+  const loadInitConfig = useCallback(
+    async (toolname: string, _tools: BasicConfig[]) => {
+      setIsConfigLoad(false);
+      await new Promise(async (resolve) => {
+        if (toolname) {
+          const defaultConfig = (await LoadInitConfig(toolname)) as any;
+          const keys = Object.keys(defaultConfig);
+
+          for (const key of keys) {
+            if (key === 'tools') {
+              updateConfig(key)([..._tools].concat(defaultConfig[key]));
+            } else if (_.chain(config).get(key).size().value() === 0) {
+              updateConfig(key)(defaultConfig[key]);
+            }
+          }
+          resolve(defaultConfig);
+        }
+      });
+      setIsConfigLoad(true);
+    },
+    [config, updateConfig],
+  );
+
+  const toolMenuItems = useMemo(() => {
     const _items = [];
     for (let i = 0; i < toolnames.length; i++) {
       if (selectTools.indexOf(toolnameT[toolnames[i]]) < 0) {
@@ -109,32 +108,17 @@ const FormConfig: FC<IProps> = () => {
       }
     }
     return _items;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectTools, tools]);
+  }, [loadInitConfig, selectTools, tools, updateSelectTools]);
 
+  // 删除工具后，selectTools中的工具也要更新
   useEffect(() => {
-    const toolArr = [];
-    if (tools && tools.length > 0) {
-      for (let i = 0; i < tools.length; i++) {
-        if (selectTools.indexOf(tools[i].tool) < 0 && toolArr.indexOf(tools[i].tool) < 0) {
-          toolArr.push(tools[i].tool);
-        }
-      }
-      let newTools = [...selectTools].concat(toolArr);
-      if (tagList.length === 0) {
-        newTools = newTools.filter((tool) => {
-          return tool !== EToolName.Tag;
-        });
-      }
-      if (textConfig.length === 0) {
-        newTools = newTools.filter((tool) => {
-          return tool !== EToolName.Text;
-        });
-      }
-      setSelectTools(newTools);
+    const toolNames = _.map(tools, 'tool');
+    if (_.isEmpty(tools) || _.isEqual(toolNames, selectTools)) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tools, tagList, textConfig]);
+
+    setSelectTools(toolNames);
+  }, [selectTools, tagList.length, textConfig.length, tools]);
 
   const [height, setHeight] = useState<number>(0);
 
@@ -148,13 +132,13 @@ const FormConfig: FC<IProps> = () => {
     setMedia(e);
   };
 
-  const updateCombineToolsConfig = (_tools: BasicConfig[], config: Record<string, unknown>, toolname: string) => {
+  const updateCombineToolsConfig = (_tools: BasicConfig[], toolConfig: Record<string, unknown>, toolname: string) => {
     const newTools = _tools.reduce((res, item) => {
       if (item.tool === toolname || toolname === 'commonForm') {
         const copyItem = { ...item };
         const newConfig = {
           ...copyItem.config,
-          ...config,
+          ...toolConfig,
         };
         copyItem.config = newConfig;
         res.push(copyItem);
@@ -163,24 +147,25 @@ const FormConfig: FC<IProps> = () => {
       }
       return res;
     }, [] as BasicConfig[]);
-    dispatch(updateToolsConfig(newTools));
+    updateTools(newTools);
   };
 
   const actUpdateToolsConfig = (name: string, info: any) => {
     if (name && Object.keys(toolnameC).indexOf(name) >= 0) {
       if (name === 'tagTool') {
-        dispatch(updateTagConfigList(info.values.tagList as OneTag[]));
+        updateTagTool(info.values.tagList as OneTag[]);
       } else if (name === 'textTool') {
-        dispatch(updateTextConfig(info.values.textConfig));
+        updateTextTool(info.values.textConfig);
       } else {
         updateCombineToolsConfig(tools, info.values, name);
       }
     }
     if (name === 'commonForm') {
       if (info.values.attribute !== undefined) {
-        dispatch(updateAllAttributeConfigList(info.values.attribute));
+        updateAttribute(info.values.attribute);
       }
-      dispatch(updatecCommonAttributeConfigurable(info.values.commonAttributeConfigurable));
+
+      updateCommonAttributeConfigurable(info.values.commonAttributeConfigurable);
       let commonToolConfig = {};
       if (info.values.drawOutsideTarget !== undefined) {
         commonToolConfig = Object.assign(commonToolConfig, { drawOutsideTarget: info.values.drawOutsideTarget });
@@ -201,7 +186,7 @@ const FormConfig: FC<IProps> = () => {
       </div>
       <div className="oneRow">
         <label>标注工具</label>
-        <Dropdown overlay={<Menu items={items} />} placement="bottomLeft" trigger={['click']}>
+        <Dropdown overlay={<Menu items={toolMenuItems} />} placement="bottomLeft" trigger={['click']}>
           <Button type="primary" ghost>
             <span style={{ fontSize: 22, marginTop: -7 }}>+ </span> 新增工具
           </Button>
@@ -216,14 +201,14 @@ const FormConfig: FC<IProps> = () => {
               setActiveTabKey(e);
               forceSet(new Date().getTime());
             }}
-            items={selectTools.map((_, i) => {
+            items={selectTools.map((tool, i) => {
               const id = String(i + 1);
               // 配置初始化
               let initC = {} as BasicConfig;
               let configArr = [];
               let isShow = true;
               configArr = tools.filter((item: any) => {
-                return item.tool === _;
+                return item.tool === tool;
               });
               initC = configArr[0];
               // 公共配置
@@ -234,7 +219,7 @@ const FormConfig: FC<IProps> = () => {
                 textConfigurable: false,
               };
 
-              if (noCommonConfigTools.indexOf(_) >= 0) {
+              if (noCommonConfigTools.indexOf(tool) >= 0) {
                 //@ts-ignore
                 isShow = false;
               } else {
@@ -254,7 +239,7 @@ const FormConfig: FC<IProps> = () => {
 
               return {
                 //@ts-ignore
-                label: `${toolnameC[_]}`,
+                label: `${toolnameC[tool]}`,
                 key: id,
                 children: (
                   <div className="toolConfigPane">
@@ -266,7 +251,18 @@ const FormConfig: FC<IProps> = () => {
                         }
                       }}
                     >
-                      {<FormEngine toolname={_} config={initC} />}
+                      {
+                        <FormEngine
+                          toolName={tool}
+                          toolConfig={initC || {}}
+                          {...{
+                            updateTagList,
+                            updateTextConfig,
+                            updateTools,
+                          }}
+                          config={config}
+                        />
+                      }
 
                       {isConfigLoad && (
                         <CommonFormItem
@@ -275,7 +271,7 @@ const FormConfig: FC<IProps> = () => {
                           attribute={attribute}
                           {...commonConfig}
                           name="commonForm"
-                          toolName={_}
+                          toolName={tool}
                           isShow={isShow}
                         />
                       )}
@@ -291,4 +287,4 @@ const FormConfig: FC<IProps> = () => {
   );
 };
 
-export default FormConfig;
+export default React.memo(FormConfig);

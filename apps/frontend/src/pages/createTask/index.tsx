@@ -67,20 +67,6 @@ const CreateTask = () => {
       return;
     }
 
-    // TODO: dead code
-    // if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length > 0) {
-    //   const currentTools = toolsConfig.tools;
-    //   for (let toolIndex = 0; toolIndex < currentTools.length; toolIndex++) {
-    //     const currentConfig = currentTools[toolIndex];
-    //     if (currentConfig.tool === 'pointTool') {
-    //         // @ts-ignore
-    //         if (!currentConfig?.config?.upperLimit) {
-    //             commonController.notificationErrorMessage({message : '请输入上限点数'},1)
-    //             return;
-    //         }
-    //     }
-    //   }
-    // }
     const res = await updateTaskConfig(taskId, {
       config: JSON.stringify(toolsConfig),
       media_type: 'IMAGE',
