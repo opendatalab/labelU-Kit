@@ -2,14 +2,14 @@
   "name": "label-u",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/web"
   ],
   "version": "1.7.0",
   "scripts": {
     "prepare": "husky install",
     "start": "lerna run build:type && lerna run --parallel --stream start",
     "dev": "npm run start",
-    "build": "lerna run --scope=@label-u/utils --scope=@label-u/annotation --scope=@label-u/components --scope=web build",
+    "build": "lerna run --scope=web build",
     "build:frontend": "lerna run --scope=@label-u/frontend build",
     "release:frontend": "cd apps/frontend && npm run release",
     "lint": "lerna run --parallel --stream lint",

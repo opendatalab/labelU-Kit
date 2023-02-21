@@ -52,8 +52,8 @@ jobs:
           echo $RELEASE_VERSION
       - name: Install dependencies
         run: pnpm install
-      - name: Build packages
-        run: pnpm run build
+      - name: Build packages:web
+        run: pnpm run build:web
         
       - name: Deploy website
         uses: peaceiris/actions-gh-pages@v3
