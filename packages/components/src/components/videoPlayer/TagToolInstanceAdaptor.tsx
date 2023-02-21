@@ -1,7 +1,7 @@
 import React from 'react';
 import type { TagToolConfig } from '@label-u/annotation';
 import { CommonToolUtils, uuid } from '@label-u/annotation';
-import _ from 'lodash';
+import pickBy from 'lodash-es/pickBy';
 
 import StepUtils from '@/utils/StepUtils';
 import { jsonParser } from '@/utils';
@@ -165,7 +165,7 @@ export class TagToolInstanceAdaptor extends React.Component<
   public combineResult = (
     inputValue: { value: { key: string; value: string }; isMulti: boolean },
     existValue: ObjectString = {},
-  ) => {
+  ): Record<string, unknown> => {
     const { isMulti } = inputValue;
     const { key, value } = inputValue.value;
 
@@ -179,12 +179,12 @@ export class TagToolInstanceAdaptor extends React.Component<
 
       const valuesSet = new Set(valuesArray);
       existValue[key] = Array.from(valuesSet).join(';');
-      return _.pickBy(existValue, (v) => v);
+      return pickBy(existValue, (v) => v);
     }
 
     existValue[key] = existValue[key] === value ? undefined : value;
 
-    return _.pickBy(existValue, (v) => v);
+    return pickBy(existValue, (v) => v);
   };
 
   public setResult = (tagResult: any[]) => {

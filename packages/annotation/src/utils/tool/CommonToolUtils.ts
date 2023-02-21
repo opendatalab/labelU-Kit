@@ -1,4 +1,4 @@
-import { isObject } from 'lodash';
+import { isObject } from 'lodash-es';
 
 import { ECheckModel, EToolName } from '@/constant/tool';
 import type { IRect } from '@/types/tool/rectTool';

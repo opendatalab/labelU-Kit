@@ -1,4 +1,4 @@
-import { isNumber } from 'lodash';
+import { isNumber } from 'lodash-es';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
@@ -30,7 +30,7 @@ import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
 
-interface IBasicToolOperationProps {
+export interface IBasicToolOperationProps {
   container: HTMLElement;
   size: ISize;
   imgNode?: HTMLImageElement; // 展示图片的内容
@@ -70,7 +70,7 @@ const validNumber = (value: number) => {
   return isNumber(value) && !isNaN(value);
 };
 
-class BasicToolOperation extends EventListener {
+export default class BasicToolOperation extends EventListener {
   public container: HTMLElement; // 当前结构绑定 container
 
   public canvas!: HTMLCanvasElement;
@@ -1569,5 +1569,3 @@ class BasicToolOperation extends EventListener {
     this.emit('changeStyle', { attribute: newAttribute });
   }
 }
-
-export { IBasicToolOperationProps, BasicToolOperation };

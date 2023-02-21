@@ -2,7 +2,7 @@ import { i18n } from '@label-u/utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { BasicToolOperation } from '@label-u/annotation';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import MainView from '@/views/MainView';
 import type { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';

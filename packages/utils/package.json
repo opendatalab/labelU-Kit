@@ -4,26 +4,24 @@
   "description": "utils for label-bee",
   "author": "Glenfiddish <edwinlee0927@hotmail.com>",
   "license": "Apache-2.0",
-  "types": "dist/types/index.d.ts",
-  "typings": "dist/types/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./es/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
       },
       "require": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
       }
     }
   },
   "homepage": "",
-  "main": "dist/index.js",
-  "module": "es/index.js",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
-    "lib",
-    "es"
+    "dist"
   ],
   "repository": {
     "type": "git",
@@ -33,8 +31,8 @@
     "start": "npm run dev",
     "test": "echo \"Error: run tests from root\" && exit 1",
     "dev": "rollup -c rollup.config.js -w ",
-    "build": "rollup -c rollup.config.js && npm run build:type",
-    "build:type": "tsc --emitDeclarationOnly --resolveJsonModule",
+    "build": "rimraf -rf dist && rimraf -rf es && cross-env NODE_ENV=production vite build && npm run build:types",
+    "build:types": "tsc -d --emitDeclarationOnly",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -44,11 +42,11 @@
     "shx": "^0.3.4"
   },
   "devDependencies": {
-    "@rollup/plugin-json": "^4.1.0",
     "@types/react-i18next": "^8.1.0",
-    "esbuild": "^0.11.0",
-    "rollup": "^2.43.1",
-    "rollup-plugin-esbuild": "^3.0.2",
-    "typescript": "^4.2.3"
+    "cross-env": "^7.0.3",
+    "typescript": "^4.2.3",
+    "typescript-transform-paths": "^3.4.6",
+    "vite": "^4.1.1",
+    "vite-tsconfig-paths": "^4.0.5"
   }
 }

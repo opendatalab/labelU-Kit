@@ -1,4 +1,4 @@
-import { isObject } from 'lodash';
+import { isObject } from 'lodash-es';
 
 export class ConfigUtils {
   public static jsonParser(content: any, defaultValue: any = {}) {
@@ -14,9 +14,8 @@ export class ConfigUtils {
 
   /**
    * 获取对应的步骤配置
-   * @param stepList 
-   * @param step 
+   * @param stepList
+   * @param step
    */
-  public static getStepConfig = (stepList: any[], step: number) =>
-    stepList.find((i) => i.step === step);
+  public static getStepConfig = (stepList: any[], step: number) => stepList.find((i) => i.step === step);
 }

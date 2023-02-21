@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { cloneDeep, cloneDeepWith } from 'lodash-es';
 
 export default class ActionsHistory {
   public record: any[] = [];
@@ -38,13 +38,13 @@ export default class ActionsHistory {
       const newRecord = this.record.slice(0, Math.min(this.recordIndex + 1, this.record.length));
       this.record = newRecord;
     }
-    this.record.push(_.cloneDeepWith(action));
+    this.record.push(cloneDeepWith(action));
     this.recordIndex += 1;
     this.emitHistoryChanged();
   }
 
   public updateHistory(newRecord: any) {
-    this.record[this.recordIndex] = _.cloneDeep(newRecord);
+    this.record[this.recordIndex] = cloneDeep(newRecord);
   }
 
   /**
@@ -68,7 +68,7 @@ export default class ActionsHistory {
     if (this.undoEnabled) {
       this.recordIndex -= 1;
       this.emitHistoryChanged();
-      return _.cloneDeep(this.record[this.recordIndex]) || [];
+      return cloneDeep(this.record[this.recordIndex]) || [];
     }
   }
 
@@ -77,7 +77,7 @@ export default class ActionsHistory {
     if (this.redoEnabled) {
       this.recordIndex += 1;
       this.emitHistoryChanged();
-      return _.cloneDeep(this.record[this.recordIndex]);
+      return cloneDeep(this.record[this.recordIndex]);
     }
   }
 
@@ -100,7 +100,7 @@ export default class ActionsHistory {
    */
   public initRecord(data: any[], isExitData = false) {
     const existData = data.length > 0 || isExitData;
-    this.record = existData ? [_.cloneDeep(data)] : [];
+    this.record = existData ? [cloneDeep(data)] : [];
     this.minRecordIndex = existData ? 0 : -1;
     this.recordIndex = 0;
   }

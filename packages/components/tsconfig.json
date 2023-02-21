@@ -1,10 +1,9 @@
 {
   "extends": "../../tsconfig.lib.json",
   "compilerOptions": {
-    "isolatedModules": false,
     "sourceMap": false,
     "outDir": "dist",
-    "declarationDir": "dist/types",
+    "declarationDir": "dist",
     "baseUrl": "./",
     "plugins": [
       { "transform": "typescript-transform-paths", "afterDeclarations": true }

@@ -4,7 +4,7 @@
  * @date 2022-06-02
  */
 
-import _ from 'lodash';
+import { cloneDeep, isNumber, cloneWith, isEqual } from 'lodash-es';
 
 import { DEFAULT_FONT, ELineColor, ELineTypes, ETextType, EToolName } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
@@ -16,7 +16,7 @@ import type { ICoordinate, IPoint, IRectArea } from '@/types/tool/common';
 import type { ILine, ILinePoint } from '@/types/tool/lineTool';
 
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 import LineToolUtils from '../../utils/tool/LineToolUtils';
 import {
   isInPolygon,
@@ -55,14 +55,14 @@ export const INNER_POINT_RADIUS = 2;
 
 type ILineOperationProps = IBasicToolOperationProps;
 
-class LineToolOperation extends BasicToolOperation {
+export default class LineToolOperation extends BasicToolOperation {
   /**
    * 渲染激活的线段
    * @param coord 当前的坐标
    * @param e 鼠标事件
    */
   public drawActivatedLine = (coord?: ICoordinate, e?: MouseEvent, hideTempAxis?: boolean) => {
-    const activeLine = _.cloneDeep(this.activeLine);
+    const activeLine = cloneDeep(this.activeLine);
 
     if (!activeLine || activeLine.length === 0) {
       return;
@@ -613,7 +613,7 @@ class LineToolOperation extends BasicToolOperation {
 
   public drawLines = () => {
     try {
-      const lineList = _.cloneDeep(this.attributeFilteredLines);
+      const lineList = cloneDeep(this.attributeFilteredLines);
       if (this.isHidden) {
         return;
       }
@@ -771,7 +771,7 @@ class LineToolOperation extends BasicToolOperation {
 
   /** 找到当前hover的线段 */
   public findHoverLine(coord: ICoordinate) {
-    const line = _.cloneDeep(this.lineList)
+    const line = cloneDeep(this.lineList)
       .reverse()
       .find(({ pointList }) => {
         const list = pointList ? this.getPointList(pointList) : [];
@@ -797,7 +797,7 @@ class LineToolOperation extends BasicToolOperation {
     let minDistance: number;
     let snappedPoint: ICoordinate | undefined;
 
-    _.cloneDeep(this.lineList)
+    cloneDeep(this.lineList)
       .reverse()
       .forEach(({ pointList, id }) => {
         if (id === this.selectedID || !pointList || pointList?.length < 2) {
@@ -907,8 +907,8 @@ class LineToolOperation extends BasicToolOperation {
       return;
     }
     const { top, left, right, bottom } = this.activeArea;
-    const hBoundaries = [left, right].map((i) => (_.isNumber(i) ? i + offsetX : 0));
-    const vBoundaries = [top, bottom].map((i) => (_.isNumber(i) ? i + offsetY : 0));
+    const hBoundaries = [left, right].map((i) => (isNumber(i) ? i + offsetX : 0));
+    const vBoundaries = [top, bottom].map((i) => (isNumber(i) ? i + offsetY : 0));
     const horizontalInRange = left >= 0 && right && MathUtils.isInRange(hBoundaries, rectHorizontalRange);
     const verticalInRange = top >= 0 && bottom && MathUtils.isInRange(vBoundaries, rectVerticalRange);
     const calcOffsetX = horizontalInRange ? offsetX : 0;
@@ -1139,7 +1139,7 @@ class LineToolOperation extends BasicToolOperation {
   }
 
   public setActiveLine(pointList?: ILinePoint[]) {
-    this.activeLine = pointList ? _.cloneDeep(pointList) : undefined;
+    this.activeLine = pointList ? cloneDeep(pointList) : undefined;
   }
 
   public onRightClick = (e: MouseEvent) => {
@@ -1385,7 +1385,7 @@ class LineToolOperation extends BasicToolOperation {
   public updateLines() {
     const line = this.lineList.find((i) => i.id === this.selectedID);
     if (line) {
-      line.pointList = _.cloneDeep(this.activeLine);
+      line.pointList = cloneDeep(this.activeLine);
       this.emit('dataUpdated', this.lineList);
     }
   }
@@ -1433,7 +1433,7 @@ class LineToolOperation extends BasicToolOperation {
   public createLineData() {
     const id = uuid();
     const newLine: ILine = {
-      pointList: _.cloneDeep(this.activeLine),
+      pointList: cloneDeep(this.activeLine),
       id,
       valid: this.isLineValid,
       // order: this.nextOrder(),
@@ -1457,8 +1457,8 @@ class LineToolOperation extends BasicToolOperation {
         const line = this.lineList.find((i) => i.id === this.selectedID);
         selectedID = this.selectedID;
         if (line) {
-          line.pointList = _.cloneWith(this.activeLine);
-          if (!_.isEqual(line.pointList, this.history?.pushHistory(this.lineList))) {
+          line.pointList = cloneWith(this.activeLine);
+          if (!isEqual(line.pointList, this.history?.pushHistory(this.lineList))) {
             this.history?.pushHistory(this.lineList);
           }
         }
@@ -1995,5 +1995,3 @@ class LineToolOperation extends BasicToolOperation {
     this.emit('selectedChange'); // 触发外层的更新
   };
 }
-
-export default LineToolOperation;

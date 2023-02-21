@@ -18,7 +18,7 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXTAREA_WIDTH = 200;
@@ -26,7 +26,7 @@ const TEXTAREA_WIDTH = 200;
 export interface IPointOperationProps extends IBasicToolOperationProps {
   style: any;
 }
-class PointOperation extends BasicToolOperation {
+export default class PointOperation extends BasicToolOperation {
   public config: IPointToolConfig;
 
   // 正在标的点
@@ -898,4 +898,3 @@ class PointOperation extends BasicToolOperation {
     this.renderTop();
   }
 }
-export default PointOperation;

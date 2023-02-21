@@ -5,13 +5,13 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: TagToolConfig;
 }
 
-class TagOperation extends BasicToolOperation {
+export default class TagOperation extends BasicToolOperation {
   public config: ITagConfig;
 
   public tagResult: ITagResult[]; // 当前图片下所有的标签集合
@@ -309,5 +309,3 @@ class TagOperation extends BasicToolOperation {
     return [tagResult, this.basicImgInfo];
   }
 }
-
-export default TagOperation;

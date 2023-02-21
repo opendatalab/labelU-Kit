@@ -1,9 +1,8 @@
-import type { Attribute } from '@label-u/annotation';
+import type { Attribute, EToolName } from '@label-u/annotation';
 import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool, BasicToolOperation } from '@label-u/annotation';
-import type { EToolName } from '@label-u/annotation/es/types/constant/tool';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import { getFormatSize } from '@/components/customResizeHook';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
