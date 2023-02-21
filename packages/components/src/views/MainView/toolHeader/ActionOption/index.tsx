@@ -1,7 +1,7 @@
 import React, { FC, ReactElement, useRef, useState } from 'react';
 import HeaderTips from '../HeaderTips';
 import GeneralOperation from '../GeneralOperation';
-import LabelShowSetArea from './LabelShowSetArea';
+import LabelShowSetArea from './labelShowSetArea';
 import DrageModel from '@/components/dragModal';
 
 const ActionOption: FC = () => {
