@@ -136,7 +136,7 @@ export const cloudMockFileList = [
   {
     mappingImgList: [
       {
-        url: 'http://localhost:3000/cloudpoint/1565685654060904.jpg',
+        url: 'http://localhost:3001/cloudpoint/1565685654060904.jpg',
         calib: {
           P: [
             [664.2713623046875, 0, 966.8039735557395, 0],
@@ -237,7 +237,7 @@ export const cloudMockFileList = [
       }
     ],
     id: 1,
-    url: 'http://localhost:3000/cloudpoint/1565685665061034.pcd',
+    url: 'http://localhost:3001/cloudpoint/1565685665061034.pcd',
     result: '{}'
   }
 ];
