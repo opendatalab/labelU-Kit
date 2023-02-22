@@ -68,16 +68,19 @@ const AnnotationConfig: FC = () => {
 
   const updateConfig = useCallback(
     (field: string) => (value: any) => {
-      const newConfig = {
-        ...config,
-        [field]: value,
-      };
-      setConfig(newConfig);
+      setConfig((prevState) => {
+        const newConfig = {
+          ...prevState,
+          [field]: value,
+        };
 
-      // 将config更新到store，以便其他组件使用，但本页面下的组件不要使用store中的数据而使用state中的数据
-      dispatch(updateAllConfig(newConfig));
+        // 将config更新到store，以便其他组件使用，但本页面下的组件不要使用store中的数据而使用state中的数据
+        dispatch(updateAllConfig(newConfig));
+
+        return newConfig;
+      });
     },
-    [config, dispatch],
+    [dispatch],
   );
 
   const configFromStore = useSelector(
