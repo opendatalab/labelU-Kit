@@ -37,8 +37,6 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
   const [selectTools, setSelectTools] = useState<string[]>([]);
   const [isConfigLoad, setIsConfigLoad] = useState<boolean>(true);
 
-  const updateTagTool = useMemo(() => updateConfig('tagTool'), [updateConfig]);
-  const updateTextTool = useMemo(() => updateConfig('textTool'), [updateConfig]);
   const updateTools = useMemo(() => updateConfig('tools'), [updateConfig]);
   const updateTagList = useMemo(() => updateConfig('tagList'), [updateConfig]);
   const updateTextConfig = useMemo(() => updateConfig('textConfig'), [updateConfig]);
@@ -153,9 +151,9 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
   const actUpdateToolsConfig = (name: string, info: any) => {
     if (name && Object.keys(toolnameC).indexOf(name) >= 0) {
       if (name === 'tagTool') {
-        updateTagTool(info.values.tagList as OneTag[]);
+        updateTagList(info.values.tagList as OneTag[]);
       } else if (name === 'textTool') {
-        updateTextTool(info.values.textConfig);
+        updateTextConfig(info.values.textConfig);
       } else {
         updateCombineToolsConfig(tools, info.values, name);
       }
