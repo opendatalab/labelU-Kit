@@ -87,6 +87,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);
+    polygonOperation.setIsEnableDrag(false);
     canvasScheduler.createCanvas(polygonOperation.canvas, { size });
 
     // // 3. Data record
