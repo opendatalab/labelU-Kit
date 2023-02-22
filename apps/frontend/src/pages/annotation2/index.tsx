@@ -8,7 +8,7 @@ import currentStyles from './index.module.scss';
 import { getTask, getSample, getPreSample } from '../../services/samples';
 import commonController from '../../utils/common/common';
 import SlideLoader from '../../components/slideLoader';
-import { updateCurrentSampleId } from '../../stores/sample.store';
+import { updateCurrentSample, updateCurrentSampleId } from '../../stores/sample.store';
 import AnnotationRightCorner from '../../components/annotationRightCorner';
 
 // import TF from './tF';
@@ -33,6 +33,8 @@ const AnnotationPage = () => {
         return;
       }
       const sampleRes = await getSample(taskId, sampleId);
+      // 更新state里面的currentStore
+      dispatch(updateCurrentSample(sampleRes?.data?.data));
       if (sampleRes.status === 200) {
         const newSample = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
         setTaskSample(newSample);
@@ -53,6 +55,7 @@ const AnnotationPage = () => {
       .catch((err) => console.error(err));
     // @ts-ignore
     dispatch(updateCurrentSampleId(sampleId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, location, sampleId]);
 
   // @ts-ignore

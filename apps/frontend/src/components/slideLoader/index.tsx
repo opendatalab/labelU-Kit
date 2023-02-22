@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { Provider } from 'react-redux';
 
 import SliderCard from './components/sliderCard';
-import { getPrevSamples, getSample } from '../../services/samples';
+import { getPrevSamples } from '../../services/samples';
 import commonController from '../../utils/common/common';
 import currentStyles from './index.module.scss';
 import store from '../../stores';
@@ -133,26 +133,28 @@ const SlideLoader = () => {
       return [];
     }
   };
+  //TODO 不太确认getSampleLocalNew之前写的逻辑
+  // const getSampleLocalNew = async function () {
+  //   const sampleRes = await getSample(taskId, sampleId);
+  //   if (sampleRes.status === 200) {
+  //     const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
+  //     newSample[0].state = sampleRes.data.data.state;
+  //     const after10 = await get10Samples('after');
+  //     const before10 = await get10Samples('before');
+  //     setPrevImgList(Object.assign(before10.concat(newSample, after10)));
+  //   } else {
+  //     commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
+  //   }
+  // };
 
-  const getSampleLocalNew = async function () {
-    const sampleRes = await getSample(taskId, sampleId);
-    if (sampleRes.status === 200) {
-      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
-      newSample[0].state = sampleRes.data.data.state;
+  const getSampleLocal = async function () {
+    const sample = store.getState()?.samples.currentSample;
+    if (sample) {
+      const newSample: any = commonController.transformFileList(sample.data, sample.id);
+      newSample[0].state = sample.state;
       const after10 = await get10Samples('after');
       const before10 = await get10Samples('before');
       setPrevImgList(Object.assign(before10.concat(newSample, after10)));
-    } else {
-      commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
-    }
-  };
-
-  const getSampleLocal = async function () {
-    const sampleRes = await getSample(taskId, sampleId);
-    if (sampleRes.status === 200) {
-      const newSample: any = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
-      newSample[0].state = sampleRes.data.data.state;
-      await getSampleLocalNew();
     } else {
       commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
     }
