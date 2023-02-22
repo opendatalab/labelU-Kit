@@ -8,10 +8,10 @@ import resolve from '@rollup/plugin-node-resolve';
 // import sourceMaps from 'rollup-plugin-sourcemaps'
 import svg from 'rollup-plugin-svg';
 import alias from '@rollup/plugin-alias';
-import pkg from './package.json';
 // import typescript from 'rollup-plugin-typescript2'
 import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import json from 'rollup-plugin-json';
+// import pkg from './package.json';
 
 const projectRootDir = path.resolve(__dirname);
 const customResolver = resolve({
@@ -84,6 +84,7 @@ export default () => [
       dir: './es',
       preserveModules: true,
       preserveModulesRoot: 'src',
+      banner,
     },
   },
   {
