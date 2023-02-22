@@ -519,6 +519,8 @@ export const usePointCloudViews = () => {
         _.pickBy(newBoxParams, (v, k) => ['width', 'height', 'x', 'y']),
       );
       updateSelectedBox(newBoxParams);
+
+      topViewInstance.pointCloud2dOperation.emit('resetView', newBoxParams);
       syncPointCloudViews(PointCloudView.Top, selectedPointCloudBox);
     }
   };
