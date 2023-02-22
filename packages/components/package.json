@@ -2,17 +2,16 @@
   "name": "@label-u/components",
   "version": "1.0.0-alpha.20",
   "description": "Provide a complete library of annotation components",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "rimraf -rf dist && rimraf -rf es && cross-env NODE_ENV=production vite build && npm run build:types",
-    "build:types": "tsc -d --emitDeclarationOnly",
     "dev:style": "dart-sass --watch src/index.scss dist/index.css ",
     "build:style": "dart-sass src/index.scss dist/index.css && shx cp -R ./src/assets/cssIcon/.  ./dist/assets/cssIcon",
+    "build": "rimraf dist && rimraf es && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:style && npm run build:types",
+    "build:types": "tsc -d --emitDeclarationOnly",
     "commit": "git-cz",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
@@ -60,6 +59,12 @@
     "react": ">=16.9.0"
   },
   "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.2",
+    "@rollup/plugin-commonjs": "^18.0.0",
+    "@rollup/plugin-eslint": "^8.0.1",
+    "@rollup/plugin-image": "^2.0.6",
+    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@svgr/rollup": "^6.5.1",
     "@ant-design/icons": "^4.7.0",
     "@types/lodash-es": "^4.17.6",
     "@types/react": "^16.13.1",
@@ -68,16 +73,16 @@
     "antd": "^4.15.0",
     "cross-env": "^7.0.3",
     "dart-sass": "^1.25.0",
+    "esbuild": "^0.11.0",
     "react": "^17.0.2",
     "react-draggable": "^4.4.5",
     "rollup": "^2.43.1",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-esbuild": "^3.0.2",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-url": "^3.0.1",
     "ts-patch": "^2.1.0",
     "typescript": "^4.2.3",
-    "typescript-transform-paths": "^3.4.6",
-    "vite": "^4.1.1",
-    "vite-plugin-svgr": "^2.4.0",
-    "vite-tsconfig-paths": "^4.0.5"
+    "typescript-transform-paths": "^3.4.6"
   },
   "config": {
     "commitizen": {

@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.lib.json",
   "compilerOptions": {
-    "isolatedModules": true,
+    "isolatedModules": false,
     "sourceMap": false,
     "esModuleInterop": false,
+    "declarationDir": "es/types",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "declarationDir": "./dist",
     "outDir": "dist",
     "baseUrl": "./"
   },
