@@ -11,7 +11,7 @@ import alias from '@rollup/plugin-alias';
 // import typescript from 'rollup-plugin-typescript2'
 import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import json from 'rollup-plugin-json';
-// import pkg from './package.json';
+import pkg from './package.json';
 
 const projectRootDir = path.resolve(__dirname);
 const customResolver = resolve({

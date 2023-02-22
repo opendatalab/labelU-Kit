@@ -1,6 +1,6 @@
 {
   "name": "@label-u/utils",
-  "version": "1.3.0-pc",
+  "version": "^1.2.0",
   "description": "utils for label-u",
   "author": "Glenfiddish <edwinlee0927@hotmail.com>",
   "license": "Apache-2.0",
