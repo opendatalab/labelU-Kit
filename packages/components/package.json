@@ -1,6 +1,6 @@
 {
   "name": "@label-u/components",
-  "version": "^0.0.3",
+  "version": "0.0.3",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -19,14 +19,6 @@
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
     "commitmsg": "commitlint -e $GIT_PARAMS"
   },
-  "author": "wuhui",
-  "contributors": [
-    "luoluo",
-    "lijingchi",
-    "tanjunbao",
-    "chenlu",
-    "lihuaqi"
-  ],
   "keywords": [
     "annotation",
     "canvas",
