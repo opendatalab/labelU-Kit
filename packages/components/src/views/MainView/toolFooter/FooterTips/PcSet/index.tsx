@@ -31,7 +31,7 @@ const PcSet: FC<Iprops> = ({ updatePopoverStatus }) => {
         name: 'pointSize',
         min: 0,
         max: 10,
-        step: 1,
+        step: 0.1,
         range: false,
         marks: {
           [pCtx.pointSize]: pCtx.pointSize,

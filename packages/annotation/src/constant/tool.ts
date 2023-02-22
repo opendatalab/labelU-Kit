@@ -254,6 +254,6 @@ export const ImageLabelTool = [EToolName.Rect, EToolName.Point, EToolName.Line, 
 
 export const PcZRange = [-5, 10];
 
-export const PointSize = 1;
+export const PointSize = 0.1;
 
 export const Radiuses = 80;
