@@ -57,6 +57,7 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'es2015',
     terserOptions: {
       compress: {
         drop_console: false,
