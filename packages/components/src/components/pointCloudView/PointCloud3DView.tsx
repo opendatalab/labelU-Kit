@@ -282,12 +282,12 @@ const PointCloud3D: React.FC<
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
-        pointCloud.loadPCDFile(currentData.url);
         ids.forEach((id: string) => {
           pointCloud?.clearBoxInSceneById(id);
         });
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
+        pointCloud?.updatePointCloudByAttributes(currentData.url, boxParamsList);
       }
 
       ptCtx.setMainViewInstance(pointCloud);

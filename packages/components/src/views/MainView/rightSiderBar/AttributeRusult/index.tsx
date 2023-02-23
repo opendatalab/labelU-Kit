@@ -308,7 +308,9 @@ const AttributeRusult: FC<IProps> = ({
               item.order = item.order - getPositionIndexInArr(deleteResult, item.order);
               res.push(item);
             } else {
-              item.id ?? deleteBoxArray.push(item.id);
+              if (item.id) {
+                deleteBoxArray.push(item.id);
+              }
             }
             return res;
           },
@@ -351,7 +353,9 @@ const AttributeRusult: FC<IProps> = ({
               }
               res.push(item);
             } else {
-              item?.id ?? deleteBoxArray.push(item.id);
+              if (item?.id) {
+                deleteBoxArray.push(item.id);
+              }
             }
             return res;
           },
