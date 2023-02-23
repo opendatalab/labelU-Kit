@@ -2,7 +2,7 @@ import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import { connect, useSelector } from 'react-redux';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import type { IFileItem } from '@/types/data';
 

@@ -1,6 +1,6 @@
 import Icon from '@ant-design/icons';
 import React from 'react';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 
 interface ToolIconProps {
   style: React.CSSProperties;

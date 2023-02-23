@@ -29,14 +29,14 @@ import PolygonUtils from '../../utils/tool/PolygonUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
 type IPolygonOperationProps = IBasicToolOperationProps;
 
-class PolygonOperation extends BasicToolOperation {
+export default class PolygonOperation extends BasicToolOperation {
   public config: IPolygonConfig;
 
   // RENDER
@@ -1722,5 +1722,3 @@ class PolygonOperation extends BasicToolOperation {
     }
   }
 }
-
-export default PolygonOperation;

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import type { AxiosResponse } from 'axios';
 
 import axiosProxy from './axiosProxy';

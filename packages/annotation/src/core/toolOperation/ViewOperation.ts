@@ -2,7 +2,7 @@
  * 查看模式 - 支持简单数据注入查看
  */
 
-import _ from 'lodash';
+import { pick } from 'lodash-es';
 import rgba from 'color-rgba';
 
 import DrawUtils from '@/utils/tool/DrawUtils';
@@ -17,7 +17,7 @@ import type { IAnnotationData, IBasicStyle } from '@/types/tool/annotationView';
 import type { IPoint } from '@/types/tool/common';
 
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 
 const newScope = 3;
 const DEFAULT_RADIUS = 3;
@@ -157,7 +157,7 @@ export default class ViewOperation extends BasicToolOperation {
    * @returns
    */
   private getSpecificStyle(obj: Record<string, any>) {
-    const specificStyle = _.pick(obj, ['stroke', 'thickness', 'fill', 'radius']);
+    const specificStyle = pick(obj, ['stroke', 'thickness', 'fill', 'radius']);
 
     const newStyle = {
       ...this.style,

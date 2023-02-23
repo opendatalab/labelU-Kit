@@ -1,6 +1,6 @@
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Collapse, Tooltip } from 'antd/es';
-import _, { cloneDeep } from 'lodash';
+import { cloneDeep, pickBy } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { OneTag } from '@label-u/annotation';
 import { CommonToolUtils, TagUtils, uuid } from '@label-u/annotation';
@@ -158,12 +158,12 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
 
       const valuesSet = new Set(valuesArray);
       existValue[key] = Array.from(valuesSet).join(';');
-      return _.pickBy(existValue, (v) => v);
+      return pickBy(existValue, (v) => v);
     }
 
     existValue[key] = existValue[key] === value ? undefined : value;
 
-    return _.pickBy(existValue, (v) => v);
+    return pickBy(existValue, (v) => v);
   };
 
   const setLabelBySelectedList = (num1: number, num2?: number) => {

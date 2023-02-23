@@ -17,17 +17,17 @@ import MarkerUtils from '../../utils/tool/MarkerUtils';
 import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
-interface IRectOperationProps extends IBasicToolOperationProps {
+export interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
   style: any;
 }
 
 const scope = 6;
 
-class RectOperation extends BasicToolOperation {
+export default class RectOperation extends BasicToolOperation {
   public drawingRect?: IRect;
 
   public firstClickCoord?: ICoordinate; // 第一次点击的位置
@@ -1728,7 +1728,3 @@ class RectOperation extends BasicToolOperation {
     }
   }
 }
-
-export { RectOperation, IRectOperationProps };
-
-export default RectOperation;

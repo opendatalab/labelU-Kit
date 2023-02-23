@@ -1,4 +1,4 @@
-import { isNumber } from 'lodash';
+import { isNumber } from 'lodash-es';
 
 import type { IInputList } from '@/types/tool/tagTool';
 import type { IPoint } from '@/types/tool/common';

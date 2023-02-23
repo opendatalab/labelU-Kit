@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import vitePluginImp from 'vite-plugin-imp';
+import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -21,18 +22,15 @@ export default defineConfig({
     },
   },
 
+  optimizeDeps: {
+    include: ['react/jsx-runtime'],
+  },
+
   plugins: [
     react(),
-    // viteMockServe({
-    //   mockPath: 'mock',
-    //   localEnabled: true,
-    // }),
-    svgr({
-      exportAsDefault: false,
-    }),
-    tsMonoAlias({
-      ignorePackages: ['web-demo', 'server'],
-    }),
+    svgr(),
+    ViteEjsPlugin(),
+    !process.env.DIST && process.env.NODE_ENV !== 'production' && tsMonoAlias({}),
     vitePluginImp({
       libList: [
         {
@@ -45,7 +43,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/'),
-      components: resolve(__dirname, 'src/components/'),
     },
   },
   css: {
@@ -60,6 +57,7 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'es2015',
     terserOptions: {
       compress: {
         drop_console: false,
