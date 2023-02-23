@@ -30,13 +30,6 @@
     "prettier": "prettier --write \"**/**.{js,jsx,tsx,ts,less,md,json}\"",
     "prepublishOnly": "npm run build"
   },
-  "lint-staged": {
-    "src/**/*.{ts,tsx}": [
-      "eslint",
-      "pretty-quick - staged",
-      "git add"
-    ]
-  },
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/preset-env": "^7.6.3",

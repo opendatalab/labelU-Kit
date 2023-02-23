@@ -19,14 +19,6 @@
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
     "commitmsg": "commitlint -e $GIT_PARAMS"
   },
-  "author": "wuhui",
-  "contributors": [
-    "luoluo",
-    "lijingchi",
-    "tanjunbao",
-    "chenlu",
-    "lihuaqi"
-  ],
   "keywords": [
     "annotation",
     "canvas",

@@ -17,8 +17,7 @@
 		"http-errors": "~1.6.3",
 		"i": "^0.3.7",
 		"jade": "~1.11.0",
-		"morgan": "~1.9.1",
-		"npm": "^8.19.2"
+		"morgan": "~1.9.1"
 	},
 	"devDependencies": {
 		"http-proxy-middleware": "^2.0.6"

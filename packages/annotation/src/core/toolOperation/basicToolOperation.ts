@@ -7,9 +7,9 @@ import { styleDefaultConfig } from '@/constant/defaultConfig';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
 import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
-import { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
+import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import TagUtils from '@/utils/tool/TagUtils';
-import { ToolConfig } from '@/interface/conbineTool';
+import type { ToolConfig } from '@/interface/conbineTool';
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
@@ -170,6 +170,8 @@ class BasicToolOperation extends EventListener {
 
   private startTime = 0; // 开始时间
 
+  private isEnableDrag: boolean = true; // 是否支持拖拽
+
   private _ctx?: CanvasRenderingContext2D;
 
   private _imgAttribute?: IImageAttribute;
@@ -308,6 +310,10 @@ class BasicToolOperation extends EventListener {
     return [];
   }
 
+  public setIsEnableDrag(isEnableDrag: boolean) {
+    this.isEnableDrag = isEnableDrag;
+  }
+
   /**
    * 设置此前工具标注结果信息
    */
@@ -404,6 +410,7 @@ class BasicToolOperation extends EventListener {
     this.destroyCanvas();
     this.eventUnbinding();
   }
+
   public initCanvas(size: ISize) {
     const pixel = this.pixelRatio;
     const childCanvas = this.container.querySelectorAll('canvas');
@@ -907,18 +914,20 @@ class BasicToolOperation extends EventListener {
 
       this.coord = coord;
       if ((this.isSpaceClick || this.isDragStart) && this._firstClickCoordinate) {
-        const currentPos = this.getCurrentPos(coord);
-        this.setCurrentPos(currentPos);
-        this.isDrag = true;
+        if (this.isEnableDrag) {
+          const currentPos = this.getCurrentPos(coord);
+          this.setCurrentPos(currentPos);
+          // 拖拽信息触发
+          this.emit('dragMove', { currentPos, zoom: this.zoom, imgInfo: this.imgInfo });
+        }
+
+        this.isDrag = false;
         this.container.style.cursor = 'grabbing';
         this.forbidCursorLine = true;
         this.renderBasicCanvas();
 
         // 依赖渲染触发
         this.emit('dependRender');
-
-        // 拖拽信息触发
-        this.emit('dragMove', { currentPos, zoom: this.zoom, imgInfo: this.imgInfo });
       }
 
       this.render();
@@ -1322,7 +1331,7 @@ class BasicToolOperation extends EventListener {
                   const toolColor = this.getColor(item.attribute);
                   const color = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
                   const transformRect = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
-                  let rectSize = `${Math.round(item.width)} * ${Math.round(item.height)}`;
+                  const rectSize = `${Math.round(item.width)} * ${Math.round(item.height)}`;
                   const textSizeWidth = rectSize.length * 7;
                   DrawUtils.drawRect(this.canvas, transformRect, {
                     isShowOrder: this.isShowOrder,
@@ -1338,7 +1347,7 @@ class BasicToolOperation extends EventListener {
                       { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
                       item.textAttribute,
                       {
-                        color: color,
+                        color,
                         textMaxWidth: textWidth,
                       },
                     );
@@ -1423,7 +1432,7 @@ class BasicToolOperation extends EventListener {
                   ...DEFAULT_TEXT_OFFSET,
                 });
                 if (this.isShowAttributeText) {
-                  let ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+                  const ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
                   ctx?.save();
                   // this.ctx.font = 'italic bold 14px SourceHanSansCN-Regular';
                   ctx.font = DEFAULT_FONT;
@@ -1521,7 +1530,7 @@ class BasicToolOperation extends EventListener {
                   clear: both;
                 `,
               );
-              let preTagDom = document.getElementById('tagToolTag');
+              const preTagDom = document.getElementById('tagToolTag');
               if (!this.canvas?.parentNode?.contains(preTagDom)) {
                 this.canvas?.parentNode?.appendChild(dom);
               }

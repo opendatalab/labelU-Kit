@@ -82,9 +82,9 @@ export const PointCloudProvider: React.FC<{}> = ({ children }) => {
   const [sideViewInstance, setSideViewInstance] = useState<PointCloudAnnotation>();
   const [backViewInstance, setBackViewInstance] = useState<PointCloudAnnotation>();
   const [mainViewInstance, setMainViewInstance] = useState<PointCloudOperation>();
-  const [radiuses, setRadiuses] = useState<string>('80');
-  const [zRange, setZrange] = useState<[number, number]>([-5, 10]);
-  const [pointSize, setPointSize] = useState<number>(1);
+  const [radiuses, setRadiuses] = useState<string>(`${Radiuses}`);
+  const [zRange, setZrange] = useState<[number, number]>(PcZRange as [number, number]);
+  const [pointSize, setPointSize] = useState<number>(PointSize);
 
   const selectedID = useMemo(() => {
     return selectedIDs.length === 1 ? selectedIDs[0] : '';

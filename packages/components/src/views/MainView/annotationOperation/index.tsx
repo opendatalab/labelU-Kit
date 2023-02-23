@@ -1,10 +1,9 @@
 import { AppProps, store } from '@/index';
-import { LabelUContext } from '@/store/ctx';
+import { LabelUContext, useDispatch } from '@/store/ctx';
 import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { message } from 'antd/es';
 import { connect } from 'react-redux';
-import { useDispatch } from '@/store/ctx';
 import { ImgAttributeState } from 'src/store/imgAttribute/types';
 
 import { AppState } from 'src/store';
@@ -139,8 +138,6 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     }
   }, [size]);
 
-
-
   // to make sure
   // useEffect(() => {
   //   // Update StepList When it update by outside
@@ -192,7 +189,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   return (
     <div ref={annotationRef} className='annotationOperation'>
-      <div className='canvas' ref={containerRef} style={size} id='toolContainer'  key={toolName} >
+      <div className='canvas' ref={containerRef} style={size} id='toolContainer' key={toolName}>
         {drawLayerSlot?.(annotationPos)}
       </div>
       {toolInstance?.isImgError === true && (
@@ -227,5 +224,5 @@ const mapStateToProps = (state: AppState) => {
 };
 
 export default connect(mapStateToProps, null, null, { context: LabelUContext })(
-  AnnotationOperation
+  AnnotationOperation,
 );
