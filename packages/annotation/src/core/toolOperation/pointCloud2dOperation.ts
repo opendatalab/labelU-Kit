@@ -82,6 +82,7 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public onMouseMove(event: MouseEvent) {
+    event.preventDefault();
     super.onMouseMove(event);
     if (this.forbidMouseOperation || !this.imgInfo || !this.arrowPointList) {
       return;

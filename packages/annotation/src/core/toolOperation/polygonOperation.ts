@@ -1290,6 +1290,7 @@ class PolygonOperation extends BasicToolOperation {
   }
 
   public onMouseMove(e: MouseEvent) {
+    e.preventDefault();
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }

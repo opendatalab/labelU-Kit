@@ -897,6 +897,7 @@ class BasicToolOperation extends EventListener {
   }
 
   public onMouseMove(e: MouseEvent): boolean | void {
+    e.preventDefault();
     if (!this.canvas || this.isImgError) {
       return true;
     }
