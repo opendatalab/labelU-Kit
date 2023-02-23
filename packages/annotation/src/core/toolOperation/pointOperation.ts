@@ -773,13 +773,14 @@ export default class PointOperation extends BasicToolOperation {
     }
     const { textAttribute = '', attribute } = point;
     const selected = point.id === this.selectedID;
+    const hovered = point.id === this.hoverID;
     const toolColor = this.getColor(attribute);
 
     const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
     const { width = 2, hiddenText = false } = this.style;
 
     const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid, {
-      isSelected: selected || point.id === this.hoverID,
+      isSelected: selected || hovered,
     });
 
     // 绘制点
@@ -788,7 +789,8 @@ export default class PointOperation extends BasicToolOperation {
       endAngleDeg: 360,
       thickness: 1,
       color: toolData.stroke,
-      fill: 'transparent',
+      // Fix: https://project.feishu.cn/bigdata_03/issue/detail/4174573?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+      fill: selected || hovered ? '#fff' : 'transparent',
     });
 
     let showText = '';
