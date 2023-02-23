@@ -1,9 +1,11 @@
 import _ from 'lodash-es';
+import type { AxiosResponse } from 'axios';
 
 import axiosProxy from './axiosProxy';
 import commonController from '../utils/common/common';
 import { generateAttributeMapFromConfig } from '../utils/generateAttributeMapFromConfig';
 import { jsonParse } from '../utils';
+import type { CreateSamplePayload, PatchSamplePayload, SamplePayload, SamplesPayload, TaskPayload } from './interface';
 const { axiosInstance } = axiosProxy;
 
 /**
@@ -42,7 +44,17 @@ function changeKeyToValue(data: any, attributeMap: ReturnType<typeof generateAtt
   return newData;
 }
 
-const createSamples = async function (taskId: number, data: any) {
+const createSamples = async function (
+  taskId: number,
+  data: {
+    attachement_ids: number[];
+    data: {
+      result: string;
+      fileNames: Record<string, string>;
+      urls: Record<string, string>;
+    };
+  }[],
+): Promise<AxiosResponse<CreateSamplePayload>> {
   // try {
   const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples`,
@@ -55,7 +67,7 @@ const createSamples = async function (taskId: number, data: any) {
   // }
 };
 
-const getTask = async function (taskId: number) {
+const getTask = async function (taskId: number): Promise<AxiosResponse<TaskPayload>> {
   if (taskId === 0) {
     return {};
   }
@@ -69,7 +81,7 @@ const getTask = async function (taskId: number) {
   return res;
 };
 
-const getSamples = async function (taskId: number, params: any) {
+const getSamples = async function (taskId: number, params: any): Promise<AxiosResponse<SamplesPayload>> {
   const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples`,
     method: 'GET',
@@ -87,7 +99,7 @@ const getPrevSamples = async function (taskId: number, params: any) {
   return res;
 };
 
-const getSample = async function (taskId: number, sampleId: number) {
+const getSample = async function (taskId: number, sampleId: number): Promise<AxiosResponse<SamplePayload>> {
   const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
     method: 'GET',
@@ -95,7 +107,12 @@ const getSample = async function (taskId: number, sampleId: number) {
   return res;
 };
 
-const updateSampleState = async function (taskId: number, sampleId: number, data: any, state?: string) {
+const updateSampleState = async function (
+  taskId: number,
+  sampleId: number,
+  data: any,
+  state?: string,
+): Promise<AxiosResponse<SamplePayload>> {
   const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
     method: 'PATCH',
@@ -110,7 +127,11 @@ const updateSampleState = async function (taskId: number, sampleId: number, data
   return res;
 };
 
-const updateSampleAnnotationResult = async function (taskId: number, sampleId: number, data: any) {
+const updateSampleAnnotationResult = async function (
+  taskId: number,
+  sampleId: number,
+  data: any,
+): Promise<AxiosResponse<PatchSamplePayload>> {
   const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
     method: 'PATCH',
@@ -228,7 +249,7 @@ const deleteSamples = async function (taskId: number, sampleIds: number[]) {
   return res;
 };
 
-const getPreSample = async function (taskId: number, sampleId: number) {
+const getPreSample = async function (taskId: number, sampleId: number): Promise<AxiosResponse<SamplePayload>> {
   const res = await axiosInstance({
     url: `/api/v1/tasks/${taskId}/samples/${sampleId}/pre`,
     method: 'GET',
