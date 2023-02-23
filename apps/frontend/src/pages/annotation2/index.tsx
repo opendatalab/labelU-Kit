@@ -33,7 +33,7 @@ const AnnotationPage = () => {
         return;
       }
       const sampleRes = await getSample(taskId, sampleId);
-      // 更新state里面的currentStore
+      // 更新store里面的currentSample
       dispatch(updateCurrentSample(sampleRes?.data?.data));
       if (sampleRes.status === 200) {
         const newSample = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
