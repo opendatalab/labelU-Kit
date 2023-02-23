@@ -45,7 +45,7 @@ async function main() {
     'utf-8',
   );
 
-  console.log('inject frontend info success!');
+  console.log('Inject frontend info success!');
 }
 
 main();
