@@ -35,7 +35,7 @@ async function main() {
   });
 
   fs.writeFileSync(
-    path.join(__dirname, '../public/frontend_version.js'),
+    path.join(__dirname, '../dist/frontend_version.js'),
     prettier.format(getCode(versions), {
       singleQuote: true,
       trailingComma: 'all',
