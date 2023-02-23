@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 
 // export const DEFAULT_LINK = '@@';
 // const DEFAULT_TOOL_ATTRIBUTE = ['valid', 'invalid'];

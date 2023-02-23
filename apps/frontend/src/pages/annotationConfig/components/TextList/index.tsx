@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Input, Button, Tooltip, Modal, Form } from 'antd';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { SettingOutlined, CloseCircleFilled } from '@ant-design/icons';
 import classnames from 'classnames';
 import { useTranslation } from 'react-i18next';

@@ -1,4 +1,4 @@
-import { isObject } from 'lodash';
+import { isObject } from 'lodash-es';
 import type { ReactNode } from 'react';
 import type { BasicConfig } from '@label-u/components';
 
