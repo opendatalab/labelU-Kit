@@ -48,6 +48,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const toolName = stepInfo?.tool;
 
   const [boxHeight, setBoxHeight] = useState<number>();
+  console.log(boxHeight);
   const [, setBoxWidth] = useState<number>();
 
   useEffect(() => {
@@ -146,7 +147,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   }
 
   return (
-    <div className={`${sidebarCls}`} style={{ height: (boxHeight as number) - 111 }}>
+    <div className={`${sidebarCls}`}>
       <Tabs
         defaultActiveKey="1"
         onChange={(e) => {
@@ -162,33 +163,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         )}
         <Tabs.TabPane tab={attributeTab} key="2">
           <AttributeRusult isPreview={isPreview} isShowClear={isShowClear} />
-          {/* {isShowClear && (
-            <Popconfirm
-              title='确认清空标注？'
-              open={open}
-              okText='确认'
-              cancelText='取消'
-              onConfirm={handleOk}
-              okButtonProps={{ loading: confirmLoading }}
-              onCancel={handleCancel}
-            >
-              <div className='leftBarFooter'>
-              <img
-                onMouseEnter={(e) => {
-                  e.stopPropagation();
-                  setIsClearHover(true);
-                }}
-                onMouseLeave={(e) => {
-                  e.stopPropagation();
-                  setIsClearHover(false);
-                }}
-                onClick={showPopconfirm}
-                className='clrearResult'
-                src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
-              />
-              </div>
-            </Popconfirm>
-          )} */}
         </Tabs.TabPane>
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane tab={textTab} key="3">

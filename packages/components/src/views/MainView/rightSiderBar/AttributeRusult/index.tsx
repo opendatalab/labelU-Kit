@@ -577,13 +577,18 @@ const AttributeRusult: FC<IProps> = ({
   }
   return (
     <div
-      style={{ height: (boxHeight as number) - 220, paddingBottom: 40 }}
+      style={{ paddingBottom: 40 }}
       className={classNames({
         attributeResult: true,
       })}
     >
       <DrageModel title="详细信息" ref={dragModalRef} width={333} okWord="确认" cancelWord="取消" content={content} />
-      <Collapse key={defaultKeys.join('')} defaultActiveKey={defaultKeys} expandIcon={expandIconFuc}>
+      <Collapse
+        key={defaultKeys.join('')}
+        className="attribute-panel"
+        defaultActiveKey={defaultKeys}
+        expandIcon={expandIconFuc}
+      >
         {attributeResultList &&
           attributeResultList.length > 0 &&
           attributeResultList.map((item) => {
@@ -755,36 +760,34 @@ const AttributeRusult: FC<IProps> = ({
                       </div>
                     );
                   })}
-
-                <Popconfirm
-                  title="确认清空标注？"
-                  open={open}
-                  okText="确认"
-                  cancelText="取消"
-                  onConfirm={handleOk}
-                  okButtonProps={{ loading: confirmLoading }}
-                  onCancel={handleCancel}
-                >
-                  <div className="rightBarFooter">
-                    <img
-                      onMouseEnter={(e) => {
-                        e.stopPropagation();
-                        setIsClearHover(true);
-                      }}
-                      onMouseLeave={(e) => {
-                        e.stopPropagation();
-                        setIsClearHover(false);
-                      }}
-                      onClick={showPopconfirm}
-                      className="clrearResult"
-                      src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
-                    />
-                  </div>
-                </Popconfirm>
               </Panel>
             );
           })}
       </Collapse>
+      <Popconfirm
+        title="确认清空标注？"
+        open={open}
+        okText="确认"
+        cancelText="取消"
+        onConfirm={handleOk}
+        okButtonProps={{ loading: confirmLoading }}
+        onCancel={handleCancel}
+      >
+        <button
+          className="rightBarFooter"
+          onClick={showPopconfirm}
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            setIsClearHover(true);
+          }}
+          onMouseLeave={(e) => {
+            e.stopPropagation();
+            setIsClearHover(false);
+          }}
+        >
+          <img className="clrearResult" src={isClearnHover ? ClearResultIconHover : ClearResultIcon} />
+        </button>
+      </Popconfirm>
     </div>
   );
 };

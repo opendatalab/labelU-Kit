@@ -8,6 +8,10 @@ $sidebarFooterHeight: 80px;
 $prefix: lab;
 $boxShadow: 1px 1px 4px rgb(204 204 204 / 50%);
 
+#annotationCotentAreaIdtoGetBox {
+  height: 100%;
+}
+
 ::-webkit-scrollbar {
   width: 6px !important;
   height: 10px !important;
@@ -72,7 +76,8 @@ body {
 .#{$prefix}-layout {
   position: relative;
   overflow: hidden;
-  height: 100vh;
+  display: flex;
+  height: 100%;
 
   &__header,
   &__footer {
@@ -90,7 +95,7 @@ body {
     overflow: hidden;
     position: relative;
     z-index: 10;
-    // border-top: 1px solid #e2e2e2;
+    height: 100%;
 
     .ant-collapse-borderless > .ant-collapse-item {
       border-bottom: 1px solid #eee;
@@ -259,12 +264,14 @@ body {
     color: rgba(0, 0, 0, 0.87) !important;
   }
   .ant-tabs-content {
-    margin-top: 16px;
-    overflow-y: scroll;
     overflow-x: hidden;
-    height: calc(100% - 10px);
+    padding-top: 16px;
     position: relative;
-    width: 100%;
+    height: 100%;
+
+    .ant-tabs-tabpane {
+      height: 100%;
+    }
   }
   .singleTool {
     height: 32px;
@@ -531,6 +538,7 @@ body {
   width: 280px;
   // box-shadow: 0px 2px 14px 0px rgba(204, 204, 204, 0.5);
   background: #ffffff;
+  height: 100%;
   overflow: scroll;
   display: flex;
   position: relative;
@@ -543,20 +551,15 @@ body {
 
   .rightBarFooter {
     position: absolute;
-    bottom: 5px;
+    bottom: 0;
     width: 100%;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #ffffff;
-    // .clrearResult {
-    //   position: absolute;
-    //   height: 20px;
-    //   bottom: 16px;
-    //   transform: translate(-50%, 0%);
-    //   left: 50%;
-    // }
+    border: 0;
+    cursor: pointer;
   }
 
   // .attributeResultPreview{
@@ -572,11 +575,11 @@ body {
   }
 
   .ant-tabs {
-    font-family: 'PingFang SC';
     font-style: normal;
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
+    height: 100%;
 
     .ant-tabs-nav {
       // padding: 0px 12px;
