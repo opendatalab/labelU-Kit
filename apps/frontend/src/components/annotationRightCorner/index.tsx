@@ -6,6 +6,7 @@ import { updateSampleState, updateSampleAnnotationResult, getSample } from '../.
 import commonController from '../../utils/common/common';
 import { annotationRef } from '../../pages/annotation2';
 import TempStore from './tempStore';
+import store from '../../stores';
 
 interface AnnotationRightCornerProps {
   isLastSample: boolean;
@@ -20,7 +21,7 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
   const skipSample = () => {
     setIsSkippedShow('SKIPPED');
     getSample(taskId, sampleId)
-      .then((sampleRes: any) => {
+      .then((sampleRes) => {
         if (sampleRes.status === 200) {
           updateSampleState(taskId, sampleId, sampleRes?.data.data.data, 'SKIPPED')
             .then((res) => {
@@ -189,19 +190,16 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
       });
   };
   useEffect(() => {
-    getSample(taskId, sampleId)
-      .then((sampleRes: any) => {
-        if (sampleRes.status === 200) {
-          if (!sampleRes.data.data.state) {
-            setIsSkippedShow('NEW');
-          } else {
-            setIsSkippedShow(sampleRes.data.data.state);
-          }
-        } else {
-          commonController.notificationErrorMessage({ message: '请求保存失败' }, 1);
-        }
-      })
-      .catch((error) => commonController.notificationSuccessMessage(error, 1));
+    const currentSample = store.getState()?.samples?.currentSample;
+    if (currentSample) {
+      if (!currentSample.state) {
+        setIsSkippedShow('NEW');
+      } else {
+        setIsSkippedShow(currentSample.state);
+      }
+    } else {
+      commonController.notificationSuccessMessage({ message: '请求保存失败' }, 1);
+    }
   }, [sampleId, taskId]);
 
   const onKeyDown = useCallback((e: any) => {
