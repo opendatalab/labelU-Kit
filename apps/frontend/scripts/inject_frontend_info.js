@@ -15,6 +15,8 @@ async function main() {
     deps: {},
   };
 
+  console.log('next version is', nextVersion);
+
   const getCode = (info) => {
     return `
     (function () {
