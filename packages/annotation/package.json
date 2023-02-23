@@ -47,7 +47,7 @@
     "@rollup/plugin-image": "^2.0.6",
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@types/jest": "^24.0.19",
-    "@types/lodash": "^4.14.165",
+    "@types/lodash-es": "^4.17.6",
     "cross-env": "^7.0.3",
     "esbuild": "^0.11.0",
     "rollup": "^2.43.1",
@@ -64,7 +64,7 @@
     "@turf/turf": "5.1.6",
     "color-rgba": "^2.3.0",
     "localforage": "^1.10.0",
-    "lodash": "^4.17.20",
+    "lodash-es": "^4.17.20",
     "rimraf": "^3.0.2",
     "shx": "^0.3.4"
   }

@@ -1,5 +1,5 @@
 import type { IRectOperationProps } from './rectOperation';
-import { RectOperation } from './rectOperation';
+import RectOperation from './rectOperation';
 
 type IMeasureOpeartion = IRectOperationProps;
 

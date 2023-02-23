@@ -2,7 +2,7 @@ import type { AnnotationEngine } from '@label-u/annotation';
 import { ImgUtils } from '@label-u/annotation';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import React, { useEffect, useRef, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import type { AppState } from 'src/store';

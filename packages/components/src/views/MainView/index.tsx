@@ -1,7 +1,7 @@
 import { cTool } from '@label-u/annotation';
 import { Layout, Spin } from 'antd';
 import classNames from 'classnames';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 

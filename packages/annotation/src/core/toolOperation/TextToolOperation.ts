@@ -3,7 +3,7 @@ import EKeyCode from '@/constant/keyCode';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 
 interface ITextResult {
   id: string;

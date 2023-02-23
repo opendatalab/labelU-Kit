@@ -5,7 +5,7 @@ import 'ace-builds/src-noconflict/snippets/json';
 import 'ace-builds/src-min-noconflict/ext-searchbox';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/webpack-resolver';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';

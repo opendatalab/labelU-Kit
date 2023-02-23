@@ -2,7 +2,7 @@
  * 查看模式 - 严格配置要求
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import RectUtils from '@/utils/tool/RectUtils';
@@ -18,7 +18,7 @@ import AxisUtils from '../../utils/tool/AxisUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 
 const TEXT_ATTRIBUTE_OFFSET = {
   x: 8,
@@ -36,7 +36,7 @@ interface ICheckOperationProps extends IBasicToolOperationProps {
 
 const newScope = 2;
 
-class CheckOperation extends BasicToolOperation {
+export default class CheckOperation extends BasicToolOperation {
   public resultList: ICheckResult[];
 
   public hoverID: string[];
@@ -277,5 +277,3 @@ class CheckOperation extends BasicToolOperation {
     return [[], {}];
   }
 }
-
-export default CheckOperation;

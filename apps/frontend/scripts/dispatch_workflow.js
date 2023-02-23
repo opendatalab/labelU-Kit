@@ -58,6 +58,8 @@ async function main() {
     .catch((err) => {
       console.log('trigger labelu workflow failed', err);
     });
+
+  require('./inject_frontend_info')(nextVersion);
 }
 
 main();

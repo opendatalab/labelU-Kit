@@ -1,11 +1,20 @@
 // @ts-ignore
 import { createSlice } from '@reduxjs/toolkit';
 
+import type { SamplePayload } from '@/services/interface';
+
+export interface SamplesState {
+  newSamples: SamplePayload[];
+  list: SamplePayload[];
+  currentSampleId?: number;
+}
+
 const samplesSlice = createSlice({
   name: 'samples',
   initialState: {
     newSamples: [],
     currentSampleId: undefined,
+    currentSample: {} as SamplePayload,
     list: [],
   },
   reducers: {
@@ -16,12 +25,16 @@ const samplesSlice = createSlice({
       state.currentSampleId = action.payload;
     },
 
+    updateCurrentSample: (state: any, action: any) => {
+      state.currentSample = action.payload;
+    },
+
     setSamples: (state: any, action: any) => {
       state.list = action.payload;
     },
   },
 });
 
-export const { updateNewSamples, updateCurrentSampleId, setSamples } = samplesSlice.actions;
+export const { updateNewSamples, updateCurrentSampleId, updateCurrentSample, setSamples } = samplesSlice.actions;
 
 export default samplesSlice.reducer;

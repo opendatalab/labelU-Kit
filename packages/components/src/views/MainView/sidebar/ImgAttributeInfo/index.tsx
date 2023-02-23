@@ -1,6 +1,6 @@
 import { Col, Row, Slider, Input } from 'antd/es';
 import { connect } from 'react-redux';
-import { throttle } from 'lodash';
+import { throttle } from 'lodash-es';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 

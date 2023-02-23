@@ -1,7 +1,7 @@
 import type { FocusEvent } from 'react';
 import React, { useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { Input } from 'antd/es';
 import { cKeyCode } from '@label-u/annotation';
 import type { TextToolOperation } from '@label-u/annotation';
