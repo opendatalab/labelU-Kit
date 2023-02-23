@@ -6,8 +6,7 @@ import Navigate from '../../components/navigate/index';
 import constants from '../../constants';
 const Homepage = () => {
   const navigate = useNavigate();
-  // REVIEW: username 一直是undefined
-  const [username] = useState(undefined);
+  const [username, setUsername] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (window.location.pathname === '/') {
       navigate(constants.urlToTasks);
@@ -16,20 +15,16 @@ const Homepage = () => {
     const token = localStorage.getItem('token');
     const _username = localStorage.getItem('username');
     if (token && _username) {
-      navigate('/tasks');
-    } else {
-      navigate('/login');
+      setUsername(_username);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate]);
   return (
-    <div className={currentStyles.outerFrame}>
+    <div className={currentStyles.main}>
       {/* @ts-ignore */}
       <Navigate username={username} />
       <div className={currentStyles.content}>
         <Outlet />
       </div>
-      {/*<TaskList />*/}
     </div>
   );
 };

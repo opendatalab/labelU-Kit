@@ -1,12 +1,11 @@
 @import '../../utils/common/common.module';
-.outerFrame {
+.loginForm {
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   justify-content: space-around;
   align-items: center;
   width: 380px;
-  height: (284 + 20) px;
-  margin: auto;
+  margin: 0 auto;
 }
 
 .title {

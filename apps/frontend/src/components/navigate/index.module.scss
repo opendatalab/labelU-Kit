@@ -1,12 +1,14 @@
 @import '../../utils/common/common.module';
-.outerFrame {
+
+.navigator {
+  --header-height: 3.5rem;
   @extend .displayFlex;
   @extend .flexDirectionRow;
   justify-content: space-between;
   align-items: center;
-  height: 56px;
+  height: var(--header-height);
   width: 100%;
-  line-height: 56px;
+  line-height: var(--header-height);
   overflow-y: visible;
 }
 
@@ -47,10 +49,17 @@
   overflow-y: visible;
   z-index: 99;
 }
-.signOut {
-  //height: 100px;
-  //margin-top: 14px;
-  cursor: pointer;
+
+.dropDownOverlay {
+  :global(.ant-dropdown-menu) {
+    padding: 0;
+    border-radius: 0;
+  }
+
+  :global(.ant-dropdown-menu-item) {
+    margin-bottom: 0;
+    padding: 0.75rem 0;
+  }
 }
 .signOutItem {
   position: absolute;
@@ -61,24 +70,12 @@
   cursor: pointer;
   color: #ffffff;
   text-align: center;
-  //height : 20px;
   z-index: 100000;
 }
 .username {
-  //width: 110px;
-  //height: 49px;
-  background-color: white;
   cursor: pointer;
   text-align: center;
 }
 .quit {
-  position: absolute;
-  z-index: 100000;
-  width: 110px;
-  height: 49px;
-  background-color: white;
-  cursor: pointer;
   text-align: center;
-  right: 40px;
-  box-shadow: 0px 4px 20px rgba(18, 30, 73, 0.06);
 }

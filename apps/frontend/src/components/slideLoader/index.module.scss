@@ -2,12 +2,9 @@
   background: #eeeeee;
   overflow-y: scroll;
   overflow-x: hidden;
-  //position : relative;
   z-index: 10;
   border-top: 1px solid #e2e2e2;
-  // height: calc(100vh - 139px);
-  height: calc(100vh - 219px);
-  //padding : 16px 0px;
+  height: 100%;
 }
 
 .tips {

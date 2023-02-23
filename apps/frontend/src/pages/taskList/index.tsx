@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pagination } from 'antd';
+import { Button, Pagination } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
@@ -64,12 +64,10 @@ const TaskList = () => {
   return (
     <React.Fragment>
       {taskCards.length > 0 && (
-        <div className={currentStyles.outerFrame}>
-          <div className={currentStyles.createTaskButtonRow}>
-            <div className={currentStyles.createTaskButton} onClick={createTask}>
-              新建任务
-            </div>
-          </div>
+        <div className={currentStyles.tasksWrapper}>
+          <Button className={currentStyles.createTaskButton} type="primary" onClick={createTask}>
+            新建任务
+          </Button>
           <div className={currentStyles.cards}>
             {taskCards.map((cardInfo: any, cardInfoIndex: number) => {
               return <TaskCard key={cardInfoIndex} cardInfo={cardInfo} />;

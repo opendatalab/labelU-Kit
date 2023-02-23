@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Breadcrumb } from 'antd';
+import { Breadcrumb, Dropdown } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PoweroffOutlined } from '@ant-design/icons';
 
@@ -139,7 +139,6 @@ const Homepage = () => {
       commonController.notificationErrorMessage({ message: '地址不正确' }, 1);
     }
   }, [location]);
-  const [isShowSignOut, setIsShowSignOut] = useState(false);
   const signOut = (e: any) => {
     e.stopPropagation();
     e.nativeEvent.stopPropagation();
@@ -149,10 +148,9 @@ const Homepage = () => {
     navigate('/login');
   };
   return (
-    <div className={currentStyles.outerFrame}>
+    <div className={currentStyles.navigator}>
       <div className={currentStyles.left}>
         <div className={currentStyles.logo} />
-        {/*<div className = {currentStyles.shortCutButton}></div>*/}
         <div className={currentStyles.breadcrumb}>
           <Breadcrumb>{breadcrumbItems}</Breadcrumb>
         </div>
@@ -162,32 +160,31 @@ const Homepage = () => {
         {isShowHelp && <HelpTips taskTips={taskTips} />}
         {isShowAnnotationTips && <AnnotationTips />}
         <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        <div
-          // onClick = {commonController.debounce(()=>{setIsShowSignOut(!isShowSignOut)}, 100)}
 
-          className={currentStyles.signOut}
-          onMouseOver={() => setIsShowSignOut(true)}
-          onMouseLeave={() => setIsShowSignOut(false)}
+        <Dropdown
+          overlayClassName={currentStyles.dropDownOverlay}
+          menu={{
+            items: [
+              {
+                label: (
+                  <div className={currentStyles.quit} onClick={signOut}>
+                    退出登录 &nbsp;&nbsp;
+                    <PoweroffOutlined />
+                  </div>
+                ),
+                key: 'signOut',
+                title: '退出登录',
+              },
+            ],
+          }}
+          trigger={['click']}
         >
           <div className={currentStyles.username}>
             {username}&nbsp;&nbsp;
             <img src="/src/icons/personal.svg" />{' '}
           </div>
-          {isShowSignOut && (
-            <div
-              className={currentStyles.quit}
-              onMouseOver={() => setIsShowSignOut(true)}
-              onMouseLeave={() => setIsShowSignOut(false)}
-              onClick={signOut}
-            >
-              退出登录&nbsp;&nbsp;
-              <PoweroffOutlined />
-            </div>
-          )}
-        </div>
+        </Dropdown>
       </div>
-      {/*{isShowSignOut && <div className = { currentStyles.signOutItem }*/}
-      {/*                       onClick={signOut}>退出</div>}*/}
     </div>
   );
 };

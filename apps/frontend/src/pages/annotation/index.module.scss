@@ -1,14 +1,3 @@
-//&__left_sider {
-//  // max-width: 232px;
-//  background: #eeeeee;
-//  overflow-y: scroll;
-//  overflow-x: hidden;
-//  position: relative;
-//  z-index: 10;
-//  border-top: 1px solid #e2e2e2;
-//  height: calc(100vh - 99px);
-//  padding: 16px 0px;
-
 .item {
   display: flex;
   // align-items: center;
@@ -68,7 +57,5 @@
 
 .annotationPage {
   overflow-y: auto;
-  height: calc(100vh - 70px);
-  height: calc(100vh - 58px);
-  width: 100%;
+  height: 100%;
 }

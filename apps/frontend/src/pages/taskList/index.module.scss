@@ -1,30 +1,14 @@
 @import '../../utils/common/common.module';
-.outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-  justify-content: flex-start;
-  align-items: center;
-  height: calc(100vh - 56px);
-  height: calc(100vh + 56px);
-  width: 100%;
-  padding-left: 24px;
-  padding-right: 24px;
-  background-color: #f4f5f7;
-}
-.createTaskButtonRow {
-  width: 100%;
-  margin-top: 24px;
+.tasksWrapper {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .createTaskButton {
   width: 88px;
-  height: 32px;
-  background-color: #1b67ff;
   border-radius: 4px;
-  cursor: pointer;
-  text-align: center;
-  color: white;
-  line-height: 32px;
 }
 
 .cards {
@@ -37,7 +21,6 @@
   justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
-  background-color: #f4f5f7;
 }
 
 .stationSymbol {
@@ -46,20 +29,8 @@
 }
 
 .pagination {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-  justify-content: flex-end;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  width: 100%;
-  //width : 1393px;
-  margin-bottom: 32px;
-  background-color: #f4f5f7;
-  :global {
-    .ant-pagination {
-      background-color: #f4f5f7;
-      //margin-top : 24px;
-      margin-bottom: 32px;
-    }
-  }
-  margin-right: 40px;
 }

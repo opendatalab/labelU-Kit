@@ -33,23 +33,21 @@ const Annotation = (props: {
   } = props;
   // @ts-ignore
   return (
-    <div style={{ height: '100%' }}>
-      <AnnotationOperation
-        leftSiderContent={leftSiderContent}
-        topActionContent={topActionContent}
-        ref={annotationRef}
-        isPreview={isPreview}
-        // exportData={exportData}
-        // onSubmit={onSubmit}
-        imgList={fileList}
-        attributeList={commonAttributeConfigurable ? attribute : []}
-        tagConfigList={tagList}
-        toolsBasicConfig={tools}
-        textConfig={textConfig}
-        isShowOrder={false}
-        // commonAttributeConfigurable ={co}
-      />
-    </div>
+    <AnnotationOperation
+      leftSiderContent={leftSiderContent}
+      topActionContent={topActionContent}
+      ref={annotationRef}
+      isPreview={isPreview}
+      // exportData={exportData}
+      // onSubmit={onSubmit}
+      imgList={fileList}
+      attributeList={commonAttributeConfigurable ? attribute : []}
+      tagConfigList={tagList}
+      toolsBasicConfig={tools}
+      textConfig={textConfig}
+      isShowOrder={false}
+      // commonAttributeConfigurable ={co}
+    />
   );
 };
 export default memo(Annotation);

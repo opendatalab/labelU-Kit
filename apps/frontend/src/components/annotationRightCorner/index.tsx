@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import currentStyles from './index.module.scss';
 import { updateSampleState, updateSampleAnnotationResult, getSample } from '../../services/samples';
 import commonController from '../../utils/common/common';
-import { annotationRef } from '../../pages/annotation2';
+import { annotationRef } from '../../pages/annotation';
 import TempStore from './tempStore';
 import store from '../../stores';
 

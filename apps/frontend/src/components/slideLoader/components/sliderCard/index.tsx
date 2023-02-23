@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import currentStyles from './index.module.scss';
 import commonController from '../../../../utils/common/common';
 import { getSample, updateSampleAnnotationResult } from '../../../../services/samples';
-import { annotationRef } from '../../../../pages/annotation2';
+import { annotationRef } from '../../../../pages/annotation';
 
 const SliderCard = (props: any) => {
   const { id, state, url } = props.cardInfo;

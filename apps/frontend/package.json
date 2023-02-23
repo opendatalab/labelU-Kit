@@ -44,6 +44,7 @@
     "react-intl-universal": "^2.6.11",
     "react-monaco-editor": "^0.50.1",
     "react-redux": "^7.2.6",
+    "react-responsive": "^9.0.2",
     "react-router": "^6.0.2",
     "react-router-dom": "^6.0.0",
     "recharts": "^2.0.0-beta.6",
