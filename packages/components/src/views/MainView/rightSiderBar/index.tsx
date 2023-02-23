@@ -3,10 +3,10 @@ import { EToolName } from '../../../data/enums/ToolType';
 import { AppState } from '../../../store';
 import { Sider } from '../../../types/main';
 import StepUtils from '../../../utils/StepUtils';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Popconfirm, Tabs } from 'antd';
 import { connect } from 'react-redux';
-import { useDispatch, useSelector } from '@/store/ctx';
+import { useDispatch, useSelector, LabelUContext } from '@/store/ctx';
 import TextToolSidebar from './TextToolSidebar';
 import TagSidebar from './TagSidebar';
 import AttributeRusult from './AttributeRusult';
@@ -17,8 +17,8 @@ import { labelTool } from '../toolHeader/headerOption';
 import { UpdateImgList } from '@/store/annotation/actionCreators';
 import { PrevResult } from '@label-u/annotation';
 import { toolList } from '../toolHeader/ToolOperation';
+import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
 import classNames from 'classnames';
-import { LabelUContext } from '@/store/ctx';
 
 interface IProps {
   toolName?: EToolName;
@@ -45,7 +45,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
-  const [isClearnHover,setIsClearHover] = useState<boolean>(false);
+  const [isClearnHover, setIsClearHover] = useState<boolean>(false);
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -55,11 +55,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const toolInstance = useSelector((state: AppState) => state.annotation.toolInstance);
   const toolName = stepInfo?.tool;
 
-  // 删除标注结果
-  // const doClearAllResult = () => {
-  //   toolInstance?.clearResult();
-  //   toolInstance?.setPrevResultList([]);
-  // };
+  const ptCtx = useContext(PointCloudContext);
 
   const showPopconfirm = () => {
     setOpen(true);
@@ -87,14 +83,25 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   // 删除标注结果
   const doClearAllResult = () => {
     let oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    let deleteBoxArray: string[] = [];
     for (let tool of labelTool) {
       let tmpResult = oldImgResult[tool]?.result;
       if (tmpResult && tmpResult.length > 0) {
         oldImgResult[tool].result = [];
+
+        deleteBoxArray = deleteBoxArray.concat(
+          tmpResult.map((item: { id: string }) => {
+            return item.id;
+          }),
+        );
       }
     }
+
     imgList[imgIndex].result = JSON.stringify(oldImgResult);
     dispatch(UpdateImgList(imgList));
+    setTimeout(() => {
+      ptCtx?.mainViewInstance?.emit('deleteBoxes', deleteBoxArray);
+    }, 100);
     updateCanvasView(oldImgResult);
   };
 
@@ -119,13 +126,15 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       setTextTab(
         <div className='rightTab'>
           <p>文本描述</p>
-          <span className={classNames({
-              'innerWord':true,
-              'finish': textResultKeys &&
-              textResultKeys.length > 0 &&
-              textResultKeys.length === textConfig.length
-
-            })}>
+          <span
+            className={classNames({
+              innerWord: true,
+              finish:
+                textResultKeys &&
+                textResultKeys.length > 0 &&
+                textResultKeys.length === textConfig.length,
+            })}
+          >
             {textResultKeys &&
             textResultKeys.length > 0 &&
             textResultKeys.length === textConfig.length
@@ -142,13 +151,15 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         setTagTab(
           <div className='rightTab'>
             <p>分类</p>
-            <span className={classNames({
-              'innerWord':true,
-              'finish': tagResultKeys &&
-              tagResultKeys.length > 0 &&
-              tagResultKeys.length === tagConfigList.length
-
-            })}>
+            <span
+              className={classNames({
+                innerWord: true,
+                finish:
+                  tagResultKeys &&
+                  tagResultKeys.length > 0 &&
+                  tagResultKeys.length === tagConfigList.length,
+              })}
+            >
               {tagResultKeys &&
               tagResultKeys.length > 0 &&
               tagResultKeys.length === tagConfigList.length
@@ -164,8 +175,15 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
       let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
       let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
-      let pointCloudResult = currentImgResult?.pointCloudTool ? currentImgResult.pointCloudTool.result:[];
-      let count = rectResult.length + polygonResult.length + lineResult.length + pointResult.length + pointCloudResult.length;
+      let pointCloudResult = currentImgResult?.pointCloudTool
+        ? currentImgResult.pointCloudTool.result
+        : [];
+      let count =
+        rectResult.length +
+        polygonResult.length +
+        lineResult.length +
+        pointResult.length +
+        pointCloudResult.length;
       setAttributeTab(
         <div className='rightTab'>
           <p>标注结果</p>
@@ -211,17 +229,19 @@ const RightSiderbar: React.FC<IProps> = (props) => {
               okButtonProps={{ loading: confirmLoading }}
               onCancel={handleCancel}
             >
-              <img onMouseEnter={e=>{
-                e.stopPropagation();
-                setIsClearHover(true)
-              }} 
-               onMouseLeave={
-                e=>{
+              <img
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  setIsClearHover(true);
+                }}
+                onMouseLeave={(e) => {
                   e.stopPropagation();
                   setIsClearHover(false);
-                }
-               }
-              onClick={showPopconfirm} className='clrearResult' src={isClearnHover?ClearResultIconHover:ClearResultIcon} />
+                }}
+                onClick={showPopconfirm}
+                className='clrearResult'
+                src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
+              />
             </Popconfirm>
           )}
         </Tabs.TabPane>
