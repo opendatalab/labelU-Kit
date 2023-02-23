@@ -26,7 +26,7 @@
     [
       "@semantic-release/exec",
       {
-        "verifyReleaseCmd": "zip -r frontend.zip ./dist",
+        "verifyReleaseCmd": "node ./scripts/inject_frontend_info.js ${nextRelease.version} && zip -r frontend.zip ./dist",
         "successCmd": "node ./scripts/dispatch_workflow.js ${branch.name} ${nextRelease.version} ${Date.now()}"
       }
     ]

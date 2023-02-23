@@ -3,12 +3,15 @@ const fs = require('fs');
 
 const prettier = require('prettier');
 const { getPackagesSync } = require('@manypkg/get-packages');
+const minimist = require('minimist');
 
-async function main(nextFrontendVersion) {
+async function main() {
+  const args = minimist(process.argv.slice(2));
+  const [nextVersion] = args._;
   const appPkgJson = require('../package.json');
   const workspace = path.join(__dirname, '../../../');
   const versions = {
-    version: nextFrontendVersion || appPkgJson.version,
+    version: nextVersion || appPkgJson.version,
     deps: {},
   };
 
@@ -45,4 +48,4 @@ async function main(nextFrontendVersion) {
   console.log('inject frontend info success!');
 }
 
-module.exports = main;
+main();
