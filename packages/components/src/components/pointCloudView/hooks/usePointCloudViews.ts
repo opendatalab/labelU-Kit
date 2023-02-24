@@ -362,6 +362,17 @@ export const usePointCloudViews = () => {
   //   mainViewInstance?.render();
   // };
 
+  const unSetSelectId = (selectId: string | undefined) => {
+    if (topViewInstance.pointCloud2dOperation.selectedID === selectId) {
+      topViewInstance?.pointCloud2dOperation.setSelectedID(undefined);
+      sideViewInstance?.pointCloud2dOperation.setSelectedID(undefined);
+      backViewInstance?.pointCloud2dOperation.setSelectedID(undefined);
+
+      sideViewInstance.pointCloudInstance.clearPointCloudAndRender();
+      backViewInstance?.pointCloudInstance.clearPointCloudAndRender();
+    }
+  };
+
   const updateMainViewGenBox = (box: IPointCloudBox) => {
     if (box.id) {
       let zInfo = box.zInfo || mainViewInstance?.getSensesPointZAxisInPolygon(box.rect);
@@ -534,6 +545,9 @@ export const usePointCloudViews = () => {
    */
 
   const syncPointCloudViewsFromSideOrBackView = async (boxParams: IPointCloudBox) => {
+    if (!ptCtx.topViewInstance?.pointCloud2dOperation.selectedID) {
+      return;
+    }
     const dataUrl = currentData?.url;
 
     const newPoints = (await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
@@ -573,6 +587,9 @@ export const usePointCloudViews = () => {
    * @param boxParams
    */
   const syncPointCloudViews = async (omitView: string, boxParams: IPointCloudBox) => {
+    if (!ptCtx.topViewInstance?.pointCloud2dOperation.selectedID) {
+      return;
+    }
     const dataUrl = currentData?.url;
     const newPoints = (await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
       width: DEFAULT_SCOPE,
@@ -683,6 +700,7 @@ export const usePointCloudViews = () => {
   };
 
   return {
+    unSetSelectId,
     syncPointCloudViewsFromSideOrBackView,
     topViewAddBox,
     topViewSelectedChanged,

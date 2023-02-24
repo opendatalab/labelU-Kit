@@ -14,12 +14,12 @@ import FilterBoxWorker from 'web-worker:./filterBoxWorker.js';
 import { isInPolygon } from '@/utils/tool/polygonTool';
 import type { IPolygonPoint } from '@/types/tool/polygon';
 import uuid from '@/utils/uuid';
-import { PCDLoader } from './PCDLoader';
+import MathUtils from '@/utils/MathUtils';
+import { PcZRange, PointSize, Radiuses } from '@/constant/tool';
 import { OrbitControls } from './OrbitControls';
 import { PointCloudCache } from './cache';
 import EventListener from '../toolOperation/eventListener';
-import MathUtils from '@/utils/MathUtils';
-import { PcZRange, PointSize, Radiuses } from '@/constant/tool';
+import { PCDLoader } from './PCDLoader';
 
 interface IOrthographicCamera {
   left: number;
@@ -696,6 +696,7 @@ export class PointCloud extends EventListener {
   }
 
   public clearPointCloud() {
+    this.removeObjectByName('selectedPointCloud');
     this.removeObjectByName(this.pointCloudObjectName);
   }
 
