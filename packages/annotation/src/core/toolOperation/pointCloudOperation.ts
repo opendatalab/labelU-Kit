@@ -614,7 +614,11 @@ class PointCloudOperation extends PointCloud {
           clean();
         }
       } else if (event.button === MOUSE.RIGHT) {
-        self.getObjectByClick(self.container, self.camera, self.scene, event);
+        if (points.length > 0 && points.length < 3) {
+          clean();
+        } else {
+          self.getObjectByClick(self.container, self.camera, self.scene, event);
+        }
       }
       self.render();
     });
@@ -704,6 +708,7 @@ class PointCloudOperation extends PointCloud {
 
         case EKeyCode.Esc:
           this.initBoxEventReturn?.cancelLabel(e);
+          this.render();
           break;
         default: {
           break;
