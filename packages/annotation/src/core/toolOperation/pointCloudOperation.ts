@@ -590,10 +590,10 @@ class PointCloudOperation extends PointCloud {
       if (!self.attribute || event.ctrlKey || event.shiftKey) {
         return;
       }
-      self.container.addEventListener('keydown', cancelLabel.bind(self));
+      self.container.addEventListener('keydown', cancelLabel);
       if (event.button === MOUSE.LEFT) {
         // 鼠标移动事件
-        self.container.addEventListener('pointermove', handleMouseMove.bind(self));
+        self.container.addEventListener('pointermove', handleMouseMove);
         const clickPoint = self.getWebglPositionFromEvent(self.container, self.camera, self.scene, event);
         points = [...points, clickPoint];
         screenPoints = [
@@ -717,7 +717,7 @@ class PointCloudOperation extends PointCloud {
    */
   public highlightOriginPointCloudByBoxes(
     boxParamsArr: IPointCloudBox[],
-    points?: THREE.Points,
+    points: THREE.Points,
   ): Promise<{ geometry: any; num: number } | undefined> {
     if (!points) {
       const originPoints = this.scene.getObjectByName(this.pointCloudObjectName);
