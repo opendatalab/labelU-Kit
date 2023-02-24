@@ -697,7 +697,6 @@ class PointCloudOperation extends PointCloud {
   public initKeyPressHandler() {
     document.addEventListener('keydown', (e: KeyboardEvent) => {
       e.stopPropagation();
-      e.preventDefault();
       switch (e.keyCode) {
         case EKeyCode.Delete:
           this.deleteSelectBox();

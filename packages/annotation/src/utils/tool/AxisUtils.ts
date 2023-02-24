@@ -1,5 +1,5 @@
 import { EToolName, ELineTypes } from '@/constant/tool';
-import { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
+import type { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
 import MathUtils from '../MathUtils';
 import PolygonUtils from './PolygonUtils';
 import LineToolUtils, { POINT_RADIUS } from './LineToolUtils';
@@ -90,14 +90,20 @@ export default class AxisUtils {
     }
   }
 
-  public static getRotatePoint(centerPoint: ICoordinate,rotatePoint:ICoordinate,rotate:number){
-    let x=(rotatePoint.x-centerPoint.x)*Math.cos(rotate)-(rotatePoint.y-centerPoint.y)*Math.sin(rotate)+centerPoint.x
-    let y=(rotatePoint.y-centerPoint.y)*Math.cos(rotate)+(rotatePoint.x-centerPoint.x)*Math.sin(rotate)+centerPoint.y;
+  public static getRotatePoint(centerPoint: ICoordinate, rotatePoint: ICoordinate, rotate: number) {
+    const x =
+      (rotatePoint.x - centerPoint.x) * Math.cos(rotate) -
+      (rotatePoint.y - centerPoint.y) * Math.sin(rotate) +
+      centerPoint.x;
+    const y =
+      (rotatePoint.y - centerPoint.y) * Math.cos(rotate) +
+      (rotatePoint.x - centerPoint.x) * Math.sin(rotate) +
+      centerPoint.y;
 
     return {
-      x:x,
-      y:y
-    }
+      x,
+      y,
+    };
   }
 
   /**
@@ -168,6 +174,13 @@ export default class AxisUtils {
       }
     }
     return axisArray;
+  }
+
+  public static isPointInsect(point: ICoordinate, points: [ICoordinate, ICoordinate]) {
+    const sLen = MathUtils.getLineLength(point, points[0]);
+    const eLen = MathUtils.getLineLength(point, points[1]);
+    const len = MathUtils.getLineLength(points[0], points[1]);
+    return Math.abs(sLen + eLen - len) <= 1;
   }
 
   /**

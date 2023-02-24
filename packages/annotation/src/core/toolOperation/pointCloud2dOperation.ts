@@ -87,18 +87,25 @@ class PointCloud2dOperation extends PolygonOperation {
     if (this.forbidMouseOperation || !this.imgInfo || !this.arrowPointList) {
       return;
     }
-    const preisArrowHover = this.isArrowHover;
     const currentCoord = this.getCoordinateUnderZoom(event);
-    const arrowPointlistByZoom = AxisUtils.changePointListByZoom(this.arrowPointList, this.zoom);
-    const newIsArrowHoverIndex = AxisUtils.returnClosePointIndex(currentCoord, arrowPointlistByZoom);
-    const isArrowHover = newIsArrowHoverIndex !== -1;
+    const currentCoordWithoutZoom = {
+      x: currentCoord.x / this.zoom,
+      y: currentCoord.y / this.zoom,
+    };
 
-    if (preisArrowHover !== isArrowHover) {
-      this.isArrowHover = newIsArrowHoverIndex !== -1;
+    this.isArrowHover = AxisUtils.isPointInsect(
+      currentCoordWithoutZoom,
+      this.arrowPointList as [ICoordinate, ICoordinate],
+    );
+
+    if (this.isArrowHover) {
       this.renderPolygon();
     }
     if ((this.isArrowHover && this.firstClickPoint) || this.rotatePointList) {
       this.getVirtualPolygon(event);
+    }
+    if (this.isApproachBund(event) && this.isUncheckedApproachBoundary) {
+      this.onMouseUp(event);
     }
   }
 
@@ -224,59 +231,6 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public renderPolygon() {
-    // 1. 静态多边形
-    // this.container.dispatchEvent(this.saveDataEvent);
-    // if (this.isHidden === false) {
-    //   this.polygonList?.forEach((polygon) => {
-    //     if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
-    //       return;
-    //     }
-    //     if (polygon.isVisible) {
-    //       const { textAttribute, attribute } = polygon;
-    //       const toolColor = this.getColor(attribute);
-    //       const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
-    //       const transformPointList = AxisUtils.changePointListByZoom(
-    //         polygon.pointList || [],
-    //         this.zoom,
-    //         this.currentPos,
-    //       );
-
-    //       DrawUtils.drawPolygonWithFillAndLine(this.canvas, transformPointList, {
-    //         fillColor: toolData.fill,
-    //         strokeColor: toolData.stroke,
-    //         pointColor: 'white',
-    //         thickness: this.style?.width ?? 2,
-    //         lineCap: 'round',
-    //         isClose: true,
-    //         lineType: this.config?.lineType,
-    //       });
-    //     }
-    //   });
-    // }
-
-    // 2. hover 多边形
-    // if (this.hoverID && this.hoverID !== this.editPolygonID) {
-    //   const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
-    //   if (hoverPolygon) {
-    //     let color = '';
-    //     const toolColor = this.getColor(hoverPolygon.attribute);
-    //     if (hoverPolygon.valid) {
-    //       color = toolColor.validHover.fill;
-    //     } else {
-    //       color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
-    //     }
-
-    //     DrawUtils.drawPolygonWithFill(
-    //       this.canvas,
-    //       AxisUtils.changePointListByZoom(hoverPolygon.pointList, this.zoom, this.currentPos),
-    //       {
-    //         color,
-    //         lineType: this.config?.lineType,
-    //       },
-    //     );
-    //   }
-    // }
-
     if (this.rotatePointList && this.rotation) {
       DrawUtils.drawSelectedPolygonWithFillAndLine(
         this.canvas,
@@ -323,15 +277,15 @@ class PointCloud2dOperation extends PolygonOperation {
           };
 
           const vectorP = {
-            x: (selectdPolygon.pointList[2].x - selectdPolygon.pointList[1].x) / 2,
-            y: (selectdPolygon.pointList[2].y - selectdPolygon.pointList[1].y) / 2,
+            x: (selectdPolygon.pointList[2].x - selectdPolygon.pointList[1].x) / 4,
+            y: (selectdPolygon.pointList[2].y - selectdPolygon.pointList[1].y) / 4,
           };
           const sEnd = {
             x: sPoint.x + vectorP.x,
             y: sPoint.y + vectorP.y,
           };
           this.setArrowPointList([sPoint, sEnd]);
-          const thickness = this.isArrowHover ? 10 : 3;
+          const thickness = this.isArrowHover ? 20 : 3;
           DrawUtils.drawLineWithPointList(
             this.canvas,
             AxisUtils.changePointListByZoom([sPoint, sEnd], this.zoom, this.currentPos),

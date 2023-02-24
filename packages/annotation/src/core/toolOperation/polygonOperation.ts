@@ -73,7 +73,7 @@ class PolygonOperation extends BasicToolOperation {
 
   public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
 
-  private isUncheckedApproachBoundary = false;
+  protected isUncheckedApproachBoundary = false;
 
   constructor(props: IPolygonOperationProps) {
     super(props);
@@ -1150,12 +1150,17 @@ class PolygonOperation extends BasicToolOperation {
     return false;
   }
 
-  public isApproachBund(e: MouseEvent) {
+  public getEventPointInCanvas(e: MouseEvent) {
     const canvasBundInfo = this.container.getBoundingClientRect();
-    const pointOnCanvas = {
+    return {
       x: e.clientX - canvasBundInfo.left,
       y: e.clientY - canvasBundInfo.top,
     };
+  }
+
+  public isApproachBund(e: MouseEvent) {
+    const canvasBundInfo = this.container.getBoundingClientRect();
+    const pointOnCanvas = this.getEventPointInCanvas(e);
     if (
       pointOnCanvas.x <= BOUND_DISTANCE ||
       canvasBundInfo.width - pointOnCanvas.x <= BOUND_DISTANCE ||
