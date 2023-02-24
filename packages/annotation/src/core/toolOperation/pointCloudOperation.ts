@@ -4,9 +4,6 @@ import { MOUSE } from 'three';
 import type { IPointCloudBox } from '@label-u/utils';
 // eslint-disable-next-line import/no-unresolved
 import HighlightBoxesWorker from 'web-worker:../pointCloud/highlightBoxesWorkder.js';
-import type { PointCloudIProps } from '../pointCloud';
-import { PointCloud } from '../pointCloud';
-import utils from '../pointCloud/uitils';
 import MathUtils from '@/utils/MathUtils';
 import uuid from '@/utils/uuid';
 import type { ShowSettingConfig, ToolConfig } from '@/interface/conbineTool';
@@ -14,6 +11,10 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import { COLORS_ARRAY } from '@/constant/style';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
+import EKeyCode from '@/constant/keyCode';
+import utils from '../pointCloud/uitils';
+import { PointCloud } from '../pointCloud';
+import type { PointCloudIProps } from '../pointCloud';
 
 interface PointCloudOperationProps {
   BoxList?: IPointCloudBox[];
@@ -41,6 +42,10 @@ class PointCloudOperation extends PointCloud {
   public showSetting: ShowSettingConfig; // 显示设置项
 
   public allAttributes?: Attribute[]; // 全量标签
+
+  public initBoxEventReturn?: {
+    cancelLabel: (e: KeyboardEvent) => void;
+  };
 
   constructor(props: PointCloudIProps & PointCloudOperationProps) {
     super(props);
@@ -101,7 +106,8 @@ class PointCloudOperation extends PointCloud {
   public initPointCloudOperation() {
     this.initGroundMesh();
     this.initLight();
-    this.initChooseEvent();
+    this.initBoxEventReturn = this.initBoxEvent();
+    this.initKeyPressHandler();
   }
 
   public setConfig(config: ToolConfig) {
@@ -170,7 +176,6 @@ class PointCloudOperation extends PointCloud {
         this.removeObjectByName(`${this.boxList[i].id}attribute`);
       }
     }
-    // this.render();
   }
 
   public clearBoxInSceneById(id: string) {
@@ -573,7 +578,7 @@ class PointCloudOperation extends PointCloud {
   }
 
   // init screen events when the instance is created
-  public initChooseEvent() {
+  public initBoxEvent() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     let points: Vector3[] = [] as unknown as THREE.Vector3[];
@@ -585,6 +590,7 @@ class PointCloudOperation extends PointCloud {
       if (!self.attribute || event.ctrlKey || event.shiftKey) {
         return;
       }
+      self.container.addEventListener('keydown', cancelLabel.bind(self));
       if (event.button === MOUSE.LEFT) {
         // 鼠标移动事件
         self.container.addEventListener('pointermove', handleMouseMove.bind(self));
@@ -605,19 +611,24 @@ class PointCloudOperation extends PointCloud {
             const box = self.addBoxInSense(rect, zInfo, self.attribute);
             self.emit('boxAdded', rect, eventClickPoints.rect, box.attribute, box.id, box.order, box.textAttribute);
           }
-          // 清除点数据
-          points = [];
-          screenPoints = [];
-          // 清除辅助线
-          self.removeObjectByName(secondlineName);
-          self.removeObjectByName(firstlineName);
-          self.container.removeEventListener('pointermove', handleMouseMove);
+          clean();
         }
       } else if (event.button === MOUSE.RIGHT) {
         self.getObjectByClick(self.container, self.camera, self.scene, event);
       }
       self.render();
     });
+
+    function clean() {
+      // 清除点数据
+      points = [];
+      screenPoints = [];
+      // 清除辅助线
+      self.removeObjectByName(secondlineName);
+      self.removeObjectByName(firstlineName);
+      self.container.removeEventListener('pointermove', handleMouseMove);
+      self.container.removeEventListener('keydown', cancelLabel);
+    }
 
     // draw a line bye moving the mouse
     function handleMouseMove(event: THREE.Event) {
@@ -654,6 +665,52 @@ class PointCloudOperation extends PointCloud {
       }
       self.render();
     }
+
+    function cancelLabel(e: KeyboardEvent) {
+      e.stopPropagation();
+      if (e.keyCode === EKeyCode.Esc) {
+        clean();
+      }
+    }
+
+    return {
+      cancelLabel,
+    };
+  }
+
+  public deleteSelectBox() {
+    if (this.selectedId && Array.isArray(this.boxList) && this.boxList.length > 0) {
+      const newBoxList = this.boxList.reduce((res, item) => {
+        if (item.id !== this.selectedId) {
+          res.push(item);
+        }
+        return res;
+      }, [] as IPointCloudBox[]);
+
+      this.emit('savePcResult', newBoxList);
+      setTimeout(() => {
+        this.emit('deleteBoxes', [this.selectedId]);
+      }, 100);
+    }
+  }
+
+  public initKeyPressHandler() {
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      switch (e.keyCode) {
+        case EKeyCode.Delete:
+          this.deleteSelectBox();
+          break;
+
+        case EKeyCode.Esc:
+          this.initBoxEventReturn?.cancelLabel(e);
+          break;
+        default: {
+          break;
+        }
+      }
+    });
   }
 
   /**
