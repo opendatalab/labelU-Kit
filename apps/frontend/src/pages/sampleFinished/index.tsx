@@ -56,32 +56,35 @@ const SamplesFinished = () => {
     setActiveTxt(value);
   };
   return (
-    <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.check}>
-        <CheckOutlined style={{ color: '#64ba64', fontSize: '40px' }} />
-      </div>
-      <div className={currentStyles.txt}>标注完成</div>
-      <div className={currentStyles.stat}>
-        <div className={currentStyles.statItem}>已标注： {stat.done},</div>
-        <div className={currentStyles.statItem}>
-          未标注： <div style={{ color: 'red' }}>{stat.new}</div>,
+    <div className={currentStyles.finishedWrapper}>
+      <div className={currentStyles.innerWrapper}>
+        <div className={currentStyles.check}>
+          <CheckOutlined style={{ color: '#64ba64', fontSize: '40px' }} />
         </div>
-        <div className={currentStyles.statItem}>跳过：{stat.skipped}</div>
-      </div>
-      <div className={currentStyles.buttons}>
-        <div
-          className={currentStyles.buttons1}
-          // onClick={commonController.debounce(outputSamplesLocal, 100)}
-          onClick={() => {
-            setIsShowModal(true);
-          }}
-        >
-          导出数据
+        <div className={currentStyles.txt}>标注完成</div>
+        <div className={currentStyles.stat}>
+          <div className={currentStyles.statItem}>已标注： {stat.done},</div>
+          <div className={currentStyles.statItem}>
+            未标注： <div style={{ color: 'red' }}>{stat.new}</div>,
+          </div>
+          <div className={currentStyles.statItem}>跳过：{stat.skipped}</div>
         </div>
-        <div className={currentStyles.buttons2} onClick={turnToSamples}>
-          返回主页
+        <div className={currentStyles.buttons}>
+          <div
+            className={currentStyles.buttons1}
+            // onClick={commonController.debounce(outputSamplesLocal, 100)}
+            onClick={() => {
+              setIsShowModal(true);
+            }}
+          >
+            导出数据
+          </div>
+          <div className={currentStyles.buttons2} onClick={turnToSamples}>
+            返回主页
+          </div>
         </div>
       </div>
+
       <Modal title="选择导出格式" okText={'导出'} onOk={clickOk} onCancel={clickCancel} open={isShowModal}>
         <div className={currentStyles1.outerFrame}>
           <div className={currentStyles1.pattern}>

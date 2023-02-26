@@ -536,10 +536,9 @@ body {
 
 .#{$prefix}-sidebar {
   width: 280px;
-  // box-shadow: 0px 2px 14px 0px rgba(204, 204, 204, 0.5);
   background: #ffffff;
   height: 100%;
-  overflow: scroll;
+  overflow: auto;
   display: flex;
   position: relative;
   flex-direction: column;

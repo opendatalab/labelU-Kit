@@ -153,6 +153,20 @@ const AttributeRusult: FC<IProps> = ({
 
   const [boxHeight, setBoxHeight] = useState<number>();
   const [, setBoxWidth] = useState<number>();
+  const attributeResultRef = useRef<HTMLDivElement>(null);
+
+  // 将右侧属性栏高度设置为剩余高度
+  useEffect(() => {
+    setTimeout(() => {
+      if (!attributeResultRef.current) {
+        return;
+      }
+
+      const rect = attributeResultRef.current.getBoundingClientRect();
+      const attributeWrapperHeight = window.innerHeight - rect.top;
+      attributeResultRef.current.style.height = `${attributeWrapperHeight}px`;
+    });
+  }, []);
 
   useEffect(() => {
     const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
@@ -581,6 +595,7 @@ const AttributeRusult: FC<IProps> = ({
       className={classNames({
         attributeResult: true,
       })}
+      ref={attributeResultRef}
     >
       <DrageModel title="详细信息" ref={dragModalRef} width={333} okWord="确认" cancelWord="取消" content={content} />
       <Collapse

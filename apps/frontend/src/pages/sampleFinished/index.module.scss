@@ -1,5 +1,13 @@
 @import '../../utils/common/common.module';
-.outerFrame {
+.finishedWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.innerWrapper {
+  display: flex;
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   width: 312px;
@@ -7,6 +15,7 @@
   justify-content: space-between;
   align-items: center;
 }
+
 .check {
   width: 79px;
   height: 79px;
