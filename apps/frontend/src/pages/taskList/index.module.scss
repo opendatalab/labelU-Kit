@@ -12,9 +12,8 @@
 }
 
 .cards {
-  margin-top: 16px;
-  width: 100%;
-  //width : 1394px;
+  --margin-horizontal: 0.75rem;
+  margin: 0.625rem calc(0rem - var(--margin-horizontal));
   @extend .displayFlex;
   @extend .flexDirectionRow;
   @extend .flexDirectionRowWrap;
