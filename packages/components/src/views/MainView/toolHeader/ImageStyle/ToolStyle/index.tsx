@@ -2,6 +2,7 @@ import { Slider } from 'antd/es';
 import { useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import _ from 'lodash';
 
 import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
@@ -19,6 +20,37 @@ interface IProps {
 }
 type ToolStyleKey = keyof ToolStyleState;
 
+const enlargeToolParam = (obj: Record<string, number>) => {
+  const key = _.keys(obj)![0];
+  if (!key) return;
+  const res: Record<string, number> = {};
+  switch (key) {
+    case 'borderOpacity':
+      res[key] = obj[key] * 10;
+      break;
+    case 'fillOpacity':
+      res[key] = obj[key] * 10;
+      break;
+    default:
+      res[key] = obj[key];
+  }
+  return res;
+};
+
+const shrinkToolParam = (key: string, value: number) => {
+  if (!key) return value;
+  let res = value;
+  switch (key) {
+    case 'borderOpacity':
+      res = value / 10;
+      break;
+    case 'fillOpacity':
+      res = value / 10;
+      break;
+  }
+  return res;
+};
+
 const getMarks = (type: string, t: any) => {
   const lineMarks = [
     { step: 1, value: '1' },
@@ -35,19 +67,19 @@ const getMarks = (type: string, t: any) => {
     { step: 9, value: 'Pink' },
   ];
   const borderOpacityMarks = [
-    { step: 1, value: '0.2' },
-    { step: 3, value: '0.4' },
-    { step: 5, value: '0.6' },
-    { step: 7, value: '0.8' },
-    { step: 9, value: '1.0' },
+    { step: 0.1, value: '0.1' },
+    { step: 0.3, value: '0.3' },
+    { step: 0.5, value: '0.5' },
+    { step: 0.7, value: '0.7' },
+    { step: 0.9, value: '0.9' },
   ];
 
   const fillOpacityMarks = [
-    { step: 1, value: '0' },
-    { step: 3, value: '0.2' },
-    { step: 5, value: '0.4' },
-    { step: 7, value: '0.6' },
-    { step: 9, value: '0.8' },
+    { step: 0.1, value: '0.1' },
+    { step: 0.3, value: '0.3' },
+    { step: 0.5, value: '0.5' },
+    { step: 0.7, value: '0.7' },
+    { step: 0.9, value: '0.9' },
   ];
   let list: { step: number; value: string }[] = [];
   const marks: Record<
@@ -113,7 +145,7 @@ const getDefaultValue = (value: string) => {
     case 'color':
       return 1;
     case 'borderOpacity':
-      return 9;
+      return 0.9;
     case 'fillOpacity':
       return 9;
   }
@@ -123,7 +155,7 @@ const getDefaultValue = (value: string) => {
  * 判断使用那种样式 (slider的step中间为选中和step为选中)
  * @param info TToolStyleConfig
  */
-const getStyleType = (info: string): boolean => ['width'].includes(info);
+const getStyleType = (info: string): boolean => ['width', 'color'].includes(info);
 
 const ToolStyle = (props: IProps) => {
   const { toolStyle } = props;
@@ -148,7 +180,8 @@ const ToolStyle = (props: IProps) => {
   const annotationConfig: any = props.config;
 
   const changeToolStyle = (obj: Record<string, number>) => {
-    store.dispatch(UpdateToolStyleConfig(obj));
+    console.log('obj', obj, enlargeToolParam(obj));
+    store.dispatch(UpdateToolStyleConfig(enlargeToolParam(obj)));
   };
 
   return (
@@ -168,10 +201,10 @@ const ToolStyle = (props: IProps) => {
             <span className="slider">
               <Slider
                 tipFormatter={null}
-                max={getStyleType(key) ? 5 : 10}
+                max={getStyleType(key) ? 5 : 1}
                 min={getStyleType(key) ? 1 : 0}
-                step={getStyleType(key) ? 1 : null}
-                value={(toolStyle[key] ?? getDefaultValue(key)) as number}
+                step={getStyleType(key) ? 1 : 1}
+                value={(shrinkToolParam(key, toolStyle[key] as number) ?? getDefaultValue(key)) as number}
                 marks={getMarks(key, t)}
                 onChange={(e: any) => changeToolStyle({ [key]: e })}
               />
