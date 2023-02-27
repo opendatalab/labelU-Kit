@@ -2,7 +2,7 @@ import { Slider } from 'antd/es';
 import { useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import _ from 'lodash';
+import { keys } from 'lodash-es';
 
 import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
@@ -21,7 +21,7 @@ interface IProps {
 type ToolStyleKey = keyof ToolStyleState;
 
 const enlargeToolParam = (obj: Record<string, number>) => {
-  const key = _.keys(obj)![0];
+  const key = keys(obj)![0];
   if (!key) return;
   const res: Record<string, number> = {};
   switch (key) {
