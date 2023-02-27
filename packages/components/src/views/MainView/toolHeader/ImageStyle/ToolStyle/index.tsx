@@ -180,7 +180,6 @@ const ToolStyle = (props: IProps) => {
   const annotationConfig: any = props.config;
 
   const changeToolStyle = (obj: Record<string, number>) => {
-    console.log('obj', obj, enlargeToolParam(obj));
     store.dispatch(UpdateToolStyleConfig(enlargeToolParam(obj)));
   };
 
