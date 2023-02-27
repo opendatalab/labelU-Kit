@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
 
 import currentStyles from './index.module.scss';
 import { getTask, outputSamples } from '../../services/samples';
@@ -70,18 +70,18 @@ const SamplesFinished = () => {
           <div className={currentStyles.statItem}>跳过：{stat.skipped}</div>
         </div>
         <div className={currentStyles.buttons}>
-          <div
-            className={currentStyles.buttons1}
-            // onClick={commonController.debounce(outputSamplesLocal, 100)}
+          <Button
+            type="primary"
+            size="large"
             onClick={() => {
               setIsShowModal(true);
             }}
           >
             导出数据
-          </div>
-          <div className={currentStyles.buttons2} onClick={turnToSamples}>
+          </Button>
+          <Button type="text" size="large" onClick={turnToSamples}>
             返回主页
-          </div>
+          </Button>
         </div>
       </div>
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Tree } from 'antd';
+import { Button, Tree } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
+import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
 
 import commonController from '../../utils/common/common';
 import { uploadFile as uploadFileService } from '../../services/createTask';
@@ -214,41 +215,30 @@ const InputInfoConfig = () => {
           <div className={currentStyles.dragAndDrop}>
             <div className={currentStyles.survey} />
             <div className={currentStyles.buttons}>
-              <div className={currentStyles.uploadFileButton}>
+              <Button type="primary" icon={<FileOutlined />}>
                 <NativeUpload
                   onChange={inputFolder}
                   directory={false}
                   multiple={true}
                   accept={'image/png,image/jpeg,image/bmp,image/gif'}
                 >
-                  <div className={currentStyles.buttonDiv}>
-                    <img src="/src/icons/uploadFile.svg" alt="" />
-                    <div style={{ display: 'inline-block', color: '#FFFFFF' }}>上传文件</div>
-                  </div>
+                  上传文件
                 </NativeUpload>
-              </div>
-              <div className={currentStyles.uploadFolderButton}>
+              </Button>
+              <Button type="primary" ghost icon={<FolderOpenOutlined />}>
                 <NativeUpload
                   onChange={inputFolder}
                   directory={true}
                   accept={'image/jpg,image/jpeg,image/bmp,image/gif'}
                 >
-                  <div className={currentStyles.buttonDiv}>
-                    <img src="/src/icons/uploadFolder.svg" alt="" />
-                    <div style={{ display: 'inline-block', color: '#1b67ff' }}>上传文件夹</div>
-                  </div>
+                  上传文件夹
                 </NativeUpload>
-              </div>
+              </Button>
             </div>
             <div className={currentStyles.illustration}>
               <div className={currentStyles.supportType}>&nbsp;支持文件类型包括：jpg、png、bmp、gif</div>
               <div className={currentStyles.advises}> 单次上传文件最大数量为100个，建议单个文件大小不超过100MB </div>
             </div>
-
-            {/*<div style = {{display : 'inline-block', color : '#1b67ff'}}>*/}
-            {/*    <input type="file" multiple ref = {inputRef} onChange = {inputFolder}/>*/}
-            {/*</div>*/}
-
             <div />
           </div>
         </div>

@@ -6,7 +6,6 @@
   height: 165px;
   position: relative;
   .imgItem {
-    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -16,18 +15,6 @@
     &:hover {
       cursor: pointer;
     }
-  }
-
-  .leftSiderImg {
-    border-radius: 4px;
-    max-width: 200px;
-    height: 120px;
-  }
-
-  .chooseImg {
-    overflow: hidden;
-    border-radius: 4px;
-    border: 3px solid #1b67ff;
   }
 
   .chooseNumber {

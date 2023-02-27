@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
+import { Button } from 'antd';
 
 import currentStyles from './index.module.scss';
 import { updateSampleState, updateSampleAnnotationResult, getSample } from '../../services/samples';
@@ -243,22 +244,18 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
       {/*>上一页</div>*/}
       <div className={currentStyles.right}>
         {isSkippedShow !== 'SKIPPED' && (
-          <div className={currentStyles.rightLeft} id={'skipped'} onClick={commonController.debounce(skipSample, 100)}>
+          <Button id={'skipped'} onClick={commonController.debounce(skipSample, 100)}>
             跳过
-          </div>
+          </Button>
         )}
         {isSkippedShow === 'SKIPPED' && (
-          <div
-            className={currentStyles.rightLeft}
-            id={'skipped'}
-            onClick={commonController.debounce(cancelSkipSample, 100)}
-          >
+          <Button id={'skipped'} onClick={commonController.debounce(cancelSkipSample, 100)}>
             取消跳过
-          </div>
+          </Button>
         )}
-        <div className={currentStyles.rightRight} id={'nextPage'} onClick={commonController.debounce(nextPage, 100)}>
+        <Button type="primary" id={'nextPage'} onClick={commonController.debounce(nextPage, 100)}>
           {isLastSample ? '完成' : '下一页'}
-        </div>
+        </Button>
       </div>
     </div>
   );

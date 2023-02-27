@@ -10,9 +10,9 @@
   width: 74px;
   height: 32px;
   //background: #1B67FF;
-  border-radius: 4px;
+
   text-align: center;
-  line-hight: 32px;
+  line-height: 32px;
   line-height: 32px;
   cursor: pointer;
   //color: #ffffff;
@@ -26,7 +26,6 @@
   @extend .flexDirectionRow;
   justify-content: space-between;
   align-items: center;
-  width: 170px;
 }
 
 .rightLeft {
@@ -44,7 +43,7 @@
   width: 70px;
   height: 32px;
   background: #1b67ff;
-  border-radius: 4px;
+
   text-align: center;
   line-hight: 32px;
   line-height: 32px;

@@ -64,29 +64,9 @@
   height: 48px;
   justify-content: space-between;
   align-items: center;
-}
 
-.buttons1 {
-  width: 144px;
-  height: 48px;
-  background: #1b67ff;
-  border-radius: 4px;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 48px;
-  cursor: pointer;
-  color: #ffffff;
-  text-align: center;
-}
-.buttons2 {
-  width: 144px;
-  height: 48px;
-  background: #f2f3f5;
-  border-radius: 4px;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 48px;
-  cursor: pointer;
-  color: rgba(0, 0, 0, 0.6);
-  text-align: center;
+  button {
+    padding: 0.375rem 2rem;
+    height: 3rem;
+  }
 }
