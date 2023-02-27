@@ -9,7 +9,14 @@ import ToolStyle from './ToolStyle';
 const ImageStyle: FC = () => {
   const toolStyle = useMemo(() => <ToolStyle />, []);
 
-  const content = useMemo(() => <div className={`${prefix}-sidebar`}>{toolStyle}</div>, [toolStyle]);
+  const content = useMemo(
+    () => (
+      <div className={`${prefix}-sidebar`} style={{ overflow: 'clip' }}>
+        {toolStyle}
+      </div>
+    ),
+    [toolStyle],
+  );
 
   return (
     <Popover
