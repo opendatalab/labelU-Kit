@@ -22,7 +22,7 @@ type ToolStyleKey = keyof ToolStyleState;
 
 const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyleState> => {
   const key = keys(obj)![0];
-  if (!key) return obj;
+  if (!key) return params;
   const res: Record<string, number> = {};
   switch (key) {
     case 'borderOpacity':
