@@ -62,7 +62,7 @@ const AnnotationPage: FC = () => {
                   y: -0.33767375595866866
                 }
               ],
-              order: 2,
+              order: 1,
               isVisible: true
             }
           ]
