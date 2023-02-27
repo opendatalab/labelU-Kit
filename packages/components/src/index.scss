@@ -118,7 +118,8 @@ body {
   &__left_sider {
     // max-width: 232px;
     background: #eeeeee;
-    overflow-y: scroll;
+    overflow-y: auto;
+    height: 100%;
     overflow-x: hidden;
     position: relative;
     z-index: 10;
