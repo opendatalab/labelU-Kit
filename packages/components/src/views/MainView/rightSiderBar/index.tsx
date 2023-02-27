@@ -153,7 +153,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
             <p>分类</p>
             <span
               className={classNames('innerWord', {
-                innerWord: true,
                 finish:
                   tagResultKeys &&
                   tagResultKeys.length > 0 &&
