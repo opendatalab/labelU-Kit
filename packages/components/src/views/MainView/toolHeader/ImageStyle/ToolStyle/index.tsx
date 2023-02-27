@@ -20,7 +20,7 @@ interface IProps {
 }
 type ToolStyleKey = keyof ToolStyleState;
 
-const enlargeToolParam = (obj: Record<string, number>): Partial<ToolStyleState> => {
+const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyleState> => {
   const key = keys(obj)![0];
   if (!key) return obj;
   const res: Record<string, number> = {};
