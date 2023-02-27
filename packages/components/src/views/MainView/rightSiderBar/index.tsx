@@ -128,7 +128,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           <p>文本描述</p>
           <span
             className={classNames('innerWord', {
-              innerWord: true,
               finish:
                 textResultKeys &&
                 textResultKeys.length > 0 &&
