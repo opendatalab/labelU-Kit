@@ -308,7 +308,6 @@ const AttributeRusult: FC<IProps> = ({
               item.order = item.order - getPositionIndexInArr(deleteResult, item.order);
               res.push(item);
             } else if (item.id) {
-              if (item.id) {
                 deleteBoxArray.push(item.id);
               }
             }
