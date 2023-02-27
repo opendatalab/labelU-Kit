@@ -50,9 +50,9 @@ export default defineConfig({
       less: {
         javascriptEnabled: true, //注意，这一句是在less对象中，写在外边不起作用
         modifyVars: {
-          '@primary-color': '#1B67FF',
-          '@primary-color-hover': '#1B67FF',
-          '@primary-color-active': '#1B67FF',
+          '@primary-color': '#0D53DE',
+          '@primary-color-hover': '#3477EB',
+          '@primary-color-active': '#0238B8',
         },
       },
     },

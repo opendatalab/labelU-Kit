@@ -9,7 +9,7 @@ import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
 
 import TextConfig from './textConfig';
 
-import './index.less';
+import './index.scss';
 
 const { confirm } = Modal;
 

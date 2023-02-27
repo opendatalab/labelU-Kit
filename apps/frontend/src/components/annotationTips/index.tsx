@@ -2,6 +2,8 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import { useSelector } from 'react-redux';
 
+import IconText from '../IconText';
+
 const AnnotationTips = () => {
   // @ts-ignore
   const taskTips = useSelector((state) => state.existTask.taskTips);
@@ -14,8 +16,9 @@ const AnnotationTips = () => {
   };
   return (
     <div onClick={() => clickShowModal()}>
-      标注提示&nbsp;
-      <QuestionCircleOutlined />
+      <IconText iconPlacement="right" icon={<QuestionCircleOutlined />}>
+        标注提示
+      </IconText>
     </div>
   );
 };

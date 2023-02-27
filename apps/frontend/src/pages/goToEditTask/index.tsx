@@ -52,7 +52,6 @@ const GoToEditTask = (props: any) => {
     <div className={currentStyles.outerFrame}>
       <InfoCircleOutlined style={{ color: '#F5483B' }} className={currentStyles.icon} />
       <div className={currentStyles.txt}>请先完成任务配置， 再开始标注</div>
-      &nbsp; &nbsp;
       <Button type="primary" ghost onClick={turnToEditTask}>
         去配置
       </Button>

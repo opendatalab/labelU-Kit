@@ -13,7 +13,7 @@ import PointConfigForm from './templates/pointConfigForm';
 import TagConfigForm from './templates/tagConfigForm';
 import TextConfigForm from './templates/textConfigForm';
 import PolygonConfigForm from './templates/polygonConfigForm';
-import './formEngine.less';
+import './formEngine.scss';
 import { updateStatus } from '../../../stores/task.store';
 interface FormEngineProps {
   toolName: string;

@@ -10,6 +10,8 @@ import currentStyles from './index.module.scss';
 import { deleteTask } from '../../services/createTask';
 import currentStyles1 from '../../pages/outputData/index.module.scss';
 import FlexItem from '../FlexItem';
+import Status from '../Status';
+import IconText from '../IconText';
 
 const TaskCard = (props: any) => {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
@@ -196,12 +198,10 @@ const TaskCard = (props: any) => {
         {doneSample === total && status !== 'DRAFT' && status !== 'IMPORTED' && (
           <div className={currentStyles.item41}>
             <div className={currentStyles.item41Left}>
-              {total}/{total}{' '}
+              {total}/{total}
             </div>
-            {/*<div className = {currentStyles.item41Right}><CheckCircleOutlined style ={{color : '#00B365'}}/>&nbsp;已完成</div>*/}
             <div className={currentStyles.item41Right}>
-              <img src="/src/icons/finished.svg" />
-              &nbsp;已完成
+              <Status type="success">已完成</Status>
             </div>
           </div>
         )}
@@ -211,19 +211,22 @@ const TaskCard = (props: any) => {
               <Progress percent={Math.trunc((doneSample * 100) / total)} showInfo={false} />
             </div>
             <div className={currentStyles.item41Left}>
-              &nbsp;&nbsp;{doneSample}/{total}{' '}
+              {doneSample}/{total}
             </div>
           </div>
         )}
         {isShowDeleteModal && (
           <div onClick={stopPropagation}>
             <Modal open={isShowDeleteModal} onOk={deleteSingleTaskOk} onCancel={deleteSingleTaskCancel}>
-              <div className={currentStyles.deleteWarnInfo}>
-                <div className={currentStyles.tipWarnIcon}>
-                  <ExclamationOutlined />
-                </div>
-                <span>&nbsp;&nbsp;您确认要删除该任务吗？</span>
-              </div>
+              <IconText
+                icon={
+                  <div className={currentStyles.tipWarnIcon}>
+                    <ExclamationOutlined />
+                  </div>
+                }
+              >
+                您确认要删除该任务吗？
+              </IconText>
             </Modal>
           </div>
         )}

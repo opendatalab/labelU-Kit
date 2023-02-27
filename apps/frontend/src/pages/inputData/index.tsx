@@ -4,6 +4,10 @@ import { Button, Tree } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
 
+import IconText from '@/components/IconText';
+import Status from '@/components/Status';
+import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
+
 import commonController from '../../utils/common/common';
 import { uploadFile as uploadFileService } from '../../services/createTask';
 import { UploadStatus } from '../../constants/upload';
@@ -236,7 +240,7 @@ const InputInfoConfig = () => {
               </Button>
             </div>
             <div className={currentStyles.illustration}>
-              <div className={currentStyles.supportType}>&nbsp;支持文件类型包括：jpg、png、bmp、gif</div>
+              <div className={currentStyles.supportType}>支持文件类型包括：jpg、png、bmp、gif</div>
               <div className={currentStyles.advises}> 单次上传文件最大数量为100个，建议单个文件大小不超过100MB </div>
             </div>
             <div />
@@ -246,13 +250,9 @@ const InputInfoConfig = () => {
           {startUploadFlag && temp.length > 0 && (
             <div className={currentStyles.rightTitle}>
               <div className={currentStyles.rightTitleLeft}>上传列表</div>
-              {/*<div className = {currentStyles.rightTitleRight}>正在上传&nbsp;*/}
-              {/*    <div  className = {currentStyles.rightTitleRightHight}>10</div>*/}
-              {/*    /30&nbsp;个文件</div>*/}
               <div>正在上传</div>
               <div>
-                &nbsp;&nbsp;
-                <div style={{ display: 'inline-block', color: '#1b67ff' }}>{tempC}</div>/
+                <div style={{ display: 'inline-block', color: 'var(--primary-color)' }}>{tempC}</div>/
               </div>
               <div>
                 <div style={{ display: 'inline-block', color: 'black' }}>{temp.length}</div>
@@ -263,22 +263,24 @@ const InputInfoConfig = () => {
           {!startUploadFlag && haveUploadFiles.length > 0 && (
             <div className={currentStyles.rightTitle}>
               <div className={currentStyles.rightTitleLeft}>上传列表</div>
-              {/*<div className = {currentStyles.rightTitleRight}>正在上传&nbsp;*/}
-              {/*    <div  className = {currentStyles.rightTitleRightHight}>10</div>*/}
-              {/*    /30&nbsp;个文件</div>*/}
               <div>
                 已上传
                 {haveUploadFiles.length}
-                个文件,
+                个文件，
               </div>
               <div>
-                &nbsp;&nbsp;上传成功
-                <div style={{ display: 'inline-block', color: '#00B365' }}>{uploadedSuccessful}</div>
-                个,
+                上传成功
+                <Status type="success" icon={null} style={{ display: 'inline-block' }}>
+                  {uploadedSuccessful}
+                </Status>
+                个，
               </div>
               <div>
-                &nbsp;&nbsp;上传失败
-                <div style={{ display: 'inline-block', color: '#f5483B' }}>{uploadedFailed}</div>个
+                上传失败
+                <Status type="failed" icon={null} style={{ display: 'inline-block' }}>
+                  {uploadedFailed}
+                </Status>
+                个
               </div>
             </div>
           )}
@@ -324,12 +326,10 @@ const InputInfoConfig = () => {
                     return (
                       <div className={currentStyles.item} key={item.uid}>
                         <div className={currentStyles.columnFileName}>
-                          <img src="/src/icons/file.svg" />
-                          &nbsp;&nbsp;{item.name}
+                          <IconText icon={<FileIcon />}>{item.name}</IconText>
                         </div>
-                        <div className={currentStyles.columnFileName}>&nbsp;&nbsp;&nbsp;&nbsp;{item.params.path}</div>
+                        <div className={currentStyles.columnFileName}>{item.params.path}</div>
                         <div className={currentStyles.columnStatus}>
-                          &nbsp;&nbsp;
                           {item.hasUploaded === UploadStatus.UPLOADING ? (
                             <div className={currentStyles.uploadStatus}>
                               <img src="/src/icons/pending.png" alt="" />
@@ -355,8 +355,7 @@ const InputInfoConfig = () => {
                         <div className={currentStyles.columnOptionButtons}>
                           {item.hasUploaded === UploadStatus.FAIL && (
                             <div className={currentStyles.columnOption1} onClick={() => renewUpload(item, itemIndex)}>
-                              {' '}
-                              重新上传{' '}
+                              重新上传
                             </div>
                           )}
                           <div className={currentStyles.columnOption} onClick={() => deleteSingleFile(itemIndex)}>

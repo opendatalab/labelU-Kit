@@ -1,7 +1,6 @@
 // import { ETextType, TEXT_TYPE } from '@/constant/store';
 import { Select as SenseSelect, Input as SenseInput, Switch } from 'antd';
 import React, { useState } from 'react';
-import '../../index.less';
 
 // 文本标注类型
 export enum ETextType {

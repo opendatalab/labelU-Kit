@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Breadcrumb, Dropdown } from 'antd';
+import { Breadcrumb, Button, Dropdown } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { PoweroffOutlined } from '@ant-design/icons';
+import Icon, { PoweroffOutlined } from '@ant-design/icons';
+
+import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
@@ -159,8 +161,6 @@ const Homepage = () => {
         {/* @ts-ignore */}
         {isShowHelp && <HelpTips taskTips={taskTips} />}
         {isShowAnnotationTips && <AnnotationTips />}
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-
         <Dropdown
           overlayClassName={currentStyles.dropDownOverlay}
           menu={{
@@ -168,7 +168,7 @@ const Homepage = () => {
               {
                 label: (
                   <div className={currentStyles.quit} onClick={signOut}>
-                    退出登录 &nbsp;&nbsp;
+                    退出登录
                     <PoweroffOutlined />
                   </div>
                 ),
@@ -179,10 +179,10 @@ const Homepage = () => {
           }}
           trigger={['click']}
         >
-          <div className={currentStyles.username}>
-            {username}&nbsp;&nbsp;
-            <img src="/src/icons/personal.svg" />{' '}
-          </div>
+          <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }}>
+            {username}
+            <Icon component={ProfileIcon} />
+          </Button>
         </Dropdown>
       </div>
     </div>

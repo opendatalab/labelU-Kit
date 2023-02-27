@@ -7,7 +7,7 @@ import './polyfills';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import store from './stores';
-import './styles/index.less';
+import './styles/index.scss';
 
 window.React = React;
 
