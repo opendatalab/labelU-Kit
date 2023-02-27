@@ -38,7 +38,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
-  // const [isClearnHover, setIsClearHover] = useState<boolean>(false);
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -46,16 +45,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const tagConfigList = useSelector((state: AppState) => state.annotation.tagConfigList);
   const textConfig = useSelector((state: AppState) => state.annotation.textConfig);
   const toolName = stepInfo?.tool;
-
-  const [boxHeight, setBoxHeight] = useState<number>();
-  console.log(boxHeight);
-  const [, setBoxWidth] = useState<number>();
-
-  useEffect(() => {
-    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
-    setBoxHeight(boxParent.clientHeight);
-    setBoxWidth(boxParent.clientWidth);
-  }, []);
 
   // 删除标注结果
   // const doClearAllResult = () => {

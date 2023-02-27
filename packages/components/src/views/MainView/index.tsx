@@ -57,15 +57,10 @@ const AnnotatedArea: React.FC<AppProps & IProps & { currentToolName: string }> =
 };
 
 const MainView: React.FC<AppProps & IProps> = (props) => {
-  // const dispatch = useDispatch();
   const { currentToolName } = props;
-
-  const [boxHeight, setBoxHeight] = useState<number>();
-  console.log(boxHeight);
   const [, setBoxWidth] = useState<number>();
   useEffect(() => {
     const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
-    setBoxHeight(boxParent.clientHeight);
     setBoxWidth(boxParent.clientWidth);
   }, []);
 
