@@ -8,6 +8,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
+import { zoomInfo } from './basicToolOperation';
 import type { IPolygonOperationProps } from './polygonOperation';
 import PolygonOperation from './polygonOperation';
 
@@ -161,6 +162,34 @@ class PointCloud2dOperation extends PolygonOperation {
       this.firstClickPoint = this.getCoordinate(e);
     }
     return true;
+  }
+
+  public onWheel(e: any, isRender = true): boolean | void {
+    if (!this.imgNode || !this.coord) {
+      return;
+    }
+
+    // 禁止外层滚轮操作
+    e.preventDefault();
+    e.stopPropagation();
+
+    const delta = e.deltaY || e.wheelDelta;
+
+    let operator: 0 | -1 | 1 = 0;
+
+    if (delta > 0 && this.zoom > zoomInfo.min) {
+      // 减小
+      operator = -1;
+    }
+    if (delta < 0 && this.zoom < zoomInfo.max) {
+      // 放大
+      operator = 1;
+    }
+    this.wheelChangePos(this.getGetCenterCoordinate(), operator);
+    if (isRender) {
+      this.render();
+    }
+    this.renderBasicCanvas();
   }
 
   /**

@@ -59,7 +59,7 @@ interface IReferenceData {
 }
 
 // zoom 的限制
-const zoomInfo = {
+export const zoomInfo = {
   min: 0.2,
   max: 1000,
   ratio: 0.4,
