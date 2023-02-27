@@ -352,7 +352,7 @@ const AttributeRusult: FC<IProps> = ({
                 item.order = item.order - 1;
               }
               res.push(item);
-            } else {
+            } else if (item.id) {
               if (item?.id) {
                 deleteBoxArray.push(item.id);
               }
