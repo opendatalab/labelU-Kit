@@ -110,7 +110,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
   const size = useSize(ref);
   const { setZoom } = useZoom();
 
-  const { addPolygon, deletePolygon } = usePolygon();
+  const { addPolygon, deletePolygon, updatePolygon } = usePolygon();
   const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
@@ -150,6 +150,14 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
         addPolygon(polygon);
         return;
       }
+      pointCloudViews.topViewAddBox(polygon, size, ptCtx.mainViewInstance?.attribute as string);
+    });
+
+    TopView2dOperation.singleOn('polygonUpdate', (polygon: IPolygonData) => {
+      if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
+        updatePolygon(polygon);
+        return;
+      }
       if (ptCtx.selectedPointCloudBox) {
         pointCloudViews.topViewAddBox(
           polygon,
@@ -157,11 +165,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
           ptCtx.selectedPointCloudBox.attribute,
           ptCtx.selectedPointCloudBox.zInfo,
         );
-        return;
-      }
-
-      if (!ptCtx.selectedPointCloudBox) {
-        pointCloudViews.topViewAddBox(polygon, size, ptCtx.mainViewInstance?.attribute as string);
       }
     });
 

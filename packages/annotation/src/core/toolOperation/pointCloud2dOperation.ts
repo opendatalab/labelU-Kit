@@ -254,7 +254,7 @@ class PointCloud2dOperation extends PolygonOperation {
         }
       }
       this.polygonList = newPolygonList;
-      this.emit('polygonCreated', newPolygon, this.zoom, this.currentPos);
+      this.emit('polygonUpdate', newPolygon, this.zoom, this.currentPos);
       this.rotation = 0;
     }
   }
