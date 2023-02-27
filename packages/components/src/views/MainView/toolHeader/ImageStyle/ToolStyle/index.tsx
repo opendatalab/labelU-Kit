@@ -20,19 +20,19 @@ interface IProps {
 }
 type ToolStyleKey = keyof ToolStyleState;
 
-const enlargeToolParam = (obj: Record<string, number>) => {
-  const key = keys(obj)![0];
-  if (!key) return;
+const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyleState> => {
+  const key = keys(params)![0];
+  if (!key) return params;
   const res: Record<string, number> = {};
   switch (key) {
     case 'borderOpacity':
-      res[key] = obj[key] * 10;
+      res[key] = params[key] * 10;
       break;
     case 'fillOpacity':
-      res[key] = obj[key] * 10;
+      res[key] = params[key] * 10;
       break;
     default:
-      res[key] = obj[key];
+      res[key] = params[key];
   }
   return res;
 };
@@ -179,8 +179,8 @@ const ToolStyle = (props: IProps) => {
   // TODO - 样式标准的定义
   const annotationConfig: any = props.config;
 
-  const changeToolStyle = (obj: Record<string, number>) => {
-    store.dispatch(UpdateToolStyleConfig(enlargeToolParam(obj)));
+  const changeToolStyle = (params: Record<string, number>) => {
+    store.dispatch(UpdateToolStyleConfig(enlargeToolParam(params)));
   };
 
   return (
