@@ -26,13 +26,13 @@ const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyleStat
   const res: Record<string, number> = {};
   switch (key) {
     case 'borderOpacity':
-      res[key] = obj[key] * 10;
+      res[key] = params[key] * 10;
       break;
     case 'fillOpacity':
-      res[key] = obj[key] * 10;
+      res[key] = params[key] * 10;
       break;
     default:
-      res[key] = obj[key];
+      res[key] = params[key];
   }
   return res;
 };
@@ -179,8 +179,8 @@ const ToolStyle = (props: IProps) => {
   // TODO - 样式标准的定义
   const annotationConfig: any = props.config;
 
-  const changeToolStyle = (obj: Record<string, number>) => {
-    store.dispatch(UpdateToolStyleConfig(enlargeToolParam(obj)));
+  const changeToolStyle = (params: Record<string, number>) => {
+    store.dispatch(UpdateToolStyleConfig(enlargeToolParam(params)));
   };
 
   return (
