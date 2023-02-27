@@ -127,7 +127,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         <div className='rightTab'>
           <p>文本描述</p>
           <span
-            className={classNames({
+            className={classNames('innerWord', {
               innerWord: true,
               finish:
                 textResultKeys &&
