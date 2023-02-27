@@ -20,9 +20,9 @@ interface IProps {
 }
 type ToolStyleKey = keyof ToolStyleState;
 
-const enlargeToolParam = (obj: Record<string, number>) => {
+const enlargeToolParam = (obj: Record<string, number>): Partial<ToolStyleState> => {
   const key = keys(obj)![0];
-  if (!key) return;
+  if (!key) return obj;
   const res: Record<string, number> = {};
   switch (key) {
     case 'borderOpacity':
