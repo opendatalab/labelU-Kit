@@ -799,7 +799,30 @@ class PointCloudOperation extends PointCloud {
     if (Array.isArray(boxList) && boxList.length > 0) {
       for (let i = 0; i < boxList.length; i++) {
         const tmpTextMesh = this.scene.getObjectByName(`${boxList[i].id}attribute`);
-        tmpTextMesh?.lookAt(camaraPostion);
+        // Todo: keep text stable
+        if (tmpTextMesh) {
+          // tmpTextMesh?.lookAt(camaraPostion);
+
+          const textPosition = tmpTextMesh.position;
+          const textToCameraVector = new THREE.Vector3(
+            camaraPostion.x - textPosition.x,
+            camaraPostion.y - textPosition.y,
+            camaraPostion.z - textPosition?.z,
+          );
+          // const angleZ = textToCameraVector.angleTo(new THREE.Vector3(0, 0, 1));
+          const angleY = textToCameraVector.angleTo(new THREE.Vector3(0, 1, 0));
+          const angleX = textToCameraVector.angleTo(new THREE.Vector3(1, 0, 0));
+          tmpTextMesh.rotation.set(angleY - 0.5 * Math.PI, 0.5 * Math.PI - angleX, 0);
+
+          // const vector3 = new THREE.Vector3(tmpTextMesh.position.x, tmpTextMesh.position.z);
+          // const standardVec = vector3.project(this.camera);
+          // const centerX = this.container.clientWidth / 2;
+          // const centerY = this.container.clientHeight / 2;
+          // const screenX = Math.round(centerX * standardVec.x + centerX);
+          // const screenY = Math.round(-centerY * standardVec.y + centerY);
+          // console.log(screenX);
+          // console.log(screenY);
+        }
       }
     }
   }

@@ -4,7 +4,7 @@ import { AppState } from '../../../../store';
 import { connect } from 'react-redux';
 import { useDispatch, LabelUContext } from '@/store/ctx';
 import { IFileItem } from '@/types/data';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { toolList } from '../../toolHeader/ToolOperation';
 import AttributeEditorIcon from '@/assets/cssIcon/attribute_editor.svg';
 import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';

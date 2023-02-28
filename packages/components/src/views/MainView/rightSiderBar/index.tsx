@@ -3,7 +3,7 @@ import { EToolName } from '../../../data/enums/ToolType';
 import { AppState } from '../../../store';
 import { Sider } from '../../../types/main';
 import StepUtils from '../../../utils/StepUtils';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useLayoutEffect, useState } from 'react';
 import { Popconfirm, Tabs } from 'antd';
 import { connect } from 'react-redux';
 import { useDispatch, useSelector, LabelUContext } from '@/store/ctx';
@@ -27,11 +27,12 @@ interface IProps {
   imgList: IFileItem[];
   imgIndex: number;
   currentToolName?: EToolName;
+  resultCollapse: boolean;
 }
 
 const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar: React.FC<IProps> = (props) => {
-  const { imgList, imgIndex, currentToolName } = props;
+  const { imgList, imgIndex, currentToolName, resultCollapse } = props;
 
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -118,7 +119,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     setOpen(false);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (imgList && imgList.length > 0) {
       let currentImgResult = JSON.parse(imgList[imgIndex].result as string);
       let textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool : [];
@@ -202,6 +203,10 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     return null;
   }
 
+  if (resultCollapse) {
+    return <div />;
+  }
+
   return (
     <div className={`${sidebarCls}`}>
       <Tabs
@@ -263,6 +268,7 @@ function mapStateToProps(state: AppState) {
     imgList: [...state.annotation.imgList],
     toolInstance: state.annotation.toolInstance,
     imgIndex: state.annotation.imgIndex,
+    resultCollapse: state.toolStyle.resultCollapse,
   };
 }
 

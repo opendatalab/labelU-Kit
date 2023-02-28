@@ -1,5 +1,5 @@
 import { EPageTurningOperation } from '../data/enums/AnnotationSize';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { jsonParser } from '.';
 
 interface IPageInfo {
@@ -51,7 +51,7 @@ class PageOperator {
       pageInfo.basicIndex,
     );
     const fileIndexChanged = nextFileIndex !== currentFileIndex;
-    
+
     // 智能标注工具无需考虑数据依赖
     // const hasNextBasicIndex = PageOperator.hasNextBasicIndex(pageTurningOperation, pageInfo);
 

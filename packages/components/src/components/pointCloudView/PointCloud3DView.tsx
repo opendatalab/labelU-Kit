@@ -154,10 +154,9 @@ const PointCloud3D: React.FC<
     const { pointCloud2dOperation: TopView2dOperation } = ptCtx.topViewInstance;
     const mainViewInstance = ptCtx.mainViewInstance;
     let sizeTop = {
-      width: TopView2dOperation.container.getBoundingClientRect().width,
-      height: TopView2dOperation.container.getBoundingClientRect().height,
+      width: TopView2dOperation.container.clientWidth,
+      height: TopView2dOperation.container.clientHeight,
     };
-
     mainViewInstance.singleOn('refreshPointCloud3dView', () => {
       refreshtPointCloud3DView();
     });
@@ -243,17 +242,23 @@ const PointCloud3D: React.FC<
         },
       });
     });
-
     mainViewInstance.singleOn('updateSelectedBox', (selectedIDs: string) => {
-      let size = {
-        width: TopView2dOperation.container.clientWidth,
-        height: TopView2dOperation.container.clientHeight,
-      };
-      let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
-      let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
-      ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
-      pointCloudViews.topViewAddBox(polygon, size, box.attribute, box.zInfo);
-      ptCtx.setSelectedIDs([selectedIDs]);
+      if (selectedIDs) {
+        let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
+        let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
+        if (box) {
+          ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
+          pointCloudViews.topViewAddBox(polygon, sizeTop, box.attribute, box.zInfo);
+          ptCtx.setSelectedIDs([selectedIDs]);
+        }
+      }
+    });
+
+    mainViewInstance.singleOn('resetAllView', async () => {
+      let selectedId = mainViewInstance.selectedId;
+      if (selectedId) {
+        mainViewInstance.emit('updateSelectedBox', selectedId);
+      }
     });
   }, [ptCtx, size, currentData, pointCloudViews]);
 

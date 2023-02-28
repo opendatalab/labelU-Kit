@@ -9,7 +9,7 @@ import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
 import { ISize } from '@/types/main';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';

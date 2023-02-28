@@ -1,6 +1,6 @@
 import { IPointCloudBoxList } from '@label-u/utils';
 import { useCallback, useContext, useMemo, useState } from 'react';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { message } from 'antd';
 import { usePointCloudViews } from './usePointCloudViews';
 import { PointCloudContext } from '../PointCloudContext';
@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 /**
  * Actions for selected boxes
  */
-export const useBoxes:any = () => {
+export const useBoxes: any = () => {
   const { selectedIDs, pointCloudBoxList, setPointCloudResult } = useContext(PointCloudContext);
   const [copiedBoxes, setCopiedBoxes] = useState<IPointCloudBoxList>([]);
   const { pointCloudBoxListUpdated } = usePointCloudViews();
@@ -22,7 +22,7 @@ export const useBoxes:any = () => {
   // };
 
   const selectedBoxes = useMemo(() => {
-    return pointCloudBoxList.filter((i: { id: string; }) => selectedIDs.includes(i.id));
+    return pointCloudBoxList.filter((i: { id: string }) => selectedIDs.includes(i.id));
   }, [selectedIDs, pointCloudBoxList]);
 
   const copySelectedBoxes = useCallback(() => {

@@ -12,7 +12,8 @@ export interface ToolStyleState {
   attributeColor: any[];
   lineColor: string;
   attributeLineColor: string[];
-  imgListCollapse:boolean
+  imgListCollapse: boolean;
+  resultCollapse: boolean;
 }
 
 interface UpdateToolStyleConfig {
@@ -25,5 +26,4 @@ interface InitToolStyleConfig {
   payload: undefined;
 }
 
-
-export type ToolStyleActionTypes = InitToolStyleConfig | UpdateToolStyleConfig ;
+export type ToolStyleActionTypes = InitToolStyleConfig | UpdateToolStyleConfig;

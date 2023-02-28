@@ -9,7 +9,7 @@ import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@label-u/ann
 import { EToolName } from '@label-u/annotation/es/types/constant/tool';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { ToolStyleState } from '../toolStyle/types';
 import { SetAnnotationLoading } from './actionCreators';
 import { AnnotationActionTypes, AnnotationState } from './types';
@@ -20,9 +20,9 @@ export const getStepConfig = (stepList: any[], step: number) =>
 
 const initialState: AnnotationState = {
   isShowOrder: false,
-  isShowAttributeText:false,
-  isShowAttribute:false,
-  isShowDirection:false,
+  isShowAttributeText: false,
+  isShowAttribute: false,
+  isShowDirection: false,
   currentToolName: '',
   annotationEngine: null,
   toolInstance: null,

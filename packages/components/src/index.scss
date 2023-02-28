@@ -186,36 +186,57 @@ body {
     flex-direction: column;
   }
 
-  .attributeBox {
-    padding-left: 16px;
-    padding-right: 16px;
-    background-color: #f7f7f7;
+  .attributeCollapseRow {
     display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    height: 50px;
-    .circle {
-      width: 3px;
-      height: 13px;
-    }
-    .attributeName {
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .ant-btn {
+    padding-left: 16px;
+    padding-right: 24px;
+    background-color: #f7f7f7;
+    .attributeBox {
+      width: 94%;
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      height: 50px;
+      .circle {
+        width: 3px;
+        height: 13px;
+      }
+      .attributeName {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .ant-btn {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      a {
+        text-decoration: none;
+      }
+      .dropdowm-a {
+        color: rgba(0, 0, 0, 0.6);
+        &:hover {
+          color: #1b67ff;
+        }
+      }
     }
-    a {
-      text-decoration: none;
-    }
-    .dropdowm-a {
-      color: rgba(0, 0, 0, 0.6);
+    .collapseAction {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
       &:hover {
-        color: #1b67ff;
+        cursor: pointer;
+      }
+      svg {
+        width: 19px;
+        height: 14px;
+        color: #fff;
+        &:active {
+          color: #1b67ff;
+        }
       }
     }
   }

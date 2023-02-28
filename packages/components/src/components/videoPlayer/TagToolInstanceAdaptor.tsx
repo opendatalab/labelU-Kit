@@ -5,7 +5,7 @@ import { jsonParser } from '@/utils';
 import { VideoPlayer } from './index';
 import { VideoTagLayer } from './VideoTagLayer';
 import { IStepInfo } from '@/types/step';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import type { ObjectString } from './types';
 import { getKeyCodeNumber } from './utils';
 import { IFileItem } from '@/types/data';
@@ -163,9 +163,13 @@ export class TagToolInstanceAdaptor extends React.Component<
    * @returns newValue
    */
   public combineResult = (
-    inputValue: { value: { key: string; value: string }; isMulti: boolean },
+    inputValue: { value: { key: string; value: string }; isMulti: boolean } | undefined,
     existValue: ObjectString = {},
   ) => {
+    if (!inputValue) {
+      return;
+    }
+
     const { isMulti } = inputValue;
     const { key, value } = inputValue.value;
 
@@ -179,12 +183,11 @@ export class TagToolInstanceAdaptor extends React.Component<
 
       const valuesSet = new Set(valuesArray);
       existValue[key] = Array.from(valuesSet).join(';');
-      return _.pickBy(existValue, (v) => v);
+      return _.pickBy(valuesSet, (v: string) => v);
     }
 
     existValue[key] = existValue[key] === value ? undefined : value;
-
-    return _.pickBy(existValue, (v) => v);
+    return existValue;
   };
 
   public setResult = (tagResult: any[]) => {

@@ -2,18 +2,17 @@ import RadioList from '@/components/attributeList';
 import CheckBoxList from '@/components/checkboxList';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Collapse, Tooltip } from 'antd/es';
-import _, { cloneDeep } from 'lodash';
+import _, { cloneDeep } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CommonToolUtils, OneTag, TagUtils, uuid } from '@label-u/annotation';
 import { connect } from 'react-redux';
-import { useDispatch } from '@/store/ctx';
+import { useDispatch, LabelUContext } from '@/store/ctx';
 import { AppState } from '@/store';
 import { IInputList } from '@/types/main';
 import { useTranslation } from 'react-i18next';
 import { ObjectString } from '@/components/videoPlayer/types';
 import { IFileItem } from '@/types/data';
 import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
-import { LabelUContext } from '@/store/ctx';
 
 interface IProps {
   imgIndex: number;

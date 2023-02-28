@@ -3,7 +3,7 @@ import { ViewportProvider } from '@/components/customResizeHook';
 import { prefix } from '@/constant';
 import { Spin } from 'antd';
 import { Layout } from 'antd/es';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import React from 'react';
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
