@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import DrageModel from '../../../components/basic/modal';
-import './index.less';
+import './index.scss';
 import { getLabelConfig } from './config';
 import TmplateBox from './tmplateBox';
 import { getTask } from '../../../services/samples';

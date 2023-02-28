@@ -10,11 +10,6 @@
   color: #333;
 }
 
-.main {
-  height: calc(100vh - @headerHeight);
-  margin-top: 61px;
-}
-
 .toolConfigPane {
   .deleteTab {
     position: absolute;
@@ -196,14 +191,13 @@
     height: 33px;
     background: rgb(99 113 255 / 100%);
     color: white;
-    border-radius: 4px;
     border: 2px solid rgb(99 113 255 / 100%);
   }
 
   .addButton {
     height: 34px;
     // border: 1px solid rgba(204, 204, 204, 1);
-    border-radius: 4px;
+
     margin-top: 4px;
   }
 
@@ -284,7 +278,6 @@
 :global {
   .ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
     background: rgb(102 108 255 / 100%);
-    border-radius: 4px;
     border: 1px solid rgb(102 108 255 / 100%);
   }
 
@@ -295,24 +288,6 @@
   .ant-drawer-wrapper-body {
     display: flex;
     flex-direction: column;
-  }
-
-  .step-config-tabs {
-    height: calc(100vh - 197px);
-    overflow-y: auto;
-  }
-
-  .step-config-tabs.ant-tabs .ant-tabs-nav-wrap {
-    background-color: #fafbff;
-    padding: 0 20px;
-  }
-
-  .step-config-tabs .ant-tabs-nav .ant-tabs-tab {
-    margin: 0;
-  }
-
-  .step-config-tabs .ant-tabs-nav .ant-tabs-tab-active {
-    background-color: #fff;
   }
 
   .ant-input:focus {

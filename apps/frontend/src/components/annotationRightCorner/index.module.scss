@@ -4,17 +4,15 @@
   @extend .flexDirectionRow;
   justify-content: space-between;
   align-items: center;
-  width: calc(100vw - 560px);
-  width: 100%;
 }
 .left {
   width: 300px;
   width: 74px;
   height: 32px;
   //background: #1B67FF;
-  border-radius: 4px;
+
   text-align: center;
-  line-hight: 32px;
+  line-height: 32px;
   line-height: 32px;
   cursor: pointer;
   //color: #ffffff;
@@ -28,28 +26,4 @@
   @extend .flexDirectionRow;
   justify-content: space-between;
   align-items: center;
-  width: 170px;
-}
-
-.rightLeft {
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 32px;
-  color: rgba(0, 0, 0, 0.6);
-  width: 56px;
-  height: 32px;
-  margin-right: 16px;
-  cursor: pointer;
-  width: 100px;
-}
-.rightRight {
-  width: 70px;
-  height: 32px;
-  background: #1b67ff;
-  border-radius: 4px;
-  text-align: center;
-  line-hight: 32px;
-  line-height: 32px;
-  cursor: pointer;
-  color: #ffffff;
 }

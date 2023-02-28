@@ -1,7 +1,7 @@
 import { CloseCircleFilled } from '@ant-design/icons';
 import { Button, Input as SenseInput } from 'antd';
 import { useRef, useState } from 'react';
-import './index.less';
+import './index.scss';
 import { useTranslation } from 'react-i18next';
 
 import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';

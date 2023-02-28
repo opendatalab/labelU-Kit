@@ -11,7 +11,6 @@ import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
 import CommonFormItem from '../components/commonFormItems';
 import { LoadInitConfig } from '../configTemplate/config';
-import '../index.less';
 import { validateTools } from '../../../utils/tool/common';
 
 const { Option } = Select;

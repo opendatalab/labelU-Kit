@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 
 import type { MyFormProps } from '@/components/core/form';
 import MyForm from '@/components/core/form';
@@ -8,7 +8,7 @@ interface SearchProps<T> extends MyFormProps<T> {
   onSearch: (values: T) => void;
 }
 
-const styles = css`
+const BaseSearchWrapper = styled.div`
   padding: 20px;
   background-color: #ffffff;
   .ant-form-item {
@@ -29,8 +29,7 @@ const BaseSearch = <T extends Record<string, unknown>>(props: SearchProps<T>) =>
   };
 
   return (
-    // eslint-disable-next-line react/no-unknown-property
-    <div css={styles}>
+    <BaseSearchWrapper>
       <MyForm {...rest} form={form} layout="inline">
         {children}
         <MyForm.Item>
@@ -41,7 +40,7 @@ const BaseSearch = <T extends Record<string, unknown>>(props: SearchProps<T>) =>
           <MyButton onClick={() => form.resetFields()}>重置</MyButton>
         </MyForm.Item>
       </MyForm>
-    </div>
+    </BaseSearchWrapper>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
 import { useDispatch } from 'react-redux';
 
 import currentStyles from './index.module.scss';
@@ -143,21 +143,18 @@ const Statistical = () => {
         </div>
       </div>
       <div className={currentStyles.right}>
-        <div className={currentStyles.rightOption1} onClick={turnToTaskConfig}>
-          {' '}
-          <SettingOutlined />
-          &nbsp;&nbsp;任务配置
-        </div>
-        <div className={currentStyles.rightOption2} onClick={() => setIsShowModal(true)}>
-          <UploadOutlined />
-          &nbsp;&nbsp;数据导出
-        </div>
-        <div className={currentStyles.rightOption3} onClick={turnToInputData}>
+        <Button type="text" icon={<SettingOutlined />} onClick={turnToTaskConfig}>
+          任务配置
+        </Button>
+        <Button type="text" icon={<UploadOutlined />} onClick={() => setIsShowModal(true)}>
+          数据导出
+        </Button>
+        <Button type="primary" ghost onClick={turnToInputData}>
           数据导入
-        </div>
-        <div className={currentStyles.rightOption4} onClick={commonController.debounce(beginAnnotation, 100)}>
+        </Button>
+        <Button type="primary" onClick={commonController.debounce(beginAnnotation, 100)}>
           开始标注
-        </div>
+        </Button>
       </div>
       <Modal title="选择导出格式" okText={'导出'} onOk={clickOk} onCancel={clickCancel} open={isShowModal}>
         <div className={currentStyles1.outerFrame}>

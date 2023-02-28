@@ -10,7 +10,7 @@ import EmptyConfigImg from '../../img/annotationCommon/emptyConfig.png';
 import ConfigTemplate from './configTemplate/index';
 import FormConfig from './formConfig';
 import { getSamples } from '../../services/samples';
-import './index.less';
+import './index.scss';
 
 interface OneFile {
   id: number;

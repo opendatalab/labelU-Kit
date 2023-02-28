@@ -4,7 +4,7 @@ import { CloseCircleFilled, PlusCircleFilled, StarFilled } from '@ant-design/ico
 import { useTranslation } from 'react-i18next';
 const InputGroup = Input.Group;
 
-import './index.less';
+import './index.scss';
 
 interface IProps {
   inputInfo: IInputList;

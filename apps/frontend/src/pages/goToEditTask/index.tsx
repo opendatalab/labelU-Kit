@@ -1,6 +1,7 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { useDispatch } from 'react-redux';
+import { Button } from 'antd';
 
 import currentStyles from './index.module.scss';
 import { getTask } from '../../services/samples';
@@ -51,9 +52,9 @@ const GoToEditTask = (props: any) => {
     <div className={currentStyles.outerFrame}>
       <InfoCircleOutlined style={{ color: '#F5483B' }} className={currentStyles.icon} />
       <div className={currentStyles.txt}>请先完成任务配置， 再开始标注</div>
-      <div className={currentStyles.toConfig} onClick={turnToEditTask}>
+      <Button type="primary" ghost onClick={turnToEditTask}>
         去配置
-      </div>
+      </Button>
     </div>
   );
 };

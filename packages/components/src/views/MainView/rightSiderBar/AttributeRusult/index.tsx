@@ -153,6 +153,20 @@ const AttributeRusult: FC<IProps> = ({
 
   const [boxHeight, setBoxHeight] = useState<number>();
   const [, setBoxWidth] = useState<number>();
+  const attributeResultRef = useRef<HTMLDivElement>(null);
+
+  // 将右侧属性栏高度设置为剩余高度
+  useEffect(() => {
+    setTimeout(() => {
+      if (!attributeResultRef.current) {
+        return;
+      }
+
+      const rect = attributeResultRef.current.getBoundingClientRect();
+      const attributeWrapperHeight = window.innerHeight - rect.top;
+      attributeResultRef.current.style.height = `${attributeWrapperHeight}px`;
+    });
+  }, []);
 
   useEffect(() => {
     const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
@@ -577,13 +591,19 @@ const AttributeRusult: FC<IProps> = ({
   }
   return (
     <div
-      style={{ height: (boxHeight as number) - 220, paddingBottom: 40 }}
+      style={{ paddingBottom: 40 }}
       className={classNames({
         attributeResult: true,
       })}
+      ref={attributeResultRef}
     >
       <DrageModel title="详细信息" ref={dragModalRef} width={333} okWord="确认" cancelWord="取消" content={content} />
-      <Collapse key={defaultKeys.join('')} defaultActiveKey={defaultKeys} expandIcon={expandIconFuc}>
+      <Collapse
+        key={defaultKeys.join('')}
+        className="attribute-panel"
+        defaultActiveKey={defaultKeys}
+        expandIcon={expandIconFuc}
+      >
         {attributeResultList &&
           attributeResultList.length > 0 &&
           attributeResultList.map((item) => {
@@ -755,36 +775,34 @@ const AttributeRusult: FC<IProps> = ({
                       </div>
                     );
                   })}
-
-                <Popconfirm
-                  title="确认清空标注？"
-                  open={open}
-                  okText="确认"
-                  cancelText="取消"
-                  onConfirm={handleOk}
-                  okButtonProps={{ loading: confirmLoading }}
-                  onCancel={handleCancel}
-                >
-                  <div className="rightBarFooter">
-                    <img
-                      onMouseEnter={(e) => {
-                        e.stopPropagation();
-                        setIsClearHover(true);
-                      }}
-                      onMouseLeave={(e) => {
-                        e.stopPropagation();
-                        setIsClearHover(false);
-                      }}
-                      onClick={showPopconfirm}
-                      className="clrearResult"
-                      src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
-                    />
-                  </div>
-                </Popconfirm>
               </Panel>
             );
           })}
       </Collapse>
+      <Popconfirm
+        title="确认清空标注？"
+        open={open}
+        okText="确认"
+        cancelText="取消"
+        onConfirm={handleOk}
+        okButtonProps={{ loading: confirmLoading }}
+        onCancel={handleCancel}
+      >
+        <button
+          className="rightBarFooter"
+          onClick={showPopconfirm}
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            setIsClearHover(true);
+          }}
+          onMouseLeave={(e) => {
+            e.stopPropagation();
+            setIsClearHover(false);
+          }}
+        >
+          <img className="clrearResult" src={isClearnHover ? ClearResultIconHover : ClearResultIcon} />
+        </button>
+      </Popconfirm>
     </div>
   );
 };

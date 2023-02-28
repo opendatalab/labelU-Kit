@@ -1,12 +1,11 @@
 // @ts-ignore
 import React, { useState, useEffect } from 'react';
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { connect, useSelector, useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
 import currentStyles from './index.module.scss';
-import commonStyles from '../../utils/common/common.module.scss';
 import Step from '../../components/step';
 import Separator from '../../components/separator';
 import { submitBasicConfig, updateTaskConfig } from '../../services/createTask';
@@ -297,24 +296,18 @@ const CreateTask = () => {
           })}
         </div>
         <div className={currentStyles.right}>
-          <div className={`${commonStyles.cancelButton}  ${currentStyles.cancelButton}`} onClick={cancelOption}>
+          <Button type="primary" ghost onClick={cancelOption}>
             取消
-          </div>
+          </Button>
           {configStep !== 1 && (
-            <div
-              className={`${commonStyles.commonButton} ${currentStyles.nextButton}`}
-              onClick={commonController.debounce(nextStep, 100)}
-            >
+            <Button type="primary" onClick={commonController.debounce(nextStep, 100)}>
               下一步
-            </div>
+            </Button>
           )}
           {configStep === 1 && (
-            <div
-              className={`${commonStyles.commonButton} ${currentStyles.nextButton}`}
-              onClick={commonController.debounce(finallySave, 200)}
-            >
+            <Button type="primary" onClick={commonController.debounce(finallySave, 200)}>
               保存
-            </div>
+            </Button>
           )}
         </div>
       </div>

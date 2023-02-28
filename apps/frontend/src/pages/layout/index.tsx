@@ -4,7 +4,7 @@ import { Layout, Drawer } from 'antd';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 
-import './index.less';
+import './index.scss';
 import MenuComponent from './menu';
 import HeaderComponent from './header';
 import { getGlobalState } from '../../utils/getGloabal';

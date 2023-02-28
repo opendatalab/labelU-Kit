@@ -1,21 +1,19 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { Provider } from 'react-redux';
+import 'antd/dist/antd.css';
 
 import './polyfills';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import store from './stores';
-import './styles/index.less';
-import 'antd/dist/antd.css';
+import './styles/index.scss';
 
 window.React = React;
 
 ReactDOM.render(
   <Provider store={store}>
-    <div className="App">
-      <App />
-    </div>
+    <App />
   </Provider>,
   document.getElementById('root'),
 );

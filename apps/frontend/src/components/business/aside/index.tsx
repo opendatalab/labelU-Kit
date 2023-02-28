@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import type { TreeProps } from 'antd';
 import { Divider, Tree } from 'antd';
 import type { DataNode } from 'rc-tree/lib/interface';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 
 export type MySideOption = DataNode;
 
@@ -12,7 +12,7 @@ export interface MyAsideProps extends Omit<TreeProps, 'treeData'> {
   footer?: React.ReactNode;
 }
 
-const styles = css`
+const AsideWrapper = styled.div`
   padding: 8px;
   background-color: #ffffff;
   margin-right: 8px;
@@ -39,7 +39,7 @@ const MyAside: FC<MyAsideProps> = (props) => {
   const { options, header, footer, ...rest } = props;
   return (
     // eslint-disable-next-line react/no-unknown-property
-    <div css={styles}>
+    <AsideWrapper>
       {header && (
         <div className="header">
           {header}
@@ -53,7 +53,7 @@ const MyAside: FC<MyAsideProps> = (props) => {
           {footer}
         </div>
       )}
-    </div>
+    </AsideWrapper>
   );
 };
 

@@ -1,6 +1,6 @@
 import type { TableProps } from 'antd';
 import { Table } from 'antd';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 
 import TableColumn from '../table-column';
 
@@ -8,7 +8,7 @@ interface MyTableProps<T extends Record<string, unknown>> extends TableProps<T> 
   height?: string;
 }
 
-const styles = css`
+const MyTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -59,10 +59,9 @@ const MyTable = <T extends Record<string, unknown>>(props: MyTableProps<T>) => {
   const combinedPagination = typeof pagination === 'object' ? { ...defaultPagination, ...pagination } : {};
 
   return (
-    // eslint-disable-next-line react/no-unknown-property
-    <div style={{ height }} css={styles}>
+    <MyTableWrapper style={{ height }}>
       <Table<T> {...rest} scroll={{ x: 'max-content', y: '100%' }} pagination={combinedPagination} />
-    </div>
+    </MyTableWrapper>
   );
 };
 

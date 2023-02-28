@@ -10,13 +10,10 @@ const RootGuard = () => {
     }
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
-    if (token && username) {
-      navigate('/tasks');
-    } else {
+    if (!token || !username) {
       navigate('/login');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate]);
 
   return <Outlet />;
 };

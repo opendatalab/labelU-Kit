@@ -88,7 +88,7 @@ const Login = (props: any) => {
   }
 
   return (
-    <div className={currentStyles.outerFrame}>
+    <div className={currentStyles.loginForm}>
       {/*<div className = {currentStyles.title} >登录</div>*/}
       {/*<div className = {currentStyles.title} >{loginText()}</div>*/}
       <div className={currentStyles.title}>{intl.get('login123')}</div>

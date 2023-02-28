@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { RadioGroupProps } from 'antd';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 
 import MyRadio from '@/components/basic/radio';
 
@@ -13,7 +13,7 @@ export interface MyRadioCardsProps extends RadioGroupProps {
   options: MyRadioCardssOption[];
 }
 
-const styles = css`
+const MyRadioWrapper = styled.div`
   padding: 8px;
   background-color: #ffffff;
   .ant-radio-group {
@@ -35,7 +35,7 @@ const MyRadioCards: FC<MyRadioCardsProps> = (props) => {
   const { options, ...rest } = props;
   return (
     // eslint-disable-next-line react/no-unknown-property
-    <div css={styles}>
+    <MyRadioWrapper>
       <MyRadio.Group buttonStyle="solid" {...rest}>
         {options?.map((option) => (
           <MyRadio.Button style={{ width: `calc(100% / ${options.length})` }} key={option.value} value={option.value}>
@@ -43,7 +43,7 @@ const MyRadioCards: FC<MyRadioCardsProps> = (props) => {
           </MyRadio.Button>
         ))}
       </MyRadio.Group>
-    </div>
+    </MyRadioWrapper>
   );
 };
 

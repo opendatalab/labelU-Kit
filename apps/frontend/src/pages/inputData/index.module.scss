@@ -47,14 +47,10 @@
 
 .left {
   flex: 1;
-  //width : 458px;
-  width: 512px;
-  width: 388px;
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   justify-content: flex-start;
   align-items: flex-start;
-  margin-right: 70px;
 }
 .leftTitle {
   flex: 1;
@@ -294,7 +290,7 @@
   line-height: 36px;
   text-align: center;
   background: #1b67ff;
-  border-radius: 4px;
+
   margin-right: 24px;
 }
 
@@ -304,7 +300,7 @@
   line-height: 36px;
   text-align: center;
   border: 1px solid #1b67ff;
-  border-radius: 4px;
+
   font-color: #1b67ff;
   cursor: pointer;
 }

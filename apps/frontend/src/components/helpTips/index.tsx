@@ -1,15 +1,17 @@
+import { BellOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+
 import currentStyles from './index.module.scss';
 
 const HelpLink = 'https://github.com/opendatalab/labelU/blob/main/docs/GUIDE.md';
-const LinkColor = 'rgba(0, 0, 0, 0.85)';
 
 const HelpTips = () => {
   return (
     <div className={currentStyles.outerFrame}>
-      <a href={HelpLink} target="_blank" style={{ color: LinkColor }} rel="noreferrer">
-        帮助文档&nbsp;&nbsp;
-        <img src="/src/icons/helpText.svg" />
-      </a>
+      <Button type="link" href={HelpLink} style={{ color: 'rgba(0, 0, 0, 0.85)' }} target="_blank" rel="noreferrer">
+        帮助文档
+        <BellOutlined />
+      </Button>
     </div>
   );
 };

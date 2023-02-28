@@ -2,7 +2,7 @@ import type { FC, ReactElement } from 'react';
 // import { RouteProps } from 'react-router';
 import { useIntl } from 'react-intl';
 
-import PrivateRoute from './pravateRoute';
+import PrivateRoute from './privateRoute';
 
 export interface WrapperRouteProps {
   /** document title locale id */

@@ -50,8 +50,9 @@ export default defineConfig({
       less: {
         javascriptEnabled: true, //注意，这一句是在less对象中，写在外边不起作用
         modifyVars: {
-          //在这里进行主题的修改，参考官方配置属性
-          // '@primary-color': '#1DA57A'
+          '@primary-color': '#0D53DE',
+          '@primary-color-hover': '#3477EB',
+          '@primary-color-active': '#0238B8',
         },
       },
     },
