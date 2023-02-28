@@ -64,6 +64,9 @@ const RightSiderbar: React.FC<IProps> = (props) => {
 
   // 更新pre 标注结果
   const updateCanvasView = (newLabelResult: any) => {
+    if (currentToolName === EToolName.PointCloud) {
+      return;
+    }
     const prevResult: PrevResult[] = [];
     for (let oneTool of toolList) {
       if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
