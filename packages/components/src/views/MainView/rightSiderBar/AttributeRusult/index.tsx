@@ -310,7 +310,6 @@ const AttributeRusult: FC<IProps> = ({
             } else if (item.id) {
               deleteBoxArray.push(item.id);
             }
-
             return res;
           },
           [],
