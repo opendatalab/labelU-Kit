@@ -7,10 +7,12 @@ import {
   ECuboidPlain,
   ECuboidPosition,
   EDragTarget,
+  ECuboidDirection,
 } from '@/constant/annotation';
 import { ICuboid, ICuboidPosition, IPlanePoints } from '@/types/tool/cuboid';
 import Vector from '../VectorUtils';
 import LineToolUtils from './LineToolUtils';
+import AxisUtils from '@/utils/tool/AxisUtils';
 
 /**
  * Get the basicInfo of cuboid-frontPoints.
@@ -778,5 +780,57 @@ export function getCuboidDragMove({
       console.error('No DragTarget');
       break;
     }
+  }
+}
+
+/**
+ * Get the points of the corresponding faces by direction
+ * @param cuboid
+ * @returns
+ */
+export function getPointListsByDirection({
+  direction,
+  frontPoints,
+  backPoints,
+}: {
+  direction: ECuboidDirection;
+  frontPoints: IPlanePoints;
+  backPoints: IPlanePoints;
+}) {
+  if (direction && frontPoints && backPoints) {
+    let points: IPlanePoints = frontPoints;
+    switch (direction) {
+      case ECuboidDirection.Back:
+        points = backPoints;
+        break;
+      case ECuboidDirection.Left:
+        points = {
+          bl: backPoints.bl,
+          br: frontPoints.bl,
+          tl: backPoints.tl,
+          tr: frontPoints.tl,
+        };
+        break;
+      case ECuboidDirection.Right:
+        points = {
+          bl: backPoints.br,
+          br: frontPoints.br,
+          tl: backPoints.tr,
+          tr: frontPoints.tr,
+        };
+        break;
+      case ECuboidDirection.Top:
+        points = {
+          bl: backPoints.tl,
+          br: frontPoints.tl,
+          tl: backPoints.tr,
+          tr: frontPoints.tr,
+        };
+        break;
+      default:
+        points = frontPoints;
+        break;
+    }
+    return AxisUtils.transformPlain2PointList(points);
   }
 }

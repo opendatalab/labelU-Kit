@@ -7,7 +7,7 @@ import cuboidTop from '@/assets/attributeIcon/icon_cuboidTop.svg';
 
 interface IBaseInfo {
   cuboidButtonMove: (type: 'in' | 'out') => void;
-  toggleGlossySide: (direction: ECuboidDirection) => void;
+  toggleDirection: (direction: ECuboidDirection) => void;
 }
 
 interface ITextAttributeProps {
@@ -46,15 +46,15 @@ export default class CuboidToggleButtonClass {
 
   private cuboidButtonMove: (type: 'in' | 'out') => void;
 
-  private onToggleGlossySide: (direction: ECuboidDirection) => void;
+  private onToggleDirection: (direction: ECuboidDirection) => void;
 
   constructor(props: ITextAttributeProps & IBaseInfo) {
-    const { container, cuboidButtonMove, toggleGlossySide } = props;
+    const { container, cuboidButtonMove, toggleDirection } = props;
     this.container = container;
     this.direction = ECuboidDirection.Front;
     this.isFrontSide = true;
     this.cuboidButtonMove = cuboidButtonMove;
-    this.onToggleGlossySide = toggleGlossySide;
+    this.onToggleDirection = toggleDirection;
     this._cuboidButtonDOM = this.initCuboidButtonDOM();
     this._cuboidFABDOM = this.initcuboidFABDOM(cuboidFAB);
     this._cuboidMoreDOM = this.initcuboidMoreDOM(cuboidMore);
@@ -76,7 +76,7 @@ export default class CuboidToggleButtonClass {
 
   public initCuboidButtonDOM() {
     const _cuboidButtonDOM = document.createElement('div'); // Top floor
-    _cuboidButtonDOM.setAttribute('id', 'box');
+    _cuboidButtonDOM.setAttribute('id', 'LABELBEE_CUBOID_BUTTON_BOX');
     _cuboidButtonDOM.setAttribute(
       'style',
       `
@@ -105,13 +105,13 @@ export default class CuboidToggleButtonClass {
   // Switching forward and back
   public initcuboidFABDOM(icon: any) {
     const _cuboidFAB = document.createElement('div');
-    _cuboidFAB.setAttribute('id', 'iconFAB');
+    _cuboidFAB.setAttribute('id', 'CUBOID_FORWARD_AND_BACK_SWITCH');
     _cuboidFAB.innerHTML = icon;
     _cuboidFAB.addEventListener('mouseup', (e: MouseEvent) => {
       e.stopPropagation();
       this.isFrontSide = !this.isFrontSide;
       this.direction = this.isFrontSide ? ECuboidDirection.Front : ECuboidDirection.Back;
-      this.onToggleGlossySide(this.direction);
+      this.onToggleDirection(this.direction);
     });
     return _cuboidFAB;
   }
@@ -119,7 +119,7 @@ export default class CuboidToggleButtonClass {
   // More
   public initcuboidMoreDOM(icon: any) {
     const _iconDOM = document.createElement('div');
-    _iconDOM.setAttribute('id', 'cuboidMore');
+    _iconDOM.setAttribute('id', 'CUBOID_MORE_ICON');
     _iconDOM.innerHTML = icon;
     _iconDOM.addEventListener('mouseup', (e: MouseEvent) => {
       if (this._cuboidButtonDOM && this._cuboidMoreListDOM) {
@@ -143,7 +143,7 @@ export default class CuboidToggleButtonClass {
   // View more icons
   public initcuboidMoreListDOM() {
     const cuboidMoreListDOM = document.createElement('div');
-    cuboidMoreListDOM.setAttribute('id', 'more');
+    cuboidMoreListDOM.setAttribute('id', 'CUBOID_MORE_LIST_ICON');
     cuboidMoreListDOM.setAttribute(
       'style',
       `
@@ -173,13 +173,13 @@ export default class CuboidToggleButtonClass {
         e.stopPropagation();
         switch (item?.id) {
           case 'cuboidLeft':
-            this.onToggleGlossySide(ECuboidDirection.Left);
+            this.onToggleDirection(ECuboidDirection.Left);
             break;
           case 'cuboidRight':
-            this.onToggleGlossySide(ECuboidDirection.Right);
+            this.onToggleDirection(ECuboidDirection.Right);
             break;
           case 'cuboidTop':
-            this.onToggleGlossySide(ECuboidDirection.Top);
+            this.onToggleDirection(ECuboidDirection.Top);
             break;
           default:
             break;

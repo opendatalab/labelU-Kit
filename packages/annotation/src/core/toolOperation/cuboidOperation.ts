@@ -9,10 +9,11 @@ import {
   getCuboidHoverRange,
   getCuboidAllSideLine,
   getHighlightPoints,
+  getPointListsByDirection,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
-import { ICuboid, ICuboidPosition, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
+import { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
 import MarkerUtils from '@/utils/tool/MarkerUtils';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import CuboidToggleButtonClass from './cuboidToggleButtonClass';
@@ -483,7 +484,7 @@ class CuboidOperation extends BasicToolOperation {
 
     const pointList = AxisUtils.transformPlain2PointList(frontPoints);
     if (direction && backPoints && frontPoints) {
-      const points = this.getPointListsByDirection(direction, frontPoints, backPoints);
+      const points = getPointListsByDirection({ direction, frontPoints, backPoints });
       if (points) {
         DrawUtils.drawPolygonWithFill(this.canvas, points, { color: toolColor.valid.fill });
       }
@@ -575,8 +576,7 @@ class CuboidOperation extends BasicToolOperation {
     }
     const { frontPoints, attribute, valid } = selectedCuboid;
 
-    const { x } = frontPoints.bl;
-    const { y } = frontPoints.bl;
+    const { x, y } = frontPoints.bl;
 
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
@@ -588,7 +588,7 @@ class CuboidOperation extends BasicToolOperation {
       this.toggleButtonInstance = new CuboidToggleButtonClass({
         container: this.container,
         cuboidButtonMove: (type: 'in' | 'out') => this.updateMouseOperation(type),
-        toggleGlossySide: (direction: ECuboidDirection) => this.toggleGlossySide(direction),
+        toggleDirection: (direction: ECuboidDirection) => this.toggleDirection(direction),
       });
     }
 
@@ -636,50 +636,10 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   // Switching glossy surfaces
-  public toggleGlossySide(direction: ECuboidDirection) {
+  public toggleDirection(direction: ECuboidDirection) {
     if (this.cuboidList && this.selectedCuboid) {
       this.cuboidList = this.cuboidList.map((i) => (i.id === this.selectedCuboid?.id ? { ...i, direction } : i));
       this.render();
-    }
-  }
-
-  // Get the points of the corresponding faces by direction
-  public getPointListsByDirection(direction: ECuboidDirection, frontPoints: IPlanePoints, backPoints: IPlanePoints) {
-    if (direction && frontPoints && backPoints) {
-      let points: IPlanePoints = frontPoints;
-      switch (direction) {
-        case ECuboidDirection.Back:
-          points = backPoints;
-          break;
-        case ECuboidDirection.Left:
-          points = {
-            bl: backPoints.bl,
-            br: frontPoints.bl,
-            tl: backPoints.tl,
-            tr: frontPoints.tl,
-          };
-          break;
-        case ECuboidDirection.Right:
-          points = {
-            bl: backPoints.br,
-            br: frontPoints.br,
-            tl: backPoints.tr,
-            tr: frontPoints.tr,
-          };
-          break;
-        case ECuboidDirection.Top:
-          points = {
-            bl: backPoints.tl,
-            br: frontPoints.tl,
-            tl: backPoints.tr,
-            tr: frontPoints.tr,
-          };
-          break;
-        default:
-          points = frontPoints;
-          break;
-      }
-      return AxisUtils.transformPlain2PointList(points);
     }
   }
 
