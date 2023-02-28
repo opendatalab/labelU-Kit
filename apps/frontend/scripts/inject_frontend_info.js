@@ -18,6 +18,7 @@ async function main() {
   if (nextVersion) {
     appPkgJson.version = nextVersion;
     fs.writeFileSync(path.join(__dirname, '../package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
+    console.log('update package.json version success!');
   }
 
   console.log('next version is', nextVersion);
