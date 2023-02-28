@@ -28,6 +28,7 @@ import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
+const BOUND_DISTANCE = 5;
 
 export type IPolygonOperationProps = IBasicToolOperationProps;
 
@@ -71,6 +72,8 @@ class PolygonOperation extends BasicToolOperation {
   public _textAttributInstance?: TextAttributeClass;
 
   public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
+
+  protected isUncheckedApproachBoundary = false;
 
   constructor(props: IPolygonOperationProps) {
     super(props);
@@ -154,6 +157,10 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     this.pattern = pattern;
+  }
+
+  public setIsUncheckedApproachBoundary(isUncheckedApproachBoundary: boolean) {
+    this.isUncheckedApproachBoundary = isUncheckedApproachBoundary;
   }
 
   /**
@@ -1143,6 +1150,28 @@ class PolygonOperation extends BasicToolOperation {
     return false;
   }
 
+  public getEventPointInCanvas(e: MouseEvent) {
+    const canvasBundInfo = this.container.getBoundingClientRect();
+    return {
+      x: e.clientX - canvasBundInfo.left,
+      y: e.clientY - canvasBundInfo.top,
+    };
+  }
+
+  public isApproachBund(e: MouseEvent) {
+    const canvasBundInfo = this.container.getBoundingClientRect();
+    const pointOnCanvas = this.getEventPointInCanvas(e);
+    if (
+      pointOnCanvas.x <= BOUND_DISTANCE ||
+      canvasBundInfo.width - pointOnCanvas.x <= BOUND_DISTANCE ||
+      canvasBundInfo.height - pointOnCanvas.y <= BOUND_DISTANCE ||
+      pointOnCanvas.y <= BOUND_DISTANCE
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   public onDragMove(e: MouseEvent) {
     if (!this.dragInfo || !this.selectedID) {
       return;
@@ -1259,9 +1288,14 @@ class PolygonOperation extends BasicToolOperation {
 
     this.setPolygonList(newPolygonList);
     this.render();
+
+    if (this.isApproachBund(e) && this.isUncheckedApproachBoundary) {
+      this.onMouseUp(e);
+    }
   }
 
   public onMouseMove(e: MouseEvent) {
+    e.preventDefault();
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
@@ -1273,7 +1307,6 @@ class PolygonOperation extends BasicToolOperation {
 
     let hoverPointIndex = -1;
     let hoverEdgeIndex = -1;
-
     const { selectedID } = this;
     if (selectedID) {
       this.hoverEdgeIndex = -1;
@@ -1644,7 +1677,7 @@ class PolygonOperation extends BasicToolOperation {
     // 6. 编辑中高亮的边
     if (this.hoverEdgeIndex > -1 && this.selectedID) {
       const selectdPolygon = this.selectedPolygon;
-      if (!selectdPolygon) {
+      if (!selectdPolygon?.pointList) {
         return;
       }
       const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });

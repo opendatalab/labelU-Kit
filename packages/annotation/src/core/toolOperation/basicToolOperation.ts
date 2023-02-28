@@ -59,7 +59,7 @@ interface IReferenceData {
 }
 
 // zoom 的限制
-const zoomInfo = {
+export const zoomInfo = {
   min: 0.2,
   max: 1000,
   ratio: 0.4,
@@ -897,6 +897,7 @@ class BasicToolOperation extends EventListener {
   }
 
   public onMouseMove(e: MouseEvent): boolean | void {
+    e.preventDefault();
     if (!this.canvas || this.isImgError) {
       return true;
     }

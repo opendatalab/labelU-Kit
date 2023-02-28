@@ -3,10 +3,10 @@ import { PointCloudUtils } from '@label-u/utils';
 import { EPolygonPattern } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import type { IPolygonData } from '@/types/tool/polygon';
+import type { ToolConfig } from '@/interface/conbineTool';
 import { PointCloud } from '.';
 import type { IPointCloud2dOperationProps } from '../toolOperation/pointCloud2dOperation';
 import PointCloud2dOperation from '../toolOperation/pointCloud2dOperation';
-import type { ToolConfig } from '@/interface/conbineTool';
 
 interface IPointCloudAnnotationOperation {
   updateData: (pcdPath: string, result: string) => void;
@@ -88,6 +88,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     polygonOperation.eventBinding();
     polygonOperation.setPattern(EPolygonPattern.Rect);
     polygonOperation.setIsEnableDrag(false);
+    polygonOperation.setIsUncheckedApproachBoundary(true);
     canvasScheduler.createCanvas(polygonOperation.canvas, { size });
 
     // // 3. Data record

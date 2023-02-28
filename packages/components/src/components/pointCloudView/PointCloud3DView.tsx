@@ -96,7 +96,7 @@ const PointCloud3D: React.FC<
   const [content, setContent] = useState<ReactElement>(<div />);
   const ptCtx = useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
-  const { initPointCloud3d } = usePointCloudViews();
+  const { initPointCloud3d, unSetSelectId } = usePointCloudViews();
   const size = useSize(ref);
   const pointCloudViews = usePointCloudViews();
   const toolStyle = useSelector((state: AppState) => {
@@ -282,12 +282,16 @@ const PointCloud3D: React.FC<
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
-        pointCloud.loadPCDFile(currentData.url);
         ids.forEach((id: string) => {
+          if (unSetSelectId) {
+            unSetSelectId(id);
+          }
+
           pointCloud?.clearBoxInSceneById(id);
         });
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
+        pointCloud?.updatePointCloudByAttributes(currentData.url, boxParamsList);
       }
 
       ptCtx.setMainViewInstance(pointCloud);

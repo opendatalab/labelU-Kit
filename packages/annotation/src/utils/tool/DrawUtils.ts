@@ -1,5 +1,5 @@
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
-import { IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonPoint } from '../../types/tool/polygon';
 import PolygonUtils from './PolygonUtils';
 import UnitUtils from './UnitUtils';
 
@@ -95,14 +95,22 @@ export default class DrawUtils {
       color: string;
       thickness: number;
       lineCap: CanvasLineCap;
-      isShowOrder?:boolean;
-      order?:number;
+      isShowOrder?: boolean;
+      order?: number;
       hiddenText: boolean;
       lineDash: number[];
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-    const { color = DEFAULT_COLOR, thickness = 1, lineCap = 'round', hiddenText = false, lineDash,isShowOrder,order } = options;
+    const {
+      color = DEFAULT_COLOR,
+      thickness = 1,
+      lineCap = 'round',
+      hiddenText = false,
+      lineDash,
+      isShowOrder,
+      order,
+    } = options;
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = thickness;
@@ -119,8 +127,8 @@ export default class DrawUtils {
       if (rect.attribute) {
         showText = `${showText}  ${rect.attribute}`;
       }
-      if(isShowOrder){
-        showText = `${order}${showText}`
+      if (isShowOrder) {
+        showText = `${order}${showText}`;
       }
       this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
       // if (rect.textAttribute) {
@@ -262,7 +270,9 @@ export default class DrawUtils {
       pointList = [...pointList, pointList[0]];
       pointList = pointList.slice(hoverEdgeIndex, hoverEdgeIndex + 2);
     }
-
+    if (!Array.isArray(pointList) || (Array.isArray(pointList) && pointList.length < 2)) {
+      return;
+    }
     const specialEdgeList = [];
     ctx.beginPath();
     ctx.moveTo(pointList[0].x, pointList[0].y);
