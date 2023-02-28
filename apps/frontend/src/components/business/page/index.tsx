@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import type { ColumnsType } from 'antd/lib/table/interface';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 
@@ -20,7 +20,7 @@ interface SearchApi {
 
 type ParseDataType<S> = S extends (params?: any) => MyResponse<PageData<infer T>> ? T : S;
 
-const styles = css`
+const BasePageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   .tabs-main {
@@ -147,7 +147,7 @@ const BasePage = <S extends SearchApi>(props: PageProps<S>, ref: React.Ref<RefPa
 
   return (
     // eslint-disable-next-line react/no-unknown-property
-    <div css={styles}>
+    <BasePageWrapper>
       {tabsData && <MyTabs className="tabs" options={tabsData} defaultValue={tabsData[0].value || tabsValue} />}
       <div className="tabs-main">
         {asideData && (
@@ -186,7 +186,7 @@ const BasePage = <S extends SearchApi>(props: PageProps<S>, ref: React.Ref<RefPa
           )}
         </div>
       </div>
-    </div>
+    </BasePageWrapper>
   );
 };
 

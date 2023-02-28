@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import type { TabPaneProps, TabsProps } from 'antd';
 import { Tabs } from 'antd';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 
 const { TabPane } = Tabs;
 
@@ -14,7 +14,7 @@ export interface MyTabsProps extends TabsProps {
   options: MyTabsOption[];
 }
 
-const styles = css`
+const TabsWrapper = styled(Tabs)`
   background-color: #fff;
   padding: 0 20px;
   box-shadow: 0 10px 10px -10px rgb(0 0 0 / 10%);
@@ -33,9 +33,9 @@ const styles = css`
 const BaseTabs: FC<MyTabsProps> = (props) => {
   const { options, children, ...rest } = props;
   return (
-    <Tabs {...rest} css={styles}>
+    <TabsWrapper {...rest}>
       {options ? options.map((option) => <TabPane {...option} tab={option.label} key={option.value} />) : children}
-    </Tabs>
+    </TabsWrapper>
   );
 };
 

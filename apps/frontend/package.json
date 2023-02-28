@@ -4,8 +4,6 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@emotion/core": "^11.0.0",
-    "@emotion/react": "^11.5.0",
     "@label-u/annotation": "1.0.0-alpha.15",
     "@label-u/components": "1.0.0-alpha.21",
     "@reduxjs/toolkit": "^1.4.0",
@@ -88,8 +86,6 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.16.0",
-    "@emotion/babel-plugin": "^11.3.0",
-    "@emotion/babel-preset-css-prop": "^11.2.0",
     "@octokit/rest": "^19.0.7",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/exec": "^6.0.3",
