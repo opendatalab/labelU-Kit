@@ -242,7 +242,7 @@ class CuboidOperation extends BasicToolOperation {
             this.closeNewDrawingFrontPlane();
             break;
           case EDrawingStatus.Cuboid:
-            this.closeCuboid();
+            this.closeAndCreateNewCuboid();
             break;
 
           default: {
@@ -441,18 +441,30 @@ class CuboidOperation extends BasicToolOperation {
     this.drawingStatus = EDrawingStatus.Cuboid;
   }
 
-  public closeCuboid() {
+  public closeAndCreateNewCuboid() {
     this.cuboidList.push(this.drawingCuboid as ICuboid);
     this.selectedID = this.drawingCuboid?.id ?? '';
-    this.drawingCuboid = undefined;
-    this.drawingStatus = EDrawingStatus.Ready;
+    this.clearDrawingStatus();
     this.render();
+  }
+
+  public clearDrawingStatus() {
+    if (this.drawingCuboid) {
+      this.drawingCuboid = undefined;
+      this.drawingStatus = EDrawingStatus.Ready;
+    }
   }
 
   public rightMouseUp(e: MouseEvent) {
     // 1. Selected
     const hoverID = this.getHoverID(e);
     this.selectedID = hoverID;
+
+    // 2. If it is in drawing, the drawing status needs to be clear.
+    if (this.drawingCuboid) {
+      this.clearDrawingStatus();
+    }
+
     this.render();
   }
 
