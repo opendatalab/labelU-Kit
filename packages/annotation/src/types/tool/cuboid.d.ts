@@ -1,4 +1,6 @@
-import { ECuboidDirection, ECuboidPlain, ECuboidPosition } from '@/constant/annotation';
+import type { ECuboidDirection, ECuboidPlain, ECuboidPosition } from '@/constant/annotation';
+
+import type { ICoordinate } from './common';
 
 declare interface IPlanePoints {
   bl: ICoordinate; // Bottom Left Point;

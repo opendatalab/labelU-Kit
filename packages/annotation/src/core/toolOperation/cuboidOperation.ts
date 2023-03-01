@@ -1,6 +1,4 @@
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
-import DrawUtils from '../../utils/tool/DrawUtils';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import uuid from '@/utils/uuid';
 import {
@@ -13,12 +11,16 @@ import {
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
-import { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
-import MarkerUtils from '@/utils/tool/MarkerUtils';
+import type { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
+import type { ICoordinate } from '@/types/tool/common';
+
+import BasicToolOperation from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import DrawUtils from '../../utils/tool/DrawUtils';
 import CuboidToggleButtonClass from './cuboidToggleButtonClass';
 
-interface ICuboidOperationProps extends IBasicToolOperationProps {}
+type ICuboidOperationProps = IBasicToolOperationProps;
 
 enum EDrawingStatus {
   Ready = 1,
@@ -51,12 +53,12 @@ class CuboidOperation extends BasicToolOperation {
   };
 
   // For effects when hover is highlighted.
-  private highlightInfo?: Array<{
+  private highlightInfo?: {
     type: string;
     points: ICoordinate[];
     originCuboid: ICuboid;
     positions: ICuboidPosition[];
-  }>;
+  }[];
 
   public constructor(props: ICuboidOperationProps) {
     super(props);
@@ -518,10 +520,6 @@ class CuboidOperation extends BasicToolOperation {
     let showText = '';
     if (this.isShowOrder && transformCuboid.order && transformCuboid?.order > 0) {
       showText = `${transformCuboid.order}`;
-    }
-    if (transformCuboid?.label && this.hasMarkerConfig) {
-      const order = CommonToolUtils.getAllToolsMaxOrder(this.cuboidList, this.prevResultList);
-      showText = `${order}_${MarkerUtils.getMarkerShowText(transformCuboid?.label, this.config.markerList)}`;
     }
 
     if (transformCuboid.attribute) {

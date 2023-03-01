@@ -1,4 +1,5 @@
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
+
 import {
   CUBOID_COLUMN,
   CUBOID_ROW,
@@ -9,10 +10,12 @@ import {
   EDragTarget,
   ECuboidDirection,
 } from '@/constant/annotation';
-import { ICuboid, ICuboidPosition, IPlanePoints } from '@/types/tool/cuboid';
+import type { ICuboid, ICuboidPosition, IPlanePoints } from '@/types/tool/cuboid';
+import AxisUtils from '@/utils/tool/AxisUtils';
+import type { ICoordinate } from '@/types/tool/common';
+
 import Vector from '../VectorUtils';
 import LineToolUtils from './LineToolUtils';
-import AxisUtils from '@/utils/tool/AxisUtils';
 
 /**
  * Get the basicInfo of cuboid-frontPoints.
@@ -496,7 +499,7 @@ export function getHighlightLines(cuboid: ICuboid) {
  * @param cuboid
  * @returns
  */
-export function getHighlightPoints(cuboid: ICuboid): Array<{ point: ICoordinate; positions: ICuboidPosition[] }> {
+export function getHighlightPoints(cuboid: ICuboid): { point: ICoordinate; positions: ICuboidPosition[] }[] {
   const { backPoints } = cuboid;
   const { isLeftSide } = getCuboidBasicInfo(cuboid);
 
@@ -508,7 +511,7 @@ export function getHighlightPoints(cuboid: ICuboid): Array<{ point: ICoordinate;
       },
     ],
     point,
-  })) as Array<{ point: ICoordinate; positions: ICuboidPosition[] }>;
+  })) as { point: ICoordinate; positions: ICuboidPosition[] }[];
 
   if (isLeftSide) {
     return [
@@ -607,16 +610,17 @@ export function getNewPointsAfterOffset({
     const lineDirection = judgeCuboidLineIsRowOrColumn([positions[0], positions[1]]);
     const forbidX = lineDirection === ECuboidLineDirection.Row;
     const forbidY = lineDirection === ECuboidLineDirection.Column;
+    let newOffset = offset;
 
     // Allows movement only in vertical direction of the line.
     if (forbidX) {
-      offset = {
+      newOffset = {
         x: 0,
         y: offset.y,
       };
     }
     if (forbidY) {
-      offset = {
+      newOffset = {
         y: 0,
         x: offset.x,
       };
@@ -629,8 +633,8 @@ export function getNewPointsAfterOffset({
 
         const movePoint = points[position];
         points[position] = {
-          x: movePoint.x + offset.x,
-          y: movePoint.y + offset.y,
+          x: movePoint.x + newOffset.x,
+          y: movePoint.y + newOffset.y,
         };
       });
       newFrontPoints = getMaxExternalQuadrilateral(newFrontPoints);
@@ -643,9 +647,9 @@ export function getNewPointsAfterOffset({
         //@ts-ignore
         newBackPoints[key] = {
           //@ts-ignore
-          x: newBackPoints[key].x + offset.x,
+          x: newBackPoints[key].x + newOffset.x,
           //@ts-ignore
-          y: newBackPoints[key].y + offset.y,
+          y: newBackPoints[key].y + newOffset.y,
         };
       });
     }
