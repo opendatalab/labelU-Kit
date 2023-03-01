@@ -176,11 +176,20 @@ export default class AxisUtils {
     return axisArray;
   }
 
-  public static isPointInsect(point: ICoordinate, points: [ICoordinate, ICoordinate]) {
-    const sLen = MathUtils.getLineLength(point, points[0]);
-    const eLen = MathUtils.getLineLength(point, points[1]);
-    const len = MathUtils.getLineLength(points[0], points[1]);
-    return Math.abs(sLen + eLen - len) <= 1;
+  public static isPointInsect(point: ICoordinate, points: ICoordinate[]) {
+    let p = 0;
+    let isInsect = false;
+    while (p < points.length - 1) {
+      const sLen = MathUtils.getLineLength(point, points[p]);
+      const eLen = MathUtils.getLineLength(point, points[p + 1]);
+      const len = MathUtils.getLineLength(points[p], points[p + 1]);
+      if (Math.abs(sLen + eLen - len) <= 1) {
+        isInsect = true;
+        break;
+      }
+      p++;
+    }
+    return isInsect;
   }
 
   /**

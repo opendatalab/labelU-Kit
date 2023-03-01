@@ -4,6 +4,9 @@
 
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import type { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
+import _ from 'lodash';
+import type { Vector2 } from 'three';
+import * as THREE from 'three';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
 import PolygonUtils from './tool/PolygonUtils';
 import Vector from './VectorUtils';
@@ -70,6 +73,17 @@ export default class MathUtils {
     const g = Math.floor(a * parseInt(values[1], 10) + (1 - a) * 255);
     const b = Math.floor(a * parseInt(values[2], 10) + (1 - a) * 255);
     return `0X${`0${r.toString(16)}`.slice(-2)}${`0${g.toString(16)}`.slice(-2)}${`0${b.toString(16)}`.slice(-2)}`;
+  }
+
+  public static getRotateVector(inputVector: Vector2, angle: number) {
+    if (!(inputVector.isVector2 && _.isNumber(angle))) {
+      return;
+    }
+    const rotationMatrix = new THREE.Matrix3();
+    rotationMatrix.set(Math.cos(angle), -Math.sin(angle), 0, Math.sin(angle), Math.cos(angle), 0, 0, 0, 1);
+    const computeVector = new THREE.Vector3(inputVector.x, inputVector.y, 1);
+    const resultVector3 = computeVector.applyMatrix3(rotationMatrix);
+    return resultVector3;
   }
 
   /**

@@ -8,6 +8,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
+import { Vector2 } from 'three';
 import { zoomInfo } from './basicToolOperation';
 import type { IPolygonOperationProps } from './polygonOperation';
 import PolygonOperation from './polygonOperation';
@@ -259,6 +260,47 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
+  public renderArrow(pointList: IPolygonPoint[], color: string) {
+    const sPoint = {
+      x: (pointList[2].x + pointList[3].x) / 2,
+      y: (pointList[2].y + pointList[3].y) / 2,
+    };
+
+    const vectorP = {
+      x: (pointList[2].x - pointList[1].x) / 6,
+      y: (pointList[2].y - pointList[1].y) / 6,
+    };
+    const arrowEndPoint = {
+      x: sPoint.x + vectorP.x * 1.3,
+      y: sPoint.y + vectorP.y * 1.3,
+    };
+    const sEnd = {
+      x: sPoint.x + vectorP.x,
+      y: sPoint.y + vectorP.y,
+    };
+
+    const inputVector = new Vector2(sEnd.x - sPoint.x, sEnd.y - sPoint.y).multiplyScalar(0.2);
+
+    const rotateVector = MathUtils.getRotateVector(inputVector, Math.PI * 0.5);
+    if (rotateVector?.isVector3) {
+      const rotatePoint = { x: sEnd.x + rotateVector.x, y: sEnd.y + rotateVector.y };
+      const backRotatePoint = { x: sEnd.x - rotateVector.x, y: sEnd.y - rotateVector.y };
+      const arrPointList = [sPoint, sEnd, rotatePoint, arrowEndPoint, backRotatePoint, sEnd];
+      this.setArrowPointList(arrPointList);
+      const thickness = this.isArrowHover ? 10 : 3;
+      DrawUtils.drawLineWithPointList(
+        this.canvas,
+        AxisUtils.changePointListByZoom(arrPointList, this.zoom, this.currentPos),
+        {
+          color,
+          thickness,
+          hoverEdgeIndex: this.hoverEdgeIndex,
+          lineType: this.config?.lineType,
+        },
+      );
+    }
+  }
+
   public renderPolygon() {
     if (this.rotatePointList && this.rotation) {
       DrawUtils.drawSelectedPolygonWithFillAndLine(
@@ -275,6 +317,7 @@ class PointCloud2dOperation extends PolygonOperation {
           lineType: this.config?.lineType,
         },
       );
+      this.renderArrow(this.rotatePointList, 'red');
     }
 
     // 3. 选中多边形的渲染
@@ -300,31 +343,7 @@ class PointCloud2dOperation extends PolygonOperation {
         );
 
         if (this.isShowArrow && selectdPolygon.isRect) {
-          const sPoint = {
-            x: (selectdPolygon.pointList[2].x + selectdPolygon.pointList[3].x) / 2,
-            y: (selectdPolygon.pointList[2].y + selectdPolygon.pointList[3].y) / 2,
-          };
-
-          const vectorP = {
-            x: (selectdPolygon.pointList[2].x - selectdPolygon.pointList[1].x) / 4,
-            y: (selectdPolygon.pointList[2].y - selectdPolygon.pointList[1].y) / 4,
-          };
-          const sEnd = {
-            x: sPoint.x + vectorP.x,
-            y: sPoint.y + vectorP.y,
-          };
-          this.setArrowPointList([sPoint, sEnd]);
-          const thickness = this.isArrowHover ? 20 : 3;
-          DrawUtils.drawLineWithPointList(
-            this.canvas,
-            AxisUtils.changePointListByZoom([sPoint, sEnd], this.zoom, this.currentPos),
-            {
-              color: toolData.stroke,
-              thickness,
-              hoverEdgeIndex: this.hoverEdgeIndex,
-              lineType: this.config?.lineType,
-            },
-          );
+          this.renderArrow(selectdPolygon.pointList, toolData.stroke);
         }
       }
     }
