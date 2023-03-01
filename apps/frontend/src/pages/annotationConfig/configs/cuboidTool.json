@@ -1,0 +1,25 @@
+{
+  "attribute": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "tools": [
+    {
+      "tool": "cuboidTool",
+      "config": {
+        "isShowCursor": false,
+        "showConfirm": false,
+        "skipWhileNoDependencies": false,
+        "drawOutsideTarget": false,
+        "copyBackwardResult": false,
+        "attributeConfigurable": true,
+        "textConfigurable": false,
+        "textCheckType": 4,
+        "customFormat": "",
+        "attributeList": [{ "key": "", "value": "" }]
+      }
+    }
+  ]
+}

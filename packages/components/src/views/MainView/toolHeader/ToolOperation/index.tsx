@@ -8,6 +8,7 @@ import { ReactComponent as LineASvg } from '@/assets/annotation/lineTool/icon_li
 import { ReactComponent as PointASvg } from '@/assets/annotation/pointTool/icon_point.svg';
 import { ReactComponent as IconPolygonPatternASvg } from '@/assets/annotation/polygonTool/icon_polygon.svg';
 import { ReactComponent as IconRectPatternSvg } from '@/assets/annotation/rectTool/icon_rectPattern.svg';
+import { ReactComponent as IconCuboidSvg } from '@/assets/annotation/cuboidTool/icon_cuboid_basic.svg';
 import type { AppState } from '@/store';
 import { EToolName } from '@/data/enums/ToolType';
 import ToolIcon from '@/components/ToolIcon';
@@ -27,8 +28,7 @@ export const toolList = [
   },
   {
     toolName: EToolName.Cuboid,
-    commonSvg: iconRectPatternSvg,
-    selectedSvg: sIconRectPatternSvg,
+    Icon: IconCuboidSvg,
   },
   {
     toolName: EToolName.Polygon,

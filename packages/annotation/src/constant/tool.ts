@@ -89,6 +89,7 @@ export const TOOL_NAME: Record<string, string> = {
   [EToolName.Text]: '文本描述',
   [EToolName.Polygon]: '多边形',
   [EToolName.Line]: '标线',
+  [EToolName.Cuboid]: '立体框',
   [EToolName.LineMarker]: '列表线条',
   [EToolName.FolderTag]: '文件夹标签',
   [EToolName.RectTrack]: '拉框跟踪',

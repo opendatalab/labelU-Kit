@@ -171,6 +171,7 @@ export default class CuboidToggleButtonClass {
     cuboidMoreListDOM.childNodes.forEach((item) => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
+        // @ts-ignore
         switch (item?.id) {
           case 'cuboidLeft':
             this.onToggleDirection(ECuboidDirection.Left);
