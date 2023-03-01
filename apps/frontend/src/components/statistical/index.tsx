@@ -1,46 +1,48 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router';
+import { useLoaderData, useNavigate } from 'react-router';
 import { Button, Modal } from 'antd';
 import { useDispatch } from 'react-redux';
+import _ from 'lodash-es';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
-import { getSamples, getTask, outputSamples } from '../../services/samples';
+import { getSamples, outputSamples } from '../../services/samples';
 import currentStyles1 from '../../pages/outputData/index.module.scss';
-import { updateTask, updateStatus } from '../../stores/task.store';
-import { updateAllConfig } from '../../stores/toolConfig.store';
+import { updateStatus } from '../../stores/task.store';
+// import { updateAllConfig } from '../../stores/toolConfig.store';
 const Statistical = () => {
   const dispatch = useDispatch();
-  const [statisticalDatas, setStatisticalDatas] = useState<any>({});
-  const taskId = parseInt(window.location.pathname.split('/')[2]);
-  const [taskStatus, setTaskStatus] = useState(undefined);
+  const taskData = useLoaderData();
+  const statisticalDatas = _.get(taskData, 'stats', {});
+  const taskStatus = _.get(taskData, 'status');
+  const taskId = _.get(taskData, 'id');
 
-  useEffect(() => {
-    getTask(taskId)
-      .then((res: any) => {
-        // @ts-ignore
-        if (res?.status === 200) {
-          // @ts-ignore
-          setStatisticalDatas(res.data.data.stats);
-          setTaskStatus(res.data.data.status);
-          // @ts-ignore
-          dispatch(updateTask({ data: res.data.data }));
-          dispatch(updateStatus(res.data.data.status));
-          if (res.data.data.config) {
-            dispatch(updateAllConfig(JSON.parse(res.data.data.config)));
-          }
-        } else {
-          commonController.notificationErrorMessage({ message: '请求任务数据出错' }, 1);
-        }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
-  }, [dispatch, taskId]);
+  // useEffect(() => {
+  //   getTask(taskId)
+  //     .then((res: any) => {
+  //       // @ts-ignore
+  //       if (res?.status === 200) {
+  //         // @ts-ignore
+  //         setStatisticalDatas(res.data.data.stats);
+  //         setTaskStatus(res.data.data.status);
+  //         // @ts-ignore
+  //         dispatch(updateTask({ data: res.data.data }));
+  //         dispatch(updateStatus(res.data.data.status));
+  //         if (res.data.data.config) {
+  //           dispatch(updateAllConfig(JSON.parse(res.data.data.config)));
+  //         }
+  //       } else {
+  //         commonController.notificationErrorMessage({ message: '请求任务数据出错' }, 1);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       commonController.notificationErrorMessage(error, 1);
+  //     });
+  // }, [dispatch, taskId]);
   const navigate = useNavigate();
   const getSamplesLocal = (params: any) => {
-    getSamples(taskId, params)
+    getSamples(taskId!, params)
       .then((res) => {
         if (res.status === 200 && res.data.data.length > 0) {
           const sampleId = res.data.data[0].id;
@@ -86,7 +88,7 @@ const Statistical = () => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal(false);
-    outputSamples(taskId, activeTxt).catch((error) => {
+    outputSamples(taskId!, activeTxt).catch((error) => {
       commonController.notificationErrorMessage(error, 1);
     });
   };

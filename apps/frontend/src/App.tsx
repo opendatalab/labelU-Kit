@@ -10,9 +10,9 @@ import 'moment/locale/zh-cn';
 
 import enUS1 from './locales/en-US';
 import zhCN1 from './locales/zh-CN';
-import RenderRouter from './routes';
-import { history, HistoryRouter } from './routes/history';
 import { localeConfig } from './locales';
+import Router from './router';
+
 const App: React.FC = () => {
   // @ts-ignore
   const { locale } = useSelector((state) => state.user);
@@ -63,9 +63,7 @@ const App: React.FC = () => {
     <ConfigProvider locale={getAntdLocale()} componentSize="middle">
       {/* @ts-ignore */}
       <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
-        <HistoryRouter history={history}>
-          <RenderRouter />
-        </HistoryRouter>
+        <Router />
       </IntlProvider>
     </ConfigProvider>
   );

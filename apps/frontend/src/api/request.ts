@@ -1,7 +1,6 @@
 import { message as $message } from 'antd';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-// import { history } from 'routes/history';
 
 const axiosInstance = axios.create({
   timeout: 6000,

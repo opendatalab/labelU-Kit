@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
 import { Table, Pagination, Modal } from 'antd';
+import _ from 'lodash-es';
 import moment from 'moment';
 
 import { setSamples } from '@/stores/sample.store';
@@ -10,16 +11,18 @@ import currentStyles from './index.module.scss';
 import Statistical from '../../components/statistical';
 import GoToEditTask from '../goToEditTask';
 import commonController from '../../utils/common/common';
-import { getTask, getSamples, deleteSamples, outputSample } from '../../services/samples';
+import { getSamples, deleteSamples, outputSample } from '../../services/samples';
 import statisticalStyles from '../../components/statistical/index.module.scss';
 import currentStyles1 from '../outputData/index.module.scss';
-const Samples = () => {
-  const taskId = parseInt(window.location.pathname.split('/')[2]);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
+const Samples = () => {
+  const navigate = useNavigate();
+  const taskData = useLoaderData();
+  const dispatch = useDispatch();
+  const taskId = _.get(taskData, 'id');
+
+  const taskStatus = _.get(taskData, 'status');
   const [isModalShow, setIsModalShow] = useState(false);
-  const [taskStatus, setTaskStatus] = useState<any>(undefined);
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [deleteSampleIds, setDeleteSampleIds] = useState<any>([]);
   const [showDatas, setShowDatas] = useState<any[]>([]);
@@ -37,23 +40,26 @@ const Samples = () => {
     navigate(`/tasks/${taskId}/samples/${sampleId}`);
   };
 
-  const getSamplesLocal = (params: any) => {
-    getSamples(taskId, params)
-      .then((res) => {
-        if (res.status === 200) {
-          setShowDatas(res.data.data);
-          setTotal(res.data.meta_data.total);
-          setCurrentPage(params.pageNo + 1);
-          setCurrentPageSize(params.pageSize);
-          dispatch(setSamples(res.data.data));
-        } else {
-          commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
-        }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
-  };
+  const getSamplesLocal = useCallback(
+    (params: any) => {
+      getSamples(taskId!, params)
+        .then((res) => {
+          if (res.status === 200) {
+            setShowDatas(res.data.data);
+            setTotal(res.data.meta_data.total);
+            setCurrentPage(params.pageNo + 1);
+            setCurrentPageSize(params.pageSize);
+            dispatch(setSamples(res.data.data));
+          } else {
+            commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
+          }
+        })
+        .catch((error) => {
+          commonController.notificationErrorMessage(error, 1);
+        });
+    },
+    [dispatch, taskId],
+  );
 
   const columns: any = [
     {
@@ -203,7 +209,7 @@ const Samples = () => {
     },
   ];
   const clickModalOk = () => {
-    deleteSamples(taskId, deleteSampleIds)
+    deleteSamples(taskId!, deleteSampleIds)
       .then((res) => {
         if (res.status === 200) {
           commonController.notificationSuccessMessage({ message: '删除成功' }, 1);
@@ -236,33 +242,9 @@ const Samples = () => {
     selectedKeys: () => {},
   };
 
-  const getTaskLocal = () => {
-    getTask(taskId)
-      .then((res: any) => {
-        if (res.status === 200) {
-          const status = res.data.data.status;
-          setTaskStatus(status);
-        } else {
-          commonController.notificationErrorMessage({ message: '请求任务详情出错' }, 1);
-        }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
-  };
   useEffect(() => {
-    getTaskLocal();
-
     getSamplesLocal({ pageNo: 0, pageSize: 10 });
-
-    // setShowDatas([{
-    //   option : (<div className={ currentStyles.optionItem }>
-    //     <div className={ currentStyles.optionItemEnter } onClick={ ()=>turnToAnnotate() }>进入标注</div>
-    //     <div className={ currentStyles.optionItemDelete }>删除</div>
-    //   </div>)
-    // }])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getSamplesLocal]);
 
   const changePage = (page: number, pageSize: number) => {
     if (page === 0) {
@@ -307,7 +289,7 @@ const Samples = () => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal1(false);
-    outputSample(taskId, deleteSampleIds, activeTxt).catch((error) => {
+    outputSample(taskId!, deleteSampleIds, activeTxt).catch((error) => {
       commonController.notificationErrorMessage(error, 1);
     });
   };
@@ -351,8 +333,6 @@ const Samples = () => {
       <div className={currentStyles.stepsRow}>
         {(taskStatus === 'DRAFT' || taskStatus === 'IMPORTED') && <GoToEditTask taskStatus={taskStatus} />}
         {taskStatus !== 'DRAFT' && taskStatus !== 'IMPORTED' && <Statistical />}
-        {/*delete*/}
-        {/*{ <Statistical />}*/}
       </div>
       <div className={currentStyles.content}>
         <Table
