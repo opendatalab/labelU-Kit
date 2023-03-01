@@ -106,7 +106,9 @@ export default class CuboidToggleButtonClass {
   public initcuboidFABDOM(icon: any) {
     const _cuboidFAB = document.createElement('div');
     _cuboidFAB.setAttribute('id', 'CUBOID_FORWARD_AND_BACK_SWITCH');
-    _cuboidFAB.innerHTML = icon;
+    const img = document.createElement('img');
+    img.src = icon;
+    _cuboidFAB.appendChild(img);
     _cuboidFAB.addEventListener('mouseup', (e: MouseEvent) => {
       e.stopPropagation();
       this.isFrontSide = !this.isFrontSide;
@@ -120,7 +122,9 @@ export default class CuboidToggleButtonClass {
   public initcuboidMoreDOM(icon: any) {
     const _iconDOM = document.createElement('div');
     _iconDOM.setAttribute('id', 'CUBOID_MORE_ICON');
-    _iconDOM.innerHTML = icon;
+    const img = document.createElement('img');
+    img.src = icon;
+    _iconDOM.appendChild(img);
     _iconDOM.addEventListener('mouseup', (e: MouseEvent) => {
       if (this._cuboidButtonDOM && this._cuboidMoreListDOM) {
         if (this._cuboidButtonDOM.contains(this._cuboidMoreListDOM)) {
@@ -164,7 +168,7 @@ export default class CuboidToggleButtonClass {
     MORE_ICON_LISTS.forEach((i, index) => {
       // The last icon is a different width, so special treatment
       const lastIconStyle = index === MORE_ICON_LISTS.length - 1 ? 'margin-left:0px;margin-right:0px;' : '';
-      str += `<span id=${i.id} key=${index} style=${iconStyle}${lastIconStyle}>${i.icon}</span>`;
+      str += `<span id=${i.id} key=${index} style=${iconStyle}${lastIconStyle}><img src="${i.icon}" /></span>`;
     });
 
     cuboidMoreListDOM.innerHTML = str;
