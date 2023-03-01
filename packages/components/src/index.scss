@@ -290,6 +290,13 @@ body {
     justify-content: flex-start;
     .toolName {
       margin-left: 10px;
+      .resetAction {
+        color: #1b67ff;
+        margin-left: 10px;
+        &:hover {
+          cursor: pointer;
+        }
+      }
     }
   }
 }

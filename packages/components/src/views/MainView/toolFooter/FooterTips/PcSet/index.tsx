@@ -7,6 +7,7 @@ import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext
 import { useTranslation } from 'react-i18next';
 import Regex from '@/constant/regex';
 import closeIcon from '@/assets/common/close.svg';
+import { PcZRange } from '@label-u/annotation';
 
 interface Iprops {
   updatePopoverStatus: () => void;
@@ -43,6 +44,9 @@ const PcSet: FC<Iprops> = ({ updatePopoverStatus }) => {
       },
       {
         name: 'rangeHeight',
+        reset: () => {
+          pCtx.setZrange(PcZRange as [number, number]);
+        },
         min: -10,
         max: 30,
         step: 1,
@@ -106,13 +110,29 @@ const PcSet: FC<Iprops> = ({ updatePopoverStatus }) => {
           <Row className='tools' style={{ padding: '0px 0' }}>
             <Col span={24}>
               <span className='singleTool'>
-                <span className='toolName'>{t(info.name)}</span>
+                <span className='toolName'>
+                  {t(info.name)}
+                  {info.reset ? (
+                    <span
+                      className='resetAction'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        info.reset();
+                      }}
+                    >
+                      {t('reset')}
+                    </span>
+                  ) : (
+                    ''
+                  )}
+                </span>
               </span>
             </Col>
           </Row>
           <Row>
             <Col span={24}>
               <Slider
+                key={`${info.value[0]}:${info.value[1]}`}
                 range={info.range}
                 min={info.min}
                 max={info.max}

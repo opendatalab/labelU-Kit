@@ -173,7 +173,8 @@
     "TopLook": "Top view",
     "pointSize": "size of point",
     "rangeHeight": "range of height",
-    "labelRedius": "radius of label"
+    "labelRedius": "radius of label",
+    "reset": "reset"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -349,6 +350,7 @@
     "TopLook": "俯视视角",
     "pointSize": "点大小",
     "rangeHeight": "高度显示范围",
-    "labelRedius": "标注范围半径"
+    "labelRedius": "标注范围半径",
+    "reset": "重置"
   }
 }
