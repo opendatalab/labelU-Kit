@@ -293,6 +293,11 @@ body {
       .resetAction {
         color: #1b67ff;
         margin-left: 10px;
+        font-family: 'Abel';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 26px;
         &:hover {
           cursor: pointer;
         }
