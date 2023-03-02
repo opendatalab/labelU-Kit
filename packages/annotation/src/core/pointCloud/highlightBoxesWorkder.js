@@ -1,25 +1,25 @@
-class PointCloudUtils {
-  static genColorByCoord(x, y, z) {
-    if (z <= 0) {
-      return [128, 128, 128];
-    }
+// class PointCloudUtils {
+//   static genColorByCoord(x, y, z) {
+//     if (z <= 0) {
+//       return [128, 128, 128];
+//     }
 
-    if (z < 5) {
-      return [255, 0, 0];
-    }
+//     if (z < 5) {
+//       return [255, 0, 0];
+//     }
 
-    if (z < 10) {
-      return [0, 255, 0];
-    }
+//     if (z < 10) {
+//       return [0, 255, 0];
+//     }
 
-    return [0, 0, 255];
-  }
+//     return [0, 0, 255];
+//   }
 
-  static getStandardColorByCoord(x, y, z) {
-    const pdColor = this.genColorByCoord(x, y, z);
-    return pdColor.map((hex) => hex / 255);
-  }
-}
+//   static getStandardColorByCoord(x, y, z) {
+//     const pdColor = this.genColorByCoord(x, y, z);
+//     return pdColor.map((hex) => hex / 255);
+//   }
+// }
 
 export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
   let counter = 0;
@@ -73,7 +73,7 @@ onmessage = function onmessage(e) {
     for (let j = 0; j < rectList.length; j++) {
       const inPolygon = isInPolygon({ x, y }, rectList[j].rect);
       const [r, g, b] = rectList[j].inColorArr;
-      if (inPolygon && z >= rectList[j].zInfo.minZ && z <= rectList[j].zInfo.maxZ) {
+      if (inPolygon && z >= rectList[j].zInfo.minZ && z <= rectList[j].zInfo.maxZ && rectList[j].isVisible) {
         num++;
         color[i] = r;
         color[i + 1] = g;

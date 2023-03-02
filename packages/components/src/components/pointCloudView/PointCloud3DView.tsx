@@ -172,6 +172,7 @@ const PointCloud3D: React.FC<
       if (Array.isArray(boxList) && boxList.length > 0) {
         for (let box of boxList) {
           if (box.order === order) {
+            mainViewInstance.setSelectedId(box.id);
             mainViewInstance.emit('updateSelectedBox', box.id);
             break;
           }
@@ -328,6 +329,9 @@ const PointCloud3D: React.FC<
             pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id, v.textAttribute);
           } else {
             pointCloud?.clearBoxInSceneById(v.id);
+            if (unSetSelectId && v.id === ptCtx.mainViewInstance?.selectedId) {
+              unSetSelectId(v.id);
+            }
           }
         });
         ptCtx.setPointCloudResult(boxParamsList);
