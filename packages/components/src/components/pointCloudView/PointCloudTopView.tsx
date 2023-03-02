@@ -163,6 +163,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
           polygon,
           size,
           ptCtx.selectedPointCloudBox.attribute,
+          ptCtx.selectedPointCloudBox.textAttribute,
           ptCtx.selectedPointCloudBox.zInfo,
         );
       }

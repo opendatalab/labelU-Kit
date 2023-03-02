@@ -249,7 +249,13 @@ const PointCloud3D: React.FC<
         let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
         if (box) {
           ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
-          pointCloudViews.topViewAddBox(polygon, sizeTop, box.attribute, box.zInfo);
+          pointCloudViews.topViewAddBox(
+            polygon,
+            sizeTop,
+            box.attribute,
+            box.textAttribute,
+            box.zInfo,
+          );
           ptCtx.setSelectedIDs([selectedIDs]);
         }
       }

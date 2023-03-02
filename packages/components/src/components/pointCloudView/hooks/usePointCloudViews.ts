@@ -395,6 +395,7 @@ export const usePointCloudViews = () => {
     newPolygon: any,
     size: ISize,
     attribute: string,
+    textAttribute?: string,
     zInfo?: {
       maxZ: number;
       minZ: number;
@@ -402,6 +403,7 @@ export const usePointCloudViews = () => {
   ) => {
     let newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
       attribute: attribute,
+      textAttribute,
     });
     if (!newParams) {
       return;
