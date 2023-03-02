@@ -283,27 +283,6 @@ body {
     position: relative;
     width: 100%;
   }
-  .singleTool {
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    .toolName {
-      margin-left: 10px;
-      .resetAction {
-        color: #1b67ff;
-        margin-left: 10px;
-        font-family: 'Abel';
-        font-style: normal;
-        font-weight: 400;
-        font-size: 14px;
-        line-height: 26px;
-        &:hover {
-          cursor: pointer;
-        }
-      }
-    }
-  }
 }
 
 .#{$prefix}-footer {
@@ -553,8 +532,81 @@ body {
     }
   }
 }
-
 //
+
+#pcSettingPopover {
+  p {
+    height: 22px;
+    line-height: 22px;
+    margin-bottom: 0px;
+  }
+}
+
+// 图片和点云设置弹框
+.tool-set-modal {
+  height: 100%;
+  width: 280px;
+  background: #ffffff;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  text-align: left;
+  #popover-with-slider {
+    .pcSettingItem {
+      font-family: 'Abel';
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 26px;
+      .tools {
+        margin-bottom: 8px;
+        margin-top: 16px;
+      }
+      .singleTool {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        .toolName {
+          height: 26px;
+          line-height: 26px;
+          .resetAction {
+            color: #1b67ff;
+            margin-left: 10px;
+            font-family: 'Abel';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 26px;
+            &:hover {
+              cursor: pointer;
+            }
+          }
+        }
+        .noticeImg {
+          height: 12px;
+          width: 12px;
+          margin-left: 8px;
+          &:hover {
+            cursor: pointer;
+          }
+        }
+      }
+      .ant-slider-handle {
+        border: 2px solid #1b67ff;
+      }
+      .ant-slider-mark-text {
+        overflow: visible;
+      }
+      .ant-slider-track {
+        background-color: #1b67ff;
+      }
+    }
+  }
+}
 
 .#{$prefix}-sidebar {
   height: 100%;
