@@ -838,3 +838,50 @@ export function getPointListsByDirection({
     return AxisUtils.transformPlain2PointList(points);
   }
 }
+
+/**
+ * Get the offset of toggleDirection Dom.
+ *
+ * Calculation
+ * 1. FrontPoints left centerPoints.
+ * 2. Offset the size of toggleDom.
+ * @param param0
+ * @returns
+ */
+export function getToggleDirectionButtonOffset({
+  cuboid,
+  currentPos,
+  zoom,
+}: {
+  cuboid: ICuboid;
+  currentPos: ICoordinate;
+  zoom: number;
+}) {
+  const { frontPoints } = cuboid;
+
+  const toggleSize = {
+    width: 40,
+    height: 74,
+  };
+
+  const frontPointsCenter = {
+    x: (frontPoints.bl.x + frontPoints.tl.x) / 2,
+    y: (frontPoints.bl.y + frontPoints.tl.y) / 2,
+  };
+
+  const leftOffset = toggleSize.width + 10;
+  const topOffset = toggleSize.height / 2;
+
+  // Move Coordinate.
+  const moveCoordinate = {
+    x: frontPointsCenter.x,
+    y: frontPointsCenter.y,
+  };
+
+  const coordinate = AxisUtils.getOffsetCoordinate(moveCoordinate, currentPos, zoom);
+
+  return {
+    left: coordinate.x - leftOffset,
+    top: coordinate.y - topOffset,
+  };
+}

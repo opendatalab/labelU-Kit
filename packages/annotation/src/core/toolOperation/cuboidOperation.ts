@@ -8,6 +8,7 @@ import {
   getCuboidAllSideLine,
   getHighlightPoints,
   getPointListsByDirection,
+  getToggleDirectionButtonOffset,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
@@ -584,16 +585,10 @@ class CuboidOperation extends BasicToolOperation {
     if (!this.ctx || this.config.textConfigurable !== true || !selectedCuboid) {
       return;
     }
-    const { frontPoints, attribute, valid } = selectedCuboid;
+    const { attribute, valid } = selectedCuboid;
 
-    const { x, y } = frontPoints.bl;
-
-    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
     const toolColor = this.getColor(attribute);
-
     const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    const distance = 4;
-
     if (!this.toggleButtonInstance) {
       this.toggleButtonInstance = new CuboidToggleButtonClass({
         container: this.container,
@@ -602,9 +597,15 @@ class CuboidOperation extends BasicToolOperation {
       });
     }
 
+    const toggleOffset = getToggleDirectionButtonOffset({
+      cuboid: selectedCuboid,
+      zoom: this.zoom,
+      currentPos: this.currentPos,
+    });
+
     this.toggleButtonInstance.update({
-      left: coordinate.x,
-      top: coordinate.y + distance,
+      left: toggleOffset.left,
+      top: toggleOffset.top,
       color,
     });
   }
