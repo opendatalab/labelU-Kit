@@ -1248,6 +1248,19 @@ export default class BasicToolOperation extends EventListener {
   }
 
   /**
+   * Get the textIconSvg by attribute.
+   * @param attribute
+   */
+  public getTextIconSvg(attribute = '') {
+    return AttributeUtils.getTextIconSvg(
+      attribute,
+      this.config?.attributeList,
+      this.config.attributeConfigurable,
+      this.baseIcon,
+    );
+  }
+
+  /**
    * 判定点是否在边界外
    * @param coordinate
    * @param currentPosition

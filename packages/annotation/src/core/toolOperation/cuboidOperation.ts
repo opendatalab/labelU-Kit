@@ -9,17 +9,20 @@ import {
   getHighlightPoints,
   getPointListsByDirection,
   getToggleDirectionButtonOffset,
+  getCuboidTextAttributeOffset,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
 import type { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import type { ICoordinate } from '@/types/tool/common';
+import { DEFAULT_TEXT_MAX_WIDTH } from '@/constant/tool';
 
 import BasicToolOperation from './basicToolOperation';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import CuboidToggleButtonClass from './cuboidToggleButtonClass';
+import TextAttributeClass from './textAttributeClass';
 
 type ICuboidOperationProps = IBasicToolOperationProps;
 
@@ -28,6 +31,7 @@ enum EDrawingStatus {
   FirstPoint = 2,
   Cuboid = 3,
 }
+const TEXT_MAX_WIDTH = 164;
 
 class CuboidOperation extends BasicToolOperation {
   private toggleButtonInstance?: CuboidToggleButtonClass;
@@ -41,7 +45,7 @@ class CuboidOperation extends BasicToolOperation {
 
   public cuboidList: ICuboid[] = [];
 
-  public selectedID = '';
+  public selectedID?: string;
 
   public hoverID = '';
 
@@ -61,9 +65,21 @@ class CuboidOperation extends BasicToolOperation {
     positions: ICuboidPosition[];
   }[];
 
+  private _textAttributeInstance?: TextAttributeClass;
+
   public constructor(props: ICuboidOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
+
+    this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
+    this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
+  }
+
+  public destroy(): void {
+    super.destroy();
+    if (this._textAttributeInstance) {
+      this._textAttributeInstance.clearTextAttribute();
+    }
   }
 
   /**
@@ -118,7 +134,80 @@ class CuboidOperation extends BasicToolOperation {
     });
   }
 
+  public getColorToRender(attribute: string, valid: boolean) {
+    const toolColor = this.getColor(attribute);
+    const strokeColor = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const fillColor = valid ? toolColor?.valid.fill : toolColor?.invalid.fill;
+
+    return { strokeColor, toolColor, fillColor };
+  }
+
+  /**
+   * TextAttributeInstance Exclusive.
+   * @param attribute
+   * @param valid
+   * @returns
+   */
+  public getCurrentSelectedData() {
+    const { selectedCuboid } = this;
+    if (!selectedCuboid) {
+      return;
+    }
+
+    const { strokeColor: color } = this.getColorToRender(selectedCuboid.attribute, selectedCuboid.valid);
+    return {
+      width: TEXT_MAX_WIDTH,
+      textAttribute: selectedCuboid.textAttribute,
+      color,
+    };
+  }
+
+  /**
+   * TextAttributeInstance Exclusive.
+   *
+   * Update text Input.
+   * @param attribute
+   * @param valid
+   * @returns
+   */
+  public updateSelectedTextAttribute(newTextAttribute?: string) {
+    if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
+      // 切换的时候如果存在
+
+      let textAttribute = newTextAttribute;
+      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
+        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
+        textAttribute = '';
+      }
+
+      this.setCuboidList(AttributeUtils.textChange(textAttribute, this.selectedID, this.cuboidList));
+      this.emit('updateTextAttribute');
+      this.render();
+    }
+  }
+
   public setResult() {}
+
+  public setSelectedID(newID?: string) {
+    const oldID = this.selectedID;
+    if (newID !== oldID && oldID) {
+      // 触发文本切换的操作
+
+      this._textAttributeInstance?.changeSelected();
+    }
+
+    if (!newID) {
+      this._textAttributeInstance?.clearTextAttribute();
+    }
+
+    this.selectedID = newID;
+    this.emit('selectedChange');
+  }
+
+  public setSelectedIDAndRender(newID?: string) {
+    this.setSelectedID(newID);
+    this.render();
+  }
 
   public onRightDblClick(e: MouseEvent) {
     super.onRightDblClick(e);
@@ -145,7 +234,11 @@ class CuboidOperation extends BasicToolOperation {
     this.setCuboidList(this.cuboidList.filter((v) => v.id !== id));
     // TODO - History.
 
-    this.selectedID = '';
+    this.setSelectedID('');
+
+    // Clear TextAttribute.
+    this._textAttributeInstance?.clearTextAttribute();
+
     this.render();
   }
 
@@ -446,7 +539,7 @@ class CuboidOperation extends BasicToolOperation {
 
   public closeAndCreateNewCuboid() {
     this.cuboidList.push(this.drawingCuboid as ICuboid);
-    this.selectedID = this.drawingCuboid?.id ?? '';
+    this.setSelectedID(this.drawingCuboid?.id);
     this.clearDrawingStatus();
     this.render();
   }
@@ -461,7 +554,7 @@ class CuboidOperation extends BasicToolOperation {
   public rightMouseUp(e: MouseEvent) {
     // 1. Selected
     const hoverID = this.getHoverID(e);
-    this.selectedID = hoverID;
+    this.setSelectedID(hoverID);
 
     // 2. If it is in drawing, the drawing status needs to be clear.
     if (this.drawingCuboid) {
@@ -471,19 +564,26 @@ class CuboidOperation extends BasicToolOperation {
     this.render();
   }
 
+  /**
+   * TODO - Need to optimize.
+   * @param cuboid
+   */
   public renderSingleCuboid(cuboid: ICuboid | IDrawingCuboid) {
     const transformCuboid = AxisUtils.changeCuboidByZoom(cuboid, this.zoom, this.currentPos);
     const isHover = transformCuboid.id === this.hoverID;
     const isSelected = transformCuboid.id === this.selectedID;
-    const toolColor = this.getColor(transformCuboid.attribute);
-    const strokeColor = toolColor.valid.stroke;
+    const { strokeColor, fillColor } = this.getColorToRender(transformCuboid.attribute, transformCuboid.valid);
+    const textColor = strokeColor;
+
     const lineWidth = this.style?.width ?? 2;
     const { hiddenText = false } = this.style;
     const defaultStyle = {
       color: strokeColor,
       thickness: lineWidth,
     };
-    const { backPoints, direction, frontPoints } = transformCuboid;
+    const { backPoints, direction, frontPoints, textAttribute } = transformCuboid;
+
+    const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
 
     if (backPoints) {
       const sideLine = getCuboidAllSideLine(transformCuboid as ICuboid);
@@ -501,7 +601,7 @@ class CuboidOperation extends BasicToolOperation {
     if (direction && backPoints && frontPoints) {
       const points = getPointListsByDirection({ direction, frontPoints, backPoints });
       if (points) {
-        DrawUtils.drawPolygonWithFill(this.canvas, points, { color: toolColor.valid.fill });
+        DrawUtils.drawPolygonWithFill(this.canvas, points, { color: fillColor });
       }
     }
     DrawUtils.drawPolygon(this.canvas, pointList, { ...defaultStyle, isClose: true });
@@ -536,6 +636,25 @@ class CuboidOperation extends BasicToolOperation {
         textMaxWidth: 300,
       });
     }
+
+    const textPosition = getCuboidTextAttributeOffset({
+      cuboid,
+      currentPos: this.currentPos,
+      zoom: this.zoom,
+      topOffset: 16,
+      leftOffset: 0,
+    });
+
+    // 文本的输入
+    if (!hiddenText && textAttribute && cuboid.id !== this.selectedID && this.isShowAttributeText) {
+      const textWidth = Math.max(20, frontPointsSizeWidth * 0.8);
+      DrawUtils.drawText(this.canvas, { x: textPosition.left, y: textPosition.top }, textAttribute, {
+        color: textColor,
+        textMaxWidth: textWidth,
+      });
+    }
+
+    this.renderTextAttribute();
   }
 
   public setDefaultAttribute(defaultAttribute?: string) {
@@ -577,6 +696,17 @@ class CuboidOperation extends BasicToolOperation {
         };
         this.render();
       }
+
+      // Update TextAttribute Icon Color
+      if (this._textAttributeInstance) {
+        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(this.defaultAttribute)) {
+          // 属性隐藏
+          this._textAttributeInstance.clearTextAttribute();
+          return;
+        }
+
+        this._textAttributeInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
+      }
     }
   }
 
@@ -587,8 +717,8 @@ class CuboidOperation extends BasicToolOperation {
     }
     const { attribute, valid } = selectedCuboid;
 
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const { strokeColor: color } = this.getColorToRender(attribute, valid);
+
     if (!this.toggleButtonInstance) {
       this.toggleButtonInstance = new CuboidToggleButtonClass({
         container: this.container,
@@ -607,6 +737,45 @@ class CuboidOperation extends BasicToolOperation {
       left: toggleOffset.left,
       top: toggleOffset.top,
       color,
+    });
+  }
+
+  public renderTextAttribute() {
+    const { selectedCuboid } = this;
+    if (!this.ctx || this.config.textConfigurable === false || !selectedCuboid) {
+      return;
+    }
+
+    const { strokeColor: color } = this.getColorToRender(selectedCuboid.attribute, selectedCuboid.valid);
+    const { attribute, textAttribute, frontPoints } = selectedCuboid;
+    const offset = getCuboidTextAttributeOffset({
+      cuboid: selectedCuboid,
+      currentPos: this.currentPos,
+      zoom: this.zoom,
+    });
+    const newWidth = (frontPoints.br.x - frontPoints.bl.x) * this.zoom * 0.8;
+
+    // Init
+    if (!this._textAttributeInstance) {
+      this._textAttributeInstance = new TextAttributeClass({
+        width: DEFAULT_TEXT_MAX_WIDTH,
+        container: this.container,
+        icon: this.getTextIconSvg(attribute),
+        color,
+        getCurrentSelectedData: this.getCurrentSelectedData,
+        updateSelectedTextAttribute: this.updateSelectedTextAttribute,
+      });
+    }
+
+    if (this._textAttributeInstance && !this._textAttributeInstance?.isExit) {
+      this._textAttributeInstance.appendToContainer();
+    }
+
+    this._textAttributeInstance.update(`${textAttribute}`, {
+      left: offset.left,
+      top: offset.top,
+      color,
+      width: newWidth,
     });
   }
 
@@ -662,8 +831,7 @@ class CuboidOperation extends BasicToolOperation {
       return;
     }
     this.highlightInfo?.forEach((data) => {
-      const toolColor = this.getColor(data.originCuboid.attribute);
-      const strokeColor = toolColor.valid.stroke;
+      const { strokeColor } = this.getColorToRender(data.originCuboid.attribute, data.originCuboid.valid);
       const thickness = 8;
 
       switch (data.type) {

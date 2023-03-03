@@ -10,7 +10,7 @@ import {
   EDragTarget,
   ECuboidDirection,
 } from '@/constant/annotation';
-import type { ICuboid, ICuboidPosition, IPlanePoints } from '@/types/tool/cuboid';
+import type { ICuboid, ICuboidPosition, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import type { ICoordinate } from '@/types/tool/common';
 
@@ -883,5 +883,40 @@ export function getToggleDirectionButtonOffset({
   return {
     left: coordinate.x - leftOffset,
     top: coordinate.y - topOffset,
+  };
+}
+
+/**
+ * The default offset is base on iconSvg.
+ *
+ * @param param0
+ * @returns
+ */
+export function getCuboidTextAttributeOffset({
+  cuboid,
+  currentPos,
+  zoom,
+  leftOffset = 16,
+  topOffset = 2,
+}: {
+  cuboid: ICuboid | IDrawingCuboid;
+  currentPos: ICoordinate;
+  zoom: number;
+  leftOffset?: number;
+  topOffset?: number;
+}) {
+  const { frontPoints } = cuboid;
+
+  // Move Coordinate.
+  const moveCoordinate = {
+    x: frontPoints.bl.x,
+    y: frontPoints.bl.y,
+  };
+
+  const coordinate = AxisUtils.getOffsetCoordinate(moveCoordinate, currentPos, zoom);
+
+  return {
+    left: coordinate.x + leftOffset,
+    top: coordinate.y + topOffset,
   };
 }
