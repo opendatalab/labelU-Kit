@@ -143,11 +143,14 @@ const CreateTask = () => {
   }, [dispatch.task, isExistTask, taskData, taskId]);
 
   useEffect(() => {
+    if (!isExistTask) {
+      dispatch.task.clearItem();
+    }
     // 当新建或编辑任务时，页面卸载时清空任务信息
     return () => {
       dispatch.task.clearItem();
     };
-  }, [dispatch.task]);
+  }, [dispatch.task, isExistTask]);
 
   const handleSave = async function () {
     if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length === 0) {

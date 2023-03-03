@@ -59,6 +59,7 @@ export const task = createModel<RootModel>()({
       return {
         ...state,
         item: {} as TaskResponseWithStatics,
+        new: {} as TaskResponse,
       };
     },
   },
