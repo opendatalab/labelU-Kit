@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
-import { useLoaderData, useNavigate } from 'react-router';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 import { Button, Modal } from 'antd';
 import { useDispatch } from 'react-redux';
 import _ from 'lodash-es';
@@ -13,7 +13,7 @@ import { updateStatus } from '../../stores/task.store';
 // import { updateAllConfig } from '../../stores/toolConfig.store';
 const Statistical = () => {
   const dispatch = useDispatch();
-  const taskData = useLoaderData();
+  const taskData = useRouteLoaderData('task');
   const statisticalDatas = _.get(taskData, 'stats', {});
   const taskStatus = _.get(taskData, 'status');
   const taskId = _.get(taskData, 'id');
@@ -43,12 +43,10 @@ const Statistical = () => {
   const navigate = useNavigate();
   const getSamplesLocal = (params: any) => {
     getSamples(taskId!, params)
-      .then((res) => {
-        if (res.status === 200 && res.data.data.length > 0) {
-          const sampleId = res.data.data[0].id;
+      .then(({ data }) => {
+        if (data.length > 0) {
+          const sampleId = data[0].id;
           navigate('/tasks/' + taskId + '/samples/' + sampleId);
-        } else {
-          commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
         }
       })
       .catch((error) => {

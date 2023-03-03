@@ -4,21 +4,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import intl from 'react-intl-universal';
 
+import type { Dispatch } from '@/store';
+
 import CommonController from '../../utils/common/common';
-import { login as loginService } from '../../services/general';
-import { setUsername } from '../../stores/user.store';
 import commonStyles from '../../utils/common/common.module.scss';
 import currentStyles from './index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
 const Login = (props: any) => {
   const { turnToSignUp, turnToTaskList } = props;
+
+  const dispatch = useDispatch<Dispatch>();
   // REVIEW: checkMessage 没有设置值的地方
   const [checkMessage] = useState<any>({});
   const [email, setEmail] = useState<any>(null);
   const [password, setPassword] = useState<any>(null);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const changeEmail = (event: any) => {
     let target = event.target.value;
     if (target !== undefined) {
@@ -51,18 +52,12 @@ const Login = (props: any) => {
       if (!checkPassword) {
         return;
       }
-      const res = await loginService({
+
+      dispatch.user.login({
         username: email,
         password,
       });
-      if (res.status !== 200) {
-        CommonController.notificationErrorMessage(res.data, 5);
-        return;
-      }
-      const token = res.data.data.token;
-      localStorage.setItem('token', token);
-      localStorage.setItem('username', email);
-      dispatch(setUsername(email));
+
       navigate(turnToTaskList);
     } catch (error) {
       CommonController.notificationErrorMessage(error, 1);
@@ -89,8 +84,6 @@ const Login = (props: any) => {
 
   return (
     <div className={currentStyles.loginForm}>
-      {/*<div className = {currentStyles.title} >登录</div>*/}
-      {/*<div className = {currentStyles.title} >{loginText()}</div>*/}
       <div className={currentStyles.title}>{intl.get('login123')}</div>
       <div className={currentStyles.email_m}>
         <Input

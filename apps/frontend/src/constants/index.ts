@@ -5,6 +5,6 @@ const Constatns = {
   // urlToCreateTask : '/taskList/createTask',
   urlToLogin: '/login',
   urlToTasks: '/tasks',
-  urlToCreateNewTask: '/tasks/0/edit/basic',
+  urlToCreateNewTask: '/tasks/0/edit',
 };
 export default Constatns;

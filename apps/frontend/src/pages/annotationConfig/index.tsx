@@ -33,9 +33,9 @@ const AnnotationConfig: FC = () => {
 
   useEffect(() => {
     const loadFirstSample = async () => {
-      const resp = await getSamples(taskId, { pageNo: 0, pageSize: 1 });
-      const data = resp.data;
-      const samples = data.data;
+      const { data: samples } = await getSamples(taskId, { pageNo: 0, pageSize: 1 });
+
+      // TODO:
       if (samples != null && samples.length > 0) {
         const firstSample = samples[0];
 

@@ -3,8 +3,10 @@ import { CheckOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { Button, Modal } from 'antd';
 
+import { getTask } from '@/services/task';
+
 import currentStyles from './index.module.scss';
-import { getTask, outputSamples } from '../../services/samples';
+import { outputSamples } from '../../services/samples';
 import commonController from '../../utils/common/common';
 import currentStyles1 from '../outputData/index.module.scss';
 
@@ -13,12 +15,8 @@ const SamplesFinished = () => {
   const taskId = parseInt(window.location.pathname.split('/')[2]);
   useEffect(() => {
     getTask(taskId)
-      .then((res: any) => {
-        if (res.status === 200) {
-          setStat(res.data.data.stats);
-        } else {
-          commonController.notificationErrorMessage({ message: '向服务端请求任务数据出错' }, 1);
-        }
+      .then(({ data }) => {
+        setStat(data.stats);
       })
       .catch((error) => {
         commonController.notificationErrorMessage(error, 1);
@@ -38,9 +36,7 @@ const SamplesFinished = () => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal(false);
-    outputSamples(taskId, activeTxt).catch((error) => {
-      commonController.notificationErrorMessage(error, 1);
-    });
+    outputSamples(taskId, activeTxt);
   };
 
   const clickCancel = (e: any) => {

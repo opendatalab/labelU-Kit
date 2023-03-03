@@ -1,7 +1,6 @@
-import React from 'react';
+import Login from '@/components/login';
 
 import currentStyles from './index.module.scss';
-import Login from '../../components/login';
 import Constants from '../../constants';
 import LogoTitle from '../../components/logoTitle';
 const LoginPage = () => {

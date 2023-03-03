@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
+import _ from 'lodash-es';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../../../utils/common/common';
@@ -10,59 +11,47 @@ const SliderCard = (props: any) => {
   const { id, state, url } = props.cardInfo;
   const [currentSampleId, setCurrentSampleId] = useState(parseInt(window.location.pathname.split('/')[4]));
   const navigate = useNavigate();
+  const routeParams = useParams();
+  const taskId = routeParams.taskId;
+  const sampleId = routeParams.sampleId;
+
   const clickSample = async function () {
-    const taskId = parseInt(window.location.pathname.split('/')[2]);
-    const sampleId = parseInt(window.location.pathname.split('/')[4]);
     // @ts-ignore
     const cResult = await annotationRef?.current?.getResult();
     const rResult = cResult[0].result;
 
-    getSample(taskId, sampleId)
-      .then((res) => {
-        if (res.status === 200) {
-          const sampleResData = res.data.data.data;
-          let annotated_count = 0;
-          // @ts-ignore
-          // let  dataParam = Object.assign({},sampleResData,{ result :  annotationRef?.current?.getResult()[0].result});
-          const dataParam = Object.assign({}, sampleResData, { result: rResult });
-          if (res.data.data.state !== 'SKIPPED') {
-            const resultJson = JSON.parse(dataParam.result);
-            for (const key in resultJson) {
-              if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
-                const tool = resultJson[key];
-                if (!tool.result) {
-                  let temp = 0;
-                  if (tool.length) {
-                    temp = tool.length;
-                  }
-                  annotated_count = annotated_count + temp;
-                } else {
-                  annotated_count = annotated_count + tool.result.length;
-                }
+    getSample(taskId, sampleId).then(({ data }) => {
+      let annotated_count = 0;
+      const dataParam = Object.assign({}, data.data, { result: rResult });
+
+      if (_.get(data, 'data.state') !== 'SKIPPED') {
+        const resultJson = JSON.parse(dataParam.result);
+        for (const key in resultJson) {
+          if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
+            const tool = resultJson[key];
+            if (!tool.result) {
+              let temp = 0;
+              if (tool.length) {
+                temp = tool.length;
               }
+              annotated_count = annotated_count + temp;
+            } else {
+              annotated_count = annotated_count + tool.result.length;
             }
-            // @ts-ignore
-            updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam })
-              .then((_res) => {
-                if (_res.status === 200) {
-                  navigate(window.location.pathname + '?' + 'POINTER' + new Date().getTime() + '&id=' + id);
-                } else {
-                  commonController.notificationErrorMessage({ message: '请求保存失败' }, 1);
-                }
-              })
-              .catch((error) => {
-                commonController.notificationErrorMessage(error, 1);
-              });
-          } else {
-            navigate(window.location.pathname + '?' + 'POINTER' + new Date().getTime() + '&id=' + id);
           }
-        } else {
-          commonController.notificationErrorMessage({ message: '获取数据信息有误' }, 1);
         }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
+        // @ts-ignore
+        updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam })
+          .then(() => {
+            navigate(window.location.pathname + '?' + 'POINTER' + new Date().getTime() + '&id=' + id);
+          })
+          .catch((error) => {
+            commonController.notificationErrorMessage(error, 1);
+          });
+      } else {
+        navigate(window.location.pathname + '?' + 'POINTER' + new Date().getTime() + '&id=' + id);
+      }
+    });
   };
   useEffect(() => {
     setCurrentSampleId(parseInt(window.location.pathname.split('/')[4]));

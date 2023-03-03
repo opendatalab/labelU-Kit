@@ -6,7 +6,7 @@ import DrageModel from '../../../components/basic/modal';
 import './index.scss';
 import { getLabelConfig } from './config';
 import TmplateBox from './tmplateBox';
-import { getTask } from '../../../services/samples';
+import { getTask } from '../../../services/task';
 import commonController from '../../../utils/common/common';
 type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 
@@ -55,12 +55,10 @@ const ConfigTemplate: FC = () => {
   useEffect(() => {
     const taskId = parseInt(window.location.pathname.split('/')[2]);
     getTask(taskId)
-      .then((res: any) => {
-        if (res.status === 200) {
-          const newTaskStatus = res.data.data.status;
-          if (newTaskStatus !== 'DRAFT' && newTaskStatus !== 'IMPORTED' && newTaskStatus !== 'CONFIGURED') {
-            setIsShowChoose(false);
-          }
+      .then(({ data }) => {
+        const newTaskStatus = data.status;
+        if (newTaskStatus !== 'DRAFT' && newTaskStatus !== 'IMPORTED' && newTaskStatus !== 'CONFIGURED') {
+          setIsShowChoose(false);
         }
       })
       .catch((error) => commonController.notificationErrorMessage(error, 1));

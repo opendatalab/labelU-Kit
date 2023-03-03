@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button, Tree } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
+import formatter from '@label-u/formatter';
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
 
 import IconText from '@/components/IconText';
@@ -9,7 +10,7 @@ import Status from '@/components/Status';
 import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
 
 import commonController from '../../utils/common/common';
-import { uploadFile as uploadFileService } from '../../services/createTask';
+import { uploadFile as uploadFileService } from '../../services/task';
 import { UploadStatus } from '../../constants/upload';
 import currentStyles from './index.module.scss';
 import { updateNewSamples } from '../../stores/sample.store';
@@ -59,9 +60,9 @@ const InputInfoConfig = () => {
       if (uid === haveUploadedFile.uid) {
         haveUploadedFile.hasUploaded = hasUploaded;
         if (result) {
-          haveUploadedFile.uploadId = result?.data.data.id;
-          haveUploadedFile.url = result.data.data.url;
-          haveUploadedFile.id = result.data.data.id;
+          haveUploadedFile.uploadId = result?.data.id;
+          haveUploadedFile.url = result.data.url;
+          haveUploadedFile.id = result.data.id;
         }
         setHaveUploadFiles(_temp);
         break;
@@ -100,18 +101,16 @@ const InputInfoConfig = () => {
     for (let newFileListInfoIndex = 0; newFileListInfoIndex < temp.length; newFileListInfoIndex++) {
       const currentInfo = temp[newFileListInfoIndex];
       let result = undefined;
-      // if (path.indexOf('/') > -1)
-      {
-        result = await uploadFileService(taskId, { file: currentInfo.params.file });
+
+      try {
+        result = await uploadFileService({ file: currentInfo.params.file, task_id: taskId });
         setTempC(newFileListInfoIndex + 1);
-        if (result?.status === 201) {
-          tempSuccessful = tempSuccessful + 1;
-          setUploadedSuccessful(uploadedSuccessful + 1);
-          updateOneOfHaveUplodaedFileList(currentInfo.uid, UploadStatus.SUCCESS, result);
-        } else {
-          tempFailed = tempFailed + 1;
-          updateOneOfHaveUplodaedFileList(currentInfo.uid, UploadStatus.FAIL, undefined);
-        }
+        tempSuccessful = tempSuccessful + 1;
+        setUploadedSuccessful(uploadedSuccessful + 1);
+        updateOneOfHaveUplodaedFileList(currentInfo.uid, UploadStatus.SUCCESS, result);
+      } catch (err) {
+        tempFailed = tempFailed + 1;
+        updateOneOfHaveUplodaedFileList(currentInfo.uid, UploadStatus.FAIL, undefined);
       }
     }
     setStartUploadFlag(false);
@@ -145,7 +144,10 @@ const InputInfoConfig = () => {
     setHaveUploadFiles(tempArr);
   };
   const renewUpload = async function (item: any, itemIndex: number) {
-    const result = await uploadFileService(taskId, item.params);
+    const result = await uploadFileService({
+      ...item.params,
+      task_id: taskId,
+    });
     const _temp: any = Object.assign([], haveUploadFiles);
     if (result?.status === 201) {
       _temp[itemIndex].hasUploaded = UploadStatus.SUCCESS;
@@ -326,7 +328,9 @@ const InputInfoConfig = () => {
                     return (
                       <div className={currentStyles.item} key={item.uid}>
                         <div className={currentStyles.columnFileName}>
-                          <IconText icon={<FileIcon />}>{item.name}</IconText>
+                          <IconText icon={<FileIcon />}>
+                            {formatter.format('ellipsis', item.name, { maxWidth: 240, type: 'tooltip' })}
+                          </IconText>
                         </div>
                         <div className={currentStyles.columnFileName}>{item.params.path}</div>
                         <div className={currentStyles.columnStatus}>

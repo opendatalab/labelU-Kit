@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
 
 import currentStyles from './index.module.scss';
@@ -15,51 +15,38 @@ interface AnnotationRightCornerProps {
 
 const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => {
   const navigate = useNavigate();
-  const taskId = parseInt(window.location.pathname.split('/')[2]);
-  const sampleId = parseInt(window.location.pathname.split('/')[4]);
+  const routeParams = useParams();
+  const taskId = routeParams.taskId;
+  const sampleId = routeParams.sampleId;
   const [isSkippedShow, setIsSkippedShow] = useState('');
 
   const skipSample = () => {
     setIsSkippedShow('SKIPPED');
-    getSample(taskId, sampleId)
-      .then((sampleRes) => {
-        if (sampleRes.status === 200) {
-          updateSampleState(taskId, sampleId, sampleRes?.data.data.data, 'SKIPPED')
-            .then((res) => {
-              if (res.status === 200) {
-                navigate(window.location.pathname + '?SKIPPED' + new Date().getTime());
-              } else {
-                commonController.notificationErrorMessage({ message: '请求跳过失败' }, 1);
-              }
-            })
-            .catch((error) => {
-              commonController.notificationErrorMessage(error, 1);
-            });
-        } else {
-          commonController.notificationErrorMessage({ message: '请求任务数据出错' }, 1);
-        }
+    getSample(+taskId!, +sampleId!)
+      .then(({ data }) => {
+        updateSampleState(+taskId!, +sampleId!, data.data, 'SKIPPED')
+          .then(() => {
+            navigate(window.location.pathname + '?SKIPPED' + new Date().getTime());
+          })
+          .catch(() => {
+            commonController.notificationErrorMessage({ message: '请求跳过失败' }, 1);
+          });
       })
-      .catch((error) => commonController.notificationErrorMessage(error, 1));
+      .catch((error) => {
+        commonController.notificationErrorMessage(error, 1);
+      });
   };
   const cancelSkipSample = () => {
     setIsSkippedShow('NEW');
-    getSample(taskId, sampleId)
+    getSample(+taskId!, +sampleId!)
       .then((sampleRes: any) => {
-        if (sampleRes.status === 200) {
-          updateSampleState(taskId, sampleId, sampleRes?.data.data.data, 'NEW')
-            .then((res) => {
-              if (res.status === 200) {
-                navigate(window.location.pathname + '?NEW' + new Date().getTime());
-              } else {
-                commonController.notificationErrorMessage({ message: '请求跳过失败' }, 1);
-              }
-            })
-            .catch((error) => {
-              commonController.notificationErrorMessage(error, 1);
-            });
-        } else {
-          commonController.notificationErrorMessage({ message: '请求任务数据出错' }, 1);
-        }
+        updateSampleState(+taskId!, +sampleId!, sampleRes?.data.data.data, 'NEW')
+          .then(() => {
+            navigate(window.location.pathname + '?NEW' + new Date().getTime());
+          })
+          .catch(() => {
+            commonController.notificationErrorMessage({ message: '请求跳过失败' }, 1);
+          });
       })
       .catch((error) => commonController.notificationErrorMessage(error, 1));
   };
@@ -67,68 +54,42 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
   let timestampNew = new Date().getTime();
   // @ts-ignore
   const nextPage = async function () {
-    // if (new Date().getTime() - timestamp <= 2000) {
-    //   setTimestamp(new Date().getTime());
-    //   return;
-    // }
-    // setTimestamp(new Date().getTime());
     timestampNew = new Date().getTime();
-    // @ts-ignore
-    const _sampleId = parseInt(window.location.pathname.split('/')[4]);
     // @ts-ignore
     const cResult = await annotationRef?.current?.getResult();
     const rResult = cResult[0].result;
-    getSample(taskId, _sampleId)
-      .then((res) => {
-        if (res.status === 200) {
-          const sampleResData = res.data.data.data;
-          let annotated_count = 0;
-          const dataParam = Object.assign({}, sampleResData, { result: rResult });
+    getSample(+taskId!, +sampleId!).then(({ data }) => {
+      const sampleResData = data.data;
+      let annotated_count = 0;
+      const dataParam = Object.assign({}, sampleResData, { result: rResult });
 
-          if (res.data.data.state !== 'SKIPPED') {
-            const resultJson = JSON.parse(dataParam.result);
-            for (const key in resultJson) {
-              if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
-                const tool = resultJson[key];
-                if (!tool.result) {
-                  let temp = 0;
-                  if (tool.length) {
-                    temp = tool.length;
-                  }
-                  annotated_count = annotated_count + temp;
-                } else {
-                  annotated_count = annotated_count + tool.result.length;
-                }
+      if (data?.state !== 'SKIPPED') {
+        const resultJson = JSON.parse(dataParam.result);
+        for (const key in resultJson) {
+          if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
+            const tool = resultJson[key];
+            if (!tool.result) {
+              let temp = 0;
+              if (tool.length) {
+                temp = tool.length;
               }
+              annotated_count = annotated_count + temp;
+            } else {
+              annotated_count = annotated_count + tool.result.length;
             }
-
-            // @ts-ignore
-            updateSampleAnnotationResult(taskId, _sampleId, { annotated_count, state: 'DONE', data: dataParam })
-              .then((_res) => {
-                if (_res.status === 200) {
-                  // Ob.nextPageS.next('DONE');
-                  navigate(window.location.pathname + '?DONE' + new Date().getTime());
-                } else {
-                  commonController.notificationErrorMessage({ message: '请求保存失败' }, 1);
-                }
-                // timestampNew = new Date().getTime();
-              })
-              .catch((error) => {
-                commonController.notificationErrorMessage(error, 1);
-                // timestampNew = new Date().getTime();
-              });
-          } else {
-            navigate(window.location.pathname + '?JUMPDOWN' + new Date().getTime());
-            // timestampNew = new Date().getTime();
           }
-        } else {
-          // timestampNew = new Date().getTime();
         }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-        // timestampNew = new Date().getTime();
-      });
+
+        // @ts-ignore
+        updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam }).then(
+          (_res) => {
+            navigate(window.location.pathname + '?DONE' + new Date().getTime());
+          },
+        );
+      } else {
+        navigate(window.location.pathname + '?JUMPDOWN' + new Date().getTime());
+      }
+    });
   };
 
   const prevPage = async function () {
@@ -138,57 +99,39 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     }
     setTimestamp(new Date().getTime());
     // @ts-ignore
-    const _sampleId = parseInt(window.location.pathname.split('/')[4]);
-    // @ts-ignore
     const cResult = await annotationRef?.current?.getResult();
     const rResult = cResult[0].result;
 
-    getSample(taskId, _sampleId)
-      .then((res) => {
-        if (res.status === 200) {
-          const sampleResData = res.data.data.data;
-          let annotated_count = 0;
-          // @ts-ignore
-          // let  dataParam = Object.assign({},sampleResData,{ result :  annotationRef?.current?.getResult()[0].result});
-          const dataParam = Object.assign({}, sampleResData, { result: rResult });
-          if (res.data.data.state !== 'SKIPPED') {
-            const resultJson = JSON.parse(dataParam.result);
-            for (const key in resultJson) {
-              if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
-                const tool = resultJson[key];
-                if (!tool.result) {
-                  let temp = 0;
-                  if (tool.length) {
-                    temp = tool.length;
-                  }
-                  annotated_count = annotated_count + temp;
-                } else {
-                  annotated_count = annotated_count + tool.result.length;
-                }
+    getSample(+taskId!, +sampleId!).then(({ data }) => {
+      const sampleResData = data.data;
+      let annotated_count = 0;
+      // @ts-ignore
+      // let  dataParam = Object.assign({},sampleResData,{ result :  annotationRef?.current?.getResult()[0].result});
+      const dataParam = Object.assign({}, sampleResData, { result: rResult });
+      if (data.state !== 'SKIPPED') {
+        const resultJson = JSON.parse(dataParam.result);
+        for (const key in resultJson) {
+          if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
+            const tool = resultJson[key];
+            if (!tool.result) {
+              let temp = 0;
+              if (tool.length) {
+                temp = tool.length;
               }
+              annotated_count = annotated_count + temp;
+            } else {
+              annotated_count = annotated_count + tool.result.length;
             }
-            // @ts-ignore
-            updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam })
-              .then((_res) => {
-                if (_res.status === 200) {
-                  // Ob.nextPageS.next('DONE');
-                  navigate(window.location.pathname + '?PREV' + new Date().getTime());
-                } else {
-                  commonController.notificationErrorMessage({ message: '请求保存失败' }, 1);
-                }
-              })
-              .catch((error) => {
-                commonController.notificationErrorMessage(error, 1);
-              });
-          } else {
-            navigate(window.location.pathname + '?JUMPUP' + new Date().getTime());
           }
-        } else {
         }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
+        // @ts-ignore
+        updateSampleAnnotationResult(taskId, sampleId, { annotated_count, state: 'DONE', data: dataParam }).then(() => {
+          navigate(window.location.pathname + '?PREV' + new Date().getTime());
+        });
+      } else {
+        navigate(window.location.pathname + '?JUMPUP' + new Date().getTime());
+      }
+    });
   };
   useEffect(() => {
     const currentSample = store.getState()?.samples?.currentSample;
@@ -233,15 +176,6 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
 
   return (
     <div className={currentStyles.outerFrame} id="rightCorner">
-      {/*<div className={currentStyles.left}*/}
-      {/*     id = {'copyPre'}*/}
-      {/*     onClick = { commonController.debounce(copyPre, 100) }*/}
-      {/*>复制上张</div>*/}
-
-      {/*<div className={currentStyles.right}*/}
-      {/*     id = {'nextPage'}*/}
-      {/*     onClick = { commonController.debounce(prevPage, 100) }*/}
-      {/*>上一页</div>*/}
       <div className={currentStyles.right}>
         {isSkippedShow !== 'SKIPPED' && (
           <Button id={'skipped'} onClick={commonController.debounce(skipSample, 100)}>

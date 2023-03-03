@@ -1,47 +1,29 @@
-import type { LoaderFunction, RouteObject } from 'react-router';
+import type { RouteObject } from 'react-router';
 import { Outlet } from 'react-router';
 import { redirect } from 'react-router-dom';
 
-import { getTask } from '@/services/samples';
+import Login from '@/pages/login/index';
+import SignUp from '@/pages/signUp';
+import TaskList from '@/pages/taskList';
+import CreateTask from '@/pages/createTask';
+import TaskAnnotation from '@/pages/annotation';
+import Samples from '@/pages/samples';
+import TaskSamplesFinished from '@/pages/sampleFinished';
+import OutputData from '@/pages/outputData';
+import type { TaskResponse } from '@/services/types';
+import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
-import AnnotationConfig from '../pages/annotationConfig';
-import Login1 from '../pages/login/index';
-import SignUp from '../pages/signUp';
-import Homepage from '../pages/homepage';
-import TaskList from '../pages/taskList';
-import CreateTask from '../pages/createTask';
-import InputInfoConfig from '../pages/inputInfoConfig';
-import InputData from '../pages/inputData';
-import TaskAnnotation from '../pages/annotation';
-import Samples from '../pages/samples';
-import TaskSamplesFinished from '../pages/sampleFinished';
-import OutputData from '../pages/outputData';
+import { taskLoader } from './loaders';
 
-export type RouterItem = RouteObject & {
-  name?: string;
-  children?: RouterItem[];
-};
-
-const taskLoader: LoaderFunction = async ({ params }) => {
-  if (!params?.taskId) {
-    return null;
-  }
-
-  const taskData = await getTask(+params.taskId);
-
-  return taskData.data.data;
-};
-
-const routes: RouterItem[] = [
+const routes: RouteObject[] = [
   {
     path: '/',
-    name: '首页',
     handle: {
       crumb: () => {
         return '首页';
       },
     },
-    element: <Homepage />,
+    element: <Outlet />,
     loader: async () => {
       const token = localStorage.getItem('token');
       const username = localStorage.getItem('username');
@@ -53,9 +35,8 @@ const routes: RouterItem[] = [
     },
   },
   {
-    name: '任务列表',
     path: '/tasks',
-    element: <Homepage />,
+    element: <MainLayout />,
     handle: {
       crumb: () => {
         return '任务列表';
@@ -68,63 +49,80 @@ const routes: RouterItem[] = [
       },
       {
         path: ':taskId',
+        id: 'task',
         element: <Outlet />,
         loader: taskLoader,
+        handle: {
+          crumb: (data: TaskResponse) => {
+            return data?.name;
+          },
+        },
         children: [
           {
-            name: '样本列表',
             index: true,
             element: <Samples />,
-            loader: taskLoader,
-            handle: {
-              crumb: () => {
-                return '样本列表';
-              },
-            },
           },
           {
             path: 'edit',
-            name: '任务配置',
             element: <CreateTask />,
+            loader: taskLoader,
             handle: {
               crumb: () => {
                 return '任务配置';
               },
             },
-            children: [
-              {
-                path: 'basic',
-                // @ts-ignore
-                name: '基本信息配置',
-                element: <InputInfoConfig />,
-              },
-              {
-                path: 'upload',
-                name: '数据导入',
-                element: <InputData />,
-              },
-              {
-                path: 'config',
-                name: '标注配置',
-                element: <AnnotationConfig />,
-              },
-            ],
+            // children: [
+            //   {
+            //     path: 'basic',
+            //     element: <InputInfoConfig />,
+            //     handle: {
+            //       crumb: () => {
+            //         return '基本信息配置';
+            //       },
+            //     },
+            //   },
+            //   {
+            //     path: 'upload',
+            //     element: <InputData />,
+            //     handle: {
+            //       crumb: () => {
+            //         return '数据导入';
+            //       },
+            //     },
+            //   },
+            //   {
+            //     path: 'config',
+            //     element: <AnnotationConfig />,
+            //     handle: {
+            //       crumb: () => {
+            //         return '标注配置';
+            //       },
+            //     },
+            //   },
+            // ],
           },
           {
             path: 'samples',
-            name: '样本',
             element: <Outlet />,
+            loader: taskLoader,
             children: [
               {
                 path: ':sampleId',
-                // @ts-ignore
-                name: '标注',
                 element: <TaskAnnotation />,
+                handle: {
+                  crumb: () => {
+                    return '开始标注';
+                  },
+                },
               },
               {
                 path: 'finished',
-                name: '标注结束',
                 element: <TaskSamplesFinished />,
+                handle: {
+                  crumb: () => {
+                    return '标注结束';
+                  },
+                },
               },
             ],
           },
@@ -133,19 +131,26 @@ const routes: RouterItem[] = [
     ],
   },
   {
-    path: '/login',
-    name: '登录',
-    element: <Login1 />,
+    path: 'login',
+    element: <Login />,
   },
   {
     path: '/register',
-    name: '注册',
     element: <SignUp />,
+    handle: {
+      crumb: () => {
+        return '注册';
+      },
+    },
   },
   {
     path: '/output',
-    name: '导出',
     element: <OutputData />,
+    handle: {
+      crumb: () => {
+        return '导出';
+      },
+    },
   },
 ];
 

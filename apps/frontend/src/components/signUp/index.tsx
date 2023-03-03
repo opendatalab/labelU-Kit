@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import intl from 'react-intl-universal';
 
 import CommonController from '../../utils/common/common';
-import { signUp } from '../../services/general';
+import { signUp } from '../../services/user';
 import currentStyles from '../signUp/index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
@@ -78,15 +78,10 @@ const SignUp = (props: any) => {
         CommonController.notificationErrorMessage({ msg: '两次输入的密码不一致' }, 1);
         return;
       }
-      const res = await signUp({
+      await signUp({
         username,
         password,
       });
-      // @ts-ignore
-      if (res.status !== 201) {
-        CommonController.notificationErrorMessage(res, 2);
-        return;
-      }
       CommonController.notificationSuccessMessage({ message: '注册成功' }, 1);
       // localStorage.setItem('token', token);
       navigate(turnToLogin);

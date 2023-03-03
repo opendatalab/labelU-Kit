@@ -1,64 +1,95 @@
 // @ts-ignore
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Modal } from 'antd';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { connect, useSelector, useDispatch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import _ from 'lodash-es';
+
+import { useHash } from '@/hooks/useHash';
+import type { TaskResponse } from '@/services/types';
+import { MediaType } from '@/services/types';
+import type { Dispatch, RootState } from '@/store';
+import AnnotationConfig from '@/pages/annotationConfig';
+import InputInfoConfig from '@/pages/inputInfoConfig';
+import InputData from '@/pages/inputData';
+import history from '@/routes/history';
 
 import currentStyles from './index.module.scss';
-import Step from '../../components/step';
-import Separator from '../../components/separator';
-import { submitBasicConfig, updateTaskConfig } from '../../services/createTask';
-import {
-  updateHaveConfigedStep,
-  updateTask,
-  updateConfigStep,
-  updateTaskId,
-  updateStatus,
-} from '../../stores/task.store';
+import Step from './components/Step';
+import { getTask, createTaskWithBasicConfig, updateTaskConfig } from '../../services/task';
+import { updateHaveConfigedStep, updateTask, updateTaskId, updateStatus } from '../../stores/task.store';
 import commonController from '../../utils/common/common';
-import { createSamples, getTask } from '../../services/samples';
+import { createSamples } from '../../services/samples';
 import { updateAllConfig } from '../../stores/toolConfig.store';
 
-const CreateTask = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  // @ts-ignore
-  const configStep = useSelector((state) => state.existTask.configStep);
-  // @ts-ignore
-  const haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
-  // @ts-ignore
-  const taskName = useSelector((state) => state.existTask.taskName);
-  // @ts-ignore
-  const taskDescription = useSelector((state) => state.existTask.taskDescription);
-  // @ts-ignore
-  const taskTips = useSelector((state) => state.existTask.taskTips);
-  // @ts-ignore
-  const taskId = useSelector((state) => state.existTask.taskId);
-  // @ts-ignore
-  const newSamples = useSelector((state) => state.samples.newSamples);
-  // @ts-ignore
-  const toolsConfig = useSelector((state) => state.toolsConfig);
-  // @ts-ignore
-  const taskStatus = useSelector((state) => state.existTask.status);
+enum StepEnum {
+  Basic = 'basic',
+  Upload = 'upload',
+  Config = 'config',
+}
 
-  const steps = [
+const stepTitleMapping = {
+  [StepEnum.Basic]: '基础配置',
+  [StepEnum.Upload]: '数据导入',
+  [StepEnum.Config]: '标注配置',
+};
+
+const partialMapping = {
+  [StepEnum.Basic]: () => <div />, //AnnotationConfig,
+  [StepEnum.Upload]: () => <div />, // InputData,
+  [StepEnum.Config]: () => <div />, //InputInfoConfig,
+};
+
+interface TaskStep {
+  title: string;
+  value: StepEnum;
+  isFinished: boolean;
+}
+
+const CreateTask = () => {
+  const dispatch = useDispatch<Dispatch>();
+  const navigate = useNavigate();
+  const routeParams = useParams();
+  const [searchParams] = useSearchParams();
+  const taskData = useRouteLoaderData('task') as TaskResponse;
+  const taskId = _.get(taskData, 'id');
+  const taskIdInUrl = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
+  const statusInUrl = searchParams.get('currentStatus');
+  const [currentStep, setCurrentStep] = useState<StepEnum>(StepEnum.Basic);
+  const location = useLocation();
+
+  const stepDataSource: TaskStep[] = [
     {
-      title: '基础配置',
-      index: 1,
-      contentUrl: `/tasks/${taskId}/edit/basic`,
+      title: stepTitleMapping[StepEnum.Basic],
+      value: StepEnum.Basic,
+      isFinished: Boolean(taskData),
     },
     {
-      title: '数据导入',
-      index: 2,
-      contentUrl: `/tasks/${taskId}/edit/upload`,
+      title: stepTitleMapping[StepEnum.Upload],
+      value: StepEnum.Upload,
+      isFinished: Boolean(taskData),
     },
     {
-      title: '标注配置',
-      index: 3,
-      contentUrl: `/tasks/${taskId}/edit/config`,
+      title: stepTitleMapping[StepEnum.Config],
+      value: StepEnum.Config,
+      isFinished: Boolean(taskData),
     },
   ];
+
+  const Partial = useMemo(() => {
+    return partialMapping[currentStep];
+  }, [currentStep]);
+
+  const newSamples = useSelector((state: RootState) => state.sample.list);
+  // @ts-ignore
+  const toolsConfig = useSelector((state) => state.toolsConfig);
+
+  // 默认显示第一个步骤「基础配置」
+  useEffect(() => {
+    if (!location.hash) {
+      history.replace(location.pathname + '#basic');
+    }
+  }, [location.hash, location.pathname]);
 
   const finallySave = async function () {
     if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length === 0) {
@@ -66,18 +97,12 @@ const CreateTask = () => {
       return;
     }
 
-    const res = await updateTaskConfig(taskId, {
+    await updateTaskConfig(taskId!, {
       config: JSON.stringify(toolsConfig),
-      media_type: 'IMAGE',
+      media_type: MediaType.IMAGE,
     });
-    if (!res) {
-      commonController.notificationErrorMessage({ message: '配置不成功' }, 1);
-      return;
-    } else {
-      if (res.status === 200) {
-        navigate('/tasks/' + taskId);
-      }
-    }
+
+    navigate('/tasks/' + taskId);
   };
 
   const updateStep = (status: string) => {
@@ -123,21 +148,15 @@ const CreateTask = () => {
       if (haveConfigedStep !== 0) {
         res = await updateTaskConfig(taskId, { name: taskName, description: taskDescription, tips: taskTips });
       } else {
-        res = await submitBasicConfig({ name: taskName, description: taskDescription, tips: taskTips });
+        res = await createTaskWithBasicConfig({ name: taskName, description: taskDescription, tips: taskTips });
       }
 
-      if (res.status === 201 || res.status === 200) {
-        const { status, id } = res.data.data;
-        updateStep(status);
-        updateTaskIdLocal(id);
-        result = id;
-      } else {
-        result = false;
-        commonController.notificationErrorMessage(res.data, 1);
-      }
+      const { status, id } = res.data;
+      updateStep(status);
+      updateTaskIdLocal(id);
+      result = id;
     } catch (error) {
       result = false;
-      commonController.notificationErrorMessage(error, 1);
     }
     return result;
   };
@@ -151,70 +170,35 @@ const CreateTask = () => {
       return true;
     }
     try {
-      const res: any = await createSamples(taskId, newSamples);
-      if (res.status === 201) {
-        const { status } = res.data.data;
-        updateStep('IMPORTED');
-        dispatch(updateStatus(status));
-      } else {
-        result = false;
-        commonController.notificationErrorMessage(res.data, 1);
-      }
+      const { data } = await createSamples(taskId, newSamples);
+      updateStep('IMPORTED');
+      dispatch(updateStatus(data.status));
+      result = false;
+      commonController.notificationErrorMessage(data, 1);
     } catch (error) {
       result = false;
-      commonController.notificationErrorMessage(error, 1);
     }
     return result;
   };
-  const nextStep = async function () {
-    let currentStep = -1;
-    let childOutlet = `/tasks/${taskId}/edit/basic`;
-    switch (configStep) {
-      case -1:
-        const isSuccess0 = await nextWhen0();
-        if (!isSuccess0) return;
-        currentStep = 0;
-        childOutlet = `/tasks/${isSuccess0}/edit/upload`;
-        break;
-      case 0:
-        const isSuccess1 = await nextWhen1();
-        if (!isSuccess1) return;
-        currentStep = 1;
-        childOutlet = `/tasks/${taskId}/edit/config`;
-        break;
-      case 1:
-        break;
-    }
-    // @ts-ignore
-    dispatch(updateConfigStep(currentStep));
-    navigate(childOutlet);
+  const handleNextStep = async function (step: TaskStep) {
+    setCurrentStep(step.value);
+  };
+
+  const handlePrevStep = (step: TaskStep) => {
+    setCurrentStep(step.value);
   };
 
   useEffect(() => {
-    const _taskId = parseInt(window.location.pathname.split('/')[2]);
-    const searchString = window.location.search;
-    // bad name
     let currentStatus = 1;
-    if (searchString.indexOf('currentStatus=2') > -1) {
-      currentStatus = 2;
+    if (statusInUrl) {
+      currentStatus = +statusInUrl;
     }
-    if (searchString.indexOf('currentStatus=3') > -1) {
-      currentStatus = 3;
-    }
-    if (_taskId > 0) {
-      getTask(_taskId)
-        .then((res: any) => {
-          if (res.status === 200) {
-            // @ts-ignore
-            dispatch(updateTask({ data: res.data.data, configStatus: currentStatus }));
-            if (res.data.data.config) {
-              dispatch(updateAllConfig(JSON.parse(res.data.data.config)));
-            } else {
-              // new task, not configured yet
-            }
-          } else {
-            commonController.notificationErrorMessage({ message: '请求任务状态不是200' }, 1);
-          }
+    if (taskIdInUrl > 0) {
+      getTask(taskIdInUrl)
+        .then(({ data }) => {
+          // @ts-ignore
+          dispatch(updateTask({ data, configStatus: currentStatus }));
+          dispatch(updateAllConfig(JSON.parse(data.config!)));
         })
         .catch((error) => commonController.notificationErrorMessage(error, 1));
     } else {
@@ -240,7 +224,7 @@ const CreateTask = () => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowCancelModal(false);
-    switch (configStep) {
+    switch (currentStep) {
       case -1:
         const isSuccess0 = await nextWhen0();
         if (!isSuccess0) return;
@@ -250,7 +234,6 @@ const CreateTask = () => {
         if (!isSuccess1) return;
         break;
       case 1:
-        return;
         const isNullToolConfigResult = isNullToolConfig();
         if (isNullToolConfigResult) {
           return;
@@ -265,54 +248,37 @@ const CreateTask = () => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowCancelModal(false);
-    // if(taskId === 0) {
-    //     navigate('/tasks');
-    //     return;
-    // }
-    // deleteTask(taskId).then((res:any)=>{
-    //   if(res.status === 200){
-    //
-    //   }else{
-    //     commonController.notificationErrorMessage({message : '删除任务不成功'},1);
-    //   }
-    // }).catch((error:any)=>commonController.notificationErrorMessage(error, 1));
     navigate('/tasks');
   };
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
         <div className={currentStyles.left}>
-          {steps.map((step: any, stepIndex: number) => {
-            if (stepIndex === steps.length - 1) {
-              return <Step ordinalNumber={step.index} title={step.title} contentUrl={step.contentUrl} key={uuidv4()} />;
-            } else {
-              return (
-                <React.Fragment key={stepIndex}>
-                  <Step key={uuidv4()} ordinalNumber={step.index} title={step.title} contentUrl={step.contentUrl} />
-                  <Separator />
-                </React.Fragment>
-              );
-            }
-          })}
+          <Step
+            steps={stepDataSource}
+            currentStep={currentStep}
+            showStepNumber={!taskData}
+            onNext={handleNextStep}
+            onPrev={handlePrevStep}
+          />
         </div>
         <div className={currentStyles.right}>
           <Button type="primary" ghost onClick={cancelOption}>
             取消
           </Button>
-          {configStep !== 1 && (
-            <Button type="primary" onClick={commonController.debounce(nextStep, 100)}>
-              下一步
-            </Button>
-          )}
-          {configStep === 1 && (
+          {currentStep === StepEnum.Config ? (
             <Button type="primary" onClick={commonController.debounce(finallySave, 200)}>
               保存
+            </Button>
+          ) : (
+            <Button type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
+              下一步
             </Button>
           )}
         </div>
       </div>
       <div className={currentStyles.content}>
-        <Outlet />
+        <Partial />
       </div>
       <Modal
         open={isShowCancelModal}
@@ -331,8 +297,4 @@ const CreateTask = () => {
   );
 };
 
-const mapStateToProps = (state: any) => {
-  return state.toolsConfig;
-};
-
-export default connect(mapStateToProps)(CreateTask);
+export default CreateTask;

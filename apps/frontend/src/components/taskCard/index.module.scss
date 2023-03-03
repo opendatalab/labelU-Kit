@@ -21,6 +21,14 @@
   }
 }
 
+.actionIcon {
+  font-size: 1rem;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+}
+
 .item {
   width: 100%;
   @extend .displayFlex;
@@ -109,14 +117,19 @@
   width: 100%;
 }
 
-.icons2 {
+.actions {
   @extend .displayFlex;
   @extend .flexDirectionRow;
   justify-content: flex-end;
   align-items: center;
   width: 60px;
-  //margin-left:140px;
   margin-right: 24px;
+  display: none;
+  color: #A3A3A3;
+
+  .cardWrapper:hover & {
+    display: flex;
+  }
 }
 .upload {
   margin-right: 10px;

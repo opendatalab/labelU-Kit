@@ -1,12 +1,14 @@
 import { Spin } from 'antd';
 import React from 'react';
+import _ from 'lodash-es';
 import DocumentTitle from 'react-document-title';
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import type { RouteObject } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, useMatches } from 'react-router-dom';
 
-import type { RouterItem } from './routes';
+import type { Match } from './components/Breadcrumb';
 import routes from './routes';
 
-export type RouteWithParent = RouterItem & {
+export type RouteWithParent = RouteObject & {
   parent: RouteWithParent | null;
 };
 
@@ -14,22 +16,33 @@ export interface RouteComponentProps {
   route: RouteWithParent;
 }
 
+// 将对应的面包屑信息添加到页面标题中
+function RouteWithTitle({ children }: { children: React.ReactNode }) {
+  const matches = useMatches() as Match[];
+  const title = _.chain(matches)
+    .filter((match) => Boolean(match.handle?.crumb))
+    .map((match) => match.handle.crumb!(match.data))
+    .last()
+    .value();
+
+  return (
+    <DocumentTitle title={title ? `${title} - LabelU` : 'LabelU'}>
+      {/* @ts-ignore */}
+      {children}
+    </DocumentTitle>
+  );
+}
+
 function mapRoutes(
-  inputRoutes: RouterItem[],
+  inputRoutes: RouteObject[],
   parentPath: string = '',
   parentRoute: RouteWithParent | null = null,
 ): React.ReactNode {
   return inputRoutes.map((route) => {
-    const { path, element, children, name, index, ...restProps } = route;
+    const { path, element, children, index, ...restProps } = route;
     const routeWithParent: RouteWithParent = { ...route, parent: parentRoute };
-    const pageTitle = name ? `${name} - LabelU` : 'LabelU';
 
-    const comp = (
-      <DocumentTitle title={pageTitle} key={`${parentPath}-${path}`}>
-        {/* @ts-ignore */}
-        {element}
-      </DocumentTitle>
-    );
+    const comp = <RouteWithTitle key={`${parentPath}-${path}`}>{element}</RouteWithTitle>;
 
     if (index) {
       return (
@@ -51,10 +64,6 @@ function mapRoutes(
   });
 }
 
-/**
- * NOTE: 任意非/api开头的路径后端（FastApi）会重定向到 根路径 「/」相关代码在labelu/internal/common/error_code.py@L110
- * 为了规避每次刷新都跳到/tasks的问题，这里使用hash路由
- */
 const router = createBrowserRouter(createRoutesFromElements(mapRoutes(routes)));
 
 export default function Router() {

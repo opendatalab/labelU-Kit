@@ -17,10 +17,6 @@ const toolsConfigSlice = createSlice({
   name: 'stepConfig',
   initialState: initialState,
   reducers: {
-    // 清空工具配置
-    removeToolsConfig(state) {
-      state.tools = [];
-    },
     // 更新工具配置
     updateToolsConfig(state, action: PayloadAction<BasicConfig[]>) {
       state.tools = action.payload;
@@ -71,7 +67,6 @@ const toolsConfigSlice = createSlice({
 });
 
 export const {
-  removeToolsConfig,
   updateToolsConfig,
   removeTagConfigList,
   updateTagConfigList,

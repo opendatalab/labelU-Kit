@@ -18,17 +18,18 @@ export interface BreadcrumbProps {
   className?: string;
   // 有些页面不需要显示「数据管理」首页的字样，比如新建团队空间和空间设置
   hideHome?: boolean;
+  style?: React.CSSProperties;
 }
 
 /**
  * 面包屑导航
  * 通过react-router-dom 的useMatches得到route的父子路径
  */
-function Breadcrumb({ className, hideHome = false }: BreadcrumbProps) {
+function Breadcrumb({ className, hideHome = false, style }: BreadcrumbProps) {
   const matches = useMatches() as Match[];
 
   const crumbs = matches
-    .filter((match) => (match.pathname === '/tasks' ? !hideHome : Boolean(match.handle?.crumb)))
+    .filter((match) => (match.pathname === '/' ? !hideHome : Boolean(match.handle?.crumb!(match.data))))
     .map((match) => ({
       ...match,
       crumb: match.handle.crumb!(match.data),
@@ -37,7 +38,7 @@ function Breadcrumb({ className, hideHome = false }: BreadcrumbProps) {
 
   return (
     // @ts-ignore
-    <StyledBreadcrumb className={className}>
+    <StyledBreadcrumb className={className} style={style}>
       {crumbs.map((item, index) => {
         const isCurrent = index === crumbs.length - 1;
 

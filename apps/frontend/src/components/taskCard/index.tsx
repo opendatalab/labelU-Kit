@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { Modal, Progress, Tooltip } from 'antd';
 import { useNavigate } from 'react-router';
 import moment from 'moment';
-import { ExclamationOutlined } from '@ant-design/icons';
+import Icon, { ExclamationOutlined } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+
+import type { Dispatch, RootState } from '@/store';
+import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
+import { ReactComponent as OutputIcon } from '@/assets/svg/outputData.svg';
 
 import commonController from '../../utils/common/common';
 import { outputSamples } from '../../services/samples';
 import currentStyles from './index.module.scss';
-import { deleteTask } from '../../services/createTask';
+import { deleteTask } from '../../services/task';
 import currentStyles1 from '../../pages/outputData/index.module.scss';
 import FlexItem from '../FlexItem';
 import Status from '../Status';
@@ -16,6 +21,7 @@ import IconText from '../IconText';
 const TaskCard = (props: any) => {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
   const { cardInfo } = props;
+  const dispatch = useDispatch<Dispatch>();
   const { stats, id, status } = cardInfo;
   const unDoneSample = stats.new;
   const doneSample = stats.done + stats.skipped;
@@ -29,14 +35,25 @@ const TaskCard = (props: any) => {
     // navigate('/taskList/task/taskAnnotation');
     navigate('/tasks/' + id);
   };
-  const localUserEmail = localStorage.getItem('username');
+  const userInfo = useSelector((state: RootState) => state.user);
 
-  const deleteTaskLocal = (e: any) => {
-    e.nativeEvent.stopImmediatePropagation();
-    e.preventDefault();
+  const handleDeleteTask = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsShowDeleteModal(true);
+
+    Modal.confirm({
+      title: '删除任务',
+      icon: <ExclamationOutlined />,
+      content: '确定删除该任务吗？',
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        dispatch.task.deleteTask(id);
+        navigate('/tasks');
+      },
+    });
   };
+
+  // TODO: 以下代码需要优化 =============================
   const [activeTxt, setActiveTxt] = useState('JSON');
   const [isShowModal, setIsShowModal] = useState(false);
   const clickOk = (e: any) => {
@@ -44,9 +61,7 @@ const TaskCard = (props: any) => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowModal(false);
-    outputSamples(id, activeTxt).catch((error) => {
-      commonController.notificationErrorMessage(error, 1);
-    });
+    outputSamples(id, activeTxt);
   };
 
   const clickCancel = (e: any) => {
@@ -67,12 +82,8 @@ const TaskCard = (props: any) => {
     e.preventDefault();
     setIsShowDeleteModal(false);
     deleteTask(id)
-      .then((res: any) => {
-        if (res.status === 200) {
-          navigate('/tasks?' + new Date().getTime());
-        } else {
-          commonController.notificationErrorMessage({ message: '删除不成功' }, 100);
-        }
+      .then(() => {
+        navigate('/tasks?' + new Date().getTime());
       })
       .catch((_e) => commonController.notificationErrorMessage(_e, 1));
   };
@@ -87,20 +98,9 @@ const TaskCard = (props: any) => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
   };
-  const [isShowTwoButtons, setIsShowTwoButtons] = useState(0);
-  const [isShowBlue, setIsShowBlue] = useState('');
 
   return (
-    <FlexItem
-      className={currentStyles.cardWrapper}
-      onClick={turnToAnnotation}
-      onMouseOver={() => {
-        setIsShowTwoButtons(id);
-      }}
-      onMouseLeave={() => {
-        setIsShowTwoButtons(0);
-      }}
-    >
+    <FlexItem className={currentStyles.cardWrapper} onClick={turnToAnnotation}>
       <div className={currentStyles.cardInner}>
         <div className={currentStyles.item}>
           <div className={currentStyles.itemLeft}>
@@ -116,78 +116,28 @@ const TaskCard = (props: any) => {
               </div>
             )}
           </div>
-          {isShowTwoButtons === id && (
-            <div className={currentStyles.icons2}>
-              <div
-                className={currentStyles.upload}
-                onClick={(e: any) => {
-                  e.nativeEvent.stopImmediatePropagation();
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setIsShowModal(true);
-                }}
-              >
-                <Tooltip placement={'top'} title={'数据导出'}>
-                  {isShowBlue !== 'outputData' && (
-                    <img
-                      src="/src/icons/outputData1.svg"
-                      onMouseOver={() => {
-                        setIsShowBlue('outputData');
-                      }}
-                      onMouseLeave={() => {
-                        setIsShowBlue('');
-                      }}
-                      alt=""
-                    />
-                  )}
-                  {isShowBlue === 'outputData' && (
-                    <img
-                      src="/src/icons/outputDataBlue.svg"
-                      onMouseOver={() => {
-                        setIsShowBlue('outputData');
-                      }}
-                      onMouseLeave={() => {
-                        setIsShowBlue('');
-                      }}
-                      alt=""
-                    />
-                  )}
-                  {/*<UploadOutlined />*/}
+          <div className={currentStyles.actions}>
+            <div
+              className={currentStyles.upload}
+              onClick={(e: any) => {
+                e.nativeEvent.stopImmediatePropagation();
+                e.stopPropagation();
+                e.preventDefault();
+                setIsShowModal(true);
+              }}
+            >
+              <Tooltip placement={'top'} title={'数据导出'}>
+                <Icon className={currentStyles.actionIcon} component={OutputIcon} />
+              </Tooltip>
+            </div>
+            {userInfo.username === cardInfo.created_by.username && (
+              <div onClick={handleDeleteTask} className={currentStyles.delete}>
+                <Tooltip title={'删除项目'} placement={'top'}>
+                  <Icon className={currentStyles.actionIcon} component={DeleteIcon} />
                 </Tooltip>
               </div>
-              {localUserEmail === cardInfo.created_by.username && (
-                <div onClick={deleteTaskLocal} className={currentStyles.delete}>
-                  <Tooltip title={'删除项目'} placement={'top'}>
-                    {isShowBlue !== 'delete' && (
-                      <img
-                        src="/src/icons/delete.svg"
-                        onMouseOver={() => {
-                          setIsShowBlue('delete');
-                        }}
-                        onMouseLeave={() => {
-                          setIsShowBlue('');
-                        }}
-                        alt=""
-                      />
-                    )}
-                    {isShowBlue === 'delete' && (
-                      <img
-                        src="/src/icons/deleteBlue.svg"
-                        onMouseOver={() => {
-                          setIsShowBlue('delete');
-                        }}
-                        onMouseLeave={() => {
-                          setIsShowBlue('');
-                        }}
-                        alt=""
-                      />
-                    )}
-                    {/*<DeleteOutlined/>*/}
-                  </Tooltip>
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
         <div className={currentStyles.item} style={{ marginTop: '8px' }}>
           {cardInfo.created_by?.username}

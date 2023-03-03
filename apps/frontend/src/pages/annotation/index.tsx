@@ -3,9 +3,11 @@ import { useLocation } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash-es';
 
+import { getTask } from '@/services/task';
+
 import Annotation from '../../components/business/annotation';
 import currentStyles from './index.module.scss';
-import { getTask, getSample, getPreSample } from '../../services/samples';
+import { getSample, getPreSample } from '../../services/samples';
 import commonController from '../../utils/common/common';
 import SlideLoader from '../../components/slideLoader';
 import { updateCurrentSample, updateCurrentSampleId } from '../../stores/sample.store';
@@ -22,28 +24,14 @@ const AnnotationPage = () => {
   const [taskSample, setTaskSample] = useState<any>([]);
 
   const getDatas = async function (taskId: number, sampleId: number) {
-    try {
-      const taskRes = await getTask(taskId);
-      // @ts-ignore
-      if (taskRes.status === 200) {
-        // @ts-ignore
-        setTaskConfig(JSON.parse(taskRes?.data.data.config));
-      } else {
-        commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
-        return;
-      }
-      const sampleRes = await getSample(taskId, sampleId);
-      // 更新store里面的currentSample
-      dispatch(updateCurrentSample(sampleRes?.data?.data));
-      if (sampleRes.status === 200) {
-        const newSample = commonController.transformFileList(sampleRes.data.data.data, sampleRes.data.data.id);
-        setTaskSample(newSample);
-      } else {
-        commonController.notificationErrorMessage({ message: '请求任务出错' }, 1);
-      }
-    } catch (err) {
-      commonController.notificationErrorMessage(err, 1);
-    }
+    const taskRes = await getTask(taskId);
+    setTaskConfig(JSON.parse(taskRes?.data.config));
+
+    const sampleRes = await getSample(taskId, sampleId);
+    // @ts-ignore 更新store里面的currentSample
+    dispatch(updateCurrentSample(sampleRes?.data));
+    const newSample = commonController.transformFileList(sampleRes.data.data, sampleRes.data.id);
+    setTaskSample(newSample);
   };
   const sampleId = parseInt(window.location.pathname.split('/')[4]);
 
