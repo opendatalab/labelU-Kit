@@ -109,6 +109,20 @@ class CuboidOperation extends BasicToolOperation {
     return this.cuboidList.find((v) => v.id === this.selectedID);
   }
 
+  /**
+   * Whether the mouse is in the hover range.
+   * @param e
+   * @returns
+   */
+  public getIsHoverSelectedCuboid(e: MouseEvent) {
+    const currentCoord = this.getCoordinateUnderZoom(e);
+    const selectedCuboid = this.selectedCuboid;
+    return (
+      selectedCuboid &&
+      AxisUtils.isCloseCuboid(currentCoord, AxisUtils.changeCuboidByZoom(selectedCuboid, this.zoom) as ICuboid)
+    );
+  }
+
   public getHoverID = (e: MouseEvent) => {
     const coordinate = this.getCoordinateUnderZoom(e);
 
@@ -253,10 +267,10 @@ class CuboidOperation extends BasicToolOperation {
       return;
     }
 
-    const hoverID = this.getHoverID(e);
-
-    // Drag must be done only if the hoverID and selectedID are the same.
-    if (hoverID !== this.selectedID) {
+    /**
+     * Dragging must be within the selectedCuboid range of the hover.
+     */
+    if (!this.getIsHoverSelectedCuboid(e)) {
       return;
     }
 
@@ -270,10 +284,6 @@ class CuboidOperation extends BasicToolOperation {
     const highlightInfo = AxisUtils.returnClosePointOrLineInCuboid(
       dragStartCoord,
       AxisUtils.changeCuboidByZoom(selectedCuboid, this.zoom) as ICuboid,
-      {
-        zoom: 1 / this.zoom,
-        scope: 5,
-      },
     );
 
     // Just use the first one.

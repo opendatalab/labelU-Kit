@@ -1,13 +1,13 @@
 import { EToolName, ELineTypes } from '@/constant/tool';
 import type { ICoordinate, IPoint, ISize } from '@/types/tool/common';
 import type { IRect, IRectConfig } from '@/types/tool/rectTool';
+import type { ICuboid, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
 
 import type { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
 import MathUtils from '../MathUtils';
 import PolygonUtils from './PolygonUtils';
 import LineToolUtils, { POINT_RADIUS } from './LineToolUtils';
-import { getHighlightLines, getHighlightPoints } from './CuboidUtils';
-import { ICuboid, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
+import { getCuboidHoverRange, getHighlightLines, getHighlightPoints } from './CuboidUtils';
 
 export default class AxisUtils {
   /**
@@ -243,6 +243,62 @@ export default class AxisUtils {
   }
 
   /**
+   * Judge the mousePoint is in the hoverRange of cuboid.
+   * @param checkPoint
+   * @param cuboid
+   * @param options
+   * @returns
+   */
+  public static isCloseCuboid(
+    checkPoint: ICoordinate,
+    cuboid: ICuboid,
+    options: Partial<{ scope: number; zoom: number }> = { scope: 5, zoom: 1 },
+  ) {
+    const points = getHighlightPoints(cuboid);
+    const { scope = 5 } = options;
+
+    // 1. Points.
+    for (let i = 0; i < points.length; i++) {
+      const pointData = points[i];
+      if (this.getIsInScope(checkPoint, pointData.point, scope)) {
+        return true;
+      }
+    }
+
+    // 2. Line.
+    const lines = getHighlightLines(cuboid);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, line.p1, line.p2, true);
+      if (length < scope) {
+        return true;
+      }
+    }
+
+    // 3. Plain.
+    if (PolygonUtils.isInPolygon(checkPoint, getCuboidHoverRange(cuboid))) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Judge the mousePoint is in the hoverRange of cuboidList.
+   * @param checkPoint
+   * @param cuboid
+   * @param options
+   * @returns
+   */
+  public static isCloseCuboidList(
+    checkPoint: ICoordinate,
+    cuboidList: ICuboid[],
+    options: Partial<{ scope: number; zoom: number }> = { scope: 5, zoom: 1 },
+  ) {
+    return cuboidList.some((cuboid) => this.isCloseCuboid(checkPoint, cuboid, options));
+  }
+
+  /**
    * Point > Line
    * @param checkPoint
    * @param cuboid
@@ -251,10 +307,10 @@ export default class AxisUtils {
   public static returnClosePointOrLineInCuboid(
     checkPoint: ICoordinate,
     cuboid: ICuboid,
-    options: Partial<{ scope: number; zoom: number }> = { scope: 3, zoom: 1 },
+    options: Partial<{ scope: number; zoom: number }> = { scope: 5, zoom: 1 },
   ) {
     const points = getHighlightPoints(cuboid);
-    const { scope = 3, zoom = 1 } = options;
+    const { scope = 5, zoom = 1 } = options;
 
     // 1. Points
     for (let i = 0; i < points.length; i++) {
