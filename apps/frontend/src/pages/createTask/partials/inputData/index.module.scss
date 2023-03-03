@@ -1,4 +1,4 @@
-@import '../../utils/common/common.module';
+@import '@/utils/common/common.module';
 .outerFrame {
   @extend .displayFlex;
   @extend .flexDirectionColumn;
@@ -46,11 +46,11 @@
 }
 
 .left {
-  flex: 1;
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   justify-content: flex-start;
   align-items: flex-start;
+  width: 414px;
 }
 .leftTitle {
   flex: 1;
@@ -64,9 +64,6 @@
 .dragAndDrop {
   margin-left: 16px;
   margin-top: 16px;
-  flex: 1;
-  width: 354px;
-  width: 390px;
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   justify-content: flex-start;
@@ -78,14 +75,14 @@
 }
 .survey {
   //background-image: url('../../assets/png/uploadSurvey.png');
-  background-image: url('../../assets/svg/上传.svg');
+  background-image: url('@/assets/svg/上传.svg');
   background-position: 0 0;
   width: 245px;
   width: 100%;
   height: 179px;
 }
 .uploadIcon {
-  background-image: url('../../assets/png/upload.png');
+  background-image: url('@/assets/png/upload.png');
   width: 12px;
   height: 15px;
 }
@@ -93,27 +90,23 @@
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   flex: 2;
-  width: 918px;
-  width: 894px;
-  //width : 100%;
+  padding: 1.5rem 0 1.5rem 1.5rem;
   height: calc(100vh - 230px);
   overflow-y: scroll;
 
   justify-content: flex-start;
   align-items: flex-start;
   border-left: 1px solid rgba(0, 0, 0, 0.05);
-  //border: 1px solid red;
+
+  :global(.ant-table-thead > tr > th) {
+    background: #fff;
+  }
 }
 .rightTitle {
-  width: 918px;
-  width: calc(100% - 24px);
-  flex: 1;
   @extend .displayFlex;
   @extend .flexDirectionRow;
   justify-content: flex-start;
   align-items: center;
-  margin-top: 24px;
-  margin-left: 24px;
 }
 .rightTitleLeft {
   color: rgba(0, 0, 0, 0.72);
@@ -121,6 +114,13 @@
   font-size: 14px;
   line-height: 24px;
   margin-right: 8px;
+}
+
+.spot {
+  width: 0.5rem;
+  height: 0.5rem;
+  display: inline-block;
+  border-radius: 50%;
 }
 
 .rightTitleRight {
@@ -139,9 +139,7 @@
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   justify-content: flex-start;
-  //align-items: center;
-  width: 918px;
-  //width : 100%;
+  width : 100%;
   flex: 1;
   margin-top: 16px;
   //margin-left:24px;

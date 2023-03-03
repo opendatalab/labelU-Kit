@@ -47,7 +47,7 @@ export default function Status({
   ...restProps
 }: StatusProps) {
   const color = restProps.color ?? typeColorMapping[type];
-  const style = useMemo(() => ({ color, ...restProps.style }), [color, restProps.style]);
+  const style = useMemo(() => ({ color, '--status-color': color, ...restProps.style }), [color, restProps.style]);
 
   return (
     <IconText className={className} icon={icon} style={style}>

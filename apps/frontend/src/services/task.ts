@@ -9,6 +9,8 @@ import type {
   ListByApiV1TasksGetParams,
   OkRespAttachmentResponse,
   CreateApiV1TasksTaskIdAttachmentsPostParams,
+  DeleteApiV1TasksTaskIdAttachmentsDeleteParams,
+  AttachmentDeleteCommand,
 } from './types';
 
 export async function getTask(taskId: number): Promise<OkRespTaskResponseWithStatics> {
@@ -38,6 +40,16 @@ export async function uploadFile(
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
+  });
+}
+
+export async function deleteFile(
+  { task_id, ...restParams }: DeleteApiV1TasksTaskIdAttachmentsDeleteParams,
+  body: AttachmentDeleteCommand,
+): Promise<OkRespCommonDataResp> {
+  return await request.delete(`/v1/tasks/${task_id}/attachments`, {
+    params: restParams,
+    data: body,
   });
 }
 

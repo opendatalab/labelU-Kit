@@ -65,46 +65,18 @@ const routes: RouteObject[] = [
           {
             path: 'edit',
             element: <CreateTask />,
-            loader: taskLoader,
+            loader: async ({ params }) => {
+              return params.taskId !== '0' ? '任务编辑' : '新建任务';
+            },
             handle: {
-              crumb: () => {
-                return '任务配置';
+              crumb: (data: string) => {
+                return data;
               },
             },
-            // children: [
-            //   {
-            //     path: 'basic',
-            //     element: <InputInfoConfig />,
-            //     handle: {
-            //       crumb: () => {
-            //         return '基本信息配置';
-            //       },
-            //     },
-            //   },
-            //   {
-            //     path: 'upload',
-            //     element: <InputData />,
-            //     handle: {
-            //       crumb: () => {
-            //         return '数据导入';
-            //       },
-            //     },
-            //   },
-            //   {
-            //     path: 'config',
-            //     element: <AnnotationConfig />,
-            //     handle: {
-            //       crumb: () => {
-            //         return '标注配置';
-            //       },
-            //     },
-            //   },
-            // ],
           },
           {
             path: 'samples',
             element: <Outlet />,
-            loader: taskLoader,
             children: [
               {
                 path: ':sampleId',

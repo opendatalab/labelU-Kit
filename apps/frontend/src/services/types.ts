@@ -38,8 +38,8 @@ export interface CreateApiV1TasksTaskIdSamplesPostParams {
 }
 
 export interface SampleData {
-  id: number;
-  state: SampleState;
+  id?: number;
+  state?: SampleState;
   result: string;
   fileNames: Record<number, string>;
   urls: Record<number, string>;
@@ -256,7 +256,7 @@ export interface TaskResponse {
   /** Config description: task config content */
   config?: string;
   /** Media Type description: task media type: IMAGE, VIDEO */
-  media_type?: string;
+  media_type?: MediaType;
   /** Status description: task status: DRAFT, IMPORTED, CONFIGURED, INPROGRESS, FINISHED */
   status?: string;
   /** Created At description: task created at time */
@@ -277,7 +277,7 @@ export interface TaskResponseWithStatics {
   /** Config description: task config content */
   config?: string;
   /** Media Type description: task media type: IMAGE, VIDEO */
-  media_type?: string;
+  media_type?: MediaType;
   /** Status description: task status: DRAFT, IMPORTED, CONFIGURED, INPROGRESS, FINISHED */
   status?: string;
   /** Created At description: task created at time */

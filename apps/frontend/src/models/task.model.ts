@@ -9,6 +9,8 @@ import type {
   TaskResponse,
 } from '@/services/types';
 import { createTaskWithBasicConfig, deleteTask, getTask, getTaskList, updateTaskConfig } from '@/services/task';
+import type { ToolsConfigState } from '@/types/toolConfig';
+import { jsonParse } from '@/utils';
 
 import type { RootModel } from './index';
 
@@ -17,6 +19,7 @@ export const task = createModel<RootModel>()({
     list: [] as unknown as TaskListResponseWithStatics,
     item: {} as TaskResponseWithStatics,
     new: {} as TaskResponse,
+    config: {} as ToolsConfigState,
   },
 
   reducers: {
@@ -28,9 +31,12 @@ export const task = createModel<RootModel>()({
     },
 
     setTask: (state, payload: TaskResponseWithStatics) => {
+      const parsedConfig = payload.config ? jsonParse(payload.config) : undefined;
+
       return {
         ...state,
         item: payload,
+        config: parsedConfig,
       };
     },
 
@@ -38,6 +44,21 @@ export const task = createModel<RootModel>()({
       return {
         ...state,
         new: payload,
+      };
+    },
+
+    setConfig: (state, payload: ToolsConfigState) => {
+      return {
+        ...state,
+        config: payload,
+      };
+    },
+
+    // 当新建或编辑任务时，页面卸载时清空任务信息
+    clearItem: (state) => {
+      return {
+        ...state,
+        item: {} as TaskResponseWithStatics,
       };
     },
   },
@@ -53,8 +74,17 @@ export const task = createModel<RootModel>()({
       dispatch.task.setTask(data);
     },
 
-    async updateTaskConfig({ taskId, config }: { taskId: number; config: UpdateCommand }) {
-      const { data } = await updateTaskConfig(taskId, config);
+    async updateTaskConfig({
+      taskId,
+      body,
+    }: {
+      taskId: number;
+      body: Omit<UpdateCommand, 'config'> & { config: ToolsConfigState };
+    }) {
+      const { data } = await updateTaskConfig(taskId, {
+        ...body,
+        config: body.config ? JSON.stringify(body.config) : undefined,
+      });
 
       dispatch.task.setTask(data);
     },
@@ -63,8 +93,9 @@ export const task = createModel<RootModel>()({
       const { data } = await createTaskWithBasicConfig(body);
 
       dispatch.task.setNewTask(data);
-    },
 
+      return data;
+    },
     deleteTask,
   }),
 });

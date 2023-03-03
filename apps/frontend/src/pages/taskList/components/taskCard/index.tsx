@@ -8,15 +8,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Dispatch, RootState } from '@/store';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import { ReactComponent as OutputIcon } from '@/assets/svg/outputData.svg';
+import commonController from '@/utils/common/common';
+import { outputSamples } from '@/services/samples';
+import { deleteTask } from '@/services/task';
+import FlexItem from '@/components/FlexItem';
+import Status from '@/components/Status';
+import IconText from '@/components/IconText';
+import currentStyles1 from '@/pages/outputData/index.module.scss';
 
-import commonController from '../../utils/common/common';
-import { outputSamples } from '../../services/samples';
 import currentStyles from './index.module.scss';
-import { deleteTask } from '../../services/task';
-import currentStyles1 from '../../pages/outputData/index.module.scss';
-import FlexItem from '../FlexItem';
-import Status from '../Status';
-import IconText from '../IconText';
 
 const TaskCard = (props: any) => {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);

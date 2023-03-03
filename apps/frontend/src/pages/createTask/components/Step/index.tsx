@@ -1,17 +1,14 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { CheckOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 
-import commonController from '@/utils/common/common';
-import history from '@/routes/history';
 import Separator from '@/components/separator';
 
 import styles from './index.module.scss';
 
-interface StepData {
+export interface StepData {
   title: string;
-  value: string | number;
+  value: any;
   isFinished?: boolean;
 }
 
@@ -46,23 +43,16 @@ const StepItem = ({ step, index, showStepNumber, isEnd, onClick, active }: StepI
 interface StepProps {
   steps: StepData[];
   showStepNumber?: boolean;
-  currentStep: string | number;
+  currentStep: any;
   onNext: (step: StepData) => void;
   onPrev: (step: StepData) => void;
 }
 
 export default function Step({ steps, currentStep, showStepNumber = false, onNext, onPrev }: StepProps) {
-  const navigate = useNavigate();
-
   const currentStepIndex = steps.findIndex((step) => step.value === currentStep);
   const currentStepData = steps[currentStepIndex];
 
   const handleOnClick = (step: StepData, index: number) => {
-    if (currentStepIndex < index && !currentStepData.isFinished) {
-      commonController.notificationWarnMessage({ message: '请先完成上一步配置，再进行下一步操作' }, 1);
-      return;
-    }
-
     if (index > currentStepIndex && typeof onNext === 'function') {
       onNext(step);
     }
@@ -70,8 +60,6 @@ export default function Step({ steps, currentStep, showStepNumber = false, onNex
     if (index < currentStepIndex && typeof onPrev === 'function') {
       onPrev(step);
     }
-
-    navigate(`${history.location.pathname}#${step.value}`);
   };
 
   return (

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Dispatch, RootState } from '@/store';
 
 import currentStyles from './index.module.scss';
-import TaskCard from '../../components/taskCard';
+import TaskCard from './components/taskCard';
 import NullTask from '../nullTask';
 
 const TaskList = () => {

@@ -1,4 +1,4 @@
-@import '../../utils/common/common.module';
+@import '@/utils/common/common.module';
 
 .cardWrapper {
   padding: var(--margin-horizontal);
@@ -123,7 +123,6 @@
   justify-content: flex-end;
   align-items: center;
   width: 60px;
-  margin-right: 24px;
   display: none;
   color: #A3A3A3;
 
