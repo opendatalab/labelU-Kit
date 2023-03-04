@@ -6,12 +6,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import _ from 'lodash-es';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
+import { validateTools } from '@/utils/tool/common';
 
 import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
 import CommonFormItem from '../components/commonFormItems';
 import { LoadInitConfig } from '../configTemplate/config';
-import { validateTools } from '../../../utils/tool/common';
 
 const { Option } = Select;
 
@@ -30,7 +30,7 @@ interface IProps {
 }
 
 const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
-  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = config;
+  const { tools = [], tagList = [], attribute = [], textConfig = [], commonAttributeConfigurable } = config || {};
   const children = [];
   const [media, setMedia] = useState<string>('图片');
   const [selectTools, setSelectTools] = useState<string[]>([]);
@@ -115,7 +115,7 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
     }
 
     setSelectTools(toolNames);
-  }, [selectTools, tagList.length, textConfig.length, tools]);
+  }, [selectTools, tagList?.length, textConfig?.length, tools]);
 
   const [height, setHeight] = useState<number>(0);
 

@@ -57,23 +57,7 @@ const Statistical = () => {
     getSamplesLocal({ pageNo: 0, pageSize: 10 });
   };
   const turnToTaskConfig = () => {
-    //   getTask(taskId).then((res:any)=>{
-    //   if (res.status === 200) {
-    //     console.log(res.data.data);
-    //     dispatch(updateTask({data:res.data.data}));
-    //     if (res.data.data.config){
-    //       dispatch(updateAllConfig(JSON.parse(res.data.data.config)));
-    //     }
-    //   }else{
-    //     commonController.notificationErrorMessage({message : '请求任务状态不是200'},1)
-    //   }
-    // }).catch(error=>commonController.notificationErrorMessage(error,1))
-    dispatch(updateStatus(taskStatus));
-    if (taskStatus !== 'CONFIGURED') {
-      navigate('/tasks/' + taskId + '/edit/config?currentStatus=2&noConfig=1');
-    } else {
-      navigate('/tasks/' + taskId + '/edit/config?currentStatus=2');
-    }
+    navigate('/tasks/' + taskId + '/edit#config');
   };
   const turnToInputData = () => {
     dispatch(updateStatus(taskStatus));

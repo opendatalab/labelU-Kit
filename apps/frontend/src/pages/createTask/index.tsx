@@ -1,13 +1,14 @@
-// @ts-ignore
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Modal } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
+import { merge, omit, set } from 'lodash/fp';
 
 import type { BasicConfigCommand, TaskResponse } from '@/services/types';
+import { TaskStatus, MediaType } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
-import AnnotationConfig from '@/pages/annotationConfig';
+import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
 import type { QueuedFile } from '@/pages/createTask/partials/inputData';
 import InputData, { UploadContext } from '@/pages/createTask/partials/inputData';
 import type { ToolsConfigState } from '@/types/toolConfig';
@@ -34,7 +35,7 @@ const stepTitleMapping = {
 const partialMapping = {
   [StepEnum.Basic]: InputInfoConfig,
   [StepEnum.Upload]: InputData,
-  [StepEnum.Config]: () => <div />, //AnnotationConfig,
+  [StepEnum.Config]: AnnotationConfig,
 };
 
 interface TaskStep extends StepData {
@@ -94,17 +95,17 @@ const CreateTask = () => {
     {
       title: stepTitleMapping[StepEnum.Upload],
       value: StepEnum.Upload,
-      isFinished: isExistTask,
+      isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(_.get(taskData, 'status') as TaskStatus),
     },
     {
       title: stepTitleMapping[StepEnum.Config],
       value: StepEnum.Config,
-      isFinished: isExistTask,
+      isFinished: _.get(taskData, 'status') === TaskStatus.CONFIGURED,
     },
   ];
 
-  const updateFormData = (field: string) => (value: unknown) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const updateFormData = (field: string) => (value: any) => {
+    setFormData(set(field)(value));
   };
 
   useEffect(() => {
@@ -121,8 +122,8 @@ const CreateTask = () => {
       return;
     }
 
-    updateFormData('config')(toolsConfig);
-  }, [toolsConfig]);
+    updateFormData('config')(_.merge(formData.config, toolsConfig || {}));
+  }, [formData.config, toolsConfig]);
 
   // 将store中的task数据同步到本地页面中
   useEffect(() => {
@@ -130,11 +131,11 @@ const CreateTask = () => {
       return;
     }
 
-    setFormData({
-      ...(taskData as unknown as TaskFormData),
-      config: toolsConfig,
-    });
-  }, [taskData, toolsConfig]);
+    setFormData((pre) => ({
+      ...omit(['config'])(taskData),
+      ...pre,
+    }));
+  }, [taskData]);
 
   useEffect(() => {
     if (isExistTask && _.isEmpty(taskData)) {
@@ -161,7 +162,10 @@ const CreateTask = () => {
     return dispatch.task
       .updateTaskConfig({
         taskId: taskId,
-        body: formData,
+        body: {
+          ...formData,
+          media_type: MediaType.IMAGE,
+        },
       })
       .then(() => {
         navigate('/tasks');
@@ -185,7 +189,7 @@ const CreateTask = () => {
     }
 
     if (isExistTask) {
-      if (currentStep === StepEnum.Upload) {
+      if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList)) {
         await createSamples(
           taskId,
           _.map(uploadFileList, (item) => ({
@@ -202,6 +206,7 @@ const CreateTask = () => {
           })),
         );
       }
+
       return dispatch.task.updateTaskConfig({
         taskId: taskId,
         body: formData,

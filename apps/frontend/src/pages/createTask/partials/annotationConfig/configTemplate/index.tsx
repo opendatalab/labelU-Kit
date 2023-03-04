@@ -1,13 +1,17 @@
 import { Button, Tabs } from 'antd';
 import type { FC } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router';
 
-import DrageModel from '../../../components/basic/modal';
-import './index.scss';
+import DrageModel from '@/components/basic/modal';
+import { getTask } from '@/services/task';
+import commonController from '@/utils/common/common';
+
 import { getLabelConfig } from './config';
 import TmplateBox from './tmplateBox';
-import { getTask } from '../../../services/task';
-import commonController from '../../../utils/common/common';
+
+import './index.scss';
+
 type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 
 interface LabelType {
@@ -19,6 +23,8 @@ interface LabelType {
 // test
 const ConfigTemplate: FC = () => {
   const modalRef = useRef<any>();
+  const routeParams = useParams();
+  const taskId = routeParams.taskId;
   const [labelTypes, setLabelTypes] = useState<LabelType[]>([
     {
       label: '图片',
@@ -53,7 +59,6 @@ const ConfigTemplate: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    const taskId = parseInt(window.location.pathname.split('/')[2]);
     getTask(taskId)
       .then(({ data }) => {
         const newTaskStatus = data.status;

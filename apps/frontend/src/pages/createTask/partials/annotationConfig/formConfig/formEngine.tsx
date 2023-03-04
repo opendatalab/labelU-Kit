@@ -6,6 +6,8 @@ import { EToolName } from '@label-u/annotation';
 import { Popconfirm } from 'antd';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
+import { RootState } from '@/store';
+import { TaskStatus } from '@/services/types';
 
 import RectConfigForm from './templates/rectConfigForm';
 import LineConfigForm from './templates/lineConfigForm';
@@ -14,7 +16,7 @@ import TagConfigForm from './templates/tagConfigForm';
 import TextConfigForm from './templates/textConfigForm';
 import PolygonConfigForm from './templates/polygonConfigForm';
 import './formEngine.scss';
-import { updateStatus } from '../../../stores/task.store';
+
 interface FormEngineProps {
   toolName: string;
   toolConfig: BasicConfig;
@@ -35,11 +37,9 @@ const FormMapping: Record<string, React.FC<any>> = {
 
 const FormEngine: FC<FormEngineProps> = (props) => {
   const { updateTextConfig, updateTagList, updateTools, toolName, config, toolConfig } = props;
-  // @ts-ignore
   const { tagList, textConfig, tools } = config;
-  // @ts-ignore
-  const taskStatus = useSelector((state) => state.existTask.status);
-  const dispatch = useDispatch();
+
+  const taskStatus = useSelector((state: RootState) => state.task.item.status);
   const ConfigTool = useMemo(() => {
     if (!toolName) {
       return null;
@@ -47,6 +47,14 @@ const FormEngine: FC<FormEngineProps> = (props) => {
 
     return FormMapping[toolName];
   }, [toolName]);
+
+  const deletable = useMemo(() => {
+    if (!taskStatus || ![TaskStatus.DRAFT, TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(taskStatus)) {
+      return true;
+    }
+
+    return false;
+  }, []);
 
   // 删除工具
   const deleteTool = (_toolName: string) => {
@@ -67,24 +75,12 @@ const FormEngine: FC<FormEngineProps> = (props) => {
     deleteTool(toolName);
   };
 
-  const [isShowDelete, setIsShowDelete] = useState(true);
-  useEffect(() => {
-    if (!taskStatus) {
-      // @ts-ignore
-      dispatch(updateStatus('IMPORTED'));
-      setIsShowDelete(true);
-    } else {
-      if (taskStatus !== 'DRAFT' && taskStatus !== 'IMPORTED' && taskStatus !== 'CONFIGURED') {
-        setIsShowDelete(false);
-      }
-    }
-  }, [dispatch, taskStatus]);
   return (
     <div>
       {ConfigTool && (
         <ConfigTool tagList={tagList} textConfig={textConfig} name={toolName} {...toolConfig}>
           <Popconfirm title="您确定要删除该工具吗？" okText="确认" cancelText="取消" onConfirm={handleOk}>
-            {isShowDelete && <span className="deleteTab">删除工具</span>}
+            {deletable && <span className="deleteTab">删除工具</span>}
           </Popconfirm>
         </ConfigTool>
       )}

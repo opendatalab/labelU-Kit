@@ -4,7 +4,7 @@ import type { FormInstance } from 'antd';
 import { Form, InputNumber, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import type { ItextConfig } from '../TextList';
+import type { ItextConfig } from '.';
 const { TextArea } = Input;
 
 interface IProps {

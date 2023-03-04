@@ -12,16 +12,16 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 
-import jsonToyam from '../../utils/jsonToyml';
+import jsonToyam from '../../../../utils/jsonToyml';
 import ConfigNotMatchImg from '../../img/annotationCommon/configNotMatch.png';
 import {
   updateAllAttributeConfigList,
   updateTagConfigList,
   updateTextConfig,
   updateToolsConfig,
-} from '../../stores/toolConfig.store';
-import { compare } from '../../utils';
-import { validateTools } from '../../utils/tool/common';
+} from '../../../../stores/toolConfig.store';
+import { compare } from '../../../../utils';
+import { validateTools } from '../../../../utils/tool/common';
 
 interface YamlConfigProps {
   toolsConfigState: ToolsConfigState;

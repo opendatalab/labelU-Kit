@@ -2,7 +2,7 @@ import { isObject } from 'lodash-es';
 import type { ReactNode } from 'react';
 import type { BasicConfig } from '@label-u/components';
 
-import { toolnameC } from '../../pages/annotationConfig/formConfig/constants';
+import { toolnameC } from '../../pages/createTask/partials/annotationConfig/formConfig/constants';
 
 export function checkNumber(v: string) {
   const reg = /^[1-9]\d*$/g;

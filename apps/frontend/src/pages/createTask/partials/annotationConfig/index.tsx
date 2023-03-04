@@ -1,16 +1,15 @@
-import type { FC } from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import AnnotationOperation from '@label-u/components';
 import { useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash-es';
 
-import type { ToolsConfigState } from '@/types/toolConfig';
-import { updateAllConfig } from '@/stores/toolConfig.store';
+import type { Dispatch, RootState } from '@/store';
+import EmptyConfigImg from '@/img/annotationCommon/emptyConfig.png';
 
-import EmptyConfigImg from '../../img/annotationCommon/emptyConfig.png';
 import ConfigTemplate from './configTemplate/index';
 import FormConfig from './formConfig';
-import { getSamples } from '../../services/samples';
 import './index.scss';
+import type { PartialConfigProps } from '../..';
 
 interface OneFile {
   id: number;
@@ -25,72 +24,57 @@ const defaultFile: OneFile = {
 };
 
 // 配置页的config统一使用此组件的state
-const AnnotationConfig: FC = () => {
-  const dispatch = useDispatch();
-  const taskId = parseInt(window.location.pathname.split('/')[2]);
+const AnnotationConfig = ({ task = {}, formData, updateFormData }: PartialConfigProps) => {
+  const dispatch = useDispatch<Dispatch>();
+  const taskId = task.id;
 
-  const [fileList, setFileList] = useState<OneFile[]>([defaultFile]);
+  const samples = useSelector((state: RootState) => state.sample.list);
+  const {
+    config = {
+      tools: [],
+      tagList: [],
+      attribute: [],
+      textConfig: [],
+      commonAttributeConfigurable: false,
+    },
+  } = formData;
+
+  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = config || {};
+
+  const headSample = useMemo(() => _.chain(samples).get('data').head().value(), [samples]);
+  const previewFiles = useMemo(() => {
+    const id = _.chain(headSample).get('data.fileNames').keys().head().value();
+    if (!id) {
+      return [defaultFile];
+    }
+
+    return [
+      {
+        id,
+        url: _.get(headSample, `data.urls.${id}`),
+        result: _.get(headSample, `data.result`),
+      },
+    ];
+  }, [headSample]);
 
   useEffect(() => {
-    const loadFirstSample = async () => {
-      const { data: samples } = await getSamples(taskId, { pageNo: 0, pageSize: 1 });
+    if (!taskId) {
+      return;
+    }
 
-      // TODO:
-      if (samples != null && samples.length > 0) {
-        const firstSample = samples[0];
-
-        // bad code
-        const urls = firstSample.data.urls;
-        if (urls != null) {
-          const firstKey = Object.keys(urls)[0];
-          const firstUrl = urls[firstKey];
-
-          const oneFile: OneFile = {
-            id: 1,
-            url: firstUrl,
-            result: '{}',
-          };
-          setFileList([oneFile]);
-        }
-      }
-    };
-    loadFirstSample();
-  }, [taskId]);
-
-  const [config, setConfig] = useState<ToolsConfigState>({
-    tools: [],
-    tagList: [],
-    attribute: [],
-    textConfig: [],
-    commonAttributeConfigurable: false,
-  });
-  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = config;
+    dispatch.sample.fetchSamples({
+      task_id: taskId,
+      pageNo: 1,
+      pageSize: 1,
+    });
+  }, [dispatch.sample, taskId]);
 
   const updateConfig = useCallback(
     (field: string) => (value: any) => {
-      setConfig((prevState) => {
-        const newConfig = {
-          ...prevState,
-          [field]: value,
-        };
-
-        // 将config更新到store，以便其他组件使用，但本页面下的组件不要使用store中的数据而使用state中的数据
-        dispatch(updateAllConfig(newConfig));
-
-        return newConfig;
-      });
+      updateFormData(`config.${field}`)(value);
     },
-    [dispatch],
+    [updateFormData],
   );
-
-  const configFromStore = useSelector(
-    // @ts-ignore
-    (state) => state.toolsConfig,
-  );
-
-  useEffect(() => {
-    setConfig(configFromStore);
-  }, [configFromStore]);
 
   const [rightImg, setRightImg] = useState<any>();
   const [isConfigError] = useState<boolean>(false);
@@ -129,7 +113,7 @@ const AnnotationConfig: FC = () => {
           </div>
         </div>
         <div className="rightSider">
-          {((fileList && fileList.length > 0 && tools && tools.length > 0) || !rightImg) && !isConfigError ? (
+          {((tools && tools.length > 0) || !rightImg) && !isConfigError ? (
             <>
               <div className="rightHeader">
                 <span className="leftSpan">标注预览</span>
@@ -139,7 +123,7 @@ const AnnotationConfig: FC = () => {
                   isPreview={true}
                   attributeList={commonAttributeConfigurable ? attribute : []}
                   tagConfigList={tagList}
-                  imgList={fileList}
+                  imgList={previewFiles}
                   textConfig={textConfig}
                   goBack={goBack}
                   toolsBasicConfig={tools}

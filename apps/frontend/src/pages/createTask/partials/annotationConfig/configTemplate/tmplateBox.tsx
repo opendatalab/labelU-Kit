@@ -7,7 +7,7 @@ import {
   updateTagConfigList,
   updateTextConfig,
   updateToolsConfig,
-} from '../../../stores/toolConfig.store';
+} from '../../../../../stores/toolConfig.store';
 export interface Item {
   img: any;
   tmplateName: string;

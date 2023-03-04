@@ -4,10 +4,10 @@ import { useMemo, useState } from 'react';
 import { Col, Row, Input as SenseInput, Form, Select, Switch } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 
+import DownWardIcon from '@/img/common/downWardIcon.svg';
+import UpperIcon from '@/img/common/upperIcon.svg';
+
 import { MapStateJSONTab } from '../../components/AttributeConfig';
-// import SvgIcon from '../../../../components/basic/svgIcon';
-import DownWardIcon from '../../../../img/common/downWardIcon.svg';
-import UpperIcon from '../../../../img/common/upperIcon.svg';
 import type { AttributeItem } from './rectConfigForm';
 import { delayTime } from '../constants';
 const { Option } = Select;

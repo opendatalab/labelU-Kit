@@ -5,9 +5,9 @@ import { useForm } from 'antd/es/form/Form';
 import type { OneTag } from '@label-u/annotation';
 
 import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
+import { addInputList, changeInputList, deleteInputList } from '@/utils/tool/editTool';
 
 import TagInput from '../../components/TagInput';
-import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
 
 export interface AttributeItem {
   key: string;

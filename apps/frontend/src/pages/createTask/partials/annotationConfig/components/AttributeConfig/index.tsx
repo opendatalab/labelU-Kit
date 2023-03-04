@@ -5,8 +5,7 @@ import './index.scss';
 import { useTranslation } from 'react-i18next';
 
 import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
-
-import { addInputList, changeInputList, deleteInputList } from '../../../../utils/tool/editTool';
+import { addInputList, changeInputList, deleteInputList } from '@/utils/tool/editTool';
 
 interface IJsonTabProps {
   value?: any[];

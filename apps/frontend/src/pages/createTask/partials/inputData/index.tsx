@@ -1,19 +1,18 @@
 import type { SetStateAction, Dispatch } from 'react';
-import React, { useState, useEffect, useMemo, useCallback, useContext } from 'react';
+import React, { useMemo, useCallback, useContext } from 'react';
 import { v4 as uuid4 } from 'uuid';
 import type { TableColumnType } from 'antd';
 import { Popconfirm, Button, Tree, Table } from 'antd';
-import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
 import formatter from '@label-u/formatter';
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import type { RcFile } from 'antd/lib/upload/interface';
 
 import IconText from '@/components/IconText';
+import type { StatusType } from '@/components/Status';
 import Status from '@/components/Status';
 import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
 import commonController from '@/utils/common/common';
-import { updateNewSamples } from '@/stores/sample.store';
 import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
 
@@ -43,7 +42,6 @@ export interface QueuedFile {
   status: UploadStatus;
   path: string;
   file: File;
-  children?: QueuedFile[];
 }
 
 export const UploadContext = React.createContext<[QueuedFile[], Dispatch<SetStateAction<QueuedFile[]>>]>([
@@ -215,7 +213,7 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
           return (
             <div className={styles.fileItem}>
               <IconText icon={<FileIcon />}>
-                {formatter.format('ellipsis', text, { maxWidth: '100%', type: 'tooltip' })}
+                {formatter.format('ellipsis', text, { maxWidth: 540, type: 'tooltip' })}
               </IconText>
             </div>
           );
@@ -228,7 +226,7 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
         responsive: ['md', 'lg'],
         key: 'path',
         render: (text: string) => {
-          return formatter.format('ellipsis', text, { maxWidth: '100%', type: 'tooltip' });
+          return formatter.format('ellipsis', text, { maxWidth: 160, type: 'tooltip' });
         },
       },
       {
@@ -241,7 +239,7 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
         render: (text: UploadStatus, record: QueuedFile) => {
           return (
             <Status
-              type={_.lowerCase(record.status)}
+              type={_.lowerCase(record.status) as StatusType}
               icon={<span className={styles.spot} style={{ backgroundColor: 'var(--status-color)' }} />}
             >
               {statusTextMapping[text]}

@@ -31,9 +31,6 @@ const GoToEditTask = (props: any) => {
             tail = 'basic';
             break;
           case 'IMPORTED':
-            // tail = 'upload';
-            tail = 'config?currentStatus=3';
-            break;
           case 'CONFIGURED':
             tail = 'config';
             break;

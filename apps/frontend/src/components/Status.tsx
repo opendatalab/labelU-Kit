@@ -9,8 +9,10 @@ import { useMemo } from 'react';
 
 import IconText from './IconText';
 
+export type StatusType = 'success' | 'error' | 'warning' | 'waiting' | 'processing' | 'completed' | 'failed';
+
 export interface StatusProps {
-  type: 'success' | 'error' | 'warning' | 'waiting' | 'processing' | 'completed' | 'failed';
+  type: StatusType;
   className?: string;
   tooltip?: string;
   icon?: React.ReactNode;

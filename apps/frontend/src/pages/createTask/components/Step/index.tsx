@@ -18,11 +18,10 @@ interface StepItemProps {
   index: number;
   step: StepData;
   currentStep: StepData;
-  showStepNumber: boolean;
   onClick: (e: React.MouseEvent) => void;
 }
 
-const StepItem = ({ step, index, showStepNumber, isEnd, onClick, active }: StepItemProps) => {
+const StepItem = ({ step, index, isEnd, onClick, active }: StepItemProps) => {
   return (
     <div className={styles.stepItem}>
       <div
@@ -32,7 +31,7 @@ const StepItem = ({ step, index, showStepNumber, isEnd, onClick, active }: StepI
         })}
         onClick={onClick}
       >
-        <div className={styles.icon}>{showStepNumber ? index + 1 : <CheckOutlined />}</div>
+        <div className={styles.icon}>{step.isFinished ? <CheckOutlined /> : index + 1}</div>
         <div className={styles.title}> {step.title} </div>
       </div>
       {!isEnd && <Separator />}
@@ -42,13 +41,12 @@ const StepItem = ({ step, index, showStepNumber, isEnd, onClick, active }: StepI
 
 interface StepProps {
   steps: StepData[];
-  showStepNumber?: boolean;
   currentStep: any;
   onNext: (step: StepData) => void;
   onPrev: (step: StepData) => void;
 }
 
-export default function Step({ steps, currentStep, showStepNumber = false, onNext, onPrev }: StepProps) {
+export default function Step({ steps, currentStep, onNext, onPrev }: StepProps) {
   const currentStepIndex = steps.findIndex((step) => step.value === currentStep);
   const currentStepData = steps[currentStepIndex];
 
@@ -68,7 +66,6 @@ export default function Step({ steps, currentStep, showStepNumber = false, onNex
         return (
           <StepItem
             key={step.value}
-            showStepNumber={showStepNumber}
             active={currentStepIndex === index}
             onClick={() => handleOnClick(step, index)}
             step={step}
