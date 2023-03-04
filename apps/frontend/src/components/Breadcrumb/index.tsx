@@ -16,7 +16,7 @@ export interface Match {
 
 export interface BreadcrumbProps {
   className?: string;
-  // 有些页面不需要显示「数据管理」首页的字样，比如新建团队空间和空间设置
+  // 有些页面不需要显示首页的标题
   hideHome?: boolean;
   style?: React.CSSProperties;
 }
