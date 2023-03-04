@@ -15,13 +15,3 @@ export async function taskLoader({ params }: LoaderFunctionArgs) {
 
   return taskData.data;
 }
-
-export async function taskEditLoader({ params }: LoaderFunctionArgs) {
-  if (!params?.taskId) {
-    return null;
-  }
-
-  const taskData = await getTask(+params.taskId);
-
-  return taskData.data;
-}
