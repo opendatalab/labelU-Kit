@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
 import _ from 'lodash-es';
@@ -10,6 +10,7 @@ import { SampleState } from '@/services/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
 
 import currentStyles from './index.module.scss';
+import AnnotationContext from '../../annotation.context';
 
 interface AnnotationRightCornerProps {
   isLastSample: boolean;
@@ -53,7 +54,7 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
   const sampleId = routeParams.sampleId;
   // TODO： 此处使用 useSelector 会获取到labelu/components中的store，后期需要修改
   const currentSample = (useRouteLoaderData('annotation') as AnnotationLoaderData).sample;
-  const samples = (useRouteLoaderData('annotation') as AnnotationLoaderData).samples.data;
+  const { samples } = useContext(AnnotationContext);
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
 
@@ -102,10 +103,10 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
         state: SampleState.DONE,
       });
 
-      const newSampleId = typeof nextSampleId !== 'number' ? nextSampleId : _.get(samples, `[${sampleIndex + 1}].id`);
+      const newSampleId = typeof nextSampleId !== 'number' ? _.get(samples, `[${sampleIndex + 1}].id`) : nextSampleId;
 
       // 切换到下一个样本
-      navigate(`/tasks/${taskId}/samples/${newSampleId}/annotation`);
+      navigate(`/tasks/${taskId}/samples/${newSampleId}`);
     },
     [currentSample, navigate, sampleId, sampleIndex, samples, taskId],
   );

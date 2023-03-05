@@ -132,8 +132,8 @@
           width: 88px;
           height: 32px;
           background: #fff;
-          border: 1px solid #1b67ff;
-          color: #1b67ff;
+          border: 1px solid var(--primary-color);
+          color: var(--primary-color);
         }
       }
 
@@ -267,13 +267,13 @@
           gap: 4px;
           width: 102px;
           height: 32px;
-          border: 1px solid #1b67ff;
+          border: 1px solid var(--primary-color);
 
           span {
             font-style: normal;
             font-weight: 400;
             font-size: 14px;
-            color: #1b67ff;
+            color: var(--primary-color);
           }
         }
 

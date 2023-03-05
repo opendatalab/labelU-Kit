@@ -17,9 +17,8 @@
   justify-content: center;
   align-items: center;
   width: 220px;
-  //height : 120px;
   margin-bottom: 10px;
-  //position : relative;
+  cursor: pointer;
 }
 
 .contentActive {
@@ -33,11 +32,11 @@
   margin-bottom: 10px;
   background: #ffffff;
   border-radius: 2px;
-  border: 3px solid #1b67ff;
+  border: 3px solid var(--primary-color);
   overflow: hidden;
 }
 .idHighlight {
-  background-color: #1b67ff;
+  background-color: var(--primary-color);
   color: white;
   border-radius: 2px;
 }
@@ -65,7 +64,7 @@
   -ms-transform: rotate(-45deg);
   -webkit-transform: rotate(-45deg);
   transform: rotate(-45deg);
-  background-color: #1b67ff;
+  background-color: var(--primary-color);
 }
 
 .tagTop {

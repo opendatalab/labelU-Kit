@@ -1,23 +1,46 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, useRouteLoaderData } from 'react-router';
-import { Provider } from 'react-redux';
+import { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import { useParams } from 'react-router';
 
-import type { SampleState } from '@/enums';
 import type { SampleResponse } from '@/services/types';
+import { useScrollFetch } from '@/hooks/useScrollFetch';
 
 import SliderCard from '../sliderCard';
 import { getSamples } from '../../../../services/samples';
-import commonController from '../../../../utils/common/common';
 import currentStyles from './index.module.scss';
-import type { AnnotationLoaderData } from '../annotationRightCorner';
 import { SAMPLE_CHANGED } from '../annotationRightCorner';
+import AnnotationContext from '../../annotation.context';
 
 const SlideLoader = () => {
   const routeParams = useParams();
-  const taskId = +routeParams.taskId!;
-  const sampleId = +routeParams.sampleId!;
-  const currentSample = (useRouteLoaderData('annotation') as AnnotationLoaderData).sample;
-  const samples = (useRouteLoaderData('annotation') as AnnotationLoaderData).samples.data;
+  const { setSamples } = useContext(AnnotationContext);
+  const leftContainerRef = useRef<HTMLDivElement>(null);
+
+  // 滚动加载
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const currentPage = useRef<number>(1);
+  const fetchSamples = useCallback(async () => {
+    if (!routeParams.taskId) {
+      return Promise.resolve([]);
+    }
+
+    const { data, meta_data } = await getSamples({
+      task_id: +routeParams.taskId!,
+      pageNo: currentPage.current,
+      pageSize: 10,
+    });
+
+    currentPage.current += 1;
+    setTotalCount(meta_data?.total ?? 0);
+
+    return data;
+  }, [routeParams.taskId]);
+  const [samples = [] as SampleResponse[]] = useScrollFetch(fetchSamples, leftContainerRef.current!, {
+    isEnd: () => totalCount === samples.length,
+  });
+
+  useEffect(() => {
+    setSamples(samples || []);
+  }, [samples, setSamples]);
 
   const handleSampleClick = (sample: SampleResponse) => {
     document.dispatchEvent(
@@ -39,12 +62,12 @@ const SlideLoader = () => {
    */
 
   return (
-    <div className={currentStyles.leftBar}>
+    <div className={currentStyles.leftBar} ref={leftContainerRef}>
       <div className={currentStyles.tips}>已到第一张</div>
-      {samples.map((item: any, itemIndex: number) => {
+      {samples?.map((item: any, itemIndex: number) => {
         return <SliderCard cardInfo={item} key={itemIndex} onClick={handleSampleClick} />;
       })}
-      <div className={currentStyles.tips}>已到最后一张</div>
+      {totalCount === samples?.length && <div className={currentStyles.tips}>已到最后一张</div>}
     </div>
   );
 };

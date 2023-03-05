@@ -18,7 +18,7 @@
 .icon {
   width: 3px;
   height: 16px;
-  background: #1b67ff;
+  background: var(--primary-color);
   border-radius: 10px;
   margin-right: 4px;
   margin-left: 16px;
@@ -139,7 +139,7 @@
   @extend .displayFlex;
   @extend .flexDirectionColumn;
   justify-content: flex-start;
-  width : 100%;
+  width: 100%;
   flex: 1;
   margin-top: 16px;
   //margin-left:24px;
@@ -231,7 +231,7 @@
   .columnOption {
     width: 30%;
     flex: 1;
-    color: #1b67ff;
+    color: var(--primary-color);
   }
 }
 
@@ -259,14 +259,14 @@
 .columnOption1 {
   width: 56px;
   //flex : 1;
-  color: #1b67ff;
+  color: var(--primary-color);
   margin-right: 10px;
   cursor: pointer;
 }
 .columnOption {
   width: 28px;
   //flex : 1;
-  color: #1b67ff;
+  color: var(--primary-color);
   cursor: pointer;
 }
 
@@ -287,7 +287,7 @@
   height: 36px;
   line-height: 36px;
   text-align: center;
-  background: #1b67ff;
+  background: var(--primary-color);
 
   margin-right: 24px;
 }
@@ -297,9 +297,9 @@
   height: 36px;
   line-height: 36px;
   text-align: center;
-  border: 1px solid #1b67ff;
+  border: 1px solid var(--primary-color);
 
-  font-color: #1b67ff;
+  font-color: var(--primary-color);
   cursor: pointer;
 }
 

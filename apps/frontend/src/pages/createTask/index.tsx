@@ -130,8 +130,8 @@ const CreateTask = () => {
       return;
     }
 
-    updateFormData('config')(_.merge(formData.config, toolsConfig || {}));
-  }, [formData.config, toolsConfig]);
+    updateFormData('config')(toolsConfig);
+  }, [toolsConfig]);
 
   // 将store中的task数据同步到本地页面中
   useEffect(() => {

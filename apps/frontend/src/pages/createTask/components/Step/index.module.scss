@@ -50,7 +50,7 @@
   font-weight: 400;
   font-size: 14px;
   color: #ffffff;
-  background-color: #1b67ff;
+  background-color: var(--primary-color);
 }
 
 .iconCheck {
@@ -60,7 +60,7 @@
   border-radius: 50%;
   font-weight: 400;
   font-size: 14px;
-  color: #1b67ff;
+  color: var(--primary-color);
   background-color: rgba(27, 103, 255, 0.1);
 }
 
@@ -72,7 +72,7 @@
   font-weight: 400;
   font-size: 14px;
   color: #ffffff;
-  background-color: #1b67ff;
+  background-color: var(--primary-color);
 }
 
 .iconActive {
@@ -80,7 +80,7 @@
   height: 24px;
   margin-right: 8px;
   border-radius: 50%;
-  background: #1b67ff;
+  background: var(--primary-color);
   font-weight: 400;
   font-size: 14px;
   color: #ffffff;

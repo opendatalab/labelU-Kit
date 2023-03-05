@@ -124,7 +124,7 @@
   align-items: center;
   width: 60px;
   display: none;
-  color: #A3A3A3;
+  color: #a3a3a3;
 
   .cardWrapper:hover & {
     display: flex;
@@ -135,12 +135,12 @@
 }
 
 .upload:hover {
-  color: #1b67ff;
+  color: var(--primary-color);
   cursor: pointer;
 }
 
 .delete:hover {
-  color: #1b67ff;
+  color: var(--primary-color);
   cursor: pointer;
 }
 
