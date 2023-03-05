@@ -1,7 +1,7 @@
 import type { BasicConfig } from '@label-u/components';
 import type { FC } from 'react';
-import React, { useMemo, useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { EToolName } from '@label-u/annotation';
 import { Popconfirm } from 'antd';
 
@@ -49,10 +49,7 @@ const FormEngine: FC<FormEngineProps> = (props) => {
   }, [toolName]);
 
   const deletable = useMemo(() => {
-    if (
-      !taskStatus ||
-      ![TaskStatus.DRAFT, TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(taskStatus as TaskStatus)
-    ) {
+    if (!taskStatus || ![TaskStatus.DRAFT, TaskStatus.CONFIGURED].includes(taskStatus as TaskStatus)) {
       return true;
     }
 
