@@ -1,4 +1,5 @@
-@import '../../../../utils/common/common.module';
+@import '@/utils/common/common.module';
+
 .outerFrameActive {
   @extend .displayFlex;
   @extend .flexDirectionColumn;

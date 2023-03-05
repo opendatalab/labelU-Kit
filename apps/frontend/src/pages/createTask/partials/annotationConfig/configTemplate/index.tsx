@@ -1,11 +1,9 @@
 import { Button, Tabs } from 'antd';
 import type { FC } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import DrageModel from '@/components/basic/modal';
-import { getTask } from '@/services/task';
-import commonController from '@/utils/common/common';
+import { TaskCreationContext } from '@/pages/createTask/taskCreation.context';
 
 import { getLabelConfig } from './config';
 import TmplateBox from './tmplateBox';
@@ -20,11 +18,9 @@ interface LabelType {
   children: React.ReactNode;
 }
 
-// test
 const ConfigTemplate: FC = () => {
+  const { task } = useContext(TaskCreationContext);
   const modalRef = useRef<any>();
-  const routeParams = useParams();
-  const taskId = routeParams.taskId;
   const [labelTypes, setLabelTypes] = useState<LabelType[]>([
     {
       label: '图片',
@@ -58,16 +54,13 @@ const ConfigTemplate: FC = () => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
-    getTask(taskId)
-      .then(({ data }) => {
-        const newTaskStatus = data.status;
-        if (newTaskStatus !== 'DRAFT' && newTaskStatus !== 'IMPORTED' && newTaskStatus !== 'CONFIGURED') {
-          setIsShowChoose(false);
-        }
-      })
-      .catch((error) => commonController.notificationErrorMessage(error, 1));
-  }, []);
+    if (task.status !== 'DRAFT' && task.status !== 'IMPORTED' && task.status !== 'CONFIGURED') {
+      setIsShowChoose(false);
+    }
+  }, [task.status]);
+
   const content = () => {
     const tabPosition: TabPosition = 'left';
     return (

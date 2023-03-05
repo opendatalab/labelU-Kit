@@ -203,7 +203,7 @@ export interface SampleResponse {
   /** Id description: annotation id */
   id?: number;
   /** State description: sample file state, NEW is has not start yet, DONE is completed, SKIPPED is skipped */
-  state?: string;
+  state?: SampleState;
   /** Data description: sample data, include filename, file url, or result */
   data?: SampleData;
   /** Annotated Count description: annotate result count */
@@ -258,7 +258,7 @@ export interface TaskResponse {
   /** Media Type description: task media type: IMAGE, VIDEO */
   media_type?: MediaType;
   /** Status description: task status: DRAFT, IMPORTED, CONFIGURED, INPROGRESS, FINISHED */
-  status?: string;
+  status?: TaskStatus;
   /** Created At description: task created at time */
   created_at?: string;
   /** Created By description: task created at time */

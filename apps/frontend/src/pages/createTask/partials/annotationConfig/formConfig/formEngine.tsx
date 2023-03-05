@@ -6,7 +6,7 @@ import { EToolName } from '@label-u/annotation';
 import { Popconfirm } from 'antd';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
-import { RootState } from '@/store';
+import type { RootState } from '@/store';
 import { TaskStatus } from '@/services/types';
 
 import RectConfigForm from './templates/rectConfigForm';
@@ -49,12 +49,15 @@ const FormEngine: FC<FormEngineProps> = (props) => {
   }, [toolName]);
 
   const deletable = useMemo(() => {
-    if (!taskStatus || ![TaskStatus.DRAFT, TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(taskStatus)) {
+    if (
+      !taskStatus ||
+      ![TaskStatus.DRAFT, TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(taskStatus as TaskStatus)
+    ) {
       return true;
     }
 
     return false;
-  }, []);
+  }, [taskStatus]);
 
   // 删除工具
   const deleteTool = (_toolName: string) => {

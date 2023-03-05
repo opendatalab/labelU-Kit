@@ -1,16 +1,11 @@
 import type { FC } from 'react';
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useContext } from 'react';
 
-import {
-  updateAllAttributeConfigList,
-  updateTagConfigList,
-  updateTextConfig,
-  updateToolsConfig,
-} from '../../../../../stores/toolConfig.store';
+import { TaskCreationContext } from '@/pages/createTask/taskCreation.context';
+
 export interface Item {
   img: any;
-  tmplateName: string;
+  templateName: string;
   label: string;
 }
 interface Iprops {
@@ -19,30 +14,19 @@ interface Iprops {
 }
 
 const TmplateBox: FC<Iprops> = ({ tempaltes, hideBox }) => {
-  const dispatch = useDispatch();
+  const { updateFormData } = useContext(TaskCreationContext);
+
   const updateToolConfig = (item: Item) => {
-    if (typeof item.tmplateName === 'object' && !Array.isArray(item.tmplateName)) {
+    if (typeof item.templateName === 'object' && !Array.isArray(item.templateName)) {
       const initConfig = {
         tools: [],
         tagList: [],
         attribute: [],
         textConfig: [],
-        // @ts-ignore
-        ...item.tmplateName,
+        ...(item.templateName as Record<string, unknown>),
       };
-      // 配置设置
-      const keys = Object.keys(initConfig);
-      for (const key of keys) {
-        if (key === 'attribute') {
-          dispatch(updateAllAttributeConfigList(initConfig[key]));
-        } else if (key === 'tagList') {
-          dispatch(updateTagConfigList(initConfig[key]));
-        } else if (key === 'textConfig') {
-          dispatch(updateTextConfig(initConfig[key]));
-        } else if (key === 'tools') {
-          dispatch(updateToolsConfig(initConfig[key]));
-        }
-      }
+
+      updateFormData('config')(initConfig);
     }
   };
 

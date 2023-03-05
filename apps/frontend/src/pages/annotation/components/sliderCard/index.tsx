@@ -5,7 +5,7 @@ import _ from 'lodash-es';
 import currentStyles from './index.module.scss';
 import commonController from '../../../../utils/common/common';
 import { getSample, updateSampleAnnotationResult } from '../../../../services/samples';
-import { annotationRef } from '../../../../pages/annotation';
+import { annotationRef } from '../..';
 
 const SliderCard = (props: any) => {
   const { id, state, url } = props.cardInfo;

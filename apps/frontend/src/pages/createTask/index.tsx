@@ -3,15 +3,14 @@ import { Button, Modal } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
-import { merge, omit, set } from 'lodash/fp';
+import { omit, set } from 'lodash/fp';
 
-import type { BasicConfigCommand, TaskResponse } from '@/services/types';
+import type { TaskResponse } from '@/services/types';
 import { TaskStatus, MediaType } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
 import type { QueuedFile } from '@/pages/createTask/partials/inputData';
-import InputData, { UploadContext } from '@/pages/createTask/partials/inputData';
-import type { ToolsConfigState } from '@/types/toolConfig';
+import InputData from '@/pages/createTask/partials/inputData';
 import { createSamples } from '@/services/samples';
 
 import InputInfoConfig from './partials/InputInfoConfig';
@@ -19,6 +18,8 @@ import currentStyles from './index.module.scss';
 import type { StepData } from './components/Step';
 import Step from './components/Step';
 import commonController from '../../utils/common/common';
+import type { TaskFormData } from './taskCreation.context';
+import { TaskCreationContext } from './taskCreation.context';
 
 enum StepEnum {
   Basic = 'basic',
@@ -42,10 +43,6 @@ interface TaskStep extends StepData {
   value: StepEnum;
 }
 
-export interface TaskFormData extends BasicConfigCommand {
-  config: ToolsConfigState;
-}
-
 export interface PartialConfigProps {
   task: TaskResponse;
   formData: TaskFormData;
@@ -66,7 +63,6 @@ const CreateTask = () => {
 
   // 缓存上传的文件清单
   const [uploadFileList, setUploadFileList] = useState<QueuedFile[]>([]);
-  const uploadContextValue = useMemo(() => [uploadFileList, setUploadFileList], [uploadFileList, setUploadFileList]);
 
   const updateCurrentStep = (step: StepEnum) => {
     setCurrentStep(step);
@@ -107,6 +103,18 @@ const CreateTask = () => {
   const updateFormData = (field: string) => (value: any) => {
     setFormData(set(field)(value));
   };
+
+  const taskCreationContextValue = useMemo(
+    () => ({
+      uploadFileList,
+      setUploadFileList,
+      setFormData,
+      updateFormData,
+      formData,
+      task: taskData,
+    }),
+    [uploadFileList, formData, taskData],
+  );
 
   useEffect(() => {
     if (!location.hash) {
@@ -243,13 +251,7 @@ const CreateTask = () => {
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
         <div className={currentStyles.left}>
-          <Step
-            steps={stepDataSource}
-            currentStep={currentStep}
-            showStepNumber={!isExistTask}
-            onNext={handleNextStep}
-            onPrev={handlePrevStep}
-          />
+          <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
         </div>
         <div className={currentStyles.right}>
           <Button type="primary" ghost onClick={handleCancel}>
@@ -267,9 +269,9 @@ const CreateTask = () => {
         </div>
       </div>
       <div className={currentStyles.content}>
-        <UploadContext.Provider value={uploadContextValue}>
+        <TaskCreationContext.Provider value={taskCreationContextValue}>
           <Partial task={taskData} formData={formData} updateFormData={updateFormData} />
-        </UploadContext.Provider>
+        </TaskCreationContext.Provider>
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
 
 import styles from './index.module.scss';
 import type { PartialConfigProps } from '../..';
+import { TaskCreationContext } from '../../taskCreation.context';
 
 export enum UploadStatus {
   Uploading = 'Uploading',
@@ -43,11 +44,6 @@ export interface QueuedFile {
   path: string;
   file: File;
 }
-
-export const UploadContext = React.createContext<[QueuedFile[], Dispatch<SetStateAction<QueuedFile[]>>]>([
-  [],
-  () => {},
-]);
 
 const isCorrectFiles = (files: File[]) => {
   let result = true;
@@ -90,7 +86,7 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
   const taskId = task.id;
 
   // 上传队列，包括成功和失败的任务
-  const [fileQueue, setFileQueue] = useContext(UploadContext);
+  const { uploadFileList: fileQueue, setUploadFileList: setFileQueue } = useContext(TaskCreationContext);
 
   const amountMapping = useMemo(() => {
     let succeeded = 0;

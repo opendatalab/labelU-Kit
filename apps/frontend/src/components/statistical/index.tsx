@@ -2,69 +2,42 @@ import { useState } from 'react';
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
 import { useNavigate, useRouteLoaderData } from 'react-router';
 import { Button, Modal } from 'antd';
-import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import _ from 'lodash-es';
+
+import type { RootState } from '@/store';
+import { outputSamples } from '@/services/samples';
+import type { TaskResponseWithStatics } from '@/services/types';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
-import { getSamples, outputSamples } from '../../services/samples';
 import currentStyles1 from '../../pages/outputData/index.module.scss';
-import { updateStatus } from '../../stores/task.store';
-// import { updateAllConfig } from '../../stores/toolConfig.store';
 const Statistical = () => {
-  const dispatch = useDispatch();
-  const taskData = useRouteLoaderData('task');
-  const statisticalDatas = _.get(taskData, 'stats', {});
-  const taskStatus = _.get(taskData, 'status');
+  const taskData = useRouteLoaderData('task') as TaskResponseWithStatics;
+  const { stats = {} } = taskData || {};
   const taskId = _.get(taskData, 'id');
 
-  // useEffect(() => {
-  //   getTask(taskId)
-  //     .then((res: any) => {
-  //       // @ts-ignore
-  //       if (res?.status === 200) {
-  //         // @ts-ignore
-  //         setStatisticalDatas(res.data.data.stats);
-  //         setTaskStatus(res.data.data.status);
-  //         // @ts-ignore
-  //         dispatch(updateTask({ data: res.data.data }));
-  //         dispatch(updateStatus(res.data.data.status));
-  //         if (res.data.data.config) {
-  //           dispatch(updateAllConfig(JSON.parse(res.data.data.config)));
-  //         }
-  //       } else {
-  //         commonController.notificationErrorMessage({ message: '请求任务数据出错' }, 1);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       commonController.notificationErrorMessage(error, 1);
-  //     });
-  // }, [dispatch, taskId]);
+  const samples = useSelector((state: RootState) => state.sample.list);
+
   const navigate = useNavigate();
-  const getSamplesLocal = (params: any) => {
-    getSamples(taskId!, params)
-      .then(({ data }) => {
-        if (data.length > 0) {
-          const sampleId = data[0].id;
-          navigate('/tasks/' + taskId + '/samples/' + sampleId);
-        }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
+
+  const handleGoAnnotation = () => {
+    if (samples.data.length === 0) {
+      return;
+    }
+    navigate(`/tasks/${taskId}/samples/${samples.data[0].id}`);
   };
-  const beginAnnotation = () => {
-    getSamplesLocal({ pageNo: 0, pageSize: 10 });
+  const handleGoConfig = () => {
+    navigate(`/tasks/${taskId}/edit#config`);
   };
-  const turnToTaskConfig = () => {
-    navigate('/tasks/' + taskId + '/edit#config');
+  const handleGoUpload = () => {
+    navigate(`/tasks/${taskId}/edit#upload`);
   };
-  const turnToInputData = () => {
-    dispatch(updateStatus(taskStatus));
-    navigate('/tasks/' + taskId + '/edit/upload?currentStatus=1');
-  };
+
   const [activeTxt, setActiveTxt] = useState('JSON');
   const [isShowModal, setIsShowModal] = useState(false);
+
+  // TODO: 重构导出逻辑；将多处出现的「导出格式选择」抽离成共用组件
   const clickOk = (e: any) => {
     e.stopPropagation();
     e.nativeEvent.stopPropagation();
@@ -99,44 +72,46 @@ const Statistical = () => {
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>已标注</b>
             </div>
-            <div className={currentStyles.leftTitleContentOptionContent}>{statisticalDatas.done}</div>
+            <div className={currentStyles.leftTitleContentOptionContent}>{stats.done}</div>
           </div>
           <div className={currentStyles.leftTitleContentOption}>
             <div className={currentStyles.leftTitleContentOptionGrayIcon} />
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>未标注</b>
             </div>
-            <div className={currentStyles.leftTitleContentOptionContent}>{statisticalDatas.new}</div>
+            <div className={currentStyles.leftTitleContentOptionContent}>{stats.new}</div>
           </div>
           <div className={currentStyles.leftTitleContentOption}>
             <div className={currentStyles.leftTitleContentOptionOrangeIcon} />
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>跳过</b>
             </div>
-            <div className={currentStyles.leftTitleContentOptionContent}>{statisticalDatas.skipped}</div>
+            <div className={currentStyles.leftTitleContentOptionContent}>{stats.skipped}</div>
           </div>
           <div className={currentStyles.leftTitleContentOption}>
             <div className={currentStyles.leftTitleContentOptionWhiteIcon} />
             <div className={currentStyles.leftTitleContentOptionContent}>
               <b>总计</b>
             </div>
-            <div className={currentStyles.leftTitleContentOptionContent}>
-              {statisticalDatas.done + statisticalDatas.new + statisticalDatas.skipped}
-            </div>
+            {stats && (
+              <div className={currentStyles.leftTitleContentOptionContent}>
+                {stats.done! + stats.new! + stats.skipped!}
+              </div>
+            )}
           </div>
         </div>
       </div>
       <div className={currentStyles.right}>
-        <Button type="text" icon={<SettingOutlined />} onClick={turnToTaskConfig}>
+        <Button type="text" icon={<SettingOutlined />} onClick={handleGoConfig}>
           任务配置
         </Button>
         <Button type="text" icon={<UploadOutlined />} onClick={() => setIsShowModal(true)}>
           数据导出
         </Button>
-        <Button type="primary" ghost onClick={turnToInputData}>
+        <Button type="primary" ghost onClick={handleGoUpload}>
           数据导入
         </Button>
-        <Button type="primary" onClick={commonController.debounce(beginAnnotation, 100)}>
+        <Button type="primary" onClick={commonController.debounce(handleGoAnnotation, 100)}>
           开始标注
         </Button>
       </div>
