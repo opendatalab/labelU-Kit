@@ -1,4 +1,5 @@
 import { isEqual } from 'lodash-es';
+import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface Option<Data> {
@@ -21,7 +22,7 @@ export function useScrollFetch<T extends any[] | undefined>(
   service: (isReset: boolean) => Promise<T>,
   container?: HTMLDivElement | undefined,
   options?: Option<T>,
-): [T, boolean] {
+): [T, boolean, Dispatch<SetStateAction<T>>] {
   const { threshold, afterFetching, isEnd, watch } = {
     threshold: 0,
     ...options,
@@ -114,5 +115,5 @@ export function useScrollFetch<T extends any[] | undefined>(
     };
   }, [container, handleOnScroll]);
 
-  return [data, isLoading];
+  return [data, isLoading, setData];
 }

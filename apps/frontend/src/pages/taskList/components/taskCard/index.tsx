@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import moment from 'moment';
 import Icon, { ExclamationOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 
 import type { Dispatch, RootState } from '@/store';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
@@ -22,6 +23,9 @@ const TaskCard = (props: any) => {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
   const { cardInfo } = props;
   const dispatch = useDispatch<Dispatch>();
+  const [searchParams] = useSearchParams({
+    page: '1',
+  });
   const { stats, id, status } = cardInfo;
   const unDoneSample = stats.new;
   const doneSample = stats.done + stats.skipped;
@@ -32,7 +36,6 @@ const TaskCard = (props: any) => {
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    // navigate('/taskList/task/taskAnnotation');
     navigate('/tasks/' + id);
   };
   const userInfo = useSelector((state: RootState) => state.user);
@@ -46,9 +49,11 @@ const TaskCard = (props: any) => {
       content: '确定删除该任务吗？',
       okText: '确定',
       cancelText: '取消',
-      onOk: () => {
-        dispatch.task.deleteTask(id);
-        navigate('/tasks');
+      onOk: async () => {
+        await dispatch.task.deleteTask(id);
+        await dispatch.task.fetchTasks({
+          page: Number(searchParams.get('page')) - 1,
+        });
       },
     });
   };

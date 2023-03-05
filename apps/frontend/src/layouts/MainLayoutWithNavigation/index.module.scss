@@ -8,6 +8,13 @@
 .content {
   flex-grow: 1;
   background-color: #f4f5f7;
+
+  :global {
+    .ant-spin-nested-loading,
+    .ant-spin-container {
+      height: 100%;
+    }
+  }
 }
 :global {
   .ant-modal-footer {

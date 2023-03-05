@@ -1,7 +1,8 @@
 import { useEffect, useCallback, useContext } from 'react';
-import { useNavigate, useParams, useRouteLoaderData } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
 import _ from 'lodash-es';
+import { set } from 'lodash/fp';
 
 import commonController from '@/utils/common/common';
 import { annotationRef } from '@/pages/annotation';
@@ -53,10 +54,29 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
   // TODO： 此处使用 useSelector 会获取到labelu/components中的store，后期需要修改
-  const currentSample = (useRouteLoaderData('annotation') as AnnotationLoaderData).sample;
-  const { samples } = useContext(AnnotationContext);
-  const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
+  const { samples, setSamples } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
+  const currentSample = samples[sampleIndex];
+  const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
+
+  const handleCancelSkipSample = async () => {
+    await updateSampleState(
+      {
+        task_id: +taskId!,
+        sample_id: +sampleId!,
+      },
+      {
+        ...currentSample,
+        state: SampleState.NEW,
+      },
+    );
+
+    setSamples(
+      samples.map((sample: SampleResponse) =>
+        sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
+      ),
+    );
+  };
 
   const handleSkipSample = async () => {
     await updateSampleState(
@@ -69,39 +89,32 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
         state: SampleState.SKIPPED,
       },
     );
-  };
-  const handleCancelSkipSample = async () => {
-    await updateSampleState(
-      {
-        task_id: +taskId!,
-        sample_id: +sampleId!,
-      },
-      {
-        ...currentSample,
-        state: SampleState.NEW,
-      },
+
+    setSamples(
+      samples.map((sample: SampleResponse) =>
+        sample.id === +sampleId! ? { ...sample, state: SampleState.SKIPPED } : sample,
+      ),
     );
+    // 切换到下一个样本
+    if (!isLastSample) {
+      navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+    }
   };
 
   const handleSampleChange = useCallback(
     async (nextSampleId: number | undefined) => {
-      if (currentSample?.state === SampleState.SKIPPED) {
-        return;
+      if (currentSample?.state !== SampleState.SKIPPED) {
+        // @ts-ignore
+        const cResult = await annotationRef?.current?.getResult();
+        const rResult = cResult[0].result;
+        const body = set('data.result')(rResult)(currentSample);
+
+        await updateSampleAnnotationResult(+taskId!, +sampleId!, {
+          ...body,
+          annotated_count: getAnnotationCount(JSON.parse(body.data!.result)),
+          state: SampleState.DONE,
+        });
       }
-
-      // @ts-ignore
-      const cResult = await annotationRef?.current?.getResult();
-      const rResult = cResult[0].result;
-      const body = {
-        ...currentSample,
-        result: rResult,
-      };
-
-      await updateSampleAnnotationResult(+taskId!, +sampleId!, {
-        ...body,
-        annotated_count: getAnnotationCount(JSON.parse(body.result)),
-        state: SampleState.DONE,
-      });
 
       const newSampleId = typeof nextSampleId !== 'number' ? _.get(samples, `[${sampleIndex + 1}].id`) : nextSampleId;
 

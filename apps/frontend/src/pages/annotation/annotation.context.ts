@@ -6,6 +6,7 @@ import type { SampleResponse } from '@/services/types';
 export interface AnnotationContextValue {
   samples: SampleResponse[];
   setSamples: Dispatch<SetStateAction<SampleResponse[]>>;
+  isEnd: boolean;
 }
 
 const AnnotationContext = React.createContext<AnnotationContextValue>({} as AnnotationContextValue);

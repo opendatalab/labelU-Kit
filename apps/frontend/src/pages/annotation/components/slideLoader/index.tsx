@@ -1,46 +1,16 @@
-import { useState, useEffect, useRef, useCallback, useContext } from 'react';
-import { useParams } from 'react-router';
+import React, { useContext } from 'react';
 
 import type { SampleResponse } from '@/services/types';
-import { useScrollFetch } from '@/hooks/useScrollFetch';
 
 import SliderCard from '../sliderCard';
-import { getSamples } from '../../../../services/samples';
 import currentStyles from './index.module.scss';
 import { SAMPLE_CHANGED } from '../annotationRightCorner';
 import AnnotationContext from '../../annotation.context';
 
+export const slideRef = React.createRef<HTMLDivElement>();
+
 const SlideLoader = () => {
-  const routeParams = useParams();
-  const { setSamples } = useContext(AnnotationContext);
-  const leftContainerRef = useRef<HTMLDivElement>(null);
-
-  // 滚动加载
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const currentPage = useRef<number>(1);
-  const fetchSamples = useCallback(async () => {
-    if (!routeParams.taskId) {
-      return Promise.resolve([]);
-    }
-
-    const { data, meta_data } = await getSamples({
-      task_id: +routeParams.taskId!,
-      pageNo: currentPage.current,
-      pageSize: 10,
-    });
-
-    currentPage.current += 1;
-    setTotalCount(meta_data?.total ?? 0);
-
-    return data;
-  }, [routeParams.taskId]);
-  const [samples = [] as SampleResponse[]] = useScrollFetch(fetchSamples, leftContainerRef.current!, {
-    isEnd: () => totalCount === samples.length,
-  });
-
-  useEffect(() => {
-    setSamples(samples || []);
-  }, [samples, setSamples]);
+  const { samples, isEnd } = useContext(AnnotationContext);
 
   const handleSampleClick = (sample: SampleResponse) => {
     document.dispatchEvent(
@@ -60,14 +30,16 @@ const SlideLoader = () => {
    * 2. 将当前样本标记为「跳过」，更新样本状态为「跳过」，然后跳到下一张
    * 3. 将当前样本标记为「取消跳过」，更新样本状态为「新」
    */
+  // context中的samples会随着「跳过」、「取消跳过」、「完成」的操作而更新，但上面的useScrollFetch只有滚动的时候才会触发更新
+  const { samples: samplesFromContext } = useContext(AnnotationContext);
 
   return (
-    <div className={currentStyles.leftBar} ref={leftContainerRef}>
+    <div className={currentStyles.leftBar} ref={slideRef}>
       <div className={currentStyles.tips}>已到第一张</div>
-      {samples?.map((item: any, itemIndex: number) => {
-        return <SliderCard cardInfo={item} key={itemIndex} onClick={handleSampleClick} />;
+      {samplesFromContext?.map((item: SampleResponse) => {
+        return <SliderCard cardInfo={item} key={item.id} onClick={handleSampleClick} />;
       })}
-      {totalCount === samples?.length && <div className={currentStyles.tips}>已到最后一张</div>}
+      {isEnd === samples?.length && <div className={currentStyles.tips}>已到最后一张</div>}
     </div>
   );
 };

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Button, Pagination } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { Dispatch, RootState } from '@/store';
@@ -12,14 +12,16 @@ import NullTask from '../nullTask';
 const TaskList = () => {
   const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams({
+    page: '1',
+  });
 
   // 初始化获取任务列表
   useEffect(() => {
     dispatch.task.fetchTasks({
-      page: currentPage - 1,
+      page: Number(searchParams.get('page')) - 1,
     });
-  }, [currentPage, dispatch.task]);
+  }, [dispatch.task, searchParams]);
 
   const { meta_data, data: tasks = [] } = useSelector((state: RootState) => state.task.list);
 
@@ -40,7 +42,15 @@ const TaskList = () => {
             })}
           </div>
           <div className={currentStyles.pagination}>
-            <Pagination defaultCurrent={1} total={meta_data?.total ?? 0} pageSize={16} onChange={setCurrentPage} />
+            <Pagination
+              defaultCurrent={1}
+              total={meta_data?.total ?? 0}
+              pageSize={16}
+              onChange={(value: number) => {
+                searchParams.set('page', String(value));
+                setSearchParams(searchParams);
+              }}
+            />
           </div>
         </div>
       )}
