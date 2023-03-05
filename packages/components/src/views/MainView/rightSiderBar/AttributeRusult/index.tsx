@@ -1,10 +1,11 @@
 import type { FC, ReactElement } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useEffect, useMemo, useRef, useState } from 'react';
 import { Collapse, Form, Input, Popconfirm, Select } from 'antd';
 import { connect, useDispatch } from 'react-redux';
 import type { PrevResult, Attribute } from '@label-u/annotation';
 import { EToolName } from '@label-u/annotation';
 import classNames from 'classnames';
+import { isEmpty } from 'lodash-es';
 
 import AttributeEditorIcon from '@/assets/cssIcon/attribute_editor.svg';
 import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';
@@ -156,13 +157,13 @@ const AttributeRusult: FC<IProps> = ({
   const attributeResultRef = useRef<HTMLDivElement>(null);
 
   // 将右侧属性栏高度设置为剩余高度
-  useEffect(() => {
+  useLayoutEffect(() => {
     setTimeout(() => {
       if (!attributeResultRef.current) {
         return;
       }
 
-      const rect = attributeResultRef.current.getBoundingClientRect();
+      const rect = attributeResultRef.current.parentElement!.getBoundingClientRect();
       const attributeWrapperHeight = window.innerHeight - rect.top;
       attributeResultRef.current.style.height = `${attributeWrapperHeight}px`;
     });
@@ -582,228 +583,228 @@ const AttributeRusult: FC<IProps> = ({
     );
   };
 
-  if (!attributeResultList || attributeResultList.length === 0 || !boxHeight) {
-    return (
-      <div className="containerBox" style={{ height: (boxHeight as number) - 220 }}>
-        <img className="emptyAttributeImg" src={emptyAttributeImg} />
-      </div>
-    );
-  }
   return (
-    <div
-      style={{ paddingBottom: 40 }}
-      className={classNames({
-        attributeResult: true,
-      })}
-      ref={attributeResultRef}
-    >
-      <DrageModel title="详细信息" ref={dragModalRef} width={333} okWord="确认" cancelWord="取消" content={content} />
-      <Collapse
-        key={defaultKeys.join('')}
-        className="attribute-panel"
-        defaultActiveKey={defaultKeys}
-        expandIcon={expandIconFuc}
+    <>
+      {isEmpty(attributeResultList) && (
+        <div className="containerBox" style={{ height: (boxHeight as number) - 220 }}>
+          <img className="emptyAttributeImg" src={emptyAttributeImg} />
+        </div>
+      )}
+      <div
+        style={{ paddingBottom: 40, display: isEmpty(attributeResultList) ? 'none' : 'block' }}
+        className={classNames({
+          attributeResult: true,
+        })}
+        ref={attributeResultRef}
       >
-        {attributeResultList &&
-          attributeResultList.length > 0 &&
-          attributeResultList.map((item) => {
-            return (
-              <Panel
-                header={
-                  <div className="attributeResultLi">
-                    <span
-                      title={item.attributeName}
-                      style={{
-                        marginRight: '36px',
-                        width: '84px',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {item.attributeName}
-                    </span>{' '}
-                    <div className="attributeResultRightImgBox">
-                      {item.isVisible ? (
-                        <img
-                          className="hoverShow"
-                          id={`${item.attributeName}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateLabelsResult({ ...item, isVisible: false });
-                            // const newTItem = { ...item, isVisible: false };
-                            // updateLabelVisible(tItem, false);
-                            // updateLabelResult(newTItem);
-                          }}
-                          onMouseEnter={(e) => {
-                            e.stopPropagation();
-                            // attributeShowRef.current?.setAttribute('src', AttributeShowHoverIcon);
-                          }}
-                          onMouseLeave={(e) => {
-                            e.stopPropagation();
-                            // attributeShowRef.current?.setAttribute('src', AttributeShowIcon);
-                          }}
-                          src={AttributeShowIcon}
-                          style={{ marginRight: '10px' }}
-                        />
-                      ) : (
-                        <img
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateLabelsResult({ ...item, isVisible: true });
-                            // updateLabelVisible(tItem, true);
-                          }}
-                          src={AttributeHideIcon}
-                          style={{ marginRight: '10px' }}
-                        />
-                      )}
-                      <img
-                        src={AttributeUnionIcon}
-                        className="hoverShow"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteLabelByAttribute(item);
-                        }}
-                      />
-                    </div>
-                  </div>
-                }
-                key={item.attributeName}
-              >
-                {item.toolInfo &&
-                  item.toolInfo.length > 0 &&
-                  item.toolInfo.map((tItem) => {
-                    return (
-                      <div
-                        // key={item.attributeName}
-                        key={tItem.toolName + tItem.order}
-                        className={classNames({
-                          attributeResultLi: true,
-                          attributeResultLiActive: tItem.order === activeOrder,
-                        })}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedLabel(tItem, item);
+        <DrageModel title="详细信息" ref={dragModalRef} width={333} okWord="确认" cancelWord="取消" content={content} />
+        <Collapse
+          key={defaultKeys.join('')}
+          className="attribute-panel"
+          defaultActiveKey={defaultKeys}
+          expandIcon={expandIconFuc}
+        >
+          {attributeResultList &&
+            attributeResultList.length > 0 &&
+            attributeResultList.map((item) => {
+              return (
+                <Panel
+                  header={
+                    <div className="attributeResultLi">
+                      <span
+                        title={item.attributeName}
+                        style={{
+                          marginRight: '36px',
+                          width: '84px',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
                         }}
                       >
-                        <span>{tItem.order}.</span>
-
-                        <MemoToolIcon icon={tItem.icon} style={{ color: item.color, width: 20 }} />
-                        <span
-                          title={item.attributeName}
-                          style={{
-                            marginRight: '36px',
-                            width: '84px',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
+                        {item.attributeName}
+                      </span>{' '}
+                      <div className="attributeResultRightImgBox">
+                        {item.isVisible ? (
+                          <img
+                            className="hoverShow"
+                            id={`${item.attributeName}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateLabelsResult({ ...item, isVisible: false });
+                              // const newTItem = { ...item, isVisible: false };
+                              // updateLabelVisible(tItem, false);
+                              // updateLabelResult(newTItem);
+                            }}
+                            onMouseEnter={(e) => {
+                              e.stopPropagation();
+                              // attributeShowRef.current?.setAttribute('src', AttributeShowHoverIcon);
+                            }}
+                            onMouseLeave={(e) => {
+                              e.stopPropagation();
+                              // attributeShowRef.current?.setAttribute('src', AttributeShowIcon);
+                            }}
+                            src={AttributeShowIcon}
+                            style={{ marginRight: '10px' }}
+                          />
+                        ) : (
+                          <img
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateLabelsResult({ ...item, isVisible: true });
+                              // updateLabelVisible(tItem, true);
+                            }}
+                            src={AttributeHideIcon}
+                            style={{ marginRight: '10px' }}
+                          />
+                        )}
+                        <img
+                          src={AttributeUnionIcon}
+                          className="hoverShow"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteLabelByAttribute(item);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  }
+                  key={item.attributeName}
+                >
+                  {item.toolInfo &&
+                    item.toolInfo.length > 0 &&
+                    item.toolInfo.map((tItem) => {
+                      return (
+                        <div
+                          // key={item.attributeName}
+                          key={tItem.toolName + tItem.order}
+                          className={classNames({
+                            attributeResultLi: true,
+                            attributeResultLiActive: tItem.order === activeOrder,
+                          })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedLabel(tItem, item);
                           }}
                         >
-                          {item.attributeName}
-                        </span>
-                        <div className="attributeResultRightImgBox">
-                          <img
-                            id={`${tItem.toolName + tItem.order} + edit`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // @ts-ignore
-                              const boundingClientRect = document
-                                .getElementById(`${tItem.toolName + tItem.order} + edit`)
-                                .getBoundingClientRect();
-                              const tmpBounds = {
-                                left: boundingClientRect.left - 50,
-                                top: boundingClientRect.top,
-                              };
+                          <span>{tItem.order}.</span>
 
-                              dragModalRef.current.switchModal(true);
-                              dragModalRef.current.switchSetBounds(tmpBounds);
-                              setContent(generateContent(tItem, item));
+                          <MemoToolIcon icon={tItem.icon} style={{ color: item.color, width: 20 }} />
+                          <span
+                            title={item.attributeName}
+                            style={{
+                              marginRight: '36px',
+                              width: '84px',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
                             }}
-                            src={AttributeEditorIcon}
-                            className="hoverShow"
-                            style={{ left: 10, position: 'absolute' }}
-                          />
-                          {tItem.isVisible ? (
+                          >
+                            {item.attributeName}
+                          </span>
+                          <div className="attributeResultRightImgBox">
                             <img
+                              id={`${tItem.toolName + tItem.order} + edit`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // @ts-ignore
+                                const boundingClientRect = document
+                                  .getElementById(`${tItem.toolName + tItem.order} + edit`)
+                                  .getBoundingClientRect();
+                                const tmpBounds = {
+                                  left: boundingClientRect.left - 50,
+                                  top: boundingClientRect.top,
+                                };
+
+                                dragModalRef.current.switchModal(true);
+                                dragModalRef.current.switchSetBounds(tmpBounds);
+                                setContent(generateContent(tItem, item));
+                              }}
+                              src={AttributeEditorIcon}
                               className="hoverShow"
-                              id={`${tItem.toolName + tItem.order}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const newTItem = { ...tItem, isVisible: false };
-                                // updateLabelVisible(tItem, false);
-                                updateLabelResult(newTItem);
-                              }}
-                              // onMouseEnter={(e) => {
-                              //   e.stopPropagation();
-                              //   document
-                              //     .getElementById(`${tItem.toolName + tItem.order}`)
-                              //     ?.setAttribute('src', AttributeShowHoverIcon);
+                              style={{ left: 10, position: 'absolute' }}
+                            />
+                            {tItem.isVisible ? (
+                              <img
+                                className="hoverShow"
+                                id={`${tItem.toolName + tItem.order}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newTItem = { ...tItem, isVisible: false };
+                                  // updateLabelVisible(tItem, false);
+                                  updateLabelResult(newTItem);
+                                }}
+                                // onMouseEnter={(e) => {
+                                //   e.stopPropagation();
+                                //   document
+                                //     .getElementById(`${tItem.toolName + tItem.order}`)
+                                //     ?.setAttribute('src', AttributeShowHoverIcon);
 
-                              // }}
-                              onMouseLeave={(e) => {
-                                e.stopPropagation();
-                                // attributeShowRef.current?.setAttribute('src', AttributeShowIcon);
-                                document
-                                  .getElementById(`${tItem.toolName + tItem.order}`)
-                                  ?.setAttribute('src', AttributeShowIcon);
-                              }}
-                              src={AttributeShowIcon}
-                              style={{ left: 30, position: 'absolute' }}
-                            />
-                          ) : (
+                                // }}
+                                onMouseLeave={(e) => {
+                                  e.stopPropagation();
+                                  // attributeShowRef.current?.setAttribute('src', AttributeShowIcon);
+                                  document
+                                    .getElementById(`${tItem.toolName + tItem.order}`)
+                                    ?.setAttribute('src', AttributeShowIcon);
+                                }}
+                                src={AttributeShowIcon}
+                                style={{ left: 30, position: 'absolute' }}
+                              />
+                            ) : (
+                              <img
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // updateLabelVisible(tItem, true);
+                                  const newTItem = { ...tItem, isVisible: true };
+                                  updateLabelResult(newTItem);
+                                }}
+                                src={AttributeHideIcon}
+                                style={{ left: 30, position: 'absolute' }}
+                              />
+                            )}
                             <img
+                              style={{ left: 50, position: 'absolute' }}
+                              src={AttributeUnionIcon}
+                              className="hoverShow"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // updateLabelVisible(tItem, true);
-                                const newTItem = { ...tItem, isVisible: true };
-                                updateLabelResult(newTItem);
+                                delelteLabel(tItem);
                               }}
-                              src={AttributeHideIcon}
-                              style={{ left: 30, position: 'absolute' }}
                             />
-                          )}
-                          <img
-                            style={{ left: 50, position: 'absolute' }}
-                            src={AttributeUnionIcon}
-                            className="hoverShow"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              delelteLabel(tItem);
-                            }}
-                          />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-              </Panel>
-            );
-          })}
-      </Collapse>
-      <Popconfirm
-        title="确认清空标注？"
-        open={open}
-        okText="确认"
-        cancelText="取消"
-        onConfirm={handleOk}
-        okButtonProps={{ loading: confirmLoading }}
-        onCancel={handleCancel}
-      >
-        <button
-          className="rightBarFooter"
-          onClick={showPopconfirm}
-          onMouseEnter={(e) => {
-            e.stopPropagation();
-            setIsClearHover(true);
-          }}
-          onMouseLeave={(e) => {
-            e.stopPropagation();
-            setIsClearHover(false);
-          }}
+                      );
+                    })}
+                </Panel>
+              );
+            })}
+        </Collapse>
+        <Popconfirm
+          title="确认清空标注？"
+          open={open}
+          okText="确认"
+          cancelText="取消"
+          onConfirm={handleOk}
+          okButtonProps={{ loading: confirmLoading }}
+          onCancel={handleCancel}
         >
-          <img className="clrearResult" src={isClearnHover ? ClearResultIconHover : ClearResultIcon} />
-        </button>
-      </Popconfirm>
-    </div>
+          <button
+            className="rightBarFooter"
+            onClick={showPopconfirm}
+            onMouseEnter={(e) => {
+              e.stopPropagation();
+              setIsClearHover(true);
+            }}
+            onMouseLeave={(e) => {
+              e.stopPropagation();
+              setIsClearHover(false);
+            }}
+          >
+            <img className="clrearResult" src={isClearnHover ? ClearResultIconHover : ClearResultIcon} />
+          </button>
+        </Popconfirm>
+      </div>
+    </>
   );
 };
 
