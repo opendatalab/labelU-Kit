@@ -152,7 +152,7 @@ const CreateTask = () => {
   }, [dispatch.task, isExistTask, taskData, taskId]);
 
   useEffect(() => {
-    if (!isExistTask) {
+    if (isExistTask) {
       dispatch.task.clearItem();
     }
     // 当新建或编辑任务时，页面卸载时清空任务信息
