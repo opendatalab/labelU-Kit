@@ -55,18 +55,6 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     };
   }, [toolInstance]);
 
-  // useEffect(() => {
-  //   if (toolInstance) {
-  //     toolInstance.singleOn('changeAttributeSidebar', (index: number) => {
-  //       forceRender((s) => s + 1);
-
-  //     });
-  //   }
-  //   return () => {
-  //     toolInstance.unbindAll('changeAttributeSidebar');
-  //   };
-  // }, [toolInstance]);
-
   // 计算attribute栏目 宽度
   useEffect(() => {
     // if (attributeList && attributeList.length > 0) {
