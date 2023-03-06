@@ -124,11 +124,11 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     navigate(`/tasks/${taskId}/samples/finished`);
   }, [saveCurrentSample, navigate, taskId]);
 
-  const handleNextSample = useCallback(() => {
+  const handleNextSample = useCallback(async () => {
     if (isLastSample) {
       handleComplete();
     } else {
-      saveCurrentSample();
+      await saveCurrentSample();
       navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
     }
   }, [handleComplete, saveCurrentSample, isLastSample, navigate, sampleIndex, samples, taskId]);
