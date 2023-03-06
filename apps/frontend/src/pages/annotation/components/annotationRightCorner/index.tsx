@@ -119,8 +119,8 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     });
   }, [currentSample, sampleId, taskId]);
 
-  const handleComplete = useCallback(() => {
-    saveCurrentSample();
+  const handleComplete = useCallback(async () => {
+    await saveCurrentSample();
     navigate(`/tasks/${taskId}/samples/finished`);
   }, [saveCurrentSample, navigate, taskId]);
 
@@ -133,12 +133,12 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     }
   }, [handleComplete, saveCurrentSample, isLastSample, navigate, sampleIndex, samples, taskId]);
 
-  const handlePrevSample = useCallback(() => {
+  const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
       return;
     }
 
-    saveCurrentSample();
+    await saveCurrentSample();
     navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex - 1}].id`)}`);
   }, [saveCurrentSample, navigate, sampleIndex, samples, taskId]);
 
@@ -165,8 +165,9 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
   // 监听标注主页的左侧样本切换
   useEffect(() => {
     const saveCurrentSampleFromOutside = ({ detail: { sampleId: _sampleId } }: CustomEvent) => {
-      saveCurrentSample();
-      navigate(`/tasks/${taskId}/samples/${_sampleId}`);
+      saveCurrentSample().then(() => {
+        navigate(`/tasks/${taskId}/samples/${_sampleId}`);
+      });
     };
 
     document.addEventListener(SAMPLE_CHANGED, saveCurrentSampleFromOutside as EventListener);
