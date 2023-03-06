@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
 import { omit, set } from 'lodash/fp';
+import type { TagToolConfig, TextToolConfig, ToolConfig } from '@label-u/annotation';
 
 import type { TaskResponse } from '@/services/types';
 import { TaskStatus, MediaType } from '@/services/types';
@@ -12,6 +13,7 @@ import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
 import type { QueuedFile } from '@/pages/createTask/partials/inputData';
 import InputData, { UploadStatus } from '@/pages/createTask/partials/inputData';
 import { createSamples } from '@/services/samples';
+import eventBus from '@/utils/common/eventBus';
 
 import InputInfoConfig from './partials/InputInfoConfig';
 import currentStyles from './index.module.scss';
@@ -37,6 +39,14 @@ const partialMapping = {
   [StepEnum.Basic]: InputInfoConfig,
   [StepEnum.Upload]: InputData,
   [StepEnum.Config]: AnnotationConfig,
+};
+
+const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
+  const attributeList = config.attributeList;
+  if (attributeList && attributeList?.length) {
+    return _.every(attributeList, (attribute) => attribute.key !== '' && attribute.value !== '');
+  }
+  return true;
 };
 
 interface TaskStep extends StepData {
@@ -167,6 +177,11 @@ const CreateTask = () => {
       return;
     }
 
+    if (_.some(toolsConfig.tools, (tool) => !isConfigEffective(tool.config))) {
+      commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
+      eventBus.emit('checkInputValue');
+      return;
+    }
     return dispatch.task
       .updateTaskConfig({
         taskId: taskId,
