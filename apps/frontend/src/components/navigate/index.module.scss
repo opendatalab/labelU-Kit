@@ -58,7 +58,6 @@
 
   :global(.ant-dropdown-menu-item) {
     margin-bottom: 0;
-    padding: 0.75rem 0;
   }
 }
 .signOutItem {
@@ -78,6 +77,7 @@
 }
 .quit {
   text-align: center;
+  padding: 0.75rem 0;
 
   span {
     margin-left: 0.5rem;

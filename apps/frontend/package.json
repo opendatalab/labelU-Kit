@@ -5,7 +5,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
     "@label-u/annotation": "1.0.0-alpha.15",
-    "@label-u/components": "1.0.0-alpha.22",
+    "@label-u/components": "1.0.0-alpha.23",
     "@reduxjs/toolkit": "^1.4.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
