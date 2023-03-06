@@ -103,43 +103,55 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     }
   };
 
-  const handleSampleChange = useCallback(
-    async (nextSampleId: number | undefined) => {
-      if (currentSample?.state !== SampleState.SKIPPED) {
-        // @ts-ignore
-        const cResult = await annotationRef?.current?.getResult();
-        const rResult = cResult[0].result;
-        const body = set('data.result')(rResult)(currentSample);
+  const saveCurrentSample = useCallback(async () => {
+    if (currentSample?.state === SampleState.SKIPPED) {
+      return;
+    }
+    // @ts-ignore
+    const cResult = await annotationRef?.current?.getResult();
+    const rResult = cResult[0].result;
+    const body = set('data.result')(rResult)(currentSample);
 
-        await updateSampleAnnotationResult(+taskId!, +sampleId!, {
-          ...body,
-          annotated_count: getAnnotationCount(JSON.parse(body.data!.result)),
-          state: SampleState.DONE,
-        });
-      }
+    await updateSampleAnnotationResult(+taskId!, +sampleId!, {
+      ...body,
+      annotated_count: getAnnotationCount(JSON.parse(body.data!.result)),
+      state: SampleState.DONE,
+    });
+  }, [currentSample, sampleId, taskId]);
 
-      const newSampleId = typeof nextSampleId !== 'number' ? _.get(samples, `[${sampleIndex + 1}].id`) : nextSampleId;
+  const handleComplete = useCallback(() => {
+    saveCurrentSample();
+    navigate(`/tasks/${taskId}/samples/finished`);
+  }, [saveCurrentSample, navigate, taskId]);
 
-      if (isLastSample) {
-        navigate(`/tasks/${taskId}/samples/finished`);
-      } else {
-        // 切换到下一个样本
-        navigate(`/tasks/${taskId}/samples/${newSampleId}`);
-      }
-    },
-    [currentSample, isLastSample, navigate, sampleId, sampleIndex, samples, taskId],
-  );
+  const handleNextSample = useCallback(() => {
+    if (isLastSample) {
+      handleComplete();
+    } else {
+      saveCurrentSample();
+      navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+    }
+  }, [handleComplete, saveCurrentSample, isLastSample, navigate, sampleIndex, samples, taskId]);
+
+  const handlePrevSample = useCallback(() => {
+    if (sampleIndex === 0) {
+      return;
+    }
+
+    saveCurrentSample();
+    navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex - 1}].id`)}`);
+  }, [saveCurrentSample, navigate, sampleIndex, samples, taskId]);
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
       const keyCode = e.keyCode;
       if (keyCode === 65 && sampleIndex > 0) {
-        commonController.debounce(() => handleSampleChange(_.get(samples, `[${sampleIndex - 1}].id`)), 1000)('');
+        commonController.debounce(handlePrevSample, 1000)('');
       } else if (keyCode === 68) {
-        handleSampleChange(undefined);
+        handleNextSample();
       }
     },
-    [handleSampleChange, sampleIndex, samples],
+    [handleNextSample, handlePrevSample, sampleIndex],
   );
 
   useEffect(() => {
@@ -152,16 +164,17 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
 
   // 监听标注主页的左侧样本切换
   useEffect(() => {
-    const handleSampleChangeFromOutside = ({ detail: { sampleId: _sampleId } }: CustomEvent) => {
-      handleSampleChange(_sampleId);
+    const saveCurrentSampleFromOutside = ({ detail: { sampleId: _sampleId } }: CustomEvent) => {
+      saveCurrentSample();
+      navigate(`/tasks/${taskId}/samples/${_sampleId}`);
     };
 
-    document.addEventListener(SAMPLE_CHANGED, handleSampleChangeFromOutside as EventListener);
+    document.addEventListener(SAMPLE_CHANGED, saveCurrentSampleFromOutside as EventListener);
 
     return () => {
-      document.removeEventListener(SAMPLE_CHANGED, handleSampleChangeFromOutside as EventListener);
+      document.removeEventListener(SAMPLE_CHANGED, saveCurrentSampleFromOutside as EventListener);
     };
-  }, [handleSampleChange]);
+  }, [navigate, saveCurrentSample, taskId]);
 
   return (
     <div className={currentStyles.outerFrame} id="rightCorner">
@@ -175,9 +188,15 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
             跳过
           </Button>
         )}
-        <Button type="primary" id={'nextPage'} onClick={commonController.debounce(handleSampleChange, 100)}>
-          {isLastSample ? '完成' : '下一页'}
-        </Button>
+        {isLastSample ? (
+          <Button type="primary" onClick={commonController.debounce(handleComplete, 100)}>
+            完成
+          </Button>
+        ) : (
+          <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)}>
+            下一页
+          </Button>
+        )}
       </div>
     </div>
   );
