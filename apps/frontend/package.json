@@ -6,7 +6,7 @@
     "@ant-design/icons": "^4.6.2",
     "@label-u/annotation": "1.0.0-alpha.15",
     "@label-u/components": "1.0.0-alpha.23",
-    "@label-u/formatter": "1.0.0-alpha.2",
+    "@label-u/formatter": "1.0.0-alpha.1",
     "@rematch/core": "^2.2.0",
     "@rematch/immer": "^2.1.3",
     "@rematch/loading": "^2.1.2",
