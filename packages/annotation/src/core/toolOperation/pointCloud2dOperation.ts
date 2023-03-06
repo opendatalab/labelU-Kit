@@ -299,9 +299,13 @@ class PointCloud2dOperation extends PolygonOperation {
       y: (pointList[2].y + pointList[3].y) / 2,
     };
 
+    const tmpR = Math.sqrt(
+      (pointList[2].x - pointList[1].x) * (pointList[2].x - pointList[1].x) +
+        (pointList[2].y - pointList[1].y) * (pointList[2].y - pointList[1].y),
+    );
     const vectorP = {
-      x: (pointList[2].x - pointList[1].x) / 6,
-      y: (pointList[2].y - pointList[1].y) / 6,
+      x: ((pointList[2].x - pointList[1].x) / tmpR) * 3,
+      y: ((pointList[2].y - pointList[1].y) / tmpR) * 3,
     };
     const arrowEndPoint = {
       x: sPoint.x + vectorP.x * 1.3,
@@ -312,7 +316,7 @@ class PointCloud2dOperation extends PolygonOperation {
       y: sPoint.y + vectorP.y,
     };
 
-    const inputVector = new Vector2(sEnd.x - sPoint.x, sEnd.y - sPoint.y).multiplyScalar(0.2);
+    const inputVector = new Vector2(sEnd.x - sPoint.x, sEnd.y - sPoint.y).multiplyScalar(0.4);
 
     const rotateVector = MathUtils.getRotateVector(inputVector, Math.PI * 0.5);
     if (rotateVector?.isVector3) {
@@ -320,7 +324,7 @@ class PointCloud2dOperation extends PolygonOperation {
       const backRotatePoint = { x: sEnd.x - rotateVector.x, y: sEnd.y - rotateVector.y };
       const arrPointList = [sPoint, sEnd, rotatePoint, arrowEndPoint, backRotatePoint, sEnd];
       this.setArrowPointList(arrPointList);
-      const thickness = this.isArrowHover ? 10 : 3;
+      const thickness = 10;
       DrawUtils.drawLineWithPointList(
         this.canvas,
         AxisUtils.changePointListByZoom(arrPointList, this.zoom, this.currentPos),
@@ -328,6 +332,7 @@ class PointCloud2dOperation extends PolygonOperation {
           color,
           thickness,
           lineType: this.config?.lineType,
+          lineCap: 'butt',
         },
       );
     }
