@@ -1,5 +1,5 @@
 import classnames from 'classnames';
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
 
 import CollapseIcon from '@/assets/cssIcon/collapse.svg';
@@ -27,17 +27,31 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
   const { imgList, imgIndex, leftSiderContent, style = {} } = props;
 
   const [imgListCollapse, setImgListCollapse] = useState<boolean>(true);
+  const sliderBoxRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const pageJump = (page: number) => {
     dispatch(PageJump(page));
   };
+
+  // 将左侧属性栏高度设置为剩余高度
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      if (!sliderBoxRef.current) {
+        return;
+      }
+
+      const rect = sliderBoxRef.current.getBoundingClientRect();
+      const attributeWrapperHeight = window.innerHeight - rect.top;
+      sliderBoxRef.current.style.height = `${attributeWrapperHeight}px`;
+    });
+  }, []);
 
   if (imgList.length === 1 && !leftSiderContent) {
     return <div />;
   }
 
   return (
-    <div className="sliderBox" id="sliderBoxId" style={style}>
+    <div className="sliderBox" id="sliderBoxId" style={style} ref={sliderBoxRef}>
       <div className={imgListCollapse ? `${layoutCls}__left_sider_hide` : `${layoutCls}__left_sider`}>
         {leftSiderContent
           ? leftSiderContent

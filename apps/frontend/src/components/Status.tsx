@@ -9,8 +9,10 @@ import { useMemo } from 'react';
 
 import IconText from './IconText';
 
+export type StatusType = 'success' | 'error' | 'warning' | 'waiting' | 'processing' | 'completed' | 'failed';
+
 export interface StatusProps {
-  type: 'success' | 'error' | 'warning' | 'waiting' | 'processing' | 'completed' | 'failed';
+  type: StatusType;
   className?: string;
   tooltip?: string;
   icon?: React.ReactNode;
@@ -27,6 +29,7 @@ const typeColorMapping = {
   processing: 'var(--primary-color)',
   completed: 'var(--success-color)',
   failed: 'var(--error-color)',
+  fail: 'var(--error-color)',
 };
 
 const typeIconMapping = {
@@ -37,6 +40,7 @@ const typeIconMapping = {
   processing: <LoadingOutlined />,
   completed: <CheckCircleFilled />,
   failed: <CloseCircleFilled />,
+  fail: <CloseCircleFilled />,
 };
 
 export default function Status({
@@ -47,7 +51,7 @@ export default function Status({
   ...restProps
 }: StatusProps) {
   const color = restProps.color ?? typeColorMapping[type];
-  const style = useMemo(() => ({ color, ...restProps.style }), [color, restProps.style]);
+  const style = useMemo(() => ({ color, '--status-color': color, ...restProps.style }), [color, restProps.style]);
 
   return (
     <IconText className={className} icon={icon} style={style}>

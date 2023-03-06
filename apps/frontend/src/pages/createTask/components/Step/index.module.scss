@@ -1,0 +1,118 @@
+@import '@/utils/common/common.module';
+
+.stepWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.stepItem {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: space-around;
+  align-items: center;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+}
+
+.stepItemInner {
+  cursor: pointer;
+  display: flex;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+  font-weight: 400;
+  background: #f2f3f5;
+  font-size: 14px;
+
+  .active & {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+  }
+
+  .finished & {
+    background-color: rgba(27, 103, 255, 0.1);
+    color: var(--primary-color);
+  }
+}
+
+.iconHighlight {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+  font-weight: 400;
+  font-size: 14px;
+  color: #ffffff;
+  background-color: var(--primary-color);
+}
+
+.iconCheck {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--primary-color);
+  background-color: rgba(27, 103, 255, 0.1);
+}
+
+.iconCheckHighlight {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+  font-weight: 400;
+  font-size: 14px;
+  color: #ffffff;
+  background-color: var(--primary-color);
+}
+
+.iconActive {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  font-weight: 400;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.title {
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.72);
+
+  .stepItemInner:hover & {
+    color: var(--primary-color);
+  }
+
+  .active & {
+    color: var(--primary-color);
+    font-weight: bold;
+  }
+}
+
+.titleHighlight {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  /* identical to box height */
+
+  /* 中性色/87% */
+
+  color: rgba(0, 0, 0, 0.87);
+}
+.titleActive {
+  font-weight: 500;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.72);
+}

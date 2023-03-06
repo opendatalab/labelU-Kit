@@ -1,12 +1,25 @@
 import _ from 'lodash-es';
-import type { AxiosResponse } from 'axios';
 
-import axiosProxy from './axiosProxy';
+import request from './request';
 import commonController from '../utils/common/common';
 import { generateAttributeMapFromConfig } from '../utils/generateAttributeMapFromConfig';
 import { jsonParse } from '../utils';
-import type { CreateSamplePayload, PatchSamplePayload, SamplePayload, SamplesPayload, TaskPayload } from './interface';
-const { axiosInstance } = axiosProxy;
+import { getTask } from './task';
+import type {
+  DeleteApiV1TasksTaskIdDeleteParams,
+  DeleteSampleCommand,
+  GetApiV1TasksTaskIdSamplesSampleIdGetParams,
+  GetPreApiV1TasksTaskIdSamplesSampleIdPreGetParams,
+  ListByApiV1TasksTaskIdSamplesGetParams,
+  OkRespCommonDataResp,
+  OkRespCreateSampleResponse,
+  OkRespSampleResponse,
+  PatchSampleCommand,
+  SampleData,
+  SampleListResponse,
+  SampleResponse,
+  UpdateApiV1TasksTaskIdSamplesSampleIdPatchParams,
+} from './types';
 
 /**
  * 将result中的label由attribute中的key转换为value
@@ -44,153 +57,113 @@ function changeKeyToValue(data: any, attributeMap: ReturnType<typeof generateAtt
   return newData;
 }
 
-const createSamples = async function (
+export async function createSamples(
   taskId: number,
   data: {
     attachement_ids: number[];
-    data: {
-      result: string;
-      fileNames: Record<string, string>;
-      urls: Record<string, string>;
-    };
+    data: SampleData;
   }[],
-): Promise<AxiosResponse<CreateSamplePayload>> {
-  // try {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples`,
-    method: 'POST',
-    data,
-  });
-  return res;
-  // }catch (e) {
-  //     CommonController.notificationErrorMessage(e, 5);
-  // }
-};
+): Promise<OkRespCreateSampleResponse> {
+  return await request.post(`/v1/tasks/${taskId}/samples`, data);
+}
 
-const getTask = async function (taskId: number): Promise<AxiosResponse<TaskPayload>> {
-  if (taskId === 0) {
-    return {};
-  }
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}`,
-    method: 'GET',
+export async function getSamples({
+  task_id,
+  ...params
+}: ListByApiV1TasksTaskIdSamplesGetParams): Promise<SampleListResponse> {
+  return await request.get(`/v1/tasks/${task_id}/samples`, {
     params: {
-      task_id: taskId,
+      ...params,
+      pageNo: typeof params.pageNo === 'undefined' ? 0 : params.pageNo - 1,
     },
   });
-  return res;
-};
+}
 
-const getSamples = async function (taskId: number, params: any): Promise<AxiosResponse<SamplesPayload>> {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples`,
-    method: 'GET',
-    params,
+export async function getSample({
+  task_id,
+  sample_id,
+}: GetApiV1TasksTaskIdSamplesSampleIdGetParams): Promise<OkRespSampleResponse> {
+  return await request.get(`/v1/tasks/${task_id}/samples/${sample_id}`);
+}
+
+export async function updateSampleState(
+  { task_id, sample_id, ...params }: UpdateApiV1TasksTaskIdSamplesSampleIdPatchParams,
+  body: PatchSampleCommand,
+): Promise<SampleResponse> {
+  return await request.patch(`/v1/tasks/${task_id}/samples/${sample_id}`, body, {
+    params: {
+      sample_id,
+      ...params,
+    },
   });
-  return res;
-};
+}
 
-const getPrevSamples = async function (taskId: number, params: any) {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples`,
-    method: 'GET',
-    params,
-  });
-  return res;
-};
-
-const getSample = async function (taskId: number, sampleId: number): Promise<AxiosResponse<SamplePayload>> {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
-    method: 'GET',
-  });
-  return res;
-};
-
-const updateSampleState = async function (
+export async function updateSampleAnnotationResult(
   taskId: number,
   sampleId: number,
-  data: any,
-  state?: string,
-): Promise<AxiosResponse<SamplePayload>> {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
-    method: 'PATCH',
-    params: {
-      sample_id: sampleId,
-    },
-    data: {
-      state: state,
-      data,
-    },
-  });
-  return res;
-};
-
-const updateSampleAnnotationResult = async function (
-  taskId: number,
-  sampleId: number,
-  data: any,
-): Promise<AxiosResponse<PatchSamplePayload>> {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples/${sampleId}`,
-    method: 'PATCH',
-    params: {
-      sample_id: sampleId,
-    },
-    data: {
+  data: SampleResponse,
+): Promise<SampleResponse> {
+  return await request.patch(
+    `/v1/tasks/${taskId}/samples/${sampleId}`,
+    {
       data: data.data,
       state: data.state,
       annotated_count: data.annotated_count,
-      // state : data.state
     },
-  });
-  return res;
-};
-const outputSample = async function (taskId: number, sampleIds: any, activeTxt: string) {
-  let res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples/export`,
-    method: 'POST',
-    params: {
-      task_id: taskId,
-      export_type: activeTxt,
+    {
+      params: {
+        sample_id: sampleId,
+      },
     },
-    data: {
+  );
+}
+
+export async function outputSample(taskId: number, sampleIds: number[], activeTxt: string) {
+  // TODO: 后期改成前端导出，不调用后端接口
+  let res = await request.post(
+    `/v1/tasks/${taskId}/samples/export`,
+    {
       sample_ids: sampleIds,
     },
-  });
-  if (activeTxt === 'MASK') {
-    res = await axiosInstance({
-      url: `/api/v1/tasks/${taskId}/samples/export`,
-      method: 'POST',
+    {
       params: {
         task_id: taskId,
         export_type: activeTxt,
       },
-      data: {
+    },
+  );
+
+  if (activeTxt === 'MASK') {
+    res = await request.post(
+      `/v1/tasks/${taskId}/samples/export`,
+      {
         sample_ids: sampleIds,
       },
-      responseType: 'blob',
-    });
+      {
+        params: {
+          task_id: taskId,
+          export_type: activeTxt,
+        },
+        responseType: 'blob',
+      },
+    );
   }
   const data = res;
-  // @ts-ignore
-  // res.blob().then(blob=>console.log(blob));
-  // res.blob().then(blob => {
-  // let afString = res.headers['content-disposition'].split(';')[1].split('=')[1];
-  // afString = afString.slice(1,-1);
-  // let blobUrl = 'blob:'+window.location.origin + '/'+ afString;
-  const taskRes: any = await getTask(taskId);
-  // 导出结果中需要将key换成value导出
-  const attributeMap = generateAttributeMapFromConfig(taskRes.data.data.config);
-  const dataWithAttributeValue = changeKeyToValue(data.data, attributeMap);
-  let blobData = new Blob([JSON.stringify(dataWithAttributeValue)]);
+  const taskRes = await getTask(taskId);
+
+  let blobData = new Blob([JSON.stringify(data)]);
   let url = window.URL.createObjectURL(blobData);
   const a = document.createElement('a');
-  let filename = taskRes.data.data.name;
+  let filename = taskRes.data.name;
+
   switch (activeTxt) {
     case 'JSON':
+      const attributeMap = generateAttributeMapFromConfig(taskRes.data.config!);
+      // 导出结果中需要将key换成value导出
+      const dataWithAttributeValue = changeKeyToValue(data, attributeMap);
+      blobData = new Blob([JSON.stringify(dataWithAttributeValue)]);
       filename = filename + '.json';
+
       break;
     case 'COCO':
       filename = filename + '.json';
@@ -202,71 +175,42 @@ const outputSample = async function (taskId: number, sampleIds: any, activeTxt: 
       url = window.URL.createObjectURL(blobData);
       break;
   }
-  a.download = filename;
+  a.download = filename!;
   a.href = url;
   a.click();
+}
 
-  // @ts-ignore
-  // window.saveAs(blobData, 'dataTimestamp' + ".json");
-  //     // const url = window.URL.createObjectURL(blobUrl);
-  //     a.href = url;
-  //     a.download = 'filename';
-  //     a.click();
-  // window.URL.revokeObjectURL(blobUrl);
-  // })
-  // commonController.downloadToFile(data, activeTxt);
-  // return res;
-};
+export async function outputSamples(taskId: number, activeTxt: string) {
+  const samplesRes = await getSamples({ task_id: taskId, pageNo: 1, pageSize: 100000 });
+  const sampleIdArrays = samplesRes.data;
+  const sampleIds = [];
 
-const outputSamples = async function (taskId: number, activeTxt: string) {
-  try {
-    const samplesRes = await getSamples(taskId, { pageNo: 0, pageSize: 100000 });
-    const sampleIdArrays = samplesRes.data.data;
-    const sampleIds = [];
-    for (const sample of sampleIdArrays) {
-      sampleIds.push(sample.id);
-    }
-    if (sampleIds.length === 0) {
-      commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
-      return;
-    }
-    await outputSample(taskId, sampleIds, activeTxt);
-    return true;
-  } catch (error) {
-    commonController.notificationErrorMessage({ message: error }, 1);
-    return false;
+  for (const sample of sampleIdArrays) {
+    sampleIds.push(sample.id!);
   }
-};
 
-const deleteSamples = async function (taskId: number, sampleIds: number[]) {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples`,
-    method: 'DELETE',
-    data: {
-      sample_ids: sampleIds,
-    },
+  if (sampleIds.length === 0) {
+    commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
+    return;
+  }
+
+  await outputSample(taskId, sampleIds, activeTxt);
+
+  return true;
+}
+
+export async function deleteSamples(
+  { task_id }: DeleteApiV1TasksTaskIdDeleteParams,
+  body: DeleteSampleCommand,
+): Promise<OkRespCommonDataResp> {
+  return await request.delete(`/v1/tasks/${task_id}/samples`, {
+    data: body,
   });
-  return res;
-};
+}
 
-const getPreSample = async function (taskId: number, sampleId: number): Promise<AxiosResponse<SamplePayload>> {
-  const res = await axiosInstance({
-    url: `/api/v1/tasks/${taskId}/samples/${sampleId}/pre`,
-    method: 'GET',
-  });
-  return res;
-};
-
-export {
-  createSamples,
-  getTask,
-  getSamples,
-  getSample,
-  getPrevSamples,
-  updateSampleState,
-  updateSampleAnnotationResult,
-  outputSample,
-  outputSamples,
-  deleteSamples,
-  getPreSample,
-};
+export async function getPreSample({
+  sample_id,
+  task_id,
+}: GetPreApiV1TasksTaskIdSamplesSampleIdPreGetParams): Promise<OkRespSampleResponse> {
+  return await request.get(`/v1/tasks/${task_id}/samples/${sample_id}/pre`);
+}

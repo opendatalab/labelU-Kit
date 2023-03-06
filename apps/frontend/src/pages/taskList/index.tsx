@@ -1,85 +1,83 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Button, Pagination } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+
+import type { Dispatch, RootState } from '@/store';
+import { useResponse } from '@/components/FlexItem';
 
 import currentStyles from './index.module.scss';
-import TaskCard from '../../components/taskCard';
-import Constatns from '../../constants';
-import { getTaskList } from '../../services/createTask';
-import CommonController from '../../utils/common/common';
-import { updateConfigStep, updateHaveConfigedStep, updateTask } from '../../stores/task.store';
+import TaskCard from './components/taskCard';
 import NullTask from '../nullTask';
-import { clearConfig } from '../../stores/toolConfig.store';
+
 const TaskList = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
-  const createTask = () => {
-    // @ts-ignore
-    dispatch(updateConfigStep(-1));
-    // @ts-ignore
-    dispatch(updateHaveConfigedStep(0));
-    dispatch(
-      // @ts-ignore
-      updateTask({
-        data: {
-          name: '',
-          tips: '',
-          description: '',
-          config: '',
-        },
-      }),
-    );
-    dispatch(clearConfig());
-    navigate(Constatns.urlToCreateNewTask);
-  };
-  const [taskCards, setTaskCards] = useState<any>([]);
-  const [taskTotal, setTaskTotal] = useState<any>(0);
-  const requestTaskList = (page: number) => {
-    getTaskList(page).then((res) => {
-      if (res) {
-        if (res.status === 200) {
-          setTaskCards(res.data?.data);
-          setTaskTotal(res.data?.meta_data?.total);
-        } else {
-          // CommonController.notificationErrorMessage({message : '拉取文件列表状态码不是200'},1);
-        }
-      } else {
-        CommonController.notificationErrorMessage({ message: '拉取文件列表失败, 请刷新页面' }, 1);
-      }
-    });
-  };
 
-  const changeCurrentPage = (page: number) => {
-    requestTaskList(page - 1);
-  };
-  useEffect(function () {
-    requestTaskList(0);
-  }, []);
+  const { isLargeScreen, isRegularScreen, isSmallScreen, isXLargeScreen, isXSmallScreen, isXXSmallScreen } =
+    useResponse();
 
+  let pageSize = 16;
+
+  if (isXXSmallScreen) {
+    pageSize = 10;
+  } else if (isXSmallScreen) {
+    pageSize = 12;
+  } else if (isSmallScreen || isRegularScreen) {
+    pageSize = 16;
+  } else if (isLargeScreen) {
+    pageSize = 20;
+  } else if (isXLargeScreen) {
+    pageSize = 36;
+  }
+
+  const [searchParams, setSearchParams] = useSearchParams({
+    page: '1',
+    size: String(pageSize),
+  });
+
+  // 初始化获取任务列表
   useEffect(() => {
-    requestTaskList(0);
-    // REVIEW: }, [window.location.search]);
-  }, []);
+    dispatch.task.fetchTasks({
+      page: Number(searchParams.get('page')) - 1,
+      size: pageSize,
+    });
+  }, [dispatch.task, pageSize, searchParams]);
+
+  const { meta_data, data: tasks = [] } = useSelector((state: RootState) => state.task.list);
+
+  const createTask = () => {
+    navigate('/tasks/0/edit');
+  };
+
   return (
     <React.Fragment>
-      {taskCards.length > 0 && (
+      {tasks.length > 0 && (
         <div className={currentStyles.tasksWrapper}>
           <Button className={currentStyles.createTaskButton} type="primary" onClick={createTask}>
             新建任务
           </Button>
           <div className={currentStyles.cards}>
-            {taskCards.map((cardInfo: any, cardInfoIndex: number) => {
+            {tasks.map((cardInfo: any, cardInfoIndex: number) => {
               return <TaskCard key={cardInfoIndex} cardInfo={cardInfo} />;
             })}
           </div>
           <div className={currentStyles.pagination}>
-            <Pagination defaultCurrent={1} total={taskTotal} pageSize={16} onChange={changeCurrentPage} />
+            <Pagination
+              defaultCurrent={1}
+              total={meta_data?.total ?? 0}
+              pageSize={+searchParams.get('size')!}
+              onChange={(value: number) => {
+                searchParams.set('page', String(value));
+                setSearchParams(searchParams);
+              }}
+            />
           </div>
         </div>
       )}
-      {taskCards.length === 0 && <NullTask />}
+      {tasks.length === 0 && <NullTask />}
     </React.Fragment>
   );
 };
+
 export default TaskList;

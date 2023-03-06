@@ -6,7 +6,7 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "isolatedModules": true,
+    "isolatedModules": false,
     "composite": true,
     "module": "ESNext",
     "allowJs": true,
@@ -30,6 +30,7 @@
   ],
   "exclude": [
     "dist",
+    "openapi.config.ts",
     "**/*.test.tsx",
     "**/*.test.ts"
   ]

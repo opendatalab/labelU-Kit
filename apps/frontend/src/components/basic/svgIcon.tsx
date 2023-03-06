@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 
-import { loadImg } from '../../pages/annotationConfig/configTemplate/config';
+import { loadImg } from '../../pages/createTask/partials/annotationConfig/configTemplate/config';
 interface SvgProps {
   name: string;
   prefix?: string;

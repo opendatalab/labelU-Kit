@@ -1,39 +1,61 @@
-import type { FC } from 'react';
 import type { RouteObject } from 'react-router';
-import { useRoutes } from 'react-router-dom';
+import { Outlet } from 'react-router';
+import { redirect } from 'react-router-dom';
 
-import AnnotationConfig from '../pages/annotationConfig';
-import Login1 from '../pages/login/index';
-import SignUp from '../pages/signUp';
-import Homepage from '../pages/homepage';
-import TaskList from '../pages/taskList';
-import CreateTask from '../pages/createTask';
-import InputInfoConfig from '../pages/inputInfoConfig';
-import InputData from '../pages/inputData';
-import TaskAnnotation from '../pages/annotation';
-import Samples from '../pages/samples';
-import RootGuard from '../pages/guards/rootGuard';
-import TaskSamplesFinished from '../pages/sampleFinished';
-import OutputData from '../pages/outputData';
+import Login from '@/pages/login/index';
+import SignUp from '@/pages/signUp';
+import TaskList from '@/pages/taskList';
+import CreateTask from '@/pages/createTask';
+import TaskAnnotation from '@/pages/annotation';
+import Samples from '@/pages/samples';
+import TaskSamplesFinished from '@/pages/sampleFinished';
+import type { TaskResponse } from '@/services/types';
+import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
-const routeList: RouteObject[] = [
+import { annotationLoader, taskLoader } from './loaders';
+
+const routes: RouteObject[] = [
   {
     path: '/',
-    element: <RootGuard />,
+    handle: {
+      crumb: () => {
+        return '首页';
+      },
+    },
+    element: <Outlet />,
+    loader: async () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      if (!token || !username) {
+        return redirect('/login');
+      }
+
+      return redirect('/tasks');
+    },
+  },
+  {
+    path: '/tasks',
+    element: <MainLayout />,
+    handle: {
+      crumb: () => {
+        return '任务列表';
+      },
+    },
     children: [
       {
-        path: 'tasks',
-        element: <Homepage />,
-        children: [
-          {
-            path: '',
-            element: <TaskList />,
-          },
-        ],
+        index: true,
+        element: <TaskList />,
       },
       {
-        path: 'tasks/:taskId',
-        element: <Homepage />,
+        path: ':taskId',
+        id: 'task',
+        element: <Outlet />,
+        loader: taskLoader,
+        handle: {
+          crumb: (data: TaskResponse) => {
+            return data?.name;
+          },
+        },
         children: [
           {
             index: true,
@@ -42,28 +64,40 @@ const routeList: RouteObject[] = [
           {
             path: 'edit',
             element: <CreateTask />,
+            loader: async ({ params }) => {
+              return params.taskId !== '0' ? '任务编辑' : '新建任务';
+            },
+            handle: {
+              crumb: (data: string) => {
+                return data;
+              },
+            },
+          },
+          {
+            path: 'samples',
+            element: <Outlet />,
             children: [
               {
-                path: 'basic',
-                element: <InputInfoConfig />,
+                path: ':sampleId',
+                element: <TaskAnnotation />,
+                id: 'annotation',
+                loader: annotationLoader,
+                handle: {
+                  crumb: () => {
+                    return '开始标注';
+                  },
+                },
               },
               {
-                path: 'upload',
-                element: <InputData />,
-              },
-              {
-                path: 'config',
-                element: <AnnotationConfig />,
+                path: 'finished',
+                element: <TaskSamplesFinished />,
+                handle: {
+                  crumb: () => {
+                    return '标注结束';
+                  },
+                },
               },
             ],
-          },
-          {
-            path: 'samples/:sampleId',
-            element: <TaskAnnotation />,
-          },
-          {
-            path: 'samples/finished',
-            element: <TaskSamplesFinished />,
           },
         ],
       },
@@ -71,21 +105,17 @@ const routeList: RouteObject[] = [
   },
   {
     path: 'login',
-    element: <Login1 />,
+    element: <Login />,
   },
   {
-    path: 'register',
+    path: '/register',
     element: <SignUp />,
-  },
-  {
-    path: 'output',
-    element: <OutputData />,
+    handle: {
+      crumb: () => {
+        return '注册';
+      },
+    },
   },
 ];
 
-const RenderRouter: FC = () => {
-  const element = useRoutes(routeList);
-  return element;
-};
-
-export default RenderRouter;
+export default routes;

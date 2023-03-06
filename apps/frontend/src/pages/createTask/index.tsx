@@ -1,338 +1,283 @@
-// @ts-ignore
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Modal } from 'antd';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { connect, useSelector, useDispatch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import _ from 'lodash-es';
+import { omit, set } from 'lodash/fp';
 
+import type { TaskResponse } from '@/services/types';
+import { TaskStatus, MediaType } from '@/services/types';
+import type { Dispatch, RootState } from '@/store';
+import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
+import type { QueuedFile } from '@/pages/createTask/partials/inputData';
+import InputData, { UploadStatus } from '@/pages/createTask/partials/inputData';
+import { createSamples } from '@/services/samples';
+
+import InputInfoConfig from './partials/InputInfoConfig';
 import currentStyles from './index.module.scss';
-import Step from '../../components/step';
-import Separator from '../../components/separator';
-import { submitBasicConfig, updateTaskConfig } from '../../services/createTask';
-import {
-  updateHaveConfigedStep,
-  updateTask,
-  updateConfigStep,
-  updateTaskId,
-  updateStatus,
-} from '../../stores/task.store';
+import type { StepData } from './components/Step';
+import Step from './components/Step';
 import commonController from '../../utils/common/common';
-import { createSamples, getTask } from '../../services/samples';
-import { updateAllConfig } from '../../stores/toolConfig.store';
+import type { TaskFormData } from './taskCreation.context';
+import { TaskCreationContext } from './taskCreation.context';
+
+enum StepEnum {
+  Basic = 'basic',
+  Upload = 'upload',
+  Config = 'config',
+}
+
+const stepTitleMapping = {
+  [StepEnum.Basic]: '基础配置',
+  [StepEnum.Upload]: '数据导入',
+  [StepEnum.Config]: '标注配置',
+};
+
+const partialMapping = {
+  [StepEnum.Basic]: InputInfoConfig,
+  [StepEnum.Upload]: InputData,
+  [StepEnum.Config]: AnnotationConfig,
+};
+
+interface TaskStep extends StepData {
+  value: StepEnum;
+}
+
+export interface PartialConfigProps {
+  task: TaskResponse;
+  formData: TaskFormData;
+  updateFormData: (field: string) => (value: string) => void;
+}
 
 const CreateTask = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
-  // @ts-ignore
-  const configStep = useSelector((state) => state.existTask.configStep);
-  // @ts-ignore
-  const haveConfigedStep = useSelector((state) => state.existTask.haveConfigedStep);
-  // @ts-ignore
-  const taskName = useSelector((state) => state.existTask.taskName);
-  // @ts-ignore
-  const taskDescription = useSelector((state) => state.existTask.taskDescription);
-  // @ts-ignore
-  const taskTips = useSelector((state) => state.existTask.taskTips);
-  // @ts-ignore
-  const taskId = useSelector((state) => state.existTask.taskId);
-  // @ts-ignore
-  const newSamples = useSelector((state) => state.samples.newSamples);
-  // @ts-ignore
-  const toolsConfig = useSelector((state) => state.toolsConfig);
-  // @ts-ignore
-  const taskStatus = useSelector((state) => state.existTask.status);
+  const routeParams = useParams();
+  const location = useLocation();
 
-  const steps = [
+  const taskId = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
+  const [currentStep, setCurrentStep] = useState<StepEnum>(
+    location.hash ? (location.hash.replace('#', '') as StepEnum) : StepEnum.Basic,
+  );
+  const [formData, setFormData] = useState<TaskFormData>({} as TaskFormData);
+
+  // 缓存上传的文件清单
+  const [uploadFileList, setUploadFileList] = useState<QueuedFile[]>([]);
+
+  const updateCurrentStep = (step: StepEnum) => {
+    setCurrentStep(step);
+    navigate({
+      pathname: location.pathname,
+      hash: step,
+    });
+  };
+
+  const Partial = useMemo(() => {
+    return partialMapping[currentStep];
+  }, [currentStep]);
+
+  const toolsConfig = useSelector((state: RootState) => state.task.config);
+  const taskData = useSelector((state: RootState) => state.task.item);
+  const loading = useSelector(
+    (state: RootState) => state.loading.effects.task.updateTaskConfig || state.loading.effects.task.createTask,
+  );
+  const isExistTask = taskId > 0;
+  const stepDataSource: TaskStep[] = [
     {
-      title: '基础配置',
-      index: 1,
-      contentUrl: `/tasks/${taskId}/edit/basic`,
+      title: stepTitleMapping[StepEnum.Basic],
+      value: StepEnum.Basic,
+      isFinished: isExistTask,
     },
     {
-      title: '数据导入',
-      index: 2,
-      contentUrl: `/tasks/${taskId}/edit/upload`,
+      title: stepTitleMapping[StepEnum.Upload],
+      value: StepEnum.Upload,
+      isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(_.get(taskData, 'status') as TaskStatus),
     },
     {
-      title: '标注配置',
-      index: 3,
-      contentUrl: `/tasks/${taskId}/edit/config`,
+      title: stepTitleMapping[StepEnum.Config],
+      value: StepEnum.Config,
+      isFinished: _.get(taskData, 'status') === TaskStatus.CONFIGURED,
     },
   ];
 
-  const finallySave = async function () {
+  const updateFormData = (field: string) => (value: any) => {
+    setFormData(set(field)(value));
+  };
+
+  const taskCreationContextValue = useMemo(
+    () => ({
+      uploadFileList,
+      setUploadFileList,
+      setFormData,
+      updateFormData,
+      formData,
+      task: taskData,
+    }),
+    [uploadFileList, formData, taskData],
+  );
+
+  useEffect(() => {
+    if (!location.hash) {
+      return;
+    }
+
+    setCurrentStep(location.hash.replace('#', '') as StepEnum);
+  }, [location.hash]);
+
+  // 将store中的task toolConfig数据同步到本地页面中
+  useEffect(() => {
+    if (!toolsConfig) {
+      return;
+    }
+
+    updateFormData('config')(toolsConfig);
+  }, [toolsConfig]);
+
+  // 将store中的task数据同步到本地页面中
+  useEffect(() => {
+    if (!taskData) {
+      return;
+    }
+
+    setFormData((pre) => ({
+      ...omit(['config'])(taskData),
+      ...pre,
+    }));
+  }, [taskData]);
+
+  useEffect(() => {
+    if (isExistTask && _.isEmpty(taskData)) {
+      dispatch.task.fetchTask(taskId);
+    }
+  }, [dispatch.task, isExistTask, taskData, taskId]);
+
+  useEffect(() => {
+    if (isExistTask) {
+      dispatch.task.clearItem();
+    }
+    // 当新建或编辑任务时，页面卸载时清空任务信息
+    return () => {
+      dispatch.task.clearItem();
+    };
+  }, [dispatch.task, isExistTask]);
+
+  const handleSave = async function () {
     if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length === 0) {
       commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
       return;
     }
 
-    const res = await updateTaskConfig(taskId, {
-      config: JSON.stringify(toolsConfig),
-      media_type: 'IMAGE',
+    return dispatch.task
+      .updateTaskConfig({
+        taskId: taskId,
+        body: {
+          ...formData,
+          media_type: MediaType.IMAGE,
+        },
+      })
+      .then(() => {
+        navigate('/tasks');
+      });
+  };
+
+  const handleCancel = () => {
+    Modal.confirm({
+      title: '确定要取消吗？',
+      content: '取消后，当前任务将不会被保存',
+      okText: '保存并退出',
+      cancelText: '取消',
+      onOk: handleSave,
     });
-    if (!res) {
-      commonController.notificationErrorMessage({ message: '配置不成功' }, 1);
-      return;
-    } else {
-      if (res.status === 200) {
-        navigate('/tasks/' + taskId);
-      }
-    }
   };
 
-  const updateStep = (status: string) => {
-    let result = 0;
-    switch (status) {
-      case 'DRAFT':
-        result = 1;
-        break;
-      case 'IMPORTED':
-        result = 2;
-        break;
-      default:
-        result = 3;
-        break;
-    }
-    // @ts-ignore
-    dispatch(updateHaveConfigedStep(result));
-  };
-  const updateTaskIdLocal = (id: number) => {
-    // @ts-ignore
-    dispatch(updateTaskId(id));
-  };
-  const nextWhen0 = async function () {
-    let result = true;
-    if (!taskName) {
+  const submitForm: () => Promise<unknown> = async function () {
+    if (!formData.name) {
       commonController.notificationErrorMessage({ message: '请填入任务名称' }, 1);
-      return false;
+      return Promise.reject();
     }
-    const isTaskNameOver = commonController.isOverFontCount(taskName, 50);
-    if (isTaskNameOver) {
-      return false;
-    }
-    const isTaskDescriptionOver = commonController.isOverFontCount(taskDescription, 500);
-    if (isTaskDescriptionOver) {
-      return false;
-    }
-    const isTaskTipsOver = commonController.isOverFontCount(taskTips, 1000);
-    if (isTaskTipsOver) {
-      return false;
-    }
-    try {
-      let res: any;
-      if (haveConfigedStep !== 0) {
-        res = await updateTaskConfig(taskId, { name: taskName, description: taskDescription, tips: taskTips });
-      } else {
-        res = await submitBasicConfig({ name: taskName, description: taskDescription, tips: taskTips });
+
+    if (isExistTask) {
+      if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList)) {
+        await createSamples(
+          taskId,
+          _.chain(uploadFileList)
+            .filter((item) => item.status === UploadStatus.Success)
+            .map((item) => ({
+              attachement_ids: [item.id!],
+              data: {
+                fileNames: {
+                  [item.id!]: item.name!,
+                },
+                result: '{}',
+                urls: {
+                  [item.id!]: item.url!,
+                },
+              },
+            }))
+            .value(),
+        );
       }
 
-      if (res.status === 201 || res.status === 200) {
-        const { status, id } = res.data.data;
-        updateStep(status);
-        updateTaskIdLocal(id);
-        result = id;
-      } else {
-        result = false;
-        commonController.notificationErrorMessage(res.data, 1);
-      }
-    } catch (error) {
-      result = false;
-      commonController.notificationErrorMessage(error, 1);
-    }
-    return result;
-  };
-  const nextWhen1 = async function () {
-    let result = true;
-    if (newSamples.length === 0 && (taskStatus === 'DRAFT' || taskStatus === 'IMPORTED' || !taskStatus)) {
-      commonController.notificationWarnMessage({ message: '请导入数据,再进行下一步操作' }, 1);
-      return false;
-    }
-    if (newSamples.length === 0 && taskStatus === 'CONFIGURED') {
-      return true;
-    }
-    try {
-      const res: any = await createSamples(taskId, newSamples);
-      if (res.status === 201) {
-        const { status } = res.data.data;
-        updateStep('IMPORTED');
-        dispatch(updateStatus(status));
-      } else {
-        result = false;
-        commonController.notificationErrorMessage(res.data, 1);
-      }
-    } catch (error) {
-      result = false;
-      commonController.notificationErrorMessage(error, 1);
-    }
-    return result;
-  };
-  const nextStep = async function () {
-    let currentStep = -1;
-    let childOutlet = `/tasks/${taskId}/edit/basic`;
-    switch (configStep) {
-      case -1:
-        const isSuccess0 = await nextWhen0();
-        if (!isSuccess0) return;
-        currentStep = 0;
-        childOutlet = `/tasks/${isSuccess0}/edit/upload`;
-        break;
-      case 0:
-        const isSuccess1 = await nextWhen1();
-        if (!isSuccess1) return;
-        currentStep = 1;
-        childOutlet = `/tasks/${taskId}/edit/config`;
-        break;
-      case 1:
-        break;
-    }
-    // @ts-ignore
-    dispatch(updateConfigStep(currentStep));
-    navigate(childOutlet);
-  };
-
-  useEffect(() => {
-    const _taskId = parseInt(window.location.pathname.split('/')[2]);
-    const searchString = window.location.search;
-    // bad name
-    let currentStatus = 1;
-    if (searchString.indexOf('currentStatus=2') > -1) {
-      currentStatus = 2;
-    }
-    if (searchString.indexOf('currentStatus=3') > -1) {
-      currentStatus = 3;
-    }
-    if (_taskId > 0) {
-      getTask(_taskId)
-        .then((res: any) => {
-          if (res.status === 200) {
-            // @ts-ignore
-            dispatch(updateTask({ data: res.data.data, configStatus: currentStatus }));
-            if (res.data.data.config) {
-              dispatch(updateAllConfig(JSON.parse(res.data.data.config)));
-            } else {
-              // new task, not configured yet
-            }
-          } else {
-            commonController.notificationErrorMessage({ message: '请求任务状态不是200' }, 1);
-          }
-        })
-        .catch((error) => commonController.notificationErrorMessage(error, 1));
+      return dispatch.task.updateTaskConfig({
+        taskId: taskId,
+        body: formData,
+      });
     } else {
-      // new created task
+      const newTask = await dispatch.task.createTask(formData);
+
+      navigate(`/tasks/${newTask.id}/edit#${StepEnum.Upload}`);
+
+      return Promise.reject();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const [isShowCancelModal, setIsShowCancelModal] = useState(false);
-  const cancelOption = () => {
-    setIsShowCancelModal(true);
   };
 
-  const isNullToolConfig = () => {
-    let result = false;
-    if (!toolsConfig || !toolsConfig.tools || toolsConfig.tools.length === 0) {
-      result = true;
-      commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
+  const handleNextStep = async function (step: TaskStep | React.MouseEvent) {
+    let nextStep = step;
+    // 点击下一步时，step为事件参数
+    if ((step as React.MouseEvent).target) {
+      const stepIndex = stepDataSource.findIndex((item) => item.value === currentStep);
+      nextStep = stepDataSource[stepIndex + 1];
     }
-    return result;
+
+    submitForm().then(() => {
+      updateCurrentStep((nextStep as TaskStep).value);
+    });
   };
-  const clickModalOk = async function (e: any) {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowCancelModal(false);
-    switch (configStep) {
-      case -1:
-        const isSuccess0 = await nextWhen0();
-        if (!isSuccess0) return;
-        break;
-      case 0:
-        const isSuccess1 = await nextWhen1();
-        if (!isSuccess1) return;
-        break;
-      case 1:
-        return;
-        const isNullToolConfigResult = isNullToolConfig();
-        if (isNullToolConfigResult) {
-          return;
-        }
-        await finallySave();
-        break;
-    }
-    navigate('/tasks');
+
+  const handlePrevStep = async (step: TaskStep) => {
+    submitForm().then(() => {
+      updateCurrentStep(step.value);
+    });
   };
-  const clickModalCancel = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowCancelModal(false);
-    // if(taskId === 0) {
-    //     navigate('/tasks');
-    //     return;
-    // }
-    // deleteTask(taskId).then((res:any)=>{
-    //   if(res.status === 200){
-    //
-    //   }else{
-    //     commonController.notificationErrorMessage({message : '删除任务不成功'},1);
-    //   }
-    // }).catch((error:any)=>commonController.notificationErrorMessage(error, 1));
-    navigate('/tasks');
-  };
+
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
         <div className={currentStyles.left}>
-          {steps.map((step: any, stepIndex: number) => {
-            if (stepIndex === steps.length - 1) {
-              return <Step ordinalNumber={step.index} title={step.title} contentUrl={step.contentUrl} key={uuidv4()} />;
-            } else {
-              return (
-                <React.Fragment key={stepIndex}>
-                  <Step key={uuidv4()} ordinalNumber={step.index} title={step.title} contentUrl={step.contentUrl} />
-                  <Separator />
-                </React.Fragment>
-              );
-            }
-          })}
+          <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
         </div>
         <div className={currentStyles.right}>
-          <Button type="primary" ghost onClick={cancelOption}>
+          <Button type="primary" ghost onClick={handleCancel}>
             取消
           </Button>
-          {configStep !== 1 && (
-            <Button type="primary" onClick={commonController.debounce(nextStep, 100)}>
-              下一步
-            </Button>
-          )}
-          {configStep === 1 && (
-            <Button type="primary" onClick={commonController.debounce(finallySave, 200)}>
+          {currentStep === StepEnum.Config ? (
+            <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
               保存
+            </Button>
+          ) : (
+            <Button loading={loading} type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
+              下一步
             </Button>
           )}
         </div>
       </div>
       <div className={currentStyles.content}>
-        <Outlet />
+        <TaskCreationContext.Provider value={taskCreationContextValue}>
+          <Partial task={taskData} formData={formData} updateFormData={updateFormData} />
+        </TaskCreationContext.Provider>
       </div>
-      <Modal
-        open={isShowCancelModal}
-        onOk={clickModalOk}
-        onCancel={clickModalCancel}
-        centered
-        okText={'保存并退出'}
-        cancelText={'不保存'}
-      >
-        <p>
-          <img src="/src/icons/warning.png" alt="" />
-          是否保存已编辑的内容？
-        </p>
-      </Modal>
     </div>
   );
 };
 
-const mapStateToProps = (state: any) => {
-  return state.toolsConfig;
-};
-
-export default connect(mapStateToProps)(CreateTask);
+export default CreateTask;

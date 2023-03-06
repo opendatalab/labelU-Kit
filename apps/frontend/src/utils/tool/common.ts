@@ -2,7 +2,7 @@ import { isObject } from 'lodash-es';
 import type { ReactNode } from 'react';
 import type { BasicConfig } from '@label-u/components';
 
-import { toolnameC } from '../../pages/annotationConfig/formConfig/constants';
+import { toolnameC } from '../../pages/createTask/partials/annotationConfig/formConfig/constants';
 
 export function checkNumber(v: string) {
   const reg = /^[1-9]\d*$/g;
@@ -10,32 +10,6 @@ export function checkNumber(v: string) {
     return true;
   }
   return false;
-}
-
-export function formatDate(date: Date, fmt: string) {
-  let format = fmt;
-  if (/(y+)/.test(format)) {
-    format = format.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
-  }
-  const o = {
-    'M+': date.getMonth() + 1,
-    'd+': date.getDate(),
-    'h+': date.getHours(),
-    'm+': date.getMinutes(),
-    's+': date.getSeconds(),
-  };
-  for (const k in o) {
-    // @ts-ignore
-    const str = o[k] + '';
-    if (new RegExp(`(${k})`).test(format)) {
-      format = format.replace(RegExp.$1, RegExp.$1.length === 1 ? str : padLeftZero(str));
-    }
-  }
-  return format;
-}
-
-function padLeftZero(str: string) {
-  return ('00' + str).substr(str.length);
 }
 
 export function getCreateProjectCmt(showBase: boolean, Base: ReactNode, Step: ReactNode) {
@@ -75,16 +49,6 @@ export const copyText = (text: string, element: 'input' | 'textarea' = 'input') 
 
   document.execCommand('copy');
   document.body.removeChild(copyInput);
-};
-
-/**
- * 截取文件名
- * @param path - 文件路径
- */
-export const getBaseName = (path: string) => {
-  const separator = /^Win/.test(navigator.platform) ? '\\' : '/';
-  const splitPath = path.split(separator);
-  return splitPath[splitPath.length - 1];
 };
 
 export const validateTools = (tools: BasicConfig[]) => {

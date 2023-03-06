@@ -1,58 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { connect, useDispatch } from 'react-redux';
-import { Table, Pagination, Modal } from 'antd';
+import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Table, Pagination, Button } from 'antd';
+import _ from 'lodash-es';
 import moment from 'moment';
 
-import { setSamples } from '@/stores/sample.store';
+import type { Dispatch, RootState } from '@/store';
+import { SampleState, TaskStatus } from '@/services/types';
+import ExportPortal from '@/components/ExportPortal';
 
 import currentStyles from './index.module.scss';
 import Statistical from '../../components/statistical';
-import GoToEditTask from '../goToEditTask';
-import commonController from '../../utils/common/common';
-import { getTask, getSamples, deleteSamples, outputSample } from '../../services/samples';
+import GoToEditTask from './components/GoToEditTask';
 import statisticalStyles from '../../components/statistical/index.module.scss';
-import currentStyles1 from '../outputData/index.module.scss';
+
 const Samples = () => {
-  const taskId = parseInt(window.location.pathname.split('/')[2]);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const taskData = useRouteLoaderData('task');
+  const dispatch = useDispatch<Dispatch>();
+  const taskId = _.get(taskData, 'id');
 
-  const [isModalShow, setIsModalShow] = useState(false);
-  const [taskStatus, setTaskStatus] = useState<any>(undefined);
+  // 查询参数
+  const [searchParams, setSearchParams] = useSearchParams(
+    new URLSearchParams({
+      // 默认按照最后更新时间倒序
+      pageNo: '1',
+      pageSize: '10',
+    }),
+  );
+
+  const taskStatus = _.get(taskData, 'status');
+  const isTaskReadyToAnnotate = ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!);
+  const {
+    meta_data = {
+      total: 0,
+    },
+    data: samples,
+  } = useSelector((state: RootState) => state.sample.list);
+
+  // 初始化获取样本列表
+  useEffect(() => {
+    dispatch.sample.fetchSamples({
+      task_id: +taskId!,
+      ...Object.fromEntries(searchParams.entries()),
+    });
+  }, [dispatch.sample, searchParams, taskId]);
+
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
-  const [deleteSampleIds, setDeleteSampleIds] = useState<any>([]);
-  const [showDatas, setShowDatas] = useState<any[]>([]);
-  const [pageInfo, setPageInfo] = useState({ pageNo: 0, pageSize: 10 });
-  const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [currentPageSize, setCurrentPageSize] = useState(10);
+  const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
 
-  const deleteSamplesLocal = (sampleIds: number[]) => {
-    setDeleteSampleIds(sampleIds);
-    setIsModalShow(true);
-  };
-
-  const turnToAnnotate = (sampleId: number) => {
+  const handleGoAnnotation = (sampleId: number) => {
     navigate(`/tasks/${taskId}/samples/${sampleId}`);
-  };
-
-  const getSamplesLocal = (params: any) => {
-    getSamples(taskId, params)
-      .then((res) => {
-        if (res.status === 200) {
-          setShowDatas(res.data.data);
-          setTotal(res.data.meta_data.total);
-          setCurrentPage(params.pageNo + 1);
-          setCurrentPageSize(params.pageSize);
-          dispatch(setSamples(res.data.data));
-        } else {
-          commonController.notificationErrorMessage({ message: '请求samples 出问题' }, 1);
-        }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
   };
 
   const columns: any = [
@@ -82,37 +80,28 @@ const Samples = () => {
       align: 'left',
 
       render: (text: string) => {
-        if (taskStatus === 'DRAFT' || taskStatus === 'IMPORTED') {
+        if (!isTaskReadyToAnnotate) {
           return '';
         }
-        let result = undefined;
-        switch (text) {
-          case 'DONE':
-            result = (
-              <div className={currentStyles.leftTitleContentOption}>
-                <div className={statisticalStyles.leftTitleContentOptionBlueIcon} />
-                <div className={statisticalStyles.leftTitleContentOptionContent}>已标注</div>
-              </div>
-            );
-            break;
-          case 'NEW':
-            result = (
-              <div className={currentStyles.leftTitleContentOption}>
-                <div className={statisticalStyles.leftTitleContentOptionGrayIcon} />
-                <div className={statisticalStyles.leftTitleContentOptionContent}>未标注</div>
-              </div>
-            );
-            break;
-          case 'SKIPPED':
-            result = (
-              <div className={currentStyles.leftTitleContentOption}>
-                <div className={statisticalStyles.leftTitleContentOptionOrangeIcon} />
-                <div className={statisticalStyles.leftTitleContentOptionContent}>跳过</div>
-              </div>
-            );
-            break;
-        }
-        return result;
+
+        const icons: Record<SampleState, React.ReactNode> = {
+          [SampleState.DONE]: <div className={statisticalStyles.leftTitleContentOptionBlueIcon} />,
+          [SampleState.NEW]: <div className={statisticalStyles.leftTitleContentOptionGrayIcon} />,
+          [SampleState.SKIPPED]: <div className={statisticalStyles.leftTitleContentOptionOrangeIcon} />,
+        };
+
+        const texts: Record<SampleState, string> = {
+          [SampleState.DONE]: '已标注',
+          [SampleState.NEW]: '未标注',
+          [SampleState.SKIPPED]: '跳过',
+        };
+
+        return (
+          <div className={currentStyles.leftTitleContentOption}>
+            {icons[text as SampleState]}
+            <div className={statisticalStyles.leftTitleContentOptionContent}>{texts[text as SampleState]}</div>
+          </div>
+        );
       },
       sorter: true,
     },
@@ -152,7 +141,7 @@ const Samples = () => {
       align: 'left',
 
       render: (created_by: any) => {
-        if (taskStatus === 'DRAFT' || taskStatus === 'IMPORTED') {
+        if (!isTaskReadyToAnnotate) {
           return '';
         }
         return created_by.username;
@@ -166,7 +155,7 @@ const Samples = () => {
 
       // width : 310,
       render: (updated_at: any) => {
-        if (taskStatus === 'DRAFT' || taskStatus === 'IMPORTED') {
+        if (!isTaskReadyToAnnotate) {
           return '';
         }
         return moment(updated_at).format('YYYY-MM-DD HH:MM');
@@ -184,17 +173,11 @@ const Samples = () => {
           <React.Fragment>
             {record.id === enterRowId && (
               <div className={currentStyles.optionItem}>
-                {taskStatus !== 'IMPORTED' && taskStatus !== 'DRAFT' && (
-                  <div className={currentStyles.optionItemEnter} onClick={() => turnToAnnotate(record.id)}>
+                {isTaskReadyToAnnotate && (
+                  <div className={currentStyles.optionItemEnter} onClick={() => handleGoAnnotation(record.id)}>
                     进入标注
                   </div>
                 )}
-                <div
-                  className={currentStyles.optionItemDelete}
-                  onClick={commonController.debounce(deleteSamplesLocal.bind(null, [record.id]), 100)}
-                >
-                  删除
-                </div>
               </div>
             )}
           </React.Fragment>
@@ -202,29 +185,11 @@ const Samples = () => {
       },
     },
   ];
-  const clickModalOk = () => {
-    deleteSamples(taskId, deleteSampleIds)
-      .then((res) => {
-        if (res.status === 200) {
-          commonController.notificationSuccessMessage({ message: '删除成功' }, 1);
-          getSamplesLocal(Object.assign({}, pageInfo, { pageNo: 0 }));
-        } else {
-          commonController.notificationErrorMessage({ message: '删除sample出错' }, 1);
-        }
-      })
-      .catch(() => {
-        commonController.notificationErrorMessage({ message: '删除sample出错' }, 1);
-      });
-    setIsModalShow(false);
-    setDeleteSampleIds([]);
-  };
-  const clickModalCancel = () => {
-    setIsModalShow(false);
-  };
+
   const rowSelection = {
     columnWidth: 58,
-    onChange: (selectedKeys: any) => {
-      setDeleteSampleIds(Object.assign([], deleteSampleIds, selectedKeys));
+    onChange: (selectedKeys: number[]) => {
+      setSelectedSampleIds(selectedKeys);
     },
     getCheckboxProps: (record: any) => {
       return {
@@ -236,47 +201,37 @@ const Samples = () => {
     selectedKeys: () => {},
   };
 
-  const getTaskLocal = () => {
-    getTask(taskId)
-      .then((res: any) => {
-        if (res.status === 200) {
-          const status = res.data.data.status;
-          setTaskStatus(status);
-        } else {
-          commonController.notificationErrorMessage({ message: '请求任务详情出错' }, 1);
-        }
-      })
-      .catch((error) => {
-        commonController.notificationErrorMessage(error, 1);
-      });
-  };
-  useEffect(() => {
-    getTaskLocal();
-
-    getSamplesLocal({ pageNo: 0, pageSize: 10 });
-
-    // setShowDatas([{
-    //   option : (<div className={ currentStyles.optionItem }>
-    //     <div className={ currentStyles.optionItemEnter } onClick={ ()=>turnToAnnotate() }>进入标注</div>
-    //     <div className={ currentStyles.optionItemDelete }>删除</div>
-    //   </div>)
-    // }])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const changePage = (page: number, pageSize: number) => {
-    if (page === 0) {
-      // eslint-disable-next-line no-param-reassign
-      page = 1;
+  // @ts-ignore
+  const handleTableChange = (pagination, filters, sorter) => {
+    if (!_.isEmpty(pagination)) {
+      searchParams.set('pageNo', `${pagination.current}`);
+      searchParams.set('pageSize', `${pagination.pageSize}`);
     }
-    setPageInfo({
-      pageNo: page - 1,
-      pageSize: pageSize,
-    });
-    getSamplesLocal({
-      pageNo: page - 1,
-      pageSize,
-    });
+
+    if (sorter) {
+      let sortValue = '';
+      switch (sorter.order) {
+        case 'ascend':
+          sortValue = 'asc';
+          break;
+        case 'descend':
+          sortValue = 'desc';
+          break;
+        case undefined:
+          sortValue = 'desc';
+          break;
+      }
+      searchParams.set('sort', `${_.get(sorter, 'field')}:${sortValue}`);
+    } else {
+      searchParams.delete('sort');
+    }
+
+    setSearchParams(searchParams);
+  };
+  const handlePaginationChange = (page: number, pageSize: number) => {
+    searchParams.set('pageNo', `${page}`);
+    searchParams.set('pageSize', `${pageSize}`);
+    setSearchParams(searchParams);
   };
 
   const onMouseEnterRow = (rowId: any) => {
@@ -290,190 +245,43 @@ const Samples = () => {
       },
     };
   };
-  // const outputSamplesLocal = ()=>{
-  //   outputSample(taskId, deleteSampleIds).then((res:any)=>{
-  //         if(res.status === 200){
-  //
-  //         }else{
-  //           commonController.notificationErrorMessage({message : '请求导出数据出错'},1)
-  //         }
-  //     }
-  //   ).catch((error:any)=>{commonController.notificationErrorMessage({message : '请求导出数据出错'},1)})
-  // }
-  const [activeTxt, setActiveTxt] = useState('JSON');
-  const [isShowModal1, setIsShowModal1] = useState(false);
-  const clickOk = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowModal1(false);
-    outputSample(taskId, deleteSampleIds, activeTxt).catch((error) => {
-      commonController.notificationErrorMessage(error, 1);
-    });
-  };
 
-  const clickCancel = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowModal1(false);
-  };
-  const confirmActiveTxt = (e: any, value: string) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setActiveTxt(value);
-  };
-  // const [sortGroup, setSortGroup] = useState({state : 'desc', 'annotated_count' : 'desc'});
-
-  const reactSorter = (p: any, f: any, s: any) => {
-    const field = s.field;
-    let sortStr = s.order;
-    switch (sortStr) {
-      case 'ascend':
-        sortStr = 'asc';
-        break;
-      case 'descend':
-        sortStr = 'desc';
-        break;
-      case undefined:
-        sortStr = 'desc';
-        break;
-    }
-    const newSortGroup = Object.assign({}, { [field]: sortStr });
-    // setSortGroup(newSortGroup);
-    const queryStr = `${field}:${newSortGroup[field]}`;
-    getSamplesLocal({ pageNo: currentPage - 1, pageSize: currentPageSize, sort: queryStr });
-  };
   // @ts-ignore
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
-        {(taskStatus === 'DRAFT' || taskStatus === 'IMPORTED') && <GoToEditTask taskStatus={taskStatus} />}
-        {taskStatus !== 'DRAFT' && taskStatus !== 'IMPORTED' && <Statistical />}
-        {/*delete*/}
-        {/*{ <Statistical />}*/}
+        {isTaskReadyToAnnotate ? <Statistical /> : <GoToEditTask taskStatus={taskStatus} />}
       </div>
       <div className={currentStyles.content}>
         <Table
           columns={columns}
-          dataSource={showDatas ? showDatas : []}
+          dataSource={samples || []}
           pagination={false}
-          rowKey={(record) => record.id}
+          rowKey={(record) => record.id!}
           rowSelection={rowSelection}
           onRow={onRow}
-          onChange={reactSorter}
+          onChange={handleTableChange}
         />
         <div className={currentStyles.pagination}>
           <div className={currentStyles.dataProcess}>
-            <div
-              className={currentStyles.dataProcessDelete}
-              onClick={(e: any) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopPropagation();
-                if (deleteSampleIds.length === 0) {
-                  commonController.notificationErrorMessage({ message: '请先勾选需要删除的数据' }, 1);
-                  return;
-                }
-                setIsModalShow(true);
-              }}
-            >
-              批量删除
-            </div>
-            <div
-              className={currentStyles.dataProcessOutput}
-              onClick={(e: any) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopPropagation();
-                if (deleteSampleIds.length === 0) {
-                  commonController.notificationErrorMessage({ message: '请先勾选需要导出的数据' }, 1);
-                  return;
-                }
-                setIsShowModal1(true);
-              }}
-            >
-              批量数据导出
-            </div>
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds}>
+              <Button type="link" disabled={selectedSampleIds.length === 0}>
+                批量数据导出
+              </Button>
+            </ExportPortal>
           </div>
           <Pagination
-            pageSize={currentPageSize}
-            current={currentPage}
-            total={total}
+            current={parseInt(searchParams.get('pageNo') || '1')}
+            pageSize={parseInt(searchParams.get('pageSize') || '10')}
+            total={meta_data?.total}
             showSizeChanger
             showQuickJumper
-            onChange={changePage}
+            onChange={handlePaginationChange}
           />
         </div>
       </div>
-      <Modal
-        open={isModalShow}
-        onOk={clickModalOk}
-        onCancel={clickModalCancel}
-        centered
-        okText={'删除'}
-        okButtonProps={{ danger: true }}
-      >
-        <p>
-          <img src="/src/icons/warning.png" alt="" />
-          确认要删除这条数据吗？
-        </p>
-      </Modal>
-      <Modal title="选择导出格式" okText={'导出'} onOk={clickOk} onCancel={clickCancel} open={isShowModal1}>
-        <div className={currentStyles1.outerFrame}>
-          <div className={currentStyles1.pattern}>
-            <div className={currentStyles1.title}>导出格式</div>
-            <div className={currentStyles1.buttons}>
-              {activeTxt === 'JSON' && (
-                <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'JSON')}>
-                  JSON
-                </div>
-              )}
-              {activeTxt !== 'JSON' && (
-                <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'JSON')}>
-                  JSON
-                </div>
-              )}
-
-              {activeTxt === 'COCO' && (
-                <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'COCO')}>
-                  COCO
-                </div>
-              )}
-              {activeTxt !== 'COCO' && (
-                <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'COCO')}>
-                  COCO
-                </div>
-              )}
-
-              {activeTxt === 'MASK' && (
-                <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'MASK')}>
-                  MASK
-                </div>
-              )}
-              {activeTxt !== 'MASK' && (
-                <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'MASK')}>
-                  MASK
-                </div>
-              )}
-            </div>
-          </div>
-          {activeTxt === 'JSON' && (
-            <div className={currentStyles.bottom}>Label U 标准格式，包含任务id、标注结果、url、fileName字段</div>
-          )}
-          {activeTxt === 'COCO' && (
-            <div className={currentStyles.bottom}>COCO数据集标准格式，面向物体检测（拉框）和图像分割（多边形）任务</div>
-          )}
-          {activeTxt === 'MASK' && <div className={currentStyles.bottom}>面向图像分割（多边形）任务</div>}
-        </div>
-      </Modal>
     </div>
   );
 };
 
-const mapStateToProps = (state: any) => {
-  return state.toolsConfig;
-};
-
-export default connect(mapStateToProps)(Samples);
+export default Samples;
