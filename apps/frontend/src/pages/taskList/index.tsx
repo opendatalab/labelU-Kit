@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { Dispatch, RootState } from '@/store';
+import { useResponse } from '@/components/FlexItem';
 
 import currentStyles from './index.module.scss';
 import TaskCard from './components/taskCard';
@@ -12,16 +13,36 @@ import NullTask from '../nullTask';
 const TaskList = () => {
   const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
+
+  const { isLargeScreen, isRegularScreen, isSmallScreen, isXLargeScreen, isXSmallScreen, isXXSmallScreen } =
+    useResponse();
+
+  let pageSize = 16;
+
+  if (isXXSmallScreen) {
+    pageSize = 10;
+  } else if (isXSmallScreen) {
+    pageSize = 12;
+  } else if (isSmallScreen || isRegularScreen) {
+    pageSize = 16;
+  } else if (isLargeScreen) {
+    pageSize = 20;
+  } else if (isXLargeScreen) {
+    pageSize = 36;
+  }
+
   const [searchParams, setSearchParams] = useSearchParams({
     page: '1',
+    size: String(pageSize),
   });
 
   // 初始化获取任务列表
   useEffect(() => {
     dispatch.task.fetchTasks({
       page: Number(searchParams.get('page')) - 1,
+      size: pageSize,
     });
-  }, [dispatch.task, searchParams]);
+  }, [dispatch.task, pageSize, searchParams]);
 
   const { meta_data, data: tasks = [] } = useSelector((state: RootState) => state.task.list);
 
@@ -45,7 +66,7 @@ const TaskList = () => {
             <Pagination
               defaultCurrent={1}
               total={meta_data?.total ?? 0}
-              pageSize={16}
+              pageSize={+searchParams.get('size')!}
               onChange={(value: number) => {
                 searchParams.set('page', String(value));
                 setSearchParams(searchParams);

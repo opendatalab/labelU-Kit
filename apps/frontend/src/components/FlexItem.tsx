@@ -7,8 +7,7 @@ interface ResponseProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTM
   className?: string;
 }
 
-// Flex 响应式布局
-export default function FlexItem({ style, children, className, ...props }: ResponseProps) {
+export function useResponse() {
   const isXXSmallScreen = useMediaQuery({
     maxWidth: 600,
   });
@@ -31,6 +30,27 @@ export default function FlexItem({ style, children, className, ...props }: Respo
   const isXLargeScreen = useMediaQuery({
     minWidth: 2501,
   });
+
+  return {
+    /** basis = '100%';  */
+    isXXSmallScreen,
+    /** basis = '50%';  */
+    isXSmallScreen,
+    /** basis = '33.3%';  */
+    isSmallScreen,
+    /** basis = '25%';  */
+    isRegularScreen,
+    /** basis = '20%';  */
+    isLargeScreen,
+    /** basis = '16.6%';  */
+    isXLargeScreen,
+  };
+}
+
+// Flex 响应式布局
+export default function FlexItem({ style, children, className, ...props }: ResponseProps) {
+  const { isXXSmallScreen, isXSmallScreen, isSmallScreen, isRegularScreen, isLargeScreen, isXLargeScreen } =
+    useResponse();
 
   let basis = '25%';
   if (isXXSmallScreen) {
