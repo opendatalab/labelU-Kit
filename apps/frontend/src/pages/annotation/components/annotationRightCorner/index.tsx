@@ -98,6 +98,8 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     // 切换到下一个样本
     if (!isLastSample) {
       navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+    } else {
+      navigate(`/tasks/${taskId}/samples/finished`);
     }
   };
 
@@ -118,10 +120,14 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
 
       const newSampleId = typeof nextSampleId !== 'number' ? _.get(samples, `[${sampleIndex + 1}].id`) : nextSampleId;
 
-      // 切换到下一个样本
-      navigate(`/tasks/${taskId}/samples/${newSampleId}`);
+      if (isLastSample) {
+        navigate(`/tasks/${taskId}/samples/finished`);
+      } else {
+        // 切换到下一个样本
+        navigate(`/tasks/${taskId}/samples/${newSampleId}`);
+      }
     },
-    [currentSample, navigate, sampleId, sampleIndex, samples, taskId],
+    [currentSample, isLastSample, navigate, sampleId, sampleIndex, samples, taskId],
   );
 
   const onKeyDown = useCallback(
