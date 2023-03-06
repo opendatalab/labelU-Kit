@@ -10,12 +10,11 @@ import type { Dispatch, RootState } from '@/store';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import { ReactComponent as OutputIcon } from '@/assets/svg/outputData.svg';
 import commonController from '@/utils/common/common';
-import { outputSamples } from '@/services/samples';
 import { deleteTask } from '@/services/task';
 import FlexItem from '@/components/FlexItem';
 import Status from '@/components/Status';
 import IconText from '@/components/IconText';
-import currentStyles1 from '@/pages/outputData/index.module.scss';
+import ExportPortal from '@/components/ExportPortal';
 
 import currentStyles from './index.module.scss';
 
@@ -32,6 +31,10 @@ const TaskCard = (props: any) => {
   const total = unDoneSample + doneSample;
   const navigate = useNavigate();
   const turnToAnnotation = (e: any) => {
+    if (!e.currentTarget.contains(e.target)) {
+      return;
+    }
+
     e.stopPropagation();
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
@@ -59,28 +62,6 @@ const TaskCard = (props: any) => {
   };
 
   // TODO: 以下代码需要优化 =============================
-  const [activeTxt, setActiveTxt] = useState('JSON');
-  const [isShowModal, setIsShowModal] = useState(false);
-  const clickOk = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowModal(false);
-    outputSamples(id, activeTxt);
-  };
-
-  const clickCancel = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowModal(false);
-  };
-  const confirmActiveTxt = (e: any, value: string) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setActiveTxt(value);
-  };
   const deleteSingleTaskOk = (e: any) => {
     e.stopPropagation();
     e.nativeEvent.stopPropagation();
@@ -122,19 +103,13 @@ const TaskCard = (props: any) => {
             )}
           </div>
           <div className={currentStyles.actions}>
-            <div
-              className={currentStyles.upload}
-              onClick={(e: any) => {
-                e.nativeEvent.stopImmediatePropagation();
-                e.stopPropagation();
-                e.preventDefault();
-                setIsShowModal(true);
-              }}
-            >
-              <Tooltip placement={'top'} title={'数据导出'}>
-                <Icon className={currentStyles.actionIcon} component={OutputIcon} />
-              </Tooltip>
-            </div>
+            <ExportPortal taskId={cardInfo.id}>
+              <div className={currentStyles.upload}>
+                <Tooltip placement={'top'} title={'数据导出'}>
+                  <Icon className={currentStyles.actionIcon} component={OutputIcon} />
+                </Tooltip>
+              </div>
+            </ExportPortal>
             {userInfo.username === cardInfo.created_by.username && (
               <div onClick={handleDeleteTask} className={currentStyles.delete}>
                 <Tooltip title={'删除项目'} placement={'top'}>
@@ -182,60 +157,6 @@ const TaskCard = (props: any) => {
               >
                 您确认要删除该任务吗？
               </IconText>
-            </Modal>
-          </div>
-        )}
-        {isShowModal && (
-          <div onClick={stopPropagation}>
-            <Modal title="选择导出格式" okText={'导出'} onOk={clickOk} onCancel={clickCancel} open={isShowModal}>
-              <div className={currentStyles1.outerFrame}>
-                <div className={currentStyles1.pattern}>
-                  <div className={currentStyles1.title}>导出格式</div>
-                  <div className={currentStyles1.buttons}>
-                    {activeTxt === 'JSON' && (
-                      <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'JSON')}>
-                        JSON
-                      </div>
-                    )}
-                    {activeTxt !== 'JSON' && (
-                      <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'JSON')}>
-                        JSON
-                      </div>
-                    )}
-
-                    {activeTxt === 'COCO' && (
-                      <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'COCO')}>
-                        COCO
-                      </div>
-                    )}
-                    {activeTxt !== 'COCO' && (
-                      <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'COCO')}>
-                        COCO
-                      </div>
-                    )}
-
-                    {activeTxt === 'MASK' && (
-                      <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'MASK')}>
-                        MASK
-                      </div>
-                    )}
-                    {activeTxt !== 'MASK' && (
-                      <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'MASK')}>
-                        MASK
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {activeTxt === 'JSON' && (
-                  <div className={currentStyles.bottom}>Label U 标准格式，包含任务id、标注结果、url、fileName字段</div>
-                )}
-                {activeTxt === 'COCO' && (
-                  <div className={currentStyles.bottom}>
-                    COCO数据集标准格式，面向物体检测（拉框）和图像分割（多边形）任务
-                  </div>
-                )}
-                {activeTxt === 'MASK' && <div className={currentStyles.bottom}>面向图像分割（多边形）任务</div>}
-              </div>
             </Modal>
           </div>
         )}

@@ -150,16 +150,20 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
   }
   const data = res;
   const taskRes = await getTask(taskId);
-  // 导出结果中需要将key换成value导出
-  const attributeMap = generateAttributeMapFromConfig(taskRes.data.config!);
-  const dataWithAttributeValue = changeKeyToValue(data.data, attributeMap);
-  let blobData = new Blob([JSON.stringify(dataWithAttributeValue)]);
+
+  let blobData = new Blob([JSON.stringify(data)]);
   let url = window.URL.createObjectURL(blobData);
   const a = document.createElement('a');
   let filename = taskRes.data.name;
+
   switch (activeTxt) {
     case 'JSON':
+      const attributeMap = generateAttributeMapFromConfig(taskRes.data.config!);
+      // 导出结果中需要将key换成value导出
+      const dataWithAttributeValue = changeKeyToValue(data, attributeMap);
+      blobData = new Blob([JSON.stringify(dataWithAttributeValue)]);
       filename = filename + '.json';
+
       break;
     case 'COCO':
       filename = filename + '.json';
@@ -178,7 +182,7 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
 
 export async function outputSamples(taskId: number, activeTxt: string) {
   try {
-    const samplesRes = await getSamples({ task_id: taskId, pageNo: 0, pageSize: 100000 });
+    const samplesRes = await getSamples({ task_id: taskId, pageNo: 1, pageSize: 100000 });
     const sampleIdArrays = samplesRes.data;
     const sampleIds = [];
 

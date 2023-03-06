@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Pagination, Modal } from 'antd';
+import { Table, Pagination, Button } from 'antd';
 import _ from 'lodash-es';
 import moment from 'moment';
 
 import type { Dispatch, RootState } from '@/store';
 import { SampleState, TaskStatus } from '@/services/types';
+import ExportPortal from '@/components/ExportPortal';
 
 import currentStyles from './index.module.scss';
 import Statistical from '../../components/statistical';
 import GoToEditTask from './components/GoToEditTask';
-import commonController from '../../utils/common/common';
-import { outputSample } from '../../services/samples';
 import statisticalStyles from '../../components/statistical/index.module.scss';
-import currentStyles1 from '../outputData/index.module.scss';
 
 const Samples = () => {
   const navigate = useNavigate();
@@ -49,7 +47,7 @@ const Samples = () => {
   }, [dispatch.sample, searchParams, taskId]);
 
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
-  const [deleteSampleIds, setDeleteSampleIds] = useState<any>([]);
+  const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
 
   const handleGoAnnotation = (sampleId: number) => {
     navigate(`/tasks/${taskId}/samples/${sampleId}`);
@@ -190,8 +188,8 @@ const Samples = () => {
 
   const rowSelection = {
     columnWidth: 58,
-    onChange: (selectedKeys: any) => {
-      setDeleteSampleIds(Object.assign([], deleteSampleIds, selectedKeys));
+    onChange: (selectedKeys: number[]) => {
+      setSelectedSampleIds(selectedKeys);
     },
     getCheckboxProps: (record: any) => {
       return {
@@ -248,31 +246,6 @@ const Samples = () => {
     };
   };
 
-  const [activeTxt, setActiveTxt] = useState('JSON');
-  const [isShowModal1, setIsShowModal1] = useState(false);
-  const clickOk = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowModal1(false);
-    outputSample(taskId!, deleteSampleIds, activeTxt).catch((error) => {
-      commonController.notificationErrorMessage(error, 1);
-    });
-  };
-
-  const clickCancel = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setIsShowModal1(false);
-  };
-  const confirmActiveTxt = (e: any, value: string) => {
-    e.stopPropagation();
-    e.nativeEvent.stopPropagation();
-    e.preventDefault();
-    setActiveTxt(value);
-  };
-
   // @ts-ignore
   return (
     <div className={currentStyles.outerFrame}>
@@ -291,35 +264,11 @@ const Samples = () => {
         />
         <div className={currentStyles.pagination}>
           <div className={currentStyles.dataProcess}>
-            <div
-              className={currentStyles.dataProcessDelete}
-              onClick={(e: any) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopPropagation();
-                if (deleteSampleIds.length === 0) {
-                  commonController.notificationErrorMessage({ message: '请先勾选需要删除的数据' }, 1);
-                  return;
-                }
-              }}
-            >
-              批量删除
-            </div>
-            <div
-              className={currentStyles.dataProcessOutput}
-              onClick={(e: any) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.nativeEvent.stopPropagation();
-                if (deleteSampleIds.length === 0) {
-                  commonController.notificationErrorMessage({ message: '请先勾选需要导出的数据' }, 1);
-                  return;
-                }
-                setIsShowModal1(true);
-              }}
-            >
-              批量数据导出
-            </div>
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds}>
+              <Button type="link" disabled={selectedSampleIds.length === 0}>
+                批量数据导出
+              </Button>
+            </ExportPortal>
           </div>
           <Pagination
             current={parseInt(searchParams.get('pageNo') || '1')}
@@ -331,54 +280,6 @@ const Samples = () => {
           />
         </div>
       </div>
-      <Modal title="选择导出格式" okText={'导出'} onOk={clickOk} onCancel={clickCancel} open={isShowModal1}>
-        <div className={currentStyles1.outerFrame}>
-          <div className={currentStyles1.pattern}>
-            <div className={currentStyles1.title}>导出格式</div>
-            <div className={currentStyles1.buttons}>
-              {activeTxt === 'JSON' && (
-                <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'JSON')}>
-                  JSON
-                </div>
-              )}
-              {activeTxt !== 'JSON' && (
-                <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'JSON')}>
-                  JSON
-                </div>
-              )}
-
-              {activeTxt === 'COCO' && (
-                <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'COCO')}>
-                  COCO
-                </div>
-              )}
-              {activeTxt !== 'COCO' && (
-                <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'COCO')}>
-                  COCO
-                </div>
-              )}
-
-              {activeTxt === 'MASK' && (
-                <div className={currentStyles1.buttonActive} onClick={(e) => confirmActiveTxt(e, 'MASK')}>
-                  MASK
-                </div>
-              )}
-              {activeTxt !== 'MASK' && (
-                <div className={currentStyles1.button} onClick={(e) => confirmActiveTxt(e, 'MASK')}>
-                  MASK
-                </div>
-              )}
-            </div>
-          </div>
-          {activeTxt === 'JSON' && (
-            <div className={currentStyles.bottom}>Label U 标准格式，包含任务id、标注结果、url、fileName字段</div>
-          )}
-          {activeTxt === 'COCO' && (
-            <div className={currentStyles.bottom}>COCO数据集标准格式，面向物体检测（拉框）和图像分割（多边形）任务</div>
-          )}
-          {activeTxt === 'MASK' && <div className={currentStyles.bottom}>面向图像分割（多边形）任务</div>}
-        </div>
-      </Modal>
     </div>
   );
 };

@@ -17,6 +17,8 @@
         "copyBackwardResult": false,
         "attributeConfigurable": true,
         "textConfigurable": false,
+        "upperLimitPointNum": 100,
+        "lowerLimitPointNum": 3,
         "textCheckType": 0,
         "customFormat": "",
         "attributeList": [{ "key": "", "value": "" }]

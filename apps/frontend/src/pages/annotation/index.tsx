@@ -21,7 +21,6 @@ export const annotationRef = createRef();
 const AnnotationPage = () => {
   const routeParams = useParams();
   const [taskSample, setTaskSample] = useState<any>([]);
-  // const [samples, setSamples] = useState<SampleResponse[]>([]);
 
   const taskConfig = useSelector((state: RootState) => state.task.config);
 
@@ -90,8 +89,6 @@ const AnnotationPage = () => {
             textConfig={taskConfig.textConfig}
             goBack={goBack}
             tools={taskConfig.tools}
-            // exportData = {exportData}
-            // onSubmit = {onSubmit}
             commonAttributeConfigurable={taskConfig.commonAttributeConfigurable}
           />
         )}
