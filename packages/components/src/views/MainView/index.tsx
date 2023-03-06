@@ -70,7 +70,6 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
       <Layout
         className={classNames({
           'lab-layout': true,
-          'lab-layout-preview': props.isPreview,
         })}
         style={props.style?.layout}
       >
