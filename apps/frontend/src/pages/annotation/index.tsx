@@ -39,7 +39,7 @@ const AnnotationPage = () => {
     const { data, meta_data } = await getSamples({
       task_id: +routeParams.taskId!,
       pageNo: currentPage.current,
-      pageSize: 10,
+      pageSize: 40,
     });
 
     currentPage.current += 1;

@@ -7,6 +7,7 @@ export interface Option<Data> {
   afterFetching?: (data: Data) => void;
   isEnd?: (allData?: Data) => boolean;
   watch?: any;
+  beforeFetching?: () => Promise<unknown>;
 }
 
 // type TData = Record<string, any>[];
@@ -39,7 +40,11 @@ export function useScrollFetch<T extends any[] | undefined>(
   const initialized = useRef<boolean>(false);
 
   const wrappedService = useCallback(
-    (reset?: boolean) => {
+    async (reset?: boolean) => {
+      if (typeof options?.beforeFetching === 'function') {
+        await options.beforeFetching();
+      }
+
       isFetching.current = true;
       toggleLoading(true);
       const promise = service(!!reset);
@@ -67,7 +72,7 @@ export function useScrollFetch<T extends any[] | undefined>(
           toggleLoading(false);
         });
     },
-    [afterFetching, data, service],
+    [afterFetching, data, options, service],
   );
 
   // 第一次加载

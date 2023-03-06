@@ -164,8 +164,14 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
 
   // 监听标注主页的左侧样本切换
   useEffect(() => {
-    const saveCurrentSampleFromOutside = ({ detail: { sampleId: _sampleId } }: CustomEvent) => {
+    const saveCurrentSampleFromOutside = (e: CustomEvent) => {
+      const _sampleId = _.get(e, 'detail.sampleId');
+
       saveCurrentSample().then(() => {
+        if (_.isNil(_sampleId)) {
+          return;
+        }
+
         navigate(`/tasks/${taskId}/samples/${_sampleId}`);
       });
     };
