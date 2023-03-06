@@ -923,7 +923,7 @@ class BasicToolOperation extends EventListener {
         }
 
         this.isDrag = false;
-        this.container.style.cursor = 'grabbing';
+        this.container.style.cursor = 'grab';
         this.forbidCursorLine = true;
         this.renderBasicCanvas();
 

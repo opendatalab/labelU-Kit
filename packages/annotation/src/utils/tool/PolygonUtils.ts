@@ -1,7 +1,7 @@
 import { difference, polygon, union } from '@turf/turf';
 import { ERotateDirection } from '@/constant/annotation';
 import CommonToolUtils from './CommonToolUtils';
-import { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonData, IPolygonPoint } from '../../types/tool/polygon';
 import { ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import AxisUtils from './AxisUtils';
 import MathUtils from '../MathUtils';
@@ -104,7 +104,7 @@ export default class PolygonUtils {
    * @returns {Array<number>}
    */
   static createSmoothCurvePointsFromPointList(
-    pointList: Array<{ x: number; y: number; [a: string]: any }>,
+    pointList: { x: number; y: number; [a: string]: any }[],
     numberOfSegments: number = SEGMENT_NUMBER,
   ) {
     const newPoints = this.createSmoothCurvePoints(
@@ -250,7 +250,6 @@ export default class PolygonUtils {
     checkPoint: ICoordinate,
     pointList: IPolygonPoint[],
     lineType: ELineTypes = ELineTypes.Line,
-    scope: number = 3,
   ) {
     let points = [...pointList];
 
@@ -268,13 +267,11 @@ export default class PolygonUtils {
       points.push(points[0]);
     }
     let edgeIndex = -1;
-    let minLength = scope;
 
     for (let i = 0; i < points.length - 1; i++) {
-      const { length } = MathUtils.getFootOfPerpendicular(checkPoint, points[i], points[i + 1]);
-      if (length < minLength) {
+      const isInsect = AxisUtils.isPointInsect(checkPoint, [points[i], points[i + 1]]);
+      if (isInsect) {
         edgeIndex = i;
-        minLength = length;
       }
     }
 

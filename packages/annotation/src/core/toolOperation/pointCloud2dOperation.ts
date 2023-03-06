@@ -18,6 +18,7 @@ interface IPointCloud2dOperationProps {
   forbidAddNew?: boolean;
   isPointCloud2DTool?: boolean;
   config?: ToolConfig;
+  onMouseUp: (e: MouseEvent) => undefined;
 }
 
 const POINT_CLOUD_POLYGON_PIXELRATIO = 1;
@@ -83,6 +84,37 @@ class PointCloud2dOperation extends PolygonOperation {
     this.arrowPointList = pointList;
   }
 
+  public onMouseUp(e: MouseEvent) {
+    super.onMouseUp(e);
+    this.setCustomCursor('none');
+    this.rotatePointList = undefined;
+    return undefined;
+  }
+
+  public setCursorWhenMove(event: MouseEvent) {
+    // hover 框内
+    if (this.getHoverID(event) && !this.rotatePointList) {
+      if (this.hoverEdgeIndex > -1) {
+        // TODO: resize polygon with resize icon
+        this.setCustomCursor('grab');
+      } else if (event.buttons === 1) {
+        this.setCustomCursor('grab');
+      } else {
+        this.setCustomCursor('pointer');
+      }
+    }
+    // hover 箭头 或者 调整方向
+    else if (this.isArrowHover || this.rotatePointList) {
+      if (event.buttons === 1) {
+        this.setCustomCursor('grab');
+      } else {
+        this.setCustomCursor('pointer');
+      }
+    } else {
+      this.setCustomCursor('none');
+    }
+  }
+
   public onMouseMove(event: MouseEvent) {
     event.preventDefault();
     super.onMouseMove(event);
@@ -99,13 +131,14 @@ class PointCloud2dOperation extends PolygonOperation {
       currentCoordWithoutZoom,
       this.arrowPointList as [ICoordinate, ICoordinate],
     );
-
+    this.setCursorWhenMove(event);
     if (this.isArrowHover) {
       this.renderPolygon();
     }
     if ((this.isArrowHover && this.firstClickPoint) || this.rotatePointList) {
       this.getVirtualPolygon(event);
     }
+
     if (this.isApproachBund(event) && this.isUncheckedApproachBoundary) {
       this.onMouseUp(event);
     }
@@ -294,7 +327,6 @@ class PointCloud2dOperation extends PolygonOperation {
         {
           color,
           thickness,
-          hoverEdgeIndex: this.hoverEdgeIndex,
           lineType: this.config?.lineType,
         },
       );
@@ -302,6 +334,10 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public renderPolygon() {
+    const selectdPolygon = this.selectedPolygon;
+    if (!selectdPolygon) {
+      return;
+    }
     if (this.rotatePointList && this.rotation) {
       DrawUtils.drawSelectedPolygonWithFillAndLine(
         this.canvas,
@@ -322,7 +358,6 @@ class PointCloud2dOperation extends PolygonOperation {
 
     // 3. 选中多边形的渲染
     if (this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
       if (selectdPolygon) {
         const toolColor = this.getColor();
         const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
@@ -341,10 +376,6 @@ class PointCloud2dOperation extends PolygonOperation {
             lineType: this.config?.lineType,
           },
         );
-
-        if (this.isShowArrow && selectdPolygon.isRect) {
-          this.renderArrow(selectdPolygon.pointList, toolData.stroke);
-        }
       }
     }
 
@@ -389,13 +420,8 @@ class PointCloud2dOperation extends PolygonOperation {
         },
       );
     }
-
     // 5. 编辑中高亮的点
     if (this.hoverPointIndex > -1 && this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
-      if (!selectdPolygon) {
-        return;
-      }
       const hoverColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
 
       const point = selectdPolygon?.pointList[this.hoverPointIndex];
@@ -409,10 +435,6 @@ class PointCloud2dOperation extends PolygonOperation {
 
     // 6. 编辑中高亮的边
     if (this.hoverEdgeIndex > -1 && this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
-      if (!selectdPolygon) {
-        return;
-      }
       const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
       DrawUtils.drawLineWithPointList(
         this.canvas,
@@ -424,6 +446,10 @@ class PointCloud2dOperation extends PolygonOperation {
           lineType: this.config?.lineType,
         },
       );
+    }
+    // 绘制 箭头
+    if (this.isShowArrow && selectdPolygon.isRect) {
+      this.renderArrow(selectdPolygon.pointList, toolData.stroke);
     }
   }
 

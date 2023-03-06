@@ -1296,11 +1296,25 @@ class PolygonOperation extends BasicToolOperation {
 
   public onMouseMove(e: MouseEvent) {
     e.preventDefault();
+
+    if (this.getHoverID(e)) {
+      if (this.hoverEdgeIndex > -1) {
+        // TODO: resize polygon
+        this.setCustomCursor('grab');
+      } else if (e.buttons === 1) {
+        this.setCustomCursor('grab');
+      } else {
+        this.setCustomCursor('pointer');
+      }
+    } else {
+      this.setCustomCursor('none');
+    }
+
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
 
-    if (this.selectedID && this.dragInfo) {
+    if (this.selectedID && this.dragInfo && this.hoverEdgeIndex < 0) {
       this.onDragMove(e);
       return;
     }
@@ -1368,7 +1382,7 @@ class PolygonOperation extends BasicToolOperation {
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return undefined;
     }
-
+    this.setCustomCursor('none');
     if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
       // 拖拽停止
       const { originPolygon } = this.dragInfo;
