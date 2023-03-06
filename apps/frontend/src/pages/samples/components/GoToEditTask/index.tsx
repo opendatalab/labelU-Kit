@@ -1,5 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
 
 import currentStyles from './index.module.scss';
@@ -7,8 +7,9 @@ import currentStyles from './index.module.scss';
 const GoToEditTask = (props: any) => {
   const { taskStatus } = props;
   const navigate = useNavigate();
+  const routeParams = useParams();
+  const taskId = +routeParams.taskId!;
   const turnToEditTask = () => {
-    const taskId = parseInt(window.location.pathname.split('/')[2]);
     if (taskId > 0) {
       let tail = 'basic';
       switch (taskStatus) {
