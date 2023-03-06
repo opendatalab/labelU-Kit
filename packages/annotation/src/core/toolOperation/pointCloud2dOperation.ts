@@ -18,7 +18,7 @@ interface IPointCloud2dOperationProps {
   forbidAddNew?: boolean;
   isPointCloud2DTool?: boolean;
   config?: ToolConfig;
-  onMouseUp: (e: MouseEvent) => undefined;
+  onMouseUp?: (e: MouseEvent) => undefined;
 }
 
 const POINT_CLOUD_POLYGON_PIXELRATIO = 1;
