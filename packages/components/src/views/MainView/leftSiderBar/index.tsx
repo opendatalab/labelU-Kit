@@ -26,7 +26,7 @@ interface LeftSiderProps {
 const LeftSider: React.FC<LeftSiderProps> = (props) => {
   const { imgList, imgIndex, leftSiderContent, style = {} } = props;
 
-  const [imgListCollapse, setImgListCollapse] = useState<boolean>(true);
+  const [imgListCollapse, setImgListCollapse] = useState<boolean>(false);
   const sliderBoxRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const pageJump = (page: number) => {
