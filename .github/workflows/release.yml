@@ -65,7 +65,7 @@ jobs:
       - name: Update frontend dependencies
         run: |
           npm cache clean -f
-          pnpm install
+          pnpm install --no-frozen-lockfile
       - name: Build frontend
         run: pnpm run build:frontend
       - name: Release frontend
