@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
+import Navigate from '@/components/Navigate';
+
 import currentStyles from './index.module.scss';
-import Navigate from '../../components/Navigate';
 
 const MainLayout = () => {
   const navigate = useNavigate();
