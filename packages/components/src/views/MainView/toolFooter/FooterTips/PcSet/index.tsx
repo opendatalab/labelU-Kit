@@ -131,7 +131,7 @@ const PcSet: FC<Iprops> = ({ updatePopoverStatus }) => {
                       className='resetAction'
                       onClick={(e) => {
                         e.stopPropagation();
-                        info.reset();
+                        info.nameRight();
                       }}
                     >
                       {t('reset')}
