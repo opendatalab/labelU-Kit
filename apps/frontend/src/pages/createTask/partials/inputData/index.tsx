@@ -81,7 +81,7 @@ const normalizeFiles = (files: File[]) => {
   });
 };
 
-const InputInfoConfig = ({ task }: PartialConfigProps) => {
+const InputData = ({ task }: PartialConfigProps) => {
   const taskId = task.id;
 
   // 上传队列，包括成功和失败的任务
@@ -117,12 +117,16 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
   const processUpload = useCallback(
     async (files: QueuedFile[]) => {
       // 开始上传
-      setFileQueue((pre) => [...pre, ...files]);
+      setFileQueue((pre) => _.uniqBy([...pre, ...files], 'uid'));
       let succeed = 0;
       let failed = 0;
 
       for (const file of files) {
         const { file: fileBlob } = file;
+
+        if ([UploadStatus.Success, UploadStatus.Uploading].includes(file.status)) {
+          continue;
+        }
 
         try {
           const { data } = await uploadFileService({
@@ -257,10 +261,7 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
                   type="link"
                   size="small"
                   onClick={() => {
-                    setFileQueue((prev) => {
-                      // TODO: 删除服务器的文件
-                      return prev.filter((item) => item.uid !== record.uid);
-                    });
+                    processUpload(fileQueue);
                   }}
                 >
                   重新上传
@@ -281,7 +282,7 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
         },
       },
     ] as TableColumnType<QueuedFile>[];
-  }, [handleFileDelete, setFileQueue]);
+  }, [fileQueue, handleFileDelete, processUpload]);
 
   return (
     <div className={styles.outerFrame}>
@@ -359,4 +360,4 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
     </div>
   );
 };
-export default InputInfoConfig;
+export default InputData;

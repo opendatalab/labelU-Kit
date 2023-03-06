@@ -10,7 +10,7 @@ import { TaskStatus, MediaType } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
 import type { QueuedFile } from '@/pages/createTask/partials/inputData';
-import InputData from '@/pages/createTask/partials/inputData';
+import InputData, { UploadStatus } from '@/pages/createTask/partials/inputData';
 import { createSamples } from '@/services/samples';
 
 import InputInfoConfig from './partials/InputInfoConfig';
@@ -200,18 +200,21 @@ const CreateTask = () => {
       if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList)) {
         await createSamples(
           taskId,
-          _.map(uploadFileList, (item) => ({
-            attachement_ids: [item.id!],
-            data: {
-              fileNames: {
-                [item.id!]: item.name!,
+          _.chain(uploadFileList)
+            .filter((item) => item.status === UploadStatus.Success)
+            .map((item) => ({
+              attachement_ids: [item.id!],
+              data: {
+                fileNames: {
+                  [item.id!]: item.name!,
+                },
+                result: '{}',
+                urls: {
+                  [item.id!]: item.url!,
+                },
               },
-              result: '{}',
-              urls: {
-                [item.id!]: item.url!,
-              },
-            },
-          })),
+            }))
+            .value(),
         );
       }
 

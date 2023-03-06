@@ -18,12 +18,6 @@ import AnnotationContext from './annotation.context';
 
 export const annotationRef = createRef();
 
-/**
- * TODO
- * 1. 页内滚动加载，将数据存在本地state
- * 2. SampleGallery context 将样本共享给子组件
- */
-
 const AnnotationPage = () => {
   const routeParams = useParams();
   const [taskSample, setTaskSample] = useState<any>([]);
