@@ -10,7 +10,7 @@
   "homepage": "",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.shlab.tech/sinan/sinan-web-sdk.git"
+    "url": "https://github.com/opendatalab/labelU-Kit.git"
   },
   "publishConfig": {
     "access": "public",
