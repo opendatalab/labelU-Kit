@@ -17,6 +17,7 @@ import type { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cubo
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import type { ICoordinate } from '@/types/tool/common';
 import { DEFAULT_TEXT_MAX_WIDTH } from '@/constant/tool';
+import EKeyCode from '@/constant/keyCode';
 
 import BasicToolOperation from './basicToolOperation';
 import type { IBasicToolOperationProps } from './basicToolOperation';
@@ -233,6 +234,29 @@ class CuboidOperation extends BasicToolOperation {
     this.render();
   }
 
+  public setCuboidValidAndRender(id: string) {
+    if (!id) {
+      return;
+    }
+
+    const newPolygonList = this.cuboidList.map((cuboid) => {
+      if (cuboid.id === id) {
+        return {
+          ...cuboid,
+          valid: !cuboid.valid,
+        };
+      }
+
+      return cuboid;
+    });
+
+    this.setCuboidList(newPolygonList);
+    // this.history.pushHistory(this.polygonList);
+    this.render();
+
+    this.emit('updateResult');
+  }
+
   public onRightDblClick(e: MouseEvent) {
     super.onRightDblClick(e);
 
@@ -264,6 +288,63 @@ class CuboidOperation extends BasicToolOperation {
     this._textAttributeInstance?.clearTextAttribute();
 
     this.render();
+  }
+
+  public onKeyDown(e: KeyboardEvent) {
+    if (!CommonToolUtils.hotkeyFilter(e)) {
+      // 如果为输入框则进行过滤
+      return;
+    }
+
+    if (super.onKeyDown(e) === false) {
+      return;
+    }
+
+    const { keyCode } = e;
+    switch (keyCode) {
+      case EKeyCode.Ctrl:
+        /**
+         * Set Invalid.
+         */
+        if (this.drawingCuboid) {
+          this.drawingCuboid = {
+            ...this.drawingCuboid,
+            valid: false,
+          };
+          this.render();
+        }
+        break;
+
+      case EKeyCode.F:
+        if (this.selectedID) {
+          this.setCuboidValidAndRender(this.selectedID);
+        }
+
+        break;
+    }
+  }
+
+  public onKeyUp(e: KeyboardEvent) {
+    super.onKeyUp(e);
+
+    switch (e.keyCode) {
+      case EKeyCode.Ctrl:
+        /**
+         * Restore the valid.
+         */
+        if (this.drawingCuboid) {
+          this.drawingCuboid = {
+            ...this.drawingCuboid,
+            valid: true,
+          };
+          this.render();
+        }
+        break;
+
+      default: {
+        break;
+      }
+    }
   }
 
   public onMouseDown(e: MouseEvent) {
@@ -345,6 +426,15 @@ class CuboidOperation extends BasicToolOperation {
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
 
     if (e.button === 0) {
+      /**
+       *
+       */
+      if (this.hoverID && e.ctrlKey && !this.drawingCuboid) {
+        this.setCuboidValidAndRender(this.hoverID);
+
+        return;
+      }
+
       // 1. Create First Point & Basic Cuboid.
       if (!this.drawingCuboid) {
         this.createNewDrawingCuboid(e, basicSourceID);
