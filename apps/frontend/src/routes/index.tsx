@@ -9,7 +9,6 @@ import CreateTask from '@/pages/createTask';
 import TaskAnnotation from '@/pages/annotation';
 import Samples from '@/pages/samples';
 import TaskSamplesFinished from '@/pages/sampleFinished';
-import OutputData from '@/pages/outputData';
 import type { TaskResponse } from '@/services/types';
 import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
@@ -114,15 +113,6 @@ const routes: RouteObject[] = [
     handle: {
       crumb: () => {
         return '注册';
-      },
-    },
-  },
-  {
-    path: '/output',
-    element: <OutputData />,
-    handle: {
-      crumb: () => {
-        return '导出';
       },
     },
   },
