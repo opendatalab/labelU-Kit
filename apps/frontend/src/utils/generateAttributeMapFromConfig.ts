@@ -12,7 +12,7 @@ export function generateAttributeMapFromConfig(config: string) {
   for (const tool of conf.tools) {
     const toolConfig = tool.config;
 
-    if (toolConfig.attributeList) {
+    if (toolConfig && toolConfig.attributeList) {
       for (const attr of toolConfig.attributeList) {
         if (!attributeMap.has(attr.key)) {
           attributeMap.set(attr.key, attr.value);

@@ -181,28 +181,22 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
 }
 
 export async function outputSamples(taskId: number, activeTxt: string) {
-  try {
-    const samplesRes = await getSamples({ task_id: taskId, pageNo: 1, pageSize: 100000 });
-    const sampleIdArrays = samplesRes.data;
-    const sampleIds = [];
+  const samplesRes = await getSamples({ task_id: taskId, pageNo: 1, pageSize: 100000 });
+  const sampleIdArrays = samplesRes.data;
+  const sampleIds = [];
 
-    for (const sample of sampleIdArrays) {
-      sampleIds.push(sample.id!);
-    }
-
-    if (sampleIds.length === 0) {
-      commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
-      return;
-    }
-
-    await outputSample(taskId, sampleIds, activeTxt);
-
-    return true;
-  } catch (error) {
-    commonController.notificationErrorMessage({ message: error }, 1);
-
-    return false;
+  for (const sample of sampleIdArrays) {
+    sampleIds.push(sample.id!);
   }
+
+  if (sampleIds.length === 0) {
+    commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
+    return;
+  }
+
+  await outputSample(taskId, sampleIds, activeTxt);
+
+  return true;
 }
 
 export async function deleteSamples(
