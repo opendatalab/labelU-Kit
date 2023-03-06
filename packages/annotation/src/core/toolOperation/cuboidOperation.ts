@@ -200,7 +200,17 @@ class CuboidOperation extends BasicToolOperation {
     }
   }
 
-  public setResult() {}
+  public setResult(cuboidList: ICuboid[]) {
+    this.clearDrawingStatus();
+    this.setCuboidList(cuboidList);
+    this.render();
+  }
+
+  public exportData() {
+    const { cuboidList } = this;
+
+    return [cuboidList, this.basicImgInfo];
+  }
 
   public setSelectedID(newID?: string) {
     const oldID = this.selectedID;
@@ -665,6 +675,11 @@ class CuboidOperation extends BasicToolOperation {
     }
 
     this.renderTextAttribute();
+
+    // LabelU-Kit Exclusive.
+    if (this.saveDataEvent) {
+      this.container.dispatchEvent(this.saveDataEvent);
+    }
   }
 
   public setDefaultAttribute(defaultAttribute?: string) {
@@ -675,7 +690,7 @@ class CuboidOperation extends BasicToolOperation {
       // If chang attribute, need to change the styles in parallel
       this.changeStyle(defaultAttribute);
 
-      //  Trigger sidebar synchronisation
+      //  Trigger sidebar synchronization
       this.emit('changeAttributeSidebar');
 
       // If this target is selected, the currently selected property needs to be changed
