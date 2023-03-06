@@ -1438,7 +1438,7 @@ export default class RectOperation extends BasicToolOperation {
       }
 
       if (rect.attribute) {
-        showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
+        showText = `${showText}  ${this.config.attributeMap.get(rect.attribute) || rect.attribute}`;
       }
 
       const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);
