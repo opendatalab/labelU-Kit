@@ -33,7 +33,7 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
     dispatch(PageJump(page));
   };
 
-  // 将右侧属性栏高度设置为剩余高度
+  // 将左侧属性栏高度设置为剩余高度
   useLayoutEffect(() => {
     setTimeout(() => {
       if (!sliderBoxRef.current) {

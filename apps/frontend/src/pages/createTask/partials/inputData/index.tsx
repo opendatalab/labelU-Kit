@@ -1,8 +1,7 @@
-import type { SetStateAction, Dispatch } from 'react';
-import React, { useMemo, useCallback, useContext } from 'react';
+import { useMemo, useCallback, useContext } from 'react';
 import { v4 as uuid4 } from 'uuid';
 import type { TableColumnType } from 'antd';
-import { Popconfirm, Button, Tree, Table } from 'antd';
+import { Popconfirm, Button, Table } from 'antd';
 import _ from 'lodash-es';
 import formatter from '@label-u/formatter';
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
@@ -166,7 +165,7 @@ const InputInfoConfig = ({ task }: PartialConfigProps) => {
       } else if (succeed > 0 && failed === 0) {
         commonController.notificationSuccessMessage({ message: `${succeed} 个文件上传成功` }, 3);
       } else if (failed > 0 && succeed === 0) {
-        commonController.notificationSuccessMessage({ message: `${failed} 个文件上传失败` }, 3);
+        commonController.notificationWarnMessage({ message: `${failed} 个文件上传失败` }, 3);
       }
     },
     [setFileQueue, taskId],

@@ -29,6 +29,7 @@ const typeColorMapping = {
   processing: 'var(--primary-color)',
   completed: 'var(--success-color)',
   failed: 'var(--error-color)',
+  fail: 'var(--error-color)',
 };
 
 const typeIconMapping = {
@@ -39,6 +40,7 @@ const typeIconMapping = {
   processing: <LoadingOutlined />,
   completed: <CheckCircleFilled />,
   failed: <CloseCircleFilled />,
+  fail: <CloseCircleFilled />,
 };
 
 export default function Status({

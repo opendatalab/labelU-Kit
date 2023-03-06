@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Table, Pagination, Modal } from 'antd';
 import _ from 'lodash-es';
 import moment from 'moment';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 import type { Dispatch, RootState } from '@/store';
 import { SampleState, TaskStatus } from '@/services/types';
@@ -52,30 +51,7 @@ const Samples = () => {
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [deleteSampleIds, setDeleteSampleIds] = useState<any>([]);
 
-  const handleDeleteSample = (ids: number[]) => {
-    Modal.confirm({
-      title: '确认要删除这条数据吗？',
-      icon: <ExclamationCircleOutlined />,
-      onOk() {
-        dispatch.sample
-          .deleteSamples({
-            task_id: taskId!,
-            body: {
-              sample_ids: ids,
-            },
-          })
-          .then(() => {
-            commonController.notificationSuccessMessage({ message: '删除成功' }, 1);
-          });
-        dispatch.sample.fetchSamples({
-          task_id: +taskId!,
-          ...Object.fromEntries(searchParams.entries()),
-        });
-      },
-    });
-  };
-
-  const turnToAnnotate = (sampleId: number) => {
+  const handleGoAnnotation = (sampleId: number) => {
     navigate(`/tasks/${taskId}/samples/${sampleId}`);
   };
 
@@ -200,13 +176,10 @@ const Samples = () => {
             {record.id === enterRowId && (
               <div className={currentStyles.optionItem}>
                 {isTaskReadyToAnnotate && (
-                  <div className={currentStyles.optionItemEnter} onClick={() => turnToAnnotate(record.id)}>
+                  <div className={currentStyles.optionItemEnter} onClick={() => handleGoAnnotation(record.id)}>
                     进入标注
                   </div>
                 )}
-                <div className={currentStyles.optionItemDelete} onClick={() => handleDeleteSample([record.id])}>
-                  删除
-                </div>
               </div>
             )}
           </React.Fragment>
