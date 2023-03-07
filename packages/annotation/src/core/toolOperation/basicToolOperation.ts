@@ -1,4 +1,4 @@
-import { isNumber } from 'lodash';
+import { isNumber } from 'lodash-es';
 import localforage from 'localforage';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';

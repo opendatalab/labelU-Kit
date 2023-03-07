@@ -74,7 +74,7 @@ class LineToolOperation extends BasicToolOperation {
       order = CommonToolUtils.getAllToolsMaxOrder(this.lineList, this.prevResultList) + 1;
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
-    activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
+    activeLine.map((point: ILinePoint) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
     this.updateActiveArea();
     this.drawLine(activeLine, coord, color, true, true);
     this.drawLineNumber(activeLine[0], order, color, '', this.defaultAttribute, isActiveLineValid);
@@ -769,7 +769,7 @@ class LineToolOperation extends BasicToolOperation {
   public findHoverLine(coord: ICoordinate) {
     const line = _.cloneDeep(this.lineList)
       .reverse()
-      .find(({ pointList }) => {
+      .find(({ pointList }: any) => {
         const list = pointList ? this.getPointList(pointList) : [];
         const scope = this.getLineWidthScope();
         return list.some((point, index) => {
@@ -795,7 +795,7 @@ class LineToolOperation extends BasicToolOperation {
 
     _.cloneDeep(this.lineList)
       .reverse()
-      .forEach(({ pointList, id }) => {
+      .forEach(({ pointList, id }: any) => {
         if (id === this.selectedID || !pointList || pointList?.length < 2) {
           return;
         }
