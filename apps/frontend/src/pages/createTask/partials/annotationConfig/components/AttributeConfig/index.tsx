@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
 import { addInputList, changeInputList, deleteInputList } from '@/utils/tool/editTool';
-import eventBus from '@/utils/common/eventBus';
+import { CHECK_INPUT_VALUE } from '@/pages/createTask';
 
 interface IJsonTabProps {
   value?: any[];
@@ -74,9 +74,14 @@ const JSONTab = (props: IJsonTabProps) => {
   };
 
   useEffect(() => {
-    eventBus.on('checkInputValue', () => {
+    const saveToolsConfig = () => {
       setInputChecked(true);
-    });
+    };
+
+    document.addEventListener(CHECK_INPUT_VALUE, saveToolsConfig as EventListener);
+    return () => {
+      document.removeEventListener(CHECK_INPUT_VALUE, saveToolsConfig as EventListener);
+    };
   }, []);
 
   return (

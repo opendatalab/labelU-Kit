@@ -13,7 +13,6 @@ import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
 import type { QueuedFile } from '@/pages/createTask/partials/inputData';
 import InputData, { UploadStatus } from '@/pages/createTask/partials/inputData';
 import { createSamples } from '@/services/samples';
-import eventBus from '@/utils/common/eventBus';
 
 import InputInfoConfig from './partials/InputInfoConfig';
 import currentStyles from './index.module.scss';
@@ -40,6 +39,8 @@ const partialMapping = {
   [StepEnum.Upload]: InputData,
   [StepEnum.Config]: AnnotationConfig,
 };
+
+export const CHECK_INPUT_VALUE = 'checkInputValue';
 
 const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
   const attributeList = config.attributeList;
@@ -179,7 +180,7 @@ const CreateTask = () => {
 
     if (_.some(toolsConfig.tools, (tool) => !isConfigEffective(tool.config))) {
       commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
-      eventBus.emit('checkInputValue');
+      document.dispatchEvent(new CustomEvent(CHECK_INPUT_VALUE, {}));
       return;
     }
     return dispatch.task
