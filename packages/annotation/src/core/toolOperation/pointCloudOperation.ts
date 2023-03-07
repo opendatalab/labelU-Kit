@@ -807,20 +807,12 @@ class PointCloudOperation extends PointCloud {
 
   public textLookAtCamera() {
     const { boxList } = this;
-    const camaraPostion = this.camera.position;
     if (Array.isArray(boxList) && boxList.length > 0) {
       for (let i = 0; i < boxList.length; i++) {
         const tmpTextMesh = this.scene.getObjectByName(`${boxList[i].id}attribute`);
         if (tmpTextMesh) {
-          const textPosition = tmpTextMesh.position;
-          const textToCameraVector = new THREE.Vector3(
-            camaraPostion.x - textPosition.x,
-            camaraPostion.y - textPosition.y,
-            camaraPostion.z - textPosition?.z,
-          );
-          const angleY = textToCameraVector.angleTo(new THREE.Vector3(0, 1, 0));
-          const angleX = textToCameraVector.angleTo(new THREE.Vector3(1, 0, 0));
-          tmpTextMesh.rotation.set(angleY - 0.5 * Math.PI, 0.5 * Math.PI - angleX, 0);
+          tmpTextMesh.lookAt(this.camera.position);
+          tmpTextMesh.up.set(0, 0, 1);
         }
       }
     }
