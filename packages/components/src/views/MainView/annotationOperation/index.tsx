@@ -160,9 +160,12 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
       // 切换工具保存标注结果
       dispatch(ChangeSave);
     }, 100);
-    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', () => {
-      throtthleSave();
-    });
+
+    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', throtthleSave);
+
+    return () => {
+      document.getElementById('toolContainer')?.removeEventListener('saveLabelResultToImg', throtthleSave);
+    };
   }, [dispatch]);
 
   return (
