@@ -1,4 +1,6 @@
 import { isNumber } from 'lodash-es';
+// TODO: 将eventBus替换成eventEmitter3
+// import EventEmitter from 'eventemitter3';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';

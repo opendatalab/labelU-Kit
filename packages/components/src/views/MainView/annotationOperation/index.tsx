@@ -69,21 +69,31 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   }, [annotationEngine, dataInjectionAtCreation, renderEnhance]);
 
   useEffect(() => {
-    if (toolInstance) {
-      toolInstance.singleOn('messageError', (error: string) => {
-        message.error(error);
-      });
-
-      toolInstance.singleOn('messageInfo', (info: string) => {
-        message.info(info);
-      });
-
-      toolInstance.singleOn('changeAnnotationShow', () => {
-        forceRender((s) => s + 1);
-      });
-
-      // toolInstance.setForbidOperation(true)
+    if (!toolInstance) {
+      return;
     }
+
+    const handleMessageError = (error: string) => {
+      message.error(error);
+    };
+
+    const handleMessageInfo = (info: string) => {
+      message.info(info);
+    };
+
+    const handleToggleAnnotationVisibility = () => {
+      forceRender((s) => s + 1);
+    };
+
+    toolInstance.singleOn('messageError', handleMessageError);
+    toolInstance.singleOn('messageInfo', handleMessageInfo);
+    toolInstance.singleOn('changeAnnotationShow', handleToggleAnnotationVisibility);
+
+    return () => {
+      toolInstance?.unbind('messageError', handleMessageError);
+      toolInstance?.unbind('messageInfo', handleMessageInfo);
+      toolInstance?.unbind('changeAnnotationShow', handleToggleAnnotationVisibility);
+    };
   }, [toolInstance]);
 
   useEffect(() => {
