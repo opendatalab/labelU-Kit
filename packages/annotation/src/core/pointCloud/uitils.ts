@@ -42,7 +42,6 @@ const utils = {
       bevelEnabled,
     };
     const geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSetting);
-    // geometry.rotateX(-0.5 * Math.PI);
     return geometry;
   },
   makeShapeGeometry(shapeCoords: any) {
@@ -65,7 +64,6 @@ const utils = {
     return mesh;
   },
 
-  // 生成矢量字体
   async getSvgTextMesh(word: string, color: number) {
     const { default: tmpl } = await import('../../assets/font/labelU_font_Regular.json');
     const tFont = new Font(tmpl);
@@ -87,11 +85,8 @@ const utils = {
     return mesh;
   },
 
-  // 生成meshline线条
   getMeshLine(vectors: any, color: THREE.ColorRepresentation | undefined, lineWidth = 5) {
     const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
-    // var g = new MeshLine();
-    // g.setGeometry(vectors);
     const geometry = new THREE.BufferGeometry().setFromPoints(vectors);
     const line = new MeshLine();
     line.setGeometry(geometry);

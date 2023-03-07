@@ -1,26 +1,3 @@
-// class PointCloudUtils {
-//   static genColorByCoord(x, y, z) {
-//     if (z <= 0) {
-//       return [128, 128, 128];
-//     }
-
-//     if (z < 5) {
-//       return [255, 0, 0];
-//     }
-
-//     if (z < 10) {
-//       return [0, 255, 0];
-//     }
-
-//     return [0, 0, 255];
-//   }
-
-//   static getStandardColorByCoord(x, y, z) {
-//     const pdColor = this.genColorByCoord(x, y, z);
-//     return pdColor.map((hex) => hex / 255);
-//   }
-// }
-
 export function isInPolygon(checkPoint, polygonPoints, lineType = 0) {
   let counter = 0;
   let i;

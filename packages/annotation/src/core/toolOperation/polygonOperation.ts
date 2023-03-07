@@ -1297,19 +1297,6 @@ class PolygonOperation extends BasicToolOperation {
   public onMouseMove(e: MouseEvent) {
     e.preventDefault();
 
-    if (this.getHoverID(e)) {
-      if (this.hoverEdgeIndex > -1) {
-        // TODO: resize polygon
-        this.setCustomCursor('grab');
-      } else if (e.buttons === 1) {
-        this.setCustomCursor('grab');
-      } else {
-        this.setCustomCursor('pointer');
-      }
-    } else {
-      this.setCustomCursor('none');
-    }
-
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }

@@ -4,7 +4,7 @@
 
 import { DEFAULT_FONT, DEFAULT_TEXT_MAX_WIDTH, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
 import type { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import type { Vector2 } from 'three';
 import * as THREE from 'three';
 import { createSmoothCurvePointsFromPointList } from './tool/polygonTool';
