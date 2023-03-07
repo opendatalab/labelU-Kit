@@ -97,7 +97,7 @@ export default class AnnotationEngine {
     const attributeMap = new Map();
 
     for (const attribute of attributeArr) {
-      attributeMap.set(attribute.key, attribute.value);
+      attributeMap.set(attribute.value, attribute.key);
     }
 
     this.config = {

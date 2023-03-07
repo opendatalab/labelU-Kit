@@ -103,6 +103,7 @@ export default class DrawUtils {
       order?: number;
       hiddenText: boolean;
       lineDash: number[];
+      allAttributesMap: Map<string, string>;
     }> = {},
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
@@ -114,6 +115,7 @@ export default class DrawUtils {
       lineDash,
       isShowOrder,
       order,
+      allAttributesMap,
     } = options;
     ctx.save();
     ctx.strokeStyle = color;
@@ -129,21 +131,12 @@ export default class DrawUtils {
     if (hiddenText === false) {
       let showText = '';
       if (rect.attribute) {
-        showText = `${showText}  ${rect.attribute}`;
+        showText = `${showText}  ${allAttributesMap?.get(rect.attribute) || rect.attribute}`;
       }
       if (isShowOrder) {
         showText = `${order}${showText}`;
       }
       this.drawText(canvas, { x: rect.x, y: rect.y - 5 }, showText);
-      // if (rect.textAttribute) {
-      //   const text = `${~~rect.width} * ${~~rect.height}`;
-      //   const textSizeWidth = text.length * 7;
-      //   const marginTop = 0;
-      //   const textWidth = Math.max(20, rect.width - textSizeWidth);
-      //   this.drawText(canvas, { x: rect.x, y: rect.y + rect.height + 20 + marginTop }, rect.textAttribute, {
-      //     textMaxWidth: textWidth,
-      //   });
-      // }
     }
     ctx.restore();
   }

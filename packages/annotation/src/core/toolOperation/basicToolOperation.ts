@@ -71,6 +71,8 @@ const validNumber = (value: number) => {
 };
 
 export default class BasicToolOperation extends EventListener {
+  static NONE_ATTRIBUTE = 'noneAttribute';
+
   public container: HTMLElement; // 当前结构绑定 container
 
   public canvas!: HTMLCanvasElement;
@@ -129,6 +131,8 @@ export default class BasicToolOperation extends EventListener {
   public attributeLockList: string[]; // 属性限制列表
 
   public allAttributes!: Attribute[]; // 多工具所有标签集合
+
+  public allAttributesMap!: Map<Attribute['value'], Attribute['key']>; // 多工具所有标签Map集合
 
   public dblClickListener: DblClickEventListener;
 
@@ -243,7 +247,7 @@ export default class BasicToolOperation extends EventListener {
     this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
-    this.defaultAttribute = props?.defaultAttribute ?? this.NoneAttribute;
+    this.defaultAttribute = props?.defaultAttribute ?? BasicToolOperation.NONE_ATTRIBUTE;
     this.forbidCursorLine = !!props.forbidCursorLine;
     this.lang = ELang.Zh;
 
@@ -274,7 +278,7 @@ export default class BasicToolOperation extends EventListener {
   }
 
   get NoneAttribute() {
-    return locale.getMessagesByLocale(EMessage.NoneAttribute, this.lang);
+    return BasicToolOperation.NONE_ATTRIBUTE;
   }
 
   get basicCtx() {
@@ -327,6 +331,11 @@ export default class BasicToolOperation extends EventListener {
    */
   public setAllAttributes(allAttributes: Attribute[]) {
     this.allAttributes = allAttributes;
+    this.allAttributesMap = new Map();
+
+    this.allAttributes.forEach((attribute) => {
+      this.allAttributesMap.set(attribute.value, attribute.key);
+    });
   }
 
   /**
@@ -1288,6 +1297,7 @@ export default class BasicToolOperation extends EventListener {
                       order: item.order,
                       color,
                       thickness,
+                      allAttributesMap: this.allAttributesMap,
                     },
                   );
                   if (this.isShowAttributeText) {
@@ -1299,7 +1309,6 @@ export default class BasicToolOperation extends EventListener {
                       item.textAttribute,
                       {
                         color: color,
-                        // font: 'italic normal 900 14px Arial',
                         textMaxWidth: textWidth,
                         // ...DEFAULT_TEXT_SHADOW,
                       },
@@ -1329,7 +1338,7 @@ export default class BasicToolOperation extends EventListener {
                     thickness,
                   },
                 );
-                let showText = item.attribute;
+                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
@@ -1376,7 +1385,7 @@ export default class BasicToolOperation extends EventListener {
                     thickness,
                   },
                 );
-                let showText = item.attribute;
+                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
@@ -1419,7 +1428,7 @@ export default class BasicToolOperation extends EventListener {
                     color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                     fill: 'transparent',
                   });
-                  let showText = item.attribute;
+                  let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
                   if (this.isShowOrder) {
                     showText = `${item.order}  ${showText}`;
                   }
