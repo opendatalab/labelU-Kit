@@ -121,14 +121,6 @@ const App: React.FC<AppProps> = (props) => {
         },
       });
       store.dispatch(LoadFileAndFileData(initialIndex as number));
-      // 页数持久化
-      // loacalforage.getItem('nextIndex', (error, value) => {
-      //   // if (value && value < imgList.length) {
-      //   //   store.dispatch(LoadFileAndFileData(value as number));
-      //   // } else {
-
-      //   // }
-      // });
     }
   }, [imgList, initialIndex, loadFileList]);
 
@@ -218,11 +210,6 @@ const App: React.FC<AppProps> = (props) => {
     // REVIEW: 尚不清楚imgUrl为何要加在deps中
     imgUrl,
   ]);
-
-  // useEffect(() => {
-
-  //   initImgList();
-  // }, [])
 
   useEffect(() => {
     if (toolInstance) {

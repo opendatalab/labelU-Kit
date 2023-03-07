@@ -33,6 +33,7 @@ const LableTools = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.P
 interface AttributeResult {
   isVisible: boolean;
   attributeName: string;
+  attributeTitle: string;
   toolInfo: ToolInfo[];
   color: string;
 }
@@ -84,7 +85,7 @@ const AttributeRusult: FC<IProps> = ({
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [isClearnHover, setIsClearHover] = useState<boolean>(false);
-  // const [isShowClear, setIsShowClear] = useState(false);
+  const allAttributesMap = useMemo(() => toolInstance?.allAttributesMap ?? new Map(), [toolInstance?.allAttributesMap]);
 
   const initToolInfo = () => {
     const initStr = JSON.stringify({
@@ -259,13 +260,14 @@ const AttributeRusult: FC<IProps> = ({
         tmpAttributeResult.push({
           isVisible: isVisible,
           attributeName: key,
+          attributeTitle: allAttributesMap.get(key) || key,
           toolInfo: attributeMap.get(key),
           color: toolInstance.getColor(key)?.valid.stroke,
         });
       }
       setAttributeResultList(tmpAttributeResult);
     }
-  }, [imgList, imgIndex, toolInstance]);
+  }, [imgList, imgIndex, toolInstance, allAttributesMap]);
 
   // 修改标注描述信息 || 修改是否可以显示
   const updateLabelResult = (toolInfo: ToolInfo) => {
@@ -526,7 +528,7 @@ const AttributeRusult: FC<IProps> = ({
     const children = [];
     for (const item of attributeList) {
       // eslint-disable-next-line react/jsx-no-undef
-      children.push(<Option key={item.key}>{item.value}</Option>);
+      children.push(<Option key={item.value}>{item.key}</Option>);
     }
     children.push(<Option key={'无标签'}>无标签</Option>);
     return (
@@ -610,7 +612,7 @@ const AttributeRusult: FC<IProps> = ({
                   header={
                     <div className="attributeResultLi">
                       <span
-                        title={item.attributeName}
+                        title={item.attributeTitle}
                         style={{
                           marginRight: '36px',
                           width: '84px',
@@ -619,7 +621,7 @@ const AttributeRusult: FC<IProps> = ({
                           overflow: 'hidden',
                         }}
                       >
-                        {item.attributeName}
+                        {item.attributeTitle}
                       </span>{' '}
                       <div className="attributeResultRightImgBox">
                         {item.isVisible ? (
@@ -629,17 +631,12 @@ const AttributeRusult: FC<IProps> = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               updateLabelsResult({ ...item, isVisible: false });
-                              // const newTItem = { ...item, isVisible: false };
-                              // updateLabelVisible(tItem, false);
-                              // updateLabelResult(newTItem);
                             }}
                             onMouseEnter={(e) => {
                               e.stopPropagation();
-                              // attributeShowRef.current?.setAttribute('src', AttributeShowHoverIcon);
                             }}
                             onMouseLeave={(e) => {
                               e.stopPropagation();
-                              // attributeShowRef.current?.setAttribute('src', AttributeShowIcon);
                             }}
                             src={AttributeShowIcon}
                             style={{ marginRight: '10px' }}
@@ -649,7 +646,6 @@ const AttributeRusult: FC<IProps> = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               updateLabelsResult({ ...item, isVisible: true });
-                              // updateLabelVisible(tItem, true);
                             }}
                             src={AttributeHideIcon}
                             style={{ marginRight: '10px' }}
@@ -688,7 +684,7 @@ const AttributeRusult: FC<IProps> = ({
 
                           <MemoToolIcon icon={tItem.icon} style={{ color: item.color, width: 20 }} />
                           <span
-                            title={item.attributeName}
+                            title={item.attributeTitle}
                             style={{
                               marginRight: '36px',
                               width: '84px',
@@ -697,7 +693,7 @@ const AttributeRusult: FC<IProps> = ({
                               overflow: 'hidden',
                             }}
                           >
-                            {item.attributeName}
+                            {item.attributeTitle}
                           </span>
                           <div className="attributeResultRightImgBox">
                             <img
@@ -728,16 +724,8 @@ const AttributeRusult: FC<IProps> = ({
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   const newTItem = { ...tItem, isVisible: false };
-                                  // updateLabelVisible(tItem, false);
                                   updateLabelResult(newTItem);
                                 }}
-                                // onMouseEnter={(e) => {
-                                //   e.stopPropagation();
-                                //   document
-                                //     .getElementById(`${tItem.toolName + tItem.order}`)
-                                //     ?.setAttribute('src', AttributeShowHoverIcon);
-
-                                // }}
                                 onMouseLeave={(e) => {
                                   e.stopPropagation();
                                   // attributeShowRef.current?.setAttribute('src', AttributeShowIcon);

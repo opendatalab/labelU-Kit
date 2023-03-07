@@ -1,9 +1,5 @@
-import _ from 'lodash-es';
-
 import request from './request';
 import commonController from '../utils/common/common';
-import { generateAttributeMapFromConfig } from '../utils/generateAttributeMapFromConfig';
-import { jsonParse } from '../utils';
 import { getTask } from './task';
 import type {
   DeleteApiV1TasksTaskIdDeleteParams,
@@ -20,42 +16,6 @@ import type {
   SampleResponse,
   UpdateApiV1TasksTaskIdSamplesSampleIdPatchParams,
 } from './types';
-
-/**
- * 将result中的label由attribute中的key转换为value
- * 修正
- * - https://project.feishu.cn/bigdata_03/issue/detail/3786802?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
- * - https://project.feishu.cn/bigdata_03/issue/detail/3572846?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
- */
-function changeKeyToValue(data: any, attributeMap: ReturnType<typeof generateAttributeMapFromConfig>) {
-  const newData = _.cloneDeep(data);
-
-  for (const dataItem of newData) {
-    if (!dataItem.result) {
-      continue;
-    }
-
-    const result = jsonParse(dataItem.result);
-
-    result.annotations = (_.chain(result).get('annotations') as any)
-      .map((annotation: any) => {
-        return {
-          ...annotation,
-          result: _.map(annotation?.result, (resultItem) => {
-            return {
-              ...resultItem,
-              label: attributeMap.get(resultItem.label),
-            };
-          }),
-        };
-      })
-      .value();
-
-    dataItem.result = JSON.stringify(result);
-  }
-
-  return newData;
-}
 
 export async function createSamples(
   taskId: number,
@@ -158,13 +118,6 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
 
   switch (activeTxt) {
     case 'JSON':
-      const attributeMap = generateAttributeMapFromConfig(taskRes.data.config!);
-      // 导出结果中需要将key换成value导出
-      const dataWithAttributeValue = changeKeyToValue(data, attributeMap);
-      blobData = new Blob([JSON.stringify(dataWithAttributeValue)]);
-      filename = filename + '.json';
-
-      break;
     case 'COCO':
       filename = filename + '.json';
       break;

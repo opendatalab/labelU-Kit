@@ -1,7 +1,7 @@
 import type { Attribute } from '@label-u/annotation';
 import { BasicToolOperation, AttributeUtils } from '@label-u/annotation';
 import type { FC } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Button, Dropdown, Space, Menu } from 'antd';
 import classNames from 'classnames';
@@ -30,6 +30,10 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [chooseAttribute, setChoseAttribute] = useState<string>();
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
   const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
+  const attributeMap = useMemo(
+    () => toolInstance?.config?.attributeMap ?? new Map(),
+    [toolInstance?.config?.attributeMap],
+  );
 
   const setActiveAttribute = (attributeName: string) => {
     BasicToolOperation.Cache.set('activeAttribute', attributeName);
@@ -78,9 +82,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       for (let i = 0; i < currentAttributeList.length; i++) {
         count++;
         if (totalWidth + 200 < attributeBoxLength) {
-          let textMeasure = ctx?.measureText(currentAttributeList[i].key + ' ' + i + 1);
-          if (currentAttributeList[i].key.length > 6) {
-            textMeasure = ctx?.measureText(currentAttributeList[i].key.substring(0, 6) + '... ' + i + 1);
+          let textMeasure = ctx?.measureText(currentAttributeList[i].value + ' ' + i + 1);
+          if (currentAttributeList[i].value.length > 6) {
+            textMeasure = ctx?.measureText(currentAttributeList[i].value.substring(0, 6) + '... ' + i + 1);
           }
           totalWidth += Number(textMeasure?.width) * 1.38 + 26 + 8 + 5;
         } else {
@@ -101,27 +105,27 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
           label: (
             <a
               className={classNames({
-                chooseAttribute: item.key === chooseAttribute,
+                chooseAttribute: item.value === chooseAttribute,
               })}
               onClick={(e) => {
                 e.stopPropagation();
-                toolInstance.setDefaultAttribute(item.key);
-                setActiveAttribute(item.key);
+                toolInstance.setDefaultAttribute(item.value);
+                setActiveAttribute(item.value);
               }}
             >
               <div
                 className="circle"
                 style={{
                   backgroundColor:
-                    toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.key, allAttributeList ?? []) + 1]
+                    toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.value, allAttributeList ?? []) + 1]
                       .valid.stroke,
                   marginRight: 5,
                 }}
               />
-              <span className="attributeName">{item.value}</span>
+              <span className="attributeName">{attributeMap.get(item.value)}</span>
             </a>
           ),
-          key: item.key,
+          key: item.value,
         };
       });
       return <Menu items={items} />;
@@ -134,6 +138,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     chooseAttribute,
     toolStyle.attributeColor,
     allAttributeList,
+    attributeMap,
     toolInstance,
   ]);
 
@@ -199,38 +204,34 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                toolInstance.setDefaultAttribute(attribute.key);
-                setActiveAttribute(attribute.key);
+                toolInstance.setDefaultAttribute(attribute.value);
+                setActiveAttribute(attribute.value);
               }}
-              // className={classNames({
-              //   chooseAttribute: attribute.key === chooseAttribute,
-              // })}
               style={{
                 border: '0px',
                 borderRadius: '4px',
                 padding: '1px 8px',
                 backgroundColor:
-                  attribute.key === chooseAttribute
+                  attribute.value === chooseAttribute
                     ? toolStyle.attributeColor[
-                        AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
+                        AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? []) + 1
                       ].valid.stroke
                     : '#FFFFFF',
-                color: attribute.key === chooseAttribute ? '#ffffff' : '',
-                // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
+                color: attribute.value === chooseAttribute ? '#ffffff' : '',
               }}
-              key={attribute.key}
+              key={attribute.value}
             >
               <div
                 className="circle"
                 style={{
                   backgroundColor:
                     toolStyle.attributeColor[
-                      AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
+                      AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? []) + 1
                     ].valid.stroke,
                   marginRight: 5,
                 }}
               />
-              <span title={attribute.key} className="attributeName">{`${attribute.key} ${
+              <span title={attribute.value} className="attributeName">{`${attributeMap.get(attribute.value)} ${
                 index <= 8 ? index + 1 : ''
               }`}</span>
             </Button>
@@ -256,9 +257,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
           >
             <Space style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
               更多
-              {/* {currentAttributeList.length} */}
               {isHoverDropdown ? drowpUpIconA : drowpDownIcon}
-              {/* <DownOutlined /> */}
             </Space>
           </a>
         </Dropdown>
