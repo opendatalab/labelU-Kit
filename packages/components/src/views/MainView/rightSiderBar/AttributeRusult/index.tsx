@@ -158,15 +158,13 @@ const AttributeRusult: FC<IProps> = ({
 
   // 将右侧属性栏高度设置为剩余高度
   useLayoutEffect(() => {
-    setTimeout(() => {
-      if (!attributeResultRef.current) {
-        return;
-      }
+    if (!attributeResultRef.current) {
+      return;
+    }
 
-      const rect = attributeResultRef.current.parentElement!.getBoundingClientRect();
-      const attributeWrapperHeight = window.innerHeight - rect.top;
-      attributeResultRef.current.style.height = `${attributeWrapperHeight}px`;
-    });
+    const rect = attributeResultRef.current.parentElement!.getBoundingClientRect();
+    const attributeWrapperHeight = window.innerHeight - rect.top;
+    attributeResultRef.current.style.height = `${attributeWrapperHeight}px`;
   }, []);
 
   useEffect(() => {
