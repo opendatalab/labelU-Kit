@@ -35,15 +35,13 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
 
   // 将左侧属性栏高度设置为剩余高度
   useLayoutEffect(() => {
-    setTimeout(() => {
-      if (!sliderBoxRef.current) {
-        return;
-      }
+    if (!sliderBoxRef.current) {
+      return;
+    }
 
-      const rect = sliderBoxRef.current.getBoundingClientRect();
-      const attributeWrapperHeight = window.innerHeight - rect.top;
-      sliderBoxRef.current.style.height = `${attributeWrapperHeight}px`;
-    });
+    const rect = sliderBoxRef.current.getBoundingClientRect();
+    const attributeWrapperHeight = window.innerHeight - rect.top;
+    sliderBoxRef.current.style.height = `${attributeWrapperHeight}px`;
   }, []);
 
   if (imgList.length === 1 && !leftSiderContent) {

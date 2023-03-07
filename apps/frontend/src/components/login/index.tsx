@@ -53,7 +53,7 @@ const Login = (props: any) => {
         return;
       }
 
-      dispatch.user.login({
+      await dispatch.user.login({
         username: email,
         password,
       });
