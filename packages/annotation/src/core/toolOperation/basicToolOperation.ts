@@ -333,6 +333,8 @@ export default class BasicToolOperation extends EventListener {
     this.allAttributes = allAttributes;
     this.allAttributesMap = new Map();
 
+    this.allAttributesMap.set(this.NoneAttribute, locale.getMessagesByLocale(EMessage.NoneAttribute, this.lang));
+
     this.allAttributes.forEach((attribute) => {
       this.allAttributesMap.set(attribute.value, attribute.key);
     });
