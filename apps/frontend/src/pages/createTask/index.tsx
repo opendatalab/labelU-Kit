@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
 import { omit, set } from 'lodash/fp';
+import type { TagToolConfig, TextToolConfig, ToolConfig } from '@label-u/annotation';
 
 import type { TaskResponse } from '@/services/types';
 import { TaskStatus, MediaType } from '@/services/types';
@@ -37,6 +38,16 @@ const partialMapping = {
   [StepEnum.Basic]: InputInfoConfig,
   [StepEnum.Upload]: InputData,
   [StepEnum.Config]: AnnotationConfig,
+};
+
+export const CHECK_INPUT_VALUE = 'checkInputValue';
+
+const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
+  const attributeList = config.attributeList;
+  if (attributeList && attributeList?.length) {
+    return _.every(attributeList, (attribute) => attribute.key !== '' && attribute.value !== '');
+  }
+  return true;
 };
 
 interface TaskStep extends StepData {
@@ -167,6 +178,11 @@ const CreateTask = () => {
       return;
     }
 
+    if (_.some(toolsConfig.tools, (tool) => !isConfigEffective(tool.config))) {
+      commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
+      document.dispatchEvent(new CustomEvent(CHECK_INPUT_VALUE, {}));
+      return;
+    }
     return dispatch.task
       .updateTaskConfig({
         taskId: taskId,

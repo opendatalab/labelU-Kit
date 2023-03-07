@@ -1,11 +1,12 @@
 import { CloseCircleFilled } from '@ant-design/icons';
 import { Button, Input as SenseInput } from 'antd';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 
 import scrollIntoEventTarget from '@/utils/scrollIntoEventTarget';
 import { addInputList, changeInputList, deleteInputList } from '@/utils/tool/editTool';
+import { CHECK_INPUT_VALUE } from '@/pages/createTask';
 
 interface IJsonTabProps {
   value?: any[];
@@ -36,6 +37,7 @@ export const ColorTag = ({ color, style }: any) => {
 const JSONTab = (props: IJsonTabProps) => {
   const attributeListDom = useRef(null);
   const [isHover, setIsHover] = useState<string>();
+  const [inputChecked, setInputChecked] = useState(false);
 
   const { t } = useTranslation();
   const {
@@ -71,6 +73,17 @@ const JSONTab = (props: IJsonTabProps) => {
     onSubmitAction?.();
   };
 
+  useEffect(() => {
+    const saveToolsConfig = () => {
+      setInputChecked(true);
+    };
+
+    document.addEventListener(CHECK_INPUT_VALUE, saveToolsConfig as EventListener);
+    return () => {
+      document.removeEventListener(CHECK_INPUT_VALUE, saveToolsConfig as EventListener);
+    };
+  }, []);
+
   return (
     <div>
       {value &&
@@ -97,6 +110,8 @@ const JSONTab = (props: IJsonTabProps) => {
                 onChange={(e: any) => changeInputInfo(e, 'key', i)}
                 disabled={readonly}
                 onBlur={onSubmitAction}
+                status={inputChecked && info.key === '' ? 'error' : undefined}
+                bordered={inputChecked && info.key === ''}
                 // addonBefore={isAttributeList && <ColorTag color={COLORS_ARRAY[i % 8]} />}
               />
               <SenseInput
@@ -106,6 +121,8 @@ const JSONTab = (props: IJsonTabProps) => {
                 onChange={(e: any) => changeInputInfo(e, 'value', i)}
                 onBlur={onSubmitAction}
                 disabled={readonly}
+                status={inputChecked && info.value === '' ? 'error' : undefined}
+                bordered={inputChecked && info.value === ''}
               />
             </div>
             {i > 0 && !readonly && isHover === info?.key + i && (
@@ -115,7 +132,16 @@ const JSONTab = (props: IJsonTabProps) => {
         ))}
 
       {!readonly && (
-        <Button type="primary" className="addButton" onClick={(e) => addInputInfo(e)} ref={attributeListDom} ghost>
+        <Button
+          type="primary"
+          className="addButton"
+          onClick={(e) => {
+            addInputInfo(e);
+            setInputChecked(false);
+          }}
+          ref={attributeListDom}
+          ghost
+        >
           新建
         </Button>
       )}

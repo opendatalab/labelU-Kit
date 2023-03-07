@@ -515,7 +515,7 @@ export default class BasicToolOperation extends EventListener {
     if (typeof basicImgInfo.valid === 'boolean') {
       this.setValid(basicImgInfo.valid);
     }
-    this.initImgPos();
+    this.initImgPos({ useCachedPosition: false });
     // 多余渲染，影响性能
     // this.render();
     // this.renderBasicCanvas();
