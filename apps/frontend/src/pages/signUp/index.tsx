@@ -6,7 +6,7 @@ import Constants from '../../constants';
 import LogoTitle from '../../components/logoTitle';
 const SignUpPage = () => {
   return (
-    <div className={currentStyles.outerFrame}>
+    <div className={currentStyles.signUpWrapper}>
       <LogoTitle />
       <SignUp turnToLogin={Constants.urlToLogin} />
     </div>
