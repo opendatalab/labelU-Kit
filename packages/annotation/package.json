@@ -1,6 +1,6 @@
 {
   "name": "@label-u/annotation",
-  "version": "1.0.0-alpha.16",
+  "version": "1.0.0-alpha.17",
   "description": "Annotation tool collection",
   "keywords": [
     "annotation",
@@ -63,6 +63,7 @@
     "@label-u/utils": "1.0.0-alpha.1",
     "@turf/turf": "5.1.6",
     "color-rgba": "^2.3.0",
+    "eventemitter3": "^5.0.0",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.20",
     "rimraf": "^3.0.2",

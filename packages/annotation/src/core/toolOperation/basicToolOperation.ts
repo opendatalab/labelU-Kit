@@ -1,4 +1,6 @@
 import { isNumber } from 'lodash-es';
+// TODO: 将eventBus替换成eventEmitter3
+// import EventEmitter from 'eventemitter3';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
@@ -332,6 +334,8 @@ export default class BasicToolOperation extends EventListener {
   public setAllAttributes(allAttributes: Attribute[]) {
     this.allAttributes = allAttributes;
     this.allAttributesMap = new Map();
+
+    this.allAttributesMap.set(this.NoneAttribute, locale.getMessagesByLocale(EMessage.NoneAttribute, this.lang));
 
     this.allAttributes.forEach((attribute) => {
       this.allAttributesMap.set(attribute.value, attribute.key);

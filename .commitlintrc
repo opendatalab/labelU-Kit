@@ -38,6 +38,7 @@
         "docs",
         "frontend",
         "components",
+        "formatter",
         "utils",
         "annotation"
       ]

@@ -11,6 +11,10 @@ import type { Attribute, OneTag, PrevResult, ToolConfig } from '@/interface/comb
 import type { ISize } from '@/types/tool/common';
 import type { IRect } from '@/types/tool/rectTool';
 import type { IRenderEnhance } from '@/types/tool/annotation';
+import { EMessage } from '@/locales/constants';
+
+import locale from '../locales';
+import BasicToolOperation from './toolOperation/basicToolOperation';
 
 export interface IProps {
   isShowOrder: boolean;
@@ -79,6 +83,7 @@ export default class AnnotationEngine {
     this.size = props.size;
     this.toolName = props.toolName;
     this.imgNode = props.imgNode;
+    this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     const tmpObjectConfig = props.config ?? getConfig(props.toolName); // 默认配置
     let attributeArr: any[] = [...props.attributeList];
     if (
@@ -95,6 +100,10 @@ export default class AnnotationEngine {
     }
 
     const attributeMap = new Map();
+    attributeMap.set(
+      BasicToolOperation.NONE_ATTRIBUTE,
+      locale.getMessagesByLocale(EMessage.NoneAttribute, this.i18nLanguage),
+    );
 
     for (const attribute of attributeArr) {
       attributeMap.set(attribute.value, attribute.key);
@@ -107,7 +116,6 @@ export default class AnnotationEngine {
       tagConfigList: props.tagConfigList,
     } as unknown as ToolConfig;
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
-    this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     this._initToolOperation();
   }
 
@@ -170,6 +178,7 @@ export default class AnnotationEngine {
     if (this.toolInstance) {
       this.toolInstance.destroy();
     }
+
     const ToolOperation: any = CommonToolUtils.getCurrentOperation(this.toolName);
     if (!ToolOperation) {
       return;

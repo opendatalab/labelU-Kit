@@ -5,7 +5,7 @@ import { connect, useDispatch } from 'react-redux';
 import type { PrevResult, Attribute } from '@label-u/annotation';
 import { EToolName } from '@label-u/annotation';
 import classNames from 'classnames';
-import { isEmpty } from 'lodash-es';
+import { isEmpty, size, find, some, sortBy } from 'lodash-es';
 
 import AttributeEditorIcon from '@/assets/cssIcon/attribute_editor.svg';
 import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';
@@ -199,74 +199,66 @@ const AttributeRusult: FC<IProps> = ({
   }, [copyToolInstance, currentToolName, imgIndex, imgList]);
 
   useEffect(() => {
-    if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
-      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      const resultKeys = Object.keys(currentImgResult);
-      const tmpAttributeResult: AttributeResult[] = [];
-      const attributeMap = new Map();
-      for (const item of toolList) {
-        if (resultKeys.indexOf(item.toolName) >= 0 && item.toolName !== 'tagTool') {
-          const result = currentImgResult[item.toolName].result;
-          if (result && Array.isArray(result)) {
-            for (const oneLabel of result) {
-              // eslint-disable-next-line max-depth
-              let isExistInTmpToolInfo = false;
-
-              if (attributeMap.has(oneLabel.attribute)) {
-                const tmpToolInfo = attributeMap.get(oneLabel.attribute);
-                // 去重
-                for (let i = 0; i < tmpToolInfo.length; i++) {
-                  if (tmpToolInfo[i].order === oneLabel.order) {
-                    isExistInTmpToolInfo = true;
-                  }
-                }
-
-                if (!isExistInTmpToolInfo) {
-                  tmpToolInfo.push({
-                    toolName: item.toolName,
-                    order: oneLabel.order,
-                    icon: item.Icon,
-                    isVisible: oneLabel.isVisible,
-                    textAttribute: oneLabel.textAttribute,
-                  });
-                }
-              } else {
-                attributeMap.set(oneLabel.attribute, [
-                  {
-                    toolName: item.toolName,
-                    order: oneLabel.order,
-                    icon: item.Icon,
-                    isVisible: oneLabel.isVisible,
-                    textAttribute: oneLabel.textAttribute,
-                  },
-                ]);
-              }
-            }
-          }
-        }
-      }
-      // 初始化attributeResultList
-      for (const key of attributeMap.keys()) {
-        const toolInfo = attributeMap.get(key);
-        let isVisible = false;
-        if (toolInfo && toolInfo.length > 0) {
-          for (const tool of toolInfo) {
-            if (tool.isVisible) {
-              isVisible = true;
-              break;
-            }
-          }
-        }
-        tmpAttributeResult.push({
-          isVisible: isVisible,
-          attributeName: key,
-          attributeTitle: allAttributesMap.get(key) || key,
-          toolInfo: attributeMap.get(key),
-          color: toolInstance.getColor(key)?.valid.stroke,
-        });
-      }
-      setAttributeResultList(tmpAttributeResult);
+    if (isEmpty(imgList) || size(imgList) <= imgIndex) {
+      return;
     }
+
+    const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
+    const resultKeys = Object.keys(currentImgResult);
+    const attributeMap = new Map();
+
+    for (const item of toolList) {
+      if (!resultKeys.includes(item.toolName) || item.toolName === 'tagTool') {
+        continue;
+      }
+
+      const result = currentImgResult[item.toolName].result;
+
+      if (!result || !Array.isArray(result)) {
+        continue;
+      }
+
+      // Fix: https://project.feishu.cn/bigdata_03/issue/detail/4136011?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+      for (const oneLabel of sortBy(result, 'order')) {
+        if (attributeMap.has(oneLabel.attribute)) {
+          const tmpToolInfo = attributeMap.get(oneLabel.attribute);
+          // 去重
+          if (!find(tmpToolInfo, (_item) => _item.order === oneLabel.order)) {
+            tmpToolInfo.push({
+              toolName: item.toolName,
+              order: oneLabel.order,
+              icon: item.Icon,
+              isVisible: oneLabel.isVisible,
+              textAttribute: oneLabel.textAttribute,
+            });
+          }
+        } else {
+          attributeMap.set(oneLabel.attribute, [
+            {
+              toolName: item.toolName,
+              order: oneLabel.order,
+              icon: item.Icon,
+              isVisible: oneLabel.isVisible,
+              textAttribute: oneLabel.textAttribute,
+            },
+          ]);
+        }
+      }
+    }
+    // 初始化attributeResultList
+    const tmpAttributeResult: AttributeResult[] = [];
+
+    for (const key of attributeMap.keys()) {
+      const toolInfo = attributeMap.get(key);
+      tmpAttributeResult.push({
+        isVisible: some(toolInfo, (item) => item.isVisible),
+        attributeName: key,
+        attributeTitle: allAttributesMap.get(key) || key,
+        toolInfo: attributeMap.get(key),
+        color: toolInstance.getColor(key)?.valid.stroke,
+      });
+    }
+    setAttributeResultList(tmpAttributeResult);
   }, [imgList, imgIndex, toolInstance, allAttributesMap]);
 
   // 修改标注描述信息 || 修改是否可以显示
