@@ -59,7 +59,7 @@ export const useAttributes = () => {
           name='changeAttribute'
           rules={[
             {
-              required: true,
+              required: false,
             },
           ]}
         >
@@ -76,7 +76,7 @@ export const useAttributes = () => {
           name='description'
           rules={[
             {
-              required: true,
+              required: false,
             },
           ]}
         >
