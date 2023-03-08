@@ -16,7 +16,6 @@ import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
 
 import styles from './index.module.scss';
-import type { PartialConfigProps } from '../..';
 import { TaskCreationContext } from '../../taskCreation.context';
 
 export enum UploadStatus {
@@ -81,11 +80,10 @@ const normalizeFiles = (files: File[]) => {
   });
 };
 
-const InputData = ({ task }: PartialConfigProps) => {
-  const taskId = task.id;
-
+const InputData = () => {
   // 上传队列，包括成功和失败的任务
-  const { uploadFileList: fileQueue, setUploadFileList: setFileQueue } = useContext(TaskCreationContext);
+  const { uploadFileList: fileQueue, setUploadFileList: setFileQueue, task = {} } = useContext(TaskCreationContext);
+  const taskId = task.id;
 
   const amountMapping = useMemo(() => {
     let succeeded = 0;

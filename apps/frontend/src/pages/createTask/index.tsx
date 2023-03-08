@@ -315,7 +315,7 @@ const CreateTask = () => {
       </div>
       <div className={currentStyles.content}>
         <TaskCreationContext.Provider value={taskCreationContextValue}>
-          <Partial task={taskData} formData={formData} updateFormData={updateFormData} />
+          <Partial />
         </TaskCreationContext.Provider>
       </div>
     </div>

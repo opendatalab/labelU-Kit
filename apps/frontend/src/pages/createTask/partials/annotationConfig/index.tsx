@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState, useCallback } from 'react';
+import { useMemo, useEffect, useState, useCallback, useContext } from 'react';
 import AnnotationOperation from '@label-u/components';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash-es';
@@ -9,7 +9,7 @@ import EmptyConfigImg from '@/img/annotationCommon/emptyConfig.png';
 import ConfigTemplate from './configTemplate/index';
 import FormConfig from './formConfig';
 import './index.scss';
-import type { PartialConfigProps } from '../..';
+import { TaskCreationContext } from '../../taskCreation.context';
 
 interface OneFile {
   id: number;
@@ -24,8 +24,9 @@ const defaultFile: OneFile = {
 };
 
 // 配置页的config统一使用此组件的state
-const AnnotationConfig = ({ task = {}, formData, updateFormData }: PartialConfigProps) => {
+const AnnotationConfig = () => {
   const dispatch = useDispatch<Dispatch>();
+  const { updateFormData, formData, task = {} } = useContext(TaskCreationContext);
   const taskId = task.id;
 
   const samples = useSelector((state: RootState) => state.sample.list);
