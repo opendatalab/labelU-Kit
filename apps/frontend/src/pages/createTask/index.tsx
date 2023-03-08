@@ -163,17 +163,16 @@ const CreateTask = () => {
   }, [dispatch.task, isExistTask, taskData, taskId]);
 
   useEffect(() => {
-    if (isExistTask) {
-      dispatch.task.clearItem();
-    }
-    // 当新建或编辑任务时，页面卸载时清空任务信息
+    // 当新建或编辑任务时，初始时清空任务信息
+    dispatch.task.clearItem();
+
     return () => {
       dispatch.task.clearItem();
     };
-  }, [dispatch.task, isExistTask]);
+  }, [dispatch.task]);
 
   const handleSave = async function () {
-    if (toolsConfig && toolsConfig.tools && toolsConfig.tools.length === 0) {
+    if (_.chain(formData).get('config.tools').isEmpty().value()) {
       commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
       return;
     }
