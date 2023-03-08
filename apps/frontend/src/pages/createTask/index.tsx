@@ -50,6 +50,16 @@ const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolC
   return true;
 };
 
+const isConfigRepeated = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
+  const attributeList = config.attributeList;
+  if (attributeList && attributeList?.length) {
+    const keys = attributeList.map((attribute) => attribute.key);
+    const values = attributeList.map((attribute) => attribute.value);
+    return keys.length > _.uniq(keys)?.length || values?.length > _.uniq(values)?.length;
+  }
+  return false;
+};
+
 interface TaskStep extends StepData {
   value: StepEnum;
 }
@@ -181,8 +191,13 @@ const CreateTask = () => {
     if (_.some(toolsConfig.tools, (tool) => !isConfigEffective(tool.config))) {
       commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
       document.dispatchEvent(new CustomEvent(CHECK_INPUT_VALUE, {}));
+    }
+
+    if (_.some(toolsConfig.tools, (tool) => isConfigRepeated(tool.config))) {
+      commonController.notificationErrorMessage({ message: '标签配置的值key, value不能重复' }, 1);
       return;
     }
+
     return dispatch.task
       .updateTaskConfig({
         taskId: taskId,
