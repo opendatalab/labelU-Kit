@@ -52,12 +52,12 @@ const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolC
 
 const isConfigRepeated = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
   const attributeList = config.attributeList;
-  if (attributeList && attributeList?.length) {
-    const keys = attributeList.map((attribute) => attribute.key);
-    const values = attributeList.map((attribute) => attribute.value);
-    return keys.length > _.uniq(keys)?.length || values?.length > _.uniq(values)?.length;
+  if (_.isEmpty(attributeList)) {
+    return false;
   }
-  return false;
+  const keys = attributeList.map((attribute) => attribute.key);
+  const values = attributeList.map((attribute) => attribute.value);
+  return keys.length > _.uniq(keys)?.length || values?.length > _.uniq(values)?.length;
 };
 
 interface TaskStep extends StepData {
