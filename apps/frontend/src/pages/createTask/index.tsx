@@ -187,12 +187,24 @@ const CreateTask = () => {
       return;
     }
 
-    if (_.some(toolsConfig.tools, (tool) => !isConfigEffective(tool.config))) {
+    if (_.some(formData?.config?.tools, (tool) => !isConfigEffective(tool.config))) {
       commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
       document.dispatchEvent(new CustomEvent(CHECK_INPUT_VALUE, {}));
+      return;
     }
 
-    if (_.some(toolsConfig.tools, (tool) => isConfigRepeated(tool.config))) {
+    if (
+      formData?.config?.commonAttributeConfigurable &&
+      !isConfigEffective({ attributeList: formData?.config?.attribute } as any)
+    ) {
+      commonController.notificationErrorMessage({ message: '通用标签配置的值不能为空' }, 1);
+      return;
+    }
+
+    if (
+      _.some(formData?.config?.tools, (tool) => isConfigRepeated(tool.config)) ||
+      isConfigRepeated({ attributeList: formData?.config?.attribute } as any)
+    ) {
       commonController.notificationErrorMessage({ message: '标签配置的值key, value不能重复' }, 1);
       return;
     }
