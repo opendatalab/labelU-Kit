@@ -8,8 +8,8 @@ import type { RootState } from '@/store';
 import type { TaskResponseWithStatics } from '@/services/types';
 
 import currentStyles from './index.module.scss';
-import commonController from '../../utils/common/common';
-import ExportPortal from '../ExportPortal';
+import commonController from '../../../../utils/common/common';
+import ExportPortal from '../../../../components/ExportPortal';
 
 const Statistical = () => {
   const taskData = useRouteLoaderData('task') as TaskResponseWithStatics;

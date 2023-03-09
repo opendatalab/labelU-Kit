@@ -7,6 +7,7 @@ const NullTask = () => {
   const createTask = () => {
     navigate('/tasks/0/edit');
   };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.nullWrapper} onClick={createTask}>

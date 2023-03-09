@@ -10,9 +10,9 @@ import { SampleState, TaskStatus } from '@/services/types';
 import ExportPortal from '@/components/ExportPortal';
 
 import currentStyles from './index.module.scss';
-import Statistical from '../../components/statistical';
+import Statistical from './components/Statistical';
 import GoToEditTask from './components/GoToEditTask';
-import statisticalStyles from '../../components/statistical/index.module.scss';
+import statisticalStyles from './components/Statistical/index.module.scss';
 
 const Samples = () => {
   const navigate = useNavigate();
