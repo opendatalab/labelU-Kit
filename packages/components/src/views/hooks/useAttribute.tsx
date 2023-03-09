@@ -72,7 +72,7 @@ export const useAttributes = () => {
           </Select>
         </Form.Item>
         <Form.Item
-          label='描述'
+          label='属性'
           name='description'
           rules={[
             {

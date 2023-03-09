@@ -812,6 +812,7 @@ class PointCloudOperation extends PointCloud {
         const tmpTextMesh = this.scene.getObjectByName(`${boxList[i].id}attribute`);
         if (tmpTextMesh) {
           tmpTextMesh.lookAt(this.camera.position);
+          tmpTextMesh.up.set(0, 0, 1);
         }
       }
     }
