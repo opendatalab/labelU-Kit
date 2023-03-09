@@ -1,5 +1,5 @@
 import { getClassName } from '@/utils/dom';
-import React, { useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import PointCloud3DView from './PointCloud3DView';
 import PointCloudBackView from './PointCloudBackView';
 import PointCloudTopView from './PointCloudTopView';
@@ -8,23 +8,33 @@ import PointCloudSideView from './PointCloudSideView';
 import PointCloudListener from './PointCloudListener';
 import { AppState } from '@/store';
 import { connect } from 'react-redux';
-import { LabelUContext } from '@/store/ctx';
+import { LabelUContext, useSelector } from '@/store/ctx';
 import { IProps } from '@/views/MainView/annotationOperation';
 import { BasicConfig } from '@/interface/toolConfig';
 import { PointCloudConfig } from '@label-u/annotation/es/types/interface/conbineTool';
 import { getCombineAttributes } from '@/views/MainView/attributeOperation';
+import { useStyle } from './hooks/useStyle';
+import { PointCloudContext } from './PointCloudContext';
 
 const PointCloudView: React.FC<IProps> = (props) => {
   if (props.imgList.length === 0) {
     return null;
   }
+
+  const { update3ViewPolygonStyle } = useStyle();
+  const toolStyle = useSelector((state: AppState) => {
+    return { ...state.toolStyle };
+  });
+
+  const ptCtx = useContext(PointCloudContext);
+
   const pcConfig = useMemo(() => {
     let comBineConfig = {
       ...(props.toolsBasicConfig[0] as BasicConfig & {
         config: PointCloudConfig;
       }),
     };
-    let tmpAttribute = getCombineAttributes(props.toolsBasicConfig,props.attributeList??[]);
+    let tmpAttribute = getCombineAttributes(props.toolsBasicConfig, props.attributeList ?? []);
     return {
       tool: 'pointTool',
       config: {
@@ -43,6 +53,12 @@ const PointCloudView: React.FC<IProps> = (props) => {
     };
   }, [props.isShowOrder, props.isShowAttribute, props.isShowAttributeText, props.isShowDirection]);
 
+  useEffect(() => {
+    if (ptCtx.topViewInstance && ptCtx.sideViewInstance && ptCtx.backViewInstance) {
+      update3ViewPolygonStyle(toolStyle);
+    }
+  }, [ptCtx.topViewInstance, ptCtx.sideViewInstance, ptCtx.backViewInstance]);
+
   return (
     <>
       <PointCloudListener />
@@ -54,8 +70,8 @@ const PointCloudView: React.FC<IProps> = (props) => {
 
           <div className={getClassName('point-cloud-container', 'right')}>
             <PointCloudTopView config={pcConfig} />
-            <PointCloudSideView />
-            <PointCloudBackView />
+            <PointCloudSideView attributes={pcConfig.config.attributeList} />
+            <PointCloudBackView attributes={pcConfig.config.attributeList} />
             {/* <div className={getClassName('point-cloud-container', 'right-bottom')}>
 
             </div> */}

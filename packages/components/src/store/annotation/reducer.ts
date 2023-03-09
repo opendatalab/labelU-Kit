@@ -99,7 +99,13 @@ const updateToolInstance = (
     throw `Not exist dom named id-toolContainer`;
     // return;
   }
-  const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
+  // TODO: GET FORMAT CANVAS SIZE
+  // const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
+  const canvasSize = {
+    width: container.clientWidth,
+    height: container.clientHeight,
+  };
+
   const annotationEngine = new AnnotationEngine({
     container,
     isShowOrder: isShowOrder,

@@ -210,6 +210,11 @@ class PolygonOperation extends BasicToolOperation {
     if (selectedID) {
       this.selectedID = selectedID;
     }
+    const selectedPolygon = polygonList.filter((polygon: IPolygonData) => polygon.id === selectedID);
+    if (Array.isArray(selectedPolygon) && selectedPolygon.length > 0) {
+      this.setDefaultAttribute(selectedPolygon[0].attribute);
+    }
+
     this.render();
   }
 

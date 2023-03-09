@@ -1,4 +1,4 @@
-import { PointCloud, PointCloudAnnotation } from '@label-u/annotation';
+import { Attribute, PointCloud, PointCloudAnnotation } from '@label-u/annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
@@ -72,7 +72,11 @@ const updateSideViewByCanvas2D = (
   SidePointCloud.render();
 };
 
-const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) => {
+const PointCloudSideView: React.FC<
+  IAnnotationStateProps & {
+    attributes: Attribute[];
+  }
+> = ({ attributes }) => {
   const ptCtx = React.useContext(PointCloudContext);
   const { sideViewUpdateBox } = usePointCloudViews();
   const { selectedBox } = useSingleBox();
@@ -92,6 +96,7 @@ const PointCloudSideView: React.FC<IAnnotationStateProps> = ({ currentData }) =>
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
       });
+      pointCloudAnnotation.pointCloud2dOperation.setAllAttributes(attributes);
       ptCtx.setSideViewInstance(pointCloudAnnotation);
       // };
     }

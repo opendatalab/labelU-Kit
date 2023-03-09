@@ -180,15 +180,6 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
-  /**
-   * The color of attribute not change by attribute in 2d operation view
-   * @param attribute
-   * @returns
-   */
-  public getColor() {
-    return super.getColor('');
-  }
-
   public onMouseDown(e: MouseEvent) {
     if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
       return;
@@ -349,6 +340,8 @@ class PointCloud2dOperation extends PolygonOperation {
     if (!selectdPolygon) {
       return;
     }
+    const toolColor = this.getColor(this.defaultAttribute);
+    const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
     if (this.rotatePointList && this.rotation) {
       DrawUtils.drawSelectedPolygonWithFillAndLine(
         this.canvas,
@@ -370,9 +363,6 @@ class PointCloud2dOperation extends PolygonOperation {
     // 3. 选中多边形的渲染
     if (this.selectedID) {
       if (selectdPolygon) {
-        const toolColor = this.getColor();
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
-
         DrawUtils.drawSelectedPolygonWithFillAndLine(
           this.canvas,
           AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
@@ -389,9 +379,6 @@ class PointCloud2dOperation extends PolygonOperation {
         );
       }
     }
-
-    const defaultColor = this.getColor();
-    const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
 
     // 4. 编辑中的多边形
     if (this.drawingPointList?.length > 0) {
@@ -433,7 +420,7 @@ class PointCloud2dOperation extends PolygonOperation {
     }
     // 5. 编辑中高亮的点
     if (this.hoverPointIndex > -1 && this.selectedID) {
-      const hoverColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const hoverColor = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
 
       const point = selectdPolygon?.pointList[this.hoverPointIndex];
       if (point) {
@@ -446,7 +433,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
     // 6. 编辑中高亮的边
     if (this.hoverEdgeIndex > -1 && this.selectedID) {
-      const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const selectedColor = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
       DrawUtils.drawLineWithPointList(
         this.canvas,
         AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
@@ -476,7 +463,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
     if (this.selectedPolygons) {
-      const toolColor = this.getColor();
+      const toolColor = this.getColor(this.defaultAttribute);
       const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
 
       const polygon = AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos);

@@ -202,7 +202,7 @@ export const synchronizeSideView = async (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
-        // attribute: pointCloud2dOperation.defaultAttribute,
+        attribute: boxParams.attribute,
       },
     ],
     boxParams.id,
@@ -256,6 +256,7 @@ export const synchronizeBackView = async (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
+        attribute: boxParams.attribute,
       },
     ],
     boxParams.id,
@@ -300,6 +301,7 @@ export const synchronizeTopView = (
         textAttribute: '',
         isRect: true,
         valid: newBoxParams.valid ?? true,
+        attribute: newBoxParams.attribute,
         // attribute:pointCloud2dOperation.defaultAttribute
       },
     );

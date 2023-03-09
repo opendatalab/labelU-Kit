@@ -1,14 +1,20 @@
 import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 
-export const UseStyle: any = () => {
-  const { topViewInstance } = useContext(PointCloudContext);
-  const updateTopViewPolygonStyle = (toolStyle: any) => {
-    if (topViewInstance && topViewInstance.pointCloud2dOperation) {
+export const useStyle: any = () => {
+  const { topViewInstance, sideViewInstance, backViewInstance } = useContext(PointCloudContext);
+  const update3ViewPolygonStyle = (toolStyle: any) => {
+    if (topViewInstance?.pointCloud2dOperation) {
       topViewInstance?.pointCloud2dOperation.setStyle(toolStyle);
+    }
+    if (sideViewInstance?.pointCloud2dOperation) {
+      sideViewInstance?.pointCloud2dOperation.setStyle(toolStyle);
+    }
+    if (backViewInstance?.pointCloud2dOperation) {
+      backViewInstance?.pointCloud2dOperation.setStyle(toolStyle);
     }
   };
   return {
-    updateTopViewPolygonStyle,
+    update3ViewPolygonStyle,
   };
 };

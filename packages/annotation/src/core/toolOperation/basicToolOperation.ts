@@ -1277,8 +1277,8 @@ class BasicToolOperation extends EventListener {
   }
 
   /** 获取当前属性颜色 */
-  public getColor(attribute = '', config = this.config) {
-    if (config?.attributeConfigurable === true && this.style.attributeColor) {
+  public getColor(attribute = '') {
+    if (this.style.attributeColor) {
       const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
       return this.style.attributeColor[attributeIndex];
     }

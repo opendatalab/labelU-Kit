@@ -1,5 +1,11 @@
 import { getClassName } from '@/utils/dom';
-import { cTool, MathUtils, PointCloudAnnotation, ToolConfig } from '@label-u/annotation';
+import {
+  cTool,
+  MathUtils,
+  PointCloudAnnotation,
+  PointCloudConfig,
+  ToolConfig,
+} from '@label-u/annotation';
 import { IPointCloudBox, IPolygonData } from '@label-u/utils';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
@@ -101,10 +107,13 @@ const TransferCanvas2WorldOffset = (
 //   );
 // };
 
-const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig }> = ({
-  currentData,
-  config,
-}) => {
+const PointCloudTopView: React.FC<
+  IAnnotationStateProps & {
+    config: BasicConfig & {
+      config: PointCloudConfig;
+    };
+  }
+> = ({ currentData, config }) => {
   const ref = useRef<HTMLDivElement>(null);
   const ptCtx = React.useContext(PointCloudContext);
   const size = useSize(ref);
@@ -114,10 +123,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
   const { deletePointCloudBox, changeBoxValidByID } = useSingleBox();
   const { t } = useTranslation();
   const pointCloudViews = usePointCloudViews();
-  const toolStyle = useSelector((state: AppState) => {
-    return { ...state.toolStyle };
-  });
-
   const { updateRotate } = useRotate({ currentData });
   useLayoutEffect(() => {
     if (ptCtx.topViewInstance) {
@@ -134,6 +139,7 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
         size,
         pcdPath: currentData.url,
       });
+      pointCloudAnnotation.pointCloud2dOperation.setAllAttributes(config.config.attributeList);
       ptCtx.setTopViewInstance(pointCloudAnnotation);
     }
   }, [currentData]);
@@ -293,7 +299,6 @@ const PointCloudTopView: React.FC<IAnnotationStateProps & { config: BasicConfig 
         pointCloud.render();
       },
     );
-    ptCtx.topViewInstance.pointCloud2dOperation.setStyle(toolStyle);
   }, [size, ptCtx.topViewInstance]);
 
   useEffect(() => {
