@@ -174,10 +174,10 @@ const CreateTask = () => {
 
   useEffect(() => {
     // 当新建或编辑任务时，初始时清空任务信息
-    dispatch.task.clearItem();
+    dispatch.task.clearTaskItemAndConfig();
 
     return () => {
-      dispatch.task.clearItem();
+      dispatch.task.clearTaskItemAndConfig();
     };
   }, [dispatch.task]);
 

@@ -55,11 +55,12 @@ export const task = createModel<RootModel>()({
     },
 
     // 当新建或编辑任务时，页面卸载时清空任务信息
-    clearItem: (state) => {
+    clearTaskItemAndConfig: (state) => {
       return {
         ...state,
         item: {} as TaskResponseWithStatics,
         new: {} as TaskResponse,
+        config: {} as ToolsConfigState,
       };
     },
   },
