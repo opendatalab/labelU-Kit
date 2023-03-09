@@ -1,12 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 
 import styles from './index.module.scss';
-import Constatns from '../../constants';
 
 const NullTask = () => {
   const navigate = useNavigate();
   const createTask = () => {
-    navigate(Constatns.urlToCreateNewTask);
+    navigate('/tasks/0/edit');
   };
   return (
     <div className={styles.wrapper}>

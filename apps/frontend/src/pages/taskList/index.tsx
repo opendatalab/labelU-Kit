@@ -8,7 +8,7 @@ import { useResponse } from '@/components/FlexItem';
 
 import currentStyles from './index.module.scss';
 import TaskCard from './components/taskCard';
-import NullTask from '../nullTask';
+import NullTask from './components/nullTask';
 
 const TaskList = () => {
   const dispatch = useDispatch<Dispatch>();
