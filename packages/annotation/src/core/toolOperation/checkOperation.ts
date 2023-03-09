@@ -147,7 +147,7 @@ class CheckOperation extends BasicToolOperation {
 
   public drawPolygon(polygonList: IPolygonData[], config: any) {
     polygonList?.forEach((polygon) => {
-      const toolColor = this.getColor(polygon.attribute, config);
+      const toolColor = this.getColor(polygon.attribute);
       const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
       let thickness = this.style?.width ?? 2;
       if (this.hoverID.includes(polygon.id)) {
@@ -204,13 +204,13 @@ class CheckOperation extends BasicToolOperation {
     });
   }
 
-  public drawRect(rectList: IRect[], config: any) {
+  public drawRect(rectList: IRect[]) {
     rectList?.forEach((rect) => {
       let thickness = 1;
       if (this.hoverID.includes(rect.id)) {
         thickness = 3;
       }
-      const toolColor = this.getColor(rect.attribute, config);
+      const toolColor = this.getColor(rect.attribute);
       const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
       DrawUtils.drawRect(this.canvas, renderRect, {
         color: rect?.valid ? toolColor.valid.stroke : toolColor.invalid.stroke,
@@ -252,7 +252,7 @@ class CheckOperation extends BasicToolOperation {
     this.resultList?.forEach((item: any) => {
       switch (item?.toolName) {
         case EToolName.Rect:
-          this.drawRect(item.result, CommonToolUtils.jsonParser(item.config));
+          this.drawRect(item.result);
           break;
         case EToolName.Polygon:
           this.drawPolygon(item.result, CommonToolUtils.jsonParser(item.config));

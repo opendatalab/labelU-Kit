@@ -122,6 +122,7 @@ const App: React.FC<AppProps> = (props) => {
       (props.toolsBasicConfig && props.toolsBasicConfig.length > 0)
     ) {
       let initToolName = currentToolName;
+
       let findToolConfigByToolName = toolsBasicConfig.filter((item) => {
         return item.tool === currentToolName;
       });
@@ -130,6 +131,9 @@ const App: React.FC<AppProps> = (props) => {
         initToolName = toolsBasicConfig[0].tool;
 
         dispatch(ChangeCurrentTool(initToolName));
+      }
+      if (!currentToolName) {
+        return;
       }
       store.dispatch(
         InitTaskData({
