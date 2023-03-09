@@ -11,6 +11,7 @@ import {
   getToggleDirectionButtonOffset,
   getCuboidTextAttributeOffset,
   isCuboidWithInLimits,
+  getPlainPointsByDiagonalPoints,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
@@ -504,27 +505,9 @@ class CuboidOperation extends BasicToolOperation {
   public drawingFrontPlanesMove(e: MouseEvent) {
     if (this.drawingCuboid && this.firstClickCoord && this.drawingStatus === EDrawingStatus.FirstPoint) {
       const coord = this.getCoordinateInOrigin(e);
-      const { x, y } = this.firstClickCoord;
-      const width = Math.abs(coord.x - x);
-      const height = Math.abs(coord.y - y);
-
       this.drawingCuboid = {
         ...this.drawingCuboid,
-        frontPoints: {
-          tl: this.firstClickCoord,
-          tr: {
-            x: x + width,
-            y,
-          },
-          bl: {
-            x,
-            y: y + height,
-          },
-          br: {
-            x: x + width,
-            y: y + height,
-          },
-        },
+        frontPoints: getPlainPointsByDiagonalPoints(this.firstClickCoord, coord),
       };
       this.render();
       return true;
