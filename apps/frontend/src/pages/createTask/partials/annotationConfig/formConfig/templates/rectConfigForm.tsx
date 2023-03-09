@@ -3,9 +3,10 @@ import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { Col, Row, Input as SenseInput, Form } from 'antd';
 import { useForm } from 'antd/es/form/Form';
+import _ from 'lodash-es';
 
 import { MapStateJSONTab } from '../../components/AttributeConfig';
-import { delayTime } from '../constants';
+
 export interface AttributeItem {
   key: string;
   value: string;
@@ -72,10 +73,7 @@ const RectConfigForm: FC<BasicConfig & { name: string }> = (props) => {
   }, []);
   const { children } = props;
 
-  // @ts-ignore
-  const formSubmitThrottle = window.throttle(() => {
-    form.submit();
-  }, delayTime);
+  const formSubmitThrottle = useMemo(() => _.debounce(form.submit, 200), [form.submit]);
 
   return (
     <div>

@@ -1,10 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { Form, Input } from 'antd';
 
 import styles from './index.module.scss';
-import type { PartialConfigProps } from '../..';
+import { TaskCreationContext } from '../../taskCreation.context';
 
-const InputInfoConfig = ({ task = {}, formData, updateFormData }: PartialConfigProps) => {
+const InputInfoConfig = () => {
+  const { task = {}, formData, updateFormData } = useContext(TaskCreationContext);
   const { name, description, tips } = task;
 
   const handleFieldChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
