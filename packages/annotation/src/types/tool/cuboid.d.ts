@@ -1,6 +1,7 @@
 import type { ECuboidDirection, ECuboidPlain, ECuboidPosition } from '@/constant/annotation';
 
-import type { ICoordinate } from './common';
+import type { ICoordinate, IToolConfig } from './common';
+import type { IInputList } from './tagTool';
 
 declare interface IPlanePoints {
   bl: ICoordinate; // Bottom Left Point;
@@ -41,4 +42,15 @@ declare interface ICuboid extends IBasicAnnotationInfo {
 
   // Back Plane;
   backPoints: IPlanePoints;
+}
+
+declare interface ICuboidConfig extends IToolConfig {
+  attributeList: IInputList[];
+  attributeConfigurable: boolean;
+  textConfigurable: boolean;
+  textCheckType: number;
+  copyBackwardResult: boolean;
+
+  minWidth: number;
+  minHeight: number;
 }

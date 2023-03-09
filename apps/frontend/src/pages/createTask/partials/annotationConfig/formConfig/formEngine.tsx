@@ -10,6 +10,7 @@ import type { RootState } from '@/store';
 import { TaskStatus } from '@/services/types';
 
 import RectConfigForm from './templates/rectConfigForm';
+import CuboidConfigForm from './templates/cuboildConfigForm';
 import LineConfigForm from './templates/lineConfigForm';
 import PointConfigForm from './templates/pointConfigForm';
 import TagConfigForm from './templates/tagConfigForm';
@@ -33,6 +34,7 @@ const FormMapping: Record<string, React.FC<any>> = {
   [EToolName.Polygon]: PolygonConfigForm,
   [EToolName.Tag]: TagConfigForm,
   [EToolName.Text]: TextConfigForm,
+  [EToolName.Cuboid]: CuboidConfigForm,
 };
 
 const FormEngine: FC<FormEngineProps> = (props) => {

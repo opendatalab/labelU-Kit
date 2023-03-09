@@ -10,7 +10,7 @@ import {
   EDragTarget,
   ECuboidDirection,
 } from '@/constant/annotation';
-import type { ICuboid, ICuboidPosition, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
+import type { ICuboid, ICuboidConfig, ICuboidPosition, IDrawingCuboid, IPlanePoints } from '@/types/tool/cuboid';
 import AxisUtils from '@/utils/tool/AxisUtils';
 import type { ICoordinate } from '@/types/tool/common';
 
@@ -919,4 +919,17 @@ export function getCuboidTextAttributeOffset({
     left: coordinate.x + leftOffset,
     top: coordinate.y + topOffset,
   };
+}
+
+/**
+ * Judgement of minWidth & minHeight
+ * @param param0
+ * @returns
+ */
+export function isCuboidWithInLimits({ cuboid, config }: { cuboid: ICuboid | IDrawingCuboid; config: ICuboidConfig }) {
+  const { minHeight, minWidth } = config;
+
+  const { width, height } = getPlanePointsBasicInfo(cuboid.frontPoints);
+
+  return width >= minWidth && height >= minHeight;
 }

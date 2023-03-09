@@ -10,10 +10,11 @@ import {
   getPointListsByDirection,
   getToggleDirectionButtonOffset,
   getCuboidTextAttributeOffset,
+  isCuboidWithInLimits,
 } from '@/utils/tool/CuboidUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import { ECuboidDirection, EDragStatus, EDragTarget } from '@/constant/annotation';
-import type { ICuboid, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
+import type { ICuboid, ICuboidConfig, ICuboidPosition, IDrawingCuboid } from '@/types/tool/cuboid';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import type { ICoordinate } from '@/types/tool/common';
 import { DEFAULT_TEXT_MAX_WIDTH } from '@/constant/tool';
@@ -24,6 +25,8 @@ import type { IBasicToolOperationProps } from './basicToolOperation';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import CuboidToggleButtonClass from './cuboidToggleButtonClass';
 import TextAttributeClass from './textAttributeClass';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 
 type ICuboidOperationProps = IBasicToolOperationProps;
 
@@ -47,6 +50,8 @@ class CuboidOperation extends BasicToolOperation {
   public cuboidList: ICuboid[] = [];
 
   public selectedID?: string;
+
+  public config: ICuboidConfig;
 
   public hoverID = '';
 
@@ -108,6 +113,10 @@ class CuboidOperation extends BasicToolOperation {
 
   public get selectedCuboid() {
     return this.cuboidList.find((v) => v.id === this.selectedID);
+  }
+
+  public get isNeedCheckCuboidSize() {
+    return this.config?.minWidth >= 0 && this.config?.minHeight >= 0;
   }
 
   /**
@@ -648,8 +657,28 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   public closeAndCreateNewCuboid() {
-    this.cuboidList.push(this.drawingCuboid as ICuboid);
-    this.setSelectedID(this.drawingCuboid?.id);
+    if (!this.drawingCuboid?.frontPoints || !this.drawingCuboid.backPoints) {
+      return;
+    }
+
+    /**
+     * The creation limits.
+     *
+     * 1. Open the cuboidSize Check.
+     * 2. beyond the limits.
+     */
+    if (
+      this.isNeedCheckCuboidSize &&
+      isCuboidWithInLimits({ cuboid: this.drawingCuboid, config: this.config }) === false
+    ) {
+      // Tips for limits. Same with rect.
+      this.emit('messageInfo', locale.getMessagesByLocale(EMessage.RectErrorSizeNotice, this.lang));
+    } else {
+      // Add New Cuboid.
+      this.cuboidList.push(this.drawingCuboid as ICuboid);
+      this.setSelectedID(this.drawingCuboid?.id);
+    }
+
     this.clearDrawingStatus();
     this.render();
   }

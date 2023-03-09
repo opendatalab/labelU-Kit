@@ -18,7 +18,9 @@
         "textConfigurable": false,
         "textCheckType": 4,
         "customFormat": "",
-        "attributeList": [{ "key": "", "value": "" }]
+        "attributeList": [{ "key": "", "value": "" }],
+        "minWidth": 1,
+        "minHeight": 1
       }
     }
   ]
