@@ -91,6 +91,7 @@ const routes: RouteObject[] = [
               {
                 path: 'finished',
                 element: <TaskSamplesFinished />,
+                loader: taskLoader,
                 handle: {
                   crumb: () => {
                     return '标注结束';

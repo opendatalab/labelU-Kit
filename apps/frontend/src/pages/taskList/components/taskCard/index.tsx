@@ -9,7 +9,6 @@ import { useSearchParams } from 'react-router-dom';
 import type { Dispatch, RootState } from '@/store';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import { ReactComponent as OutputIcon } from '@/assets/svg/outputData.svg';
-import commonController from '@/utils/common/common';
 import { deleteTask } from '@/services/task';
 import FlexItem from '@/components/FlexItem';
 import Status from '@/components/Status';
@@ -67,11 +66,9 @@ const TaskCard = (props: any) => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
     setIsShowDeleteModal(false);
-    deleteTask(id)
-      .then(() => {
-        navigate('/tasks?' + new Date().getTime());
-      })
-      .catch((_e) => commonController.notificationErrorMessage(_e, 1));
+    deleteTask(id).then(() => {
+      navigate('/tasks');
+    });
   };
   const deleteSingleTaskCancel = (e: any) => {
     e.stopPropagation();
