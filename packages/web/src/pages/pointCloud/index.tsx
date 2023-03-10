@@ -73,7 +73,7 @@ const AnnotationPage: FC = () => {
       order: number;
       isVisible: boolean;
     }[] = [];
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 200; i++) {
       let tmpOneLabel = { ...oneLabel };
       tmpOneLabel.id = i + 'dfsfsdf';
       tmpOneLabel.order = i;

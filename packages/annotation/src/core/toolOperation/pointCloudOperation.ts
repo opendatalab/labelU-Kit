@@ -361,7 +361,7 @@ class PointCloudOperation extends PointCloud {
   };
 
   // add attributes to scene
-  public addAttributeAndOrder = (boxInfo: IPointCloudBox, attribute: string, color: number) => {
+  public addAttributeAndOrderWithRender = (boxInfo: IPointCloudBox, attribute: string, color: number) => {
     if (this.showSetting.isShowAttribute || this.showSetting.isShowOrder || this.showSetting.isShowAttributeText) {
       let text = '';
 
@@ -431,6 +431,7 @@ class PointCloudOperation extends PointCloud {
     const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
 
+    // scene deal
     if (rectPoints.length > 0) {
       const sharpRect = rectPoints.map((item) => {
         return {
@@ -446,12 +447,14 @@ class PointCloudOperation extends PointCloud {
       const boxMesh = this.createBox(sharpRect, zInfo, color, opacity);
       boxMesh.name = `${boxInfo.id}box`;
       this.scene.add(boxMesh);
+
       if (this.showSetting.isShowDirection) {
         const boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
         boxArrowMesh.name = `${boxInfo.id}boxArrow`;
         this.scene.add(boxArrowMesh);
       }
-      this.addAttributeAndOrder(boxInfo, attribute, color);
+
+      this.addAttributeAndOrderWithRender(boxInfo, attribute, color);
     }
 
     return newBoxList;

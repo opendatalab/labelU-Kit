@@ -194,8 +194,7 @@ const PointCloud3D: React.FC<
         const cavasPointList = pointList.map((point) => {
           return MathUtils.transerWord2Canvas(point, sizeTop);
         });
-        // bacause top view should only show the selected box so we should clear the previous polygon list
-        // TopView2dOperation.setPolygonList([]);
+
         TopView2dOperation.setDefaultAttribute(attribute);
         TopView2dOperation.drawingPointList = cavasPointList;
         TopView2dOperation.addDrawingPointToPolygonList(true, id);
@@ -330,9 +329,9 @@ const PointCloud3D: React.FC<
         pointCloud.setBoxList(boxParamsList);
 
         let boxList: IPointCloudBox[] = [];
-        // Add Init Box
+        // refresh box in scene
         boxParamsList.forEach((v: IPointCloudBox) => {
-          // to do change color by attribute
+          // to change color by attribute
           if (v.isVisible) {
             boxList = (pointCloud as PointCloudOperation).doUpateboxInScene(
               v.rect,
