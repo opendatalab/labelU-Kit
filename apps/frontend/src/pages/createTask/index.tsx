@@ -103,23 +103,27 @@ const CreateTask = () => {
     (state: RootState) => state.loading.effects.task.updateTaskConfig || state.loading.effects.task.createTask,
   );
   const isExistTask = taskId > 0;
-  const stepDataSource: TaskStep[] = [
-    {
-      title: stepTitleMapping[StepEnum.Basic],
-      value: StepEnum.Basic,
-      isFinished: isExistTask,
-    },
-    {
-      title: stepTitleMapping[StepEnum.Upload],
-      value: StepEnum.Upload,
-      isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(_.get(taskData, 'status') as TaskStatus),
-    },
-    {
-      title: stepTitleMapping[StepEnum.Config],
-      value: StepEnum.Config,
-      isFinished: _.get(taskData, 'status') === TaskStatus.CONFIGURED,
-    },
-  ];
+  const taskStatus = _.get(taskData, 'status') as TaskStatus;
+  const stepDataSource: TaskStep[] = useMemo(
+    () => [
+      {
+        title: stepTitleMapping[StepEnum.Basic],
+        value: StepEnum.Basic,
+        isFinished: isExistTask,
+      },
+      {
+        title: stepTitleMapping[StepEnum.Upload],
+        value: StepEnum.Upload,
+        isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+      },
+      {
+        title: stepTitleMapping[StepEnum.Config],
+        value: StepEnum.Config,
+        isFinished: [TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+      },
+    ],
+    [isExistTask, taskStatus],
+  );
 
   const updateFormData = (field: string) => (value: any) => {
     setFormData(set(field)(value));
