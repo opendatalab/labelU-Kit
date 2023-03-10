@@ -13,6 +13,7 @@ import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
 import type { QueuedFile } from '@/pages/createTask/partials/inputData';
 import InputData, { UploadStatus } from '@/pages/createTask/partials/inputData';
 import { createSamples } from '@/services/samples';
+import type { ToolsConfigState } from '@/types/toolConfig';
 
 import InputInfoConfig from './partials/InputInfoConfig';
 import currentStyles from './index.module.scss';
@@ -147,23 +148,16 @@ const CreateTask = () => {
 
   // 将store中的task toolConfig数据同步到本地页面中
   useEffect(() => {
-    if (!toolsConfig) {
-      return;
-    }
-
     updateFormData('config')(toolsConfig);
   }, [toolsConfig]);
 
   // 将store中的task数据同步到本地页面中
   useEffect(() => {
-    if (!taskData) {
-      return;
-    }
-
-    setFormData((pre) => ({
+    // @ts-ignore
+    setFormData({
       ...omit(['config'])(taskData),
-      ...pre,
-    }));
+      config: {} as ToolsConfigState,
+    });
   }, [taskData]);
 
   useEffect(() => {
