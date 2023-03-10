@@ -1,7 +1,7 @@
 import { uuid } from '@label-u/annotation';
 import { jsonParser } from '.';
 import { EToolName } from '@/data/enums/ToolType';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { IStepInfo } from '@/types/step';
 
 export default class AnnotationDataUtils {
@@ -96,7 +96,7 @@ export default class AnnotationDataUtils {
         // }
 
         // if (isInitData !== true) {
-          return resultList;
+        return resultList;
         // }
 
         // return toolInstance.getInitResultList(stepConfig.dataSourceStep, basicResultList);
@@ -132,7 +132,7 @@ export default class AnnotationDataUtils {
       const oldResForCurStep = oldRes[stepKey]?.result;
 
       /** 没有旧数据时不处理 */
-      if (!oldResForCurStep||oldResForCurStep&&oldResForCurStep.length===0) {
+      if (!oldResForCurStep || (oldResForCurStep && oldResForCurStep.length === 0)) {
         return newResStr;
       }
 

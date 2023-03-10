@@ -4,7 +4,7 @@ import { AppState } from '../../../../store';
 import { connect } from 'react-redux';
 import { useDispatch, LabelUContext } from '@/store/ctx';
 import { IFileItem } from '@/types/data';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { toolList } from '../../toolHeader/ToolOperation';
 import AttributeEditorIcon from '@/assets/cssIcon/attribute_editor.svg';
 import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';
@@ -308,8 +308,7 @@ const AttributeRusult: FC<IProps> = ({
               item.order = item.order - getPositionIndexInArr(deleteResult, item.order);
               res.push(item);
             } else if (item.id) {
-                deleteBoxArray.push(item.id);
-              }
+              deleteBoxArray.push(item.id);
             }
             return res;
           },
@@ -352,8 +351,7 @@ const AttributeRusult: FC<IProps> = ({
               }
               res.push(item);
             } else if (item.id) {
-                deleteBoxArray.push(item.id);
-              }
+              deleteBoxArray.push(item.id);
             }
             return res;
           },

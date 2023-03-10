@@ -1026,7 +1026,8 @@ export class PointCloud extends EventListener {
   // TODO: get more properly element of zoom
   public getBoxPolygon2DCoordinate(boxParams: IPointCloudBox, perspectiveView: EPerspectiveView) {
     const vectorList = this.boxParams2ViewPolygon(boxParams, perspectiveView);
-    const { width, height } = boxParams;
+    const { width, height, depth } = boxParams;
+
     const projectMatrix = new THREE.Matrix4()
       .premultiply(this.camera.matrixWorldInverse)
       .premultiply(this.camera.projectionMatrix);
@@ -1042,10 +1043,11 @@ export class PointCloud extends EventListener {
       .map((vector) => vector.applyMatrix4(this.sideMatrix as any));
 
     const wZoom = this.containerWidth / width;
-    const hZoom = this.containerHeight / height;
+    const hZoom = this.containerWidth / height;
+    const dZoom = this.containerHeight / depth;
     return {
       polygon2d,
-      zoom: Math.min(wZoom, hZoom) / 1.2,
+      zoom: perspectiveView === 'LEFT' ? Math.min(wZoom, dZoom) / 1.4 : Math.min(dZoom, hZoom) / 1.3,
     };
   }
 
@@ -1076,7 +1078,7 @@ export class PointCloud extends EventListener {
     const hZoom = this.containerHeight / height;
     return {
       polygon2d,
-      zoom: Math.min(wZoom, hZoom) / 2,
+      zoom: Math.min(wZoom, hZoom) / 1.8,
     };
   }
 

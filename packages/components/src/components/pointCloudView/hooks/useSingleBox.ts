@@ -1,6 +1,6 @@
 import { IPointCloudBox } from '@label-u/utils';
 import { useCallback, useContext, useMemo } from 'react';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { PointCloudContext } from '../PointCloudContext';
 import { cAnnotation } from '@label-u/annotation';
 
@@ -42,7 +42,7 @@ export const useSingleBox = () => {
   /** Use Partial<IPointCloudBox> to update box by ID  */
   const updateBoxByID = useCallback(
     (params: Partial<IPointCloudBox>, id: string) => {
-      const boxIndex = pointCloudBoxList.findIndex((v: { id: string; }) => v.id === id);
+      const boxIndex = pointCloudBoxList.findIndex((v: { id: string }) => v.id === id);
 
       if (boxIndex > -1) {
         pointCloudBoxList.splice(boxIndex, 1, _.merge(pointCloudBoxList[boxIndex], params));
@@ -78,7 +78,7 @@ export const useSingleBox = () => {
 
   const changeBoxValidByID = useCallback(
     (id: string) => {
-      const boxInfo = pointCloudBoxList.find((v: { id: string; }) => v.id === id);
+      const boxInfo = pointCloudBoxList.find((v: { id: string }) => v.id === id);
 
       if (boxInfo) {
         const { id, valid = true } = boxInfo;
@@ -114,7 +114,7 @@ export const useSingleBox = () => {
   };
 
   const deletePointCloudBox = (id: string) => {
-    setPointCloudResult(pointCloudBoxList.filter((v: { id: string; }) => v.id !== id));
+    setPointCloudResult(pointCloudBoxList.filter((v: { id: string }) => v.id !== id));
     mainViewInstance?.removeObjectByName(id);
     mainViewInstance?.render();
     // TODO Clear Highlight.

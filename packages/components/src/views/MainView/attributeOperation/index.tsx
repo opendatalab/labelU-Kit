@@ -8,9 +8,12 @@ import { Button, Dropdown, Space, Menu } from 'antd';
 import classNames from 'classnames';
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
-import { LabelUContext } from '@/store/ctx';
+import { ReactComponent as CollapseIcon } from '@/assets/common/collapse.svg';
+import { LabelUContext, useDispatch } from '@/store/ctx';
 import { UseAttributes } from '@/components/pointCloudView/hooks/useAttribute';
 import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext';
+import { updateResultCollapseStatus } from '@/store/toolStyle/actionCreators';
+import ToolIcon from '@/components/ToolIcon';
 
 interface AttributeOperationProps {
   attributeList: Attribute[];
@@ -64,6 +67,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
   const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
   const { updateMainViewAttribute } = UseAttributes();
+  const { resultCollapse } = toolStyle;
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (copytoolInstance?.defaultAttribute) {
@@ -197,84 +203,99 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
   ]);
 
   return (
-    <div className='attributeBox' key={chooseAttribute}>
-      {currentAttributeList &&
-        currentAttributeList.length > 0 &&
-        currentAttributeList.map((attribute, index) => {
-          const buttomDom = (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                setChoseAttribute(attribute.key);
-                if (toolInstance) {
-                  toolInstance.setDefaultAttribute(attribute.key);
-                }
-                if (ptCtx.mainViewInstance) {
-                  updateMainViewAttribute?.(attribute.key);
-                }
-                forceRender((s) => s + 1);
-              }}
-              // className={classNames({
-              //   chooseAttribute: attribute.key === chooseAttribute,
-              // })}
-              style={{
-                border: '0px',
-                borderRadius: '4px',
-                padding: '1px 8px',
-                backgroundColor:
-                  attribute.key === chooseAttribute
-                    ? toolStyle.attributeColor[
-                        AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
-                      ].valid.stroke
-                    : '#FFFFFF',
-                color: attribute.key === chooseAttribute ? '#ffffff' : '',
-                // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
-              }}
-              key={attribute.key}
-            >
-              <div
-                className='circle'
-                style={{
-                  backgroundColor:
-                    toolStyle.attributeColor[
-                      AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
-                    ].valid.stroke,
-                  marginRight: 5,
+    <div className='attributeCollapseRow'>
+      <div className='attributeBox' key={chooseAttribute}>
+        {currentAttributeList &&
+          currentAttributeList.length > 0 &&
+          currentAttributeList.map((attribute, index) => {
+            const buttomDom = (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setChoseAttribute(attribute.key);
+                  if (toolInstance) {
+                    toolInstance.setDefaultAttribute(attribute.key);
+                  }
+                  if (ptCtx.mainViewInstance) {
+                    updateMainViewAttribute?.(attribute.key);
+                  }
+                  forceRender((s) => s + 1);
                 }}
-              />
-              <span title={attribute.key} className='attributeName'>{`${attribute.key} ${
-                index <= 8 ? index + 1 : ''
-              }`}</span>
-            </Button>
-          );
-          if (index < shwoAttributeCount) {
-            return buttomDom;
-          }
-          return <div key={index} />;
-        })}
-      {shwoAttributeCount < currentAttributeList.length && (
-        <Dropdown overlay={attributeMenue()} trigger={['click']}>
-          <a
-            onMouseEnter={(e) => {
-              e.preventDefault();
-              setIsHoverDropdown(true);
-            }}
-            onMouseLeave={(e) => {
-              e.preventDefault();
-              setIsHoverDropdown(false);
-            }}
-            onClick={(e) => e.preventDefault()}
-            className='dropdowm-a'
-          >
-            <Space style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
-              更多
-              {/* {currentAttributeList.length} */}
-              {isHoverDropdown ? drowpUpIconA : drowpDownIcon}
-              {/* <DownOutlined /> */}
-            </Space>
-          </a>
-        </Dropdown>
-      )}
+                // className={classNames({
+                //   chooseAttribute: attribute.key === chooseAttribute,
+                // })}
+                style={{
+                  border: '0px',
+                  borderRadius: '4px',
+                  padding: '1px 8px',
+                  backgroundColor:
+                    attribute.key === chooseAttribute
+                      ? toolStyle.attributeColor[
+                          AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) +
+                            1
+                        ].valid.stroke
+                      : '#FFFFFF',
+                  color: attribute.key === chooseAttribute ? '#ffffff' : '',
+                  // backgroundColor: COLORS_ARRAY_LIGHT[(index - 1) % COLORS_ARRAY_LIGHT.length],
+                }}
+                key={attribute.key}
+              >
+                <div
+                  className='circle'
+                  style={{
+                    backgroundColor:
+                      toolStyle.attributeColor[
+                        AttributeUtils.getAttributeIndex(attribute.key, allAttributeList ?? []) + 1
+                      ].valid.stroke,
+                    marginRight: 5,
+                  }}
+                />
+                <span title={attribute.key} className='attributeName'>{`${attribute.key} ${
+                  index <= 8 ? index + 1 : ''
+                }`}</span>
+              </Button>
+            );
+            if (index < shwoAttributeCount) {
+              return buttomDom;
+            }
+            return <div key={index} />;
+          })}
+        {shwoAttributeCount < currentAttributeList.length && (
+          <Dropdown overlay={attributeMenue()} trigger={['click']}>
+            <a
+              onMouseEnter={(e) => {
+                e.preventDefault();
+                setIsHoverDropdown(true);
+              }}
+              onMouseLeave={(e) => {
+                e.preventDefault();
+                setIsHoverDropdown(false);
+              }}
+              onClick={(e) => e.preventDefault()}
+              className='dropdowm-a'
+            >
+              <Space style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
+                更多
+                {/* {currentAttributeList.length} */}
+                {isHoverDropdown ? drowpUpIconA : drowpDownIcon}
+                {/* <DownOutlined /> */}
+              </Space>
+            </a>
+          </Dropdown>
+        )}
+      </div>
+      <div
+        className='collapseAction'
+        onClick={(e) => {
+          e.stopPropagation();
+          dispatch(updateResultCollapseStatus(!resultCollapse));
+          setTimeout(() => {
+            ptCtx.mainViewInstance?.emit('resetAllView');
+          }, 500);
+        }}
+      >
+        <ToolIcon icon={CollapseIcon} className='collapseIcon' />
+      </div>
     </div>
   );
 };

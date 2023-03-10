@@ -1,6 +1,6 @@
-import { isNumber } from 'lodash';
-import { ELang } from '../../constant/annotation';
-import { IPolygonData } from '../../types/tool/polygon';
+import { isNumber } from 'lodash-es';
+import type { ELang } from '../../constant/annotation';
+import type { IPolygonData } from '../../types/tool/polygon';
 import { COLORS_ARRAY, ICON_ARRAY, INVALID_ICON, NULL_COLOR, NULL_ICON } from '../../constant/style';
 import { ETextType } from '../../constant/tool';
 import locale from '../../locales';

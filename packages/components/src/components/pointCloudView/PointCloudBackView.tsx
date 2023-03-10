@@ -1,4 +1,4 @@
-import { PointCloud, MathUtils, PointCloudAnnotation } from '@label-u/annotation';
+import { PointCloud, MathUtils, PointCloudAnnotation, Attribute } from '@label-u/annotation';
 import { getClassName } from '@/utils/dom';
 import { PointCloudContainer } from './PointCloudLayout';
 import React, { useEffect, useRef } from 'react';
@@ -74,7 +74,12 @@ const updateBackViewByCanvas2D = (
   backPointCloud.render();
 };
 
-const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
+const PointCloudSideView = ({
+  currentData,
+  attributes,
+}: IAnnotationStateProps & {
+  attributes: Attribute[];
+}) => {
   const ptCtx = React.useContext(PointCloudContext);
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
@@ -95,6 +100,7 @@ const PointCloudSideView = ({ currentData }: IAnnotationStateProps) => {
         size,
         polygonOperationProps: { showDirectionLine: false, forbidAddNew: true },
       });
+      pointCloudAnnotation.pointCloud2dOperation.setAllAttributes(attributes);
       ptCtx.setBackViewInstance(pointCloudAnnotation);
     }
   }, []);

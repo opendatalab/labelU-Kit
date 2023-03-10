@@ -6,9 +6,9 @@
 
 import { PCDLoader } from './PCDLoader';
 
-type TCacheInfo = {
+interface TCacheInfo {
   src: string;
-};
+}
 
 export class PointCloudCache {
   public pcdLoader: PCDLoader;
@@ -17,7 +17,7 @@ export class PointCloudCache {
 
   private pointsMap: Map<string, THREE.Points>;
 
-  private cacheList: Array<TCacheInfo> = [];
+  private cacheList: TCacheInfo[] = [];
 
   private static instance: PointCloudCache;
 
@@ -33,9 +33,9 @@ export class PointCloudCache {
     return this.instance;
   }
 
-  public setInstance(src:string,points:THREE.Points) {
-    if( PointCloudCache.instance){
-      this.pointsMap.set(src,points);
+  public setInstance(src: string, points: THREE.Points) {
+    if (PointCloudCache.instance) {
+      this.pointsMap.set(src, points);
     }
   }
 

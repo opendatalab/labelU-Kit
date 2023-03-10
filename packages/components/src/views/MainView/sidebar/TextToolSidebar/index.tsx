@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, FocusEvent } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { classnames } from '@/utils';
 import { Input } from 'antd/es';
 import { cKeyCode } from '@label-u/annotation';

@@ -13,7 +13,8 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import MarkerUtils from '../../utils/tool/MarkerUtils';
 import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
 import uuid from '../../utils/uuid';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 interface IRectOperationProps extends IBasicToolOperationProps {
@@ -927,7 +928,7 @@ class RectOperation extends BasicToolOperation {
         // CommonToolUtils.getMaxOrder(
         //   this.rectList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
         // ) + 1,
-        CommonToolUtils.getAllToolsMaxOrder( this.rectList,this.prevResultList) +1
+        CommonToolUtils.getAllToolsMaxOrder(this.rectList, this.prevResultList) + 1,
     });
 
     this.firstClickCoord = {
@@ -1429,7 +1430,7 @@ class RectOperation extends BasicToolOperation {
 
       if (rect.label && this.hasMarkerConfig) {
         // const order = CommonToolUtils.getCurrentMarkerIndex(rect.label, this.config.markerList) + 1;
-        const order = CommonToolUtils.getAllToolsMaxOrder(this.rectList,this.prevResultList)
+        const order = CommonToolUtils.getAllToolsMaxOrder(this.rectList, this.prevResultList);
         showText = `${order}_${MarkerUtils.getMarkerShowText(rect.label, this.config.markerList)}`;
       }
 

@@ -59,7 +59,7 @@ export const useAttributes = () => {
           name='changeAttribute'
           rules={[
             {
-              required: true,
+              required: false,
             },
           ]}
         >
@@ -72,11 +72,11 @@ export const useAttributes = () => {
           </Select>
         </Form.Item>
         <Form.Item
-          label='描述'
+          label='属性'
           name='description'
           rules={[
             {
-              required: true,
+              required: false,
             },
           ]}
         >

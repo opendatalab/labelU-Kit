@@ -4,16 +4,22 @@ import { ToolStyleActionTypes, ToolStyleState } from './types';
 export function InitToolStyleConfig(): ToolStyleActionTypes {
   return {
     type: TOOL_STYLE_ACTIONS.INIT_TOOL_STYLE_CONFIG,
-    payload: undefined
+    payload: undefined,
   };
 }
 
-
-export function updateCollapseStatus(isCollapse:boolean){
+export function updateCollapseStatus(isCollapse: boolean) {
   return {
     type: TOOL_STYLE_ACTIONS.UPDATE_COLLAPSE_STATUS,
-    payload: {imgListCollapse:isCollapse},
-  }
+    payload: { imgListCollapse: isCollapse },
+  };
+}
+
+export function updateResultCollapseStatus(isCollapse: boolean) {
+  return {
+    type: TOOL_STYLE_ACTIONS.UPDATE_RESULT_COLLAPSE_STATUS,
+    payload: { resultCollapse: isCollapse },
+  };
 }
 
 export function UpdateToolStyleConfig(toolStyle: Partial<ToolStyleState>): ToolStyleActionTypes {
@@ -26,5 +32,5 @@ export function UpdateToolStyleConfig(toolStyle: Partial<ToolStyleState>): ToolS
 export default {
   InitToolStyleConfig,
   UpdateToolStyleConfig,
-  updateCollapseStatus
+  updateCollapseStatus,
 };

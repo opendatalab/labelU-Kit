@@ -6,7 +6,7 @@ import {
   BORDER_OPACITY_LEVEL,
   FILL_OPACITY_LEVEL,
 } from '@/data/Style';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 const FILL_OPACITY = 0.8;
 

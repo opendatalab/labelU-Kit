@@ -2,7 +2,7 @@ import RadioList from '@/components/attributeList';
 import CheckBoxList from '@/components/checkboxList';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Badge, Collapse, Tooltip } from 'antd/es';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import clearSmall from '@/assets/annotation/common/icon_clearSmall.svg';
 import clearSmallA from '@/assets/annotation/common/icon_clearSmall_a.svg';
@@ -26,7 +26,7 @@ export const expandIconFuc = ({ isActive }: any) => (
 
 const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
   const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
-  
+
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [, forceRender] = useState<number>(0);
   const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
@@ -218,9 +218,7 @@ const TagSidebar: React.FC<IProps> = ({ toolInstance, imgIndex }) => {
       {inputList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div style={{ height }}>
-          {labelPanel(inputList)}
-        </div>
+        <div style={{ height }}>{labelPanel(inputList)}</div>
       )}
     </div>
   );

@@ -1,5 +1,4 @@
-
-import { TMatrix4Tuple, IVolume } from "@/types/pointCloud";
+import type { TMatrix4Tuple, IVolume } from '@/types/pointCloud';
 
 class PerspectiveShiftUtils {
   /**
@@ -9,11 +8,7 @@ class PerspectiveShiftUtils {
    * @param z
    * @returns
    */
-  public static translationMatrix(
-    x: number,
-    y: number,
-    z: number
-  ): TMatrix4Tuple {
+  public static translationMatrix(x: number, y: number, z: number): TMatrix4Tuple {
     return [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1];
   }
 
@@ -68,19 +63,12 @@ class PerspectiveShiftUtils {
    * @returns
    */
 
-  public static leftFrontTopViewMatrix4(
-    scale: number,
-    volume: IVolume
-  ): TMatrix4Tuple {
+  public static leftFrontTopViewMatrix4(scale: number, volume: IVolume): TMatrix4Tuple {
     const offsetX = volume.width / 2;
     const offsetY = volume.height / 2;
     const offsetZ = volume.depth / 2;
 
-    return this.translationMatrix(
-      offsetX * scale,
-      offsetY * scale,
-      offsetZ * scale
-    );
+    return this.translationMatrix(offsetX * scale, offsetY * scale, offsetZ * scale);
   }
 
   /**
@@ -88,19 +76,12 @@ class PerspectiveShiftUtils {
    * @param distance
    * @returns
    */
-  public static rightBackTopViewMatrix4(
-    scale: number,
-    volume: IVolume
-  ): TMatrix4Tuple {
+  public static rightBackTopViewMatrix4(scale: number, volume: IVolume): TMatrix4Tuple {
     const offsetX = -volume.width / 2;
     const offsetY = -volume.height / 2;
     const offsetZ = volume.depth / 2;
 
-    return this.translationMatrix(
-      offsetX * scale,
-      offsetY * scale,
-      offsetZ * scale
-    );
+    return this.translationMatrix(offsetX * scale, offsetY * scale, offsetZ * scale);
   }
 }
 

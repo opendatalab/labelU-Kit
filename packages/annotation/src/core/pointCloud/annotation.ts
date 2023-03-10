@@ -156,8 +156,8 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
 
   public updatePolygonList = (pointCloudDataList: IPointCloudBox[], extraList?: IPolygonData[]) => {
     const sizeTop = {
-      width: this.pointCloud2dOperation.container.getBoundingClientRect().width,
-      height: this.pointCloud2dOperation.container.getBoundingClientRect().height,
+      width: this.pointCloud2dOperation.container.clientWidth,
+      height: this.pointCloud2dOperation.container.clientHeight,
     };
     let polygonList = pointCloudDataList.map((v) => {
       const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinateFromBox(v, sizeTop);

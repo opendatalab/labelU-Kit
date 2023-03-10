@@ -9,7 +9,7 @@ import { useContext } from 'react';
 import { PointCloudContext } from '../PointCloudContext';
 import { useSingleBox } from './useSingleBox';
 import { ISize } from '@/types/main';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { useDispatch, useSelector } from '@/store/ctx';
 import { AppState } from '@/store';
 import StepUtils from '@/utils/StepUtils';
@@ -202,7 +202,7 @@ export const synchronizeSideView = async (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
-        // attribute: pointCloud2dOperation.defaultAttribute,
+        attribute: boxParams.attribute,
       },
     ],
     boxParams.id,
@@ -256,6 +256,7 @@ export const synchronizeBackView = async (
         pointList: polygon2d,
         textAttribute: '',
         isRect: true,
+        attribute: boxParams.attribute,
       },
     ],
     boxParams.id,
@@ -300,6 +301,7 @@ export const synchronizeTopView = (
         textAttribute: '',
         isRect: true,
         valid: newBoxParams.valid ?? true,
+        attribute: newBoxParams.attribute,
         // attribute:pointCloud2dOperation.defaultAttribute
       },
     );
@@ -395,6 +397,7 @@ export const usePointCloudViews = () => {
     newPolygon: any,
     size: ISize,
     attribute: string,
+    textAttribute?: string,
     zInfo?: {
       maxZ: number;
       minZ: number;
@@ -402,6 +405,7 @@ export const usePointCloudViews = () => {
   ) => {
     let newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
       attribute: attribute,
+      textAttribute,
     });
     if (!newParams) {
       return;

@@ -1,6 +1,6 @@
 import { Col, Row, Slider, Input } from 'antd/es';
 import { connect } from 'react-redux';
-import { throttle } from 'lodash';
+import { throttle } from 'lodash-es';
 import React, { useEffect } from 'react';
 import { ImgAttributeState } from '@/store/imgAttribute/types';
 import ImgAttribute from '@/store/imgAttribute/actionCreators';

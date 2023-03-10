@@ -1,6 +1,6 @@
-import { isObject } from 'lodash';
+import { isObject } from 'lodash-es';
 import { ECheckModel, EToolName } from '@/constant/tool';
-import { IPolygonPoint } from '../../types/tool/polygon';
+import type { IPolygonPoint } from '../../types/tool/polygon';
 import { ESortDirection, EStepType } from '../../constant/annotation';
 import CheckOperation from '../../core/toolOperation/checkOperation';
 import PolygonOperation from '../../core/toolOperation/polygonOperation';
@@ -10,11 +10,11 @@ import LineToolOperation from '../../core/toolOperation/LineToolOperation';
 import PointOperation from '../../core/toolOperation/pointOperation';
 import TextToolOperation from '../../core/toolOperation/TextToolOperation';
 
-type point = {
+interface Point {
   id: string;
   x: number;
   y: number;
-};
+}
 
 export default class CommonToolUtils {
   /**
@@ -79,21 +79,20 @@ export default class CommonToolUtils {
     return order;
   }
 
-
-  public static getAllToolsMaxOrder(result:any[],preveResultList:any[]|undefined){
-    let order =0;
-    if(result){
-      for(let item of result){
-        if(item.order > order){
+  public static getAllToolsMaxOrder(result: any[], preveResultList: any[] | undefined) {
+    let order = 0;
+    if (result) {
+      for (const item of result) {
+        if (item.order > order) {
           order = item.order;
         }
       }
     }
-    if(preveResultList){
-      for(let toolResult of preveResultList){
-        if(toolResult.toolName && toolResult.toolName !== 'tagTool'){
-          for(let item of toolResult.result){
-            if(item.order > order){
+    if (preveResultList) {
+      for (const toolResult of preveResultList) {
+        if (toolResult.toolName && toolResult.toolName !== 'tagTool') {
+          for (const item of toolResult.result) {
+            if (item.order > order) {
               order = item.order;
             }
           }
@@ -160,7 +159,7 @@ export default class CommonToolUtils {
   }
 
   public static getNextSelectedRectID(
-    rectList: point[],
+    rectList: Point[],
     sort: ESortDirection = ESortDirection.ascend,
     selectedID?: string,
   ) {
@@ -183,7 +182,7 @@ export default class CommonToolUtils {
     return sortRectList[(i + 1) % len];
   }
 
-  public static getNextSelectedRectIDByEvent(pointList: point[], event: KeyboardEvent, selectedID?: string) {
+  public static getNextSelectedRectIDByEvent(pointList: Point[], event: KeyboardEvent, selectedID?: string) {
     const sortDirection = event.shiftKey ? ESortDirection.descend : ESortDirection.ascend;
     return this.getNextSelectedRectID(pointList, sortDirection, selectedID);
   }
@@ -241,7 +240,7 @@ export default class CommonToolUtils {
    * @param pointList
    * @returns
    */
-  public static findAllLine(pointList: IPolygonPoint[] | point[], isClose = true) {
+  public static findAllLine(pointList: IPolygonPoint[] | Point[], isClose = true) {
     const arr = [];
     const newPoint = [...pointList];
     if (newPoint.length >= 3 && isClose === true) {
@@ -310,11 +309,7 @@ export default class CommonToolUtils {
    * @param markerIndex
    * @returns
    */
-  public static getNextMarker(
-    resultList: Array<IPointUnit | IRect>,
-    markerList: IInputList[] = [],
-    markerIndex?: number,
-  ) {
+  public static getNextMarker(resultList: (IPointUnit | IRect)[], markerList: IInputList[] = [], markerIndex?: number) {
     if (markerList?.length === 0) {
       return undefined;
     }

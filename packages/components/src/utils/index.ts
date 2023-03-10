@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 export const jsonParser = (content: any, defaultValue: any = {}) => {
   try {

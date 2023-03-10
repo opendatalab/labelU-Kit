@@ -16,17 +16,15 @@ import { AnnotationEngine } from '@label-u/annotation';
 import { i18n } from '@label-u/utils';
 import { Button, Tooltip } from 'antd/es';
 import classNames from 'classnames';
-import { last } from 'lodash';
+import { last } from 'lodash-es';
 import React, { useReducer, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { useDispatch, LabelUContext } from '@/store/ctx';
 import { store } from 'src';
-// import ExportData from './ExportData';
 import HeaderOption from './headerOption';
 import StepSwitch from './StepSwitch';
 import ActionOption from './ActionOption';
-// import { BasicConfig } from '@/types/tool';
 import ToolOperation from './ToolOperation';
 import { BasicConfig } from '@/types/tool';
 interface INextStep {

@@ -8,6 +8,7 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
+import { Vector2 } from 'three';
 import { zoomInfo } from './basicToolOperation';
 import type { IPolygonOperationProps } from './polygonOperation';
 import PolygonOperation from './polygonOperation';
@@ -17,6 +18,7 @@ interface IPointCloud2dOperationProps {
   forbidAddNew?: boolean;
   isPointCloud2DTool?: boolean;
   config?: ToolConfig;
+  onMouseUp?: (e: MouseEvent) => undefined;
 }
 
 const POINT_CLOUD_POLYGON_PIXELRATIO = 1;
@@ -82,8 +84,40 @@ class PointCloud2dOperation extends PolygonOperation {
     this.arrowPointList = pointList;
   }
 
+  public onMouseUp(e: MouseEvent) {
+    super.onMouseUp(e);
+    this.setCustomCursor('none');
+    this.rotatePointList = undefined;
+    return undefined;
+  }
+
+  public setCursorWhenMove(event: MouseEvent) {
+    // hover 框内
+    if (this.getHoverID(event) && !this.rotatePointList) {
+      if (this.hoverEdgeIndex > -1) {
+        // TODO: resize polygon with resize icon
+        this.setCustomCursor('grab');
+      } else if (event.buttons === 1) {
+        this.setCustomCursor('grab');
+      } else {
+        this.setCustomCursor('pointer');
+      }
+    }
+    // hover 箭头 或者 调整方向
+    else if (this.isArrowHover || this.rotatePointList) {
+      if (event.buttons === 1) {
+        this.setCustomCursor('grab');
+      } else {
+        this.setCustomCursor('pointer');
+      }
+    } else {
+      this.setCustomCursor('none');
+    }
+  }
+
   public onMouseMove(event: MouseEvent) {
     event.preventDefault();
+    this.setCursorWhenMove(event);
     super.onMouseMove(event);
     if (this.forbidMouseOperation || !this.imgInfo || !this.arrowPointList) {
       return;
@@ -105,6 +139,7 @@ class PointCloud2dOperation extends PolygonOperation {
     if ((this.isArrowHover && this.firstClickPoint) || this.rotatePointList) {
       this.getVirtualPolygon(event);
     }
+
     if (this.isApproachBund(event) && this.isUncheckedApproachBoundary) {
       this.onMouseUp(event);
     }
@@ -143,15 +178,6 @@ class PointCloud2dOperation extends PolygonOperation {
       });
       this.rotation = rotation;
     }
-  }
-
-  /**
-   * The color of attribute not change by attribute in 2d operation view
-   * @param attribute
-   * @returns
-   */
-  public getColor() {
-    return super.getColor('');
   }
 
   public onMouseDown(e: MouseEvent) {
@@ -259,7 +285,63 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
+  public renderArrow(pointList: IPolygonPoint[], color: string) {
+    const sPoint = {
+      x: (pointList[2].x + pointList[3].x) / 2,
+      y: (pointList[2].y + pointList[3].y) / 2,
+    };
+
+    const vectorP = {
+      x: (pointList[2].x - pointList[1].x) / 5,
+      y: (pointList[2].y - pointList[1].y) / 5,
+    };
+    const arrowEndPoint = {
+      x: sPoint.x + vectorP.x * 1.3,
+      y: sPoint.y + vectorP.y * 1.3,
+    };
+    const sEnd = {
+      x: sPoint.x + vectorP.x,
+      y: sPoint.y + vectorP.y,
+    };
+
+    const inputVector = new Vector2(sEnd.x - sPoint.x, sEnd.y - sPoint.y).multiplyScalar(0.4);
+
+    const rotateVector = MathUtils.getRotateVector(inputVector, Math.PI * 0.5);
+    if (rotateVector?.isVector3) {
+      const rotatePoint = { x: sEnd.x + rotateVector.x, y: sEnd.y + rotateVector.y };
+      const backRotatePoint = { x: sEnd.x - rotateVector.x, y: sEnd.y - rotateVector.y };
+      const arrPointList = [sPoint, sEnd, rotatePoint, arrowEndPoint, backRotatePoint, sEnd];
+      this.setArrowPointList(arrPointList);
+      const thickness = 5;
+      DrawUtils.drawPolygonWithFill(
+        this.canvas,
+        AxisUtils.changePointListByZoom(arrPointList, this.zoom, this.currentPos),
+        {
+          color,
+          lineType: this.config?.lineType,
+        },
+      );
+
+      DrawUtils.drawLineWithPointList(
+        this.canvas,
+        AxisUtils.changePointListByZoom(arrPointList, this.zoom, this.currentPos),
+        {
+          color,
+          thickness,
+          lineType: this.config?.lineType,
+          lineCap: 'butt',
+        },
+      );
+    }
+  }
+
   public renderPolygon() {
+    const selectdPolygon = this.selectedPolygon;
+    if (!selectdPolygon) {
+      return;
+    }
+    const toolColor = this.getColor(this.defaultAttribute);
+    const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
     if (this.rotatePointList && this.rotation) {
       DrawUtils.drawSelectedPolygonWithFillAndLine(
         this.canvas,
@@ -275,15 +357,12 @@ class PointCloud2dOperation extends PolygonOperation {
           lineType: this.config?.lineType,
         },
       );
+      this.renderArrow(this.rotatePointList, 'red');
     }
 
     // 3. 选中多边形的渲染
     if (this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
       if (selectdPolygon) {
-        const toolColor = this.getColor();
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
-
         DrawUtils.drawSelectedPolygonWithFillAndLine(
           this.canvas,
           AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
@@ -298,39 +377,8 @@ class PointCloud2dOperation extends PolygonOperation {
             lineType: this.config?.lineType,
           },
         );
-
-        if (this.isShowArrow && selectdPolygon.isRect) {
-          const sPoint = {
-            x: (selectdPolygon.pointList[2].x + selectdPolygon.pointList[3].x) / 2,
-            y: (selectdPolygon.pointList[2].y + selectdPolygon.pointList[3].y) / 2,
-          };
-
-          const vectorP = {
-            x: (selectdPolygon.pointList[2].x - selectdPolygon.pointList[1].x) / 4,
-            y: (selectdPolygon.pointList[2].y - selectdPolygon.pointList[1].y) / 4,
-          };
-          const sEnd = {
-            x: sPoint.x + vectorP.x,
-            y: sPoint.y + vectorP.y,
-          };
-          this.setArrowPointList([sPoint, sEnd]);
-          const thickness = this.isArrowHover ? 20 : 3;
-          DrawUtils.drawLineWithPointList(
-            this.canvas,
-            AxisUtils.changePointListByZoom([sPoint, sEnd], this.zoom, this.currentPos),
-            {
-              color: toolData.stroke,
-              thickness,
-              hoverEdgeIndex: this.hoverEdgeIndex,
-              lineType: this.config?.lineType,
-            },
-          );
-        }
       }
     }
-
-    const defaultColor = this.getColor();
-    const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
 
     // 4. 编辑中的多边形
     if (this.drawingPointList?.length > 0) {
@@ -370,14 +418,9 @@ class PointCloud2dOperation extends PolygonOperation {
         },
       );
     }
-
     // 5. 编辑中高亮的点
     if (this.hoverPointIndex > -1 && this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
-      if (!selectdPolygon) {
-        return;
-      }
-      const hoverColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const hoverColor = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
 
       const point = selectdPolygon?.pointList[this.hoverPointIndex];
       if (point) {
@@ -390,11 +433,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
     // 6. 编辑中高亮的边
     if (this.hoverEdgeIndex > -1 && this.selectedID) {
-      const selectdPolygon = this.selectedPolygon;
-      if (!selectdPolygon) {
-        return;
-      }
-      const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const selectedColor = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
       DrawUtils.drawLineWithPointList(
         this.canvas,
         AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
@@ -405,6 +444,10 @@ class PointCloud2dOperation extends PolygonOperation {
           lineType: this.config?.lineType,
         },
       );
+    }
+    // 绘制 箭头
+    if (this.isShowArrow && selectdPolygon.isRect) {
+      this.renderArrow(selectdPolygon.pointList, toolData.stroke);
     }
   }
 
@@ -420,7 +463,7 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public renderSingleSelectedPolygon = (selectedPolygon: IPolygonData) => {
     if (this.selectedPolygons) {
-      const toolColor = this.getColor();
+      const toolColor = this.getColor(this.defaultAttribute);
       const toolData = StyleUtils.getStrokeAndFill(toolColor, selectedPolygon.valid, { isSelected: true });
 
       const polygon = AxisUtils.changePointListByZoom(selectedPolygon.pointList, this.zoom, this.currentPos);

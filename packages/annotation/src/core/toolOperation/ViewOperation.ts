@@ -2,622 +2,622 @@
  * 查看模式 - 支持简单数据注入查看
  */
 
- import _ from 'lodash';
- import rgba from 'color-rgba';
- import DrawUtils from '@/utils/tool/DrawUtils';
- import AxisUtils from '@/utils/tool/AxisUtils';
- import RectUtils from '@/utils/tool/RectUtils';
- import PolygonUtils from '@/utils/tool/PolygonUtils';
- import MathUtils from '@/utils/MathUtils';
- import RenderDomClass from '@/utils/tool/RenderDomClass';
- import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
- import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
- import ImgPosUtils from '@/utils/tool/ImgPosUtils';
- import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
- 
- const newScope = 3;
- const DEFAULT_RADIUS = 3;
- const DEFAULT_STROKE_COLOR = '#6371FF';
- 
- type IViewOperationProps = {
-   style: IBasicStyle;
-   annotations: IAnnotationData[];
- } & IBasicToolOperationProps;
- 
- export interface ISpecificStyle {
-   stroke: string;
-   thickness: number;
-   fill: string;
-   radius: number;
- }
- 
- export interface IFontStyle {
-   fontFamily: string;
-   fontSize: number;
- }
- 
- export default class ViewOperation extends BasicToolOperation {
-   public style: IBasicStyle = {};
- 
-   public annotations: IAnnotationData[] = [];
- 
-   private mouseHoverID?: string;
- 
-   private loading: boolean; // 加载图片时不渲染图形
- 
-   private renderDomInstance: RenderDomClass;
- 
-   private connectionPoints: ICoordinate[] = [];
- 
-   constructor(props: IViewOperationProps) {
-     super({ ...props, showDefaultCursor: true });
-     this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
-     this.annotations = props.annotations;
-     this.loading = false;
-     this.renderDomInstance = new RenderDomClass({
-       container: this.container,
-       height: this.canvas.height,
-     });
-   }
- 
-   /**
-    * Get the connection points in annotationData.
-    * @param newAnnotations
-    */
-   public checkConnectionPoints(newAnnotations: IAnnotationData[] = this.annotations) {
-     const { connectionPoints } = MathUtils.getCollectionPointByAnnotationData(newAnnotations);
-     this.connectionPoints = connectionPoints;
-   }
- 
-   public setLoading(loading: boolean) {
-     this.loading = loading;
-     this.render();
-   }
- 
-   public onMouseLeave() {
-     super.onMouseLeave();
-     this.mouseHoverID = undefined;
-     this.emit('onChange', 'hover', []);
-   }
- 
-   public onMouseDown(e: MouseEvent) {
-     if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
-       return true;
-     }
- 
-     const newMouseSelectedID = this.mouseHoverID;
-     if (e.button === 0) {
-       let selectedID: any[] = [];
-       if (newMouseSelectedID) {
-         selectedID = [newMouseSelectedID];
-       }
-       this.emit('onChange', 'selected', selectedID);
-       this.render();
-     }
-   }
- 
-   public onMouseMove(e: MouseEvent) {
-     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
-       return;
-     }
- 
-     const oldMouseHoverID = this.mouseHoverID;
-     const newMouseHoverID = this.getHoverRectID(e);
-     if (oldMouseHoverID !== newMouseHoverID) {
-       this.mouseHoverID = newMouseHoverID;
-       let hoverID: string[] = [];
-       if (newMouseHoverID) {
-         hoverID = [newMouseHoverID];
-       }
- 
-       this.emit('onChange', 'hover', hoverID);
-       this.render();
-     }
-   }
- 
-   // 获取当前 hoverID
-   public getHoverRectID = (e: MouseEvent) => {
-     const coordinate = this.getCoordinateUnderZoom(e);
-     const originCoordinate = AxisUtils.changePointByZoom(coordinate, 1 / this.zoom);
-     if (this.annotations?.length <= 0 || !this.annotations?.length) {
-       return;
-     }
- 
-     /**
-      * 1. 优先级升序
-      * 2. 相同级别
-      */
-     let id = '';
-     let minArea = Number.MAX_SAFE_INTEGER;
- 
-     for (let i = 0; i < this.annotations.length; i++) {
-       const annotation = this.annotations[i];
-       switch (annotation.type) {
-         case 'rect': {
-           const rect = annotation.annotation;
-           if (RectUtils.isInRect(coordinate, rect as any, newScope, this.zoom)) {
-             const area = rect.width * rect.height;
-             if (area < minArea) {
-               id = rect.id;
-               minArea = area;
-             }
-           }
-           break;
-         }
- 
-         case 'polygon': {
-           const polygon = annotation.annotation;
-           if (PolygonUtils.isInPolygon(originCoordinate, polygon.pointList)) {
-             const area = PolygonUtils.getPolygonArea(polygon.pointList);
-             if (area < minArea) {
-               id = polygon.id;
-               minArea = area;
-             }
-           }
-           break;
-         }
-         default: {
-           //
-         }
-       }
-     }
- 
-     return id;
-   };
- 
-   public updateData(annotations: IAnnotationData[]) {
-     this.annotations = annotations;
-     this.render();
-   }
- 
-   /**
-    * 获取当前结果的标注类型
-    * @param obj
-    * @returns
-    */
-   private getSpecificStyle(obj: { [a: string]: any }) {
-     const specificStyle = _.pick(obj, ['stroke', 'thickness', 'fill', 'radius']);
- 
-     const newStyle = {
-       ...this.style,
-       ...specificStyle,
-     };
- 
-     if (newStyle.stroke) {
-       // 兼容下方默认值 color 的携带
-       Object.assign(newStyle, {
-         color: newStyle.stroke,
-       });
-     }
- 
-     return newStyle;
-   }
- 
-   /**
-    * Get font rendering style
-    * @param obj
-    * @param style
-    * @returns
-    */
-   private getFontStyle(obj: { [a: string]: any }, style: ISpecificStyle) {
-     const fontSize = obj?.fontSize ?? 14;
-     const fontFamily = obj?.fontFamily ?? 'Arial';
-     return {
-       ...DEFAULT_TEXT_SHADOW,
-       color: style.stroke,
-       font: `normal normal 600 ${fontSize}px ${fontFamily}`,
-     };
-   }
- 
-   /**
-    *  Append Draw offset
-    */
-   public appendOffset({ x, y }: ICoordinate) {
-     return { x: x + DEFAULT_TEXT_OFFSET.offsetX, y: y + DEFAULT_TEXT_OFFSET.offsetY };
-   }
- 
-   /**
-    * 获取当前展示的文本
-    * @param result
-    * @returns
-    */
-   public getRenderText(result: any, hiddenText = false) {
-     let headerText = '';
-     let bottomText = '';
- 
-     if (!result || hiddenText === true) {
-       return { headerText, bottomText };
-     }
- 
-     if (result?.order) {
-       headerText = `${result.order}`;
-     }
- 
-     if (result?.label) {
-       if (headerText) {
-         headerText = `${headerText}_${result.label}`;
-       } else {
-         headerText = `${result.label}`;
-       }
-     }
- 
-     if (result?.attribute) {
-       if (headerText) {
-         headerText = `${headerText}  ${result.attribute}`;
-       } else {
-         headerText = `${result.attribute}`;
-       }
-     }
- 
-     if (result?.textAttribute) {
-       bottomText = result?.textAttribute;
-     }
-     return { headerText, bottomText };
-   }
- 
-   public getReferenceOptions(isReference?: boolean): { lineCap?: CanvasLineCap; lineDash?: number[] } {
-     return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
-   }
- 
-   /**
-    * Focus on the selected lang.
-    * @param pointList
-    */
-   public focusPositionByPointList(pointList: ICoordinate[]) {
-     const basicZone = MathUtils.calcViewportBoundaries(pointList);
-     const newBoundary = {
-       x: basicZone.left,
-       y: basicZone.top,
-       width: basicZone.right - basicZone.left,
-       height: basicZone.bottom - basicZone.top,
-     } as IRect;
-     const pos = ImgPosUtils.getBasicRecPos(this.imgNode, newBoundary, this.size, 0.5);
-     if (pos) {
-       this.setCurrentPos(pos.currentPos);
-       this.setCurrentPosStorage(pos.currentPos);
-       const { imgInfo } = this;
-       const { innerZoom } = this.innerPosAndZoom;
-       if (imgInfo) {
-         this.setImgInfo({
-           ...imgInfo,
-           width: (imgInfo.width / innerZoom) * pos.innerZoom,
-           height: (imgInfo.height / innerZoom) * pos.innerZoom,
-         });
-       }
- 
-       // 需要加载下更改当前的 imgInfo
-       this.setZoom(pos.innerZoom);
- 
-       this.render();
-       this.renderBasicCanvas();
-     }
-   }
- 
-   public renderConnectionPoints() {
-     this.connectionPoints.forEach((point) => {
-       const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
- 
-       DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 4, { color: '#fff' });
-       DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 2, { color: '#000' });
-     });
-   }
- 
-   public render() {
-     try {
-       super.render();
-       if (this.loading === true) {
-         return;
-       }
-       this.renderDomInstance.render(
-         this.annotations.filter((v) => v.type === 'text' && v.annotation.position === 'rt').map((v) => v.annotation),
-       );
- 
-       this.annotations.forEach((annotation) => {
-         const style = this.getSpecificStyle(annotation.annotation);
-         const fontStyle = this.getFontStyle(annotation.annotation, style);
- 
-         switch (annotation.type) {
-           case 'rect': {
-             const rect: any = annotation.annotation;
-             const { hiddenText = false, isReference, hiddenRectSize = false } = rect;
-             const { zoom } = this;
-             const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
- 
-             const { x, y, width, height } = renderRect;
- 
-             if (rect.id === this.mouseHoverID || style.fill) {
-               const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
-               const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
-               DrawUtils.drawRectWithFill(this.canvas, renderRect, { color: fill }); // color 看后续是否要改 TODO
-             }
-             DrawUtils.drawRect(this.canvas, renderRect, {
-               ...style,
-               hiddenText: true,
-               ...this.getReferenceOptions(isReference),
-             });
- 
-             // 文本渲染
-             const { headerText, bottomText } = this.getRenderText(rect, rect?.hiddenText);
- 
-             if (headerText) {
-               // 框体上方展示
-               DrawUtils.drawText(this.canvas, { x, y: y - 6 }, headerText, {
-                 textMaxWidth: 300,
-                 ...fontStyle,
-               });
-             }
- 
-             // 框大小数值显示
-             const rectSize = `${Math.round(width / zoom)} * ${Math.round(height / zoom)}`;
-             const textSizeWidth = rectSize.length * 7;
- 
-             if (!hiddenText && !hiddenRectSize) {
-               DrawUtils.drawText(
-                 this.canvas,
-                 { x: x + width - textSizeWidth, y: y + height + 15 },
-                 rectSize,
-                 fontStyle,
-               );
-             }
- 
-             if (bottomText) {
-               const marginTop = 20;
-               const textWidth = Math.max(20, width - textSizeWidth);
-               DrawUtils.drawText(this.canvas, { x, y: y + height + marginTop }, rect.textAttribute, {
-                 textMaxWidth: textWidth,
-                 ...fontStyle,
-               });
-             }
- 
-             break;
-           }
-           case 'polygon': {
-             const polygon = annotation.annotation;
-             if (!(polygon?.pointList?.length >= 3)) {
-               return;
-             }
- 
-             const { lineType = ELineTypes.Line } = polygon;
-             const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
-             if (polygon.id === this.mouseHoverID || style.fill) {
-               const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
-               const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
-               DrawUtils.drawPolygonWithFill(this.canvas, renderPolygon, { color: fill, lineType });
-             }
- 
-             const polygonRenderOptions = {
-               ...style,
-               isClose: true,
-               ...this.getReferenceOptions(polygon?.isReference),
-               lineType,
-               strokeColor: style.stroke,
-             };
- 
-             let newPointList = [];
- 
-             // 是否展示关键点
-             if (polygon.showKeyPoint) {
-               newPointList = DrawUtils.drawPolygonWithKeyPoint(this.canvas, renderPolygon, polygonRenderOptions);
-             } else {
-               newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, polygonRenderOptions);
-             }
- 
-             const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
- 
-             // 是否展示方向
-             if (isShowDirection) {
-               let startPoint = renderPolygon[0];
-               let endPoint = MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]);
- 
-               if (lineType === ELineTypes.Curve) {
-                 const pos = Math.floor(SEGMENT_NUMBER / 2);
-                 startPoint = newPointList[pos];
-                 endPoint = newPointList[pos + 1];
-               }
-               DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
-                 color: style.stroke,
-                 thickness: style.thickness,
-               });
-               DrawUtils.drawCircle(this.canvas, renderPolygon[0], style.thickness + 6, {
-                 color: style.stroke,
-                 thickness: style.thickness,
-               });
-             }
- 
-             // 文本渲染
-             const { headerText, bottomText } = this.getRenderText(polygon, polygon?.hiddenText);
-             if (headerText) {
-               DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
-             }
-             if (bottomText) {
-               const endPoint = renderPolygon[renderPolygon.length - 1];
- 
-               DrawUtils.drawText(
-                 this.canvas,
-                 this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
-                 bottomText,
-                 fontStyle,
-               );
-             }
- 
-             break;
-           }
- 
-           case 'line': {
-             const line = annotation.annotation;
-             if (!(line?.pointList?.length >= 2)) {
-               return;
-             }
- 
-             const { lineType = ELineTypes.Line } = line;
-             const renderLine = AxisUtils.changePointListByZoom(
-               (line?.pointList as IPoint[]) ?? [],
-               this.zoom,
-               this.currentPos,
-             );
- 
-             const newPointList = DrawUtils.drawPolygon(this.canvas, renderLine, {
-               ...style,
-               ...this.getReferenceOptions(line?.isReference),
-               lineType,
-             });
- 
-             const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
- 
-             // 是否展示方向
-             if (isShowDirection) {
-               let startPoint = renderLine[0];
-               let endPoint = MathUtils.getLineCenterPoint([renderLine[0], renderLine[1]]);
- 
-               if (lineType === ELineTypes.Curve) {
-                 const pos = Math.floor(SEGMENT_NUMBER / 2);
-                 startPoint = newPointList[pos];
-                 endPoint = newPointList[pos + 1];
-               }
-               DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
-                 color: style.stroke,
-                 thickness: style.thickness,
-               });
-               DrawUtils.drawCircle(this.canvas, renderLine[0], style.thickness + 6, {
-                 color: style.stroke,
-                 thickness: style.thickness,
-               });
-             }
- 
-             // 文本渲染
-             const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
-             if (headerText) {
-               DrawUtils.drawText(this.canvas, this.appendOffset(renderLine[0]), headerText, fontStyle);
-             }
-             if (bottomText) {
-               const endPoint = renderLine[renderLine.length - 1];
- 
-               DrawUtils.drawText(
-                 this.canvas,
-                 this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
-                 bottomText,
-                 fontStyle,
-               );
-             }
-             break;
-           }
- 
-           case 'point': {
-             const point = annotation.annotation;
- 
-             const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
- 
-             const radius = style.radius ?? DEFAULT_RADIUS;
-             DrawUtils.drawCircle(this.canvas, renderPoint, radius, style);
- 
-             // 文本渲染
-             const { headerText, bottomText } = this.getRenderText(point, point?.hiddenText);
-             if (headerText) {
-               DrawUtils.drawText(
-                 this.canvas,
-                 { x: renderPoint.x + radius / 2, y: renderPoint.y - radius - 4 },
-                 headerText,
-                 {
-                   textAlign: 'center',
-                   ...fontStyle,
-                 },
-               );
-             }
-             if (bottomText) {
-               DrawUtils.drawText(
-                 this.canvas,
-                 this.appendOffset({ x: renderPoint.x + radius, y: renderPoint.y + radius + 24 }),
-                 bottomText,
-                 fontStyle,
-               );
-             }
-             break;
-           }
- 
-           case 'text': {
-             const textAnnotation = annotation.annotation;
-             const {
-               text,
-               x,
-               y,
-               textMaxWidth,
-               color = 'white',
-               background = 'rgba(0, 0, 0, 0.6)',
-               lineHeight = 25,
-               font = DEFAULT_FONT,
-               position,
-             } = textAnnotation;
-             const paddingTB = 10;
-             const paddingLR = 10;
- 
-             const renderPoint = AxisUtils.changePointByZoom({ x, y }, this.zoom, this.currentPos);
- 
-             const {
-               width,
-               height,
-               fontHeight = 0,
-             } = MathUtils.getTextArea(this.canvas, textAnnotation.text, textMaxWidth, font, lineHeight);
- 
-             // 定位在右上角 - 以 dom 元素展现
-             if (position === 'rt') {
-               break;
-             }
- 
-             // 字体背景
-             DrawUtils.drawRectWithFill(
-               this.canvas,
-               {
-                 x: renderPoint.x,
-                 y: renderPoint.y,
-                 width: width + paddingLR * 2,
-                 height: height + paddingTB * 2,
-                 id: '',
-                 sourceID: '',
-                 valid: true,
-                 textAttribute: '',
-                 attribute: '',
-                 isVisible: false
-               },
-               {
-                 color: background,
-               },
-             );
- 
-             DrawUtils.drawText(
-               this.canvas,
-               {
-                 x: renderPoint.x + paddingLR,
-                 y: renderPoint.y + fontHeight + paddingTB,
-               },
-               text,
-               {
-                 color,
-                 lineHeight,
-                 font,
-                 textMaxWidth,
-               },
-             );
-             break;
-           }
- 
-           default: {
-             //
-           }
-         }
-         annotation.annotation?.renderEnhance?.({
-           ctx: this.ctx,
-           canvas: this.canvas,
-           currentPos: this.currentPos,
-           zoom: this.zoom,
-           data: annotation,
-           toolInstance: this,
-         });
-       });
- 
-       this.renderConnectionPoints();
-     } catch (e) {
-       console.error('ViewOperation Render Error', e);
-     }
-   }
- }
- 
+import _ from 'lodash-es';
+import rgba from 'color-rgba';
+import DrawUtils from '@/utils/tool/DrawUtils';
+import AxisUtils from '@/utils/tool/AxisUtils';
+import RectUtils from '@/utils/tool/RectUtils';
+import PolygonUtils from '@/utils/tool/PolygonUtils';
+import MathUtils from '@/utils/MathUtils';
+import RenderDomClass from '@/utils/tool/RenderDomClass';
+import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '@/constant/tool';
+import { DEFAULT_TEXT_SHADOW, DEFAULT_TEXT_OFFSET, TEXT_ATTRIBUTE_OFFSET } from '@/constant/annotation';
+import ImgPosUtils from '@/utils/tool/ImgPosUtils';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
+
+const newScope = 3;
+const DEFAULT_RADIUS = 3;
+const DEFAULT_STROKE_COLOR = '#6371FF';
+
+type IViewOperationProps = {
+  style: IBasicStyle;
+  annotations: IAnnotationData[];
+} & IBasicToolOperationProps;
+
+export interface ISpecificStyle {
+  stroke: string;
+  thickness: number;
+  fill: string;
+  radius: number;
+}
+
+export interface IFontStyle {
+  fontFamily: string;
+  fontSize: number;
+}
+
+export default class ViewOperation extends BasicToolOperation {
+  public style: IBasicStyle = {};
+
+  public annotations: IAnnotationData[] = [];
+
+  private mouseHoverID?: string;
+
+  private loading: boolean; // 加载图片时不渲染图形
+
+  private renderDomInstance: RenderDomClass;
+
+  private connectionPoints: ICoordinate[] = [];
+
+  constructor(props: IViewOperationProps) {
+    super({ ...props, showDefaultCursor: true });
+    this.style = props.style ?? { stroke: DEFAULT_STROKE_COLOR, thickness: 3 };
+    this.annotations = props.annotations;
+    this.loading = false;
+    this.renderDomInstance = new RenderDomClass({
+      container: this.container,
+      height: this.canvas.height,
+    });
+  }
+
+  /**
+   * Get the connection points in annotationData.
+   * @param newAnnotations
+   */
+  public checkConnectionPoints(newAnnotations: IAnnotationData[] = this.annotations) {
+    const { connectionPoints } = MathUtils.getCollectionPointByAnnotationData(newAnnotations);
+    this.connectionPoints = connectionPoints;
+  }
+
+  public setLoading(loading: boolean) {
+    this.loading = loading;
+    this.render();
+  }
+
+  public onMouseLeave() {
+    super.onMouseLeave();
+    this.mouseHoverID = undefined;
+    this.emit('onChange', 'hover', []);
+  }
+
+  public onMouseDown(e: MouseEvent) {
+    if (super.onMouseDown(e) || this.forbidMouseOperation || !this.imgInfo) {
+      return true;
+    }
+
+    const newMouseSelectedID = this.mouseHoverID;
+    if (e.button === 0) {
+      let selectedID: any[] = [];
+      if (newMouseSelectedID) {
+        selectedID = [newMouseSelectedID];
+      }
+      this.emit('onChange', 'selected', selectedID);
+      this.render();
+    }
+  }
+
+  public onMouseMove(e: MouseEvent) {
+    if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
+      return;
+    }
+
+    const oldMouseHoverID = this.mouseHoverID;
+    const newMouseHoverID = this.getHoverRectID(e);
+    if (oldMouseHoverID !== newMouseHoverID) {
+      this.mouseHoverID = newMouseHoverID;
+      let hoverID: string[] = [];
+      if (newMouseHoverID) {
+        hoverID = [newMouseHoverID];
+      }
+
+      this.emit('onChange', 'hover', hoverID);
+      this.render();
+    }
+  }
+
+  // 获取当前 hoverID
+  public getHoverRectID = (e: MouseEvent) => {
+    const coordinate = this.getCoordinateUnderZoom(e);
+    const originCoordinate = AxisUtils.changePointByZoom(coordinate, 1 / this.zoom);
+    if (this.annotations?.length <= 0 || !this.annotations?.length) {
+      return;
+    }
+
+    /**
+     * 1. 优先级升序
+     * 2. 相同级别
+     */
+    let id = '';
+    let minArea = Number.MAX_SAFE_INTEGER;
+
+    for (let i = 0; i < this.annotations.length; i++) {
+      const annotation = this.annotations[i];
+      switch (annotation.type) {
+        case 'rect': {
+          const rect = annotation.annotation;
+          if (RectUtils.isInRect(coordinate, rect as any, newScope, this.zoom)) {
+            const area = rect.width * rect.height;
+            if (area < minArea) {
+              id = rect.id;
+              minArea = area;
+            }
+          }
+          break;
+        }
+
+        case 'polygon': {
+          const polygon = annotation.annotation;
+          if (PolygonUtils.isInPolygon(originCoordinate, polygon.pointList)) {
+            const area = PolygonUtils.getPolygonArea(polygon.pointList);
+            if (area < minArea) {
+              id = polygon.id;
+              minArea = area;
+            }
+          }
+          break;
+        }
+        default: {
+          //
+        }
+      }
+    }
+
+    return id;
+  };
+
+  public updateData(annotations: IAnnotationData[]) {
+    this.annotations = annotations;
+    this.render();
+  }
+
+  /**
+   * 获取当前结果的标注类型
+   * @param obj
+   * @returns
+   */
+  private getSpecificStyle(obj: Record<string, any>) {
+    const specificStyle = _.pick(obj, ['stroke', 'thickness', 'fill', 'radius']);
+
+    const newStyle = {
+      ...this.style,
+      ...specificStyle,
+    };
+
+    if (newStyle.stroke) {
+      // 兼容下方默认值 color 的携带
+      Object.assign(newStyle, {
+        color: newStyle.stroke,
+      });
+    }
+
+    return newStyle;
+  }
+
+  /**
+   * Get font rendering style
+   * @param obj
+   * @param style
+   * @returns
+   */
+  private getFontStyle(obj: Record<string, any>, style: ISpecificStyle) {
+    const fontSize = obj?.fontSize ?? 14;
+    const fontFamily = obj?.fontFamily ?? 'Arial';
+    return {
+      ...DEFAULT_TEXT_SHADOW,
+      color: style.stroke,
+      font: `normal normal 600 ${fontSize}px ${fontFamily}`,
+    };
+  }
+
+  /**
+   *  Append Draw offset
+   */
+  public appendOffset({ x, y }: ICoordinate) {
+    return { x: x + DEFAULT_TEXT_OFFSET.offsetX, y: y + DEFAULT_TEXT_OFFSET.offsetY };
+  }
+
+  /**
+   * 获取当前展示的文本
+   * @param result
+   * @returns
+   */
+  public getRenderText(result: any, hiddenText = false) {
+    let headerText = '';
+    let bottomText = '';
+
+    if (!result || hiddenText === true) {
+      return { headerText, bottomText };
+    }
+
+    if (result?.order) {
+      headerText = `${result.order}`;
+    }
+
+    if (result?.label) {
+      if (headerText) {
+        headerText = `${headerText}_${result.label}`;
+      } else {
+        headerText = `${result.label}`;
+      }
+    }
+
+    if (result?.attribute) {
+      if (headerText) {
+        headerText = `${headerText}  ${result.attribute}`;
+      } else {
+        headerText = `${result.attribute}`;
+      }
+    }
+
+    if (result?.textAttribute) {
+      bottomText = result?.textAttribute;
+    }
+    return { headerText, bottomText };
+  }
+
+  public getReferenceOptions(isReference?: boolean): { lineCap?: CanvasLineCap; lineDash?: number[] } {
+    return isReference ? { lineCap: 'butt', lineDash: [20, 20] } : {};
+  }
+
+  /**
+   * Focus on the selected lang.
+   * @param pointList
+   */
+  public focusPositionByPointList(pointList: ICoordinate[]) {
+    const basicZone = MathUtils.calcViewportBoundaries(pointList);
+    const newBoundary = {
+      x: basicZone.left,
+      y: basicZone.top,
+      width: basicZone.right - basicZone.left,
+      height: basicZone.bottom - basicZone.top,
+    } as IRect;
+    const pos = ImgPosUtils.getBasicRecPos(this.imgNode, newBoundary, this.size, 0.5);
+    if (pos) {
+      this.setCurrentPos(pos.currentPos);
+      this.setCurrentPosStorage(pos.currentPos);
+      const { imgInfo } = this;
+      const { innerZoom } = this.innerPosAndZoom;
+      if (imgInfo) {
+        this.setImgInfo({
+          ...imgInfo,
+          width: (imgInfo.width / innerZoom) * pos.innerZoom,
+          height: (imgInfo.height / innerZoom) * pos.innerZoom,
+        });
+      }
+
+      // 需要加载下更改当前的 imgInfo
+      this.setZoom(pos.innerZoom);
+
+      this.render();
+      this.renderBasicCanvas();
+    }
+  }
+
+  public renderConnectionPoints() {
+    this.connectionPoints.forEach((point) => {
+      const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
+
+      DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 4, { color: '#fff' });
+      DrawUtils.drawCircleWithFill(this.canvas, renderPoint, 2, { color: '#000' });
+    });
+  }
+
+  public render() {
+    try {
+      super.render();
+      if (this.loading === true) {
+        return;
+      }
+      this.renderDomInstance.render(
+        this.annotations.filter((v) => v.type === 'text' && v.annotation.position === 'rt').map((v) => v.annotation),
+      );
+
+      this.annotations.forEach((annotation) => {
+        const style = this.getSpecificStyle(annotation.annotation);
+        const fontStyle = this.getFontStyle(annotation.annotation, style);
+
+        switch (annotation.type) {
+          case 'rect': {
+            const rect: any = annotation.annotation;
+            const { hiddenText = false, isReference, hiddenRectSize = false } = rect;
+            const { zoom } = this;
+            const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
+
+            const { x, y, width, height } = renderRect;
+
+            if (rect.id === this.mouseHoverID || style.fill) {
+              const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
+              const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
+              DrawUtils.drawRectWithFill(this.canvas, renderRect, { color: fill }); // color 看后续是否要改 TODO
+            }
+            DrawUtils.drawRect(this.canvas, renderRect, {
+              ...style,
+              hiddenText: true,
+              ...this.getReferenceOptions(isReference),
+            });
+
+            // 文本渲染
+            const { headerText, bottomText } = this.getRenderText(rect, rect?.hiddenText);
+
+            if (headerText) {
+              // 框体上方展示
+              DrawUtils.drawText(this.canvas, { x, y: y - 6 }, headerText, {
+                textMaxWidth: 300,
+                ...fontStyle,
+              });
+            }
+
+            // 框大小数值显示
+            const rectSize = `${Math.round(width / zoom)} * ${Math.round(height / zoom)}`;
+            const textSizeWidth = rectSize.length * 7;
+
+            if (!hiddenText && !hiddenRectSize) {
+              DrawUtils.drawText(
+                this.canvas,
+                { x: x + width - textSizeWidth, y: y + height + 15 },
+                rectSize,
+                fontStyle,
+              );
+            }
+
+            if (bottomText) {
+              const marginTop = 20;
+              const textWidth = Math.max(20, width - textSizeWidth);
+              DrawUtils.drawText(this.canvas, { x, y: y + height + marginTop }, rect.textAttribute, {
+                textMaxWidth: textWidth,
+                ...fontStyle,
+              });
+            }
+
+            break;
+          }
+          case 'polygon': {
+            const polygon = annotation.annotation;
+            if (!(polygon?.pointList?.length >= 3)) {
+              return;
+            }
+
+            const { lineType = ELineTypes.Line } = polygon;
+            const renderPolygon = AxisUtils.changePointListByZoom(polygon?.pointList ?? [], this.zoom, this.currentPos);
+            if (polygon.id === this.mouseHoverID || style.fill) {
+              const fillArr = rgba(style?.fill ?? style?.stroke ?? DEFAULT_STROKE_COLOR);
+              const fill = `rgba(${fillArr[0]}, ${fillArr[1]}, ${fillArr[2]},${fillArr[3] * 0.8})`;
+              DrawUtils.drawPolygonWithFill(this.canvas, renderPolygon, { color: fill, lineType });
+            }
+
+            const polygonRenderOptions = {
+              ...style,
+              isClose: true,
+              ...this.getReferenceOptions(polygon?.isReference),
+              lineType,
+              strokeColor: style.stroke,
+            };
+
+            let newPointList = [];
+
+            // 是否展示关键点
+            if (polygon.showKeyPoint) {
+              newPointList = DrawUtils.drawPolygonWithKeyPoint(this.canvas, renderPolygon, polygonRenderOptions);
+            } else {
+              newPointList = DrawUtils.drawPolygon(this.canvas, renderPolygon, polygonRenderOptions);
+            }
+
+            const isShowDirection = polygon?.showDirection === true && polygon?.pointList?.length > 2;
+
+            // 是否展示方向
+            if (isShowDirection) {
+              let startPoint = renderPolygon[0];
+              let endPoint = MathUtils.getLineCenterPoint([renderPolygon[0], renderPolygon[1]]);
+
+              if (lineType === ELineTypes.Curve) {
+                const pos = Math.floor(SEGMENT_NUMBER / 2);
+                startPoint = newPointList[pos];
+                endPoint = newPointList[pos + 1];
+              }
+              DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
+                color: style.stroke,
+                thickness: style.thickness,
+              });
+              DrawUtils.drawCircle(this.canvas, renderPolygon[0], style.thickness + 6, {
+                color: style.stroke,
+                thickness: style.thickness,
+              });
+            }
+
+            // 文本渲染
+            const { headerText, bottomText } = this.getRenderText(polygon, polygon?.hiddenText);
+            if (headerText) {
+              DrawUtils.drawText(this.canvas, this.appendOffset(renderPolygon[0]), headerText, fontStyle);
+            }
+            if (bottomText) {
+              const endPoint = renderPolygon[renderPolygon.length - 1];
+
+              DrawUtils.drawText(
+                this.canvas,
+                this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
+                bottomText,
+                fontStyle,
+              );
+            }
+
+            break;
+          }
+
+          case 'line': {
+            const line = annotation.annotation;
+            if (!(line?.pointList?.length >= 2)) {
+              return;
+            }
+
+            const { lineType = ELineTypes.Line } = line;
+            const renderLine = AxisUtils.changePointListByZoom(
+              (line?.pointList as IPoint[]) ?? [],
+              this.zoom,
+              this.currentPos,
+            );
+
+            const newPointList = DrawUtils.drawPolygon(this.canvas, renderLine, {
+              ...style,
+              ...this.getReferenceOptions(line?.isReference),
+              lineType,
+            });
+
+            const isShowDirection = line?.showDirection === true && line?.pointList?.length > 2;
+
+            // 是否展示方向
+            if (isShowDirection) {
+              let startPoint = renderLine[0];
+              let endPoint = MathUtils.getLineCenterPoint([renderLine[0], renderLine[1]]);
+
+              if (lineType === ELineTypes.Curve) {
+                const pos = Math.floor(SEGMENT_NUMBER / 2);
+                startPoint = newPointList[pos];
+                endPoint = newPointList[pos + 1];
+              }
+              DrawUtils.drawArrowByCanvas(this.canvas, startPoint, endPoint, {
+                color: style.stroke,
+                thickness: style.thickness,
+              });
+              DrawUtils.drawCircle(this.canvas, renderLine[0], style.thickness + 6, {
+                color: style.stroke,
+                thickness: style.thickness,
+              });
+            }
+
+            // 文本渲染
+            const { headerText, bottomText } = this.getRenderText(line, line?.hiddenText);
+            if (headerText) {
+              DrawUtils.drawText(this.canvas, this.appendOffset(renderLine[0]), headerText, fontStyle);
+            }
+            if (bottomText) {
+              const endPoint = renderLine[renderLine.length - 1];
+
+              DrawUtils.drawText(
+                this.canvas,
+                this.appendOffset({ x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y }),
+                bottomText,
+                fontStyle,
+              );
+            }
+            break;
+          }
+
+          case 'point': {
+            const point = annotation.annotation;
+
+            const renderPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
+
+            const radius = style.radius ?? DEFAULT_RADIUS;
+            DrawUtils.drawCircle(this.canvas, renderPoint, radius, style);
+
+            // 文本渲染
+            const { headerText, bottomText } = this.getRenderText(point, point?.hiddenText);
+            if (headerText) {
+              DrawUtils.drawText(
+                this.canvas,
+                { x: renderPoint.x + radius / 2, y: renderPoint.y - radius - 4 },
+                headerText,
+                {
+                  textAlign: 'center',
+                  ...fontStyle,
+                },
+              );
+            }
+            if (bottomText) {
+              DrawUtils.drawText(
+                this.canvas,
+                this.appendOffset({ x: renderPoint.x + radius, y: renderPoint.y + radius + 24 }),
+                bottomText,
+                fontStyle,
+              );
+            }
+            break;
+          }
+
+          case 'text': {
+            const textAnnotation = annotation.annotation;
+            const {
+              text,
+              x,
+              y,
+              textMaxWidth,
+              color = 'white',
+              background = 'rgba(0, 0, 0, 0.6)',
+              lineHeight = 25,
+              font = DEFAULT_FONT,
+              position,
+            } = textAnnotation;
+            const paddingTB = 10;
+            const paddingLR = 10;
+
+            const renderPoint = AxisUtils.changePointByZoom({ x, y }, this.zoom, this.currentPos);
+
+            const {
+              width,
+              height,
+              fontHeight = 0,
+            } = MathUtils.getTextArea(this.canvas, textAnnotation.text, textMaxWidth, font, lineHeight);
+
+            // 定位在右上角 - 以 dom 元素展现
+            if (position === 'rt') {
+              break;
+            }
+
+            // 字体背景
+            DrawUtils.drawRectWithFill(
+              this.canvas,
+              {
+                x: renderPoint.x,
+                y: renderPoint.y,
+                width: width + paddingLR * 2,
+                height: height + paddingTB * 2,
+                id: '',
+                sourceID: '',
+                valid: true,
+                textAttribute: '',
+                attribute: '',
+                isVisible: false,
+              },
+              {
+                color: background,
+              },
+            );
+
+            DrawUtils.drawText(
+              this.canvas,
+              {
+                x: renderPoint.x + paddingLR,
+                y: renderPoint.y + fontHeight + paddingTB,
+              },
+              text,
+              {
+                color,
+                lineHeight,
+                font,
+                textMaxWidth,
+              },
+            );
+            break;
+          }
+
+          default: {
+            //
+          }
+        }
+        annotation.annotation?.renderEnhance?.({
+          ctx: this.ctx,
+          canvas: this.canvas,
+          currentPos: this.currentPos,
+          zoom: this.zoom,
+          data: annotation,
+          toolInstance: this,
+        });
+      });
+
+      this.renderConnectionPoints();
+    } catch (e) {
+      console.error('ViewOperation Render Error', e);
+    }
+  }
+}

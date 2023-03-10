@@ -4,6 +4,8 @@ import alias from '@rollup/plugin-alias';
 import resolve from '@rollup/plugin-node-resolve';
 import dts from 'rollup-plugin-dts';
 import path from 'path';
+import svgr from '@svgr/rollup';
+import url from 'rollup-plugin-url';
 // import postcss from 'rollup-plugin-postcss';
 // import sass from 'sass';
 // import url from 'postcss-url';
@@ -102,7 +104,14 @@ export default () => {
         preserveModules: true,
         preserveModulesRoot: 'src',
       },
-      plugins: [...commonPlugin, esbuildPlugin()],
+      plugins: [
+        ...commonPlugin,
+        esbuildPlugin(),
+        url(),
+        svgr({
+          svgo: false,
+        }),
+      ],
       external: ['react', 'antd'],
     },
     {

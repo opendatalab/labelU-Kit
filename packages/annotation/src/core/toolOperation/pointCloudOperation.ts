@@ -12,6 +12,7 @@ import { COLORS_ARRAY } from '@/constant/style';
 import AttributeUtils from '@/utils/tool/AttributeUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import EKeyCode from '@/constant/keyCode';
+import _ from 'lodash-es';
 import utils from '../pointCloud/uitils';
 import { PointCloud } from '../pointCloud';
 import type { PointCloudIProps } from '../pointCloud';
@@ -324,6 +325,16 @@ class PointCloudOperation extends PointCloud {
     };
   }
 
+  public setSelectIdEmptyWhenExistInArr(ids: string[]) {
+    if (_.isArray(ids)) {
+      for (const id of ids) {
+        if (id === this.selectedId) {
+          this.setSelectedId('');
+        }
+      }
+    }
+  }
+
   // add box in scene
   public addBoxInSense = (
     rectPoints: ICoordinate[],
@@ -339,8 +350,12 @@ class PointCloudOperation extends PointCloud {
       isVisible: true,
       attribute,
     };
+
+    this.setTransparencyByName(`${this.selectedId}box`, 0);
+
     const newBoxList = this.addBoxInfoIntoBoxList(boxList, boxInfo);
     this.setBoxList(newBoxList);
+    this.setSelectedId(boxInfo.id);
     this.emit('savePcResult', newBoxList);
     return boxInfo;
   };
@@ -423,14 +438,13 @@ class PointCloudOperation extends PointCloud {
           1: item.y,
         };
       });
-      if (this.selectedId) {
+      if (this.selectedId === paramId) {
         this.setTransparencyByName(`${this.selectedId}box`, 0);
       } else {
         opacity = 0;
       }
       const boxMesh = this.createBox(sharpRect, zInfo, color, opacity);
       boxMesh.name = `${boxInfo.id}box`;
-      this.setSelectedId(boxInfo.id);
       this.scene.add(boxMesh);
       if (this.showSetting.isShowDirection) {
         const boxArrowMesh = this.getBoxArrowByRectAndZinfo(rectPoints, zInfo, color);
@@ -783,8 +797,6 @@ class PointCloudOperation extends PointCloud {
       }
       this.clearPointCloud();
       const newPoints = new THREE.Points(highLightData.geometry, points.material);
-      // 更新点云缓存
-      // this.cacheInstance.setInstance(src, newPoints);
       newPoints.name = this.pointCloudObjectName;
       this.pointsUuid = newPoints.uuid;
       this.renderPointCloud(newPoints);
@@ -795,11 +807,13 @@ class PointCloudOperation extends PointCloud {
 
   public textLookAtCamera() {
     const { boxList } = this;
-    const camaraPostion = this.camera.position;
     if (Array.isArray(boxList) && boxList.length > 0) {
       for (let i = 0; i < boxList.length; i++) {
         const tmpTextMesh = this.scene.getObjectByName(`${boxList[i].id}attribute`);
-        tmpTextMesh?.lookAt(camaraPostion);
+        if (tmpTextMesh) {
+          tmpTextMesh.lookAt(this.camera.position);
+          tmpTextMesh.up.set(0, 0, 1);
+        }
       }
     }
   }

@@ -29,7 +29,7 @@ const FooterTips: FC<Iprops> = ({ currentToolName }) => {
 
   if (isPcTool) {
     content = (
-      <div className={`${prefix}-sidebar`}>
+      <div className='tool-set-modal'>
         <PcSet updatePopoverStatus={updatePopoverStatus} />
       </div>
     );
@@ -37,7 +37,7 @@ const FooterTips: FC<Iprops> = ({ currentToolName }) => {
   }
 
   if (isImgLabelTool) {
-    content = <div className={`${prefix}-sidebar`}>{imageStyleSet}</div>;
+    content = <div className='tool-set-modal'>{imageStyleSet}</div>;
     textInContent = '图片调整';
   }
 

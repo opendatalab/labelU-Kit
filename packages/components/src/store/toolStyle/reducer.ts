@@ -12,7 +12,8 @@ const initialState: ToolStyleState = {
   attributeColor: ToolStyleUtils.getAttributeColors(),
   lineColor: ToolStyleUtils.getDefaultToolLineColors(),
   attributeLineColor: [NULL_COLOR].concat(COLORS_ARRAY),
-  imgListCollapse:true
+  imgListCollapse: true,
+  resultCollapse: true,
 };
 
 export function toolStyleReducer(
@@ -46,11 +47,18 @@ export function toolStyleReducer(
       };
     }
 
-    case TOOL_STYLE_ACTIONS.UPDATE_COLLAPSE_STATUS:{
-      return{
+    case TOOL_STYLE_ACTIONS.UPDATE_COLLAPSE_STATUS: {
+      return {
         ...state,
-        ...action.payload
-      }
+        ...action.payload,
+      };
+    }
+
+    case TOOL_STYLE_ACTIONS.UPDATE_RESULT_COLLAPSE_STATUS: {
+      return {
+        ...state,
+        ...action.payload,
+      };
     }
 
     default:

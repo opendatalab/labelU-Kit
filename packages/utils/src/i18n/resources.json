@@ -105,6 +105,8 @@
     "lineTool": "LineTool",
     "pointTool": "PointTool",
     "textTool": "TextTool",
+    "revocation": "撤回 Ctrl + Z",
+    "restore": "重做 Ctrl+Shift+Z",
     "Speed": "Speed",
     "PlayPause": "Play / Pause",
     "FastForward": "Fast Forward",
@@ -173,7 +175,8 @@
     "TopLook": "Top view",
     "pointSize": "size of point",
     "rangeHeight": "range of height",
-    "labelRedius": "radius of label"
+    "labelRedius": "radius of label",
+    "reset": "reset"
   },
   "cn": {
     "TextInput": "文本输入",
@@ -281,6 +284,8 @@
     "lineTool": "线条",
     "pointTool": "标点",
     "textTool": "文本",
+    "revocation": "撤回 Ctrl + Z",
+    "restore": "重做 Ctrl+Shift+Z",
     "Speed": "倍速",
     "PlayPause": "播放/暂停",
     "FastForward": "快进",
@@ -349,6 +354,7 @@
     "TopLook": "俯视视角",
     "pointSize": "点大小",
     "rangeHeight": "高度显示范围",
-    "labelRedius": "标注范围半径"
+    "labelRedius": "标注范围半径",
+    "reset": "重置"
   }
 }

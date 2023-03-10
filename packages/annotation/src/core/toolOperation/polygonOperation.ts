@@ -210,6 +210,11 @@ class PolygonOperation extends BasicToolOperation {
     if (selectedID) {
       this.selectedID = selectedID;
     }
+    const selectedPolygon = polygonList.filter((polygon: IPolygonData) => polygon.id === selectedID);
+    if (Array.isArray(selectedPolygon) && selectedPolygon.length > 0) {
+      this.setDefaultAttribute(selectedPolygon[0].attribute);
+    }
+
     this.render();
   }
 
@@ -1296,11 +1301,12 @@ class PolygonOperation extends BasicToolOperation {
 
   public onMouseMove(e: MouseEvent) {
     e.preventDefault();
+
     if (super.onMouseMove(e) || this.forbidMouseOperation || !this.imgInfo) {
       return;
     }
 
-    if (this.selectedID && this.dragInfo) {
+    if (this.selectedID && this.dragInfo && this.hoverEdgeIndex < 0) {
       this.onDragMove(e);
       return;
     }
@@ -1368,7 +1374,7 @@ class PolygonOperation extends BasicToolOperation {
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return undefined;
     }
-
+    this.setCustomCursor('none');
     if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
       // 拖拽停止
       const { originPolygon } = this.dragInfo;

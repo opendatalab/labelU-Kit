@@ -1,4 +1,4 @@
-import { Col, Row, Slider, Input, message as Message } from 'antd/es';
+import { Col, Row, Slider, Input, message as Message, Popover } from 'antd/es';
 import { connect } from 'react-redux';
 import React, { FC, useContext, useMemo, useState } from 'react';
 
@@ -7,6 +7,8 @@ import { PointCloudContext } from '@/components/pointCloudView/PointCloudContext
 import { useTranslation } from 'react-i18next';
 import Regex from '@/constant/regex';
 import closeIcon from '@/assets/common/close.svg';
+import notice from '@/assets/common/notice.svg';
+import { PcZRange } from '@label-u/annotation';
 
 interface Iprops {
   updatePopoverStatus: () => void;
@@ -43,6 +45,9 @@ const PcSet: FC<Iprops> = ({ updatePopoverStatus }) => {
       },
       {
         name: 'rangeHeight',
+        nameRight: () => {
+          pCtx.setZrange(PcZRange as [number, number]);
+        },
         min: -10,
         max: 30,
         step: 1,
@@ -77,12 +82,25 @@ const PcSet: FC<Iprops> = ({ updatePopoverStatus }) => {
           />
         </Col>
       </Row>
-      <div className='imgAttributeController'>
+      <div className='pcSettingItem'>
         <Row className='tools' style={{ padding: '0px 0' }}>
           <Col span={24}>
-            <span className='singleTool'>
+            <div className='singleTool'>
               <span className='toolName'>{t('labelRedius')}</span>
-            </span>
+              <Popover
+                id='pcSettingPopover'
+                placement='right'
+                content={
+                  <>
+                    <p>支持输入多个范围半径，以</p>
+                    <p>分号分割。如“6；10；16”</p>
+                  </>
+                }
+                trigger='hover'
+              >
+                <img className='noticeImg' src={notice} />
+              </Popover>
+            </div>
           </Col>
         </Row>
         <Row>
@@ -102,17 +120,33 @@ const PcSet: FC<Iprops> = ({ updatePopoverStatus }) => {
       </div>
 
       {imgAttributeSliderItems.map((info: any, index: number) => (
-        <div className='imgAttributeController' key={`option_${index}`}>
+        <div className='pcSettingItem' key={`option_${index}`}>
           <Row className='tools' style={{ padding: '0px 0' }}>
             <Col span={24}>
               <span className='singleTool'>
-                <span className='toolName'>{t(info.name)}</span>
+                <span className='toolName'>
+                  {t(info.name)}
+                  {info.nameRight ? (
+                    <span
+                      className='resetAction'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        info.nameRight();
+                      }}
+                    >
+                      {t('reset')}
+                    </span>
+                  ) : (
+                    ''
+                  )}
+                </span>
               </span>
             </Col>
           </Row>
           <Row>
             <Col span={24}>
               <Slider
+                key={`${info.value[0]}:${info.value[1]}`}
                 range={info.range}
                 min={info.min}
                 max={info.max}

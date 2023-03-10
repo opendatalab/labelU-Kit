@@ -1,6 +1,6 @@
 import { AppProps, store } from '@/index';
 import { LabelUContext, useDispatch } from '@/store/ctx';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import React, { useEffect, useRef, useState } from 'react';
 import { message } from 'antd/es';
 import { connect } from 'react-redux';

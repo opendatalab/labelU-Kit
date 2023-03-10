@@ -2,25 +2,26 @@
  * 查看模式 - 严格配置要求
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import RectUtils from '@/utils/tool/RectUtils';
 import TagUtils from '@/utils/tool/TagUtils';
 import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
 import { EToolName } from '../../constant/tool';
-import { IPolygonData } from '../../types/tool/polygon';
+import type { IPolygonData } from '../../types/tool/polygon';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 
 const TEXT_ATTRIBUTE_OFFSET = {
   x: 8,
   y: 26,
 };
 interface ICheckResult {
-  result: Array<IPolygonData | IRect | ITagResult>;
+  result: (IPolygonData | IRect | ITagResult)[];
   toolName: EToolName;
   config: string[];
 }
@@ -61,9 +62,9 @@ class CheckOperation extends BasicToolOperation {
     }
 
     const newMouseSelectedID = this.mouseHoverID;
-    const currentShowList = (this.resultList.find((v) => v.toolName === EToolName.Rect)?.result ?? []) as Array<
-      IRect & { isSelected: boolean }
-    >;
+    const currentShowList = (this.resultList.find((v) => v.toolName === EToolName.Rect)?.result ?? []) as (IRect & {
+      isSelected: boolean;
+    })[];
 
     if (e.button === 0) {
       let selectedID = [newMouseSelectedID];
@@ -146,7 +147,7 @@ class CheckOperation extends BasicToolOperation {
 
   public drawPolygon(polygonList: IPolygonData[], config: any) {
     polygonList?.forEach((polygon) => {
-      const toolColor = this.getColor(polygon.attribute, config);
+      const toolColor = this.getColor(polygon.attribute);
       const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
       let thickness = this.style?.width ?? 2;
       if (this.hoverID.includes(polygon.id)) {
@@ -203,13 +204,13 @@ class CheckOperation extends BasicToolOperation {
     });
   }
 
-  public drawRect(rectList: IRect[], config: any) {
+  public drawRect(rectList: IRect[]) {
     rectList?.forEach((rect) => {
       let thickness = 1;
       if (this.hoverID.includes(rect.id)) {
         thickness = 3;
       }
-      const toolColor = this.getColor(rect.attribute, config);
+      const toolColor = this.getColor(rect.attribute);
       const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
       DrawUtils.drawRect(this.canvas, renderRect, {
         color: rect?.valid ? toolColor.valid.stroke : toolColor.invalid.stroke,
@@ -251,7 +252,7 @@ class CheckOperation extends BasicToolOperation {
     this.resultList?.forEach((item: any) => {
       switch (item?.toolName) {
         case EToolName.Rect:
-          this.drawRect(item.result, CommonToolUtils.jsonParser(item.config));
+          this.drawRect(item.result);
           break;
         case EToolName.Polygon:
           this.drawPolygon(item.result, CommonToolUtils.jsonParser(item.config));

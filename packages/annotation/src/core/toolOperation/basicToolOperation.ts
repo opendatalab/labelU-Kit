@@ -1,4 +1,4 @@
-import { isNumber } from 'lodash';
+import { isNumber } from 'lodash-es';
 import localforage from 'localforage';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
@@ -923,7 +923,7 @@ class BasicToolOperation extends EventListener {
         }
 
         this.isDrag = false;
-        this.container.style.cursor = 'grabbing';
+        this.container.style.cursor = 'grab';
         this.forbidCursorLine = true;
         this.renderBasicCanvas();
 
@@ -1277,8 +1277,8 @@ class BasicToolOperation extends EventListener {
   }
 
   /** 获取当前属性颜色 */
-  public getColor(attribute = '', config = this.config) {
-    if (config?.attributeConfigurable === true && this.style.attributeColor) {
+  public getColor(attribute = '') {
+    if (this.style.attributeColor) {
       const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
       return this.style.attributeColor[attributeIndex];
     }

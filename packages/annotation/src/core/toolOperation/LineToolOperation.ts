@@ -4,14 +4,15 @@
  * @date 2022-06-02
  */
 
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { DEFAULT_FONT, ELineColor, ELineTypes, ETextType, EToolName } from '@/constant/tool';
 import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
-import { LineToolConfig } from '@/interface/conbineTool';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { LineToolConfig } from '@/interface/conbineTool';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 import LineToolUtils from '../../utils/tool/LineToolUtils';
 import {
   isInPolygon,
@@ -48,7 +49,7 @@ export const POINT_ACTIVE_RADIUS = 5;
 /** 内侧圆的半径 */
 export const INNER_POINT_RADIUS = 2;
 
-interface ILineOperationProps extends IBasicToolOperationProps {}
+type ILineOperationProps = IBasicToolOperationProps;
 
 class LineToolOperation extends BasicToolOperation {
   /**
@@ -70,10 +71,10 @@ class LineToolOperation extends BasicToolOperation {
       order = existLine.order;
     } else {
       // order = this.nextOrder();
-      order = CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList) +1
+      order = CommonToolUtils.getAllToolsMaxOrder(this.lineList, this.prevResultList) + 1;
     }
     const color = this.getLineColorByAttribute({ attribute: this.defaultAttribute, valid: !!isActiveLineValid });
-    activeLine.map((point) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
+    activeLine.map((point: ILinePoint) => Object.assign(point, this.coordUtils.getRenderCoord(point)));
     this.updateActiveArea();
     this.drawLine(activeLine, coord, color, true, true);
     this.drawLineNumber(activeLine[0], order, color, '', this.defaultAttribute, isActiveLineValid);
@@ -530,7 +531,7 @@ class LineToolOperation extends BasicToolOperation {
    * @param showPoint 是否显示点
    */
   public drawLine = (
-    points: Array<ILinePoint | ICoordinate>,
+    points: (ILinePoint | ICoordinate)[],
     cursor: ICoordinate | undefined,
     color: string,
     showPoint: boolean = false,
@@ -768,7 +769,7 @@ class LineToolOperation extends BasicToolOperation {
   public findHoverLine(coord: ICoordinate) {
     const line = _.cloneDeep(this.lineList)
       .reverse()
-      .find(({ pointList }) => {
+      .find(({ pointList }: any) => {
         const list = pointList ? this.getPointList(pointList) : [];
         const scope = this.getLineWidthScope();
         return list.some((point, index) => {
@@ -794,7 +795,7 @@ class LineToolOperation extends BasicToolOperation {
 
     _.cloneDeep(this.lineList)
       .reverse()
-      .forEach(({ pointList, id }) => {
+      .forEach(({ pointList, id }: any) => {
         if (id === this.selectedID || !pointList || pointList?.length < 2) {
           return;
         }
@@ -1425,7 +1426,7 @@ class LineToolOperation extends BasicToolOperation {
       id,
       valid: this.isLineValid,
       // order: this.nextOrder(),
-      order :CommonToolUtils.getAllToolsMaxOrder(this.lineList,this.prevResultList) +1,
+      order: CommonToolUtils.getAllToolsMaxOrder(this.lineList, this.prevResultList) + 1,
       isVisible: true,
     };
     newLine.attribute = this.defaultAttribute;

@@ -1,4 +1,4 @@
-import { TMatrix4Tuple, TMatrix14Tuple, TMatrix13Tuple } from './types/pointCloud';
+import type { TMatrix4Tuple, TMatrix14Tuple, TMatrix13Tuple } from './types/pointCloud';
 
 const flat = (acc: number[], cur: number[]) => {
   return [...acc, ...cur];
