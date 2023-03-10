@@ -39,6 +39,7 @@ const DrageModel = (props: Iprops, ref: any) => {
   };
 
   const handleCancel = (e: any) => {
+    props?.cancelEvent?.();
     setIsVisible(false);
   };
 

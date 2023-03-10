@@ -379,13 +379,16 @@ export const usePointCloudViews = () => {
     if (box.id) {
       let zInfo = box.zInfo || mainViewInstance?.getSensesPointZAxisInPolygon(box.rect);
       if (zInfo) {
-        mainViewInstance?.doUpateboxInScene(
+        let newBoxList = mainViewInstance?.doUpateboxInScene(
           box.rect,
           zInfo,
           box.attribute,
           box.id,
           box.textAttribute,
         );
+
+        mainViewInstance?.emit('savePcResult', newBoxList);
+
         mainViewInstance?.controls.update();
         mainViewInstance?.render();
       }
@@ -668,14 +671,22 @@ export const usePointCloudViews = () => {
     if (currentData.result) {
       const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
       const polygonList = PointCloudUtils.getPolygonListFromResultList(currentData.result);
-
+      let boxList: IPointCloudBox[] = [];
       // Add Init Box
       boxParamsList.forEach((v: IPointCloudBox) => {
         // mainViewInstance?.generateBox(v);
         if (v.isVisible) {
-          mainViewInstance?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id, v.textAttribute);
+          boxList = mainViewInstance?.doUpateboxInScene(
+            v.rect,
+            v.zInfo,
+            v.attribute,
+            v.id,
+            v.textAttribute,
+          );
         }
       });
+
+      mainViewInstance?.emit('savePcResult', boxList);
 
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);

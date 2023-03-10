@@ -453,7 +453,8 @@ class PointCloudOperation extends PointCloud {
       }
       this.addAttributeAndOrder(boxInfo, attribute, color);
     }
-    this.emit('savePcResult', newBoxList);
+
+    return newBoxList;
   };
 
   // get box order
@@ -708,7 +709,7 @@ class PointCloudOperation extends PointCloud {
       this.emit('savePcResult', newBoxList);
       setTimeout(() => {
         this.emit('deleteBoxes', [this.selectedId]);
-      }, 100);
+      }, 50);
     }
   }
 

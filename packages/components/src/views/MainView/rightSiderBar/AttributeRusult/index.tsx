@@ -211,7 +211,7 @@ const AttributeRusult: FC<IProps> = ({
       dispatch(UpdateImgList(imgList));
       setTimeout(() => {
         ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
-      }, 100);
+      }, 50);
       updateCanvasView(oldImgResult);
     }
   };
@@ -260,7 +260,7 @@ const AttributeRusult: FC<IProps> = ({
       dispatch(UpdateImgList(imgList));
       setTimeout(() => {
         ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
-      }, 100);
+      }, 50);
       updateCanvasView(oldImgResult);
     }
   };
@@ -319,7 +319,7 @@ const AttributeRusult: FC<IProps> = ({
       dispatch(UpdateImgList(imgList));
       setTimeout(() => {
         ptCtx?.mainViewInstance?.emit('deleteBoxes', deleteBoxArray);
-      }, 100);
+      }, 50);
       updateCanvasView(newImgResult);
     }
   };
@@ -363,7 +363,7 @@ const AttributeRusult: FC<IProps> = ({
     dispatch(UpdateImgList(imgList));
     setTimeout(() => {
       ptCtx?.mainViewInstance?.emit('deleteBoxes', deleteBoxArray);
-    }, 100);
+    }, 50);
     updateCanvasView(newImageResult);
   };
 
@@ -455,6 +455,11 @@ const AttributeRusult: FC<IProps> = ({
         width={333}
         okWord='确认'
         cancelWord='取消'
+        cancelEvent={() => {
+          setTimeout(() => {
+            ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
+          }, 50);
+        }}
         content={content}
       />
       <Collapse

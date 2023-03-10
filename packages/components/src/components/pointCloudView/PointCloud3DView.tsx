@@ -328,11 +328,19 @@ const PointCloud3D: React.FC<
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
+
+        let boxList: IPointCloudBox[] = [];
         // Add Init Box
         boxParamsList.forEach((v: IPointCloudBox) => {
           // to do change color by attribute
           if (v.isVisible) {
-            pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id, v.textAttribute);
+            boxList = (pointCloud as PointCloudOperation).doUpateboxInScene(
+              v.rect,
+              v.zInfo,
+              v.attribute,
+              v.id,
+              v.textAttribute,
+            );
           } else {
             pointCloud?.clearBoxInSceneById(v.id);
             if (unSetSelectId && v.id === ptCtx.mainViewInstance?.selectedId) {
@@ -340,6 +348,9 @@ const PointCloud3D: React.FC<
             }
           }
         });
+
+        pointCloud?.emit('savePcResult', boxList);
+
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
         pointCloud?.updatePointCloudByAttributes(currentData.url, boxParamsList);
@@ -371,6 +382,11 @@ const PointCloud3D: React.FC<
         okWord='确认'
         isSetPosition={true}
         cancelWord='取消'
+        cancelEvent={() => {
+          setTimeout(() => {
+            ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
+          }, 50);
+        }}
         content={content}
       />
       <PointCloudContainer
