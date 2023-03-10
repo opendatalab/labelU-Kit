@@ -12,6 +12,7 @@ import enUS1 from './locales/en-US';
 import zhCN1 from './locales/zh-CN';
 import { localeConfig } from './locales';
 import Router from './router';
+import themeToken from './styles/theme.json';
 
 const App: React.FC = () => {
   // @ts-ignore
@@ -60,7 +61,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <ConfigProvider locale={getAntdLocale()} componentSize="middle">
+    <ConfigProvider locale={getAntdLocale()} componentSize="middle" theme={{ token: themeToken.token }}>
       {/* @ts-ignore */}
       <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
         <Router />
