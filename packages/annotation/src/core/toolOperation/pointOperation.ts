@@ -809,7 +809,7 @@ export default class PointOperation extends BasicToolOperation {
     }
 
     if (point.attribute) {
-      showText = `${showText}  ${AttributeUtils.getAttributeShowText(point.attribute, this.config?.attributeList)}`;
+      showText = `${showText} ${this.config.attributeMap.get(point.attribute) || point.attribute}`;
     }
 
     // 上方属性（列表、序号）

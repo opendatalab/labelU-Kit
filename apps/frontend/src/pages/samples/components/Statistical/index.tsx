@@ -1,18 +1,17 @@
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
-import { useNavigate, useRouteLoaderData } from 'react-router';
+import { useNavigate } from 'react-router';
 import { Button } from 'antd';
 import { useSelector } from 'react-redux';
 import _ from 'lodash-es';
 
 import type { RootState } from '@/store';
-import type { TaskResponseWithStatics } from '@/services/types';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../../../utils/common/common';
 import ExportPortal from '../../../../components/ExportPortal';
 
 const Statistical = () => {
-  const taskData = useRouteLoaderData('task') as TaskResponseWithStatics;
+  const taskData = useSelector((state: RootState) => state.task.item);
   const { stats = {} } = taskData || {};
   const taskId = _.get(taskData, 'id');
 

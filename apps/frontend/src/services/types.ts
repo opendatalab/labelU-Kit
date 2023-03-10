@@ -279,7 +279,7 @@ export interface TaskResponseWithStatics {
   /** Media Type description: task media type: IMAGE, VIDEO */
   media_type?: MediaType;
   /** Status description: task status: DRAFT, IMPORTED, CONFIGURED, INPROGRESS, FINISHED */
-  status?: string;
+  status?: TaskStatus;
   /** Created At description: task created at time */
   created_at?: string;
   /** Created By description: task created at time */

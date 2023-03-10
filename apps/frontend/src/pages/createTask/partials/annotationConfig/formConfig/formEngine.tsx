@@ -48,12 +48,13 @@ const FormEngine: FC<FormEngineProps> = (props) => {
     return FormMapping[toolName];
   }, [toolName]);
 
+  // 进行中和已完成的任务不允许删除工具
   const deletable = useMemo(() => {
-    if (!taskStatus || ![TaskStatus.DRAFT, TaskStatus.CONFIGURED].includes(taskStatus as TaskStatus)) {
-      return true;
+    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus)) {
+      return false;
     }
 
-    return false;
+    return true;
   }, [taskStatus]);
 
   // 删除工具
