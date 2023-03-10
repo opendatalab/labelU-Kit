@@ -42,7 +42,7 @@ const partialMapping = {
 
 export const CHECK_INPUT_VALUE = 'checkInputValue';
 
-const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
+const isValidConfig = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
   const attributeList = config.attributeList;
   if (attributeList && attributeList?.length) {
     return _.every(attributeList, (attribute) => attribute.key !== '' && attribute.value !== '');
@@ -50,7 +50,7 @@ const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolC
   return true;
 };
 
-const isConfigRepeated = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
+const isAttributeKeyOrValueDuplicated = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
   const attributeList = config.attributeList;
   if (_.isEmpty(attributeList)) {
     return false;
@@ -183,7 +183,12 @@ const CreateTask = () => {
       return;
     }
 
-    if (_.some(formData?.config?.tools, (tool) => !isConfigEffective(tool.config))) {
+    const toolsWithoutTagAndText = _.filter(
+      formData?.config?.tools,
+      (tool) => !['tagTool', 'textTool'].includes(tool.tool),
+    );
+
+    if (_.some(toolsWithoutTagAndText, (tool) => !isValidConfig(tool.config))) {
       commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
       document.dispatchEvent(new CustomEvent(CHECK_INPUT_VALUE, {}));
       return;
@@ -191,15 +196,15 @@ const CreateTask = () => {
 
     if (
       formData?.config?.commonAttributeConfigurable &&
-      !isConfigEffective({ attributeList: formData?.config?.attribute } as any)
+      !isValidConfig({ attributeList: formData?.config?.attribute } as any)
     ) {
       commonController.notificationErrorMessage({ message: '通用标签配置的值不能为空' }, 1);
       return;
     }
 
     if (
-      _.some(formData?.config?.tools, (tool) => isConfigRepeated(tool.config)) ||
-      isConfigRepeated({ attributeList: formData?.config?.attribute } as any)
+      _.some(toolsWithoutTagAndText, (tool) => isAttributeKeyOrValueDuplicated(tool.config)) ||
+      isAttributeKeyOrValueDuplicated({ attributeList: formData?.config?.attribute } as any)
     ) {
       commonController.notificationErrorMessage({ message: '标签配置的值key, value不能重复' }, 1);
       return;
