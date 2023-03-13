@@ -2,14 +2,15 @@ import { useMemo, useEffect, useState, useCallback, useContext } from 'react';
 import AnnotationOperation from '@label-u/components';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash-es';
+import { Button } from 'antd';
 
 import type { Dispatch, RootState } from '@/store';
 import EmptyConfigImg from '@/img/annotationCommon/emptyConfig.png';
 
 import ConfigTemplate from './configTemplate/index';
 import FormConfig from './formConfig';
-import './index.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
+import styles from './index.module.scss';
 
 interface OneFile {
   id: number;
@@ -29,7 +30,7 @@ const AnnotationConfig = () => {
   const { updateFormData, formData, task = {} } = useContext(TaskCreationContext);
   const taskId = task.id;
 
-  const samples = useSelector((state: RootState) => state.sample.list);
+  // const samples = useSelector((state: RootState) => state.sample.list);
   const {
     config = {
       tools: [],
@@ -39,24 +40,6 @@ const AnnotationConfig = () => {
       commonAttributeConfigurable: false,
     },
   } = formData;
-
-  const { tools, tagList, attribute, textConfig, commonAttributeConfigurable } = config || {};
-
-  const headSample = useMemo(() => _.chain(samples).get('data').head().value(), [samples]);
-  const previewFiles = useMemo(() => {
-    const id = _.chain(headSample).get('data.fileNames').keys().head().value();
-    if (!id) {
-      return [defaultFile];
-    }
-
-    return [
-      {
-        id,
-        url: _.get(headSample, `data.urls.${id}`),
-        result: _.get(headSample, `data.result`),
-      },
-    ];
-  }, [headSample]);
 
   useEffect(() => {
     if (!taskId) {
@@ -77,9 +60,6 @@ const AnnotationConfig = () => {
     [updateFormData],
   );
 
-  const [rightImg, setRightImg] = useState<any>();
-  const [isConfigError] = useState<boolean>(false);
-
   useEffect(() => {
     // 初始化配置防抖方法
     const throttle = (fun: () => void, time: number) => {
@@ -96,14 +76,20 @@ const AnnotationConfig = () => {
     };
     // @ts-ignore
     window.throttle = throttle;
-    setRightImg(EmptyConfigImg);
   }, []);
 
-  const goBack = () => {};
-
   return (
-    <div className="container">
-      <div className="configBox">
+    <div className={styles.wrapper}>
+      <div className={styles.innerWrapper}>
+        <div className={styles.header}>
+          <span className={styles.title}>配置方式</span>
+          <Button type="link">选择模板</Button>
+        </div>
+        <div className={styles.content}>
+          <FormConfig config={config} updateConfig={updateConfig} />
+        </div>
+      </div>
+      {/* <div className="configBox">
         <div className="leftSider" id="lefeSiderId">
           <div className="leftSiderTitle">
             <span className="leftTabContent">标注配置</span>
@@ -137,7 +123,7 @@ const AnnotationConfig = () => {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

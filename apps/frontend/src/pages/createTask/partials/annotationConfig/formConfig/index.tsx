@@ -1,9 +1,10 @@
 import type { OneTag } from '@label-u/annotation';
 import type { BasicConfig } from '@label-u/components';
-import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
+import { Button, Dropdown, Form, Menu, Select, Switch, Tabs } from 'antd';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import _ from 'lodash-es';
+import { PlusOutlined } from '@ant-design/icons';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 import { validateTools } from '@/utils/tool/common';
@@ -12,6 +13,7 @@ import { toolnames, types, toolnameT, toolnameC } from './constants';
 import FormEngine from './formEngine';
 import CommonFormItem from '../components/commonFormItems';
 import { LoadInitConfig } from '../configTemplate/config';
+import styles from './index.module.scss';
 
 const { Option } = Select;
 
@@ -117,14 +119,6 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
     setSelectTools(toolNames);
   }, [selectTools, tagList?.length, textConfig?.length, tools]);
 
-  const [height, setHeight] = useState<number>(0);
-
-  useEffect(() => {
-    const leftSiderDom = document.getElementById('lefeSiderId');
-    const _height = leftSiderDom?.getBoundingClientRect().height as number;
-    setHeight(_height - 128);
-  }, []);
-
   const handleChange = (e: React.SetStateAction<string>) => {
     setMedia(e);
   };
@@ -174,113 +168,87 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
     }
   };
   return (
-    <div className="formConfig" style={{ height: height }}>
-      <div className="oneRow">
-        <label>标注类型</label>
+    <Form labelCol={{ span: 3 }} wrapperCol={{ span: 21 }} colon={false} className={styles.formConfig}>
+      <Form.Item label="标注类型">
         <Select size="middle" value={media} onChange={handleChange} listItemHeight={10} listHeight={250}>
           {children}
         </Select>
-      </div>
-      <div className="oneRow">
-        <label>标注工具</label>
+      </Form.Item>
+      <Form.Item label="标注工具">
         <Dropdown overlay={<Menu items={toolMenuItems} />} placement="bottomLeft" trigger={['click']}>
-          <Button type="primary" ghost>
-            <span style={{ fontSize: 22, marginTop: -7 }}>+ </span> 新增工具
+          <Button type="primary" ghost icon={<PlusOutlined />}>
+            新增工具
           </Button>
         </Dropdown>
-      </div>
-      {selectTools && selectTools.length > 0 && validateTools(tools) && (
-        <div className="formTabBox">
-          <Tabs
-            type="card"
-            activeKey={String(Math.min(Number(activeTabKey), selectTools.length))}
-            onChange={(e) => {
-              setActiveTabKey(e);
-              forceSet(new Date().getTime());
-            }}
-            items={selectTools.map((tool, i) => {
-              const id = String(i + 1);
-              // 配置初始化
-              let initC = {} as BasicConfig;
-              let configArr = [];
-              let isShow = true;
-              configArr = tools.filter((item: any) => {
-                return item.tool === tool;
-              });
-              initC = configArr[0];
-              // 公共配置
-              let commonConfig = {
-                drawOutsideTarget: false,
-                textCheckType: 1,
-                customFormat: '',
-                textConfigurable: false,
-              };
+      </Form.Item>
+      <Form.Item wrapperCol={{ offset: 3 }}>
+        {selectTools && selectTools.length > 0 && validateTools(tools) && (
+          <div className="formTabBox">
+            <Tabs
+              type="card"
+              size="small"
+              activeKey={String(Math.min(Number(activeTabKey), selectTools.length))}
+              onChange={(e) => {
+                setActiveTabKey(e);
+                forceSet(new Date().getTime());
+              }}
+              items={selectTools.map((tool, i) => {
+                const id = String(i + 1);
+                // 配置初始化
+                let initC = {} as BasicConfig;
+                let configArr = [];
+                configArr = tools.filter((item: any) => {
+                  return item.tool === tool;
+                });
+                initC = configArr[0];
 
-              if (noCommonConfigTools.indexOf(tool) >= 0) {
-                //@ts-ignore
-                isShow = false;
-              } else {
-                if (initC && initC.config) {
-                  commonConfig = {
-                    //@ts-ignore
-                    drawOutsideTarget: initC.config.drawOutsideTarget,
-                    //@ts-ignore
-                    textCheckType: initC.config.textCheckType,
-                    //@ts-ignore
-                    customFormat: initC.config.customFormat,
-                    //@ts-ignore
-                    textConfigurable: initC.config.textConfigurable,
-                  };
-                }
-              }
-
-              return {
-                //@ts-ignore
-                label: `${toolnameC[tool]}`,
-                key: id,
-                children: (
-                  <div className="toolConfigPane">
-                    <Form.Provider
-                      onFormFinish={(name, info) => {
-                        if (Object.keys(info.forms).length > 0) {
-                          // todo 统一处理表单 和  标注工具之间联动
-                          actUpdateToolsConfig(name, info);
+                return {
+                  //@ts-ignore
+                  label: `${toolnameC[tool]}`,
+                  key: id,
+                  children: (
+                    <div className="toolConfigPane">
+                      <Form.Provider
+                        onFormFinish={(name, info) => {
+                          if (Object.keys(info.forms).length > 0) {
+                            // todo 统一处理表单 和  标注工具之间联动
+                            actUpdateToolsConfig(name, info);
+                          }
+                        }}
+                      >
+                        {
+                          <FormEngine
+                            toolName={tool}
+                            toolConfig={initC || {}}
+                            {...{
+                              updateTagList,
+                              updateTextConfig,
+                              updateTools,
+                            }}
+                            config={config}
+                          />
                         }
-                      }}
-                    >
-                      {
-                        <FormEngine
-                          toolName={tool}
-                          toolConfig={initC || {}}
-                          {...{
-                            updateTagList,
-                            updateTextConfig,
-                            updateTools,
-                          }}
-                          config={config}
-                        />
-                      }
+                      </Form.Provider>
+                    </div>
+                  ),
+                };
+              })}
+            />
+          </div>
+        )}
+      </Form.Item>
+      <Form.Item valuePropName="checked" label="画布外标注" name="drawOutsideTarget">
+        <Switch />
+      </Form.Item>
 
-                      {isConfigLoad && (
-                        <CommonFormItem
-                          key={force}
-                          commonAttributeConfigurable={commonAttributeConfigurable}
-                          attribute={attribute}
-                          {...commonConfig}
-                          name="commonForm"
-                          toolName={tool}
-                          isShow={isShow}
-                        />
-                      )}
-                    </Form.Provider>
-                  </div>
-                ),
-              };
-            })}
-          />
-        </div>
-      )}
-    </div>
+      <Form.Item
+        valuePropName="checked"
+        label={<span className="formTitle">通用标签</span>}
+        name="commonAttributeConfigurable"
+      >
+        <Switch />
+      </Form.Item>
+    </Form>
   );
 };
 

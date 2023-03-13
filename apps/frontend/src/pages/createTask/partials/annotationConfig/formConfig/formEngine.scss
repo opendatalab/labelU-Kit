@@ -25,7 +25,7 @@
   .selectedMain {
     position: relative;
     padding-top: 25px;
-    border: 1px solid #e6e6e6;
+    border: 1px solid var(--color-border-secondary);
     border-top: 0;
 
     .ant-form-item-label > label::after {
