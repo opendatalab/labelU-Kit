@@ -47,6 +47,7 @@ const TaskList = () => {
   const { meta_data, data: tasks = [] } = useSelector((state: RootState) => state.task.list);
 
   const createTask = () => {
+    dispatch.task.clearTaskItemAndConfig();
     navigate('/tasks/0/edit');
   };
 

@@ -52,13 +52,6 @@ const Samples = () => {
     dispatch.task.fetchTask(taskId);
   }, [dispatch.task, taskId]);
 
-  useEffect(() => {
-    // 当新建或编辑任务时，初始时清空任务信息
-    return () => {
-      dispatch.task.clearTaskItemAndConfig();
-    };
-  }, [dispatch.task]);
-
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
 
