@@ -173,15 +173,6 @@ const CreateTask = () => {
     }
   }, [dispatch.task, isExistTask, taskData, taskId]);
 
-  useEffect(() => {
-    // 当新建或编辑任务时，初始时清空任务信息
-    dispatch.task.clearTaskItemAndConfig();
-
-    return () => {
-      dispatch.task.clearTaskItemAndConfig();
-    };
-  }, [dispatch.task]);
-
   const handleSave = async function () {
     if (_.chain(formData).get('config.tools').isEmpty().value()) {
       commonController.notificationErrorMessage({ message: '请选择工具' }, 1);

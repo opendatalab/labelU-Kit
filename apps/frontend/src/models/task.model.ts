@@ -40,6 +40,19 @@ export const task = createModel<RootModel>()({
       };
     },
 
+    mergeTask: (state, payload: TaskResponseWithStatics) => {
+      const parsedConfig = payload.config ? jsonParse(payload.config) : undefined;
+
+      return {
+        ...state,
+        item: {
+          ...state.item,
+          ...payload,
+        },
+        config: parsedConfig,
+      };
+    },
+
     setNewTask: (state, payload: TaskResponse) => {
       return {
         ...state,
@@ -88,7 +101,7 @@ export const task = createModel<RootModel>()({
         config: body.config ? JSON.stringify(body.config) : undefined,
       });
 
-      dispatch.task.setTask(data);
+      dispatch.task.mergeTask(data);
     },
 
     async createTask(body: BasicConfigCommand) {
