@@ -111,7 +111,7 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
   const data = res;
   const taskRes = await getTask(taskId);
 
-  let blobData = new Blob([JSON.stringify(data)]);
+  const blobData = new Blob([JSON.stringify(data)]);
   let url = window.URL.createObjectURL(blobData);
   const a = document.createElement('a');
   let filename = taskRes.data.name;
@@ -122,10 +122,7 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
       filename = filename + '.json';
       break;
     case 'MASK':
-      // @ts-ignore
-      blobData = new Blob([data.data], { type: 'application/zip' });
-      filename = filename + '.zip';
-      url = window.URL.createObjectURL(blobData);
+      url = window.URL.createObjectURL(data as any);
       break;
   }
   a.download = filename!;
