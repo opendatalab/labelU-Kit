@@ -6,7 +6,7 @@ import DrageModel from '@/components/basic/modal';
 import { TaskCreationContext } from '@/pages/createTask/taskCreation.context';
 
 import { getLabelConfig } from './config';
-import TmplateBox from './tmplateBox';
+import TemplateBox from './templateBox';
 
 import './index.scss';
 
@@ -39,8 +39,8 @@ const ConfigTemplate: FC = () => {
           return {
             ...item,
             children: (
-              <TmplateBox
-                tempaltes={result}
+              <TemplateBox
+                templates={result}
                 hideBox={() => {
                   modalRef.current.switchModal(false);
                 }}

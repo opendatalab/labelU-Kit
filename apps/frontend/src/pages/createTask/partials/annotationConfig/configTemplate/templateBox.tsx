@@ -9,11 +9,11 @@ export interface Item {
   label: string;
 }
 interface Iprops {
-  tempaltes: Item[];
+  templates: Item[];
   hideBox: () => void;
 }
 
-const TmplateBox: FC<Iprops> = ({ tempaltes, hideBox }) => {
+const TemplateBox: FC<Iprops> = ({ templates, hideBox }) => {
   const { updateFormData } = useContext(TaskCreationContext);
 
   const updateToolConfig = (item: Item) => {
@@ -32,7 +32,7 @@ const TmplateBox: FC<Iprops> = ({ tempaltes, hideBox }) => {
 
   return (
     <div className="tabContentBox">
-      {tempaltes.map((item) => {
+      {templates.map((item) => {
         return (
           <div
             key={item.label}
@@ -51,4 +51,4 @@ const TmplateBox: FC<Iprops> = ({ tempaltes, hideBox }) => {
   );
 };
 
-export default TmplateBox;
+export default TemplateBox;

@@ -12,6 +12,8 @@
     "allowJs": true,
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",

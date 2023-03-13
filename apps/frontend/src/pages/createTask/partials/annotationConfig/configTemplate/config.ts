@@ -1,6 +1,6 @@
 import type { ToolsConfigState } from '@/types/toolConfig';
 
-import type { Item } from './tmplateBox';
+import type { Item } from './templateBox';
 interface ConfigItem {
   label: string;
   img: any;
