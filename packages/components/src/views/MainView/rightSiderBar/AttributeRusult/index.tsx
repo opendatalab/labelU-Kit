@@ -26,7 +26,6 @@ import ClearResultIconHover from '../../../../assets/annotation/common/clear_res
 import ClearResultIcon from '../../../../assets/annotation/common/clear_result.svg';
 
 const { Panel } = Collapse;
-const { Option } = Select;
 
 const LableTools = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];
 
@@ -517,12 +516,14 @@ const AttributeRusult: FC<IProps> = ({
   }, [attributeResultList]);
 
   const generateContent = (toolInfo: ToolInfo, attributeResult: AttributeResult) => {
-    const children = [];
-    for (const item of attributeList) {
-      // eslint-disable-next-line react/jsx-no-undef
-      children.push(<Option key={item.value}>{item.key}</Option>);
-    }
-    children.push(<Option key={'无标签'}>无标签</Option>);
+    const options = attributeList.map((item) => ({
+      label: item.key,
+      value: item.value,
+    }));
+    options.push({
+      label: '无标签',
+      value: 'noneAttribute',
+    });
     return (
       <Form
         name="basic"
@@ -553,12 +554,12 @@ const AttributeRusult: FC<IProps> = ({
         >
           <Select
             value={attributeResult.attributeName}
+            optionLabelProp="label"
+            options={options}
             style={{
               width: '100%',
             }}
-          >
-            {children}
-          </Select>
+          />
         </Form.Item>
         <Form.Item
           label="描述"

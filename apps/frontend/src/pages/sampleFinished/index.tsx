@@ -1,20 +1,27 @@
 import { CheckOutlined } from '@ant-design/icons';
-import { useNavigate, useParams, useRouteLoaderData } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
 import ExportPortal from '@/components/ExportPortal';
-import type { TaskResponseWithStatics } from '@/services/types';
+import type { Dispatch, RootState } from '@/store';
 
 import styles from './index.module.scss';
 
 const SamplesFinished = () => {
-  const taskData = useRouteLoaderData('task') as TaskResponseWithStatics;
+  const dispatch = useDispatch<Dispatch>();
+  const taskData = useSelector((state: RootState) => state.task.item);
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
   const navigate = useNavigate();
   const handleGoHome = () => {
-    navigate(`/tasks/${taskId}`);
+    navigate(`/tasks/${taskId}?t=${Date.now()}`);
   };
+
+  useEffect(() => {
+    dispatch.task.fetchTask(taskId);
+  }, [dispatch.task, taskId]);
 
   return (
     <div className={styles.finishedWrapper}>

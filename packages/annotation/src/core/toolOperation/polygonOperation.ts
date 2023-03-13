@@ -1451,7 +1451,7 @@ export default class PolygonOperation extends BasicToolOperation {
             lineType: this.config?.lineType,
           });
 
-          let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config?.attributeList) ?? ''}`;
+          let showText = `${this.config.attributeMap.get(attribute) || attribute}`;
           if (this.isShowOrder && polygon?.order > 0) {
             showText = `${polygon.order} ${showText}`;
           }
@@ -1525,9 +1525,7 @@ export default class PolygonOperation extends BasicToolOperation {
           },
         );
 
-        let showText = `${
-          AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config?.attributeList) ?? ''
-        }`;
+        let showText = `${this.config.attributeMap.get(selectdPolygon.attribute) || selectdPolygon.attribute}`;
         if (this.isShowOrder && selectdPolygon?.order > 0) {
           showText = `${selectdPolygon.order} ${showText}`;
         }

@@ -13,7 +13,6 @@ import type { IRect } from '@/types/tool/rectTool';
 import { DEFAULT_TEXT_OFFSET } from '../../constant/annotation';
 import { EToolName } from '../../constant/tool';
 import type { IPolygonData } from '../../types/tool/polygon';
-import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
@@ -181,7 +180,7 @@ export default class CheckOperation extends BasicToolOperation {
           },
         );
       }
-      let showText = `${AttributeUtils.getAttributeShowText(polygon.attribute, config?.attributeList ?? []) ?? ''}`;
+      let showText = `${this.config.attributeMap.get(polygon.attribute) || polygon.attribute}`;
       if (config?.isShowOrder && polygon?.order > 0) {
         showText = `${polygon.order} ${showText}`;
       }

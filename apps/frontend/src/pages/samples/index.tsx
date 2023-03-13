@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Pagination, Button } from 'antd';
 import _ from 'lodash-es';
@@ -16,9 +16,10 @@ import statisticalStyles from './components/Statistical/index.module.scss';
 
 const Samples = () => {
   const navigate = useNavigate();
-  const taskData = useRouteLoaderData('task');
   const dispatch = useDispatch<Dispatch>();
-  const taskId = _.get(taskData, 'id');
+  const routeParams = useParams();
+  const taskId = +routeParams.taskId!;
+  const taskData = useSelector((state: RootState) => state.task.item);
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
@@ -45,6 +46,18 @@ const Samples = () => {
       ...Object.fromEntries(searchParams.entries()),
     });
   }, [dispatch.sample, searchParams, taskId]);
+
+  // 获取任务信息
+  useEffect(() => {
+    dispatch.task.fetchTask(taskId);
+  }, [dispatch.task, taskId]);
+
+  useEffect(() => {
+    // 当新建或编辑任务时，初始时清空任务信息
+    return () => {
+      dispatch.task.clearTaskItemAndConfig();
+    };
+  }, [dispatch.task]);
 
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);

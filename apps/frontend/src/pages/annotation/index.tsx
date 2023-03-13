@@ -1,10 +1,10 @@
 import { useState, useEffect, createRef, useMemo, useCallback, useRef } from 'react';
 import { useParams } from 'react-router';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash-es';
 import { Spin } from 'antd';
 
-import type { RootState } from '@/store';
+import type { Dispatch, RootState } from '@/store';
 import type { SampleResponse } from '@/services/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import { getSamples } from '@/services/samples';
@@ -20,8 +20,7 @@ export const annotationRef = createRef();
 
 const AnnotationPage = () => {
   const routeParams = useParams();
-  const [taskSample, setTaskSample] = useState<any>([]);
-
+  const dispatch = useDispatch<Dispatch>();
   const taskConfig = useSelector((state: RootState) => state.task.config);
 
   const sampleId = routeParams.sampleId;
@@ -51,14 +50,13 @@ const AnnotationPage = () => {
     isEnd: () => totalCount === samples.length,
   });
 
-  useEffect(() => {
-    if (!sample) {
-      return;
-    }
+  const transformed = useMemo(() => {
+    return commonController.transformFileList(sample.data, sample.id!);
+  }, [sample.data, sample.id]);
 
-    const newSample = commonController.transformFileList(sample.data, sample.id!);
-    setTaskSample(newSample);
-  }, [sample]);
+  useEffect(() => {
+    dispatch.task.fetchTask(+routeParams.taskId!);
+  }, [dispatch.task, routeParams.taskId]);
 
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
 
@@ -78,14 +76,14 @@ const AnnotationPage = () => {
   return (
     <Spin className={currentStyles.annotationPage} spinning={loading} style={{ height: '100%' }}>
       <AnnotationContext.Provider value={annotationContextValue}>
-        {taskSample && taskSample.length > 0 && taskConfig.tools && taskConfig.tools.length > 0 && (
+        {!_.isEmpty(transformed) && !_.isEmpty(taskConfig.tools) && (
           <Annotation
             leftSiderContent={leftSiderContent}
             topActionContent={topActionContent}
             annotationRef={annotationRef}
             attribute={taskConfig.attribute}
             tagList={taskConfig.tagList}
-            fileList={[{ ...taskSample[0] }]}
+            fileList={[{ ...transformed[0] }]}
             textConfig={taskConfig.textConfig}
             goBack={goBack}
             tools={taskConfig.tools}

@@ -42,7 +42,7 @@ const partialMapping = {
 
 export const CHECK_INPUT_VALUE = 'checkInputValue';
 
-const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
+const isValidConfig = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
   const attributeList = config.attributeList;
   if (attributeList && attributeList?.length) {
     return _.every(attributeList, (attribute) => attribute.key !== '' && attribute.value !== '');
@@ -50,7 +50,7 @@ const isConfigEffective = (config: Exclude<ToolConfig, TextToolConfig | TagToolC
   return true;
 };
 
-const isConfigRepeated = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
+const isAttributeKeyOrValueDuplicated = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
   const attributeList = config.attributeList;
   if (_.isEmpty(attributeList)) {
     return false;
@@ -103,23 +103,27 @@ const CreateTask = () => {
     (state: RootState) => state.loading.effects.task.updateTaskConfig || state.loading.effects.task.createTask,
   );
   const isExistTask = taskId > 0;
-  const stepDataSource: TaskStep[] = [
-    {
-      title: stepTitleMapping[StepEnum.Basic],
-      value: StepEnum.Basic,
-      isFinished: isExistTask,
-    },
-    {
-      title: stepTitleMapping[StepEnum.Upload],
-      value: StepEnum.Upload,
-      isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED].includes(_.get(taskData, 'status') as TaskStatus),
-    },
-    {
-      title: stepTitleMapping[StepEnum.Config],
-      value: StepEnum.Config,
-      isFinished: _.get(taskData, 'status') === TaskStatus.CONFIGURED,
-    },
-  ];
+  const taskStatus = _.get(taskData, 'status') as TaskStatus;
+  const stepDataSource: TaskStep[] = useMemo(
+    () => [
+      {
+        title: stepTitleMapping[StepEnum.Basic],
+        value: StepEnum.Basic,
+        isFinished: isExistTask,
+      },
+      {
+        title: stepTitleMapping[StepEnum.Upload],
+        value: StepEnum.Upload,
+        isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+      },
+      {
+        title: stepTitleMapping[StepEnum.Config],
+        value: StepEnum.Config,
+        isFinished: [TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+      },
+    ],
+    [isExistTask, taskStatus],
+  );
 
   const updateFormData = (field: string) => (value: any) => {
     setFormData(set(field)(value));
@@ -147,16 +151,12 @@ const CreateTask = () => {
 
   // 将store中的task toolConfig数据同步到本地页面中
   useEffect(() => {
-    if (!toolsConfig) {
-      return;
-    }
-
     updateFormData('config')(toolsConfig);
   }, [toolsConfig]);
 
   // 将store中的task数据同步到本地页面中
   useEffect(() => {
-    if (!taskData) {
+    if (!isExistTask) {
       return;
     }
 
@@ -164,7 +164,7 @@ const CreateTask = () => {
       ...omit(['config'])(taskData),
       ...pre,
     }));
-  }, [taskData]);
+  }, [isExistTask, taskData]);
 
   useEffect(() => {
     if (isExistTask && _.isEmpty(taskData)) {
@@ -187,7 +187,12 @@ const CreateTask = () => {
       return;
     }
 
-    if (_.some(formData?.config?.tools, (tool) => !isConfigEffective(tool.config))) {
+    const toolsWithoutTagAndText = _.filter(
+      formData?.config?.tools,
+      (tool) => !['tagTool', 'textTool'].includes(tool.tool),
+    );
+
+    if (_.some(toolsWithoutTagAndText, (tool) => !isValidConfig(tool.config))) {
       commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
       document.dispatchEvent(new CustomEvent(CHECK_INPUT_VALUE, {}));
       return;
@@ -195,15 +200,15 @@ const CreateTask = () => {
 
     if (
       formData?.config?.commonAttributeConfigurable &&
-      !isConfigEffective({ attributeList: formData?.config?.attribute } as any)
+      !isValidConfig({ attributeList: formData?.config?.attribute } as any)
     ) {
       commonController.notificationErrorMessage({ message: '通用标签配置的值不能为空' }, 1);
       return;
     }
 
     if (
-      _.some(formData?.config?.tools, (tool) => isConfigRepeated(tool.config)) ||
-      isConfigRepeated({ attributeList: formData?.config?.attribute } as any)
+      _.some(toolsWithoutTagAndText, (tool) => isAttributeKeyOrValueDuplicated(tool.config)) ||
+      isAttributeKeyOrValueDuplicated({ attributeList: formData?.config?.attribute } as any)
     ) {
       commonController.notificationErrorMessage({ message: '标签配置的值key, value不能重复' }, 1);
       return;

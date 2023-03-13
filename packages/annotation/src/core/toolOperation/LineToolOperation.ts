@@ -690,9 +690,7 @@ export default class LineToolOperation extends BasicToolOperation {
       let text = this.isShowOrder ? order.toString() : `${label}`;
 
       if (this.attributeConfigurable) {
-        const keyForAttribute = attribute
-          ? this.attributeList?.find((i: any) => i.value === attribute)?.key ?? attribute
-          : '';
+        const keyForAttribute = attribute ? this.config.attributeMap.get(attribute) || attribute : '';
 
         text = [text, `${!valid && keyForAttribute ? '无效' : ''}${keyForAttribute}`].filter((i) => i).join(' ');
       }
