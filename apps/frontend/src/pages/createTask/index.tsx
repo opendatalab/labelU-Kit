@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Modal } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -81,6 +81,7 @@ const CreateTask = () => {
     location.hash ? (location.hash.replace('#', '') as StepEnum) : StepEnum.Basic,
   );
   const [formData, setFormData] = useState<TaskFormData>({} as TaskFormData);
+  const attachmentsConnected = useRef<boolean>(false);
 
   // 缓存上传的文件清单
   const [uploadFileList, setUploadFileList] = useState<QueuedFile[]>([]);
@@ -244,7 +245,7 @@ const CreateTask = () => {
     }
 
     if (isExistTask) {
-      if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList)) {
+      if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList) && !attachmentsConnected.current) {
         await createSamples(
           taskId,
           _.chain(uploadFileList)
@@ -263,6 +264,9 @@ const CreateTask = () => {
             }))
             .value(),
         );
+
+        // 切换到其他步骤后，再切换回来，不会再次创建样本
+        attachmentsConnected.current = true;
       }
 
       return dispatch.task.updateTaskConfig({
