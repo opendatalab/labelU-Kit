@@ -1,70 +1,80 @@
 import type { ToolsConfigState } from '@/types/toolConfig';
 
-import type { Item } from './tmplateBox';
+import type { Item } from './templateBox';
+import { rectTool, pointTool, polygonTool, lineTool, textTool, tagTool } from '../configs';
+
 interface ConfigItem {
   label: string;
   img: any;
   templateName: any;
 }
 
-const imgLebalConfig: Item[] = [
+const templateMapping: Record<string, unknown> = {
+  rectTool,
+  pointTool,
+  polygonTool,
+  lineTool,
+  textTool,
+  tagTool,
+};
+
+const imgLabelConfig: Item[] = [
   {
     label: '目标检测（矩形框）',
     img: 'rectImg',
-    templateName: 'rectTool.json',
+    templateName: 'rectTool',
   },
   {
     label: '语义分割(多边形)',
     img: 'polygonImg',
-    templateName: 'polygonTool.json',
+    templateName: 'polygonTool',
   },
   {
     label: '线标注',
     img: 'lineImg',
-    templateName: 'lineTool.json',
+    templateName: 'lineTool',
   },
   {
     label: '点标注',
     img: 'pointImg',
-    templateName: 'pointTool.json',
+    templateName: 'pointTool',
   },
   {
     label: '目标分类(标签分类)',
     img: 'tagImg',
-    templateName: 'tagTool.json',
+    templateName: 'tagTool',
   },
   {
     label: '文本描述',
     img: 'textImg',
-    templateName: 'textTool.json',
+    templateName: 'textTool',
   },
 ];
 
 export const getLabelConfig: () => Promise<ConfigItem[]> = async () => {
   return new Promise(async (resolve) => {
-    const reuslt: ConfigItem[] = [];
-    if (imgLebalConfig.length > 0) {
-      for (const item of imgLebalConfig) {
+    const result: ConfigItem[] = [];
+    if (imgLabelConfig.length > 0) {
+      for (const item of imgLabelConfig) {
         const { default: imgSrc } = await import(`../frontCoverImg/${item.img}.png`);
-        const { default: tmpl } = await import(`../configs/${item.templateName}`);
-        reuslt.push({
+        result.push({
           label: item.label,
           img: imgSrc,
-          templateName: tmpl,
+          templateName: templateMapping[item.templateName],
         });
       }
     }
-    resolve(reuslt);
+    resolve(result);
   });
 };
 
 // 加载初始化配置
 export const LoadInitConfig: (toolName: string) => Promise<ToolsConfigState> = async (toolName: string) => {
   return new Promise(async (resolve, reject) => {
-    const { default: tmpl } = await import(`../configs/${toolName}.json`);
-    if (tmpl) {
+    const result = templateMapping[toolName];
+    if (result) {
       //@ts-ignore
-      resolve(tmpl);
+      resolve(result);
     } else {
       reject('err');
     }
