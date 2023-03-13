@@ -48,8 +48,8 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = (props) => {
     upperLimitPointNum: 100,
     attributeList: [
       {
-        key: 'lineTool',
-        value: 'lineTool',
+        key: '',
+        value: '',
       },
     ],
   } as FormLineConfig);
@@ -73,8 +73,8 @@ const LineConfigForm: FC<BasicConfig & { name: string }> = (props) => {
             props.config.attributeList
           : [
               {
-                key: 'lineTool',
-                value: 'lineTool',
+                key: '',
+                value: '',
               },
             ],
       };

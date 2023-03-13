@@ -40,6 +40,7 @@ const FormEngine: FC<FormEngineProps> = (props) => {
   const { tagList, textConfig, tools } = config;
 
   const taskStatus = useSelector((state: RootState) => state.task.item.status);
+  const taskDoneAmount = useSelector((state: RootState) => state.task.item.stats?.done);
   const ConfigTool = useMemo(() => {
     if (!toolName) {
       return null;
@@ -50,12 +51,12 @@ const FormEngine: FC<FormEngineProps> = (props) => {
 
   // 进行中和已完成的任务不允许删除工具
   const deletable = useMemo(() => {
-    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus)) {
+    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
       return false;
     }
 
     return true;
-  }, [taskStatus]);
+  }, [taskStatus, taskDoneAmount]);
 
   // 删除工具
   const deleteTool = (_toolName: string) => {
