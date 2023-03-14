@@ -37,7 +37,9 @@ export const composeResult = (
         toolName: 'tagTool',
         result: [...data.tagTool],
       };
-    } else if (data[stepName]) {
+    }
+
+    if (data[stepName] && stepName !== 'tagTool') {
       const info = data[stepName];
       if (info.result) {
         if (JSON.stringify(info.result) === JSON.stringify(rect)) {
