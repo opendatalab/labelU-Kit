@@ -5,6 +5,7 @@ import { connect, useSelector } from 'react-redux';
 import _ from 'lodash-es';
 
 import type { IFileItem } from '@/types/data';
+import { ChangeCurrentTool } from '@/store/annotation/actionCreators';
 
 import { prefix } from '../../../constant';
 import type { EToolName } from '../../../data/enums/ToolType';
@@ -28,7 +29,7 @@ interface IProps {
 
 const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar: React.FC<IProps> = (props) => {
-  const { imgList, imgIndex, currentToolName, isPreview } = props;
+  const { imgList, imgIndex, currentToolName, isPreview, dispatch } = props;
   const [textTab, setTextTab] = useState<any>();
   const [tabIndex, setTabIndex] = useState<string>('1');
   const [tagTab, setTagTab] = useState<any>(
@@ -58,7 +59,12 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       const textResultKeys = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
       // 设置文本描述结果
       setTextTab(
-        <div className="rightTab">
+        <div
+          className="rightTab"
+          onClick={() => {
+            dispatch(ChangeCurrentTool('textTool'));
+          }}
+        >
           <p>文本描述</p>
           <span
             className={classNames({
@@ -75,7 +81,12 @@ const RightSiderbar: React.FC<IProps> = (props) => {
       // 设置分类结果
       const tagResultKeys = Object.keys(_.get(currentImgResult, 'tagTool.result[0].result', {}));
       setTagTab(
-        <div className="rightTab">
+        <div
+          className="rightTab"
+          onClick={() => {
+            dispatch(ChangeCurrentTool('tagTool'));
+          }}
+        >
           <p>分类</p>
           <span
             className={classNames({
@@ -129,7 +140,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         setIsShowClear(false);
       }
     }
-  }, [currentToolName, tabIndex, imgList, imgIndex, textConfig.length, tagConfigList.length]);
+  }, [currentToolName, tabIndex, imgList, imgIndex, textConfig.length, tagConfigList.length, dispatch]);
 
   if (!toolName) {
     return null;

@@ -262,7 +262,9 @@ export default class TagOperation extends BasicToolOperation {
       return;
     }
     const dom = document.createElement('div');
-    const tagInfoList = TagUtils.getTagNameList(this.tagResult[0]?.result ?? {}, this.config.inputList);
+    // TODO: 增加tagConfigList类型
+    // @ts-ignore
+    const tagInfoList = TagUtils.getTagNameList(this.tagResult[0]?.result ?? {}, this.config.tagConfigList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {

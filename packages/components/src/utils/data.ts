@@ -32,14 +32,12 @@ export const composeResult = (
     // 将步骤替换为工具
     const stepName = stepList[0].tool;
 
-    if (data.tagTool && !data.tagTool.toolName) {
+    if (data.tagTool) {
       data.tagTool = {
         toolName: 'tagTool',
         result: [...data.tagTool],
       };
-    }
-
-    if (data[stepName]) {
+    } else if (data[stepName]) {
       const info = data[stepName];
       if (info.result) {
         if (JSON.stringify(info.result) === JSON.stringify(rect)) {

@@ -12,7 +12,7 @@ import type { AppState } from '@/store';
 import type { IInputList } from '@/types/main';
 import type { ObjectString } from '@/components/videoPlayer/types';
 import type { IFileItem } from '@/types/data';
-import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
+import { UpdateImgList } from '@/store/annotation/actionCreators';
 import CheckBoxList from '@/components/checkboxList';
 import RadioList from '@/components/attributeList';
 
@@ -290,7 +290,6 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
           <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
             <CheckBoxList
               attributeChanged={() => {
-                dispatch(ChangeSave);
                 setLabel(basicIndex, index);
               }}
               selectedAttribute={[selectedAttribute]}
