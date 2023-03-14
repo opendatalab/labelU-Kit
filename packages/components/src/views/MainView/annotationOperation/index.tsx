@@ -24,6 +24,7 @@ interface IProps extends AppState, AppProps {
 }
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
+  const initializeTime = useRef(Date.now());
   const [, forceRender] = useState<number>(0);
   const dispatch = useDispatch();
   const {
@@ -148,7 +149,10 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
           clearTimeout(timmer);
         }
         timmer = setTimeout(() => {
-          fun();
+          // TODO: 引擎优化后删除以下代码
+          if (initializeTime.current > 0 && Date.now() - initializeTime.current > 2000) {
+            fun();
+          }
         }, time);
       };
       return returnFunction;
@@ -164,6 +168,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', throtthleSave);
 
     return () => {
+      initializeTime.current = 0;
       document.getElementById('toolContainer')?.removeEventListener('saveLabelResultToImg', throtthleSave);
     };
   }, [dispatch]);
