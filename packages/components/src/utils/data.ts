@@ -41,6 +41,7 @@ export const composeResult = (
 
     if (data[stepName]) {
       const info = data[stepName];
+
       if (info.result) {
         if (JSON.stringify(info.result) === JSON.stringify(rect)) {
           return JSON.stringify(data);
@@ -50,9 +51,10 @@ export const composeResult = (
             ...info.result.filter((v: { sourceID: string }) => !(v.sourceID && v.sourceID === basicRectID)),
             ...rect.filter((v) => v.sourceID && v.sourceID === basicRectID),
           ];
-        } else {
+        } else if (stepName !== 'tagTool') {
           info.result = rect;
         }
+
         return JSON.stringify(data);
       }
       return JSON.stringify({
