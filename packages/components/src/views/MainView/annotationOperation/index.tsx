@@ -13,6 +13,7 @@ import FileError from '@/components/fileException/FileError';
 import useSize from '@/hooks/useSize';
 import { store } from '@/index';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
+import { ChangeSave } from '@/store/annotation/actionCreators';
 
 interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;
@@ -161,7 +162,7 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     // @ts-ignore 添加防抖提升性能
     const throtthleSave = window.Cthrottle(() => {
       // 切换工具保存标注结果
-      // dispatch(ChangeSave);
+      dispatch(ChangeSave);
       // TODO：以上代码不必要
     }, 100);
 
