@@ -28,6 +28,15 @@ const AnnotationPage = () => {
 
   const sample = useSelector((state: RootState) => state.sample.item);
 
+  useEffect(() => {
+    if (routeParams.sampleId) {
+      dispatch.sample.fetchSample({
+        task_id: +routeParams.taskId!,
+        sample_id: +routeParams.sampleId!,
+      });
+    }
+  }, [dispatch.sample, routeParams.sampleId, routeParams.taskId]);
+
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
   const currentPage = useRef<number>(1);
