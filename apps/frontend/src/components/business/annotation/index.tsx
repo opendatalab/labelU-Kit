@@ -2,7 +2,6 @@ import type { TextConfig, BasicConfig } from '@label-u/components';
 import type { Attribute, OneTag } from '@label-u/annotation';
 import AnnotationOperation from '@label-u/components';
 import '@label-u/components/dist/index.css';
-import { memo } from 'react';
 
 const Annotation = (props: {
   fileList: any;
@@ -50,4 +49,5 @@ const Annotation = (props: {
     />
   );
 };
-export default memo(Annotation);
+
+export default Annotation;
