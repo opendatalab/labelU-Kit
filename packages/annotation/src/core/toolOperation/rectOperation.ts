@@ -1106,6 +1106,7 @@ export default class RectOperation extends BasicToolOperation {
     if (this.drawingRect) {
       // 结束框的绘制
       this.addDrawingRectToRectList();
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
 
