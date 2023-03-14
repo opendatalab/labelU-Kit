@@ -1,0 +1,55 @@
+@import '../../utils/common/common.module';
+.loginForm {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  justify-content: space-around;
+  align-items: center;
+  width: 380px;
+  margin: 0 auto;
+}
+
+.title {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  height: 32px;
+  line-height: 32px;
+  font-weight: 400;
+  font-size: 24px;
+  text-align: center;
+}
+
+.email_m {
+  width: inherit;
+  margin-top: 10px;
+  :global {
+    .ant-input-affix-wrapper {
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .ant-input-affix-wrapper > .ant-input:not(textarea) {
+      padding-left: 20px;
+    }
+  }
+}
+
+.loginButton {
+  height: 48px;
+  width: inherit;
+  border-radius: 8px;
+  line-height: 48px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--primary-color);
+  color: white;
+  margin-top: 24px;
+}
+
+.signUpButton {
+  margin-top: 10px;
+  color: var(--primary-color);
+  height: 48px;
+  width: inherit;
+  text-align: right;
+  cursor: pointer;
+}

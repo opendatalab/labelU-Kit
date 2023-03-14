@@ -5,7 +5,10 @@
     "sourceMap": false,
     "outDir": "dist",
     "declarationDir": "dist/types",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "plugins": [
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ]
   },
   "include": ["./src", "images.d.ts"]
 }

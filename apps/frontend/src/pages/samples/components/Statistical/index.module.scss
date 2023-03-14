@@ -1,0 +1,121 @@
+@import '@/utils/common/common.module';
+
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+  width: 100%;
+  line-height: 56px;
+}
+
+.left {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 30px;
+}
+.leftTitle {
+  width: 56px;
+  height: 22px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 22px;
+  /* identical to box height, or 157% */
+  /* 中性色/87% */
+  color: rgba(0, 0, 0, 0.87);
+  margin-right: 56px;
+}
+.leftTitleContent {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+}
+.leftTitleContentOption {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 22px;
+  /* identical to box height, or 157% */
+
+  /* 中性色/87% */
+
+  color: rgba(0, 0, 0, 0.87);
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  align-items: center;
+  height: 24px;
+  margin-right: 50px;
+  justify-content: flex-start;
+}
+
+.leftTitleContentOptionContent {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 22px;
+  /* identical to box height, or 157% */
+
+  /* 中性色/87% */
+
+  font-color: rgba(0, 0, 0, 0.87);
+  margin-right: 6px;
+  font-style: normal;
+}
+
+.leftTitleContentOptionBlueIcon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  margin-right: 6px;
+}
+.leftTitleContentOptionGrayIcon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.24);
+  margin-right: 6px;
+}
+.leftTitleContentOptionOrangeIcon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff8800;
+  margin-right: 6px;
+}
+.leftTitleContentOptionWhiteIcon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  margin-right: 6px;
+}
+
+.logo {
+  background-image: url('../../assets/svg/LOGO.svg');
+  background-size: 120px 32px;
+  background-repeat: no-repeat;
+  width: 120px;
+  height: 32px;
+}
+.shortCutButton {
+  background-image: url('../../assets/png/threeLines.png');
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
+  margin-left: 18px;
+}
+.breadcrumb {
+  margin-left: 39px;
+}
+.right {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-end;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  margin-right: 40px;
+  margin-right: 24px;
+}

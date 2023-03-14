@@ -1,0 +1,17 @@
+.leftBar {
+  background: #eeeeee;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  z-index: 10;
+  border-top: 1px solid #e2e2e2;
+  height: 100%;
+}
+
+.tips {
+  width: 100%;
+  height: 30px;
+  text-align: center;
+  margin-top: 10px;
+  //background-color: white;
+  //color : var(--primary-color);
+}

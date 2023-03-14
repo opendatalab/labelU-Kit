@@ -1,0 +1,59 @@
+@import '../../utils/common/common.module';
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  justify-content: flex-start;
+  align-items: center;
+  //height : 56px;
+  width: 100%;
+  //line-height: 56px;
+}
+
+.stepsRow {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+  width: 100%;
+  background: #ffffff;
+  box-shadow: inset 0px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+.left {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 30px;
+}
+
+.right {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-end;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  margin-right: 40px;
+  margin-right: 24px;
+}
+
+.nextButton {
+  width: 74px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  color: white;
+}
+
+.content {
+  width: 100%;
+  // height : calc(100vh - 136px);
+  height: calc(100vh - 136px);
+  margin: 24px 24px 0 24px;
+  //margin-left:24px;
+  //margin-right:24px;
+  //margin-top:24px;
+  background-color: white;
+}

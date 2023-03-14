@@ -1,24 +1,28 @@
-import { isNumber } from 'lodash';
+import { isNumber } from 'lodash-es';
+// TODO: 将eventBus替换成eventEmitter3
+// import EventEmitter from 'eventemitter3';
 
-import CanvasUtils from '@/utils/tool/CanvasUtils';
-import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import MathUtils from '@/utils/MathUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
-import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
-import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
-import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
-import TagUtils from '@/utils/tool/TagUtils';
-import type { Attribute, PrevResult, ToolConfig } from '@/interface/conbineTool';
+import type { Attribute, PrevResult, ToolConfig } from '@/interface/combineTool';
+import type { IImageAttribute } from '@/types/imgAttributeStore';
+import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
 import type { ICoordinate, ISize } from '@/types/tool/common';
 import type { ILinePoint } from '@/types/tool/lineTool';
-import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
-import type { IImageAttribute } from '@/types/imgAttributeStore';
+import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
 import type { IRectConfig } from '@/types/tool/rectTool';
+import MathUtils from '@/utils/MathUtils';
+import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
+import CanvasUtils from '@/utils/tool/CanvasUtils';
+import CommonToolUtils from '@/utils/tool/CommonToolUtils';
+import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
+import TagUtils from '@/utils/tool/TagUtils';
 
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
+import locale from '../../locales';
+import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
@@ -27,10 +31,8 @@ import ImgPosUtils from '../../utils/tool/ImgPosUtils';
 import RenderDomUtils from '../../utils/tool/RenderDomUtils';
 import ZoomUtils from '../../utils/tool/ZoomUtils';
 import EventListener from './eventListener';
-import locale from '../../locales';
-import { EMessage } from '../../locales/constants';
 
-interface IBasicToolOperationProps {
+export interface IBasicToolOperationProps {
   container: HTMLElement;
   size: ISize;
   imgNode?: HTMLImageElement; // 展示图片的内容
@@ -70,7 +72,9 @@ const validNumber = (value: number) => {
   return isNumber(value) && !isNaN(value);
 };
 
-class BasicToolOperation extends EventListener {
+export default class BasicToolOperation extends EventListener {
+  static NONE_ATTRIBUTE = 'noneAttribute';
+
   public container: HTMLElement; // 当前结构绑定 container
 
   public canvas!: HTMLCanvasElement;
@@ -129,6 +133,8 @@ class BasicToolOperation extends EventListener {
   public attributeLockList: string[]; // 属性限制列表
 
   public allAttributes!: Attribute[]; // 多工具所有标签集合
+
+  public allAttributesMap!: Map<Attribute['value'], Attribute['key']>; // 多工具所有标签Map集合
 
   public dblClickListener: DblClickEventListener;
 
@@ -243,7 +249,7 @@ class BasicToolOperation extends EventListener {
     this._imgAttribute = props.imgAttribute ?? {};
     this.isHidden = false;
     this.dragStatus = EDragStatus.Wait;
-    this.defaultAttribute = props?.defaultAttribute ?? '无标签';
+    this.defaultAttribute = props?.defaultAttribute ?? BasicToolOperation.NONE_ATTRIBUTE;
     this.forbidCursorLine = !!props.forbidCursorLine;
     this.lang = ELang.Zh;
 
@@ -273,6 +279,10 @@ class BasicToolOperation extends EventListener {
     return this._ctx || this.canvas?.getContext('2d');
   }
 
+  get NoneAttribute() {
+    return BasicToolOperation.NONE_ATTRIBUTE;
+  }
+
   get basicCtx() {
     return this.basicCanvas?.getContext('2d');
   }
@@ -299,6 +309,18 @@ class BasicToolOperation extends EventListener {
     return [];
   }
 
+  hasAttributeInConfig(attribute: string) {
+    if (attribute === '') {
+      return false;
+    }
+
+    if (attribute === this.NoneAttribute) {
+      return true;
+    }
+
+    return this.config.attributeMap.has(attribute);
+  }
+
   /**
    * 设置此前工具标注结果信息
    */
@@ -311,6 +333,13 @@ class BasicToolOperation extends EventListener {
    */
   public setAllAttributes(allAttributes: Attribute[]) {
     this.allAttributes = allAttributes;
+    this.allAttributesMap = new Map();
+
+    this.allAttributesMap.set(this.NoneAttribute, locale.getMessagesByLocale(EMessage.NoneAttribute, this.lang));
+
+    this.allAttributes.forEach((attribute) => {
+      this.allAttributesMap.set(attribute.value, attribute.key);
+    });
   }
 
   /**
@@ -490,7 +519,7 @@ class BasicToolOperation extends EventListener {
     if (typeof basicImgInfo.valid === 'boolean') {
       this.setValid(basicImgInfo.valid);
     }
-    this.initImgPos();
+    this.initImgPos({ useCachedPosition: false });
     // 多余渲染，影响性能
     // this.render();
     // this.renderBasicCanvas();
@@ -581,10 +610,12 @@ class BasicToolOperation extends EventListener {
   }
 
   /** 用于初始化图片的位置 */
-  public initImgPos = async () => {
+  public initImgPos = async (options?: { useCachedPosition?: boolean }) => {
     if (!this.imgNode || this.imgNode.width === 0) {
       return;
     }
+    // 初始化图片位置信息时，优先从持久化记录中获取
+    const { useCachedPosition } = options || { useCachedPosition: true };
     const zoomRatio = this._imgAttribute?.zoomRatio;
     const isOriginalSize = this._imgAttribute?.isOriginalSize;
     const { currentPos, zoom } = ImgPosUtils.getInitImgPos(
@@ -596,8 +627,8 @@ class BasicToolOperation extends EventListener {
     );
     // 初始化图片位置信息时，优先从持久化记录中获取
     const cachedCoordinate = BasicToolOperation.Cache.get(this._coordinateCacheKey) as ICoordinate;
-    this.setCurrentPos(cachedCoordinate || currentPos);
-    this.currentPosStorage = cachedCoordinate || currentPos;
+    this.setCurrentPos(useCachedPosition ? cachedCoordinate || currentPos : currentPos);
+    this.currentPosStorage = useCachedPosition ? cachedCoordinate : currentPos;
     let cachedZoom = 0;
     // 当部位原图比例显示时，采用stable zoom
     if (!isOriginalSize) {
@@ -1085,11 +1116,8 @@ class BasicToolOperation extends EventListener {
   public setImgAttribute(imgAttribute: IImageAttribute) {
     const oldImgAttribute = this._imgAttribute;
     this._imgAttribute = imgAttribute;
-    if (
-      oldImgAttribute?.zoomRatio !== imgAttribute.zoomRatio ||
-      oldImgAttribute.isOriginalSize !== imgAttribute.isOriginalSize
-    ) {
-      this.initImgPos();
+    if (oldImgAttribute?.zoomRatio !== imgAttribute.zoomRatio || imgAttribute.isOriginalSize) {
+      this.initImgPos({ useCachedPosition: false });
       return;
     }
     this.renderBasicCanvas();
@@ -1175,7 +1203,7 @@ class BasicToolOperation extends EventListener {
     // 更改当前图片的旋转方式
     const rotate = MathUtils.getRotate(this.basicImgInfo.rotate);
     this.basicImgInfo.rotate = rotate;
-    this.initImgPos();
+    this.initImgPos({ useCachedPosition: false });
 
     // 触发外层 result 的更改
     this.emit('updateResult');
@@ -1273,6 +1301,7 @@ class BasicToolOperation extends EventListener {
                       order: item.order,
                       color,
                       thickness,
+                      allAttributesMap: this.allAttributesMap,
                     },
                   );
                   if (this.isShowAttributeText) {
@@ -1284,7 +1313,6 @@ class BasicToolOperation extends EventListener {
                       item.textAttribute,
                       {
                         color: color,
-                        // font: 'italic normal 900 14px Arial',
                         textMaxWidth: textWidth,
                         // ...DEFAULT_TEXT_SHADOW,
                       },
@@ -1314,7 +1342,7 @@ class BasicToolOperation extends EventListener {
                     thickness,
                   },
                 );
-                let showText = item.attribute;
+                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
@@ -1361,7 +1389,7 @@ class BasicToolOperation extends EventListener {
                     thickness,
                   },
                 );
-                let showText = item.attribute;
+                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
@@ -1404,7 +1432,7 @@ class BasicToolOperation extends EventListener {
                     color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
                     fill: 'transparent',
                   });
-                  let showText = item.attribute;
+                  let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
                   if (this.isShowOrder) {
                     showText = `${item.order}  ${showText}`;
                   }
@@ -1554,5 +1582,3 @@ class BasicToolOperation extends EventListener {
     this.emit('changeStyle', { attribute: newAttribute });
   }
 }
-
-export { IBasicToolOperationProps, BasicToolOperation };

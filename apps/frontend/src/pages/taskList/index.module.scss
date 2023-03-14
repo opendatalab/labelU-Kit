@@ -1,0 +1,34 @@
+@import '@/utils/common/common.module';
+.tasksWrapper {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.createTaskButton {
+  width: 88px;
+}
+
+.cards {
+  --margin-horizontal: 0.75rem;
+  margin: 0.625rem calc(0rem - var(--margin-horizontal));
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  @extend .flexDirectionRowWrap;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stationSymbol {
+  flex: 0 1 auto;
+  width: 1px;
+}
+
+.pagination {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -16,6 +16,7 @@ export enum EMessage {
   DisableDelete = 'DisableDelete',
   ClearPartialData = 'ClearPartialData',
   MarkerFinish = 'MarkerFinish',
+  NoneAttribute = 'NoneAttribute',
   LowerLimitPoint = 'LowerLimitPoint',
   NoRotateInDependence = 'noRotateInDependence',
   UnableToReannotation = 'unableToReannotation',

@@ -1,0 +1,72 @@
+@import '../../utils/common/common.module';
+.finishedWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.innerWrapper {
+  display: flex;
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  width: 312px;
+  height: 290px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.check {
+  width: 79px;
+  height: 79px;
+  border-radius: 50%;
+  background-color: #ecfeec;
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkIcon {
+  color: #64ba64;
+}
+
+.txt {
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 24px;
+  width: 104px;
+  height: 24px;
+  color: #000000;
+}
+
+.stat {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  width: 308px;
+  height: 24px;
+  justify-content: space-between;
+  align-items: center;
+}
+.statItem {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 24px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.buttons {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  width: 312px;
+  height: 48px;
+  justify-content: space-between;
+  align-items: center;
+
+  button {
+    padding: 0.375rem 2rem;
+    height: 3rem;
+  }
+}

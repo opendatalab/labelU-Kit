@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
 import { Tabs } from 'antd';
-import { connect, useSelector } from 'react-redux';
 import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
+import { connect, useSelector } from 'react-redux';
+import _ from 'lodash-es';
 
 import type { IFileItem } from '@/types/data';
 
@@ -10,10 +11,10 @@ import type { EToolName } from '../../../data/enums/ToolType';
 import type { AppState } from '../../../store';
 import type { Sider } from '../../../types/main';
 import StepUtils from '../../../utils/StepUtils';
-import TextToolSidebar from './TextToolSidebar';
-import TagSidebar from './TagSidebar';
-import AttributeRusult from './AttributeRusult';
 import { toolList } from '../toolHeader/ToolOperation';
+import AttributeRusult from './AttributeRusult';
+import TagSidebar from './TagSidebar';
+import TextToolSidebar from './TextToolSidebar';
 
 interface IProps {
   toolName?: EToolName;
@@ -37,7 +38,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     </div>,
   );
   const [attributeTab, setAttributeTab] = useState<any>();
-  // const [isClearnHover, setIsClearHover] = useState<boolean>(false);
   const stepInfo = useSelector((state: AppState) =>
     StepUtils.getCurrentStepInfo(state.annotation.step, state.annotation.stepList),
   );
@@ -45,15 +45,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const tagConfigList = useSelector((state: AppState) => state.annotation.tagConfigList);
   const textConfig = useSelector((state: AppState) => state.annotation.textConfig);
   const toolName = stepInfo?.tool;
-
-  const [boxHeight, setBoxHeight] = useState<number>();
-  const [, setBoxWidth] = useState<number>();
-
-  useEffect(() => {
-    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
-    setBoxHeight(boxParent.clientHeight);
-    setBoxWidth(boxParent.clientWidth);
-  }, []);
 
   // 删除标注结果
   // const doClearAllResult = () => {
@@ -82,8 +73,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         </div>,
       );
       // 设置分类结果
-      // if (currentImgResult?.tagTool?.toolName) {
-      const tagResultKeys = currentImgResult?.tagTool ? Object.keys(currentImgResult?.tagTool.result[0]?.result) : [];
+      const tagResultKeys = Object.keys(_.get(currentImgResult, 'tagTool.result[0].result', {}));
       setTagTab(
         <div className="rightTab">
           <p>分类</p>
@@ -146,7 +136,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   }
 
   return (
-    <div className={`${sidebarCls}`} style={{ height: (boxHeight as number) - 111 }}>
+    <div className={`${sidebarCls}`}>
       <Tabs
         defaultActiveKey="1"
         onChange={(e) => {
@@ -162,33 +152,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
         )}
         <Tabs.TabPane tab={attributeTab} key="2">
           <AttributeRusult isPreview={isPreview} isShowClear={isShowClear} />
-          {/* {isShowClear && (
-            <Popconfirm
-              title='确认清空标注？'
-              open={open}
-              okText='确认'
-              cancelText='取消'
-              onConfirm={handleOk}
-              okButtonProps={{ loading: confirmLoading }}
-              onCancel={handleCancel}
-            >
-              <div className='leftBarFooter'>
-              <img
-                onMouseEnter={(e) => {
-                  e.stopPropagation();
-                  setIsClearHover(true);
-                }}
-                onMouseLeave={(e) => {
-                  e.stopPropagation();
-                  setIsClearHover(false);
-                }}
-                onClick={showPopconfirm}
-                className='clrearResult'
-                src={isClearnHover ? ClearResultIconHover : ClearResultIcon}
-              />
-              </div>
-            </Popconfirm>
-          )} */}
         </Tabs.TabPane>
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane tab={textTab} key="3">

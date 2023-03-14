@@ -1,0 +1,64 @@
+@import '@/utils/common/common.module';
+
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.title {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  align-items: center;
+  width: calc(100% - 48px);
+  height: 44px;
+  background: #fafafa;
+  margin-top: 24px;
+}
+.icon {
+  width: 3px;
+  height: 16px;
+  background: var(--primary-color);
+  border-radius: 10px;
+  margin-right: 4px;
+  margin-left: 16px;
+}
+.titleText {
+  color: rgba(0, 0, 0, 0.87);
+  font-weight: 500;
+  font-size: 16px;
+  width: 64px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+}
+.content {
+  margin-top: 44px;
+}
+.item {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.itemLabel {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-end;
+  align-items: center;
+  width: 68px;
+  height: 32px;
+  line-height: 32px;
+  text-align: right;
+  text-align: -moz-right;
+  text-align: -webkit-right;
+  font-size: 14px;
+  font-weight: 400;
+  margin-right: 16px;
+}
+.itemInput {
+  width: 516px;
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+}

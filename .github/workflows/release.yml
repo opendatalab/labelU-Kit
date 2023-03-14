@@ -1,0 +1,78 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release
+
+env:
+  LAB_NPM_TOKEN: ${{ secrets.LAB_NPM_TOKEN }}
+  # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: ["release", "beta", "alpha"]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  publish-packages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Show env
+        run: |
+          echo $RELEASE_VERSION
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build packages
+        run: pnpm run build
+      - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
+      - name: Publish packages
+        run: pnpm run release
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      - name: Execute before release script
+        run: node ./scripts/before-release-frontend.js
+      - name: Update frontend dependencies
+        run: |
+          npm cache clean -f
+          pnpm install --no-frozen-lockfile
+      - name: Build frontend
+        run: pnpm run build:frontend
+      - name: Release frontend
+        run: pnpm run release:frontend
+      - name: Commit package.json files to current branch
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Update package.json [skip ci]"
+          file_pattern: "package.json"

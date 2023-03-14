@@ -1,0 +1,24 @@
+@import '../../utils/common/common.module';
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  flex-grow: 1;
+  background-color: #f4f5f7;
+
+  :global {
+    .ant-spin-nested-loading,
+    .ant-spin-container {
+      height: 100%;
+    }
+  }
+}
+:global {
+  .ant-modal-footer {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}

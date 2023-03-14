@@ -1,9 +1,8 @@
-import type { Attribute } from '@label-u/annotation';
-import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool } from '@label-u/annotation';
-import type { EToolName } from '@label-u/annotation/es/types/constant/tool';
+import type { Attribute, EToolName } from '@label-u/annotation';
+import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool, BasicToolOperation } from '@label-u/annotation';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import { getFormatSize } from '@/components/customResizeHook';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
@@ -92,18 +91,29 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
 
   let allAttributesList: Attribute[] = [];
-  if (attributeList && attributeList.length > 0) {
-    allAttributesList = [...allAttributesList, ...attributeList];
+  /**
+   * TODO: 为了兼容历史配置数据，此处过滤掉空的属性；但是后续应该在保存配置的时候就过滤掉，或者校验空值。
+   * 修正：https://project.feishu.cn/bigdata_03/issue/detail/3877218?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+   **/
+  const noneEmptyAttributeList = attributeList.filter((i) => i.key !== '' && i.value !== '');
+  if (noneEmptyAttributeList && noneEmptyAttributeList.length > 0) {
+    allAttributesList = [...allAttributesList, ...noneEmptyAttributeList];
   }
   if (toolsBasicConfig && toolsBasicConfig.length > 0) {
     for (let i = 0; i < toolsBasicConfig.length; i++) {
       // @ts-ignore
       if (toolsBasicConfig[i].config?.attributeList) {
-        // @ts-ignore
-        allAttributesList = [...allAttributesList, ...toolsBasicConfig[i].config?.attributeList];
+        allAttributesList = [
+          ...allAttributesList,
+          // @ts-ignore
+          ...toolsBasicConfig[i].config?.attributeList.filter(
+            (item: Attribute) => item.key !== '' && item.value !== '',
+          ),
+        ];
       }
     }
   }
+
   const annotationEngine = new AnnotationEngine({
     container,
     isShowOrder: isShowOrder,
@@ -113,10 +123,17 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     config,
     style: toolStyle,
     tagConfigList,
-    attributeList,
+    attributeList: noneEmptyAttributeList,
     allAttributesList,
   });
-  // annotationEngine.toolInstance.setResult()
+
+  // 切换工具时，高亮上一个工具且本工具也存在的标签
+  const lastActiveAttribute = BasicToolOperation.Cache.get('activeAttribute');
+  if (annotationEngine?.toolInstance.config.attributeMap.has(lastActiveAttribute)) {
+    annotationEngine.toolInstance.setDefaultAttribute?.(lastActiveAttribute);
+  } else if (typeof annotationEngine.toolInstance.setDefaultAttribute === 'function') {
+    annotationEngine.toolInstance.setDefaultAttribute(annotationEngine.toolInstance.NoneAttribute);
+  }
 
   return { toolInstance: annotationEngine?.toolInstance, annotationEngine };
 };

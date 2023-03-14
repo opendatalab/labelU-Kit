@@ -1,0 +1,45 @@
+.textConfigItem {
+  display: flex;
+  padding-top: 14px;
+
+  .textConfigIndex {
+    width: 6%;
+    align-self: center;
+  }
+
+  .textConfigInput {
+    margin-right: 8px;
+    flex: 1;
+  }
+
+  .textConfigIconBox {
+    width: 66px;
+    padding-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    color: #aaa;
+
+    span {
+      cursor: pointer;
+      width: 20px;
+      height: 1px;
+    }
+  }
+
+  .activeColor {
+    color: #fba761;
+  }
+
+  .close {
+    display: none;
+  }
+}
+
+.multiple {
+  &:hover {
+    .close {
+      display: block;
+    }
+  }
+}

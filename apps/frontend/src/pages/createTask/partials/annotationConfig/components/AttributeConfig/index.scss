@@ -1,0 +1,57 @@
+@input-border: 1px solid #ccc;
+@input-border_activated: 1px solid #6371ff;
+
+.clearInput {
+  border: 0;
+  border-radius: 0;
+  // border-bottom: @input-border;
+}
+
+.sensebee-input-wrap {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  // .ant-input,
+  // .ant-input-group-addon :extend(.clearInput) {
+  //   &:focus,
+  //   &:hover {
+  //     // border-bottom: @input-border_activated;
+  //     border: @input-border_activated;
+  //   }
+  // }
+
+  .ant-input-group-wrapper {
+    width: auto;
+  }
+
+  .select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  // .sensebee-input{
+  //   min-width: 150px;
+  // }
+
+  .ant-input-group-addon {
+    border: 0;
+    background-color: transparent;
+  }
+
+  .deleteIcon {
+    margin-left: 1px;
+  }
+
+  .ant-input {
+    // border: 0;
+    background: #fbfbfb;
+    border-radius: 2px;
+    margin-left: 16px;
+    height: 32px;
+    width: 150px;
+  }
+}
+
+.ant-form-item-label > label::after {
+  content: '';
+}

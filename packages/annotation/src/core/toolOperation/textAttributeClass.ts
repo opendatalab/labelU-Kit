@@ -80,7 +80,7 @@ export default class TextAttributeClass {
     if (!this._textAttributeDOM || !this._textDOM || !this._iconDOM) {
       return;
     }
-    
+
     this.container.appendChild(this._textAttributeDOM);
     this._textAttributeDOM.appendChild(this._textDOM);
     this._textAttributeDOM.appendChild(this._iconDOM);
@@ -260,11 +260,11 @@ export default class TextAttributeClass {
     this._textAttributeDOM?.setAttribute(
       'style',
       `
-        position: absolute; 
+        position: absolute;
         width: ${newWidth}px;
-        font-size: 14px; 
-        left:${left}px; 
-        top: ${top}px; 
+        font-size: 14px;
+        left:${left}px;
+        top: ${top}px;
         color: ${color};
       `,
     );

@@ -1,12 +1,12 @@
-import type { FC } from 'react';
-import React, { useState } from 'react';
 import { Popover } from 'antd/es';
+import type { FC } from 'react';
+import { useState } from 'react';
 
 import { prefix } from '@/constant';
 
-import ImgAttributeInfo from '../../sidebar/ImgAttributeInfo';
 import ImageAdjust from '../../../../assets/annotation/common/image_adjust.svg';
 import ImageAdjustA from '../../../../assets/annotation/common/image_adjustA.svg';
+import ImgAttributeInfo from '../../sidebar/ImgAttributeInfo';
 
 const FooterTips: FC = () => {
   const [toolHover, setToolHover] = useState('');

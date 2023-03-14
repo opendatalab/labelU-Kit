@@ -29,14 +29,14 @@ import PolygonUtils from '../../utils/tool/PolygonUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
 type IPolygonOperationProps = IBasicToolOperationProps;
 
-class PolygonOperation extends BasicToolOperation {
+export default class PolygonOperation extends BasicToolOperation {
   public config: IPolygonConfig;
 
   // RENDER
@@ -386,6 +386,11 @@ class PolygonOperation extends BasicToolOperation {
 
   public setDefaultAttribute(defaultAttribute: string = '') {
     const oldDefault = this.defaultAttribute;
+
+    if (!this.hasAttributeInConfig(defaultAttribute)) {
+      return;
+    }
+
     this.defaultAttribute = defaultAttribute;
 
     if (oldDefault !== defaultAttribute) {
@@ -394,6 +399,7 @@ class PolygonOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
+      this.container.dispatchEvent(this.saveDataEvent);
 
       // 如有选中目标，则需更改当前选中的属性
       const { selectedID } = this;
@@ -870,6 +876,7 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     this.render();
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public onMouseDown(e: MouseEvent) {
@@ -1044,7 +1051,6 @@ class PolygonOperation extends BasicToolOperation {
       this.setPolygonList(newPolygonList);
       this.history.pushHistory(newPolygonList);
       this.render();
-
       this.emit('messageInfo', i18n.t('CombineSuccess'));
     } else {
       this.emit('messageInfo', i18n.t('CombiningFailedNotify'));
@@ -1319,6 +1325,7 @@ class PolygonOperation extends BasicToolOperation {
       }
     }
     this.render();
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public dragMouseUp() {
@@ -1420,7 +1427,6 @@ class PolygonOperation extends BasicToolOperation {
 
   public renderPolygon() {
     // 1. 静态多边形
-    this.container.dispatchEvent(this.saveDataEvent);
     if (this.isHidden === false) {
       this.polygonList?.forEach((polygon) => {
         if ([this.selectedID, this.editPolygonID].includes(polygon.id)) {
@@ -1446,7 +1452,7 @@ class PolygonOperation extends BasicToolOperation {
             lineType: this.config?.lineType,
           });
 
-          let showText = `${AttributeUtils.getAttributeShowText(attribute, this.config?.attributeList) ?? ''}`;
+          let showText = `${this.config.attributeMap.get(attribute) || attribute}`;
           if (this.isShowOrder && polygon?.order > 0) {
             showText = `${polygon.order} ${showText}`;
           }
@@ -1520,9 +1526,7 @@ class PolygonOperation extends BasicToolOperation {
           },
         );
 
-        let showText = `${
-          AttributeUtils.getAttributeShowText(selectdPolygon.attribute, this.config?.attributeList) ?? ''
-        }`;
+        let showText = `${this.config.attributeMap.get(selectdPolygon.attribute) || selectdPolygon.attribute}`;
         if (this.isShowOrder && selectdPolygon?.order > 0) {
           showText = `${selectdPolygon.order} ${showText}`;
         }
@@ -1690,6 +1694,8 @@ class PolygonOperation extends BasicToolOperation {
       this.setPolygonList(polygonList);
       this.render();
     }
+
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   /** 重做 */
@@ -1715,7 +1721,7 @@ class PolygonOperation extends BasicToolOperation {
       this.setPolygonList(polygonList);
       this.render();
     }
+
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 }
-
-export default PolygonOperation;

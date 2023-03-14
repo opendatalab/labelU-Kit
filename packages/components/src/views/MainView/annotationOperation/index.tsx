@@ -1,18 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { message } from 'antd/es';
-import type { AppState } from 'src/store';
-import { connect, useDispatch } from 'react-redux';
-import type { ImgAttributeState } from 'src/store/imgAttribute/types';
-import _ from 'lodash';
 import type { AnnotationEngine } from '@label-u/annotation';
 import { ImgUtils } from '@label-u/annotation';
 import { i18n } from '@label-u/utils';
+import { message } from 'antd/es';
+import _ from 'lodash-es';
+import React, { useEffect, useRef, useState } from 'react';
+import { connect, useDispatch } from 'react-redux';
+import type { AppState } from 'src/store';
+import type { ImgAttributeState } from 'src/store/imgAttribute/types';
 
-import { store } from '@/index';
-import useSize from '@/hooks/useSize';
-import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
-import FileError from '@/components/fileException/FileError';
 import type { AppProps } from '@/App';
+import FileError from '@/components/fileException/FileError';
+import useSize from '@/hooks/useSize';
+import { store } from '@/index';
+import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
 import { ChangeSave } from '@/store/annotation/actionCreators';
 
 interface IProps extends AppState, AppProps {
@@ -24,6 +24,7 @@ interface IProps extends AppState, AppProps {
 }
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
+  const initializeTime = useRef(Date.now());
   const [, forceRender] = useState<number>(0);
   const dispatch = useDispatch();
   const {
@@ -69,21 +70,31 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   }, [annotationEngine, dataInjectionAtCreation, renderEnhance]);
 
   useEffect(() => {
-    if (toolInstance) {
-      toolInstance.singleOn('messageError', (error: string) => {
-        message.error(error);
-      });
-
-      toolInstance.singleOn('messageInfo', (info: string) => {
-        message.info(info);
-      });
-
-      toolInstance.singleOn('changeAnnotationShow', () => {
-        forceRender((s) => s + 1);
-      });
-
-      // toolInstance.setForbidOperation(true)
+    if (!toolInstance) {
+      return;
     }
+
+    const handleMessageError = (error: string) => {
+      message.error(error);
+    };
+
+    const handleMessageInfo = (info: string) => {
+      message.info(info);
+    };
+
+    const handleToggleAnnotationVisibility = () => {
+      forceRender((s) => s + 1);
+    };
+
+    toolInstance.singleOn('messageError', handleMessageError);
+    toolInstance.singleOn('messageInfo', handleMessageInfo);
+    toolInstance.singleOn('changeAnnotationShow', handleToggleAnnotationVisibility);
+
+    return () => {
+      toolInstance?.unbind('messageError', handleMessageError);
+      toolInstance?.unbind('messageInfo', handleMessageInfo);
+      toolInstance?.unbind('changeAnnotationShow', handleToggleAnnotationVisibility);
+    };
   }, [toolInstance]);
 
   useEffect(() => {
@@ -138,7 +149,10 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
           clearTimeout(timmer);
         }
         timmer = setTimeout(() => {
-          fun();
+          // TODO: 引擎优化后删除以下代码
+          if (initializeTime.current > 0 && Date.now() - initializeTime.current > 2000) {
+            fun();
+          }
         }, time);
       };
       return returnFunction;
@@ -149,10 +163,15 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     const throtthleSave = window.Cthrottle(() => {
       // 切换工具保存标注结果
       dispatch(ChangeSave);
+      // TODO：以上代码不必要
     }, 100);
-    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', () => {
-      throtthleSave();
-    });
+
+    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', throtthleSave);
+
+    return () => {
+      initializeTime.current = 0;
+      document.getElementById('toolContainer')?.removeEventListener('saveLabelResultToImg', throtthleSave);
+    };
   }, [dispatch]);
 
   return (

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Badge, Collapse, Tooltip } from 'antd/es';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import type { TagOperation } from '@label-u/annotation';
 import { TagUtils } from '@label-u/annotation';
 import { connect } from 'react-redux';

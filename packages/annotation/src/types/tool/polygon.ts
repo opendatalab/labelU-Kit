@@ -22,6 +22,7 @@ export interface IPolygonPoint {
 }
 
 export interface IPolygonConfig extends IToolConfig {
+  attributeMap: Map<string, string>;
   // 多边形持有
   lineType: ELineTypes; // 线条类型
   lineColor: ELineColor; // 线条颜色

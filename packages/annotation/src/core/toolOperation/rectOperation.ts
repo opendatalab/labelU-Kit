@@ -17,17 +17,17 @@ import MarkerUtils from '../../utils/tool/MarkerUtils';
 import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
-interface IRectOperationProps extends IBasicToolOperationProps {
+export interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
   style: any;
 }
 
 const scope = 6;
 
-class RectOperation extends BasicToolOperation {
+export default class RectOperation extends BasicToolOperation {
   public drawingRect?: IRect;
 
   public firstClickCoord?: ICoordinate; // 第一次点击的位置
@@ -1065,6 +1065,7 @@ class RectOperation extends BasicToolOperation {
     }
 
     this.render();
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public shiftRightMouseUp(e: MouseEvent) {
@@ -1105,6 +1106,7 @@ class RectOperation extends BasicToolOperation {
     if (this.drawingRect) {
       // 结束框的绘制
       this.addDrawingRectToRectList();
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
 
@@ -1117,6 +1119,7 @@ class RectOperation extends BasicToolOperation {
     // 创建框
     this.createNewDrawingRect(e, basicSourceID);
     this.render();
+    this.container.dispatchEvent(this.saveDataEvent);
 
     return undefined;
   }
@@ -1438,7 +1441,7 @@ class RectOperation extends BasicToolOperation {
       }
 
       if (rect.attribute) {
-        showText = `${showText}  ${AttributeUtils.getAttributeShowText(rect.attribute, this.config?.attributeList)}`;
+        showText = `${showText}  ${this.config.attributeMap.get(rect.attribute) || rect.attribute}`;
       }
 
       const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);
@@ -1574,7 +1577,6 @@ class RectOperation extends BasicToolOperation {
    * 渲染矩形框体
    */
   public renderRect() {
-    this.container.dispatchEvent(this.saveDataEvent);
     this.renderStaticRect();
     this.renderCreatingRect();
   }
@@ -1590,6 +1592,11 @@ class RectOperation extends BasicToolOperation {
 
   public setDefaultAttribute(defaultAttribute?: string) {
     const oldDefault = this.defaultAttribute;
+
+    if (!this.hasAttributeInConfig(defaultAttribute!)) {
+      return;
+    }
+
     this.defaultAttribute = defaultAttribute ?? '';
 
     if (oldDefault !== defaultAttribute) {
@@ -1598,6 +1605,7 @@ class RectOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
+      this.container.dispatchEvent(this.saveDataEvent);
 
       // 如有选中目标，则需更改当前选中的属性
       const { selectedRect } = this;
@@ -1723,7 +1731,3 @@ class RectOperation extends BasicToolOperation {
     }
   }
 }
-
-export { RectOperation, IRectOperationProps };
-
-export default RectOperation;

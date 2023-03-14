@@ -1,0 +1,52 @@
+{
+  "name": "@label-u/formatter",
+  "version": "1.0.0-alpha.1",
+  "private": false,
+  "description": "A collection of universal data formatting functions.",
+  "keywords": [
+    "data formatting",
+    "react data formatting"
+  ],
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opendatalab/labelU-Kit.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.shlab.tech"
+  },
+  "license": "ISC",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "directories": {
+    "test": "__tests__",
+    "dist": "dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && npm run build:types",
+    "build:types": "tsc -d --emitDeclarationOnly",
+    "test": "jest -c=../../jest.config.js --no-cache"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.1",
+    "filesize": "10.0.6"
+  },
+  "devDependencies": {
+    "@types/rollup-plugin-peer-deps-external": "^2.2.1",
+    "react": "^18.0.0",
+    "react-dom": "^18.1.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "typescript": "4.6.3",
+    "vite": "^4.1.1",
+    "vite-tsconfig-paths": "^3.5.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.9.0",
+    "react-dom": ">=16.9.0"
+  }
+}

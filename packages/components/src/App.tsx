@@ -2,7 +2,7 @@ import { i18n } from '@label-u/utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { BasicToolOperation } from '@label-u/annotation';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import MainView from '@/views/MainView';
 import type { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
@@ -100,7 +100,6 @@ const App: React.FC<AppProps> = (props) => {
     loadFileList,
     defaultLang = 'cn',
   } = props;
-
   //@ts-ignore
   if (props.imgList && props.imgList.length > 0) {
     console.info('result', props.imgList[0].result);
@@ -122,14 +121,6 @@ const App: React.FC<AppProps> = (props) => {
         },
       });
       store.dispatch(LoadFileAndFileData(initialIndex as number));
-      // 页数持久化
-      // loacalforage.getItem('nextIndex', (error, value) => {
-      //   // if (value && value < imgList.length) {
-      //   //   store.dispatch(LoadFileAndFileData(value as number));
-      //   // } else {
-
-      //   // }
-      // });
     }
   }, [imgList, initialIndex, loadFileList]);
 
@@ -171,9 +162,11 @@ const App: React.FC<AppProps> = (props) => {
       initToolName = toolsBasicConfig[0].tool;
       dispatch(ChangeCurrentTool(initToolName));
     }
+
     store.dispatch(
       InitTaskData({
         toolStyle,
+        // NOTE: 切换工具必须重新初始化AnnotationEngine
         initToolName,
         onSubmit,
         stepList: stepList || [],
@@ -199,6 +192,7 @@ const App: React.FC<AppProps> = (props) => {
     getFileData,
     initImgList,
     loadFileList,
+    currentToolName,
     onPageChange,
     onSave,
     onStepChange,
@@ -209,7 +203,6 @@ const App: React.FC<AppProps> = (props) => {
     shouldInitial,
     // ====
     attributeList,
-    currentToolName,
     tagConfigList,
     textConfig,
     toolStyle,
@@ -217,11 +210,6 @@ const App: React.FC<AppProps> = (props) => {
     // REVIEW: 尚不清楚imgUrl为何要加在deps中
     imgUrl,
   ]);
-
-  // useEffect(() => {
-
-  //   initImgList();
-  // }, [])
 
   useEffect(() => {
     if (toolInstance) {

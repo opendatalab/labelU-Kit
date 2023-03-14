@@ -1,17 +1,17 @@
-import type { TagToolConfig } from '@/interface/conbineTool';
+import type { TagToolConfig } from '@/interface/combineTool';
 import type { ITagConfig, ITagResult } from '@/types/tool/tagTool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 
 import TagUtils from '../../utils/tool/TagUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 
 interface ITagOperationProps extends IBasicToolOperationProps {
   config: TagToolConfig;
 }
 
-class TagOperation extends BasicToolOperation {
+export default class TagOperation extends BasicToolOperation {
   public config: ITagConfig;
 
   public tagResult: ITagResult[]; // 当前图片下所有的标签集合
@@ -262,7 +262,9 @@ class TagOperation extends BasicToolOperation {
       return;
     }
     const dom = document.createElement('div');
-    const tagInfoList = TagUtils.getTagNameList(this.tagResult[0]?.result ?? {}, this.config.inputList);
+    // TODO: 增加tagConfigList类型
+    // @ts-ignore
+    const tagInfoList = TagUtils.getTagNameList(this.tagResult[0]?.result ?? {}, this.config.tagConfigList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {
@@ -309,5 +311,3 @@ class TagOperation extends BasicToolOperation {
     return [tagResult, this.basicImgInfo];
   }
 }
-
-export default TagOperation;

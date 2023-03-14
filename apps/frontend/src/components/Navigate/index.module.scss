@@ -1,0 +1,85 @@
+@import '../../utils/common/common.module';
+
+.navigator {
+  --header-height: 3.5rem;
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--header-height);
+  width: 100%;
+  line-height: var(--header-height);
+  overflow-y: visible;
+}
+
+.left {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 30px;
+}
+
+.logo {
+  background-image: url('../../assets/svg/LOGO.svg');
+  background-size: 120px 32px;
+  background-repeat: no-repeat;
+  width: 120px;
+  height: 32px;
+}
+.shortCutButton {
+  background-image: url('../../assets/png/threeLines.png');
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
+  margin-left: 18px;
+}
+.breadcrumb {
+  margin-left: 39px;
+}
+.right {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-end;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  margin-right: 40px;
+  overflow-y: visible;
+  z-index: 99;
+}
+
+.dropDownOverlay {
+  :global(.ant-dropdown-menu) {
+    padding: 0;
+    border-radius: 0;
+  }
+
+  :global(.ant-dropdown-menu-item) {
+    margin-bottom: 0;
+  }
+}
+.signOutItem {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 1px solid #cccccc;
+  background-color: #cccccc;
+  cursor: pointer;
+  color: #ffffff;
+  text-align: center;
+  z-index: 100000;
+}
+.username {
+  cursor: pointer;
+  text-align: center;
+}
+.quit {
+  text-align: center;
+  padding: 0.75rem 0;
+
+  span {
+    margin-left: 0.5rem;
+  }
+}

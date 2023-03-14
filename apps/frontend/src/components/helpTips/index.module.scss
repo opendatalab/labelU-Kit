@@ -1,0 +1,8 @@
+@import '../../utils/common/common.module';
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: flex-start;
+  align-items: center;
+  cursor: pointer;
+}

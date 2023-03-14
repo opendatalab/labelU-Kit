@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import { EPageTurningOperation } from '../data/enums/AnnotationSize';
 import { jsonParser } from '.';

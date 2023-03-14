@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import classnames from 'classnames';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
 
 import CollapseIcon from '@/assets/cssIcon/collapse.svg';
@@ -9,8 +9,8 @@ import { PageJump } from '@/store/annotation/actionCreators';
 // import { updateCollapseStatus } from '../../../store/toolStyle/actionCreators';
 
 import { prefix } from '../../../constant';
-import type { IFileItem } from '../../../types/data';
 import type { AppState } from '../../../store';
+import type { IFileItem } from '../../../types/data';
 const layoutCls = `${prefix}-layout`;
 
 interface LeftSiderProps {
@@ -20,23 +20,36 @@ interface LeftSiderProps {
   currentToolName: string;
   imgIndex: string;
   leftSiderContent?: React.ReactNode | React.ReactNode;
+  style?: React.CSSProperties;
 }
 
 const LeftSider: React.FC<LeftSiderProps> = (props) => {
-  const { imgList, imgIndex, leftSiderContent } = props;
+  const { imgList, imgIndex, leftSiderContent, style = {} } = props;
 
-  const [imgListCollapse, setImgListCollapse] = useState<boolean>(true);
+  const [imgListCollapse, setImgListCollapse] = useState<boolean>(false);
+  const sliderBoxRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const pageJump = (page: number) => {
     dispatch(PageJump(page));
   };
+
+  // 将左侧属性栏高度设置为剩余高度
+  useLayoutEffect(() => {
+    if (!sliderBoxRef.current) {
+      return;
+    }
+
+    const rect = sliderBoxRef.current.getBoundingClientRect();
+    const attributeWrapperHeight = window.innerHeight - rect.top;
+    sliderBoxRef.current.style.height = `${attributeWrapperHeight}px`;
+  }, []);
 
   if (imgList.length === 1 && !leftSiderContent) {
     return <div />;
   }
 
   return (
-    <div className="sliderBox" id="sliderBoxId">
+    <div className="sliderBox" id="sliderBoxId" style={style} ref={sliderBoxRef}>
       <div className={imgListCollapse ? `${layoutCls}__left_sider_hide` : `${layoutCls}__left_sider`}>
         {leftSiderContent
           ? leftSiderContent

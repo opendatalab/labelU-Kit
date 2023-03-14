@@ -1,5 +1,5 @@
-import React from 'react';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import adaptIcon from '@/assets/annotation/common/icon_adapt.svg';
@@ -7,8 +7,8 @@ import adaptIconBlack from '@/assets/annotation/common/icon_adapt_black.svg';
 import type { AppState } from '@/store';
 import type { ToolInstance } from '@/store/annotation/types';
 
-import ZoomLevel from './ZoomLevel';
 import { footerCls } from '../index';
+import ZoomLevel from './ZoomLevel';
 
 interface IProps {
   toolInstance: ToolInstance;

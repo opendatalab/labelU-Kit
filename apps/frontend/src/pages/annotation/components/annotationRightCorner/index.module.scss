@@ -1,0 +1,30 @@
+@import '@/utils/common/common.module';
+
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: space-between;
+  align-items: center;
+}
+.left {
+  width: 300px;
+  width: 74px;
+  height: 32px;
+  //background: var(--primary-color);
+
+  text-align: center;
+  line-height: 32px;
+  line-height: 32px;
+  cursor: pointer;
+  //color: #ffffff;
+  color: black;
+  //width : 100%;
+  margin-right: 40px;
+}
+
+.right {
+  @extend .displayFlex;
+  @extend .flexDirectionRow;
+  justify-content: space-between;
+  align-items: center;
+}

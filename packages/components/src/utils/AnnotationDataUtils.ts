@@ -1,5 +1,5 @@
 import { uuid } from '@label-u/annotation';
-import _ from 'lodash';
+import _ from 'lodash-es';
 
 import { EToolName } from '@/data/enums/ToolType';
 import type { IStepInfo } from '@/types/step';

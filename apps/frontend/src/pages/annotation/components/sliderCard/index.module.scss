@@ -1,0 +1,93 @@
+@import '@/utils/common/common.module';
+
+.outerFrameActive {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  justify-content: center;
+  align-items: center;
+  width: 220px;
+  //height : 120px;
+  margin-bottom: 10px;
+  //position : relative;
+}
+
+.outerFrame {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  justify-content: center;
+  align-items: center;
+  width: 220px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.contentActive {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 120px;
+  position: relative;
+  margin-bottom: 10px;
+  background: #ffffff;
+  border-radius: 2px;
+  border: 3px solid var(--primary-color);
+  overflow: hidden;
+}
+.idHighlight {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 2px;
+}
+.content {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 120px;
+  position: relative;
+  margin-bottom: 10px;
+  background: #ffffff;
+
+  overflow: hidden;
+}
+
+.tagBottom {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  z-index: 100;
+  width: 32px;
+  height: 32px;
+  -ms-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  background-color: var(--primary-color);
+}
+
+.tagTop {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 1000;
+  width: 16px;
+  height: 16px;
+}
+
+.skipped {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+  background: #ff8800;
+  border-radius: 0px 4px;
+  width: 36px;
+  height: 25px;
+  color: white;
+  text-align: center;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 25px;
+}

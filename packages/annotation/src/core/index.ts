@@ -7,10 +7,14 @@ import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import type { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
-import type { Attribute, OneTag, PrevResult, ToolConfig } from '@/interface/conbineTool';
+import type { Attribute, OneTag, PrevResult, ToolConfig } from '@/interface/combineTool';
 import type { ISize } from '@/types/tool/common';
 import type { IRect } from '@/types/tool/rectTool';
 import type { IRenderEnhance } from '@/types/tool/annotation';
+import { EMessage } from '@/locales/constants';
+
+import locale from '../locales';
+import BasicToolOperation from './toolOperation/basicToolOperation';
 
 export interface IProps {
   isShowOrder: boolean;
@@ -79,6 +83,7 @@ export default class AnnotationEngine {
     this.size = props.size;
     this.toolName = props.toolName;
     this.imgNode = props.imgNode;
+    this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     const tmpObjectConfig = props.config ?? getConfig(props.toolName); // 默认配置
     let attributeArr: any[] = [...props.attributeList];
     if (
@@ -93,13 +98,24 @@ export default class AnnotationEngine {
       // @ts-ignore
       attributeArr = [...attributeArr, ...props.config?.attributeList];
     }
+
+    const attributeMap = new Map();
+    attributeMap.set(
+      BasicToolOperation.NONE_ATTRIBUTE,
+      locale.getMessagesByLocale(EMessage.NoneAttribute, this.i18nLanguage),
+    );
+
+    for (const attribute of attributeArr) {
+      attributeMap.set(attribute.value, attribute.key);
+    }
+
     this.config = {
       ...tmpObjectConfig,
       attributeList: attributeArr,
+      attributeMap,
       tagConfigList: props.tagConfigList,
     } as unknown as ToolConfig;
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
-    this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     this._initToolOperation();
   }
 
@@ -162,6 +178,7 @@ export default class AnnotationEngine {
     if (this.toolInstance) {
       this.toolInstance.destroy();
     }
+
     const ToolOperation: any = CommonToolUtils.getCurrentOperation(this.toolName);
     if (!ToolOperation) {
       return;

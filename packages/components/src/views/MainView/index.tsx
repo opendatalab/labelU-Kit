@@ -1,24 +1,24 @@
-import { Spin, Layout } from 'antd';
-import React, { useEffect, useState } from 'react';
 import { cTool } from '@label-u/annotation';
-import { connect } from 'react-redux';
+import { Layout } from 'antd';
 import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
 
 import type { AppProps } from '@/App';
 import { ViewportProvider } from '@/components/customResizeHook';
-import { prefix } from '@/constant';
 import VideoAnnotate from '@/components/videoAnnotate';
+import { prefix } from '@/constant';
 import type { AppState } from '@/store';
 import type { IFileItem } from '@/types/data';
 
 import AnnotationOperation from './annotationOperation';
 import AnnotationTips from './annotationTips';
 // import Sidebar from './sidebar';
+import AttributeOperation from './attributeOperation';
+import LeftSider from './leftSiderBar';
 import RightSiderbar from './rightSiderBar';
 import ToolFooter from './toolFooter';
 import ToolHeader from './toolHeader';
-import AttributeOperation from './attributeOperation';
-import LeftSider from './leftSiderBar';
 
 const { EVideoToolName } = cTool;
 
@@ -29,6 +29,7 @@ interface IProps {
   currentToolName: string;
   imgIndex: string;
   imgListCollapse: boolean;
+  style?: React.CSSProperties;
 }
 
 const { Sider, Content } = Layout;
@@ -56,51 +57,44 @@ const AnnotatedArea: React.FC<AppProps & IProps & { currentToolName: string }> =
 };
 
 const MainView: React.FC<AppProps & IProps> = (props) => {
-  // const dispatch = useDispatch();
   const { currentToolName } = props;
-
-  const [boxHeight, setBoxHeight] = useState<number>();
   const [, setBoxWidth] = useState<number>();
   useEffect(() => {
     const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
-    setBoxHeight(boxParent.clientHeight);
     setBoxWidth(boxParent.clientWidth);
   }, []);
 
   // 取消加载时loading
   return (
     <ViewportProvider>
-      <Spin spinning={false}>
-        <Layout
-          className={classNames({
-            'lab-layout': true,
-            'lab-layout-preview': props.isPreview,
-          })}
-          style={props.style?.layout}
-        >
-          <header className={`${layoutCls}__header`} style={props.style?.header}>
-            <ToolHeader
-              isPreview={props?.isPreview}
-              header={props?.header}
-              headerName={props.headerName}
-              goBack={props.goBack}
-              exportData={props.exportData}
-              topActionContent={props.topActionContent}
-            />
-          </header>
-          <AttributeOperation />
-          <Layout>
-            {<LeftSider {...props} />}
-            <Content className={`${layoutCls}__content`} style={{ height: (boxHeight as number) - 111 }}>
-              <AnnotatedArea {...props} currentToolName={currentToolName} />
-            </Content>
-            <Sider className={`${layoutCls}__side`} width="auto" style={props.style?.sider}>
-              {/* <Sidebar sider={props?.sider} /> */}
-              <RightSiderbar isPreview={props?.isPreview as boolean} />
-            </Sider>
-          </Layout>
+      <Layout
+        className={classNames({
+          'lab-layout': true,
+        })}
+        style={props.style?.layout}
+      >
+        <header className={`${layoutCls}__header`} style={props.style?.header}>
+          <ToolHeader
+            isPreview={props?.isPreview}
+            header={props?.header}
+            headerName={props.headerName}
+            goBack={props.goBack}
+            exportData={props.exportData}
+            topActionContent={props.topActionContent}
+          />
+        </header>
+        <AttributeOperation />
+        <Layout>
+          {<LeftSider {...props} />}
+          <Content className={`${layoutCls}__content`}>
+            <AnnotatedArea {...props} currentToolName={currentToolName} />
+          </Content>
+          <Sider className={`${layoutCls}__side`} width="auto" style={props.style?.sider ?? {}}>
+            {/* <Sidebar sider={props?.sider} /> */}
+            <RightSiderbar isPreview={props?.isPreview as boolean} />
+          </Sider>
         </Layout>
-      </Spin>
+      </Layout>
     </ViewportProvider>
   );
 };

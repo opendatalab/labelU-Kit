@@ -1,4 +1,4 @@
-import { isNumber } from 'lodash';
+import { isNumber } from 'lodash-es';
 
 import type { IInputList } from '@/types/tool/tagTool';
 import type { IPoint } from '@/types/tool/common';
@@ -105,7 +105,7 @@ export default class AttributeUtils {
    */
   public static getAttributeIndex(attribute: string | undefined, attributeList: IInputList[]) {
     try {
-      const attributeIndex = attributeList.findIndex((i: any) => i.key === attribute);
+      const attributeIndex = attributeList.findIndex((i: any) => i.value === attribute);
       if (attributeIndex >= 8) {
         // 大于指定颜色范围后需要循环
 

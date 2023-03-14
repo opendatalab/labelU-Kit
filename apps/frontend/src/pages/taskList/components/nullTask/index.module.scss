@@ -1,0 +1,55 @@
+@import '@/utils/common/common.module';
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.nullWrapper {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  width: 288px;
+  height: 220px;
+
+  background: #fbfcff;
+  //background
+  border: 1px dashed #d0dfff;
+  border-radius: 8px;
+
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.container {
+  @extend .displayFlex;
+  @extend .flexDirectionColumn;
+  width: 88px;
+  height: 100px;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.createTaskIcon {
+  //background-image: url('../../assets/png/createTask.png');
+  background-repeat: no-repeat;
+  width: 56px;
+  height: 56px;
+  cursor: pointer;
+}
+
+.createTask {
+  width: 88px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 400;
+  background-color: var(--primary-color);
+  border-radius: 3px;
+  cursor: pointer;
+}

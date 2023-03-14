@@ -30,7 +30,6 @@
     "url": "git@github.com:opendatalab/labelU-Kit.git"
   },
   "scripts": {
-    "start": "npm run dev",
     "test": "echo \"Error: run tests from root\" && exit 1",
     "dev": "rollup -c rollup.config.js -w ",
     "build": "rollup -c rollup.config.js && npm run build:type",
@@ -38,8 +37,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "i18next": "^22.0.5",
-    "react-i18next": "^11.12.0",
+    "i18next": "^22.4.10",
+    "react-i18next": "^12.1.5",
     "rimraf": "^3.0.2",
     "shx": "^0.3.4"
   },

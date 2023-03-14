@@ -18,7 +18,7 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
-import { BasicToolOperation } from './basicToolOperation';
+import BasicToolOperation from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXTAREA_WIDTH = 200;
@@ -26,7 +26,7 @@ const TEXTAREA_WIDTH = 200;
 export interface IPointOperationProps extends IBasicToolOperationProps {
   style: any;
 }
-class PointOperation extends BasicToolOperation {
+export default class PointOperation extends BasicToolOperation {
   public config: IPointToolConfig;
 
   // 正在标的点
@@ -159,6 +159,11 @@ class PointOperation extends BasicToolOperation {
 
   public setDefaultAttribute(defaultAttribute: string = '') {
     const oldDefault = this.defaultAttribute;
+
+    if (!this.hasAttributeInConfig(defaultAttribute)) {
+      return;
+    }
+
     this.defaultAttribute = defaultAttribute;
 
     if (oldDefault !== defaultAttribute) {
@@ -167,6 +172,7 @@ class PointOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
+      this.container.dispatchEvent(this.saveDataEvent);
 
       // 如有选中目标，则需更改当前选中的属性
       const { selectedID } = this;
@@ -286,7 +292,7 @@ class PointOperation extends BasicToolOperation {
 
       this.createPoint(e);
       this.render();
-      // this.container.dispatchEvent(this.saveDataEvent);
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
     // 有选中的点时 才能进行拖拽
@@ -566,6 +572,7 @@ class PointOperation extends BasicToolOperation {
       this.history.pushHistory(pointList);
       this.setSelectedID('');
       this.hoverID = '';
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
 
@@ -581,6 +588,7 @@ class PointOperation extends BasicToolOperation {
         this.emit('markIndexChange');
       }
     }
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public onTabKeyDown(e: KeyboardEvent) {
@@ -660,6 +668,7 @@ class PointOperation extends BasicToolOperation {
       this._textAttributInstance?.clearTextAttribute();
       this.emit('selectedChange');
       this.render();
+      this.container.dispatchEvent(this.saveDataEvent);
     }
   }
 
@@ -717,7 +726,6 @@ class PointOperation extends BasicToolOperation {
       this.setPointList(AttributeUtils.textChange(textAttribute, this.selectedID, this.pointList));
 
       this.emit('updateTextAttribute');
-      // this.container.dispatchEvent(this.saveDataEvent);
       this.render();
     }
   }
@@ -768,13 +776,14 @@ class PointOperation extends BasicToolOperation {
     }
     const { textAttribute = '', attribute } = point;
     const selected = point.id === this.selectedID;
+    const hovered = point.id === this.hoverID;
     const toolColor = this.getColor(attribute);
 
     const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
     const { width = 2, hiddenText = false } = this.style;
 
     const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid, {
-      isSelected: selected || point.id === this.hoverID,
+      isSelected: selected || hovered,
     });
 
     // 绘制点
@@ -783,7 +792,8 @@ class PointOperation extends BasicToolOperation {
       endAngleDeg: 360,
       thickness: 1,
       color: toolData.stroke,
-      fill: 'transparent',
+      // Fix: https://project.feishu.cn/bigdata_03/issue/detail/4174573?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
+      fill: selected || hovered ? '#fff' : 'transparent',
     });
 
     let showText = '';
@@ -802,7 +812,7 @@ class PointOperation extends BasicToolOperation {
     }
 
     if (point.attribute) {
-      showText = `${showText}  ${AttributeUtils.getAttributeShowText(point.attribute, this.config?.attributeList)}`;
+      showText = `${showText} ${this.config.attributeMap.get(point.attribute) || point.attribute}`;
     }
 
     // 上方属性（列表、序号）
@@ -836,7 +846,6 @@ class PointOperation extends BasicToolOperation {
       this.attributeLockList,
       this.selectedID,
     );
-    this.container.dispatchEvent(this.saveDataEvent);
     if (!this.isHidden) {
       showingPointList.forEach((point) => {
         this.renderPoint(point);
@@ -893,4 +902,3 @@ class PointOperation extends BasicToolOperation {
     this.renderTop();
   }
 }
-export default PointOperation;

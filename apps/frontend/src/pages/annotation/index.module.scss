@@ -1,0 +1,48 @@
+.item {
+  display: flex;
+  // align-items: center;
+  justify-content: center;
+  width: 232px;
+  height: 165px;
+  position: relative;
+  .imgItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 120px;
+    background-color: #fff;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  .chooseNumber {
+    width: 6.99px;
+    height: 10.39px;
+
+    color: #ffffff;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    background: var(--primary-color);
+    border-radius: 2px;
+  }
+
+  .pageNumber {
+    text-align: center;
+    width: 13px;
+    line-height: 17px;
+    height: 17px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 16px;
+  }
+}
+//}
+
+.annotationPage {
+  overflow-y: auto;
+  height: 100%;
+}
