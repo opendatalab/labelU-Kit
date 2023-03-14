@@ -57,11 +57,15 @@ async function main() {
   try {
     await sendMessageToWechat(releaseNotes);
 
-    await createPullRequest({
-      branchName,
-      body: releaseNotes,
-      base: 'main',
-      title: 'Update package version',
+    setTimeout(() => {
+      createPullRequest({
+        branchName,
+        body: releaseNotes,
+        base: 'main',
+        title: 'Update package version',
+      }).catch((err) => {
+        console.log(err);
+      });
     });
   } catch (err) {
     console.log(err);
