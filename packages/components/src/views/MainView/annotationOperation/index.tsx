@@ -12,8 +12,8 @@ import type { AppProps } from '@/App';
 import FileError from '@/components/fileException/FileError';
 import useSize from '@/hooks/useSize';
 import { store } from '@/index';
-import { ChangeSave } from '@/store/annotation/actionCreators';
 import { InitToolStyleConfig } from '@/store/toolStyle/actionCreators';
+import { ChangeSave } from '@/store/annotation/actionCreators';
 
 interface IProps extends AppState, AppProps {
   imgAttribute: ImgAttributeState;
@@ -24,6 +24,7 @@ interface IProps extends AppState, AppProps {
 }
 
 const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
+  const initializeTime = useRef(Date.now());
   const [, forceRender] = useState<number>(0);
   const dispatch = useDispatch();
   const {
@@ -148,7 +149,10 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
           clearTimeout(timmer);
         }
         timmer = setTimeout(() => {
-          fun();
+          // TODO: 引擎优化后删除以下代码
+          if (initializeTime.current > 0 && Date.now() - initializeTime.current > 2000) {
+            fun();
+          }
         }, time);
       };
       return returnFunction;
@@ -159,11 +163,13 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
     const throtthleSave = window.Cthrottle(() => {
       // 切换工具保存标注结果
       dispatch(ChangeSave);
+      // TODO：以上代码不必要
     }, 100);
 
     document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', throtthleSave);
 
     return () => {
+      initializeTime.current = 0;
       document.getElementById('toolContainer')?.removeEventListener('saveLabelResultToImg', throtthleSave);
     };
   }, [dispatch]);

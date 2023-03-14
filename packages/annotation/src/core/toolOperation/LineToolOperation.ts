@@ -617,7 +617,7 @@ export default class LineToolOperation extends BasicToolOperation {
       if (this.isHidden) {
         return;
       }
-      this.container.dispatchEvent(this.saveDataEvent);
+
       lineList.forEach((line: ILine) => {
         if (line.id === this.selectedID) {
           return;
@@ -1148,9 +1148,10 @@ export default class LineToolOperation extends BasicToolOperation {
         return;
       }
       this.stopLineCreating(true);
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
-    // this.container.dispatchEvent(this.saveDataEvent);
+
     this.setActiveArea(this.getCoordinate(e), true);
     this.emit('contextmenu');
   };
@@ -1700,6 +1701,7 @@ export default class LineToolOperation extends BasicToolOperation {
     this.setNoneStatus();
     this.emit('dataUpdated', this.lineList);
     this.render();
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public setInvalidLine(id?: string, valid?: boolean, isRender: boolean = true) {

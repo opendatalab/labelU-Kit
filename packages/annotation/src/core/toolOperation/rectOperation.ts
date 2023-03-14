@@ -1065,6 +1065,7 @@ export default class RectOperation extends BasicToolOperation {
     }
 
     this.render();
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public shiftRightMouseUp(e: MouseEvent) {
@@ -1105,6 +1106,7 @@ export default class RectOperation extends BasicToolOperation {
     if (this.drawingRect) {
       // 结束框的绘制
       this.addDrawingRectToRectList();
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
 
@@ -1117,6 +1119,7 @@ export default class RectOperation extends BasicToolOperation {
     // 创建框
     this.createNewDrawingRect(e, basicSourceID);
     this.render();
+    this.container.dispatchEvent(this.saveDataEvent);
 
     return undefined;
   }
@@ -1574,7 +1577,6 @@ export default class RectOperation extends BasicToolOperation {
    * 渲染矩形框体
    */
   public renderRect() {
-    this.container.dispatchEvent(this.saveDataEvent);
     this.renderStaticRect();
     this.renderCreatingRect();
   }
@@ -1603,6 +1605,7 @@ export default class RectOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
+      this.container.dispatchEvent(this.saveDataEvent);
 
       // 如有选中目标，则需更改当前选中的属性
       const { selectedRect } = this;
