@@ -61,8 +61,12 @@ const AnnotationPage = () => {
   });
 
   const transformed = useMemo(() => {
-    return commonController.transformFileList(sample.data, sample.id!);
-  }, [sample.data, sample.id]);
+    if (!sample.data) {
+      return [];
+    }
+
+    return commonController.transformFileList(sample.data, +routeParams.sampleId!);
+  }, [sample.data, routeParams.sampleId]);
 
   useEffect(() => {
     dispatch.task.fetchTask(+routeParams.taskId!);
