@@ -85,8 +85,12 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
   );
 
   useEffect(() => {
-    if (Array.isArray(value) && !isEqual(value)(attributesOmitWithId(stateValue))) {
-      const newValues = value.map((item) => {
+    if (!Array.isArray(value) || isEqual(value)(attributesOmitWithId(stateValue))) {
+      return;
+    }
+
+    setValue(
+      value.map((item) => {
         if (!attributeMapping.current[item.value]) {
           return wrapWithId(item);
         }
@@ -95,9 +99,8 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
           ...item,
           id: attributeMapping.current[item.value].id,
         };
-      });
-      setValue(newValues);
-    }
+      }),
+    );
   }, [stateValue, value]);
 
   useEffect(() => {
