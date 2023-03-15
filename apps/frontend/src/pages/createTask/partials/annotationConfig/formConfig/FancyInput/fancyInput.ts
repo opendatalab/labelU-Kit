@@ -2,10 +2,12 @@ import { FancyBoolean } from './Boolean.fancy';
 import { FancyEnum } from './Enum.fancy';
 import { FancyAttributeList } from '../customFancy/ListAttribute.fancy';
 import { FancyString } from './String.fancy';
+import { FancyNumber } from './Number.fancy';
 
 export const inputs: Record<string, React.FC<any>> = {
   enum: FancyEnum,
   string: FancyString,
+  number: FancyNumber,
   boolean: FancyBoolean,
   'list-attribute': FancyAttributeList,
 };
