@@ -7,14 +7,15 @@ import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
-import { IPolygonData } from '../../types/tool/polygon';
+import type { IPolygonData } from '../../types/tool/polygon';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
-import { BasicToolOperation, IBasicToolOperationProps } from './basicToolOperation';
+import type { IBasicToolOperationProps } from './basicToolOperation';
+import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXTAREA_WIDTH = 200;
@@ -775,7 +776,7 @@ class PointOperation extends BasicToolOperation {
 
     let showText = '';
 
-    const isShowOrder = this.isShowOrder 
+    const { isShowOrder } = this;
 
     if (isShowOrder && point.order && point?.order > 0) {
       showText = `${point.order}`;

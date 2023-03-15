@@ -27,6 +27,7 @@ import AxisUtils from './utils/tool/AxisUtils';
 import DrawUtils from './utils/tool/DrawUtils';
 import ImgUtils from './utils/ImgUtils';
 import MathUtils from './utils/MathUtils';
+import utils from './core/pointCloud/uitils';
 
 // ToolListener
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
@@ -82,6 +83,7 @@ export {
   DrawUtils,
   ImgUtils,
   MathUtils,
+  utils,
   AnnotationEngine,
   ScribbleTool,
   PointCloud,

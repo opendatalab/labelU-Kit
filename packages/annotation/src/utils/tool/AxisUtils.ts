@@ -1,4 +1,5 @@
 import { EToolName, ELineTypes } from '@/constant/tool';
+import { Vector2 } from 'three';
 import type { IPolygonPoint, IPolygonData, IPolygonConfig } from '../../types/tool/polygon';
 import MathUtils from '../MathUtils';
 import PolygonUtils from './PolygonUtils';
@@ -91,14 +92,20 @@ export default class AxisUtils {
   }
 
   public static getRotatePoint(centerPoint: ICoordinate, rotatePoint: ICoordinate, rotate: number) {
-    const x =
-      (rotatePoint.x - centerPoint.x) * Math.cos(rotate) -
-      (rotatePoint.y - centerPoint.y) * Math.sin(rotate) +
-      centerPoint.x;
-    const y =
-      (rotatePoint.y - centerPoint.y) * Math.cos(rotate) +
-      (rotatePoint.x - centerPoint.x) * Math.sin(rotate) +
-      centerPoint.y;
+    const x = Number(
+      (
+        (rotatePoint.x - centerPoint.x) * Math.cos(rotate) -
+        (rotatePoint.y - centerPoint.y) * Math.sin(rotate) +
+        centerPoint.x
+      ).toFixed(6),
+    );
+    const y = Number(
+      (
+        (rotatePoint.y - centerPoint.y) * Math.cos(rotate) +
+        (rotatePoint.x - centerPoint.x) * Math.sin(rotate) +
+        centerPoint.y
+      ).toFixed(6),
+    );
 
     return {
       x,
@@ -122,6 +129,18 @@ export default class AxisUtils {
       height: rect.height * zoom,
     };
   }
+
+  /**
+   * 计算
+   */
+
+  public static getAngleFromRect = (cavasPointList: [ICoordinate, ICoordinate, ICoordinate, ICoordinate]) => {
+    const vectorWidth = new Vector2(
+      cavasPointList[2].x - cavasPointList[1].x,
+      cavasPointList[2].y - cavasPointList[1].y,
+    );
+    return (vectorWidth.angle() / Math.PI) * 180;
+  };
 
   /**
    * 计算点在 zoom 和 currentPos 的转换

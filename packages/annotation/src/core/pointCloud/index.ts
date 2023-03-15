@@ -90,6 +90,8 @@ export class PointCloud extends EventListener {
 
   public radiuses: number[] = [Radiuses];
 
+  public angle: number = 0;
+
   constructor({
     container,
     noAppend,
@@ -126,7 +128,7 @@ export class PointCloud extends EventListener {
     this.axesHelper = new THREE.AxesHelper(1000);
 
     // For Developer
-    // this.scene.add(this.axesHelper);
+    this.scene.add(this.axesHelper);
 
     this.scene.add(this.camera);
     // TODO
@@ -180,6 +182,10 @@ export class PointCloud extends EventListener {
     this.camera.updateProjectionMatrix();
   }
 
+  public setAngle(angle: number) {
+    this.angle = angle;
+  }
+
   /**
    * Init PerspectiveCamera to default config by size
    * @returns
@@ -198,7 +204,6 @@ export class PointCloud extends EventListener {
   public initCamera() {
     // Camera setting must be set before Control's initial.
     const { camera } = this;
-
     // TODO
     if (this.isOrthographicCamera) {
       const { x, y, z } = this.initCameraPosition;
@@ -1078,7 +1083,7 @@ export class PointCloud extends EventListener {
     const hZoom = this.containerHeight / height;
     return {
       polygon2d,
-      zoom: Math.min(wZoom, hZoom) / 1.8,
+      zoom: Math.min(wZoom, hZoom) / 1.5,
     };
   }
 
@@ -1093,7 +1098,7 @@ export class PointCloud extends EventListener {
 
     return {
       polygon2d,
-      zoom: Math.min(wZoom, hZoom) / 2,
+      zoom: Math.min(wZoom, hZoom) / 1.2,
     };
   }
 

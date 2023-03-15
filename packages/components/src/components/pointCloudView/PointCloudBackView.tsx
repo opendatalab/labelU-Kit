@@ -86,7 +86,7 @@ const PointCloudSideView = ({
   const { updateSelectedBox, selectedBox } = useSingleBox();
   const { t } = useTranslation();
 
-  const { syncPointCloudViewsFromSideOrBackView } = usePointCloudViews();
+  const { syncPointCloudViewsFromBox } = usePointCloudViews();
 
   useEffect(() => {
     if (ref.current) {
@@ -203,7 +203,7 @@ const PointCloudSideView = ({
 
         // TODO: update view by change selected box
         // ptCtx.mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
-        syncPointCloudViewsFromSideOrBackView?.(newBoxParams);
+        syncPointCloudViewsFromBox?.(newBoxParams);
 
         // save new Boxlist
         const newBoxList = ptCtx.mainViewInstance?.boxList;

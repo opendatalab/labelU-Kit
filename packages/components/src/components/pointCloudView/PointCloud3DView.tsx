@@ -1,5 +1,6 @@
 import { getClassName } from '@/utils/dom';
 import {
+  AxisUtils,
   ICoordinate,
   MathUtils,
   PointCloudOperation,
@@ -190,18 +191,29 @@ const PointCloud3D: React.FC<
         order: number,
         textAttribute: string,
       ) => {
-        // const currentPolygonList = TopView2dOperation.polygonList;
         const cavasPointList = pointList.map((point) => {
           return MathUtils.transerWord2Canvas(point, sizeTop);
         });
 
+        const rotateion = AxisUtils.getAngleFromRect(
+          cavasPointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+        );
+        const newDrawingPoint = MathUtils.rotateRectPointList(
+          -rotateion,
+          cavasPointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+        );
+        ptCtx.topViewInstance?.pointCloudInstance.setAngle(rotateion);
+
         TopView2dOperation.setDefaultAttribute(attribute);
-        TopView2dOperation.drawingPointList = cavasPointList;
-        TopView2dOperation.addDrawingPointToPolygonList(true, id);
+        TopView2dOperation.drawingPointList = newDrawingPoint;
+        TopView2dOperation.addDrawingPointToTopviewPolygonList(rotateion, true, id);
         TopView2dOperation.setSelectedIDs([id]);
         TopView2dOperation.render();
         ptCtx.setSelectedIDs([id]);
 
+        if (!screenPoints) {
+          return;
+        }
         const topRitghtPoint = MathUtils.getRightTopPoints(screenPoints);
         const bounds = {
           left: topRitghtPoint.x,
@@ -247,8 +259,9 @@ const PointCloud3D: React.FC<
         let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
         let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
         if (box) {
+          ptCtx.topViewInstance?.pointCloudInstance.setAngle(polygon.angle as number);
           ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
-          pointCloudViews.topViewAddBox(
+          pointCloudViews.updateViewByTopPolygon(
             polygon,
             sizeTop,
             box.attribute,

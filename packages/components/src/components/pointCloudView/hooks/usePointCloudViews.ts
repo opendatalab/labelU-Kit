@@ -3,6 +3,8 @@ import {
   PointCloud,
   PointCloudOperation,
   MathUtils,
+  ICoordinate,
+  AxisUtils,
 } from '@label-u/annotation';
 import { IPointCloudBox, EPerspectiveView, PointCloudUtils, IPolygonPoint } from '@label-u/utils';
 import { useContext } from 'react';
@@ -18,6 +20,7 @@ import { SetPointCloudLoading } from '@/store/annotation/actionCreators';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
+import { IPolygonData } from '@label-u/annotation/es/types/types/tool/polygon.d';
 
 const DEFAULT_SCOPE = 5;
 
@@ -288,21 +291,31 @@ export const synchronizeTopView = (
 
   const { polygon2d } = pointCloudInstance.getBoxTopPolygon2DCoordinate(newBoxParams);
 
+  const rotateion = AxisUtils.getAngleFromRect(
+    polygon2d as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+  );
+  const newDrawingPoint = MathUtils.rotateRectPointList(
+    -rotateion,
+    polygon2d as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+  );
+  pointCloudInstance.setAngle(rotateion);
+
   const newPolygonList = [...pointCloud2dOperation.polygonList];
   const oldPolygon = newPolygonList.find((v) => v.id === newBoxParams.id);
   if (oldPolygon) {
-    oldPolygon.pointList = polygon2d;
+    oldPolygon.pointList = newDrawingPoint;
+    oldPolygon.angle = rotateion;
   } else {
     newPolygonList.push(
       // @ts-ignore
       {
         id: newBoxParams.id,
-        pointList: polygon2d,
+        pointList: newDrawingPoint,
         textAttribute: '',
         isRect: true,
         valid: newBoxParams.valid ?? true,
         attribute: newBoxParams.attribute,
-        // attribute:pointCloud2dOperation.defaultAttribute
+        angle: rotateion,
       },
     );
   }
@@ -340,7 +353,7 @@ export const usePointCloudViews = () => {
 
   if (!topViewInstance || !sideViewInstance) {
     return {
-      topViewAddBox: () => {},
+      updateViewByTopPolygon: () => {},
       topViewSelectedChanged: () => {},
       sideViewUpdateBox: () => {},
     };
@@ -395,9 +408,8 @@ export const usePointCloudViews = () => {
     }
   };
 
-  /** Top-view create box from 2D */
-  const topViewAddBox = (
-    newPolygon: any,
+  const updateViewByTopPolygon = (
+    newPolygon: IPolygonData,
     size: ISize,
     attribute: string,
     textAttribute?: string,
@@ -405,8 +417,15 @@ export const usePointCloudViews = () => {
       maxZ: number;
       minZ: number;
     },
+    isReset = true,
   ) => {
-    let newParams = topViewPolygon2PointCloud(newPolygon, size, topViewPointCloud, undefined, {
+    let polygonClone = { ...newPolygon };
+    polygonClone.pointList = MathUtils.rotateRectPointList(
+      newPolygon.angle,
+      newPolygon.pointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+    );
+
+    let newParams = topViewPolygon2PointCloud(polygonClone, size, topViewPointCloud, undefined, {
       attribute: attribute,
       textAttribute,
     });
@@ -423,12 +442,9 @@ export const usePointCloudViews = () => {
 
     const boxParams: IPointCloudBox = newParams;
     const polygonOperation = topViewInstance?.pointCloud2dOperation;
-    polygonOperation.emit('resetView', boxParams);
-
-    // Temporarily hide
-    // const boxParams: IPointCloudBox = Object.assign(newParams, {
-    //   trackID: getNextTrackID(),
-    // });
+    if (isReset) {
+      polygonOperation.emit('resetView', boxParams);
+    }
 
     // If the count is less than lowerLimitPointsNumInBox, needs to delete it
     if (
@@ -501,7 +517,7 @@ export const usePointCloudViews = () => {
         };
         // TODO: sycn data by sade view
         // mainViewInstance.emit('changeSelectedBox', box, newBoxParams.id);
-        syncPointCloudViewsFromSideOrBackView(newBoxParams);
+        syncPointCloudViewsFromBox(newBoxParams);
         updateSelectedBox(newBoxParams);
       }
     }
@@ -520,10 +536,29 @@ export const usePointCloudViews = () => {
    * @param polygon
    * @param size
    */
-  const topViewUpdateBox = (polygon: any, size: ISize) => {
+  const topViewUpdateBox = async (
+    polygon: IPolygonData,
+    originPolygon: IPolygonData,
+    size: ISize,
+  ) => {
     if (selectedPointCloudBox) {
+      let polygonClone = { ...polygon };
+
+      let prevCenter = MathUtils.getRectCenterPoint(
+        originPolygon.pointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+      );
+
+      let newPointList = polygonClone.pointList.map((point: any) => {
+        return AxisUtils.getRotatePoint(
+          prevCenter,
+          point,
+          ((polygonClone.angle as number) / 180) * Math.PI,
+        );
+      });
+
+      polygonClone.pointList = newPointList;
       const newBoxParams = topViewPolygon2PointCloud(
-        polygon,
+        polygonClone,
         size,
         topViewInstance.pointCloudInstance,
         selectedPointCloudBox,
@@ -538,20 +573,19 @@ export const usePointCloudViews = () => {
       );
       updateSelectedBox(newBoxParams);
 
-      topViewInstance.pointCloud2dOperation.emit('resetView', newBoxParams);
-      syncPointCloudViews(PointCloudView.Top, selectedPointCloudBox);
+      await syncPointCloudViewsFromBox(newBoxParams);
     }
   };
 
   /**
-   * sync pointcloudview when side view change
+   * sync pointcloudview when box change
    * @param omitView
    * @param polygon
    * @param boxParams
    * @param topPolygon
    */
 
-  const syncPointCloudViewsFromSideOrBackView = async (boxParams: IPointCloudBox) => {
+  const syncPointCloudViewsFromBox = async (boxParams: IPointCloudBox) => {
     if (!ptCtx.topViewInstance?.pointCloud2dOperation.selectedID) {
       return;
     }
@@ -716,8 +750,8 @@ export const usePointCloudViews = () => {
 
   return {
     unSetSelectId,
-    syncPointCloudViewsFromSideOrBackView,
-    topViewAddBox,
+    syncPointCloudViewsFromBox,
+    updateViewByTopPolygon,
     topViewSelectedChanged,
     topViewUpdateBox,
     sideViewUpdateBox,
