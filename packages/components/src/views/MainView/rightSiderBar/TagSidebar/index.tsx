@@ -188,6 +188,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
       imgList[imgIndex].result = JSON.stringify(currentImgResult);
       dispatch(UpdateImgList(imgList));
       setTagResult(result as ITagResult[]);
+      dispatch(ChangeSave);
     }
   };
 
@@ -290,7 +291,6 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
           <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
             <CheckBoxList
               attributeChanged={() => {
-                dispatch(ChangeSave);
                 setLabel(basicIndex, index);
               }}
               selectedAttribute={[selectedAttribute]}

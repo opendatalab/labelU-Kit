@@ -5,7 +5,7 @@ import { connect, useDispatch } from 'react-redux';
 import type { PrevResult, Attribute } from '@label-u/annotation';
 import { EToolName } from '@label-u/annotation';
 import classNames from 'classnames';
-import { isEmpty, size, find, some, sortBy } from 'lodash-es';
+import { isEmpty, size, find, some, sortBy, mapKeys } from 'lodash-es';
 
 import AttributeEditorIcon from '@/assets/cssIcon/attribute_editor.svg';
 import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';
@@ -524,13 +524,17 @@ const AttributeRusult: FC<IProps> = ({
       label: '无标签',
       value: 'noneAttribute',
     });
+    const optionsMap = mapKeys(options, 'value');
+    const value = optionsMap[attributeResult.attributeName]
+      ? attributeResult.attributeName
+      : allAttributesMap.get(attributeResult.attributeName);
     return (
       <Form
         name="basic"
         layout="vertical"
         key={new Date().getTime()}
         initialValues={{
-          changeAttribute: attributeResult.attributeName,
+          changeAttribute: value,
           description: toolInfo.textAttribute,
         }}
         autoComplete="off"
@@ -553,7 +557,7 @@ const AttributeRusult: FC<IProps> = ({
           ]}
         >
           <Select
-            value={attributeResult.attributeName}
+            value={value}
             optionLabelProp="label"
             options={options}
             style={{

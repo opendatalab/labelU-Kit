@@ -232,15 +232,15 @@ export function InitTaskData({
   onSubmit,
   onSave,
   initToolName,
-  tagConfigList,
-  attributeList,
+  tagConfigList = [],
+  attributeList = [],
   toolsBasicConfig,
-  textConfig,
+  textConfig = [],
   onPageChange,
   onStepChange,
   getFileData,
   pageSize,
-  loadFileList,
+  loadFileList = [],
   step,
   stepList,
 }: any): any {
@@ -262,19 +262,14 @@ export function InitTaskData({
   }
   // tasks.push(UpdateIsShowOrder(isShowOrder));
 
-  if (textConfig) {
-    tasks.push(UpdateTextConfig(textConfig));
-  }
+  tasks.push(UpdateTextConfig(textConfig));
 
   if (onSubmit) {
     tasks.push(UpdateOnSubmit(onSubmit));
   }
-  if (tagConfigList) {
-    tasks.push(UpdateTagList(tagConfigList));
-  }
-  if (attributeList) {
-    tasks.push(UpdateAttributeList(attributeList));
-  }
+
+  tasks.push(UpdateTagList(tagConfigList));
+  tasks.push(UpdateAttributeList(attributeList));
 
   if (onSave) {
     tasks.push(UpdateOnSave(onSave));
@@ -302,10 +297,6 @@ export function InitTaskData({
   tasks.push({
     type: ANNOTATION_ACTIONS.CALC_STEP_PROGRESS,
   });
-
-  // tasks.push({
-  //   type: ANNOTATION_ACTIONS.INIT_TOOL,
-  // });
 
   tasks.push(InitToolWithStyle(toolStyle));
 

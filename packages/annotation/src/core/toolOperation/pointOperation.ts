@@ -172,6 +172,7 @@ export default class PointOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
+      this.container.dispatchEvent(this.saveDataEvent);
 
       // 如有选中目标，则需更改当前选中的属性
       const { selectedID } = this;
@@ -291,7 +292,7 @@ export default class PointOperation extends BasicToolOperation {
 
       this.createPoint(e);
       this.render();
-      // this.container.dispatchEvent(this.saveDataEvent);
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
     // 有选中的点时 才能进行拖拽
@@ -571,6 +572,7 @@ export default class PointOperation extends BasicToolOperation {
       this.history.pushHistory(pointList);
       this.setSelectedID('');
       this.hoverID = '';
+      this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
 
@@ -586,6 +588,7 @@ export default class PointOperation extends BasicToolOperation {
         this.emit('markIndexChange');
       }
     }
+    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public onTabKeyDown(e: KeyboardEvent) {
@@ -665,6 +668,7 @@ export default class PointOperation extends BasicToolOperation {
       this._textAttributInstance?.clearTextAttribute();
       this.emit('selectedChange');
       this.render();
+      this.container.dispatchEvent(this.saveDataEvent);
     }
   }
 
@@ -722,7 +726,6 @@ export default class PointOperation extends BasicToolOperation {
       this.setPointList(AttributeUtils.textChange(textAttribute, this.selectedID, this.pointList));
 
       this.emit('updateTextAttribute');
-      // this.container.dispatchEvent(this.saveDataEvent);
       this.render();
     }
   }
@@ -843,7 +846,6 @@ export default class PointOperation extends BasicToolOperation {
       this.attributeLockList,
       this.selectedID,
     );
-    this.container.dispatchEvent(this.saveDataEvent);
     if (!this.isHidden) {
       showingPointList.forEach((point) => {
         this.renderPoint(point);

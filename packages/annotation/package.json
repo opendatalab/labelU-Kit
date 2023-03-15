@@ -1,6 +1,6 @@
 {
   "name": "@label-u/annotation",
-  "version": "1.0.0-alpha.19",
+  "version": "1.0.0",
   "description": "Annotation tool collection",
   "keywords": [
     "annotation",
@@ -60,7 +60,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@label-u/utils": "1.0.0-alpha.1",
+    "@label-u/utils": "1.0.0",
     "@turf/turf": "5.1.6",
     "color-rgba": "^2.3.0",
     "eventemitter3": "^5.0.0",

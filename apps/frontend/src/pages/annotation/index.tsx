@@ -3,13 +3,14 @@ import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash-es';
 import { Spin } from 'antd';
+import AnnotationOperation from '@label-u/components';
+import '@label-u/components/dist/index.css';
 
 import type { Dispatch, RootState } from '@/store';
 import type { SampleResponse } from '@/services/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import { getSamples } from '@/services/samples';
 
-import Annotation from '../../components/business/annotation';
 import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
 import SlideLoader, { slideRef } from './components/slideLoader';
@@ -26,6 +27,15 @@ const AnnotationPage = () => {
   const sampleId = routeParams.sampleId;
 
   const sample = useSelector((state: RootState) => state.sample.item);
+
+  useEffect(() => {
+    if (routeParams.sampleId) {
+      dispatch.sample.fetchSample({
+        task_id: +routeParams.taskId!,
+        sample_id: +routeParams.sampleId!,
+      });
+    }
+  }, [dispatch.sample, routeParams.sampleId, routeParams.taskId]);
 
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -51,8 +61,12 @@ const AnnotationPage = () => {
   });
 
   const transformed = useMemo(() => {
-    return commonController.transformFileList(sample.data, sample.id!);
-  }, [sample.data, sample.id]);
+    if (!sample.data) {
+      return [];
+    }
+
+    return commonController.transformFileList(sample.data, +routeParams.sampleId!);
+  }, [sample.data, routeParams.sampleId]);
 
   useEffect(() => {
     dispatch.task.fetchTask(+routeParams.taskId!);
@@ -60,7 +74,6 @@ const AnnotationPage = () => {
 
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
 
-  const goBack = () => {};
   const leftSiderContent = <SlideLoader />;
   // NOTE: labelu/components包裹了store，在AnnotationRightCorner里获取store不是应用的store！有冲突！
   const topActionContent = <AnnotationRightCorner isLastSample={isLastSample} />;
@@ -77,17 +90,17 @@ const AnnotationPage = () => {
     <Spin className={currentStyles.annotationPage} spinning={loading} style={{ height: '100%' }}>
       <AnnotationContext.Provider value={annotationContextValue}>
         {!_.isEmpty(transformed) && !_.isEmpty(taskConfig.tools) && (
-          <Annotation
+          <AnnotationOperation
             leftSiderContent={leftSiderContent}
             topActionContent={topActionContent}
-            annotationRef={annotationRef}
-            attribute={taskConfig.attribute}
-            tagList={taskConfig.tagList}
-            fileList={[{ ...transformed[0] }]}
+            ref={annotationRef}
+            isPreview={false}
+            imgList={[transformed[0]]}
+            attributeList={taskConfig.commonAttributeConfigurable ? taskConfig.attribute : []}
+            tagConfigList={taskConfig.tagList}
+            toolsBasicConfig={taskConfig.tools}
             textConfig={taskConfig.textConfig}
-            goBack={goBack}
-            tools={taskConfig.tools}
-            commonAttributeConfigurable={taskConfig.commonAttributeConfigurable}
+            isShowOrder={false}
           />
         )}
       </AnnotationContext.Provider>

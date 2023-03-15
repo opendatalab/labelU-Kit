@@ -12,7 +12,7 @@ import TaskSamplesFinished from '@/pages/sampleFinished';
 import type { TaskResponse } from '@/services/types';
 import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
-import { annotationLoader, taskLoader } from './loaders';
+import { taskLoader } from './loaders';
 
 const routes: RouteObject[] = [
   {
@@ -81,7 +81,6 @@ const routes: RouteObject[] = [
                 path: ':sampleId',
                 element: <TaskAnnotation />,
                 id: 'annotation',
-                loader: annotationLoader,
                 handle: {
                   crumb: () => {
                     return '开始标注';
