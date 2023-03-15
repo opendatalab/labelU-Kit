@@ -695,6 +695,7 @@ export class PointCloud extends EventListener {
     if (Array.isArray(this.radiuses)) {
       for (const redius of this.radiuses) {
         const circle = this.createRange(redius);
+        circle.name = `noticeCircle${redius}`;
         this.scene.add(circle);
       }
     }
@@ -1266,9 +1267,20 @@ export class PointCloud extends EventListener {
     this.renderPointCloud(points);
   };
 
+  public clearCircle = () => {
+    if (Array.isArray(this.scene.children)) {
+      for (const tmpMesh of this.scene.children) {
+        if (tmpMesh.name.startsWith('noticeCircle')) {
+          tmpMesh.removeFromParent();
+        }
+      }
+    }
+  };
+
   public applyCircle = (radiuses: number[]) => {
     const points: any = this.scene.children.find((i) => i.uuid === this.pointsUuid);
     this.radiuses = radiuses;
+    this.clearCircle();
     this.renderPointCloud(points);
   };
 
