@@ -415,6 +415,28 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
+  public onDragMove(e: MouseEvent) {
+    super.onDragMove(e);
+    if (Array.isArray(this.selectedPolygon?.pointList)) {
+      this.selectedPolygon?.pointList.forEach((point) => {
+        const pointInCanvas = {
+          x: this.currentPos.x + point.x * this.zoom,
+          y: this.currentPos.y + point.y * this.zoom,
+        };
+        if (pointInCanvas.x <= 0 || pointInCanvas.x >= this.container.clientWidth) {
+          this.onMouseUp(e);
+        }
+        if (pointInCanvas.y <= 0 || pointInCanvas.y >= this.container.clientHeight) {
+          this.onMouseUp(e);
+        }
+      });
+
+      if (this.isApproachBund(e) && this.isUncheckedApproachBoundary) {
+        this.onMouseUp(e);
+      }
+    }
+  }
+
   public renderPolygon() {
     const selectdPolygon = this.selectedPolygon;
     if (!selectdPolygon) {

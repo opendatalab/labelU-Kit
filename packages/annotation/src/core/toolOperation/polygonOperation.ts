@@ -1293,10 +1293,6 @@ class PolygonOperation extends BasicToolOperation {
 
     this.setPolygonList(newPolygonList);
     this.render();
-
-    if (this.isApproachBund(e) && this.isUncheckedApproachBoundary) {
-      this.onMouseUp(e);
-    }
   }
 
   public onMouseMove(e: MouseEvent) {
