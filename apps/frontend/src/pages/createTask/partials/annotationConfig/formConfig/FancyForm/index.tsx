@@ -64,7 +64,7 @@ export const FancyGroup: React.FC<FancyGroupProps> = ({ group, value, name }) =>
               initialValue={initialValue}
               hidden={hidden}
             >
-              <FancyInput {...itemConfig} />
+              <FancyInput {...itemConfig} fullField={finalName} />
             </Form.Item>
           );
         })}
@@ -72,6 +72,7 @@ export const FancyGroup: React.FC<FancyGroupProps> = ({ group, value, name }) =>
     );
   }
 
+  // eslint-disable-next-line no-console
   console.warn('FancyGroup: group is not an array');
 
   return null;

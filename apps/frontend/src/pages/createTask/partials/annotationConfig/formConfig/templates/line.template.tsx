@@ -1,6 +1,8 @@
 import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import type { RuleRender } from 'antd/es/form';
 
+import type { FancyItemIdentifier } from '../FancyInput/types';
+
 export default [
   {
     field: 'tool',
@@ -19,6 +21,7 @@ export default [
         key: 'lineType',
         type: 'enum',
         label: '线条类型',
+        initialValue: 0,
         options: [
           { label: '直线', value: 0 },
           { label: '贝塞尔曲线', value: 1 },
@@ -74,7 +77,7 @@ export default [
                 required: true,
                 message: '最大闭合点个数不能为空',
               },
-              (({ getFieldValue }) => ({
+              ({ getFieldValue }) => ({
                 // @ts-ignore
                 validator({ fullField }, value: number) {
                   const minNum = getFieldValue(
@@ -86,7 +89,7 @@ export default [
 
                   return Promise.resolve();
                 },
-              })) as RuleRender,
+              }),
             ],
           },
         ],
@@ -112,4 +115,4 @@ export default [
       },
     ],
   },
-];
+] as FancyItemIdentifier[];

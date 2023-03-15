@@ -1,4 +1,4 @@
-import { Button, Input } from 'antd';
+import { Button, Form, Input } from 'antd';
 import { set, isEqual, omit, map, size } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -43,7 +43,7 @@ const StyledAttributesWrapper = styled.div`
 
 // ======================= end =======================
 
-export function FancyAttributeList({ value, onChange, defaultValue = [] }: FancyAttributeListProps) {
+export function FancyAttributeList({ value, onChange, defaultValue = [], fullField }: FancyAttributeListProps) {
   const defaultValueWithId = useMemo(() => {
     return attributesWrapWithId(defaultValue);
   }, [defaultValue]);
@@ -114,16 +114,22 @@ export function FancyAttributeList({ value, onChange, defaultValue = [] }: Fancy
       stateValue.map((item, index) => {
         return (
           <StyledAttributeItem key={item.id}>
-            <input type="color" value={item.color} onChange={handleOnChange(`[${index}].color`)} />
-            <Input placeholder="前端显示（中文）" value={item.key} onChange={handleOnChange(`[${index}].key`)} />
-            <Input placeholder="保存结果（英文）" value={item.value} onChange={handleOnChange(`[${index}].value`)} />
+            <Form.Item name={[...fullField, index, 'color']} rules={[{ required: true }]}>
+              <input type="color" value={item.color} onChange={handleOnChange(`[${index}].color`)} />
+            </Form.Item>
+            <Form.Item name={[...fullField, index, 'key']} rules={[{ required: true }]}>
+              <Input placeholder="前端显示（中文）" value={item.key} onChange={handleOnChange(`[${index}].key`)} />
+            </Form.Item>
+            <Form.Item name={[...fullField, index, 'value']} rules={[{ required: true }]}>
+              <Input placeholder="保存结果（英文）" value={item.value} onChange={handleOnChange(`[${index}].value`)} />
+            </Form.Item>
             <Button type="link" danger size="small" onClick={handleRemoveAttribute(item)}>
               删除
             </Button>
           </StyledAttributeItem>
         );
       }),
-    [handleOnChange, handleRemoveAttribute, stateValue],
+    [fullField, handleOnChange, handleRemoveAttribute, stateValue],
   );
 
   return (
