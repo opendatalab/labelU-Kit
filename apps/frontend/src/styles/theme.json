@@ -21,8 +21,8 @@
     "colorBorder": "#D7D8DD",
     "colorBorderSecondary": "#EBECF0",
     "colorInfo": "#0d53de",
-    "borderRadius": 2,
-    "borderRadiusLG": 4,
+    "borderRadius": "2px",
+    "borderRadiusLG": "4px",
     "boxShadow": "      0 8px 26px 0 rgba(18, 19, 22, 0.12),      0 3px 6px -4px rgba(0, 0, 0, 0.12),      0 9px 28px 8px rgba(0, 0, 0, 0.05)    ",
     "boxShadowSecondary": "      0 4px 12px 0 rgba(0, 0, 0, 0.08),      0 3px 6px -4px rgba(0, 0, 0, 0.12),      0 9px 28px 8px rgba(0, 0, 0, 0.05)    ",
     "wireframe": false
