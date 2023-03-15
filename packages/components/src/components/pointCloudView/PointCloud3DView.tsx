@@ -273,7 +273,7 @@ const PointCloud3D: React.FC<
       }
     });
 
-    mainViewInstance.singleOn('resetAllView', async () => {
+    mainViewInstance.singleOn('resetAllView', () => {
       let selectedId = mainViewInstance.selectedId;
       if (selectedId) {
         mainViewInstance.emit('updateSelectedBox', selectedId);

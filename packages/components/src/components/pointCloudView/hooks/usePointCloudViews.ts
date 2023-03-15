@@ -628,14 +628,12 @@ export const usePointCloudViews = () => {
    * @param boxParams
    */
   const syncPointCloudViews = async (omitView: string, boxParams: IPointCloudBox) => {
-    if (!ptCtx.topViewInstance?.pointCloud2dOperation.selectedID) {
-      return;
-    }
     const dataUrl = currentData?.url;
     const newPoints = (await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
       width: DEFAULT_SCOPE,
       depth: DEFAULT_SCOPE,
     })) as unknown as THREE.Points;
+
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
         if (sideViewInstance) {
