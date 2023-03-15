@@ -275,18 +275,7 @@ const PointCloudTopView: React.FC<
       };
       polygonOperation.setCurrentPos(newCurrentPros);
 
-      const TOMatrix = new THREE.Matrix4().makeTranslation(-box.center.x, -box.center.y, 0);
-      const TBMatrix = new THREE.Matrix4().makeTranslation(box.center.x, box.center.y, 0);
-      const RMatrix = new THREE.Matrix4().makeRotationZ((pointCloud.angle / 180) * Math.PI);
-      const applyMatrix = new THREE.Matrix4()
-        .multiply(TBMatrix)
-        .multiply(RMatrix)
-        .multiply(TOMatrix);
-      let points = pointCloud.scene.getObjectByName('pointCloud');
-      let ground = ptCtx?.topViewInstance?.pointCloudInstance.scene.getObjectByName('ground');
-      points?.applyMatrix4(applyMatrix);
-      ground?.applyMatrix4(applyMatrix);
-
+      pointCloud.rotatePointCloud({ x: box.center.x, y: box.center.y, z: 0 }, pointCloud.angle);
       pointCloud.camera.zoom = zoom;
       pointCloud.camera.updateProjectionMatrix();
       pointCloud.render();

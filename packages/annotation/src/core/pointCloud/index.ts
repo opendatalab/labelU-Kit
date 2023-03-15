@@ -655,6 +655,16 @@ export class PointCloud extends EventListener {
     return ellipse;
   }
 
+  public rotatePointCloud(center: { x: number; y: number; z: number }, angle: number) {
+    debugger;
+    const TOMatrix = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
+    const TBMatrix = new THREE.Matrix4().makeTranslation(center.x, center.y, center.z);
+    const RMatrix = new THREE.Matrix4().makeRotationZ((angle / 180) * Math.PI);
+    const applyMatrix = new THREE.Matrix4().multiply(TBMatrix).multiply(RMatrix).multiply(TOMatrix);
+    const points = this.scene.getObjectByName('pointCloud');
+    points?.applyMatrix4(applyMatrix);
+  }
+
   public overridePointShader = (shader: Shader) => {
     shader.vertexShader = `
     attribute float sizes;
