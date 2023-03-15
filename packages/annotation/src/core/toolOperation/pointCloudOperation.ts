@@ -809,6 +809,13 @@ class PointCloudOperation extends PointCloud {
     cb(points);
   };
 
+  public applyCircle = (radiuses: number[]) => {
+    const points: any = this.scene.children.find((i) => i.uuid === this.pointsUuid);
+    this.radiuses = radiuses;
+    this.clearCircle();
+    this.renderPointCloud(points);
+  };
+
   public textLookAtCamera() {
     const { boxList } = this;
     if (Array.isArray(boxList) && boxList.length > 0) {
@@ -820,6 +827,17 @@ class PointCloudOperation extends PointCloud {
         }
       }
     }
+  }
+
+  public renderPointCloud(points: THREE.Points) {
+    if (Array.isArray(this.radiuses)) {
+      for (const redius of this.radiuses) {
+        const circle = this.createRange(redius);
+        circle.name = `noticeCircle${redius}`;
+        this.scene.add(circle);
+      }
+    }
+    super.renderPointCloud(points);
   }
 
   public render() {

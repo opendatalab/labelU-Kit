@@ -692,14 +692,6 @@ export class PointCloud extends EventListener {
       size: this.pointSize,
     });
     pointsMaterial.onBeforeCompile = this.overridePointShader;
-    if (Array.isArray(this.radiuses)) {
-      for (const redius of this.radiuses) {
-        const circle = this.createRange(redius);
-        circle.name = `noticeCircle${redius}`;
-        this.scene.add(circle);
-      }
-    }
-
     this.pointsUuid = points.uuid;
     points.material = pointsMaterial;
     this.filterZAxisPoints(points);
@@ -1275,13 +1267,6 @@ export class PointCloud extends EventListener {
         }
       }
     }
-  };
-
-  public applyCircle = (radiuses: number[]) => {
-    const points: any = this.scene.children.find((i) => i.uuid === this.pointsUuid);
-    this.radiuses = radiuses;
-    this.clearCircle();
-    this.renderPointCloud(points);
   };
 
   /**
