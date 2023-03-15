@@ -656,7 +656,6 @@ export class PointCloud extends EventListener {
   }
 
   public rotatePointCloud(center: { x: number; y: number; z: number }, angle: number) {
-    debugger;
     const TOMatrix = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
     const TBMatrix = new THREE.Matrix4().makeTranslation(center.x, center.y, center.z);
     const RMatrix = new THREE.Matrix4().makeRotationZ((angle / 180) * Math.PI);

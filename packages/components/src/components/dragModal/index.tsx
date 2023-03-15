@@ -1,5 +1,5 @@
 import { Modal } from 'antd';
-import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 
 interface Iprops {
   // 弹框左上角位置
@@ -51,6 +51,40 @@ const DrageModel = (props: Iprops, ref: any) => {
       setBounds(bounds);
     },
   }));
+
+  useEffect(() => {
+    if (document.getElementsByClassName('ant-modal-content').length > 0) {
+      const bundingRect = document
+        .getElementsByClassName('ant-modal-content')[0]
+        .getBoundingClientRect();
+      const maxTop = window.innerHeight - bundingRect.height;
+      const maxleft = window.innerWidth - bundingRect.width;
+
+      if (bounds.top > maxTop) {
+        document.body.onmousemove = null;
+        setBounds({
+          ...bounds,
+          top: maxTop,
+        });
+      }
+
+      if (bounds.left > maxleft) {
+        document.body.onmousemove = null;
+        setBounds({
+          ...bounds,
+          left: maxleft,
+        });
+      }
+
+      if (bounds.left < 0) {
+        document.body.onmousemove = null;
+        setBounds({
+          ...bounds,
+          left: 0,
+        });
+      }
+    }
+  }, [bounds, props]);
 
   // 计算是否超出屏幕;超出后
   const inWindow = (left: number, top: number, startPosX: number, startPosY: number) => {
