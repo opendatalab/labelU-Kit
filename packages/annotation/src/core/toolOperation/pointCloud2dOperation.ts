@@ -97,11 +97,11 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public setCursorWhenMove(event: MouseEvent) {
-    if (this.cursorEnableChange === false) {
-      return;
-    }
     if (this.getHoverID(event) && !this.rotatePointList && this.selectedPolygon) {
-      // hover 框内
+      if (this.cursorEnableChange === false) {
+        return;
+      }
+      // resize
       if (this.hoverPointIndex > -1) {
         let nexIndex = this.hoverPointIndex + 1;
         if (this.hoverPointIndex === 3) {
@@ -126,6 +126,7 @@ class PointCloud2dOperation extends PolygonOperation {
         } else {
           this.setCustomCursor('nw-resize');
         }
+        // four side resize
       } else if (this.hoverEdgeIndex === 0 || this.hoverEdgeIndex === 2) {
         this.setCustomCursor('e-resize');
       } else if (this.hoverEdgeIndex === 1 || this.hoverEdgeIndex === 3) {
@@ -135,16 +136,16 @@ class PointCloud2dOperation extends PolygonOperation {
       } else {
         this.setCustomCursor('pointer');
       }
-    }
-    // hover 箭头 或者 调整方向
-    else if (this.isArrowHover || this.rotatePointList) {
+
+      // hover 箭头 或者 调整方向
+    } else if (this.isArrowHover || this.rotatePointList) {
       if (event.buttons === 1) {
-        this.setCustomCursor('grab');
+        this.setCustomCursor('default');
       } else {
-        this.setCustomCursor('pointer');
+        this.setCustomCursor('s-resize');
       }
     } else {
-      this.setCustomCursor('none');
+      this.setCustomCursor('default');
     }
   }
 

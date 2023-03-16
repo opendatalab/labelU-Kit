@@ -226,7 +226,7 @@ class BasicToolOperation extends EventListener {
       x: 0,
       y: 0,
     };
-    this.isShowCursor = false;
+    this.isShowCursor = true;
     this.isShowOrder = false;
     this.isShowAttributeText = true;
     this.style = {
@@ -308,6 +308,10 @@ class BasicToolOperation extends EventListener {
   /** 数据列表，根据其判断是否可以旋转 */
   get dataList(): any[] {
     return [];
+  }
+
+  public setIsShowCursor(isShowCursor: boolean) {
+    this.isShowCursor = isShowCursor;
   }
 
   public setIsEnableDrag(isEnableDrag: boolean) {
@@ -913,7 +917,6 @@ class BasicToolOperation extends EventListener {
         throw new Error('coord error');
       }
 
-      this.coord = coord;
       if ((this.isSpaceClick || this.isDragStart) && this._firstClickCoordinate) {
         if (this.isEnableDrag) {
           const currentPos = this.getCurrentPos(coord);
