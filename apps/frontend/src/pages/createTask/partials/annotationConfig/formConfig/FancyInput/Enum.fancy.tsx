@@ -1,8 +1,10 @@
 import type { SelectProps } from 'antd';
 import { Select } from 'antd';
 
-export type FancyEnumProps = SelectProps;
+export interface FancyEnumProps {
+  antProps: SelectProps;
+}
 
-export function FancyEnum(props: FancyEnumProps) {
-  return <Select {...props} />;
+export function FancyEnum({ antProps, ...props }: FancyEnumProps) {
+  return <Select {...antProps} {...props} />;
 }

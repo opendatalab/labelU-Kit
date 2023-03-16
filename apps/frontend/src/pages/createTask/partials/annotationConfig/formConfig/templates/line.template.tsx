@@ -22,10 +22,12 @@ export default [
         type: 'enum',
         label: '线条类型',
         initialValue: 0,
-        options: [
-          { label: '直线', value: 0 },
-          { label: '贝塞尔曲线', value: 1 },
-        ],
+        antProps: {
+          options: [
+            { label: '直线', value: 0 },
+            { label: '贝塞尔曲线', value: 1 },
+          ],
+        },
       },
       {
         type: 'group',
@@ -37,12 +39,13 @@ export default [
             field: 'lowerLimitPointNum',
             key: 'lowerLimitPointNum',
             type: 'number',
-            addonAfter: <ArrowDownOutlined />,
             label: undefined,
             initialValue: 2,
-            min: 0,
-            placeholder: '最小闭合点个数',
-            dependencies: ['upperLimitPointNum'],
+            antProps: {
+              addonAfter: <ArrowDownOutlined />,
+              min: 0,
+              placeholder: '最小闭合点个数',
+            },
             rules: [
               {
                 required: true,
@@ -67,11 +70,13 @@ export default [
             field: 'upperLimitPointNum',
             key: 'upperLimitPointNum',
             type: 'number',
-            addonAfter: <ArrowUpOutlined />,
             label: undefined,
+            antProps: {
+              addonAfter: <ArrowUpOutlined />,
+              min: 0,
+              placeholder: '最大闭合点个数',
+            },
             initialValue: 100,
-            min: 0,
-            placeholder: '最大闭合点个数',
             rules: [
               {
                 required: true,
@@ -108,8 +113,43 @@ export default [
         label: '标签配置',
         initialValue: [
           {
+            color: '#ff6600',
             key: '标签-1',
             value: 'label-1',
+          },
+        ],
+      },
+      {
+        field: 'categoryList',
+        key: 'categoryList',
+        type: 'category-attribute',
+        label: '分类属性',
+        initialValue: [
+          {
+            key: '标签-1',
+            isMultiple: false,
+            value: 'label-1',
+            options: [
+              {
+                key: '标签-1-1',
+                value: 'label-1-1',
+              },
+              {
+                key: '标签-1-2',
+                value: 'label-1-2',
+              },
+            ],
+          },
+          {
+            key: '标签-2',
+            value: 'label-2',
+            isMultiple: true,
+            options: [
+              {
+                key: '标签-2-1',
+                value: 'label-2-1',
+              },
+            ],
           },
         ],
       },

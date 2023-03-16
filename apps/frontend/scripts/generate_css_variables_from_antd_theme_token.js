@@ -5,19 +5,42 @@ const _ = require('lodash');
 let codeTemplate;
 const targetPath = path.join(__dirname, '../src/styles/global-variables.scss');
 const tokenPath = path.join(__dirname, '../src/styles/theme.json');
+const { theme } = require('antd');
+const prettier = require('prettier');
+const { defaultAlgorithm, defaultSeed } = theme;
+
+const mapToken = defaultAlgorithm(defaultSeed);
 
 try {
   const theme = {
+    ...mapToken,
     ...require(tokenPath).token,
   };
-
-  console.log('theme', theme);
 
   const result = _.chain(theme)
     .keys()
     .map((key) => {
-      const newKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
-      return `--${newKey}: ${theme[key]};`;
+      const newKey = key
+        .replace(/([A-Z])+/g, (match, p1) => {
+          return `-${match}`;
+        })
+        .toLowerCase();
+      if (
+        newKey.includes('size') ||
+        newKey.includes('border-radius') ||
+        newKey.includes('control-height') ||
+        newKey.includes('line-width-bold')
+      ) {
+        return `--${newKey}: ${theme[key]}px;`;
+      }
+
+      let value = theme[key];
+
+      if (typeof value === 'number' && value.toString().length > 5) {
+        value = parseFloat(value.toFixed(2));
+      }
+
+      return `--${newKey}: ${value};`;
     })
     .value();
 
@@ -35,8 +58,15 @@ try {
 } catch (err) {
 } finally {
   if (codeTemplate) {
-    fs.writeFile(targetPath, codeTemplate, 'utf-8', () => {
-      console.log(`🎉 ${targetPath}已生成`);
-    });
+    fs.writeFile(
+      targetPath,
+      prettier.format(codeTemplate, {
+        parser: 'scss',
+      }),
+      'utf-8',
+      () => {
+        console.log(`🎉 ${targetPath}已生成`);
+      },
+    );
   }
 }

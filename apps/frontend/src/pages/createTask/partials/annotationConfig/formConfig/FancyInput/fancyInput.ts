@@ -3,6 +3,7 @@ import { FancyEnum } from './Enum.fancy';
 import { FancyAttributeList } from '../customFancy/ListAttribute.fancy';
 import { FancyString } from './String.fancy';
 import { FancyNumber } from './Number.fancy';
+import { FancyCategoryAttribute } from '../customFancy/CategoryAttribute.fancy';
 
 export const inputs: Record<string, React.FC<any>> = {
   enum: FancyEnum,
@@ -10,6 +11,7 @@ export const inputs: Record<string, React.FC<any>> = {
   number: FancyNumber,
   boolean: FancyBoolean,
   'list-attribute': FancyAttributeList,
+  'category-attribute': FancyCategoryAttribute,
 };
 
 export function add(type: string) {

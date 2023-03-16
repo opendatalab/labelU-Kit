@@ -44,6 +44,7 @@
     "yaml": "^2.1.1"
   },
   "scripts": {
+    "postinstall": "node ./scripts/generate_css_variables_from_antd_theme_token.js",
     "start": "vite",
     "build": "cross-env CI=false vite build",
     "package:dist": "cross-env DIST=true vite",
@@ -99,7 +100,6 @@
     "@types/rx": "^4.1.2",
     "@types/styled-components": "^5.1.26",
     "@types/uuid": "^9.0.0",
-    "@umijs/openapi": "^1.8.2",
     "@vitejs/plugin-react": "^3.1.0",
     "cross-env": "^7.0.3",
     "eslint-config-prettier": "^8.3.0",

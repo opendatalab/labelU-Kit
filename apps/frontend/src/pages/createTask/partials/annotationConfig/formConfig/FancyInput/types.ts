@@ -12,4 +12,11 @@ export interface FancyItemIdentifier {
   children?: FancyItemIdentifier[];
   hidden?: boolean;
   rules?: Rule[];
+  /** antd input component props */
+  antProps?: Record<string, unknown>;
+}
+
+export interface FancyInputProps {
+  type: string;
+  [key: string]: any;
 }

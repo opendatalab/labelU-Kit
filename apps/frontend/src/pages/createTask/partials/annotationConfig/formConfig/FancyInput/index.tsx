@@ -1,9 +1,5 @@
 import { inputs } from './fancyInput';
-
-export interface FancyInputProps {
-  type: string;
-  [key: string]: any;
-}
+import type { FancyInputProps } from './types';
 
 export default function FancyInput({ type, ...props }: FancyInputProps) {
   const Input = inputs[type];

@@ -1,8 +1,10 @@
 import type { InputNumberProps } from 'antd';
 import { InputNumber } from 'antd';
 
-export type FancyNumberProps = InputNumberProps;
+export interface FancyNumberProps {
+  antProps: InputNumberProps;
+}
 
-export function FancyNumber({ ...props }: FancyNumberProps) {
-  return <InputNumber {...props} />;
+export function FancyNumber({ antProps, ...props }: FancyNumberProps) {
+  return <InputNumber {...antProps} {...props} />;
 }
