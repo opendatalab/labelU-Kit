@@ -13,6 +13,7 @@ import AttributeUtils from '@/utils/tool/AttributeUtils';
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import EKeyCode from '@/constant/keyCode';
 import _ from 'lodash-es';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import utils from '../pointCloud/uitils';
 import { PointCloud } from '../pointCloud';
 import type { PointCloudIProps } from '../pointCloud';
@@ -363,19 +364,7 @@ class PointCloudOperation extends PointCloud {
   // add attributes to scene
   public addAttributeAndOrderWithRender = (boxInfo: IPointCloudBox, attribute: string, color: number) => {
     if (this.showSetting.isShowAttribute || this.showSetting.isShowOrder || this.showSetting.isShowAttributeText) {
-      let text = '';
-
-      if (this.showSetting.isShowOrder) {
-        text += boxInfo.order;
-      }
-
-      if (this.showSetting.isShowAttribute) {
-        text = this.showSetting.isShowOrder ? `${boxInfo.order} - ${attribute}` : attribute;
-      }
-
-      if (this.showSetting.isShowAttributeText) {
-        text = `${text} \n ${boxInfo.textAttribute}`;
-      }
+      const text = this.getAtributeInfoText(boxInfo, attribute);
 
       utils.getSvgTextMesh(text, color).then((fmesh) => {
         const position = { ...fmesh.position };
@@ -390,6 +379,93 @@ class PointCloudOperation extends PointCloud {
         this.scene.add(fmesh);
         this.render();
       });
+    }
+  };
+
+  public getAtributeInfoText(boxInfo: IPointCloudBox, attribute?: string) {
+    let text = '';
+    if (attribute) {
+      boxInfo.attribute = attribute;
+    }
+    if (this.showSetting.isShowOrder) {
+      text += boxInfo.order;
+    }
+
+    if (this.showSetting.isShowAttribute) {
+      text = this.showSetting.isShowOrder ? `${boxInfo.order} - ${boxInfo.attribute}` : boxInfo.attribute;
+    }
+
+    if (this.showSetting.isShowAttributeText) {
+      text = `${text} \n ${boxInfo.textAttribute}`;
+    }
+    return text;
+  }
+
+  public cleanShowSettingStuff = () => {
+    if (Array.isArray(this.boxList)) {
+      for (const boxInfo of this.boxList) {
+        this.removeObjectByName(`${boxInfo.id}attribute`);
+        this.removeObjectByName(`${boxInfo.id}boxArrow`);
+      }
+      this.render();
+    }
+  };
+
+  public refreshAttributeWithBoxList = () => {
+    if (this.showSetting.isShowAttribute || this.showSetting.isShowOrder || this.showSetting.isShowAttributeText) {
+      utils.getSvgFont().then((tFont) => {
+        if (Array.isArray(this.boxList)) {
+          for (const boxInfo of this.boxList) {
+            const color = new THREE.Color(this.getColor(boxInfo.attribute).valid.stroke).getHex();
+            const word = this.getAtributeInfoText(boxInfo);
+            const fontGeoMetry = new TextGeometry(word, {
+              font: tFont,
+              size: 1,
+              height: 0.1,
+            });
+            const material = new THREE.MeshBasicMaterial({
+              color,
+              transparent: true,
+              opacity: 1,
+              side: THREE.DoubleSide,
+            });
+            const mesh = new THREE.Mesh(fontGeoMetry, material);
+            const box = new THREE.Box3().setFromObject(mesh);
+            const xLength = box.max.x - box.min.x;
+            mesh.position.x = -xLength / 2;
+
+            const position = { ...mesh.position };
+            const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
+            const Tt = new THREE.Matrix4().makeTranslation(
+              boxInfo.center.x + position.x,
+              boxInfo.center.y + position.y,
+              0,
+            );
+            const Tb = new THREE.Matrix4().makeTranslation(-position.x, -position.y, boxInfo.zInfo.maxZ + 2);
+            const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
+            mesh.applyMatrix4(Rz);
+            mesh.applyMatrix4(tranlateMatrix);
+            mesh.name = `${boxInfo.id}attribute`;
+            this.scene.add(mesh);
+          }
+        }
+        this.render();
+      });
+    }
+  };
+
+  public refreshArrowDirection = () => {
+    if (!this.showSetting.isShowDirection) {
+      return;
+    }
+    if (Array.isArray(this.boxList)) {
+      for (const boxInfo of this.boxList) {
+        const color = new THREE.Color(this.getColor(boxInfo.attribute).valid.stroke).getHex();
+        const boxArrowMesh = this.getBoxArrowByRectAndZinfo(boxInfo.rect, boxInfo.zInfo, color);
+        boxArrowMesh.name = `${boxInfo.id}boxArrow`;
+        this.scene.add(boxArrowMesh);
+      }
+      this.render();
     }
   };
 

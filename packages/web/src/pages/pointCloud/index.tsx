@@ -40,20 +40,20 @@ const AnnotationPage: FC = () => {
       },
       rect: [
         {
-          x: 2.9910560049913646,
-          y: 19.977956756710284
+          x: 43.836008210143305,
+          y: -4.492155520093377
         },
         {
-          x: -10.327058301767032,
-          y: 19.976892498853452
+          x: 46.00530587422975,
+          y: -14.251182603583956
         },
         {
-          x: -10.325434868532296,
-          y: -0.33873801381550095
+          x: 38.16370839221224,
+          y: -15.994262006368274
         },
         {
-          x: 2.9926794382260997,
-          y: -0.33767375595866866
+          x: 35.994410728125814,
+          y: -6.23523492287768
         }
       ],
       order: 1,
@@ -73,10 +73,10 @@ const AnnotationPage: FC = () => {
       order: number;
       isVisible: boolean;
     }[] = [];
-    for (let i = 0; i < 0; i++) {
+    for (let i = 0; i < 500; i++) {
       let tmpOneLabel = { ...oneLabel };
       tmpOneLabel.id = i + 'dfsfsdf';
-      tmpOneLabel.order = i;
+      tmpOneLabel.order = i + 1;
 
       let translate = Math.random() * 10 - 5;
       let angle = Math.random() * 365;

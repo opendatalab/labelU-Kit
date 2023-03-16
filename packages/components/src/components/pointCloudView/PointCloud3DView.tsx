@@ -145,7 +145,14 @@ const PointCloud3D: React.FC<
 
   useEffect(() => {
     refreshtPointCloud3DView();
-  }, [currentData?.url, showSettingConfig]);
+  }, [currentData?.url]);
+
+  useEffect(() => {
+    ptCtx.mainViewInstance?.setShowSettings(showSettingConfig);
+    ptCtx.mainViewInstance?.cleanShowSettingStuff();
+    ptCtx.mainViewInstance?.refreshAttributeWithBoxList();
+    ptCtx.mainViewInstance?.refreshArrowDirection();
+  }, [showSettingConfig]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance || !ptCtx.mainViewInstance) {
@@ -236,7 +243,6 @@ const PointCloud3D: React.FC<
     );
 
     mainViewInstance.singleOn('savePcResult', (boxList: IPointCloudBox[]) => {
-      mainViewInstance?.updatePointCloudByAttributes(currentData.url as string, boxList);
       dispatch({
         type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
         payload: {
@@ -302,7 +308,6 @@ const PointCloud3D: React.FC<
         ptCtx.setMainViewInstance(pointCloud);
         pointCloud.setAllAttributes(config.config.attributeList);
       }
-      pointCloud.setShowSettings(showSettingConfig);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
@@ -335,7 +340,6 @@ const PointCloud3D: React.FC<
         ptCtx.setMainViewInstance(pointCloud);
         pointCloud.setAllAttributes(config.config.attributeList);
       }
-      pointCloud.setShowSettings(showSettingConfig);
       pointCloud.setStyle(toolStyle);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
@@ -361,6 +365,7 @@ const PointCloud3D: React.FC<
           }
         });
 
+        pointCloud.render();
         pointCloud?.emit('savePcResult', boxList);
 
         ptCtx.setPointCloudResult(boxParamsList);

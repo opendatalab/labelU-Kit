@@ -401,7 +401,10 @@ export const usePointCloudViews = () => {
         );
 
         mainViewInstance?.emit('savePcResult', newBoxList);
-
+        mainViewInstance?.updatePointCloudByAttributes(
+          currentData.url as string,
+          newBoxList as IPointCloudBox[],
+        );
         mainViewInstance?.controls.update();
         mainViewInstance?.render();
       }
@@ -719,7 +722,10 @@ export const usePointCloudViews = () => {
       });
 
       mainViewInstance?.emit('savePcResult', boxList);
-
+      mainViewInstance?.updatePointCloudByAttributes(
+        currentData.url as string,
+        boxList as IPointCloudBox[],
+      );
       ptCtx.setPointCloudResult(boxParamsList);
       ptCtx.setPolygonList(polygonList);
     } else {
