@@ -46,6 +46,8 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public rotation: number = 0;
 
+  public cursorEnableChange: boolean = true;
+
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
     this.isPointCloud2DTool = true;
@@ -88,15 +90,18 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public onMouseUp(e: MouseEvent) {
     super.onMouseUp(e);
+    this.cursorEnableChange = true;
     this.setCustomCursor('none');
     this.rotatePointList = undefined;
     return undefined;
   }
 
   public setCursorWhenMove(event: MouseEvent) {
-    // hover 框内
+    if (this.cursorEnableChange === false) {
+      return;
+    }
     if (this.getHoverID(event) && !this.rotatePointList && this.selectedPolygon) {
-      console.log(this.hoverPointIndex);
+      // hover 框内
       if (this.hoverPointIndex > -1) {
         let nexIndex = this.hoverPointIndex + 1;
         if (this.hoverPointIndex === 3) {
@@ -209,9 +214,11 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public onMouseDown(e: MouseEvent) {
+    this.cursorEnableChange = false;
     if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
       return;
     }
+
     if (this.isArrowHover) {
       this.firstClickPoint = this.getCoordinate(e);
     }
