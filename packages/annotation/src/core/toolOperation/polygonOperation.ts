@@ -1302,7 +1302,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.selectedID && this.dragInfo && this.hoverEdgeIndex < 0) {
+    if (this.selectedID && this.dragInfo && this.hoverEdgeIndex < 0 && this.hoverPointIndex < 0) {
       this.onDragMove(e);
       return;
     }
