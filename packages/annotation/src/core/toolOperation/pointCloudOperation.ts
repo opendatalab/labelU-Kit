@@ -368,15 +368,17 @@ class PointCloudOperation extends PointCloud {
 
       utils.getSvgTextMesh(text, color).then((fmesh) => {
         const position = { ...fmesh.position };
-        const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
+        const Rz = new THREE.Matrix4().makeRotationZ(-0.5 * Math.PI);
         const Tt = new THREE.Matrix4().makeTranslation(boxInfo.center.x + position.x, boxInfo.center.y + position.y, 0);
         const Tb = new THREE.Matrix4().makeTranslation(-position.x, -position.y, boxInfo.zInfo.maxZ + 2);
-        const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
-        fmesh.applyMatrix4(Rz);
-        fmesh.applyMatrix4(tranlateMatrix);
+
+        const textMatrix = new THREE.Matrix4().multiply(Tt).multiply(Rz).multiply(Tb);
+
+        fmesh.applyMatrix4(textMatrix);
         fmesh.name = `${boxInfo.id}attribute`;
         this.removeObjectByName(fmesh.name);
         this.scene.add(fmesh);
+
         this.render();
       });
     }
@@ -435,16 +437,18 @@ class PointCloudOperation extends PointCloud {
             mesh.position.x = -xLength / 2;
 
             const position = { ...mesh.position };
-            const Rz = new THREE.Matrix4().makeRotationZ(-boxInfo.rotation);
+
+            const Rz = new THREE.Matrix4().makeRotationZ(-0.5 * Math.PI);
             const Tt = new THREE.Matrix4().makeTranslation(
               boxInfo.center.x + position.x,
               boxInfo.center.y + position.y,
               0,
             );
             const Tb = new THREE.Matrix4().makeTranslation(-position.x, -position.y, boxInfo.zInfo.maxZ + 2);
-            const tranlateMatrix = new THREE.Matrix4().multiply(Tb).multiply(Tt);
-            mesh.applyMatrix4(Rz);
-            mesh.applyMatrix4(tranlateMatrix);
+
+            const textMatrix = new THREE.Matrix4().multiply(Tt).multiply(Rz).multiply(Tb);
+
+            mesh.applyMatrix4(textMatrix);
             mesh.name = `${boxInfo.id}attribute`;
             this.scene.add(mesh);
           }
@@ -917,7 +921,10 @@ class PointCloudOperation extends PointCloud {
   }
 
   public render() {
-    this.textLookAtCamera();
+    if (Math.abs(this.camera.position.x) > 5 || Math.abs(this.camera.position.x) > 5) {
+      this.textLookAtCamera();
+    }
+
     super.render();
   }
 }
