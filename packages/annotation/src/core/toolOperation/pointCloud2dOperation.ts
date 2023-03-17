@@ -122,15 +122,15 @@ class PointCloud2dOperation extends PolygonOperation {
         const vetor = new Vector2(nextVetor.x + prevVector.x, nextVetor.y + prevVector.y);
         const angle = Math.abs((new Vector2(vetor.x, vetor.y).angle() / Math.PI) * 180);
         if ((angle > 270 && angle < 360) || (angle > 90 && angle < 180)) {
-          this.setCustomCursor('ne-resize');
+          this.setCustomCursor('nesw-resize');
         } else {
-          this.setCustomCursor('nw-resize');
+          this.setCustomCursor('nwse-resize');
         }
         // four side resize
       } else if (this.hoverEdgeIndex === 0 || this.hoverEdgeIndex === 2) {
-        this.setCustomCursor('e-resize');
+        this.setCustomCursor('ew-resize');
       } else if (this.hoverEdgeIndex === 1 || this.hoverEdgeIndex === 3) {
-        this.setCustomCursor('s-resize');
+        this.setCustomCursor('ns-resize');
       } else if (event.buttons === 1) {
         this.setCustomCursor('grab');
       } else {
@@ -142,7 +142,7 @@ class PointCloud2dOperation extends PolygonOperation {
       if (event.buttons === 1) {
         this.setCustomCursor('default');
       } else {
-        this.setCustomCursor('s-resize');
+        this.setCustomCursor('ew-resize');
       }
     } else {
       this.setCustomCursor('default');
