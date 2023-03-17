@@ -152,6 +152,7 @@ export const PointCloudValidity = () => {
           color: 'white',
           left: 0,
           top: 0,
+          opacity: 1,
           fontSize: 20,
           padding: '8px 16px',
           zIndex: 20,

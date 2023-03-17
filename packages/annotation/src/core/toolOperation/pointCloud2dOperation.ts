@@ -511,7 +511,7 @@ class PointCloud2dOperation extends PolygonOperation {
         AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
         {
           color: selectedColor.stroke,
-          thickness: 10,
+          thickness: 4,
           hoverEdgeIndex: this.hoverEdgeIndex,
           lineType: this.config?.lineType,
         },

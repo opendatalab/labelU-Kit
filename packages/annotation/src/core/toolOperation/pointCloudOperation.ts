@@ -74,6 +74,10 @@ class PointCloudOperation extends PointCloud {
     this.initPointCloudOperation();
   }
 
+  get selectedBox() {
+    return this.boxList.filter((item) => item.id === this.selectedId);
+  }
+
   public setSelectedId(selectedId: string) {
     this.selectedId = selectedId;
   }
@@ -483,7 +487,7 @@ class PointCloudOperation extends PointCloud {
   ) => {
     let prevBox;
     const color = new THREE.Color(this.getColor(attribute).valid.stroke).getHex();
-    let opacity = 0.3;
+    let opacity = 0.5;
     const { boxList } = this;
     const boxInfo = this.getBoxFormmat(
       rectPoints as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
@@ -648,7 +652,7 @@ class PointCloudOperation extends PointCloud {
         }
       });
 
-      this.setTransparencyByName(`${this.selectedId}box`, 0.3);
+      this.setTransparencyByName(`${this.selectedId}box`, 0.5);
       this.emit('updateSelectedBox', this.selectedId);
     }
   }
@@ -745,7 +749,7 @@ class PointCloudOperation extends PointCloud {
           self.scene.remove(lineInScene as THREE.Object3D);
         }
 
-        const meshLine = utils.getMeshLine(tmpPoint, self.color, 10);
+        const meshLine = utils.getMeshLine(tmpPoint, self.color, 4);
         meshLine.name = firstlineName;
         self.scene.add(meshLine);
       }
@@ -761,7 +765,7 @@ class PointCloudOperation extends PointCloud {
         const { sharpRect } = self.getFooterRect(points, clickPoint);
         const reactanglePoint = { x: sharpRect[2][0], y: sharpRect[2][1], z: 0 };
         const tmpPoint = [points[1], reactanglePoint];
-        const meshLine = utils.getMeshLine(tmpPoint, self.color, 10);
+        const meshLine = utils.getMeshLine(tmpPoint, self.color, 4);
         meshLine.name = secondlineName;
         self.scene.add(meshLine);
       }
