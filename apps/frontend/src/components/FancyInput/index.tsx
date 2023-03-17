@@ -1,4 +1,4 @@
-import { inputs } from './fancyInput';
+import { inputs, add, remove } from './fancyInput';
 import type { FancyInputProps } from './types';
 
 export default function FancyInput({ type, ...props }: FancyInputProps) {
@@ -11,3 +11,5 @@ export default function FancyInput({ type, ...props }: FancyInputProps) {
 
   return <Input {...props} />;
 }
+
+export { add, remove };

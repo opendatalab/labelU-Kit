@@ -1,7 +1,7 @@
 import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import type { RuleRender } from 'antd/es/form';
 
-import type { FancyItemIdentifier } from '../FancyInput/types';
+import type { FancyItemIdentifier } from '@/components/FancyInput/types';
 
 export default [
   {
@@ -116,48 +116,6 @@ export default [
             color: '#ff6600',
             key: '标签-1',
             value: 'label-1',
-          },
-        ],
-      },
-      {
-        field: 'categoryList',
-        key: 'categoryList',
-        type: 'category-attribute',
-        label: '分类属性',
-        initialValue: [
-          {
-            key: '标签-1',
-            type: 'enum',
-            value: 'label-1',
-            options: [
-              {
-                key: '标签-1-1',
-                value: 'label-1-1',
-              },
-              {
-                key: '标签-1-2',
-                value: 'label-1-2',
-              },
-            ],
-          },
-          {
-            key: '标签-2',
-            value: 'label-2',
-            type: 'tuple',
-            options: [
-              {
-                key: '标签-2-1',
-                value: 'label-2-1',
-              },
-            ],
-          },
-          {
-            key: '标签-3',
-            value: 'label-3',
-            type: 'string',
-            maxLength: 100,
-            stringType: 'text',
-            defaultValue: '',
           },
         ],
       },

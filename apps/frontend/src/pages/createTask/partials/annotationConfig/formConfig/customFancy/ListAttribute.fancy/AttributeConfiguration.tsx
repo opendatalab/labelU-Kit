@@ -1,9 +1,9 @@
 import type { DrawerProps } from 'antd';
-import { App, Form, Button, Drawer } from 'antd';
-import { isEmpty, isEqual } from 'lodash/fp';
+import { Form, Button, Drawer } from 'antd';
+import { get, isEmpty, isEqual } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import Icon from '@ant-design/icons';
+import Icon, { ExclamationCircleFilled } from '@ant-design/icons';
 
 import { ReactComponent as AddCategoryIcon } from '@/assets/svg/add-category.svg';
 import { ReactComponent as AddTextIcon } from '@/assets/svg/add-text.svg';
@@ -86,7 +86,6 @@ interface AttributeConfigurationState {
 
 export default function AttributeConfiguration({ onClose, visible, value, onChange }: AttributeConfigurationProps) {
   const [stateValue, setStateValue] = useState<AttributeConfigurationState>({ list: value || [] });
-  const { message } = App.useApp();
   const ref = useRef<FancyCategoryAttributeRef>(null);
   const [form] = Form.useForm();
 
@@ -120,18 +119,29 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
         reset();
       })
       .catch((error) => {
-        form.scrollToField(error.errorFields[0].name);
-        message.error('请检查输入是否正确');
+        modal.info({
+          title: '请填写完整的属性内容',
+          content: get('errorFields[0].errors[0]')(error),
+          icon: <ExclamationCircleFilled style={{ color: 'var(--color-warning)' }} />,
+          onOk: () => {
+            form.scrollToField(error.errorFields[0].name);
+          },
+        });
       });
-  }, [form, message, onChange, onClose, reset]);
+  }, [form, onChange, onClose, reset]);
 
-  const handleClose = () => {
+  const handleCancel = useCallback(() => {
+    reset();
+    onClose();
+  }, [onClose, reset]);
+
+  const handleClose = useCallback(() => {
     if (!isEqual(value)(form.getFieldsValue().list)) {
       modal.confirm({
-        title: '是否保存修改',
-        content: '当前属性配置已修改，是否保存修改？',
-        onOk: handleSave,
-        okText: '保存并离开',
+        title: '关联属性将不会保存，是否确认退出',
+        content: '当前属性配置已修改',
+        onOk: handleCancel,
+        okText: '退出',
         cancelText: '继续编辑',
       });
 
@@ -139,12 +149,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
     }
 
     onClose();
-  };
-
-  const handleCancel = useCallback(() => {
-    reset();
-    onClose();
-  }, [onClose, reset]);
+  }, [form, handleCancel, onClose, value]);
 
   const emptyPlaceholder = useMemo(
     () => (
@@ -170,10 +175,10 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
         <Button type="primary" onClick={handleSave}>
           保存
         </Button>
-        <Button onClick={handleCancel}>取消</Button>
+        <Button onClick={handleClose}>取消</Button>
       </div>
     ),
-    [handleSave, handleCancel],
+    [handleSave, handleClose],
   );
 
   const isValueEmpty = useMemo(() => {

@@ -10,7 +10,7 @@ import Icon, { CloseCircleFilled, PlusOutlined, StarFilled, SwapOutlined } from 
 import { ReactComponent as TreeSwitcherIcon } from '@/assets/svg/tree-switcher.svg';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 
-import type { FancyInputProps } from '../../FancyInput/types';
+import type { FancyInputProps } from '../../../../../../../components/FancyInput/types';
 import { listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
 
 export enum CategoryType {

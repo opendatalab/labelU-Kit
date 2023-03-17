@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import ColorPalette from '@/classes/ColorPalette';
 
 import type { CategoryAttributeItem } from '../CategoryAttribute.fancy';
-import type { FancyInputProps } from '../../FancyInput/types';
+import type { FancyInputProps } from '../../../../../../../components/FancyInput/types';
 import AttributeConfiguration from './AttributeConfiguration';
 import { listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
 

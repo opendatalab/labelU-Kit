@@ -12,7 +12,7 @@ export interface FancyItemIdentifier {
   children?: FancyItemIdentifier[];
   hidden?: boolean;
   rules?: Rule[];
-  /** antd input component props */
+  /** antd input component props, only in template definition */
   antProps?: Record<string, unknown>;
 }
 

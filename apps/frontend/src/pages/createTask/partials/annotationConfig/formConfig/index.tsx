@@ -9,12 +9,18 @@ import { PlusOutlined } from '@ant-design/icons';
 import type { ToolsConfigState } from '@/types/toolConfig';
 import { validateTools } from '@/utils/tool/common';
 import { MediaType } from '@/services/types';
+import FancyForm from '@/components/FancyForm';
+import FancyInput, { add } from '@/components/FancyInput';
 
+import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
+import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
 import { LoadInitConfig } from '../configTemplate/config';
 import styles from './index.module.scss';
 import lineTemplate from './templates/line.template';
-import FancyForm from './FancyForm';
-import FancyInput from './FancyInput';
+
+// 注册fancyInput自定义输入组件
+add('list-attribute', FancyAttributeList);
+add('category-attribute', FancyCategoryAttribute);
 
 const validTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line, EToolName.Tag, EToolName.Text];
 
