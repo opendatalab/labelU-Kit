@@ -24,9 +24,9 @@ const LabelShowSetArea: FC = () => {
   );
   const [initValue, setInitialValue] = useState<LabelShowConfigItems>({
     isShowAttributeText: false,
-    isShowAttribute: false,
-    isShowOrder: false,
-    isShowDirection: false,
+    isShowAttribute: true,
+    isShowOrder: true,
+    isShowDirection: true,
   });
   const labelShowFormConfig = [
     {

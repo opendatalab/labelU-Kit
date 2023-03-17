@@ -428,12 +428,8 @@ class PolygonOperation extends BasicToolOperation {
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
 
-      // 如有选中目标，则需更改当前选中的属性
       const { selectedID } = this;
       if (selectedID) {
-        if (this.selectedPolygon) {
-          this.selectedPolygon.attribute = defaultAttribute;
-        }
         this.history.pushHistory(this.polygonList);
         this.render();
       }

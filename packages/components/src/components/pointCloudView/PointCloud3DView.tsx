@@ -307,6 +307,7 @@ const PointCloud3D: React.FC<
         });
         ptCtx.setMainViewInstance(pointCloud);
         pointCloud.setAllAttributes(config.config.attributeList);
+        pointCloud.setShowSettings(showSettingConfig);
       }
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
@@ -339,6 +340,7 @@ const PointCloud3D: React.FC<
         });
         ptCtx.setMainViewInstance(pointCloud);
         pointCloud.setAllAttributes(config.config.attributeList);
+        pointCloud.setShowSettings(showSettingConfig);
       }
       pointCloud.setStyle(toolStyle);
       if (currentData.result) {

@@ -1,4 +1,3 @@
-import { getFormatSize } from '@/components/customResizeHook';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { jsonParser } from '@/utils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
@@ -19,10 +18,10 @@ export const getStepConfig = (stepList: any[], step: number) =>
   stepList.find((i) => i.step === step);
 
 const initialState: AnnotationState = {
-  isShowOrder: false,
+  isShowOrder: true,
   isShowAttributeText: false,
-  isShowAttribute: false,
-  isShowDirection: false,
+  isShowAttribute: true,
+  isShowDirection: true,
   currentToolName: '',
   annotationEngine: null,
   toolInstance: null,
