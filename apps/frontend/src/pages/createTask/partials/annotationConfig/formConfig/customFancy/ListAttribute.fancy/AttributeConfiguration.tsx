@@ -1,6 +1,6 @@
 import type { DrawerProps } from 'antd';
 import { Form, Button, Drawer } from 'antd';
-import { get, isEmpty, isEqual } from 'lodash/fp';
+import { compose, get, isEqual, size } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Icon, { ExclamationCircleFilled } from '@ant-design/icons';
@@ -186,8 +186,10 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   );
 
   const isValueEmpty = useMemo(() => {
-    return isEmpty(stateValue.list);
-  }, [stateValue.list]);
+    return compose(size, get('list'))(form.getFieldsValue()) === 0;
+    // stateValue 只用于判断是否为空
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, stateValue]);
 
   const content = useMemo(
     () => (
