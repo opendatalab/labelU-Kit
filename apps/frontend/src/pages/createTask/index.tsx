@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Modal } from 'antd';
+import { Button } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
 import { omit, set } from 'lodash/fp';
 import type { TagToolConfig, TextToolConfig, ToolConfig } from '@label-u/annotation';
 
+import { modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
 import { TaskStatus, MediaType } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
@@ -220,7 +221,7 @@ const CreateTask = () => {
   };
 
   const handleCancel = () => {
-    Modal.confirm({
+    modal.confirm({
       title: '确定要取消吗？',
       content: '取消后，当前任务将不会被保存',
       okText: '保存并退出',

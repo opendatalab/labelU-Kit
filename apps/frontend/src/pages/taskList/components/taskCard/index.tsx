@@ -6,6 +6,7 @@ import Icon, { ExclamationOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
+import { modal } from '@/StaticAnt';
 import type { Dispatch, RootState } from '@/store';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import { ReactComponent as OutputIcon } from '@/assets/svg/outputData.svg';
@@ -45,7 +46,7 @@ const TaskCard = (props: any) => {
   const handleDeleteTask = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    Modal.confirm({
+    modal.confirm({
       title: '删除任务',
       icon: <ExclamationOutlined />,
       content: '确定删除该任务吗？',

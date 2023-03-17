@@ -127,7 +127,7 @@ export default [
         initialValue: [
           {
             key: '标签-1',
-            isMultiple: false,
+            type: 'enum',
             value: 'label-1',
             options: [
               {
@@ -143,13 +143,21 @@ export default [
           {
             key: '标签-2',
             value: 'label-2',
-            isMultiple: true,
+            type: 'tuple',
             options: [
               {
                 key: '标签-2-1',
                 value: 'label-2-1',
               },
             ],
+          },
+          {
+            key: '标签-3',
+            value: 'label-3',
+            type: 'string',
+            maxLength: 100,
+            stringType: 'text',
+            defaultValue: '',
           },
         ],
       },

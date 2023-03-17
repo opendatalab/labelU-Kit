@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import ColorPalette from '@/classes/ColorPalette';
 
+import type { CategoryAttributeItem } from '../CategoryAttribute.fancy';
 import type { FancyInputProps } from '../../FancyInput/types';
 import AttributeConfiguration from './AttributeConfiguration';
 import { listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
@@ -16,6 +17,7 @@ export interface AttributeItem {
   color: string;
   key: string;
   value: string;
+  attributes?: CategoryAttributeItem[];
 }
 
 interface AttributeItemInState extends AttributeItem {
@@ -130,9 +132,21 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
   );
 
   const [isAttributeConfigurationOpen, setAttributeConfigurationOpen] = useState(false);
-  const handleOpenAttributeConfiguration = useCallback(() => {
+  const [activeAttributeIndex, setActiveAttributeIndex] = useState<number>(0);
+  const handleOpenAttributeConfiguration = useCallback((index: number) => {
     setAttributeConfigurationOpen(true);
+    setActiveAttributeIndex(index);
   }, []);
+
+  const handleChangeAttributes = useCallback(
+    (values: CategoryAttributeItem[]) => {
+      const newValue = set(`[${activeAttributeIndex}].attributes`)(values)(stateValue);
+      setValue(newValue);
+      onChange?.(listOmitWithId(newValue) as AttributeItem[]);
+    },
+    [activeAttributeIndex, onChange, stateValue],
+  );
+
   const handleCloseAttributeConfiguration = useCallback(() => {
     setAttributeConfigurationOpen(false);
   }, []);
@@ -189,10 +203,10 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
               <Input placeholder="保存结果（英文）" value={item.value} onChange={handleOnChange(`[${index}].value`)} />
             </Form.Item>
             <div className="add-wrapper">
-              <Button type="link" onClick={handleOpenAttributeConfiguration}>
+              <Button type="link" onClick={() => handleOpenAttributeConfiguration(index)}>
                 添加属性
               </Button>
-              <Badge count={12} color="var(--color-fill-secondary)" />
+              <Badge count={size(item.attributes)} showZero color="var(--color-fill-secondary)" />
             </div>
             <Tooltip title="删除">
               <div className="remove-wrapper">
@@ -213,8 +227,9 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
       </Button>
       <AttributeConfiguration
         visible={isAttributeConfigurationOpen}
-        value={[]}
+        value={stateValue[activeAttributeIndex]?.attributes}
         onClose={handleCloseAttributeConfiguration}
+        onChange={handleChangeAttributes}
       />
     </StyledAttributesWrapper>
   );

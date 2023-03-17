@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { IntlProvider } from 'react-intl';
-import { ConfigProvider } from 'antd';
+import { App as AntApp, ConfigProvider } from 'antd';
 import enUS from 'antd/es/locale/en_US';
 import zhCN from 'antd/es/locale/zh_CN';
 import moment from 'moment';
@@ -13,6 +13,7 @@ import zhCN1 from './locales/zh-CN';
 import { localeConfig } from './locales';
 import Router from './router';
 import themeToken from './styles/theme.json';
+import StaticAnt from './StaticAnt';
 
 const App: React.FC = () => {
   // @ts-ignore
@@ -62,10 +63,13 @@ const App: React.FC = () => {
 
   return (
     <ConfigProvider locale={getAntdLocale()} componentSize="middle" theme={{ token: themeToken.token }}>
-      {/* @ts-ignore */}
-      <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
-        <Router />
-      </IntlProvider>
+      <AntApp>
+        <StaticAnt />
+        {/* @ts-ignore */}
+        <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
+          <Router />
+        </IntlProvider>
+      </AntApp>
     </ConfigProvider>
   );
 };
