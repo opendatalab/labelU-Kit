@@ -142,7 +142,7 @@ class PointCloud2dOperation extends PolygonOperation {
       if (event.buttons === 1) {
         this.setCustomCursor('default');
       } else {
-        this.setCustomCursor('ew-resize');
+        this.setCustomCursor('ns-resize');
       }
     } else {
       this.setCustomCursor('default');
