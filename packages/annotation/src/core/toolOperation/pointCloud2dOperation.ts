@@ -48,6 +48,8 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public cursorEnableChange: boolean = true;
 
+  protected isUncheckedApproachBoundary = false;
+
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
     this.isPointCloud2DTool = true;
@@ -265,6 +267,10 @@ class PointCloud2dOperation extends PolygonOperation {
     //   return;
     // }
   };
+
+  public setIsUncheckedApproachBoundary(isUncheckedApproachBoundary: boolean) {
+    this.isUncheckedApproachBoundary = isUncheckedApproachBoundary;
+  }
 
   public get selectedPolygons() {
     return PolygonUtils.getPolygonByIDs(this.polygonList, this.selectedIDs);

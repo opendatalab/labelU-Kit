@@ -28,7 +28,7 @@ import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
-const BOUND_DISTANCE = 5;
+const BOUND_DISTANCE = 10;
 
 export type IPolygonOperationProps = IBasicToolOperationProps;
 
@@ -72,8 +72,6 @@ class PolygonOperation extends BasicToolOperation {
   public _textAttributInstance?: TextAttributeClass;
 
   public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
-
-  protected isUncheckedApproachBoundary = false;
 
   constructor(props: IPolygonOperationProps) {
     super(props);
@@ -157,10 +155,6 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     this.pattern = pattern;
-  }
-
-  public setIsUncheckedApproachBoundary(isUncheckedApproachBoundary: boolean) {
-    this.isUncheckedApproachBoundary = isUncheckedApproachBoundary;
   }
 
   /**
