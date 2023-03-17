@@ -90,9 +90,13 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   const [form] = Form.useForm();
 
   useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
     setStateValue({ list: value || [] });
     form.setFieldsValue({ list: value || [] });
-  }, [form, value]);
+  }, [form, value, visible]);
 
   const handleAddCategoryAttribute = useCallback(
     (type: CategoryType) => () => {
