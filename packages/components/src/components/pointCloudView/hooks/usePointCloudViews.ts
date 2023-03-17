@@ -597,6 +597,7 @@ export const usePointCloudViews = () => {
     const newPoints = (await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
       width: DEFAULT_SCOPE,
       depth: DEFAULT_SCOPE,
+      height: DEFAULT_SCOPE,
     })) as unknown as THREE.Points;
     const viewToBeUpdated = {
       [PointCloudView.Side]: () => {
@@ -635,6 +636,7 @@ export const usePointCloudViews = () => {
     const newPoints = (await mainViewInstance?.loadPCDFileByBox(dataUrl, boxParams, {
       width: DEFAULT_SCOPE,
       depth: DEFAULT_SCOPE,
+      height: DEFAULT_SCOPE,
     })) as unknown as THREE.Points;
 
     const viewToBeUpdated = {
