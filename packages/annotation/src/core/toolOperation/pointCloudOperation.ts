@@ -79,6 +79,7 @@ class PointCloudOperation extends PointCloud {
   }
 
   public setSelectedId(selectedId: string) {
+    this.setTransparencyByName(`${this.selectedId}box`, 0);
     this.selectedId = selectedId;
   }
 
