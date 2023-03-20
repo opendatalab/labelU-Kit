@@ -12,6 +12,7 @@ export interface FancyItemIdentifier {
   children?: FancyItemIdentifier[];
   hidden?: boolean;
   rules?: Rule[];
+  layout?: 'horizontal' | 'vertical';
   /** antd input component props, only in template definition */
   antProps?: Record<string, unknown>;
 }

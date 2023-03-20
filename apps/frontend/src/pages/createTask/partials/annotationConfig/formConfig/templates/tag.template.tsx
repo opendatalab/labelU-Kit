@@ -14,6 +14,20 @@ export default [
     type: 'group',
     children: [
       {
+        field: 'textConfigurable',
+        key: 'textConfigurable',
+        type: 'boolean',
+        hidden: true,
+        initialValue: false,
+      },
+      {
+        field: 'textCheckType',
+        key: 'textCheckType',
+        type: 'enum',
+        hidden: true,
+        initialValue: 0,
+      },
+      {
         type: 'category-attribute',
         key: 'field',
         field: 'tags',

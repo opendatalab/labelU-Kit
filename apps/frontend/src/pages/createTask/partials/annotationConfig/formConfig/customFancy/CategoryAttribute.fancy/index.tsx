@@ -1,5 +1,5 @@
 import type { AffixProps, ButtonProps } from 'antd';
-import { Affix, Select, InputNumber, Button, Form, Input, Tag, Tooltip, Tree } from 'antd';
+import { Switch, Affix, Select, InputNumber, Button, Form, Input, Tag, Tooltip, Tree } from 'antd';
 import type { NamePath } from 'antd/es/form/interface';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { filter, isEqual, map, omit, set, size, update } from 'lodash/fp';
@@ -9,8 +9,8 @@ import Icon, { CloseCircleFilled, PlusOutlined, StarFilled, SwapOutlined } from 
 
 import { ReactComponent as TreeSwitcherIcon } from '@/assets/svg/tree-switcher.svg';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
+import type { FancyInputProps } from '@/components/FancyInput/types';
 
-import type { FancyInputProps } from '../../../../../../../components/FancyInput/types';
 import { listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
 
 export enum CategoryType {
@@ -231,8 +231,10 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
 
     const handleOnChange = useCallback(
       (fieldPath: string) =>
-        (changedValue: string | number | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | null) => {
-          const targetValue = ['string', 'number'].includes(typeof changedValue)
+        (
+          changedValue: string | number | boolean | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | null,
+        ) => {
+          const targetValue = ['string', 'number', 'boolean'].includes(typeof changedValue)
             ? changedValue
             : changedValue === null
             ? ''
@@ -258,7 +260,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                 key: `分类-${size(stateValue) + 1}`,
                 value: `label-${size(stateValue) + 1}`,
                 type: cateType,
-                maxLength: 100,
+                maxLength: 1000,
                 stringType: StringType.Text,
                 defaultValue: '',
                 regexp: '',
@@ -498,6 +500,9 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                           options={stringTypeOptions}
                           onChange={handleOnChange(`[${index}].stringType`)}
                         />
+                      </Form.Item>
+                      <Form.Item name={[...path, index, 'required']} label="是否必填">
+                        <Switch onChange={handleOnChange(`[${index}].required`)} />
                       </Form.Item>
                       {(item.stringType as StringType) === StringType.Regexp && (
                         <Form.Item name={[...path, index, 'regexp']} label="自定义格式（正则表达式）">

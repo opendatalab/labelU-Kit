@@ -17,6 +17,28 @@ export default [
     type: 'group',
     children: [
       {
+        field: 'attributeConfigurable',
+        key: 'attributeConfigurable',
+        type: 'boolean',
+        hidden: true,
+        initialValue: true,
+      },
+      {
+        field: 'textCheckType',
+        key: 'textCheckType',
+        type: 'enum',
+        hidden: true,
+        initialValue: 0,
+      },
+      {
+        field: 'lineColor',
+        key: 'lineColor',
+        type: 'enum',
+        label: '线条是否为多色',
+        hidden: true,
+        initialValue: 1,
+      },
+      {
         field: 'lineType',
         key: 'lineType',
         type: 'enum',
@@ -107,8 +129,8 @@ export default [
         initialValue: false,
       },
       {
-        field: 'attributeList',
-        key: 'attributeList',
+        field: 'attributes',
+        key: 'attributes',
         type: 'list-attribute',
         label: '标签配置',
         initialValue: [

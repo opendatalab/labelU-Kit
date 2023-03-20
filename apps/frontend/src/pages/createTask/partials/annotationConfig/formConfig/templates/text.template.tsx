@@ -14,6 +14,20 @@ export default [
     type: 'group',
     children: [
       {
+        field: 'textConfigurable',
+        key: 'textConfigurable',
+        type: 'boolean',
+        hidden: true,
+        initialValue: false,
+      },
+      {
+        field: 'textCheckType',
+        key: 'textCheckType',
+        type: 'enum',
+        hidden: true,
+        initialValue: 0,
+      },
+      {
         type: 'category-attribute',
         key: 'field',
         field: 'texts',
@@ -25,12 +39,10 @@ export default [
             key: '标签-1',
             value: 'label-1',
             type: 'string',
-            options: [
-              {
-                key: '标签-1-1',
-                value: 'label-1-1',
-              },
-            ],
+            maxLength: 1000,
+            stringType: 'text',
+            required: false,
+            defaultValue: '',
           },
         ],
       },

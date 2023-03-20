@@ -20,6 +20,20 @@ export default [
         label: '最小尺寸',
         children: [
           {
+            field: 'attributeConfigurable',
+            key: 'attributeConfigurable',
+            type: 'boolean',
+            hidden: true,
+            initialValue: true,
+          },
+          {
+            field: 'textCheckType',
+            key: 'textCheckType',
+            type: 'enum',
+            hidden: true,
+            initialValue: 0,
+          },
+          {
             field: 'minWidth',
             key: 'minWidth',
             type: 'number',
@@ -58,8 +72,8 @@ export default [
         ],
       },
       {
-        field: 'attributeList',
-        key: 'attributeList',
+        field: 'attributes',
+        key: 'attributes',
         type: 'list-attribute',
         label: '标签配置',
         initialValue: [

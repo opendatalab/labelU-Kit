@@ -1,8 +1,5 @@
 import { isObject } from 'lodash-es';
 import type { ReactNode } from 'react';
-import type { BasicConfig } from '@label-u/components';
-
-import { toolnameC } from '../../pages/createTask/partials/annotationConfig/formConfig/constants';
 
 export function checkNumber(v: string) {
   const reg = /^[1-9]\d*$/g;
@@ -49,17 +46,4 @@ export const copyText = (text: string, element: 'input' | 'textarea' = 'input') 
 
   document.execCommand('copy');
   document.body.removeChild(copyInput);
-};
-
-export const validateTools = (tools: BasicConfig[]) => {
-  if (tools && tools.length > 0) {
-    for (let i = 0; i < tools.length; i++) {
-      if (Object.keys(toolnameC).indexOf(tools[i].tool) < 0) {
-        return false;
-      }
-    }
-  } else {
-    return false;
-  }
-  return true;
 };

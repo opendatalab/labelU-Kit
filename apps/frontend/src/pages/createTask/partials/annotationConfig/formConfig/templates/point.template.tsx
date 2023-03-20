@@ -14,6 +14,20 @@ export default [
     type: 'group',
     children: [
       {
+        field: 'attributeConfigurable',
+        key: 'attributeConfigurable',
+        type: 'boolean',
+        hidden: true,
+        initialValue: true,
+      },
+      {
+        field: 'textCheckType',
+        key: 'textCheckType',
+        type: 'enum',
+        hidden: true,
+        initialValue: 0,
+      },
+      {
         type: 'number',
         key: 'upperLimit',
         field: 'upperLimit',
@@ -27,8 +41,8 @@ export default [
         ],
       },
       {
-        field: 'attributeList',
-        key: 'attributeList',
+        field: 'attributes',
+        key: 'attributes',
         type: 'list-attribute',
         label: '标签配置',
         initialValue: [
