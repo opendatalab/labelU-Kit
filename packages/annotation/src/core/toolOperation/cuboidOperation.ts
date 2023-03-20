@@ -786,8 +786,8 @@ class CuboidOperation extends BasicToolOperation {
         textMaxWidth: textWidth,
       });
     }
-
-    this.renderTextAttribute();
+    // LabelU-kit need to be hidden
+    // this.renderTextAttribute();
 
     // LabelU-Kit Exclusive.
     if (this.saveDataEvent) {
