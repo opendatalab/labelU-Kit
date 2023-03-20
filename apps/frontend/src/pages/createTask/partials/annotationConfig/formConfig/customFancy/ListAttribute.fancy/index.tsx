@@ -44,6 +44,10 @@ const StyledAttributesWrapper = styled.div`
     margin-right: 0.5rem;
   }
 
+  .input {
+    flex-grow: 1;
+  }
+
   .sn {
     flex-basis: 1rem;
   }
@@ -196,10 +200,18 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
             <Form.Item name={[...preFields, index, 'color']} rules={[{ required: true }]}>
               <input type="color" className="color" value={item.color} onChange={handleOnChange(`[${index}].color`)} />
             </Form.Item>
-            <Form.Item name={[...preFields, index, 'key']} rules={[{ required: true, message: 'key不可为空' }]}>
+            <Form.Item
+              name={[...preFields, index, 'key']}
+              className="input"
+              rules={[{ required: true, message: 'key不可为空' }]}
+            >
               <Input placeholder="前端显示（中文）" value={item.key} onChange={handleOnChange(`[${index}].key`)} />
             </Form.Item>
-            <Form.Item name={[...preFields, index, 'value']} rules={[{ required: true, message: 'value不可为空' }]}>
+            <Form.Item
+              name={[...preFields, index, 'value']}
+              className="input"
+              rules={[{ required: true, message: 'value不可为空' }]}
+            >
               <Input placeholder="保存结果（英文）" value={item.value} onChange={handleOnChange(`[${index}].value`)} />
             </Form.Item>
             <div className="add-wrapper">
