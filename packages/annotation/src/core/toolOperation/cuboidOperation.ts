@@ -5,9 +5,7 @@ import {
   getPointsByBottomRightPoint,
   getCuboidDragMove,
   getCuboidHoverRange,
-  getCuboidAllSideLine,
   getHighlightPoints,
-  getPointListsByDirection,
   getToggleDirectionButtonOffset,
   getCuboidTextAttributeOffset,
   isCuboidWithInLimits,
@@ -189,6 +187,21 @@ class CuboidOperation extends BasicToolOperation {
       textAttribute: selectedCuboid.textAttribute,
       color,
     };
+  }
+
+  /**
+   * Forbidden to draw a cuboid if the backPlane is front than the frontPlane.
+   * @param e
+   * @param cuboid
+   * @returns
+   */
+  public isForbiddenMove(e: MouseEvent, cuboid: ICuboid | IDrawingCuboid) {
+    const coord = this.getCoordinateInOrigin(e);
+
+    if (coord.y > cuboid.frontPoints.br.y) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -430,8 +443,10 @@ class CuboidOperation extends BasicToolOperation {
       return undefined;
     }
 
+    /**
+     * Drag Status Clear.
+     */
     if (this.dragInfo && this.dragStatus === EDragStatus.Move) {
-      // 拖拽停止
       this.dragInfo = undefined;
       this.dragStatus = EDragStatus.Wait;
 
@@ -446,13 +461,16 @@ class CuboidOperation extends BasicToolOperation {
 
     if (e.button === 0) {
       /**
-       *
+       * Ctrl + left Mouse update the valid of cuboid.
        */
       if (this.hoverID && e.ctrlKey && !this.drawingCuboid) {
         this.setCuboidValidAndRender(this.hoverID);
 
         return;
       }
+      /**
+       * Office Annotation.
+       */
 
       // 1. Create First Point & Basic Cuboid.
       if (!this.drawingCuboid) {
@@ -477,7 +495,7 @@ class CuboidOperation extends BasicToolOperation {
       }
     }
 
-    // Right Click
+    // Right Mouse Up
     if (e.button === 2) {
       this.rightMouseUp(e);
     }
@@ -488,11 +506,17 @@ class CuboidOperation extends BasicToolOperation {
       return;
     }
 
+    /**
+     * Drag Move.
+     */
     if (this.selectedID && this.dragInfo) {
       this.onDragMove(e);
       return;
     }
 
+    /**
+     * Drawing Cuboid.
+     */
     if (this.drawingCuboid) {
       // 1. Drawing Front Plane.
       if (this.drawingFrontPlanesMove(e)) {
@@ -505,9 +529,11 @@ class CuboidOperation extends BasicToolOperation {
       return;
     }
 
+    /**
+     * Highlight hover cuboid.
+     */
     this.hoverID = this.getHoverID(e);
 
-    // Hover HightLight
     this.onHoverMove(e);
   }
 
@@ -521,16 +547,6 @@ class CuboidOperation extends BasicToolOperation {
       this.render();
       return true;
     }
-  }
-
-  // Forbidden to draw a cuboid if the backPlane is front than the frontPlane.
-  public isForbiddenMove(e: MouseEvent, cuboid: ICuboid | IDrawingCuboid) {
-    const coord = this.getCoordinateInOrigin(e);
-
-    if (coord.y > cuboid.frontPoints.br.y) {
-      return true;
-    }
-    return false;
   }
 
   public drawingBackPlaneMove(e: MouseEvent) {
@@ -580,6 +596,12 @@ class CuboidOperation extends BasicToolOperation {
     this.render();
   }
 
+  /**
+   * onMouseMove in hover.
+   *
+   * Highlight the position of hover.
+   * @param e
+   */
   public onHoverMove(e: MouseEvent) {
     const { selectedCuboid } = this;
     if (selectedCuboid) {
@@ -603,15 +625,6 @@ class CuboidOperation extends BasicToolOperation {
     if (!this.imgInfo) {
       return;
     }
-    // const coordinateZoom = this.getCoordinateUnderZoom(e);
-    // const coordinate = AxisUtils.changeDrawOutsideTarget(
-    //   coordinateZoom,
-    //   { x: 0, y: 0 },
-    //   this.imgInfo,
-    //   this.config.drawOutsideTarget,
-    //   this.basicResult,
-    //   this.zoom,
-    // );
     const coordinate = this.getCoordinateInOrigin(e);
 
     // 1. Create New Cuboid.
@@ -714,30 +727,11 @@ class CuboidOperation extends BasicToolOperation {
       color: strokeColor,
       thickness: lineWidth,
     };
-    const { backPoints, direction, frontPoints, textAttribute } = transformCuboid;
+    const { backPoints, frontPoints, textAttribute } = transformCuboid;
 
     const frontPointsSizeWidth = frontPoints.br.x - frontPoints.bl.x;
 
-    if (backPoints) {
-      const sideLine = getCuboidAllSideLine(transformCuboid as ICuboid);
-      sideLine?.forEach((line) => {
-        DrawUtils.drawLine(this.canvas, line.p1, line.p2, { ...defaultStyle });
-      });
-
-      // DrawUtils.drawRect(this.canvas, backRect, { ...defaultStyle });
-      const backPointList = AxisUtils.transformPlain2PointList(backPoints);
-
-      DrawUtils.drawPolygon(this.canvas, backPointList, { ...defaultStyle, isClose: true });
-    }
-
-    const pointList = AxisUtils.transformPlain2PointList(frontPoints);
-    if (direction && backPoints && frontPoints) {
-      const points = getPointListsByDirection({ direction, frontPoints, backPoints });
-      if (points) {
-        DrawUtils.drawPolygonWithFill(this.canvas, points, { color: fillColor });
-      }
-    }
-    DrawUtils.drawPolygon(this.canvas, pointList, { ...defaultStyle, isClose: true });
+    DrawUtils.drawCuboid(this.canvas, transformCuboid, { strokeColor, fillColor, thickness: lineWidth });
 
     // Hover Highlight
     if (isHover || isSelected) {
@@ -751,6 +745,7 @@ class CuboidOperation extends BasicToolOperation {
         });
       }
     }
+
     let showText = '';
     if (this.isShowOrder && transformCuboid.order && transformCuboid?.order > 0) {
       showText = `${transformCuboid.order}`;

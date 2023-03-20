@@ -1,9 +1,12 @@
 import type { IImageAttribute } from '@/types/imgAttributeStore';
 import type { ICoordinate, IOffsetCanvasPosition, IPoint } from '@/types/tool/common';
+import type { ICuboid, IDrawingCuboid } from '@/types/tool/cuboid';
 import type { IRect } from '@/types/tool/rectTool';
 
 import { DEFAULT_FONT, ELineTypes, SEGMENT_NUMBER } from '../../constant/tool';
 import type { IPolygonPoint } from '../../types/tool/polygon';
+import AxisUtils from './AxisUtils';
+import { getCuboidAllSideLine, getPointListsByDirection } from './CuboidUtils';
 import PolygonUtils from './PolygonUtils';
 import UnitUtils from './UnitUtils';
 
@@ -733,5 +736,54 @@ export default class DrawUtils {
   ): void {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
     this.drawArrow(ctx, startPoint, endPoint, options);
+  }
+
+  /**
+   * Expansion of other base draw.
+   *
+   * Simple Version.
+   * @param param0
+   */
+  public static drawCuboid(
+    canvas: HTMLCanvasElement,
+    cuboid: ICuboid | IDrawingCuboid,
+    options: Partial<{
+      strokeColor: string;
+      fillColor: string;
+      thickness: number;
+    }> = {},
+  ) {
+    const { backPoints, direction, frontPoints } = cuboid;
+    const { strokeColor, thickness, fillColor } = options;
+
+    const defaultStyle = {
+      color: strokeColor,
+      thickness,
+    };
+
+    if (backPoints) {
+      // 1. Draw the backPoints.
+      const backPointList = AxisUtils.transformPlain2PointList(backPoints);
+      DrawUtils.drawPolygon(canvas, backPointList, { ...defaultStyle, isClose: true });
+
+      // 2. Draw the all sideLine.
+      const sideLine = getCuboidAllSideLine(cuboid as ICuboid);
+      sideLine?.forEach((line) => {
+        DrawUtils.drawLine(canvas, line.p1, line.p2, { ...defaultStyle });
+      });
+    }
+
+    const pointList = AxisUtils.transformPlain2PointList(frontPoints);
+
+    // 3. Draw Direction.
+    if (direction && backPoints && frontPoints) {
+      const points = getPointListsByDirection({ direction, frontPoints, backPoints });
+      if (points) {
+        DrawUtils.drawPolygonWithFill(canvas, points, { color: fillColor });
+      }
+    }
+
+    // 4. Drawing the frontPoints.
+    DrawUtils.drawPolygon(canvas, pointList, { ...defaultStyle, isClose: true });
   }
 }

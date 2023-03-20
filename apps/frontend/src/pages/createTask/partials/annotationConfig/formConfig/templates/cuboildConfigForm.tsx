@@ -4,7 +4,8 @@ import React, { useMemo, useState } from 'react';
 import { Col, Row, Input as SenseInput, Form } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 
-import { delayTime } from '../constants';
+import { delayTime } from '@/pages/createTask/partials/annotationConfig/formConfig/constants';
+
 export interface AttributeItem {
   key: string;
   value: string;
