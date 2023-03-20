@@ -1,28 +1,12 @@
-import { useMemo, useEffect, useState, useCallback, useContext } from 'react';
-import AnnotationOperation from '@label-u/components';
-import { useDispatch, useSelector } from 'react-redux';
-import _ from 'lodash-es';
+import { useEffect, useCallback, useContext } from 'react';
+import { useDispatch } from 'react-redux';
 import { Button } from 'antd';
 
-import type { Dispatch, RootState } from '@/store';
-import EmptyConfigImg from '@/img/annotationCommon/emptyConfig.png';
+import type { Dispatch } from '@/store';
 
-import ConfigTemplate from './configTemplate/index';
 import FormConfig from './formConfig';
 import { TaskCreationContext } from '../../taskCreation.context';
 import styles from './index.module.scss';
-
-interface OneFile {
-  id: number;
-  url: string;
-  result: string;
-}
-
-const defaultFile: OneFile = {
-  id: 1,
-  url: '/src/img/example/bear4.webp',
-  result: '{}',
-};
 
 // 配置页的config统一使用此组件的state
 const AnnotationConfig = () => {

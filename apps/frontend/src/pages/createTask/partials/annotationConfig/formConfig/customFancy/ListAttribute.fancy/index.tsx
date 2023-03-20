@@ -227,7 +227,7 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
       </Button>
       <AttributeConfiguration
         visible={isAttributeConfigurationOpen}
-        value={stateValue[activeAttributeIndex]?.attributes}
+        value={stateValue[activeAttributeIndex]?.attributes || []}
         onClose={handleCloseAttributeConfiguration}
         onChange={handleChangeAttributes}
       />

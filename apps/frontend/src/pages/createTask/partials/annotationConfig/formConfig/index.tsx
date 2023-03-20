@@ -1,8 +1,8 @@
 import { EToolName, TOOL_NAME } from '@label-u/annotation';
-import type { MenuProps, TabsProps } from 'antd';
+import type { FormProps, MenuProps, TabsProps } from 'antd';
 import { Button, Dropdown, Form, Tabs } from 'antd';
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import _ from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 
@@ -17,6 +17,11 @@ import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
 import { LoadInitConfig } from '../configTemplate/config';
 import styles from './index.module.scss';
 import lineTemplate from './templates/line.template';
+import rectTemplate from './templates/rect.template';
+import polygonTemplate from './templates/polygon.template';
+import pointTemplate from './templates/point.template';
+import tagTemplate from './templates/tag.template';
+import textTemplate from './templates/text.template';
 
 // 注册fancyInput自定义输入组件
 add('list-attribute', FancyAttributeList);
@@ -45,6 +50,11 @@ const mediaOptions = Object.values(MediaType).map((item) => {
 
 const templateMapping: Record<string, any> = {
   [EToolName.Line]: lineTemplate,
+  [EToolName.Rect]: rectTemplate,
+  [EToolName.Polygon]: polygonTemplate,
+  [EToolName.Point]: pointTemplate,
+  [EToolName.Tag]: tagTemplate,
+  [EToolName.Text]: textTemplate,
 };
 
 interface IProps {
@@ -55,6 +65,7 @@ interface IProps {
 const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
   const { tools = [] } = config || {};
   const [activeTool, setActiveTool] = useState<string>(toolOptions[0].value);
+  const [form] = Form.useForm();
 
   // ======================== 以下为新增代码 ========================
   const updateTools = useMemo(() => updateConfig('tools'), [updateConfig]);
@@ -87,14 +98,7 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
         key: tool,
         label: TOOL_NAME[tool],
         children: (
-          <div
-            style={{
-              padding: '1rem',
-              border: '1px solid var(--color-border-secondary)',
-              borderTop: 0,
-              borderRadius: '0 0 var(--border-radius) var(--border-radius)',
-            }}
-          >
+          <div className={styles.innerForm}>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
                 删除工具
@@ -111,19 +115,34 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
     return _.map(tools, 'tool');
   }, [tools]);
 
+  const [hasAttributes, setHasAttributes] = useState(false);
+
+  // TODO: 增加表单数据类型
+  const handleFormValuesChange: FormProps['onValuesChange'] = useCallback(
+    (changedValue: any, allValues: any) => {
+      if ('commonAttributeConfigurable' in changedValue) {
+        if (!changedValue.commonAttributeConfigurable) {
+          form.setFieldValue('attributes', []);
+        }
+        setHasAttributes(changedValue.commonAttributeConfigurable);
+      }
+
+      console.log('allValues', allValues);
+    },
+    [form],
+  );
+
   // ========================= end ==============================
 
   return (
     <Form
       labelCol={{ span: 3 }}
+      form={form}
       wrapperCol={{ span: 21 }}
       colon={false}
       className={styles.formConfig}
       initialValues={config}
-      onValuesChange={(changedValues, allValues) => {
-        console.log('changedValues', changedValues);
-        console.log('allValues', allValues);
-      }}
+      onValuesChange={handleFormValuesChange}
     >
       <Form.Item label="标注类型" name="media_type">
         <FancyInput type="enum" size="middle" options={mediaOptions} listItemHeight={10} listHeight={250} />
@@ -150,16 +169,19 @@ const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
           </div>
         )}
       </Form.Item>
-      <Form.Item valuePropName="checked" label="画布外标注" name="drawOutsideTarget">
+      <Form.Item label="画布外标注" name="drawOutsideTarget">
         <FancyInput type="boolean" />
       </Form.Item>
 
-      <Form.Item
-        valuePropName="checked"
-        label={<span className="formTitle">通用标签</span>}
-        name="commonAttributeConfigurable"
-      >
+      <Form.Item label={<span className="formTitle">通用标签</span>} name="commonAttributeConfigurable">
         <FancyInput type="boolean" />
+      </Form.Item>
+      <Form.Item wrapperCol={{ offset: 3 }} className={styles.attributes} hidden={!hasAttributes}>
+        <div className={styles.attributesBox}>
+          <Form.Item name="attributes">
+            <FancyInput type="list-attribute" fullField={['attributes']} />
+          </Form.Item>
+        </div>
       </Form.Item>
     </Form>
   );

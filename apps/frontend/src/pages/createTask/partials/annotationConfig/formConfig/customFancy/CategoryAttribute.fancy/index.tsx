@@ -54,6 +54,10 @@ export interface FancyCategoryAttributeProps extends FancyInputProps {
   className?: string;
   style?: React.CSSProperties;
   affixProps?: AffixProps;
+  addTagText?: string;
+  addStringText?: string;
+  showAddTag?: boolean;
+  showAddString?: boolean;
 }
 
 export interface FancyCategoryAttributeRef {
@@ -203,7 +207,19 @@ const stringTypeOptions = [
 
 export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, FancyCategoryAttributeProps>(
   function ForwardRefFancyCategoryAttribute(
-    { defaultValue = [], value, fullField, onChange, className, style, affixProps },
+    {
+      defaultValue = [],
+      value,
+      fullField,
+      onChange,
+      className,
+      style,
+      affixProps,
+      addTagText = '新建分类属性',
+      addStringText = '新建文本分类',
+      showAddTag = true,
+      showAddString = true,
+    },
     ref,
   ) {
     const defaultValueWithId = useMemo(() => {
@@ -541,24 +557,28 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
     const treeData = useMemo(() => makeTreeData(stateValue, fullField), [fullField, makeTreeData, stateValue]);
     const buttons = (
       <div className="buttons">
-        <Button
-          className="add"
-          icon={<PlusOutlined />}
-          type="primary"
-          ghost
-          onClick={handleAddAttribute(CategoryType.Enum)}
-        >
-          新建分类属性
-        </Button>
-        <Button
-          className="add"
-          icon={<PlusOutlined />}
-          type="primary"
-          ghost
-          onClick={handleAddAttribute(CategoryType.String)}
-        >
-          新建文本属性
-        </Button>
+        {showAddTag && (
+          <Button
+            className="add"
+            icon={<PlusOutlined />}
+            type="primary"
+            ghost
+            onClick={handleAddAttribute(CategoryType.Enum)}
+          >
+            {addTagText}
+          </Button>
+        )}
+        {showAddString && (
+          <Button
+            className="add"
+            icon={<PlusOutlined />}
+            type="primary"
+            ghost
+            onClick={handleAddAttribute(CategoryType.String)}
+          >
+            {addStringText}
+          </Button>
+        )}
       </div>
     );
 

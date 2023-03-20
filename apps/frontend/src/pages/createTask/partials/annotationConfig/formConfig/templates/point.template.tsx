@@ -1,0 +1,44 @@
+import type { FancyItemIdentifier } from '@/components/FancyInput/types';
+
+export default [
+  {
+    field: 'tool',
+    key: 'tool',
+    type: 'string',
+    hidden: true,
+    initialValue: 'pointTool',
+  },
+  {
+    key: 'config',
+    field: 'config',
+    type: 'group',
+    children: [
+      {
+        type: 'number',
+        key: 'upperLimit',
+        field: 'upperLimit',
+        label: '上限点数',
+        initialValue: 100,
+        rules: [
+          {
+            required: true,
+            message: '上限点数不能为空',
+          },
+        ],
+      },
+      {
+        field: 'attributeList',
+        key: 'attributeList',
+        type: 'list-attribute',
+        label: '标签配置',
+        initialValue: [
+          {
+            color: '#ff6600',
+            key: '标签-1',
+            value: 'label-1',
+          },
+        ],
+      },
+    ],
+  },
+] as FancyItemIdentifier[];

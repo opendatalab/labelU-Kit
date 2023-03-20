@@ -7,7 +7,6 @@ import FancyInput from '../FancyInput';
 import type { FancyItemIdentifier } from '../FancyInput/types';
 
 export interface FancyFormProps {
-  // TODO: 完善类型
   template: FancyItemIdentifier[];
   name: NamePath;
   value?: any;

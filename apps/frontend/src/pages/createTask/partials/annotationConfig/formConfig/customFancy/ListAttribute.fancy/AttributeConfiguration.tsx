@@ -75,7 +75,7 @@ const StyledDrawer = styled<React.FC<DrawerProps>>(Drawer)`
   ${StyledFancyAttributeWrapper} {
     margin-bottom: 1rem;
     .buttons {
-      padding: 1rem 0;
+      padding: 1rem 0 1rem;
     }
   }
 `;
@@ -204,7 +204,14 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
         style={{ display: isValueEmpty ? 'none' : 'block', width: '100%' }}
       >
         <Form.Item name="list" label="">
-          <FancyCategoryAttribute className="category-content" ref={ref} fullField={['list']} />
+          <FancyCategoryAttribute
+            className="category-content"
+            ref={ref}
+            fullField={['list']}
+            affixProps={{
+              offsetBottom: 61,
+            }}
+          />
         </Form.Item>
       </Form>
     ),
