@@ -120,6 +120,10 @@ class CuboidOperation extends BasicToolOperation {
     return this.config?.minWidth >= 0 && this.config?.minHeight >= 0;
   }
 
+  public get dataList() {
+    return this.cuboidList;
+  }
+
   /**
    * Whether the mouse is in the hover range.
    * @param e
@@ -206,6 +210,7 @@ class CuboidOperation extends BasicToolOperation {
       }
 
       this.setCuboidList(AttributeUtils.textChange(textAttribute, this.selectedID, this.cuboidList));
+      this.history.pushHistory(this.cuboidList);
       this.emit('updateTextAttribute');
       this.render();
     }
@@ -260,11 +265,9 @@ class CuboidOperation extends BasicToolOperation {
       return cuboid;
     });
 
-    this.setCuboidList(newPolygonList);
-    // this.history.pushHistory(this.polygonList);
+    this.setCuboidList(newPolygonList, true);
+    this.history.pushHistory(this.cuboidList);
     this.render();
-
-    this.emit('updateResult');
   }
 
   public onRightDblClick(e: MouseEvent) {
@@ -276,12 +279,17 @@ class CuboidOperation extends BasicToolOperation {
     }
   }
 
-  public setCuboidList(cuboidList: ICuboid[]) {
+  public setCuboidList(cuboidList: ICuboid[], isUpload = false) {
     const oldLen = this.cuboidList.length;
     this.cuboidList = cuboidList;
 
     if (oldLen !== cuboidList.length) {
       this.emit('updatePageNumber');
+    }
+
+    // Sync with external data.
+    if (isUpload) {
+      this.emit('updateResult');
     }
   }
 
@@ -290,7 +298,8 @@ class CuboidOperation extends BasicToolOperation {
       return;
     }
     this.setCuboidList(this.cuboidList.filter((v) => v.id !== id));
-    // TODO - History.
+
+    this.history.pushHistory(this.cuboidList);
 
     this.setSelectedID('');
 
@@ -425,10 +434,10 @@ class CuboidOperation extends BasicToolOperation {
       // 拖拽停止
       this.dragInfo = undefined;
       this.dragStatus = EDragStatus.Wait;
-      // TODO History.
-      // this.history.pushHistory(this.polygonList);
 
-      // 同步 结果
+      this.history.pushHistory(this.cuboidList);
+
+      // Sync with external data.
       this.emit('updateResult');
       return;
     }
@@ -658,8 +667,10 @@ class CuboidOperation extends BasicToolOperation {
       this.emit('messageInfo', locale.getMessagesByLocale(EMessage.RectErrorSizeNotice, this.lang));
     } else {
       // Add New Cuboid.
-      this.cuboidList.push(this.drawingCuboid as ICuboid);
+      this.setCuboidList([...this.cuboidList, this.drawingCuboid as ICuboid]);
       this.setSelectedID(this.drawingCuboid?.id);
+
+      this.history.pushHistory(this.cuboidList);
     }
 
     this.clearDrawingStatus();
@@ -942,10 +953,10 @@ class CuboidOperation extends BasicToolOperation {
     }
   }
 
-  // Switching glossy surfaces
   public toggleDirection(direction: ECuboidDirection) {
     if (this.cuboidList && this.selectedCuboid) {
-      this.cuboidList = this.cuboidList.map((i) => (i.id === this.selectedCuboid?.id ? { ...i, direction } : i));
+      this.setCuboidList(this.cuboidList.map((i) => (i.id === this.selectedCuboid?.id ? { ...i, direction } : i)));
+      this.history.pushHistory(this.cuboidList);
       this.render();
     }
   }
@@ -1005,6 +1016,28 @@ class CuboidOperation extends BasicToolOperation {
     super.render();
     this.renderCuboid();
     this.renderCursorLine();
+  }
+
+  public undo() {
+    const cuboidList = this.history.undo();
+    if (cuboidList) {
+      if (cuboidList.length !== this.cuboidList.length) {
+        this.setSelectedID('');
+      }
+      this.setCuboidList(cuboidList, true);
+      this.render();
+    }
+  }
+
+  public redo() {
+    const cuboidList = this.history.redo();
+    if (cuboidList) {
+      if (cuboidList.length !== this.cuboidList.length) {
+        this.setSelectedID('');
+      }
+      this.setCuboidList(cuboidList, true);
+      this.render();
+    }
   }
 }
 

@@ -19,8 +19,8 @@
         "textCheckType": 4,
         "customFormat": "",
         "attributeList": [{ "key": "", "value": "" }],
-        "minWidth": 1,
-        "minHeight": 1
+        "minWidth": 10,
+        "minHeight": 10
       }
     }
   ]
