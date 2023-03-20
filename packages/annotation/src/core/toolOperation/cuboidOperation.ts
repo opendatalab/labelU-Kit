@@ -1015,7 +1015,7 @@ class CuboidOperation extends BasicToolOperation {
     }
     super.render();
     this.renderCuboid();
-    this.renderCursorLine();
+    this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   }
 
   public undo() {
