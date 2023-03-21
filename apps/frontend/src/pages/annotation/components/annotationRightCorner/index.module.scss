@@ -1,9 +1,6 @@
-@import url('@/utils/common/common.module');
-
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
@@ -24,9 +21,8 @@
 }
 
 .right {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }

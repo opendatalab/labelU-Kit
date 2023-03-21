@@ -1,9 +1,6 @@
-@import url('../../utils/common/common.module');
-
 .loginForm {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: space-around;
   align-items: center;
   width: 380px;
@@ -55,5 +52,21 @@
   height: 48px;
   width: inherit;
   text-align: right;
+  cursor: pointer;
+}
+
+.loginAndSignUpNotice {
+  width: inherit;
+  height: 10px;
+  color: red;
+}
+
+.commonButton {
+  background-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.cancelButton {
+  background-color: #f2f3f5;
   cursor: pointer;
 }

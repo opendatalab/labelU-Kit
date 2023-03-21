@@ -1,9 +1,6 @@
-@import url('@/utils/common/common.module');
-
 .outerFrameActive {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 220px;
@@ -13,9 +10,8 @@
 }
 
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 220px;
@@ -24,9 +20,8 @@
 }
 
 .contentActive {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 200px;
@@ -46,9 +41,8 @@
 }
 
 .content {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 200px;
@@ -66,7 +60,6 @@
   z-index: 100;
   width: 32px;
   height: 32px;
-  transform: rotate(-45deg);
   transform: rotate(-45deg);
   transform: rotate(-45deg);
   background-color: var(--color-primary);

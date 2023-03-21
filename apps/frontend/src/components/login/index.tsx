@@ -7,8 +7,7 @@ import intl from 'react-intl-universal';
 import type { Dispatch } from '@/store';
 
 import CommonController from '../../utils/common/common';
-import commonStyles from '../../utils/common/common.module.scss';
-import currentStyles from './index.module.scss';
+import styles from './index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
 const Login = (props: any) => {
@@ -83,9 +82,9 @@ const Login = (props: any) => {
   }
 
   return (
-    <div className={currentStyles.loginForm}>
-      <div className={currentStyles.title}>{intl.get('login123')}</div>
-      <div className={currentStyles.email_m}>
+    <div className={styles.loginForm}>
+      <div className={styles.title}>{intl.get('login123')}</div>
+      <div className={styles.email_m}>
         <Input
           placeholder={intl.get('email')}
           onChange={changeEmail}
@@ -97,10 +96,10 @@ const Login = (props: any) => {
           onBlur={CommonController.debounce(CommonController.checkEmail, 500)}
           // onPressEnter = {CommonController.debounce(CommonController.checkEmail, 1000)}
         />
-        <div className={commonStyles.loginAndSignUpNotice}>{checkMessage.email}</div>
+        <div className={styles.loginAndSignUpNotice}>{checkMessage.email}</div>
       </div>
 
-      <div className={currentStyles.email_m}>
+      <div className={styles.email_m}>
         <Input.Password
           placeholder={intl.get('password')}
           onChange={changePassword}
@@ -111,13 +110,13 @@ const Login = (props: any) => {
           visibilityToggle={false}
           onBlur={CommonController.debounce(CommonController.checkPassword, 500)}
         />
-        <div className={commonStyles.loginAndSignUpNotice}>{checkMessage.password}</div>
+        <div className={styles.loginAndSignUpNotice}>{checkMessage.password}</div>
       </div>
 
-      <div className={currentStyles.loginButton} onClick={CommonController.debounce(loginController, 500)}>
+      <div className={styles.loginButton} onClick={CommonController.debounce(loginController, 500)}>
         {intl.get('login123')}
       </div>
-      <div className={currentStyles.signUpButton}>
+      <div className={styles.signUpButton}>
         <Link to={turnToSignUp}>{intl.get('signUp')}</Link>
       </div>
     </div>

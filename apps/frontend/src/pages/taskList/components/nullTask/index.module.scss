@@ -1,5 +1,3 @@
-@import url('@/utils/common/common.module');
-
 .wrapper {
   display: flex;
   align-items: center;
@@ -8,9 +6,8 @@
 }
 
 .nullWrapper {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   width: 288px;
   height: 220px;
   background: #fbfcff;
@@ -23,9 +20,8 @@
 }
 
 .container {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   width: 88px;
   height: 100px;
   align-items: center;

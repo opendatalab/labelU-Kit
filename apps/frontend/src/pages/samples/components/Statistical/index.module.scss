@@ -1,9 +1,6 @@
-@import url('@/utils/common/common.module');
-
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   height: 56px;
@@ -12,9 +9,8 @@
 }
 
 .left {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   margin-left: 30px;
@@ -35,8 +31,8 @@
 }
 
 .leftTitleContent {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
 }
 
 .leftTitleContentOption {
@@ -49,9 +45,8 @@
   /* 中性色/87% */
 
   color: rgb(0 0 0 / 87%);
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: center;
   height: 24px;
   margin-right: 50px;
@@ -126,9 +121,8 @@
 }
 
 .right {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   font-weight: 400;

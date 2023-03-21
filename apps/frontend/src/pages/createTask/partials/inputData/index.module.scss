@@ -1,17 +1,13 @@
-@import url('@/utils/common/common.module');
-
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   align-items: center;
 }
 
 .title {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: center;
   width: calc(100% - 48px);
   height: 44px;
@@ -39,9 +35,8 @@
 }
 
 .content {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: flex-start;
   width: calc(100% - 48px);
   margin-left: 24px;
@@ -53,9 +48,8 @@
 }
 
 .left {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
   width: 414px;
@@ -74,9 +68,8 @@
 .dragAndDrop {
   margin-left: 16px;
   margin-top: 16px;
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   background: #fbfcff;
@@ -101,9 +94,8 @@
 }
 
 .right {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   flex: 2;
   padding: 1.5rem 0 1.5rem 1.5rem;
   height: calc(100vh - 230px);
@@ -118,9 +110,8 @@
 }
 
 .rightTitle {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
 }
@@ -141,9 +132,8 @@
 }
 
 .rightTitleRight {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   font-weight: 400;
   font-size: 12px;
   line-height: 24px;
@@ -155,9 +145,8 @@
 }
 
 .rightContent {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
-
+  display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   width: 100%;
   flex: 1;
@@ -167,9 +156,8 @@
 }
 
 .columnsName {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   box-shadow: inset 0 -1px 0 rgb(0 0 0 / 5%);
@@ -181,9 +169,8 @@
 }
 
 .item {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   height: 50px;
@@ -196,9 +183,8 @@
 }
 
 .folderItem {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   font-weight: 400;
@@ -223,9 +209,8 @@
 }
 
 .itemInFolder {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   height: 50px;
@@ -274,14 +259,13 @@
   width: 39px;
   flex: 1;
   margin-left: 46px;
-  @extend .displayFlex;
+  display: flex;
 }
 
 .columnOptionButtons {
   width: 96px;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
   align-items: center;
 }
@@ -308,9 +292,8 @@
 }
 
 .buttons {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   margin-top: 24px;
@@ -372,9 +355,8 @@
 }
 
 .uploadStatus {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: center;
   margin-left: 30px;
 }
@@ -396,16 +378,14 @@
 }
 
 .pending {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: center;
 }
 
 .buttonDiv {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   height: 36px;

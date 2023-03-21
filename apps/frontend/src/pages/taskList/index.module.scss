@@ -1,4 +1,3 @@
-@import '@/utils/common/common.module';
 .tasksWrapper {
   padding: 1.5rem;
   height: 100%;
@@ -12,10 +11,10 @@
 
 .cards {
   --margin-horizontal: 0.75rem;
+
   margin: 0.625rem calc(0rem - var(--margin-horizontal));
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-  @extend .flexDirectionRowWrap;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;

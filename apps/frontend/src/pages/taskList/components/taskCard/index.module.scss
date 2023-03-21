@@ -1,5 +1,3 @@
-@import url('@/utils/common/common.module');
-
 .cardWrapper {
   padding: var(--margin-horizontal);
   box-sizing: border-box;
@@ -33,9 +31,8 @@
 
 .item {
   width: 100%;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   font-weight: 400;
   font-size: 14px;
@@ -43,9 +40,8 @@
 }
 
 .itemLeft {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
 }
@@ -72,9 +68,8 @@
   font-weight: 400;
   font-size: 14px;
   text-align: center;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
 }
@@ -85,18 +80,16 @@
   background: rgb(255 136 0 / 20%);
   //border: 1px solid #FF8800;
   border-radius: 2px;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
 }
 
 .item41 {
   width: 100%;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   margin-top: 10px;
@@ -119,9 +112,8 @@
 
 .item42 {
   width: 100%;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   margin-top: 10px;
@@ -133,9 +125,7 @@
 }
 
 .actions {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   width: 60px;
@@ -162,9 +152,8 @@
 }
 
 .deleteWarnInfo {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
 }
@@ -175,9 +164,8 @@
   border-radius: 50%;
   background-color: #f80;
   color: white;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
-
+  display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
 }
