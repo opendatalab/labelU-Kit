@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Modal, Progress, Tooltip } from 'antd';
 import { useNavigate } from 'react-router';
-import moment from 'moment';
 import Icon, { ExclamationOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import formatter from '@label-u/formatter';
 
 import { modal } from '@/StaticAnt';
 import type { Dispatch, RootState } from '@/store';
@@ -121,7 +121,7 @@ const TaskCard = (props: any) => {
           {cardInfo.created_by?.username}
         </div>
         <div className={currentStyles.item} style={{ marginTop: '8px' }}>
-          {moment(cardInfo.created_at).format('YYYY-MM-DD HH:MM')}
+          {formatter.format('dateTime', cardInfo.created_at, { style: 'YYYY-MM-DD HH:mm' })}
         </div>
         {doneSample === total && status !== 'DRAFT' && status !== 'IMPORTED' && (
           <div className={currentStyles.item41}>

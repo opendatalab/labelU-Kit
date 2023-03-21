@@ -45,7 +45,7 @@ const mediaOptions = Object.values(MediaType).map((item) => {
   return {
     label: mediaTypeMapping[item],
     value: item,
-    disabled: item === MediaType.VIDEO,
+    disabled: [MediaType.VIDEO, MediaType.POINT_CLOUD].includes(item),
   };
 });
 
