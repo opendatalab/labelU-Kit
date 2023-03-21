@@ -1,24 +1,26 @@
 .displayFlex {
   display: flex;
   display: -moz-flex;
-  display: -webkit-flex;
+  display: flex;
   display: -ms-flex;
 }
+
 .flexDirectionColumn {
-  -ms-flex-direction: column;
-  -webkit-flex-direction: column;
+  flex-direction: column;
+  flex-direction: column;
   flex-direction: column;
 }
+
 .flexDirectionRow {
-  -ms-flex-direction: row;
-  -webkit-flex-direction: row;
+  flex-direction: row;
+  flex-direction: row;
   flex-direction: row;
 }
 
 .flexDirectionRowWrap {
   flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 .loginAndSignUpNotice {
@@ -28,13 +30,11 @@
 }
 
 .commonButton {
-  background-color: var(--primary-color);
-
+  background-color: var(--color-primary);
   cursor: pointer;
 }
 
 .cancelButton {
   background-color: #f2f3f5;
-
   cursor: pointer;
 }

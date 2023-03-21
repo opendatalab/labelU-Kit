@@ -1,7 +1,9 @@
-@import '@/utils/common/common.module';
+@import url('@/utils/common/common.module');
+
 .outerFrame {
   @extend .displayFlex;
   @extend .flexDirectionColumn;
+
   justify-content: flex-start;
   align-items: center;
 }
@@ -9,22 +11,25 @@
 .title {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   align-items: center;
   width: calc(100% - 48px);
   height: 44px;
   background: #fafafa;
   margin-top: 24px;
 }
+
 .icon {
   width: 3px;
   height: 16px;
-  background: var(--primary-color);
+  background: var(--color-primary);
   border-radius: 10px;
   margin-right: 4px;
   margin-left: 16px;
 }
+
 .titleText {
-  color: rgba(0, 0, 0, 0.87);
+  color: rgb(0 0 0 / 87%);
   font-weight: 500;
   font-size: 16px;
   width: 64px;
@@ -32,9 +37,11 @@
   line-height: 24px;
   text-align: center;
 }
+
 .content {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   align-items: flex-start;
   width: calc(100% - 48px);
   margin-left: 24px;
@@ -48,24 +55,28 @@
 .left {
   @extend .displayFlex;
   @extend .flexDirectionColumn;
+
   justify-content: flex-start;
   align-items: flex-start;
   width: 414px;
 }
+
 .leftTitle {
   flex: 1;
   margin-top: 24px;
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
-  color: rgba(0, 0, 0, 0.72);
+  color: rgb(0 0 0 / 72%);
   margin-left: 16px;
 }
+
 .dragAndDrop {
   margin-left: 16px;
   margin-top: 16px;
   @extend .displayFlex;
   @extend .flexDirectionColumn;
+
   justify-content: flex-start;
   align-items: center;
   background: #fbfcff;
@@ -73,6 +84,7 @@
   border-radius: 8px;
   height: 354px;
 }
+
 .survey {
   //background-image: url('../../assets/png/uploadSurvey.png');
   background-image: url('@/assets/svg/上传.svg');
@@ -81,35 +93,40 @@
   width: 100%;
   height: 179px;
 }
+
 .uploadIcon {
   background-image: url('@/assets/png/upload.png');
   width: 12px;
   height: 15px;
 }
+
 .right {
   @extend .displayFlex;
   @extend .flexDirectionColumn;
+
   flex: 2;
   padding: 1.5rem 0 1.5rem 1.5rem;
   height: calc(100vh - 230px);
   overflow-y: scroll;
-
   justify-content: flex-start;
   align-items: flex-start;
-  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  border-left: 1px solid rgb(0 0 0 / 5%);
 
   :global(.ant-table-thead > tr > th) {
     background: #fff;
   }
 }
+
 .rightTitle {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
 }
+
 .rightTitleLeft {
-  color: rgba(0, 0, 0, 0.72);
+  color: rgb(0 0 0 / 72%);
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
@@ -126,18 +143,21 @@
 .rightTitleRight {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   font-weight: 400;
   font-size: 12px;
   line-height: 24px;
-  color: rgba(0, 0, 0, 0.72);
+  color: rgb(0 0 0 / 72%);
 }
 
 .rightTitleRightHight {
   color: #16b7ff;
 }
+
 .rightContent {
   @extend .displayFlex;
   @extend .flexDirectionColumn;
+
   justify-content: flex-start;
   width: 100%;
   flex: 1;
@@ -145,44 +165,48 @@
   //margin-left:24px;
   //width : calc(100% - 24px);
 }
+
 .columnsName {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
-  box-shadow: inset 0px -1px 0px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 5%);
   height: 50px;
   line-height: 50px;
   font-weight: 500;
   font-size: 14px;
   width: calc(100% - 24px);
 }
+
 .item {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
   height: 50px;
-  line-height: 50px;
   font-weight: 400;
   font-size: 14px;
   line-height: 16px;
-  color: rgba(0, 0, 0, 0.6);
-  box-shadow: inset 0px -1px 0px rgba(0, 0, 0, 0.05);
+  color: rgb(0 0 0 / 60%);
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 5%);
   overflow-y: scroll;
 }
 
 .folderItem {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
   font-weight: 400;
   font-size: 14px;
   width: 800px;
   //width : 100%;
-  color: rgba(0, 0, 0, 0.6);
-  box-shadow: inset 0px -1px 0px rgba(0, 0, 0, 0.05);
+  color: rgb(0 0 0 / 60%);
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 5%);
   //overflow-y: scroll;
   //overflow: auto;
   //width : 50px;
@@ -190,23 +214,25 @@
     .ant-tree {
       width: calc(100% - 24px);
     }
+
     .ant-tree.ant-tree-directory .ant-tree-treenode .ant-tree-node-content-wrapper {
       display: flex;
       align-items: center;
     }
   }
 }
+
 .itemInFolder {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
   height: 50px;
-  line-height: 50px;
   font-weight: 400;
   font-size: 14px;
   line-height: 16px;
-  color: rgba(0, 0, 0, 0.6);
+  color: rgb(0 0 0 / 60%);
   //box-shadow: inset 0px -1px 0px rgba(0, 0, 0, 0.05);
   overflow-y: scroll;
   flex: 1;
@@ -231,7 +257,7 @@
   .columnOption {
     width: 30%;
     flex: 1;
-    color: var(--primary-color);
+    color: var(--color-primary);
   }
 }
 
@@ -242,6 +268,7 @@
   margin-left: 24px;
   word-break: break-all;
 }
+
 .columnStatus {
   width: 349px;
   width: 39px;
@@ -249,24 +276,28 @@
   margin-left: 46px;
   @extend .displayFlex;
 }
+
 .columnOptionButtons {
   width: 96px;
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-end;
   align-items: center;
 }
+
 .columnOption1 {
   width: 56px;
   //flex : 1;
-  color: var(--primary-color);
+  color: var(--color-primary);
   margin-right: 10px;
   cursor: pointer;
 }
+
 .columnOption {
   width: 28px;
   //flex : 1;
-  color: var(--primary-color);
+  color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -275,20 +306,22 @@
   overflow-y: scroll;
   width: 100%;
 }
+
 .buttons {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: center;
   align-items: center;
   margin-top: 24px;
 }
+
 .uploadFileButton {
   width: 120px;
   height: 36px;
   line-height: 36px;
   text-align: center;
-  background: var(--primary-color);
-
+  background: var(--color-primary);
   margin-right: 24px;
 }
 
@@ -297,9 +330,8 @@
   height: 36px;
   line-height: 36px;
   text-align: center;
-  border: 1px solid var(--primary-color);
-
-  font-color: var(--primary-color);
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -321,26 +353,28 @@
 
   /* 中性色/36% */
 
-  color: rgba(0, 0, 0, 0.36);
+  color: rgb(0 0 0 / 36%);
 }
 
 .advises {
   font-weight: 400;
   font-size: 12px;
   line-height: 17px;
+
   /* identical to box height */
 
   text-align: center;
 
   /* 中性色/36% */
   width: 364px;
-  color: rgba(0, 0, 0, 0.36);
+  color: rgb(0 0 0 / 36%);
   margin-bottom: 24px;
 }
 
 .uploadStatus {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   align-items: center;
   margin-left: 30px;
 }
@@ -364,12 +398,14 @@
 .pending {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   align-items: center;
 }
 
 .buttonDiv {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   align-items: center;
   justify-content: flex-start;
   height: 36px;

@@ -91,7 +91,7 @@ const TaskCard = (props: any) => {
             <div className={currentStyles.itemTaskName}>{cardInfo.name}</div>
             {cardInfo.status !== 'DRAFT' && cardInfo.status !== 'IMPORTED' && (
               <div className={currentStyles.mediaType}>
-                <div style={{ color: 'var(--primary-color)' }}>图片</div>
+                <div style={{ color: 'var(--color-primary)' }}>图片</div>
               </div>
             )}
             {(cardInfo.status === 'DRAFT' || cardInfo.status === 'IMPORTED') && (

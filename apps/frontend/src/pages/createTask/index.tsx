@@ -260,9 +260,11 @@ const CreateTask = () => {
       }
     }
 
-    submitForm().then(() => {
-      updateCurrentStep((nextStep as TaskStep).value);
-    });
+    submitForm()
+      .then(() => {
+        updateCurrentStep((nextStep as TaskStep).value);
+      })
+      .catch(() => {});
   };
 
   const handlePrevStep = async (step: TaskStep, lastStep: TaskStep) => {
@@ -275,9 +277,11 @@ const CreateTask = () => {
         return;
       }
     }
-    submitForm().then(() => {
-      updateCurrentStep(step.value);
-    });
+    submitForm()
+      .then(() => {
+        updateCurrentStep(step.value);
+      })
+      .catch(() => {});
   };
 
   return (

@@ -328,7 +328,7 @@ const InputData = () => {
                 <div className={styles.rightTitleLeft}>上传列表</div>
                 <div>正在上传</div>
                 <div>
-                  <div style={{ display: 'inline-block', color: 'var(--primary-color)' }}>
+                  <div style={{ display: 'inline-block', color: 'var(--color-primary)' }}>
                     {amountMapping.uploading}
                   </div>
                   个；

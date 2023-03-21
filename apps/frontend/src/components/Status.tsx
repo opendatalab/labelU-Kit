@@ -22,14 +22,14 @@ export interface StatusProps {
 }
 
 const typeColorMapping = {
-  success: 'var(--success-color)',
-  error: 'var(--error-color)',
-  warning: 'var(--warning-color)',
-  waiting: 'var(--warning-color)',
-  processing: 'var(--primary-color)',
-  completed: 'var(--success-color)',
-  failed: 'var(--error-color)',
-  fail: 'var(--error-color)',
+  success: 'var(--color-success)',
+  error: 'var(--color-error)',
+  warning: 'var(--color-warning)',
+  waiting: 'var(--color-warning)',
+  processing: 'var(--color-primary)',
+  completed: 'var(--color-success)',
+  failed: 'var(--color-error)',
+  fail: 'var(--color-error)',
 };
 
 const typeIconMapping = {

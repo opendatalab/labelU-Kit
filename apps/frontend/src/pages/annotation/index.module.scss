@@ -5,6 +5,7 @@
   width: 232px;
   height: 165px;
   position: relative;
+
   .imgItem {
     display: flex;
     align-items: center;
@@ -12,6 +13,7 @@
     width: 200px;
     height: 120px;
     background-color: #fff;
+
     &:hover {
       cursor: pointer;
     }
@@ -20,12 +22,11 @@
   .chooseNumber {
     width: 6.99px;
     height: 10.39px;
-
-    color: #ffffff;
+    color: #fff;
     flex: none;
     order: 0;
     flex-grow: 0;
-    background: var(--primary-color);
+    background: var(--color-primary);
     border-radius: 2px;
   }
 

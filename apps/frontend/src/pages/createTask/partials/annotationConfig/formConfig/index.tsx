@@ -38,6 +38,7 @@ const toolOptions = validTools.map((item) => {
 const mediaTypeMapping = {
   [MediaType.IMAGE]: '图片',
   [MediaType.VIDEO]: '视频',
+  [MediaType.POINT_CLOUD]: '点云',
 };
 
 const mediaOptions = Object.values(MediaType).map((item) => {
@@ -143,8 +144,8 @@ const FormConfig: FC<IProps> = ({ form }) => {
   return (
     <Form
       form={form}
-      labelCol={{ span: 3 }}
-      wrapperCol={{ span: 21 }}
+      labelCol={{ span: 4 }}
+      wrapperCol={{ span: 20 }}
       colon={false}
       className={styles.formConfig}
       initialValues={config}
@@ -167,7 +168,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
           </Button>
         </Dropdown>
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 3 }}>
+      <Form.Item wrapperCol={{ offset: 4 }}>
         {selectedTools.length > 0 ? (
           <div className="formTabBox">
             <Tabs
@@ -195,7 +196,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
       >
         <FancyInput type="boolean" />
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 3 }} className={styles.attributes} hidden={!hasAttributes}>
+      <Form.Item wrapperCol={{ offset: 4 }} className={styles.attributes} hidden={!hasAttributes}>
         <div className={styles.attributesBox}>
           <Form.Item name="attributes">
             <FancyInput type="list-attribute" fullField={['attributes']} />

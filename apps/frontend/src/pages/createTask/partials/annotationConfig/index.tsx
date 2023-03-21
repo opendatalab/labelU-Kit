@@ -1,12 +1,12 @@
-import { useEffect, useContext } from 'react';
+import { useEffect, useContext, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button } from 'antd';
 
 import type { Dispatch } from '@/store';
 
 import FormConfig from './formConfig';
 import { TaskCreationContext } from '../../taskCreation.context';
 import styles from './index.module.scss';
+import TemplateModal from './templateModal';
 
 // 配置页的config统一使用此组件的state
 const AnnotationConfig = () => {
@@ -26,12 +26,19 @@ const AnnotationConfig = () => {
     });
   }, [dispatch.sample, taskId]);
 
+  const handleSelect = useCallback(
+    (basicConfig: any) => {
+      dispatch.task.setConfig(basicConfig);
+    },
+    [dispatch],
+  );
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.innerWrapper}>
         <div className={styles.header}>
           <span className={styles.title}>配置方式</span>
-          <Button type="link">选择模板</Button>
+          <TemplateModal onSelect={handleSelect} />
         </div>
         <div className={styles.content}>
           <FormConfig form={annotationFormInstance} />

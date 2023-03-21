@@ -1,4 +1,4 @@
-@import '@/utils/common/common.module';
+@import url('@/utils/common/common.module');
 
 .stepWrapper {
   display: flex;
@@ -9,6 +9,7 @@
 .stepItem {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: space-around;
   align-items: center;
   text-align: center;
@@ -32,13 +33,13 @@
   font-size: 14px;
 
   .active & {
-    background: var(--primary-color) !important;
-    color: #ffffff !important;
+    background: var(--color-primary) !important;
+    color: #fff !important;
   }
 
   .finished & {
-    background-color: rgba(27, 103, 255, 0.1);
-    color: var(--primary-color);
+    background-color: rgb(27 103 255 / 10%);
+    color: var(--color-primary);
   }
 }
 
@@ -49,8 +50,8 @@
   border-radius: 50%;
   font-weight: 400;
   font-size: 14px;
-  color: #ffffff;
-  background-color: var(--primary-color);
+  color: #fff;
+  background-color: var(--color-primary);
 }
 
 .iconCheck {
@@ -60,8 +61,8 @@
   border-radius: 50%;
   font-weight: 400;
   font-size: 14px;
-  color: var(--primary-color);
-  background-color: rgba(27, 103, 255, 0.1);
+  color: var(--color-primary);
+  background-color: rgb(27 103 255 / 10%);
 }
 
 .iconCheckHighlight {
@@ -71,8 +72,8 @@
   border-radius: 50%;
   font-weight: 400;
   font-size: 14px;
-  color: #ffffff;
-  background-color: var(--primary-color);
+  color: #fff;
+  background-color: var(--color-primary);
 }
 
 .iconActive {
@@ -80,23 +81,23 @@
   height: 24px;
   margin-right: 8px;
   border-radius: 50%;
-  background: var(--primary-color);
+  background: var(--color-primary);
   font-weight: 400;
   font-size: 14px;
-  color: #ffffff;
+  color: #fff;
 }
 
 .title {
   font-weight: 400;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.72);
+  color: rgb(0 0 0 / 72%);
 
   .stepItemInner:hover & {
-    color: var(--primary-color);
+    color: var(--color-primary);
   }
 
   .active & {
-    color: var(--primary-color);
+    color: var(--color-primary);
     font-weight: bold;
   }
 }
@@ -105,14 +106,16 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
+
   /* identical to box height */
 
   /* 中性色/87% */
 
-  color: rgba(0, 0, 0, 0.87);
+  color: rgb(0 0 0 / 87%);
 }
+
 .titleActive {
   font-weight: 500;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.72);
+  color: rgb(0 0 0 / 72%);
 }

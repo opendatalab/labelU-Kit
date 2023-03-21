@@ -144,6 +144,11 @@ const StyledTree = styled<React.FC<TreeProps>>(Tree)`
       width: 100%;
     }
   }
+
+  .should-align-center {
+    display: flex;
+    align-items: center;
+  }
 `;
 
 export const StyledFancyAttributeWrapper = styled.div`
@@ -439,14 +444,16 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   <Form.Item name={[...path, index, 'value']} rules={[{ required: true, message: 'value不可为空' }]}>
                     <Input onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
-                  <Tooltip title={tooltipTitleMapping[itemType]}>
-                    <Tag className="multiple-switcher" onClick={handleToggleMultiple(index)}>
-                      {tagTitleMapping[itemType]} <SwapOutlined />
-                    </Tag>
-                  </Tooltip>
-                  <Tooltip title="删除">
-                    <Icon className="remove" component={DeleteIcon} onClick={handleRemoveAttribute(item)} />
-                  </Tooltip>
+                  <div className="should-align-center">
+                    <Tooltip title={tooltipTitleMapping[itemType]}>
+                      <Tag className="multiple-switcher" onClick={handleToggleMultiple(index)}>
+                        {tagTitleMapping[itemType]} <SwapOutlined />
+                      </Tag>
+                    </Tooltip>
+                    <Tooltip title="删除">
+                      <Icon className="remove" component={DeleteIcon} onClick={handleRemoveAttribute(item)} />
+                    </Tooltip>
+                  </div>
                 </div>
               ),
               key: item.id,
@@ -474,10 +481,12 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   <Form.Item name={[...path, index, 'value']} rules={[{ required: true, message: 'value不可为空' }]}>
                     <Input onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
-                  <Tag>{tagTitleMapping[itemType]}</Tag>
-                  <Tooltip title="删除">
-                    <Icon className="remove" component={DeleteIcon} onClick={handleRemoveAttribute(item)} />
-                  </Tooltip>
+                  <div className="should-align-center">
+                    <Tag>{tagTitleMapping[itemType]}</Tag>
+                    <Tooltip title="删除">
+                      <Icon className="remove" component={DeleteIcon} onClick={handleRemoveAttribute(item)} />
+                    </Tooltip>
+                  </div>
                 </div>
               ),
               key: item.id,

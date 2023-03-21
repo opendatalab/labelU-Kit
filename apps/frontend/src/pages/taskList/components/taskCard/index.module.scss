@@ -1,11 +1,12 @@
-@import '@/utils/common/common.module';
+@import url('@/utils/common/common.module');
 
 .cardWrapper {
   padding: var(--margin-horizontal);
+  box-sizing: border-box;
 }
 
 .cardInner {
-  background-color: #ffffff;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -13,11 +14,12 @@
   flex-direction: column;
   padding: 1.25rem 1.5rem;
   border-radius: 8px;
-  height: 10rem;
   border: 1px solid #fff;
+  height: 10rem;
+  box-sizing: border-box;
 
   &:hover {
-    border: 1px solid var(--primary-color);
+    border: 1px solid var(--color-primary);
   }
 }
 
@@ -25,7 +27,7 @@
   font-size: 1rem;
 
   &:hover {
-    color: var(--primary-color);
+    color: var(--color-primary);
   }
 }
 
@@ -33,22 +35,26 @@
   width: 100%;
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: space-between;
   font-weight: 400;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.72);
+  color: rgb(0 0 0 / 72%);
 }
+
 .itemLeft {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
 }
+
 .itemTaskName {
   font-weight: 500;
   font-size: 18px;
   line-height: 26px;
-  color: rgba(0, 0, 0, 0.87);
+  color: rgb(0 0 0 / 87%);
   margin-right: 12px;
   //max-width : calc(100% - 52px - 2rem);
   max-width: 200px;
@@ -61,13 +67,14 @@
   width: 40px;
   height: 22px;
   line-height: 22px;
-  background: rgba(27, 103, 255, 0.1);
+  background: rgb(27 103 255 / 10%);
   border-radius: 2px;
   font-weight: 400;
   font-size: 14px;
   text-align: center;
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   align-items: center;
   justify-content: center;
 }
@@ -75,43 +82,51 @@
 .draft {
   width: 40px;
   height: 22px;
-  background: rgba(255, 136, 0, 0.2);
+  background: rgb(255 136 0 / 20%);
   //border: 1px solid #FF8800;
   border-radius: 2px;
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   align-items: center;
   justify-content: center;
 }
+
 .item41 {
   width: 100%;
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
   margin-top: 10px;
 }
+
 .item41Left {
   margin-right: 10px;
-  color: rgba(0, 0, 0, 0.72);
+  color: rgb(0 0 0 / 72%);
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
 }
+
 .item41Right {
   color: #00b365;
   font-weight: 400;
   font-size: 12px;
   line-height: 18px;
 }
+
 .item42 {
   width: 100%;
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
   margin-top: 10px;
 }
+
 .item42Left {
   width: 242px;
   width: 100%;
@@ -120,6 +135,7 @@
 .actions {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-end;
   align-items: center;
   width: 60px;
@@ -130,23 +146,25 @@
     display: flex;
   }
 }
+
 .upload {
   margin-right: 10px;
 }
 
 .upload:hover {
-  color: var(--primary-color);
+  color: var(--color-primary);
   cursor: pointer;
 }
 
 .delete:hover {
-  color: var(--primary-color);
+  color: var(--color-primary);
   cursor: pointer;
 }
 
 .deleteWarnInfo {
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: flex-start;
   align-items: center;
 }
@@ -155,10 +173,11 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background-color: #ff8800;
+  background-color: #f80;
   color: white;
   @extend .displayFlex;
   @extend .flexDirectionRow;
+
   justify-content: center;
   align-items: center;
 }
