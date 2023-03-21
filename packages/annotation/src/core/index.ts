@@ -93,10 +93,10 @@ export default class AnnotationEngine {
         props.toolName === 'polygonTool') &&
       props.config &&
       typeof props.config === 'object' &&
-      Object.keys(props.config).indexOf('attributeList') >= 0
+      Object.keys(props.config).indexOf('attributes') >= 0
     ) {
       // @ts-ignore
-      attributeArr = [...attributeArr, ...props.config?.attributeList];
+      attributeArr = [...attributeArr, ...props.config?.attributes];
     }
 
     const attributeMap = new Map();

@@ -3,13 +3,14 @@ import { Button, Form, Input, Tooltip, Badge } from 'antd';
 import { set, isEqual, size } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
+import type { NamePath } from 'antd/es/form/interface';
 
 import ColorPalette from '@/classes/ColorPalette';
 import type { FancyInputProps } from '@/components/FancyInput/types';
 
 import type { CategoryAttributeItem } from '../CategoryAttribute.fancy';
 import AttributeConfiguration from './AttributeConfiguration';
-import { listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
+import { duplicatedValueValidator, listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
 
 const colorPalette = new ColorPalette();
 
@@ -194,6 +195,14 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
   const attributes = useMemo(
     () =>
       stateValue.map((item, index) => {
+        const otherValueFields: NamePath[] = [];
+
+        stateValue.forEach((_, inputIndex) => {
+          if (inputIndex !== index) {
+            otherValueFields.push([...preFields, inputIndex, 'value']);
+          }
+        });
+
         return (
           <StyledAttributeItem key={item.id}>
             <div className="sn">{index + 1}</div>
@@ -210,7 +219,9 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
             <Form.Item
               name={[...preFields, index, 'value']}
               className="input"
-              rules={[{ required: true, message: 'value不可为空' }]}
+              dependencies={otherValueFields}
+              // @ts-ignore
+              rules={[{ required: true, message: 'value不可为空' }, duplicatedValueValidator(preFields, index)]}
             >
               <Input placeholder="保存结果（英文）" value={item.value} onChange={handleOnChange(`[${index}].value`)} />
             </Form.Item>

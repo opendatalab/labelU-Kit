@@ -96,7 +96,7 @@ const AnnotationPage = () => {
             ref={annotationRef}
             isPreview={false}
             imgList={[transformed[0]]}
-            attributeList={taskConfig.commonAttributeConfigurable ? taskConfig.attribute : []}
+            attributeList={taskConfig.commonAttributeConfigurable ? taskConfig.attributes : []}
             tagConfigList={taskConfig.tagList}
             toolsBasicConfig={taskConfig.tools}
             textConfig={taskConfig.textConfig}

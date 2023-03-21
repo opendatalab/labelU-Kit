@@ -71,7 +71,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
   const { tools } = config || {};
 
   useEffect(() => {
-    setSelectedTools((tools || []).map((item) => item.tool));
+    setSelectedTools(_.chain(tools).compact().map('tool').value());
     setActiveTool((tools || [])[0]?.tool);
     setHasAttributes(config?.commonAttributeConfigurable ?? false);
   }, [config, tools]);
@@ -110,6 +110,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
       return {
         key: tool,
         label: TOOL_NAME[tool],
+        forceRender: true,
         children: (
           <div className={styles.innerForm}>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -175,6 +176,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
               type="card"
               size="small"
               activeKey={activeTool}
+              destroyInactiveTabPane={false}
               onChange={(tabKey) => {
                 setActiveTool(tabKey);
               }}

@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
 import { omit } from 'lodash/fp';
+import { ArrowRightOutlined } from '@ant-design/icons';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
@@ -291,9 +292,13 @@ const CreateTask = () => {
           <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
         </div>
         <div className={currentStyles.right}>
-          <Button type="primary" ghost onClick={handleCancel}>
-            取消
-          </Button>
+          {currentStep === StepEnum.Config && (
+            <Button>
+              进入预览
+              <ArrowRightOutlined />
+            </Button>
+          )}
+          <Button onClick={handleCancel}>取消</Button>
           {currentStep === StepEnum.Config ? (
             <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
               保存

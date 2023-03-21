@@ -61,13 +61,8 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
 
   // 计算attribute栏目 宽度
   useEffect(() => {
-    // if (attributeList && attributeList.length > 0) {
-    // const leftSliderDomWidth = document.getElementById('sliderBoxId')?.offsetWidth as number;
-    // const rightSliderDomWidth = 240;
-    // const attributeBoxLength = window.innerWidth - leftSliderDomWidth - rightSliderDomWidth;
     const toolContainerWidth = document.getElementById('toolContainer')?.offsetWidth as number;
     setAttributeBoxLength(toolContainerWidth - 30);
-    // }
   }, [attributeList, props.imgListCollapse]);
 
   // 计算可显示 attribute 个数
@@ -150,9 +145,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       currentToolConfig = toolsBasicConfig.filter((item) => {
         return item.tool === currentToolName;
       });
-      if (currentToolConfig?.[0].config && Object.keys(currentToolConfig?.[0].config).indexOf('attributeList') > 0) {
+      if (currentToolConfig?.[0].config && Object.keys(currentToolConfig?.[0].config).indexOf('attributes') > 0) {
         // @ts-ignore
-        tmpCurrentAttributeList = attributeList.concat(currentToolConfig?.[0].config.attributeList);
+        tmpCurrentAttributeList = attributeList.concat(currentToolConfig?.[0].config.attributes);
       }
     } else {
       tmpCurrentAttributeList = attributeList;
@@ -170,9 +165,9 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
       if (props.toolsBasicConfig && props.toolsBasicConfig.length > 0) {
         for (let i = 0; i < props.toolsBasicConfig.length; i++) {
           // @ts-ignore
-          if (props.toolsBasicConfig[i].config?.attributeList) {
+          if (props.toolsBasicConfig[i].config?.attributes) {
             // @ts-ignore
-            tmpAttributesList = [...tmpAttributesList, ...props.toolsBasicConfig[i].config?.attributeList];
+            tmpAttributesList = [...tmpAttributesList, ...props.toolsBasicConfig[i].config?.attributes];
           }
         }
       }

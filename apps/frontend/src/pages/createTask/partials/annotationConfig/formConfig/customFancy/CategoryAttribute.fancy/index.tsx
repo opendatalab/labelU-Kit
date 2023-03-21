@@ -11,7 +11,7 @@ import { ReactComponent as TreeSwitcherIcon } from '@/assets/svg/tree-switcher.s
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import type { FancyInputProps } from '@/components/FancyInput/types';
 
-import { listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
+import { duplicatedValueValidator, listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
 
 export enum CategoryType {
   Enum = 'enum',
@@ -433,6 +433,14 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
 
         return input.map((item, index) => {
           const itemType = item.type as CategoryType;
+          const otherValueFields: NamePath[] = [];
+
+          input.forEach((_, inputIndex) => {
+            if (inputIndex !== index) {
+              otherValueFields.push([...path, inputIndex, 'value']);
+            }
+          });
+
           if (Array.isArray(item.options) && [CategoryType.Enum, CategoryType.Tuple].includes(itemType)) {
             return {
               title: (
@@ -441,7 +449,12 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: 'key不可为空' }]}>
                     <Input onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
-                  <Form.Item name={[...path, index, 'value']} rules={[{ required: true, message: 'value不可为空' }]}>
+                  <Form.Item
+                    name={[...path, index, 'value']}
+                    dependencies={otherValueFields}
+                    // @ts-ignore
+                    rules={[{ required: true, message: 'value不可为空' }, duplicatedValueValidator(path, index)]}
+                  >
                     <Input onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <div className="should-align-center">
@@ -478,7 +491,12 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: 'key不可为空' }]}>
                     <Input onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
-                  <Form.Item name={[...path, index, 'value']} rules={[{ required: true, message: 'value不可为空' }]}>
+                  <Form.Item
+                    name={[...path, index, 'value']}
+                    dependencies={otherValueFields}
+                    // @ts-ignore
+                    rules={[{ required: true, message: 'value不可为空' }, duplicatedValueValidator(path, index)]}
+                  >
                     <Input onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <div className="should-align-center">
