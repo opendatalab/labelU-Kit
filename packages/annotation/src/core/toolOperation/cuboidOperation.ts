@@ -136,7 +136,7 @@ class CuboidOperation extends BasicToolOperation {
     );
   }
 
-  public getHoverID = (e: MouseEvent) => {
+  public getHoverData = (e: MouseEvent) => {
     const coordinate = this.getCoordinateUnderZoom(e);
 
     const { currentShowList } = this;
@@ -146,10 +146,17 @@ class CuboidOperation extends BasicToolOperation {
       const polygonList = currentShowList.map((cuboid) => {
         return { id: cuboid.id, pointList: AxisUtils.changePointListByZoom(getCuboidHoverRange(cuboid), this.zoom) };
       });
-      return PolygonUtils.getHoverPolygonID(coordinate, polygonList);
+      const hoverID = PolygonUtils.getHoverPolygonID(coordinate, polygonList);
+
+      if (hoverID) {
+        return {
+          hoverID,
+          hoverCuboid: currentShowList.find((cuboid) => cuboid.id === hoverID),
+        };
+      }
     }
 
-    return '';
+    return {};
   };
 
   public updateSelectedCuboid(newCuboid: ICuboid) {
@@ -286,9 +293,9 @@ class CuboidOperation extends BasicToolOperation {
   public onRightDblClick(e: MouseEvent) {
     super.onRightDblClick(e);
 
-    const hoverRectID = this.getHoverID(e);
-    if (this.selectedID && this.selectedID === hoverRectID) {
-      this.deleteCuboid(hoverRectID);
+    const { hoverID } = this.getHoverData(e);
+    if (this.selectedID && this.selectedID === hoverID) {
+      this.deleteCuboid(hoverID);
     }
   }
 
@@ -532,7 +539,7 @@ class CuboidOperation extends BasicToolOperation {
     /**
      * Highlight hover cuboid.
      */
-    this.hoverID = this.getHoverID(e);
+    this.hoverID = this.getHoverData(e).hoverID ?? '';
 
     this.onHoverMove(e);
   }
@@ -699,8 +706,13 @@ class CuboidOperation extends BasicToolOperation {
 
   public rightMouseUp(e: MouseEvent) {
     // 1. Selected
-    const hoverID = this.getHoverID(e);
+    const { hoverID, hoverCuboid } = this.getHoverData(e);
     this.setSelectedID(hoverID);
+
+    // Sync the attribute of hoverCuboid.
+    if (hoverCuboid) {
+      this.setDefaultAttribute(hoverCuboid.attribute);
+    }
 
     // 2. If it is in drawing, the drawing status needs to be clear.
     if (this.drawingCuboid) {
