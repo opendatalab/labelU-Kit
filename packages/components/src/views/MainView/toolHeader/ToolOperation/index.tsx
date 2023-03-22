@@ -62,7 +62,7 @@ const ToolOperation: React.FC<IProps> = (props) => {
           const renderTool = toolList?.find((tItem) => tItem?.toolName === item.tool);
           if (notShowIconTool.indexOf(item.tool as EToolName) < 0) {
             return (
-              <Popover key={item.tool} content={t(item.tool)} trigger="hover">
+              <Popover key={item.tool} content={t(item.tool)}>
                 <a
                   onClick={(e) => {
                     // 切换工具保存标注结果
@@ -75,7 +75,7 @@ const ToolOperation: React.FC<IProps> = (props) => {
                   <ToolIcon
                     className="lb-left-item"
                     icon={renderTool?.Icon}
-                    style={{ color: currentToolName === item.tool ? '#1B67FF' : '#666' }}
+                    style={{ color: currentToolName === item.tool ? 'var(--color-primary)' : '#666' }}
                   />
                 </a>
               </Popover>

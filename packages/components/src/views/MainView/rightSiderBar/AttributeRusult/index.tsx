@@ -5,7 +5,7 @@ import { connect, useDispatch } from 'react-redux';
 import type { PrevResult, Attribute } from '@label-u/annotation';
 import { EToolName } from '@label-u/annotation';
 import classNames from 'classnames';
-import { isEmpty, size, find, some, sortBy, mapKeys } from 'lodash-es';
+import { isEmpty, size, find, some, sortBy, mapKeys, get } from 'lodash-es';
 
 import AttributeEditorIcon from '@/assets/cssIcon/attribute_editor.svg';
 import AttributeShowIcon from '@/assets/cssIcon/attribute_show.svg';
@@ -168,7 +168,7 @@ const AttributeRusult: FC<IProps> = ({
   }, []);
 
   useEffect(() => {
-    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    const boxParent = document.getElementById('annotation-content-area-to-get-box')?.parentNode as HTMLElement;
     setBoxHeight(boxParent.clientHeight);
     setBoxWidth(boxParent.clientWidth);
   }, []);
@@ -249,12 +249,15 @@ const AttributeRusult: FC<IProps> = ({
 
     for (const key of attributeMap.keys()) {
       const toolInfo = attributeMap.get(key);
+
+      const attribute = allAttributesMap.get(get(toolInfo, '[0].toolName'))?.get(key);
+
       tmpAttributeResult.push({
         isVisible: some(toolInfo, (item) => item.isVisible),
         attributeName: key,
-        attributeTitle: allAttributesMap.get(key) || key,
+        attributeTitle: attribute?.key || key,
         toolInfo: attributeMap.get(key),
-        color: toolInstance.getColor(key)?.valid.stroke,
+        color: attribute?.color ?? '#000000',
       });
     }
     setAttributeResultList(tmpAttributeResult);
@@ -525,9 +528,10 @@ const AttributeRusult: FC<IProps> = ({
       value: 'noneAttribute',
     });
     const optionsMap = mapKeys(options, 'value');
+    const toolName = get(toolInfo, '[0].toolName')!;
     const value = optionsMap[attributeResult.attributeName]
       ? attributeResult.attributeName
-      : allAttributesMap.get(attributeResult.attributeName);
+      : allAttributesMap.get(toolName)?.get(attributeResult.attributeName)?.key;
     return (
       <Form
         name="basic"

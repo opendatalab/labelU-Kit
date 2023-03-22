@@ -40,8 +40,6 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
   } = props;
   const annotationRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  // const windowSize = useContext(viewportContext);
-  // const canvasSize = getFormatSize(windowSize);
   const size = useSize(annotationRef);
 
   useEffect(() => {
@@ -115,6 +113,10 @@ const AnnotationOperation: React.FC<IProps> = (props: IProps) => {
 
   /** 窗口大小监听 */
   useEffect(() => {
+    if (!size.width || !size.height) {
+      return;
+    }
+
     if (toolInstance?.setSize) {
       toolInstance.setSize(size);
     }

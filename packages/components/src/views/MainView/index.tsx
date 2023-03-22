@@ -60,7 +60,7 @@ const MainView: React.FC<AppProps & IProps> = (props) => {
   const { currentToolName } = props;
   const [, setBoxWidth] = useState<number>();
   useEffect(() => {
-    const boxParent = document.getElementById('annotationCotentAreaIdtoGetBox')?.parentNode as HTMLElement;
+    const boxParent = document.getElementById('annotation-content-area-to-get-box')?.parentNode as HTMLElement;
     setBoxWidth(boxParent.clientWidth);
   }, []);
 

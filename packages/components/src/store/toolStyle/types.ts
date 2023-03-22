@@ -5,11 +5,6 @@ export interface ToolStyleState {
   width: number;
   borderOpacity: number; // 边框透明度
   fillOpacity: number; // 填充透明度
-
-  toolColor: Record<number, any>;
-  attributeColor: any[];
-  lineColor: string;
-  attributeLineColor: string[];
   imgListCollapse: boolean;
 }
 

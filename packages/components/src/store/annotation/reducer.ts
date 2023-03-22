@@ -2,9 +2,8 @@ import type { Attribute, EToolName } from '@label-u/annotation';
 import { AnnotationEngine, CommonToolUtils, ImgUtils, cTool, BasicToolOperation } from '@label-u/annotation';
 import { i18n } from '@label-u/utils';
 import { message } from 'antd/es';
-import _ from 'lodash-es';
+import _, { forEach } from 'lodash-es';
 
-import { getFormatSize } from '@/components/customResizeHook';
 import { ANNOTATION_ACTIONS } from '@/store/Actions';
 import { jsonParser } from '@/utils';
 import AnnotationDataUtils from '@/utils/AnnotationDataUtils';
@@ -68,7 +67,7 @@ const calcStepProgress = (fileList: any[], step: number) =>
   }, 0) / fileList.length;
 
 const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageElement, toolStyle: ToolStyleState) => {
-  const { step, stepList, attributeList, tagConfigList, toolInstance, toolsBasicConfig, isShowOrder } = annotation;
+  const { step, stepList, attributeList = [], tagConfigList, toolInstance, toolsBasicConfig, isShowOrder } = annotation;
   const stepConfig = StepUtils.getCurrentStepInfo(step, stepList);
   // const stepConfig = stepList[0]; // 修改为无步骤，因此无需通过步骤来选定工具
   // 此前工具绑定时间清空
@@ -88,29 +87,27 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
   if (!container) {
     throw Error(`Not exist dom named id-toolContainer`);
   }
-  const canvasSize = getFormatSize({ width: window?.innerWidth, height: window?.innerHeight });
 
-  let allAttributesList: Attribute[] = [];
-  /**
-   * TODO: 为了兼容历史配置数据，此处过滤掉空的属性；但是后续应该在保存配置的时候就过滤掉，或者校验空值。
-   * 修正：https://project.feishu.cn/bigdata_03/issue/detail/3877218?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
-   **/
-  const noneEmptyAttributeList = attributeList.filter((i) => i.key !== '' && i.value !== '');
-  if (noneEmptyAttributeList && noneEmptyAttributeList.length > 0) {
-    allAttributesList = [...allAttributesList, ...noneEmptyAttributeList];
-  }
+  const allAttributesMap = new Map<string, any>();
+
   if (toolsBasicConfig && toolsBasicConfig.length > 0) {
     for (let i = 0; i < toolsBasicConfig.length; i++) {
+      const attributeMap = new Map<string, any>();
+      attributeMap.set(BasicToolOperation.NONE_ATTRIBUTE, {
+        // TODO: 国际化
+        key: '无标签',
+        value: BasicToolOperation.NONE_ATTRIBUTE,
+        color: '#ccc',
+      });
       // @ts-ignore
-      if (toolsBasicConfig[i].config?.attributeList) {
-        allAttributesList = [
-          ...allAttributesList,
-          // @ts-ignore
-          ...toolsBasicConfig[i].config?.attributeList.filter(
-            (item: Attribute) => item.key !== '' && item.value !== '',
-          ),
-        ];
+      if (toolsBasicConfig[i].config?.attributes) {
+        // @ts-ignore
+        forEach([...toolsBasicConfig[i].config?.attributes, ...attributeList], (item: Attribute) => {
+          attributeMap.set(item.value, item);
+        });
       }
+
+      allAttributesMap.set(toolsBasicConfig[i].tool, attributeMap);
     }
   }
 
@@ -118,13 +115,15 @@ const updateToolInstance = (annotation: AnnotationState, imgNode: HTMLImageEleme
     container,
     isShowOrder: isShowOrder,
     toolName: stepConfig.tool as EToolName,
-    size: canvasSize,
+    size: {
+      width: 1,
+      height: 1,
+    },
     imgNode,
     config,
     style: toolStyle,
     tagConfigList,
-    attributeList: noneEmptyAttributeList,
-    allAttributesList,
+    allAttributesMap,
   });
 
   // 切换工具时，高亮上一个工具且本工具也存在的标签

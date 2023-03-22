@@ -1,4 +1,4 @@
-import { Slider } from 'antd/es';
+import { Slider } from 'antd';
 import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 

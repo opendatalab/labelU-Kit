@@ -211,16 +211,10 @@ const ToolHeader: React.FC<IToolHeaderProps> = ({
   return (
     <div className={classNames(`${prefix}-header`)} ref={ref}>
       <div className={`${prefix}-header__title`}>
-        {/* {backNode}
-        {headerNameNode}
-        {stepListNode}
-        {currentOption} */}
         <ToolOperation toolsBasicConfig={toolsBasicConfig} />
         <div id="operationNode" className={`${prefix}-header__operationNode`}>
           {headerOptionNode}
         </div>
-        {/* <div className={`${prefix}-header__titlePlacement`} /> */}
-        {/* {langNode} */}
         <ActionOption />
         {!isPreview && NextImageOption}
       </div>

@@ -18,9 +18,9 @@ import type { Footer, Header, Sider } from './types/main';
 import type { IStepInfo } from './types/step';
 
 interface IAnnotationStyle {
-  strokeColor: string;
-  fillColor: string;
-  textColor: string;
+  stroke: string;
+  fill: string;
+  text: string;
   toolColor: any;
 }
 
@@ -219,7 +219,7 @@ const App: React.FC<AppProps> = (props) => {
   }, [toolInstance, isShowOrder, setToolInstance]);
 
   return (
-    <div id="annotationCotentAreaIdtoGetBox">
+    <div id="annotation-content-area-to-get-box">
       <MainView {...props} currentToolName={currentToolName as string} />
     </div>
   );

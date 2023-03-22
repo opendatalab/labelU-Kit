@@ -1,10 +1,9 @@
 import type { Attribute } from '@label-u/annotation';
-import { BasicToolOperation, AttributeUtils } from '@label-u/annotation';
+import { BasicToolOperation } from '@label-u/annotation';
 import type { FC } from 'react';
 import { useMemo, useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Button, Dropdown, Space, Menu } from 'antd';
-import classNames from 'classnames';
 
 import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
 import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
@@ -19,17 +18,15 @@ interface AttributeOperationProps {
   toolInstance: any;
   copytoolInstance: any;
   imgListCollapse: boolean;
-  toolStyle: any;
 }
 
 const AttributeOperation: FC<AttributeOperationProps> = (props) => {
-  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance, toolStyle } = props;
+  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance } = props;
   const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
   const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
-  const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
   const attributeMap = useMemo(
     () => toolInstance?.config?.attributeMap ?? new Map(),
     [toolInstance?.config?.attributeMap],
@@ -99,9 +96,10 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
         return {
           label: (
             <a
-              className={classNames({
-                chooseAttribute: item.value === chooseAttribute,
-              })}
+              style={{
+                background: item.value === chooseAttribute ? item.color : '#fff',
+                color: item.value === chooseAttribute ? '#fff' : '#000',
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 toolInstance.setDefaultAttribute(item.value);
@@ -111,13 +109,11 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className="circle"
                 style={{
-                  backgroundColor:
-                    toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.value, allAttributeList ?? []) + 1]
-                      .valid.stroke,
+                  backgroundColor: item.color,
                   marginRight: 5,
                 }}
               />
-              <span className="attributeName">{attributeMap.get(item.value)}</span>
+              <span className="attributeName">{item?.key}</span>
             </a>
           ),
           key: item.value,
@@ -127,15 +123,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     } else {
       return <div />;
     }
-  }, [
-    currentAttributeList,
-    shwoAttributeCount,
-    chooseAttribute,
-    toolStyle.attributeColor,
-    allAttributeList,
-    attributeMap,
-    toolInstance,
-  ]);
+  }, [currentAttributeList, shwoAttributeCount, chooseAttribute, toolInstance]);
 
   // 根据工具名称的修改情况获取最新的attributeList
   useEffect(() => {
@@ -156,39 +144,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
     setCurrentAttributeList(tmpCurrentAttributeList);
   }, [attributeList, toolsBasicConfig, currentToolName]);
 
-  useEffect(() => {
-    if (toolInstance) {
-      let tmpAttributesList: Attribute[] = [];
-      if (props.attributeList && props.attributeList.length > 0) {
-        tmpAttributesList = [...tmpAttributesList, ...props.attributeList];
-      }
-      if (props.toolsBasicConfig && props.toolsBasicConfig.length > 0) {
-        for (let i = 0; i < props.toolsBasicConfig.length; i++) {
-          // @ts-ignore
-          if (props.toolsBasicConfig[i].config?.attributes) {
-            // @ts-ignore
-            tmpAttributesList = [...tmpAttributesList, ...props.toolsBasicConfig[i].config?.attributes];
-          }
-        }
-      }
-
-      /**
-       * TODO: 为了兼容历史配置数据，此处过滤掉空的属性；但是后续应该在保存配置的时候就过滤掉，或者校验空值。
-       * 修正：https://project.feishu.cn/bigdata_03/issue/detail/3877218?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
-       **/
-      tmpAttributesList = tmpAttributesList.filter((item) => item.key !== '' && item.value !== '');
-      toolInstance?.setAllAttributes(tmpAttributesList);
-      setAllAttributeList(tmpAttributesList);
-    }
-  }, [
-    currentToolName,
-    toolInstance?.isShowOrder,
-    toolsBasicConfig,
-    attributeList,
-    toolInstance,
-    props.attributeList,
-    props.toolsBasicConfig,
-  ]);
+  // REVIEW: 这里删除了原先的useEffect（用于设置attributeList）
 
   return (
     <div className="attributeBox" key={chooseAttribute}>
@@ -206,12 +162,7 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
                 border: '0px',
                 borderRadius: '4px',
                 padding: '1px 8px',
-                backgroundColor:
-                  attribute.value === chooseAttribute
-                    ? toolStyle.attributeColor[
-                        AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? []) + 1
-                      ].valid.stroke
-                    : '#FFFFFF',
+                backgroundColor: attribute.value === chooseAttribute ? attribute.color : '#FFFFFF',
                 color: attribute.value === chooseAttribute ? '#ffffff' : '',
               }}
               key={attribute.value}
@@ -219,14 +170,11 @@ const AttributeOperation: FC<AttributeOperationProps> = (props) => {
               <div
                 className="circle"
                 style={{
-                  backgroundColor:
-                    toolStyle.attributeColor[
-                      AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? []) + 1
-                    ].valid.stroke,
+                  backgroundColor: attribute.color,
                   marginRight: 5,
                 }}
               />
-              <span title={attribute.value} className="attributeName">{`${attributeMap.get(attribute.value)} ${
+              <span title={attribute.value} className="attributeName">{`${attributeMap.get(attribute.value)?.key} ${
                 index <= 8 ? index + 1 : ''
               }`}</span>
             </Button>
@@ -268,7 +216,6 @@ const mapStateToProps = (appState: AppState) => ({
   toolsBasicConfig: appState.annotation.toolsBasicConfig,
   currentToolName: appState.annotation.currentToolName,
   imgListCollapse: appState.toolStyle.imgListCollapse,
-  toolStyle: appState.toolStyle,
 });
 
 export default connect(mapStateToProps)(AttributeOperation);
