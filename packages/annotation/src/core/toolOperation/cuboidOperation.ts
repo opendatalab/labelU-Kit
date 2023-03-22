@@ -242,6 +242,11 @@ class CuboidOperation extends BasicToolOperation {
     this.render();
   }
 
+  public clearResult() {
+    this.setCuboidList([], true);
+    this.setSelectedID(undefined);
+  }
+
   public exportData() {
     const { cuboidList } = this;
 
