@@ -96,6 +96,9 @@ export enum ECuboidLineDirection {
   Column = 'column',
 }
 
+/**
+ * Get the Position by the point and direction(Row or Column).
+ */
 export const CUBOID_ROW = {
   [ECuboidPosition.TL]: ECuboidPosition.TR,
   [ECuboidPosition.TR]: ECuboidPosition.TL,

@@ -29,6 +29,9 @@ import { EMessage } from '../../locales/constants';
 
 type ICuboidOperationProps = IBasicToolOperationProps;
 
+/**
+ * Just use for the drawing.
+ */
 enum EDrawingStatus {
   Ready = 1,
   FirstPoint = 2,
@@ -41,7 +44,9 @@ class CuboidOperation extends BasicToolOperation {
 
   public drawingCuboid?: IDrawingCuboid;
 
-  // First Click
+  /**
+   * The coordinates of the first click, used for creating a cuboid.
+   */
   public firstClickCoord?: ICoordinate;
 
   public drawingStatus = EDrawingStatus.Ready;
@@ -88,7 +93,11 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   /**
-   * 当前页面展示的框体
+   * Get the showing cuboidList which is needed to be shown.
+   *
+   * Filter Condition: (It is not enabled currently)
+   * 1. basicResult
+   * 2. attributeLockList
    */
   public get currentShowList() {
     let cuboidList: ICuboid[] = [];
@@ -114,12 +123,12 @@ class CuboidOperation extends BasicToolOperation {
     return this.cuboidList.find((v) => v.id === this.selectedID);
   }
 
-  public get isNeedCheckCuboidSize() {
-    return this.config?.minWidth >= 0 && this.config?.minHeight >= 0;
-  }
-
   public get dataList() {
     return this.cuboidList;
+  }
+
+  public get isNeedCheckCuboidSize() {
+    return this.config?.minWidth >= 0 && this.config?.minHeight >= 0;
   }
 
   /**
@@ -134,6 +143,21 @@ class CuboidOperation extends BasicToolOperation {
       selectedCuboid &&
       AxisUtils.isCloseCuboid(currentCoord, AxisUtils.changeCuboidByZoom(selectedCuboid, this.zoom) as ICuboid)
     );
+  }
+
+  /**
+   * Forbidden to draw a cuboid if the backPlane is front than the frontPlane.
+   * @param e
+   * @param cuboid
+   * @returns
+   */
+  public isForbiddenMove(e: MouseEvent, cuboid: ICuboid | IDrawingCuboid) {
+    const coord = this.getCoordinateInOrigin(e);
+
+    if (coord.y > cuboid.frontPoints.br.y) {
+      return true;
+    }
+    return false;
   }
 
   public getHoverData = (e: MouseEvent) => {
@@ -177,7 +201,9 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   /**
-   * TextAttributeInstance Exclusive.
+   * Get Selected Data.
+   *
+   * Exclusive: TextAttributeInstance.
    * @param attribute
    * @param valid
    * @returns
@@ -197,24 +223,9 @@ class CuboidOperation extends BasicToolOperation {
   }
 
   /**
-   * Forbidden to draw a cuboid if the backPlane is front than the frontPlane.
-   * @param e
-   * @param cuboid
-   * @returns
-   */
-  public isForbiddenMove(e: MouseEvent, cuboid: ICuboid | IDrawingCuboid) {
-    const coord = this.getCoordinateInOrigin(e);
-
-    if (coord.y > cuboid.frontPoints.br.y) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * TextAttributeInstance Exclusive.
-   *
    * Update text Input.
+   *
+   * Exclusive: TextAttributeInstance.
    * @param attribute
    * @param valid
    * @returns
@@ -812,7 +823,7 @@ class CuboidOperation extends BasicToolOperation {
     this.defaultAttribute = defaultAttribute ?? '';
 
     if (oldDefault !== defaultAttribute) {
-      // If chang attribute, need to change the styles in parallel
+      // If change attribute, need to change the styles in parallel
       this.changeStyle(defaultAttribute);
 
       //  Trigger sidebar synchronization

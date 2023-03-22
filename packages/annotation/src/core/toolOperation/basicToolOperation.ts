@@ -606,6 +606,11 @@ export default class BasicToolOperation extends EventListener {
     this.defaultAttribute = attribute;
   }
 
+  /**
+   * Get the coordinate point in the original image coordinate system by mouse events
+   * @param e
+   * @returns
+   */
   public getCoordinateInOrigin(e: MouseEvent) {
     const bounding = this.canvas.getBoundingClientRect();
 

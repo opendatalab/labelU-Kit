@@ -42,6 +42,6 @@ export enum EToolName {
   ClientAttribute = 'clientAttributeTool',
   /** OCR关联关系工具 */
   OCRRelation = 'OCRRelationTool',
-
-  Cuboid = 'cuboidTool'
+  /** 立体框工具 */
+  Cuboid = 'cuboidTool',
 }
