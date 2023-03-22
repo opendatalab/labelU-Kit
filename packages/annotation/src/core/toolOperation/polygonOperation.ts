@@ -26,7 +26,6 @@ import CanvasUtils from '../../utils/tool/CanvasUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import PolygonUtils from '../../utils/tool/PolygonUtils';
-import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
@@ -1360,8 +1359,8 @@ export default class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    const toolColor = this.getColor(selectedPolygon.attribute);
-    const color = selectedPolygon.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(selectedPolygon.attribute, selectedPolygon.valid);
+    const color = toolStyle.stroke;
     return {
       width: TEXT_MAX_WIDTH,
       textAttribute: selectedPolygon.textAttribute,
@@ -1398,8 +1397,8 @@ export default class PolygonOperation extends BasicToolOperation {
 
     const newWidth = TEXT_MAX_WIDTH;
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(attribute, valid);
+    const color = toolStyle.stroke;
     if (!this._textAttributInstance) {
       // 属性文本示例
 
@@ -1434,8 +1433,10 @@ export default class PolygonOperation extends BasicToolOperation {
         }
         if (polygon.isVisible) {
           const { textAttribute, attribute } = polygon;
-          const toolColor = this.getColor(attribute);
-          const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
+          const toolColor = this.getColor(attribute, this.config, EToolName.Polygon);
+          const toolData = this.getRenderStyle(polygon.attribute, polygon.valid, {
+            color: toolColor,
+          });
           const transformPointList = AxisUtils.changePointListByZoom(
             polygon.pointList || [],
             this.zoom,
@@ -1452,7 +1453,7 @@ export default class PolygonOperation extends BasicToolOperation {
             lineType: this.config?.lineType,
           });
 
-          let showText = `${this.config.attributeMap.get(attribute) || attribute}`;
+          let showText = `${this.getAttributeKey(attribute)}`;
           if (this.isShowOrder && polygon?.order > 0) {
             showText = `${polygon.order} ${showText}`;
           }
@@ -1485,13 +1486,9 @@ export default class PolygonOperation extends BasicToolOperation {
     if (this.hoverID && this.hoverID !== this.editPolygonID) {
       const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
       if (hoverPolygon) {
-        let color = '';
-        const toolColor = this.getColor(hoverPolygon.attribute);
-        if (hoverPolygon.valid) {
-          color = toolColor.validHover.fill;
-        } else {
-          color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
-        }
+        const color = this.getRenderStyle(hoverPolygon.attribute, hoverPolygon.valid, {
+          isHovered: true,
+        }).fill;
 
         DrawUtils.drawPolygonWithFill(
           this.canvas,
@@ -1509,8 +1506,9 @@ export default class PolygonOperation extends BasicToolOperation {
       const selectdPolygon = this.selectedPolygon;
 
       if (selectdPolygon) {
-        const toolColor = this.getColor(selectdPolygon.attribute);
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
+        const toolData = this.getRenderStyle(selectdPolygon.attribute, selectdPolygon.valid, {
+          isSelected: true,
+        });
 
         DrawUtils.drawSelectedPolygonWithFillAndLine(
           this.canvas,
@@ -1526,7 +1524,7 @@ export default class PolygonOperation extends BasicToolOperation {
           },
         );
 
-        let showText = `${this.config.attributeMap.get(selectdPolygon.attribute) || selectdPolygon.attribute}`;
+        let showText = `${this.getAttributeKey(selectdPolygon.attribute)}`;
         if (this.isShowOrder && selectdPolygon?.order > 0) {
           showText = `${selectdPolygon.order} ${showText}`;
         }
@@ -1545,8 +1543,7 @@ export default class PolygonOperation extends BasicToolOperation {
       }
     }
 
-    const defaultColor = this.getColor(this.defaultAttribute);
-    const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
+    const toolData = this.getRenderStyle(this.defaultAttribute, !this.isCtrl);
     // 4. 编辑中的多边形
     if (this.drawingPointList?.length > 0) {
       // 渲染绘制中的多边形
@@ -1592,13 +1589,15 @@ export default class PolygonOperation extends BasicToolOperation {
       if (!selectdPolygon) {
         return;
       }
-      const hoverColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const selectedColor = this.getRenderStyle(this.defaultAttribute, selectdPolygon.valid, {
+        isSelected: true,
+      });
 
       const point = selectdPolygon?.pointList[this.hoverPointIndex];
       if (point) {
         const { x, y } = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
         DrawUtils.drawCircleWithFill(this.canvas, { x, y }, 5, {
-          color: hoverColor.fill,
+          color: selectedColor.fill,
         });
       }
     }
@@ -1609,7 +1608,10 @@ export default class PolygonOperation extends BasicToolOperation {
       if (!selectdPolygon) {
         return;
       }
-      const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+
+      const selectedColor = this.getRenderStyle(this.defaultAttribute, selectdPolygon.valid, {
+        isSelected: true,
+      });
 
       DrawUtils.drawLineWithPointList(
         this.canvas,
@@ -1633,8 +1635,8 @@ export default class PolygonOperation extends BasicToolOperation {
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   }
 
-  public renderCursorLine(lineColor: string) {
-    super.renderCursorLine(lineColor);
+  public renderCursorLine(color: string) {
+    super.renderCursorLine(color);
     if (this.isCombined) {
       const { x, y } = this.coord;
       const padding = 10; // 框的边界

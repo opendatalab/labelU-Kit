@@ -103,6 +103,7 @@ export default class RectOperation extends BasicToolOperation {
     }
   }
 
+  // @ts-ignore
   public setConfig(config: IRectConfig, isClear = false) {
     this.config = config;
     if (isClear === true) {
@@ -1282,38 +1283,13 @@ export default class RectOperation extends BasicToolOperation {
       return;
     }
 
-    const toolColor = this.getColor(selectedRect.attribute);
-    const color = selectedRect.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(selectedRect.attribute, selectedRect.valid);
+    const color = toolStyle.stroke;
+
     return {
       width: selectedRect.width * this.zoom * 0.6,
       textAttribute: selectedRect.textAttribute,
       color,
-    };
-  }
-
-  /**
-   * 获取当前渲染的样式
-   * @param rect
-   * @returns
-   */
-  public getRenderStyle(rect: IRect) {
-    const toolColor = this.getColor(rect.attribute);
-    let strokeColor;
-    let fillColor;
-
-    // 是否为有效框;
-    if (rect.valid === false) {
-      strokeColor = toolColor?.invalid.stroke;
-      fillColor = toolColor?.invalid.fill;
-    } else {
-      strokeColor = toolColor?.valid.stroke;
-      fillColor = toolColor?.valid.fill;
-    }
-    return {
-      strokeColor,
-      fillColor,
-      textColor: strokeColor,
-      toolColor,
     };
   }
 
@@ -1327,8 +1303,10 @@ export default class RectOperation extends BasicToolOperation {
 
     const newWidth = width * this.zoom * 0.6;
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y: y + height }, this.currentPos, this.zoom);
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+
+    const toolStyle = this.getRenderStyle(attribute, valid);
+    const color = toolStyle.stroke;
+
     const distance = 4;
     if (!this._textAttributInstance) {
       // 属性文本示例
@@ -1365,7 +1343,7 @@ export default class RectOperation extends BasicToolOperation {
     let radius = 10;
     const pointList = RectUtils.getRectPointList(selectedRect);
     const len = pointList.length;
-    const toolColor = this.getColor(rect.attribute);
+    const toolStyle = this.getRenderStyle(rect.attribute, rect.valid);
 
     pointList.forEach((v: ICoordinate, i: number) => {
       ctx.save();
@@ -1378,14 +1356,8 @@ export default class RectOperation extends BasicToolOperation {
         radius = scope;
       }
 
-      // 是否为有效框;
-      if (rect.valid === false) {
-        ctx.strokeStyle = toolColor?.invalid.stroke;
-        ctx.fillStyle = toolColor?.invalid.stroke;
-      } else {
-        ctx.strokeStyle = toolColor?.valid.stroke;
-        ctx.fillStyle = toolColor?.valid.stroke;
-      }
+      ctx.strokeStyle = toolStyle.stroke;
+      ctx.fillStyle = toolStyle.stroke;
 
       ctx.arc(v.x * this.zoom + this.currentPos.x, v.y * this.zoom + this.currentPos.y, radius, 0, 2 * Math.PI);
       ctx.fill();
@@ -1394,8 +1366,8 @@ export default class RectOperation extends BasicToolOperation {
       if (this.hoverRectEdgeIndex === i) {
         ctx.beginPath();
         ctx.lineWidth = 10;
-        const lineColor = this.getColor(rect.attribute);
-        const strokeStyle = rect.valid === false ? lineColor?.invalid?.stroke : lineColor?.valid?.stroke;
+
+        const strokeStyle = toolStyle.stroke;
 
         ctx.strokeStyle = strokeStyle;
 
@@ -1426,7 +1398,7 @@ export default class RectOperation extends BasicToolOperation {
 
       ctx.save();
 
-      const { strokeColor, fillColor, textColor } = this.getRenderStyle(rect);
+      const { stroke, fill, text } = this.getRenderStyle(rect.attribute, rect.valid);
 
       ctx.font = 'lighter 14px Arial';
       let showText = '';
@@ -1441,7 +1413,7 @@ export default class RectOperation extends BasicToolOperation {
       }
 
       if (rect.attribute) {
-        showText = `${showText}  ${this.config.attributeMap.get(rect.attribute) || rect.attribute}`;
+        showText = `${showText}  ${this.getAttributeKey(rect.attribute)}`;
       }
 
       const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);
@@ -1449,7 +1421,7 @@ export default class RectOperation extends BasicToolOperation {
       if (!hiddenText) {
         // 框体上方展示
         DrawUtils.drawText(this.canvas, { x: transformRect.x, y: transformRect.y - 5 }, showText, {
-          color: strokeColor,
+          color: stroke,
           // font: 'normal normal 900 14px SourceHanSansCN-Regular',
           // ...DEFAULT_TEXT_SHADOW,
           textMaxWidth: 300,
@@ -1459,10 +1431,10 @@ export default class RectOperation extends BasicToolOperation {
       const lineWidth = this.style?.width ?? 2;
 
       if (rect.id === this.hoverRectID || rect.id === this.selectedRectID) {
-        DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
+        DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fill });
       }
 
-      DrawUtils.drawRect(this.canvas, transformRect, { color: strokeColor, thickness: lineWidth, hiddenText: true });
+      DrawUtils.drawRect(this.canvas, transformRect, { color: stroke, thickness: lineWidth, hiddenText: true });
       ctx.restore();
 
       // 框大小数值显示
@@ -1474,18 +1446,6 @@ export default class RectOperation extends BasicToolOperation {
       }
 
       const textSizeWidth = rectSize.length * 7;
-      // if (!hiddenText) {
-      //   DrawUtils.drawText(
-      //     this.canvas,
-      //     { x: transformRect.x + transformRect.width - textSizeWidth, y: transformRect.y + transformRect.height + 15 },
-      //     rectSize,
-      //     {
-      //       color: textColor,
-      //       font: 'normal normal 600 14px Arial',
-      //       ...DEFAULT_TEXT_SHADOW,
-      //     },
-      //   );
-      // }
       // 文本的输入
       if (!hiddenText && rect.textAttribute && rect.id !== this.selectedRectID && this.isShowAttributeText) {
         const marginTop = 0;
@@ -1495,7 +1455,7 @@ export default class RectOperation extends BasicToolOperation {
           { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
           rect.textAttribute,
           {
-            color: textColor,
+            color: text,
             // font: 'italic normal 900 14px Arial',
             textMaxWidth: textWidth,
             // ...DEFAULT_TEXT_SHADOW,
@@ -1529,7 +1489,7 @@ export default class RectOperation extends BasicToolOperation {
             renderEnhance.staticRender(
               this.canvas,
               AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos),
-              this.getRenderStyle(rect),
+              this.getRenderStyle(rect.attribute, rect.valid),
             );
           }
         }
@@ -1545,7 +1505,7 @@ export default class RectOperation extends BasicToolOperation {
         renderEnhance.selectedRender(
           this.canvas,
           AxisUtils.changeRectByZoom(selectedRect, this.zoom, this.currentPos),
-          this.getRenderStyle(selectedRect),
+          this.getRenderStyle(selectedRect.attribute, selectedRect.valid),
         );
       }
     }
@@ -1568,7 +1528,7 @@ export default class RectOperation extends BasicToolOperation {
       renderEnhance.creatingRender(
         this.canvas,
         AxisUtils.changeRectByZoom(this.drawingRect, 1, this.currentPos),
-        this.getRenderStyle(this.drawingRect),
+        this.getRenderStyle(this.drawingRect.attribute, this.drawingRect.valid),
       );
     }
   }

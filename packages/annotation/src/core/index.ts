@@ -7,14 +7,10 @@ import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import type { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
-import type { Attribute, OneTag, PrevResult, ToolConfig } from '@/interface/combineTool';
+import type { OneTag, PrevResult, ToolConfig } from '@/interface/combineTool';
 import type { ISize } from '@/types/tool/common';
 import type { IRect } from '@/types/tool/rectTool';
 import type { IRenderEnhance } from '@/types/tool/annotation';
-import { EMessage } from '@/locales/constants';
-
-import locale from '../locales';
-import BasicToolOperation from './toolOperation/basicToolOperation';
 
 export interface IProps {
   isShowOrder: boolean;
@@ -25,8 +21,7 @@ export interface IProps {
   config?: ToolConfig; // 任务配置
   style?: any;
   tagConfigList: OneTag[];
-  attributeList: Attribute[];
-  allAttributesList: Attribute[];
+  allAttributesMap: Map<string, any>;
 }
 
 const loadImage = (imgSrc: string) => {
@@ -63,11 +58,9 @@ export default class AnnotationEngine {
 
   private tagConfigList: OneTag[]; // 配置tag 信息，工具共享一套tag
 
-  private attributeList: Attribute[]; // 标签配置选项，工具共享一套标签
-
   private imgNode?: HTMLImageElement;
 
-  private allAttributesList: Attribute[];
+  private allAttributesMap: Map<string, any>;
 
   // 工具内依赖的记录
   private basicResult?: IRect | IPolygonData; // 用于存储当前的标注结果的依赖物体结果状态
@@ -77,15 +70,14 @@ export default class AnnotationEngine {
   constructor(props: IProps) {
     this.isShowOrder = props.isShowOrder;
     this.tagConfigList = props.tagConfigList;
-    this.attributeList = props.attributeList;
-    this.allAttributesList = props.allAttributesList;
+    this.allAttributesMap = props.allAttributesMap;
     this.container = props.container;
     this.size = props.size;
     this.toolName = props.toolName;
     this.imgNode = props.imgNode;
     this.i18nLanguage = 'cn'; // 默认为中文（跟 basicOperation 内同步）
     const tmpObjectConfig = props.config ?? getConfig(props.toolName); // 默认配置
-    let attributeArr: any[] = [...props.attributeList];
+    let attributeArr: any[] = [];
     if (
       (props.toolName === 'rectTool' ||
         props.toolName === 'pointTool' ||
@@ -96,23 +88,18 @@ export default class AnnotationEngine {
       Object.keys(props.config).indexOf('attributes') >= 0
     ) {
       // @ts-ignore
-      attributeArr = [...attributeArr, ...props.config?.attributes];
+      attributeArr = props.config?.attributes;
     }
 
-    const attributeMap = new Map();
-    attributeMap.set(
-      BasicToolOperation.NONE_ATTRIBUTE,
-      locale.getMessagesByLocale(EMessage.NoneAttribute, this.i18nLanguage),
-    );
-
-    for (const attribute of attributeArr) {
-      attributeMap.set(attribute.value, attribute.key);
-    }
-
+    // attributeMap.set(BasicToolOperation.NONE_ATTRIBUTE, {
+    //   key: locale.getMessagesByLocale(EMessage.NoneAttribute, this.i18nLanguage),
+    //   value: BasicToolOperation.NONE_ATTRIBUTE,
+    //   color: '#ccc',
+    // });
     this.config = {
       ...tmpObjectConfig,
       attributeList: attributeArr,
-      attributeMap,
+      attributeMap: this.allAttributesMap.get(props.toolName),
       tagConfigList: props.tagConfigList,
     } as unknown as ToolConfig;
     this.style = props.style ?? styleDefaultConfig; // 设置默认操作
@@ -205,8 +192,8 @@ export default class AnnotationEngine {
     // 设置是否显示顺序
     this.toolInstance.setIsShowOrder(this.isShowOrder);
     // 设置统一标签
-    if (this.allAttributesList) {
-      this.toolInstance?.setAllAttributes(this.allAttributesList);
+    if (this.allAttributesMap) {
+      this.toolInstance?.setAllAttributesMap(this.allAttributesMap);
     }
   }
 

@@ -26,7 +26,6 @@ import {
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import CanvasUtils from '../../utils/tool/CanvasUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import TextAttributeClass from './textAttributeClass';
 
@@ -608,7 +607,9 @@ export default class LineToolOperation extends BasicToolOperation {
   };
 
   public getLineColorByAttribute(line: { attribute: string; valid: boolean } | ILine, isSelected: boolean = false) {
-    return StyleUtils.getStrokeAndFill(this.getColor(line.attribute), line.valid, { isSelected }).stroke;
+    return this.getRenderStyle(line.attribute, line.valid, {
+      isSelected,
+    }).stroke;
   }
 
   public drawLines = () => {
@@ -690,7 +691,7 @@ export default class LineToolOperation extends BasicToolOperation {
       let text = this.isShowOrder ? order.toString() : `${label}`;
 
       if (this.attributeConfigurable) {
-        const keyForAttribute = attribute ? this.config.attributeMap.get(attribute) || attribute : '';
+        const keyForAttribute = attribute ? this.getAttributeKey(attribute) : '';
 
         text = [text, `${!valid && keyForAttribute ? '无效' : ''}${keyForAttribute}`].filter((i) => i).join(' ');
       }
@@ -1916,8 +1917,9 @@ export default class LineToolOperation extends BasicToolOperation {
   public getCurrentSelectedData() {
     const valid = this.isActiveLineValid();
     const attribute = this.defaultAttribute;
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(attribute, Boolean(valid));
+
+    const color = toolStyle.stroke;
     const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
 
     return {
@@ -1934,8 +1936,8 @@ export default class LineToolOperation extends BasicToolOperation {
     const attribute = this.defaultAttribute;
     const { x, y } = this.activeLine[1];
     const coordinate = this.coordUtils.getRenderCoord({ x, y });
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(attribute, Boolean(valid));
+    const color = toolStyle.stroke;
     const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
     if (!this._textAttributeInstance) {
       this._textAttributeInstance = new TextAttributeClass({

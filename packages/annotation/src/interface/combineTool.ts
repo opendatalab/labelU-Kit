@@ -4,6 +4,7 @@ import type { Result } from '@/types/annotationTask';
 export interface Attribute {
   key: string;
   value: string;
+  color: string;
 }
 
 interface CommonConfig {

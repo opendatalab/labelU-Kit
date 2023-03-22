@@ -15,7 +15,6 @@ import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
@@ -140,6 +139,7 @@ export default class PointOperation extends BasicToolOperation {
     }
   }
 
+  // @ts-ignore
   public setConfig(config: IPointToolConfig, isClear = false) {
     this.config = CommonToolUtils.jsonParser(config);
     if (isClear === true) {
@@ -704,8 +704,8 @@ export default class PointOperation extends BasicToolOperation {
     if (!this.selectedID) return;
     // 后面这里可以用传参的形式 不用在重新过滤了
     const point = this.pointList?.find((item) => item.id === this.selectedID);
-    const toolColor = this.getColor(point?.attribute);
-    const color = point?.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(point?.attribute, point?.valid);
+    const color = toolStyle.stroke;
     this.dragStatus = EDragStatus.Wait;
     return {
       width: TEXTAREA_WIDTH * this.zoom * 0.6,
@@ -739,8 +739,8 @@ export default class PointOperation extends BasicToolOperation {
 
     const newWidth = TEXTAREA_WIDTH * this.zoom * 0.6;
     const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(attribute, Boolean(valid));
+    const color = toolStyle.stroke;
     const distance = 4;
     if (!this._textAttributInstance) {
       // 属性文本示例
@@ -777,13 +777,14 @@ export default class PointOperation extends BasicToolOperation {
     const { textAttribute = '', attribute } = point;
     const selected = point.id === this.selectedID;
     const hovered = point.id === this.hoverID;
-    const toolColor = this.getColor(attribute);
+    const toolColor = this.getColor(attribute, this.config, EToolName.Point);
 
     const transformPoint = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
     const { width = 2, hiddenText = false } = this.style;
 
-    const toolData = StyleUtils.getStrokeAndFill(toolColor, point.valid, {
+    const toolData = this.getRenderStyle(point.attribute, point.valid, {
       isSelected: selected || hovered,
+      color: toolColor,
     });
 
     // 绘制点
@@ -812,7 +813,7 @@ export default class PointOperation extends BasicToolOperation {
     }
 
     if (point.attribute) {
-      showText = `${showText} ${this.config.attributeMap.get(point.attribute) || point.attribute}`;
+      showText = `${showText} ${this.getAttributeKey(point.attribute)}`;
     }
 
     // 上方属性（列表、序号）

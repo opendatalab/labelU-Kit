@@ -8,9 +8,9 @@ import type { ITagResult } from './tagTool';
  * 标注渲染样式
  */
 export interface IAnnotationStyle {
-  strokeColor: string;
-  fillColor: string;
-  textColor: string;
+  stroke: string;
+  fill: string;
+  text: string;
   toolColor: any;
 }
 

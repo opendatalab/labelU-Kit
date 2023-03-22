@@ -1,4 +1,5 @@
 import { isNumber } from 'lodash-es';
+import { rgba, darken } from 'polished';
 // TODO: 将eventBus替换成eventEmitter3
 // import EventEmitter from 'eventemitter3';
 
@@ -24,7 +25,6 @@ import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
-import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import ImgPosUtils from '../../utils/tool/ImgPosUtils';
@@ -134,7 +134,7 @@ export default class BasicToolOperation extends EventListener {
 
   public allAttributes!: Attribute[]; // 多工具所有标签集合
 
-  public allAttributesMap!: Map<Attribute['value'], Attribute['key']>; // 多工具所有标签Map集合
+  public allAttributesMap!: Map<string, Map<Attribute['value'], Attribute>>; // 多工具所有标签Map集合
 
   public dblClickListener: DblClickEventListener;
 
@@ -331,15 +331,8 @@ export default class BasicToolOperation extends EventListener {
   /**
    * 多工具全量标签设置
    */
-  public setAllAttributes(allAttributes: Attribute[]) {
-    this.allAttributes = allAttributes;
-    this.allAttributesMap = new Map();
-
-    this.allAttributesMap.set(this.NoneAttribute, locale.getMessagesByLocale(EMessage.NoneAttribute, this.lang));
-
-    this.allAttributes.forEach((attribute) => {
-      this.allAttributesMap.set(attribute.value, attribute.key);
-    });
+  public setAllAttributesMap(allAttributesMap: Map<string, any>) {
+    this.allAttributesMap = allAttributesMap;
   }
 
   /**
@@ -1073,14 +1066,14 @@ export default class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
   };
 
-  public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
+  public renderCursorLine(color: string) {
     if (!this.ctx || this.forbidCursorLine) {
       return;
     }
 
     const { x, y } = this.coord;
-    DrawUtils.drawLine(this.canvas, { x: 0, y }, { x: 10000, y }, { color: lineColor });
-    DrawUtils.drawLine(this.canvas, { x, y: 0 }, { x, y: 10000 }, { color: lineColor });
+    DrawUtils.drawLine(this.canvas, { x: 0, y }, { x: 10000, y }, { color });
+    DrawUtils.drawLine(this.canvas, { x, y: 0 }, { x, y: 10000 }, { color });
     DrawUtils.drawCircleWithFill(this.canvas, { x, y }, 1, { color: 'white' });
   }
 
@@ -1111,6 +1104,10 @@ export default class BasicToolOperation extends EventListener {
         this.renderInvalidPage();
       }
     }
+  }
+
+  public getAttributeKey(attribute: string) {
+    return this.config.attributeMap.get(attribute)?.key ?? attribute;
   }
 
   public setImgAttribute(imgAttribute: IImageAttribute) {
@@ -1210,11 +1207,15 @@ export default class BasicToolOperation extends EventListener {
   }
 
   /** 获取当前属性颜色 */
-  public getColor(attribute = '', config = this.config) {
-    if (config?.attributeConfigurable === true && this.style.attributeColor) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
-      return this.style.attributeColor[attributeIndex];
+  public getColor(attribute = '', config = this.config, toolName: EToolName) {
+    if (config?.attributeConfigurable === true) {
+      if (!toolName) {
+        return config.attributeMap.get(attribute)?.color ?? '#000';
+      }
+
+      return this.allAttributesMap.get(toolName)?.get(attribute)?.color ?? '#000';
     }
+
     const { color, toolColor } = this.style;
     if (toolColor) {
       return toolColor[color];
@@ -1222,15 +1223,53 @@ export default class BasicToolOperation extends EventListener {
     return styleDefaultConfig.toolColor['1'];
   }
 
+  /**
+   * 获取当前渲染的样式
+   * @param rect
+   * @returns
+   */
+  public getRenderStyle(
+    attribute: string | undefined,
+    isValid: boolean | undefined = false,
+    opts?: {
+      color?: string;
+      isHovered?: boolean;
+      isSelected?: boolean;
+      toolName?: EToolName;
+    },
+  ) {
+    const { borderOpacity = 10, fillOpacity = 5 } = this.style;
+    const { color, isHovered, isSelected, toolName } = opts || {};
+    const toolColor = color || this.getColor(attribute, this.config, toolName as EToolName);
+    let stroke = rgba(toolColor, borderOpacity / 10);
+    let fill = rgba(toolColor, fillOpacity / 10);
+
+    // 是否为有效框;
+    if (isValid === false) {
+      stroke = rgba(toolColor, 0.3);
+      fill = rgba(toolColor, 0.15);
+    } else if (isHovered) {
+      stroke = darken(0.1, toolColor);
+      fill = rgba(toolColor, 0.8);
+    } else if (isSelected) {
+      stroke = darken(0.1, toolColor);
+      fill = rgba(toolColor, 0.8);
+    }
+
+    return {
+      stroke,
+      fill,
+      text: stroke,
+      toolColor,
+    };
+  }
+
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
-      return this.style.attributeLineColor ? this.style.attributeLineColor[attributeIndex] : '';
+      return this.config.attributeMap.get(attribute)?.color ?? '';
     }
-    const { color, lineColor } = this.style;
-    if (color && lineColor) {
-      return lineColor[color];
-    }
+
+    // TODO: 颜色还可以不用配置颜色？
     return '';
   }
 
@@ -1287,8 +1326,11 @@ export default class BasicToolOperation extends EventListener {
             if (currentReulst.result && currentReulst.result.length > 0) {
               currentReulst.result.forEach((item) => {
                 if (item.isVisible) {
-                  const toolColor = this.getColor(item.attribute);
-                  const color = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                    toolName: EToolName.Rect,
+                  });
+
+                  const color = toolStyle.stroke;
                   const transformRect = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
                   const rectSize = `${Math.round(item.width)} * ${Math.round(item.height)}`;
                   const textSizeWidth = rectSize.length * 7;
@@ -1301,7 +1343,7 @@ export default class BasicToolOperation extends EventListener {
                       order: item.order,
                       color,
                       thickness,
-                      allAttributesMap: this.allAttributesMap,
+                      text: this.allAttributesMap.get(EToolName.Rect)?.get(item.attribute)?.key,
                     },
                   );
                   if (this.isShowAttributeText) {
@@ -1326,7 +1368,9 @@ export default class BasicToolOperation extends EventListener {
           case EToolName.Polygon: {
             currentReulst.result.forEach((item) => {
               if (item.isVisible) {
-                const toolColor = this.getColor(item.attribute);
+                const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                  toolName: EToolName.Polygon,
+                });
                 const transformPointList = AxisUtils.changePointListByZoom(
                   item.pointList || [],
                   this.zoom,
@@ -1336,19 +1380,19 @@ export default class BasicToolOperation extends EventListener {
                   this.canvas,
                   AxisUtils.changePointListByZoom(item.pointList, this.zoom, this.currentPos),
                   {
-                    fillColor: item.valid ? toolColor?.valid.fill : toolColor?.invalid.fill,
-                    strokeColor: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                    fillColor: toolStyle.fill,
+                    strokeColor: toolStyle.stroke,
                     isClose: true,
                     thickness,
                   },
                 );
-                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
+                let showText = this.allAttributesMap.get(EToolName.Polygon)?.get(item.attribute)?.key || item.attribute;
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
 
                 DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
-                  color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                  color: toolStyle.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
                 if (this.isShowAttributeText) {
@@ -1359,7 +1403,7 @@ export default class BasicToolOperation extends EventListener {
                       { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
                       item.textAttribute,
                       {
-                        color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        color: toolStyle.stroke,
                         ...DEFAULT_TEXT_OFFSET,
                       },
                     );
@@ -1373,8 +1417,9 @@ export default class BasicToolOperation extends EventListener {
             // @ts-ignore
             currentReulst.result.forEach((item) => {
               if (item.isVisible) {
-                const toolColor = this.getColor(item.attribute);
-                // const toolColor = item && this.getLineColorByAttribute(item);
+                const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                  toolName: EToolName.Line,
+                });
                 const transformPointList = AxisUtils.changePointListByZoom(
                   item.pointList || [],
                   this.zoom,
@@ -1385,16 +1430,16 @@ export default class BasicToolOperation extends EventListener {
                   // @ts-ignore
                   AxisUtils.changePointListByZoom(item.pointList, this.zoom, this.currentPos),
                   {
-                    color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                    color: toolStyle.stroke,
                     thickness,
                   },
                 );
-                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
+                let showText = this.allAttributesMap.get(EToolName.Line)?.get(item.attribute)?.key || item.attribute;
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
                 DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
-                  color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                  color: toolStyle.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
                 if (this.isShowAttributeText) {
@@ -1402,8 +1447,8 @@ export default class BasicToolOperation extends EventListener {
                   ctx?.save();
                   // this.ctx.font = 'italic bold 14px SourceHanSansCN-Regular';
                   ctx.font = DEFAULT_FONT;
-                  ctx.fillStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-                  ctx.strokeStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  ctx.fillStyle = toolStyle.stroke;
+                  ctx.strokeStyle = toolStyle.stroke;
                   DrawUtils.wrapText(
                     this.canvas,
                     item.textAttribute,
@@ -1424,15 +1469,19 @@ export default class BasicToolOperation extends EventListener {
                   const { width = 2 } = this.style;
                   const transformPoint = AxisUtils.changePointByZoom(item, this.zoom, this.currentPos);
                   const points = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
-                  const toolColor = this.getColor(item.attribute);
+
+                  const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                    toolName: EToolName.Point,
+                  });
+
                   DrawUtils.drawCircle(this.canvas, points, width, {
                     startAngleDeg: 0,
                     endAngleDeg: 360,
                     thickness: 1,
-                    color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                    color: toolStyle.stroke,
                     fill: 'transparent',
                   });
-                  let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
+                  let showText = this.allAttributesMap.get(EToolName.Point)?.get(item.attribute)?.key || item.attribute;
                   if (this.isShowOrder) {
                     showText = `${item.order}  ${showText}`;
                   }
@@ -1443,7 +1492,7 @@ export default class BasicToolOperation extends EventListener {
                     showText,
                     {
                       textAlign: 'center',
-                      color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                      color: toolStyle.stroke,
                     },
                   );
 
@@ -1453,7 +1502,7 @@ export default class BasicToolOperation extends EventListener {
                       { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
                       item.textAttribute,
                       {
-                        color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        color: toolStyle.stroke,
                         ...DEFAULT_TEXT_OFFSET,
                       },
                     );
@@ -1517,55 +1566,6 @@ export default class BasicToolOperation extends EventListener {
     }
     this.clearBasicCanvas();
     this.drawImg();
-
-    //  无多步骤，无需依赖，因此注释
-    // if (this.basicResult && this.dependToolName) {
-    //   switch (this.dependToolName) {
-    //     case EToolName.Rect: {
-    //       DrawUtils.drawRect(
-    //         this.basicCanvas,
-    //         AxisUtils.changeRectByZoom(this.basicResult, this.zoom, this.currentPos),
-    //         {
-    //           color: 'rgba(204,204,204,1.00)',
-    //           thickness,
-    //         },
-    //       );
-    //       break;
-    //     }
-
-    //     case EToolName.Polygon: {
-    //       DrawUtils.drawPolygonWithFillAndLine(
-    //         this.basicCanvas,
-    //         AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
-    //         {
-    //           fillColor: 'transparent',
-    //           strokeColor: 'rgba(204,204,204,1.00)',
-    //           isClose: true,
-    //           thickness,
-    //         },
-    //       );
-
-    //       break;
-    //     }
-
-    //     case EToolName.Line: {
-    //       DrawUtils.drawLineWithPointList(
-    //         this.basicCanvas,
-    //         AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
-    //         {
-    //           color: 'rgba(204,204,204,1.00)',
-    //           thickness,
-    //         },
-    //       );
-
-    //       break;
-    //     }
-
-    //     default: {
-    //       //
-    //     }
-    //   }
-    // }
   }
 
   public render() {

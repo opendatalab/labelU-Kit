@@ -15,7 +15,6 @@ import { EToolName } from '../../constant/tool';
 import type { IPolygonData } from '../../types/tool/polygon';
 import AxisUtils from '../../utils/tool/AxisUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import StyleUtils from '../../utils/tool/StyleUtils';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
 
@@ -150,8 +149,10 @@ export default class CheckOperation extends BasicToolOperation {
 
   public drawPolygon(polygonList: IPolygonData[], config: any) {
     polygonList?.forEach((polygon) => {
-      const toolColor = this.getColor(polygon.attribute, config);
-      const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
+      const toolColor = this.getColor(polygon.attribute, config, EToolName.Polygon);
+      const toolData = this.getRenderStyle(polygon.attribute, polygon.valid, {
+        color: toolColor,
+      });
       let thickness = this.style?.width ?? 2;
       if (this.hoverID.includes(polygon.id)) {
         thickness = 4;
@@ -180,7 +181,7 @@ export default class CheckOperation extends BasicToolOperation {
           },
         );
       }
-      let showText = `${this.config.attributeMap.get(polygon.attribute) || polygon.attribute}`;
+      let showText = `${this.getAttributeKey(polygon.attribute)}`;
       if (config?.isShowOrder && polygon?.order > 0) {
         showText = `${polygon.order} ${showText}`;
       }
@@ -213,16 +214,18 @@ export default class CheckOperation extends BasicToolOperation {
       if (this.hoverID.includes(rect.id)) {
         thickness = 3;
       }
-      const toolColor = this.getColor(rect.attribute, config);
+      const toolColor = this.getColor(rect.attribute, config, EToolName.Rect);
+      const toolStyle = this.getRenderStyle(rect.attribute, rect.valid, toolColor);
+
       const renderRect = AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos);
       DrawUtils.drawRect(this.canvas, renderRect, {
-        color: rect?.valid ? toolColor.valid.stroke : toolColor.invalid.stroke,
+        color: toolStyle.stroke,
         thickness,
       });
 
       if (this.fillID.includes(rect.id)) {
         DrawUtils.drawRectWithFill(this.canvas, renderRect, {
-          color: rect?.valid ? toolColor.valid.fill : toolColor.invalid.fill,
+          color: toolStyle.fill,
         });
       }
     });
