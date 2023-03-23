@@ -85,9 +85,9 @@ export const SingleTextInput = (props: any) => {
 
   const textLength = value?.length ?? 0;
 
-  const updateTextWithKey = (newVal: string) => {
+  const updateTextWithValue = (newVal: string) => {
     if (updateText) {
-      updateText(newVal, config.key, index);
+      updateText(newVal, config.value, index);
       if (config.required) {
         setInvalid(!newVal);
       }
@@ -111,7 +111,7 @@ export const SingleTextInput = (props: any) => {
     },
     onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
       setTextAreaFocus(false);
-      updateTextWithKey(value);
+      updateTextWithValue(value);
       if (config.required) {
         setInvalid(!e.target.value);
       }
@@ -159,16 +159,7 @@ export const SingleTextInput = (props: any) => {
   return (
     <div className="textField">
       <div className="label">
-        <span className={classnames({ required: config.required })}>{config.label}</span>
-        {/* <i
-          className={classnames({ clearText: true, disabled: disabled })}
-          onClick={() => {
-            if (disabled) {
-              return;
-            }
-            updateTextWithKey('');
-          }}
-        /> */}
+        <span className={classnames({ required: config.required })}>{config.key}</span>
       </div>
       <div
         className={classnames({
@@ -231,7 +222,7 @@ const TextToolSidebar: React.FC<IProps> = ({
             return {
               id: uuid(),
               sourceID: '',
-              value: { [item.key]: item.default },
+              value: { [item.key]: item.defaultValue },
             };
           });
           setResult(res);
@@ -253,6 +244,7 @@ const TextToolSidebar: React.FC<IProps> = ({
       };
       imgList[imgIndex].result = JSON.stringify(currentImgResult);
       dispatch(UpdateImgList(imgList));
+      // dispatch(ChangeSave);
       setResult(result);
     }
   };
@@ -260,14 +252,6 @@ const TextToolSidebar: React.FC<IProps> = ({
   useEffect(() => {
     setForceRender(new Date().getTime());
   }, [result]);
-
-  // useEffect(() => {
-  //   if (imgIndex > -1 && triggerEventAfterIndexChanged) {
-  //     textareaFocus(0);
-  //   }
-  // }, [imgIndex]);
-
-  // const result = toolInstance.textList[0]?.value ?? {};
 
   const onNext = () => {
     dispatch(PageForward(true));

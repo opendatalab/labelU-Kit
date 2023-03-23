@@ -46,12 +46,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
   const textConfig = useSelector((state: AppState) => state.annotation.textConfig);
   const toolName = stepInfo?.tool;
 
-  // 删除标注结果
-  // const doClearAllResult = () => {
-  //   toolInstance?.clearResult();
-  //   toolInstance?.setPrevResultList([]);
-  // };
-
   useEffect(() => {
     if (imgList && imgList.length > 0) {
       const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
@@ -89,12 +83,6 @@ const RightSiderbar: React.FC<IProps> = (props) => {
           </span>
         </div>,
       );
-      // }
-      // 设置标注件数
-      // let rectResult = currentImgResult?.rectTool ? currentImgResult.rectTool.result : [];
-      // let polygonResult = currentImgResult?.polygonTool ? currentImgResult.polygonTool.result : [];
-      // let lineResult = currentImgResult?.lineTool ? currentImgResult.lineTool.result : [];
-      // let pointResult = currentImgResult?.pointTool ? currentImgResult.pointTool.result : [];
       const imgResult = JSON.parse(imgList[imgIndex].result as string);
       let count = 0;
       let order: number[] = [];
