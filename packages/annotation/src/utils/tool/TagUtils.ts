@@ -28,12 +28,12 @@ export default class TagUtil {
 
     for (const i of labelInfoSet) {
       if (i.value === key) {
-        if (!i.subSelected) {
+        if (!i.options) {
           console.error('标签解析错误', key, value);
           return '';
         }
 
-        for (const j of i.subSelected) {
+        for (const j of i.options) {
           if (j.value === value) {
             return j.key;
           }
@@ -107,9 +107,9 @@ export default class TagUtil {
     }
 
     const a = inputList.filter((v) => {
-      if (v.value === key && v.subSelected) {
+      if (v.value === key && v.options) {
         const resultValue = value?.split(';');
-        return v?.subSelected.filter((i) => resultValue.indexOf(i.value) > -1).length > 0;
+        return v?.options.filter((i) => resultValue.indexOf(i.value) > -1).length > 0;
       }
 
       return false;
@@ -125,8 +125,8 @@ export default class TagUtil {
    */
   public static getDefaultResultByConfig(inputList: IInputList[]) {
     return inputList.reduce((acc: Record<string, string>, cur: IInputList) => {
-      if (cur.subSelected) {
-        cur.subSelected.forEach((data) => {
+      if (cur.options) {
+        cur.options.forEach((data) => {
           if (data.isDefault) {
             const originResult = acc[cur.value] ?? '';
 

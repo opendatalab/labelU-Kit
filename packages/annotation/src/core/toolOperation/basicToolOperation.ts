@@ -1241,6 +1241,16 @@ export default class BasicToolOperation extends EventListener {
     const { borderOpacity = 10, fillOpacity = 5 } = this.style;
     const { color, isHovered, isSelected, toolName } = opts || {};
     const toolColor = color || this.getColor(attribute, this.config, toolName as EToolName);
+
+    if (typeof toolColor === 'object') {
+      return {
+        stroke: '#000',
+        fill: 'rgba(0, 0, 0, 0.5)',
+        text: '#000',
+        toolColor: '#000',
+      };
+    }
+
     let stroke = rgba(toolColor, borderOpacity / 10);
     let fill = rgba(toolColor, fillOpacity / 10);
 

@@ -5,6 +5,7 @@ import _ from 'lodash-es';
 import { Spin } from 'antd';
 import AnnotationOperation from '@label-u/components';
 import '@label-u/components/dist/index.css';
+import { EToolName } from '@label-u/annotation';
 
 import type { Dispatch, RootState } from '@/store';
 import type { SampleResponse } from '@/services/types';
@@ -86,6 +87,14 @@ const AnnotationPage = () => {
     };
   }, [samples, setSamples, totalCount]);
 
+  const textConfig = useMemo(() => {
+    return _.chain(taskConfig).get('tools').find({ tool: EToolName.Text }).get('config.texts').value();
+  }, [taskConfig]);
+
+  const tagConfigList = useMemo(() => {
+    return _.chain(taskConfig).get('tools').find({ tool: EToolName.Tag }).get('config.tags').value();
+  }, [taskConfig]);
+
   return (
     <Spin className={currentStyles.annotationPage} spinning={loading} style={{ height: '100%' }}>
       <AnnotationContext.Provider value={annotationContextValue}>
@@ -97,9 +106,9 @@ const AnnotationPage = () => {
             isPreview={false}
             imgList={[transformed[0]]}
             attributeList={taskConfig.commonAttributeConfigurable ? taskConfig.attributes : []}
-            tagConfigList={taskConfig.tagList}
+            tagConfigList={tagConfigList}
             toolsBasicConfig={taskConfig.tools}
-            textConfig={taskConfig.textConfig}
+            textConfig={textConfig}
             isShowOrder={false}
           />
         )}
