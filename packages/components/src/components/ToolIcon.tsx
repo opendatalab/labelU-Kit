@@ -3,7 +3,7 @@ import React from 'react';
 import { isEqual } from 'lodash-es';
 
 interface ToolIconProps {
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
   className?: string;
   icon: any;
 }

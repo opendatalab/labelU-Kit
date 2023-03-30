@@ -1149,6 +1149,7 @@ export default class LineToolOperation extends BasicToolOperation {
         return;
       }
       this.stopLineCreating(true);
+      this.emit('drawEnd', this.activeLine, e);
       this.container.dispatchEvent(this.saveDataEvent);
       return;
     }

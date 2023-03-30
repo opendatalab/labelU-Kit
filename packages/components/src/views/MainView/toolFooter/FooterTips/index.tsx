@@ -6,7 +6,7 @@ import { prefix } from '@/constant';
 
 import ImageAdjust from '../../../../assets/annotation/common/image_adjust.svg';
 import ImageAdjustA from '../../../../assets/annotation/common/image_adjustA.svg';
-import ImgAttributeInfo from '../../sidebar/ImgAttributeInfo';
+import ImgAttributeInfo from './ImgAttributeInfo';
 
 const FooterTips: FC = () => {
   const [toolHover, setToolHover] = useState('');

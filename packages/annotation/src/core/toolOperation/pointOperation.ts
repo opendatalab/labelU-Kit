@@ -293,6 +293,7 @@ export default class PointOperation extends BasicToolOperation {
       this.createPoint(e);
       this.render();
       this.container.dispatchEvent(this.saveDataEvent);
+
       return;
     }
     // 有选中的点时 才能进行拖拽
@@ -549,6 +550,7 @@ export default class PointOperation extends BasicToolOperation {
     this.setPointList(newPointList);
     this.history.pushHistory(newPointList);
     this.setSelectedID(newDrawingPoint.id);
+    this.emit('drawEnd', newDrawingPoint, e);
   }
 
   // 判断是是否在标点范围内

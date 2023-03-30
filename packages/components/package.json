@@ -51,7 +51,8 @@
     "resize-observer-polyfill": "^1.5.1",
     "rimraf": "^3.0.2",
     "rollup-plugin-dts": "^4.2.2",
-    "shx": "^0.3.4"
+    "shx": "^0.3.4",
+    "styled-components": "^5.3.6"
   },
   "peerDependencies": {
     "@ant-design/icons": "^4.7.0",
@@ -70,6 +71,7 @@
     "@types/react": "^16.13.1",
     "@types/react-redux": "^7.1.16",
     "@types/redux": "^3.6.0",
+    "@types/styled-components": "^5.1.26",
     "antd": "^5.3.2",
     "cross-env": "^7.0.3",
     "dart-sass": "^1.25.0",

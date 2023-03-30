@@ -14,18 +14,10 @@ $boxShadow: 1px 1px 4px rgb(204 204 204 / 50%);
 
 ::-webkit-scrollbar {
   width: 6px !important;
-  height: 10px !important;
 }
 
-/* 定义滚动条轨道 内阴影+圆角 */
-::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 0 rgb(180 180 180 / 50%);
-  border-radius: 10px;
-}
-
-/* 定义滑块 内阴影+圆角 */
 ::-webkit-scrollbar-thumb {
-  border-radius: 10px;
+  background-color: #ccc;
   box-shadow: inset 0 0 0 rgb(180 180 180 / 50%);
 }
 
@@ -456,8 +448,6 @@ body {
         cursor: pointer;
         user-select: none;
         user-select: none;
-        user-select: none;
-        user-select: none;
       }
     }
 
@@ -504,8 +494,6 @@ body {
   display: flex;
   position: relative;
   flex-direction: column;
-  user-select: none;
-  user-select: none;
   user-select: none;
   user-select: none;
   text-align: left;
@@ -566,18 +554,6 @@ body {
     background: #fff;
     border: 0;
     cursor: pointer;
-  }
-
-  // .attributeResultPreview{
-  //   height: calc(89vh - 220px) !important;
-  // }
-
-  .attributeResult {
-    border-bottom: 1px solid rgb(0 0 0 / 5%);
-    width: 100%;
-    // height: calc(100vh - 230px);
-    overflow-y: scroll;
-    overflow-x: hidden;
   }
 
   .ant-tabs {
@@ -1260,8 +1236,6 @@ $hotkey-container-padding: 7px;
   box-shadow: 0 15px 10px 0 #eee;
   user-select: none;
   user-select: none;
-  user-select: none;
-  user-select: none;
 
   .item {
     text-align: center;
@@ -1329,12 +1303,6 @@ $hotkey-container-padding: 7px;
     overflow: auto;
     user-select: none;
     user-select: none;
-    user-select: none;
-    user-select: none;
-  }
-
-  .main::-webkit-scrollbar {
-    width: 0;
   }
 
   .keyDownIcon {
@@ -1628,8 +1596,6 @@ $hotkey-container-padding: 7px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      user-select: none;
-      user-select: none;
       user-select: none;
       user-select: none;
       margin: 0 21px 4px;

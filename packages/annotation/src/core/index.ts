@@ -91,11 +91,6 @@ export default class AnnotationEngine {
       attributeArr = props.config?.attributes;
     }
 
-    // attributeMap.set(BasicToolOperation.NONE_ATTRIBUTE, {
-    //   key: locale.getMessagesByLocale(EMessage.NoneAttribute, this.i18nLanguage),
-    //   value: BasicToolOperation.NONE_ATTRIBUTE,
-    //   color: '#ccc',
-    // });
     this.config = {
       ...tmpObjectConfig,
       attributeList: attributeArr,
@@ -155,6 +150,8 @@ export default class AnnotationEngine {
 
   public setStyle(style: any) {
     this.style = style;
+
+    this.toolInstance.setStyle(style);
   }
 
   /**

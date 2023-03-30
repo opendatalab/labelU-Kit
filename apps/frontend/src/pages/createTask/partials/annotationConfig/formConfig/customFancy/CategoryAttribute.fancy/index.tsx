@@ -22,7 +22,7 @@ export enum CategoryType {
 export enum StringType {
   Text = 'text',
   Number = 'number',
-  Serial = 'serial',
+  Order = 'order',
   Regexp = 'regexp',
   English = 'english',
 }
@@ -58,6 +58,7 @@ export interface FancyCategoryAttributeProps extends FancyInputProps {
   addStringText?: string;
   showAddTag?: boolean;
   showAddString?: boolean;
+  disabledStringOptions?: string[];
 }
 
 export interface FancyCategoryAttributeRef {
@@ -204,7 +205,7 @@ const tooltipTitleMapping: Record<CategoryType, string> = {
 
 const stringTypeOptions = [
   { label: '任意字符', value: StringType.Text },
-  { label: '序号', value: StringType.Serial },
+  { label: '序号', value: StringType.Order },
   { label: '仅数字', value: StringType.Number },
   { label: '仅英文', value: StringType.English },
   { label: '自定义格式', value: StringType.Regexp },
@@ -224,6 +225,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
       addStringText = '新建文本分类',
       showAddTag = true,
       showAddString = true,
+      disabledStringOptions,
     },
     ref,
   ) {
@@ -423,6 +425,14 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
       );
     }, [stateValue, value]);
 
+    const finalStringTypeOptions = useMemo(() => {
+      if (!disabledStringOptions) {
+        return stringTypeOptions;
+      }
+
+      return stringTypeOptions.filter((option) => !disabledStringOptions.includes(option.value));
+    }, [disabledStringOptions]);
+
     const makeTreeData = useCallback(
       (input: CategoryAttributeStateItem[], path: NamePath, preIndex?: number): DataNode[] => {
         if (!Array.isArray(input)) {
@@ -524,7 +534,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                       <Form.Item name={[...path, index, 'stringType']} label="字符类型">
                         <Select
                           style={{ width: '71.5%' }}
-                          options={stringTypeOptions}
+                          options={finalStringTypeOptions}
                           onChange={handleOnChange(`[${index}].stringType`)}
                         />
                       </Form.Item>
@@ -577,6 +587,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
         });
       },
       [
+        finalStringTypeOptions,
         handleAddOption,
         handleOnChange,
         handleRemoveAttribute,

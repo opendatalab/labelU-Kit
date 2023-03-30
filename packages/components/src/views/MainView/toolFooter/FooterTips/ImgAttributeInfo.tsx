@@ -1,30 +1,24 @@
 import { Col, Row, Slider, Input } from 'antd/es';
-import { connect } from 'react-redux';
 import { throttle } from 'lodash-es';
-import React, { useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ImgAttributeState } from '@/store/imgAttribute/types';
-import ImgAttribute from '@/store/imgAttribute/actionCreators';
-import { store } from '@/index';
 import saturationSvg from '@/assets/annotation/image/saturation.svg';
 import contrastSvg from '@/assets/annotation/image/contrast.svg';
 import brightnessSvg from '@/assets/annotation/image/brightness.svg';
+import ViewContext from '@/view.context';
 
-interface IProps {
-  imgAttribute: ImgAttributeState;
-}
-
-const ImgAttributeInfo = (props: IProps) => {
-  const {
-    imgAttribute: { contrast, saturation, brightness },
-  } = props;
-
+const ImgAttributeInfo = () => {
   const { t } = useTranslation();
+  const { imageAttribute, setImageAttribute } = useContext(ViewContext);
 
   const imgAttributeChange = throttle(
     (payload: Partial<ImgAttributeState>) => {
-      store.dispatch(ImgAttribute.UpdateImgAttribute(payload as ImgAttributeState));
+      setImageAttribute((pre) => ({
+        ...pre,
+        ...payload,
+      }));
     },
     60,
     { trailing: true },
@@ -37,7 +31,7 @@ const ImgAttributeInfo = (props: IProps) => {
       max: 500,
       step: 2,
       onChange: (v: number) => imgAttributeChange({ saturation: v }),
-      value: saturation,
+      value: imageAttribute.saturation,
       svg: saturationSvg,
     },
     {
@@ -46,7 +40,7 @@ const ImgAttributeInfo = (props: IProps) => {
       max: 300,
       step: 2,
       onChange: (v: number) => imgAttributeChange({ contrast: v }),
-      value: contrast,
+      value: imageAttribute.contrast,
       svg: contrastSvg,
     },
     {
@@ -55,25 +49,10 @@ const ImgAttributeInfo = (props: IProps) => {
       max: 400,
       step: 2,
       onChange: (v: number) => imgAttributeChange({ brightness: v }),
-      value: brightness,
+      value: imageAttribute.brightness,
       svg: brightnessSvg,
     },
-    // {
-    //   name: 'ScreenRatio',
-    //   min: 0.1,
-    //   max: 10,
-    //   step: 0.1,
-    //   onChange: (v: number) => imgAttributeChange({ zoomRatio: v }),
-    //   value: zoomRatio,
-    //   svg: ZoomUpSvg,
-    // },
   ];
-
-  useEffect(() => {
-    return () => {
-      store.dispatch(ImgAttribute.InitImgAttribute());
-    };
-  }, []);
 
   return (
     <div>
@@ -113,28 +92,8 @@ const ImgAttributeInfo = (props: IProps) => {
           </Row>
         </div>
       ))}
-      {/* <div className='imgAttributeController'>
-        <Row className='tools' style={{ padding: '10px 0' }}>
-          <Col span={18}>
-            <span className='singleTool'>
-              <img src={originalPic} width={16} style={{ marginTop: '-2px' }} />
-              <span className='toolName'>{t('OriginalScale')}</span>
-            </span>
-          </Col>
-          <Col>
-            <Switch
-              checked={isOriginalSize}
-              onChange={(v: boolean) => imgAttributeChange({ isOriginalSize: v })}
-            />
-          </Col>
-        </Row>
-      </div> */}
     </div>
   );
 };
 
-function mapStateToProps({ imgAttribute }: any) {
-  return { imgAttribute };
-}
-
-export default connect(mapStateToProps)(ImgAttributeInfo);
+export default ImgAttributeInfo;

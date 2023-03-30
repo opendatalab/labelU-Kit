@@ -1,25 +1,14 @@
 import { Checkbox, Radio, Tree } from 'antd';
 import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { cloneDeep, get, isEmpty, omit, set, update } from 'lodash-es';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { OneTag } from '@label-u/annotation';
+import { cloneDeep, get, isEmpty, isEqual, omit, set, update } from 'lodash-es';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { TagUtils, uuid } from '@label-u/annotation';
 import { dfsEach, objectEach } from '@label-u/utils';
-import { connect, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 
-import type { AppState } from '@/store';
-import type { IFileItem } from '@/types/data';
-import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
-
-interface IProps {
-  imgIndex: number;
-  tagConfigList: OneTag[];
-  imgList: IFileItem[];
-  isPreview: boolean;
-}
+import ViewContext from '@/view.context';
 
 interface ITagResult {
   id?: string;
@@ -30,15 +19,14 @@ export const expandIconFuc = ({ isActive }: any) => (
   <CaretRightOutlined rotate={isActive ? 90 : 0} style={{ color: 'rgba(0, 0, 0, 0.36)' }} />
 );
 
-const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPreview }) => {
+const TagSidebar = () => {
+  const { sample, result: allResult, tagConfigList, setResult } = useContext(ViewContext);
   const defaultTagInjected = useRef(false);
   const [tagResult, setTagResult] = useState<ITagResult>({
     values: {},
   });
   const sidebarRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
-
-  const dispatch = useDispatch();
 
   const clearTag = () => {
     const parentNode = document.getElementById('toolContainer');
@@ -97,7 +85,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
 
   useEffect(() => {
     renderTag();
-  }, [renderTag, imgList]);
+  }, [renderTag, sample]);
 
   const syncToStore = useCallback(
     (newTagResult) => {
@@ -113,29 +101,26 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
         }
       });
 
-      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
       const currentImgResult = {
-        ...oldImgResult,
+        ...allResult,
         tagTool: {
           toolName: 'tagTool',
           result: [
             {
-              id: tagResult.id,
+              id: tagResult.id || uuid(8, 62),
               result: tagsInString,
             },
           ],
         },
       };
-      imgList[imgIndex].result = JSON.stringify(currentImgResult);
-      dispatch(UpdateImgList(imgList));
-      dispatch(ChangeSave);
+
+      setResult(currentImgResult);
     },
-    [dispatch, imgIndex, imgList, tagResult.id],
+    [allResult, setResult, tagResult.id],
   );
 
   const tagValues = useMemo(() => {
     const stateValue: ITagResult = {
-      id: uuid(8, 62),
       values: {},
     };
 
@@ -171,13 +156,12 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
       },
     );
 
-    if (!imgList || imgList.length === 0) {
+    if (!sample) {
       return stateValue;
     }
 
     try {
-      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      const tagResult_ = currentImgResult?.tagTool ? currentImgResult?.tagTool?.result : [];
+      const tagResult_ = allResult?.tagTool ? allResult?.tagTool?.result : [];
 
       if (tagResult_.length === 0) {
         return stateValue;
@@ -195,21 +179,25 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
     } catch (err) {
       return stateValue;
     }
-  }, [imgIndex, imgList, tagConfigList]);
+  }, [allResult?.tagTool, sample, tagConfigList]);
 
   useEffect(() => {
+    if (isEqual(tagValues, tagResult)) {
+      return;
+    }
+
     setTagResult(tagValues);
 
     if (!defaultTagInjected.current) {
       syncToStore(tagValues.values);
       defaultTagInjected.current = true;
     }
-  }, [syncToStore, tagValues]);
+  }, [syncToStore, tagResult, tagValues]);
 
   useEffect(() => {
     defaultTagInjected.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imgList[0].id]);
+  }, [sample.id]);
 
   const handleOnChange = useCallback(
     (type: 'tuple' | 'enum', path: string[]) => (e: CheckboxChangeEvent) => {
@@ -304,7 +292,7 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
     <div
       className={classNames({
         tagOperationMenu: true,
-        tagOperationMenuPreview: isPreview,
+        tagOperationMenuPreview: false,
       })}
       ref={sidebarRef}
     >
@@ -317,12 +305,4 @@ const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPrev
   );
 };
 
-function mapStateToProps(state: AppState) {
-  return {
-    imgList: state.annotation.imgList,
-    tagConfigList: state.annotation.tagConfigList,
-    imgIndex: state.annotation.imgIndex,
-  };
-}
-
-export default connect(mapStateToProps)(TagSidebar);
+export default TagSidebar;

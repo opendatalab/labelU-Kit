@@ -33,6 +33,7 @@ export default [
         field: 'texts',
         label: '',
         addStringText: '新建',
+        disabledStringOptions: ['order'],
         showAddTag: false,
         initialValue: [
           {

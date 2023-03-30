@@ -279,7 +279,7 @@ export default class PolygonOperation extends BasicToolOperation {
       AxisUtils.changePointListByZoom(this.drawingPointList, this.zoom),
     );
     if (calculateHoverPointIndex === 0) {
-      this.addDrawingPointToPolygonList();
+      this.addDrawingPointToPolygonList(false, e);
       return;
     }
 
@@ -314,7 +314,7 @@ export default class PolygonOperation extends BasicToolOperation {
         }
       }
       // 创建多边形
-      this.addDrawingPointToPolygonList(true);
+      this.addDrawingPointToPolygonList(true, e);
       return;
     }
 
@@ -398,7 +398,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
-      this.container.dispatchEvent(this.saveDataEvent);
 
       // 如有选中目标，则需更改当前选中的属性
       const { selectedID } = this;
@@ -459,7 +458,7 @@ export default class PolygonOperation extends BasicToolOperation {
    * 初始化的添加的数据
    * @returns
    */
-  public addDrawingPointToPolygonList(isRect?: boolean) {
+  public addDrawingPointToPolygonList(isRect?: boolean, e: MouseEvent) {
     let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
@@ -518,6 +517,7 @@ export default class PolygonOperation extends BasicToolOperation {
       polygonList.push(newPolygon);
 
       this.setSelectedIdAfterAddingDrawing(id);
+      this.emit('drawEnd', newPolygon, e);
     }
 
     this.setPolygonList(polygonList);
@@ -797,10 +797,10 @@ export default class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public rightMouseUp() {
+  public rightMouseUp(e: MouseEvent) {
     // 标注中的数据结束
     if (this.drawingPointList.length > 0) {
-      this.addDrawingPointToPolygonList();
+      this.addDrawingPointToPolygonList(false, e);
       // this.container.dispatchEvent(this.saveDataEvent);
     }
 
@@ -1314,7 +1314,7 @@ export default class PolygonOperation extends BasicToolOperation {
       }
 
       case 2: {
-        this.rightMouseUp();
+        this.rightMouseUp(e);
 
         break;
       }

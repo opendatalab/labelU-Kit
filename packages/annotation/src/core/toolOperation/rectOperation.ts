@@ -958,7 +958,7 @@ export default class RectOperation extends BasicToolOperation {
    * 将绘制中的框体添加进 rectList 中
    * @returns
    */
-  public addDrawingRectToRectList() {
+  public addDrawingRectToRectList(e: MouseEvent) {
     if (!this.drawingRect) {
       return;
     }
@@ -992,6 +992,7 @@ export default class RectOperation extends BasicToolOperation {
     this.drawingRect = undefined;
     this.dragInfo = undefined;
     this.dragStatus = EDragStatus.Wait;
+    this.emit('drawEnd', newRectList[newRectList.length - 1], e);
   }
 
   public setSelectedIdAfterAddingDrawingRect() {
@@ -1106,7 +1107,7 @@ export default class RectOperation extends BasicToolOperation {
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
     if (this.drawingRect) {
       // 结束框的绘制
-      this.addDrawingRectToRectList();
+      this.addDrawingRectToRectList(e);
       this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
@@ -1606,12 +1607,6 @@ export default class RectOperation extends BasicToolOperation {
         this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
       }
     }
-  }
-
-  public setValid(valid: boolean) {
-    super.setValid(valid);
-
-    this.emit('updateResult');
   }
 
   /**

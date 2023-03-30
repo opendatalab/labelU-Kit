@@ -1,302 +1,179 @@
-import type { FocusEvent } from 'react';
-import React, { useEffect, useState, useRef } from 'react';
-import { connect } from 'react-redux';
-import { Input } from 'antd/es';
+import React, { useCallback, useContext, useEffect, useRef, useMemo } from 'react';
+import { Input, Form } from 'antd';
 import { cKeyCode, uuid } from '@label-u/annotation';
-import { useTranslation } from 'react-i18next';
+import { cloneDeep, map, set } from 'lodash-es';
+import styled from 'styled-components';
+import type { FormInstance, Rule } from 'antd/es/form';
+import type { NamePath } from 'antd/es/form/interface';
 
-import type { AppState } from '@/store';
 import { classnames } from '@/utils';
-import { PageForward, UpdateImgList } from '@/store/annotation/actionCreators';
-import { ConfigUtils } from '@/utils/ConfigUtils';
-import type { IStepInfo } from '@/types/step';
-import type { TextConfig } from '@/interface/toolConfig';
-import type { IFileItem } from '@/types/data';
+import ViewContext from '@/view.context';
 
 const EKeyCode = cKeyCode.default;
 
-const syntheticEventStopPagination = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-  e.stopPropagation();
-  e.nativeEvent.stopPropagation();
-  e.nativeEvent.stopImmediatePropagation();
-};
+const TextWrapper = styled.div`
+  .text-value {
+    position: relative;
+  }
+  .text-tips {
+    font-size: 12px;
+    position: absolute;
+    padding: 0.5rem;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: none;
+    color: #ccc;
+  }
 
-interface ITextareaWithFooterProps {
-  textareaProps?: any;
-  footer?: any;
-}
+  .ant-input-data-count {
+    position: absolute;
+    font-size: 12px;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    margin-bottom: 0;
+  }
 
-interface IProps {
-  dispatch: Function;
-  imgList: IFileItem[];
-  textConfig: TextConfig;
-  imgIndex: number;
-  triggerEventAfterIndexChanged: boolean;
-  step: number;
-  stepList: IStepInfo[];
-  basicResultList: any[];
-  isPreview: boolean;
-}
+  .ant-form-item-has-error + .text-tips {
+    bottom: 1.375rem;
+  }
 
-interface ITextResult {
-  id: string;
-  sourceID: string;
-  value: Record<string, string>;
-}
+  .required-flag {
+    color: var(--color-error);
+    margin-right: 0.25rem;
+  }
+`;
 
-export const TextareaWithFooter = (props: ITextareaWithFooterProps) => {
-  const { textareaProps, footer } = props;
+function TextItem({ form, config, name }: { form: FormInstance; config: any; name: NamePath }) {
+  const { maxLength, required, key, stringType, regexp } = config;
+  const tipRef = useRef<HTMLDivElement>(null);
+  const rules = useMemo(() => {
+    const _rules: Rule[] = [{ required, message: `${key}不可为空` }];
 
-  return (
-    <>
-      <Input.TextArea
-        bordered={false}
-        rows={6}
-        onKeyDown={syntheticEventStopPagination}
-        onKeyUp={syntheticEventStopPagination}
-        {...textareaProps}
-      />
-      <div
-        className={classnames({
-          textAreaLength: true,
-        })}
-      >
-        {footer}
-      </div>
-    </>
-  );
-};
-
-export const SingleTextInput = (props: any) => {
-  const ref = useRef(null);
-  const [textAreaFocus, setTextAreaFocus] = useState(false);
-  const [invalid, setInvalid] = useState(false);
-  const { t } = useTranslation();
-
-  const { disabled, config, result, updateText, index, switchToNextTextarea, hasMultiple, onNext } = props;
-  const { maxLength } = config;
-  const [value, setValue] = useState<string>('');
-
-  useEffect(() => {
-    if (result && result.length > 0 && result[index]) {
-      setValue(result[index].value[config.key]);
+    if (stringType === 'number') {
+      _rules.push({ pattern: /^\d+$/, message: `${key}必须为数字` });
     }
-  }, [config.key, index, result]);
 
-  const textLength = value?.length ?? 0;
-
-  const updateTextWithValue = (newVal: string) => {
-    if (updateText) {
-      updateText(newVal, config.value, index);
-      if (config.required) {
-        setInvalid(!newVal);
-      }
+    if (stringType === 'english') {
+      _rules.push({ pattern: /^[a-zA-Z]+$/, message: `${key}必须为英文` });
     }
-  };
 
-  const tabToSwitchEnabled = hasMultiple && switchToNextTextarea;
+    if (stringType === 'regexp') {
+      _rules.push({ pattern: new RegExp(regexp), message: `${key}必须为自定义的${regexp}格式` });
+    }
 
-  const textareaProps = {
-    id: `textInput-${index}`,
-    ref,
-    disabled,
-    value,
-    maxLength,
-    autoSize: { minRows: 2, maxRows: 6 },
-    onChange: (e: FocusEvent<HTMLTextAreaElement>) => {
-      setValue(e.target.value);
-    },
-    onFocus: () => {
-      setTextAreaFocus(true);
-    },
-    onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
-      setTextAreaFocus(false);
-      updateTextWithValue(value);
-      if (config.required) {
-        setInvalid(!e.target.value);
-      }
-    },
-    style: {
-      resize: 'none',
-      wordBreak: 'break-all',
-    },
-    onKeyDownCapture: (e: React.KeyboardEvent) => {
-      if (e.ctrlKey && e.keyCode === EKeyCode.Enter) {
-        if (onNext) {
-          onNext();
-        }
-        e.preventDefault();
-      }
+    return _rules;
+  }, [key, regexp, required, stringType]);
 
-      if (e.keyCode === EKeyCode.Tab && tabToSwitchEnabled) {
-        e.preventDefault();
-        e.nativeEvent.stopImmediatePropagation();
-        switchToNextTextarea(index);
-      }
-
+  const handlePageChange = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      e.stopPropagation();
       e.nativeEvent.stopPropagation();
-    },
-  };
+      e.nativeEvent.stopImmediatePropagation();
 
-  const TextareaFooter = (
-    <div className="textAreaFooter">
-      <div className="hotkeyTip">
-        {tabToSwitchEnabled && <span>{`[${t('Switch')}]Tab`}</span>}
-        <span>{`[${t('TurnPage')}]Ctrl+Enter`}</span>
-      </div>
-      <div className="wordCount">
-        <span className={textLength >= maxLength ? 'warning' : ''}>{textLength}</span>/<span>{maxLength}</span>
-      </div>
-    </div>
-  );
-
-  useEffect(() => {
-    if (disabled) {
-      setTextAreaFocus(false);
-    }
-  }, [disabled]);
-
-  return (
-    <div className="textField">
-      <div className="label">
-        <span className={classnames({ required: config.required })}>{config.key}</span>
-      </div>
-      <div
-        className={classnames({
-          disabled,
-          'textarea-outline': true,
-          'ant-input-focused': textAreaFocus,
-          textareaContainer: true,
-          focus: textAreaFocus,
-          invalid: invalid,
-        })}
-      >
-        <TextareaWithFooter footer={TextareaFooter} textareaProps={textareaProps} />
-      </div>
-    </div>
-  );
-};
-
-const TextToolSidebar: React.FC<IProps> = ({
-  imgList,
-  textConfig,
-  imgIndex,
-  dispatch,
-  isPreview,
-  // triggerEventAfterIndexChanged,
-  step,
-  stepList,
-  basicResultList,
-}) => {
-  const [focusIndex, setFocusIndex] = useState(0);
-  const [forceRender, setForceRender] = useState(0);
-  const [result, setResult] = useState<ITextResult[]>([]);
-
-  const textareaFocus = (index: number) => {
-    setTimeout(() => {
-      const textarea = document.getElementById(`textInput-${index}`) as HTMLTextAreaElement;
-      if (textarea) {
-        setFocusIndex(index);
-        textarea.focus();
-        textarea.select();
-        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
-  };
-
-  const switchToNextTextarea = (currentIndex: number) => {
-    const nextIndex = (currentIndex + 1) % textConfig.length;
-    textareaFocus(nextIndex);
-  };
-
-  useEffect(() => {
-    if (imgList && imgList.length > 0) {
-      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      const textResult = currentImgResult?.textTool ? currentImgResult?.textTool.result : [];
-      if (textResult && textResult.length > 0) {
-        setResult(textResult);
-      }
-      if (!textResult || textResult.length === 0) {
-        if (textConfig && textConfig.length > 0) {
-          const res = textConfig.map((item) => {
-            return {
-              id: uuid(),
-              sourceID: '',
-              value: { [item.key]: item.defaultValue },
-            };
+      if (e.ctrlKey && e.keyCode === EKeyCode.Enter) {
+        e.preventDefault();
+        form
+          .validateFields()
+          .then(() => {
+            document.dispatchEvent(new CustomEvent('sampleChanged', { detail: 'next' }));
+          })
+          .catch(() => {
+            // do nothing
           });
-          setResult(res);
-        }
       }
-    }
-  }, [textConfig, imgList, imgIndex]);
+    },
+    [form],
+  );
 
-  const updateText = (v: string, k: string, index: number) => {
-    if (v) {
-      result[index].value[k] = v;
-      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      const currentImgResult = {
-        ...oldImgResult,
-        textTool: {
-          toolName: 'textTool',
-          result: result,
-        },
-      };
-      imgList[imgIndex].result = JSON.stringify(currentImgResult);
-      dispatch(UpdateImgList(imgList));
-      // dispatch(ChangeSave);
-      setResult(result);
+  const handleFocus = () => {
+    if (!tipRef.current) {
+      return;
     }
+
+    tipRef.current.style.display = 'block';
+  };
+
+  const handleBlur = () => {
+    if (!tipRef.current) {
+      return;
+    }
+
+    tipRef.current.style.display = 'none';
+    form.submit();
+  };
+
+  return (
+    <div className="text-value">
+      <Form.Item label={key} required={required} name={name} rules={rules}>
+        <Input.TextArea
+          className="text-input"
+          rows={4}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          showCount
+          onKeyDownCapture={handlePageChange}
+          maxLength={maxLength}
+        />
+      </Form.Item>
+      <div ref={tipRef} className="text-tips">
+        <div className="text-tips__item">[切换] Tab</div>
+        <div className="text-tips__item">[翻页] Ctrl + Enter</div>
+      </div>
+    </div>
+  );
+}
+
+const TextToolSidebar = () => {
+  const { result, setResult, textConfig } = useContext(ViewContext);
+  const textValues = useMemo(() => {
+    return result?.textTool?.result ?? [];
+  }, [result.textTool]);
+  const [form] = Form.useForm();
+
+  const handleChange = (values: any) => {
+    const newResult = cloneDeep(result);
+
+    set(newResult, `textTool.result`, values.list);
+    setResult(newResult);
   };
 
   useEffect(() => {
-    setForceRender(new Date().getTime());
-  }, [result]);
+    // 填入默认值
+    let _textValues = textValues;
 
-  const onNext = () => {
-    dispatch(PageForward(true));
-  };
+    if (_textValues.length === 0) {
+      _textValues = map(textConfig, (configItem) => {
+        return {
+          id: uuid(),
+          value: {
+            [configItem.value]: configItem.defaultValue,
+          },
+        };
+      });
+    }
 
-  const stepConfig = ConfigUtils.getStepConfig(stepList, step);
-  const disabled = stepConfig.dataSourceStep > 0 && basicResultList.length === 0;
+    form.setFieldsValue({ list: _textValues });
+  }, [form, textConfig, textValues]);
 
   return (
-    <div
+    <TextWrapper
       className={classnames({
         textToolOperationMenu: true,
-        textToolOperationMenuPreview: isPreview,
       })}
     >
-      {result &&
-        result.length > 0 &&
-        textConfig.map((i, index) => (
-          <SingleTextInput
-            config={i}
-            key={i.key + forceRender}
-            index={index}
-            result={result}
-            updateText={updateText}
-            switchToNextTextarea={switchToNextTextarea}
-            hasMultiple={textConfig.length > 1}
-            focus={focusIndex === index}
-            onNext={onNext}
-            disabled={disabled}
+      <Form form={form} onFinish={handleChange} name="list" layout="vertical">
+        {map(textConfig, (configItem, index) => (
+          <TextItem
+            key={configItem.value}
+            name={['list', index, 'value', configItem.value]}
+            config={configItem}
+            form={form}
           />
         ))}
-    </div>
+      </Form>
+    </TextWrapper>
   );
 };
 
-function mapStateToProps(state: AppState) {
-  return {
-    imgList: state.annotation.imgList,
-    textConfig: state.annotation.textConfig,
-    imgIndex: state.annotation.imgIndex,
-    step: state.annotation.step,
-    basicResultList: state.annotation.basicResultList,
-    stepList: state.annotation.stepList,
-    triggerEventAfterIndexChanged: state.annotation.triggerEventAfterIndexChanged,
-  };
-}
-
-export default connect(mapStateToProps)(TextToolSidebar);
+export default TextToolSidebar;
