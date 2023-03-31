@@ -5,7 +5,6 @@ import _ from 'lodash-es';
 import { Spin } from 'antd';
 import AnnotationOperation from '@label-u/components';
 import '@label-u/components/dist/index.css';
-import { EToolName } from '@label-u/annotation';
 
 import type { Dispatch, RootState } from '@/store';
 import type { SampleResponse } from '@/services/types';
@@ -78,7 +77,6 @@ const AnnotationPage = () => {
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
 
   const leftSiderContent = <SlideLoader />;
-  // NOTE: labelu/components包裹了store，在AnnotationRightCorner里获取store不是应用的store！有冲突！
   const topActionContent = <AnnotationRightCorner isLastSample={isLastSample} isFirstSample={isFirstSample} />;
 
   const annotationContextValue = useMemo(() => {
@@ -88,14 +86,6 @@ const AnnotationPage = () => {
       isEnd: totalCount === samples.length,
     };
   }, [samples, setSamples, totalCount]);
-
-  const textConfig = useMemo(() => {
-    return _.chain(taskConfig).get('tools').find({ tool: EToolName.Text }).get('config.texts').value();
-  }, [taskConfig]);
-
-  const tagConfigList = useMemo(() => {
-    return _.chain(taskConfig).get('tools').find({ tool: EToolName.Tag }).get('config.tags').value();
-  }, [taskConfig]);
 
   return (
     <Spin className={currentStyles.annotationPage} spinning={loading || sampleLoading} style={{ height: '100%' }}>
@@ -107,13 +97,8 @@ const AnnotationPage = () => {
             loading={loading || sampleLoading}
             ref={annotationRef}
             isPreview={false}
-            imgList={[transformed[0]]}
             sample={transformed[0]}
-            attributeList={taskConfig.commonAttributeConfigurable ? taskConfig.attributes : []}
-            tagConfigList={tagConfigList}
             config={taskConfig}
-            toolsBasicConfig={taskConfig.tools}
-            textConfig={textConfig}
             isShowOrder={false}
           />
         )}

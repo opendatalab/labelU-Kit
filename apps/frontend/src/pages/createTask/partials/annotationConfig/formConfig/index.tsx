@@ -3,7 +3,7 @@ import type { FormInstance, FormProps, MenuProps, TabsProps } from 'antd';
 import { Empty, Popconfirm, Button, Dropdown, Form, Tabs } from 'antd';
 import type { FC } from 'react';
 import React, { useEffect, useCallback, useMemo, useState } from 'react';
-import _ from 'lodash-es';
+import _, { cloneDeep } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 
@@ -87,8 +87,18 @@ const FormConfig: FC<IProps> = ({ form }) => {
       const newTools = selectedTools.filter((item) => item !== toolName);
       setSelectedTools(newTools);
       setActiveTool(newTools[0]);
+
+      // 因为antd的form的特殊性，删除数组元素时，需要手动调用setFieldsValue
+      const prevValues = cloneDeep(form.getFieldsValue());
+
+      setTimeout(() => {
+        form.setFieldsValue({
+          ...prevValues,
+          tools: prevValues.tools.filter((item: any) => item.tool !== toolName),
+        });
+      });
     },
-    [selectedTools],
+    [form, selectedTools],
   );
 
   const toolsMenu: MenuProps['items'] = useMemo(

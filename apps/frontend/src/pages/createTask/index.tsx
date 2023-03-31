@@ -4,7 +4,8 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _ from 'lodash-es';
 import { omit } from 'lodash/fp';
-import { ArrowRightOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import AnnotationOperation from '@label-u/components';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
@@ -88,6 +89,7 @@ const CreateTask = () => {
   }, [currentStep]);
 
   const toolsConfig = useSelector((state: RootState) => state.task.config);
+  const samples = useSelector((state: RootState) => state.sample.list);
   const taskData = useSelector((state: RootState) => state.task.item);
   const loading = useSelector(
     (state: RootState) => state.loading.effects.task.updateTaskConfig || state.loading.effects.task.createTask,
@@ -190,6 +192,26 @@ const CreateTask = () => {
     });
   };
 
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const handleOpenPreview = () => {
+    dispatch.sample.fetchSamples({ task_id: taskId });
+    annotationFormInstance
+      .validateFields()
+      .then(() => {
+        setPreviewVisible(true);
+      })
+      .catch(() => {});
+  };
+
+  const transformedSample = useMemo(() => {
+    const sample = samples?.data?.[0];
+    if (!sample) {
+      return [];
+    }
+
+    return commonController.transformFileList(sample.data, +sample.id!);
+  }, [samples]);
+
   const submitForm: () => Promise<unknown> = async function () {
     let basicFormValues;
     try {
@@ -277,6 +299,10 @@ const CreateTask = () => {
         message.error('请检查标注配置');
         return;
       }
+
+      if (previewVisible) {
+        setPreviewVisible(false);
+      }
     }
     submitForm()
       .then(() => {
@@ -292,10 +318,16 @@ const CreateTask = () => {
           <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
         </div>
         <div className={currentStyles.right}>
-          {currentStep === StepEnum.Config && (
-            <Button>
+          {currentStep === StepEnum.Config && !previewVisible && (
+            <Button onClick={handleOpenPreview}>
               进入预览
               <ArrowRightOutlined />
+            </Button>
+          )}
+          {previewVisible && (
+            <Button onClick={() => setPreviewVisible(false)}>
+              <ArrowLeftOutlined />
+              退出预览
             </Button>
           )}
           <Button onClick={handleCancel}>取消</Button>
@@ -312,7 +344,20 @@ const CreateTask = () => {
       </div>
       <div className={currentStyles.content}>
         <TaskCreationContext.Provider value={taskCreationContextValue}>
-          <>{partials}</>
+          <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
+            {partials}
+          </div>
+          {previewVisible && (
+            <div className="preview-content">
+              <AnnotationOperation
+                topActionContent={null}
+                isPreview
+                sample={transformedSample[0]}
+                config={annotationFormInstance.getFieldsValue()}
+                isShowOrder={false}
+              />
+            </div>
+          )}
         </TaskCreationContext.Provider>
       </div>
     </div>
