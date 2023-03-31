@@ -1,36 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import type { PrevResult } from '@label-u/annotation';
 import { cTool, EKeyCode } from '@label-u/annotation';
 import { Popover } from 'antd';
 import { cloneDeep } from 'lodash-es';
 
-import type { AppState } from '@/store';
-// import rotateSvg from '@/assets/annotation/common/icon_r.svg';
 import revocationSvg from '@/assets/annotation/common/icon_next.svg';
 import restoreSvg from '@/assets/annotation/common/icon_back.svg';
-// import rotateHighlightSvg from '@/assets/annotation/common/icon_rA.svg';
 import revocationHighlightSvg from '@/assets/annotation/common/icon_nextA.svg';
 import restoreHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
-// import saveSvg from '@/assets/annotation/common/icon_save.svg';
-// import saveLightSvg from '@/assets/annotation/common/icon_saveA.svg';
 import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
-// import { ChangeSave } from '@/store/annotation/actionCreators';
-import type { IStepInfo } from '@/types/step';
-import { UpdateImgList } from '@/store/annotation/actionCreators';
 import ViewContext from '@/view.context';
 
-import { toolList } from '../ToolOperation';
 const { EVideoToolName } = cTool;
 
 import './index.scss';
-
-interface IProps {
-  isBegin?: boolean;
-  stepInfo: IStepInfo;
-}
 
 enum EColor {
   Hover = '#666fff',

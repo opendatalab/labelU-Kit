@@ -234,6 +234,7 @@ export default class LineToolOperation extends BasicToolOperation {
     return this.config.attributeConfigurable;
   }
 
+  // TODO: 应该由是否含有标签属性决定
   get isTextConfigurable() {
     return this.config.textConfigurable;
   }
@@ -1148,8 +1149,7 @@ export default class LineToolOperation extends BasicToolOperation {
         // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
         return;
       }
-      this.stopLineCreating(true);
-      this.emit('drawEnd', this.activeLine, e);
+      this.stopLineCreating(true, e);
       this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
@@ -1449,7 +1449,7 @@ export default class LineToolOperation extends BasicToolOperation {
    * 停止当前的线条绘制
    * @param isAppend
    */
-  public stopLineCreating(isAppend: boolean = true) {
+  public stopLineCreating(isAppend: boolean = true, e: MouseEvent) {
     /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
     const setActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
     let selectedID;
@@ -1479,6 +1479,8 @@ export default class LineToolOperation extends BasicToolOperation {
 
     this.actionsHistory?.empty();
     this.emit('dataUpdated', this.lineList);
+    this.emit('drawEnd', this.lineList[this.lineList.length - 1], e);
+
     this.render();
   }
 

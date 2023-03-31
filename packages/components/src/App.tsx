@@ -1,76 +1,26 @@
 import { i18n } from '@label-u/utils';
-import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
 import _, { cloneDeep, isEmpty, set } from 'lodash-es';
 
 import MainView from '@/views/MainView';
-import type { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
+import type { Attribute, LabelUAnnotationConfig } from '@/interface/toolConfig';
 
-import type { ToolInstance } from './store/annotation/types';
-import type { GetFileData, OnSave, OnSubmit, IFileItem, OnPageChange, OnStepChange, LoadFileList } from './types/data';
-import type { Footer, Header, Sider } from './types/main';
-import type { IStepInfo } from './types/step';
+import type { IFileItem } from './types/data';
 import ViewContext from './view.context';
 import { jsonParser } from './utils';
 
-interface IAnnotationStyle {
-  stroke: string;
-  fill: string;
-  text: string;
-  toolColor: any;
-}
-
 export interface AppProps {
-  toolStyle?: IAnnotationStyle;
-  exportData?: (data: any[]) => void;
-  goBack?: (data: any) => void;
-  imgList?: IFileItem[];
-  config?: any;
-  stepList?: IStepInfo[];
-  step?: number;
+  config?: LabelUAnnotationConfig;
   isPreview?: boolean; // if preview
-  onSubmit?: OnSubmit;
-  onSave?: OnSave;
-  onPageChange?: OnPageChange;
-  onStepChange?: OnStepChange;
-  getFileData?: GetFileData;
-  pageSize?: number;
-  loadFileList?: LoadFileList;
-  headerName?: string;
-  initialIndex?: number;
   className?: string;
-  toolInstance?: ToolInstance;
-  currentToolName?: string; // redux
-  header?: Header;
-  footer?: Footer;
-  sider?: Sider;
-  style?: {
-    layout?: Record<string, any>;
-    header?: Record<string, any>;
-    sider?: Record<string, any>;
-    footer?: Record<string, any>;
-  };
-  setToolInstance?: (tool: ToolInstance) => void;
-  mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   showTips?: boolean; // 是否展示 tips
   defaultLang?: 'en' | 'cn'; // 国际化设置
   leftSiderContent?: React.ReactNode | React.ReactNode; // 左侧图片列表操作空间
   topActionContent?: React.ReactNode | React.ReactNode; // 顶部操作空间
-  tagConfigList?: OneTag[]; // 配置tag 信息，工具共享一套tag
-  attributeList?: Attribute[]; // 标签配置选项，工具共享一套标签
-  toolsBasicConfig: BasicConfig[]; // 多工具配置
-  textConfig: TextConfig;
-  // 标注信息扩展的功能
-  dataInjectionAtCreation?: (annotationData: any) => {};
   // 是否显示标注顺序
   isShowOrder?: boolean;
-  // 渲染增强
-  renderEnhance?: {
-    staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
-    selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
-    creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
-  };
-
+  currentToolName?: EToolName;
   sample: IFileItem;
 }
 
@@ -97,26 +47,29 @@ const extractResult = (input: any, excludeToolNames?: string[]) =>
     return res;
   }, []);
 
-const App = (props, ref) => {
+const App = forwardRef<
+  {
+    getResult: () => any;
+    toolInstance: any;
+  },
+  AppProps
+>((props, ref) => {
   const {
     currentToolName,
     config,
     isShowOrder,
     sample,
-    isPreview,
+    isPreview = false,
     leftSiderContent,
     topActionContent,
     defaultLang = 'cn',
   } = props;
-  const tools = config?.tools;
-
-  // 以下是新代码
   const [imgNode, setImgNode] = useState<HTMLImageElement | null>(null);
   const parsedResult = useMemo(() => {
     return jsonParser(sample?.result);
   }, [sample?.result]);
   const [engine, setEngine] = useState<AnnotationEngine | null>(null);
-  const [toolName, setToolName] = useState<string>(currentToolName as string);
+  const [toolName, setToolName] = useState<EToolName>(currentToolName!);
   const [imageAttribute, setImageAttribute] = useState({
     brightness: 1,
     contrast: 1,
@@ -128,7 +81,7 @@ const App = (props, ref) => {
   const [result, setResult] = useState<any>({});
   const [orderVisible, toggleOrderVisible] = useState<boolean>(!!isShowOrder);
   const [selectedResult, setSelectedResult] = useState<string | null>(null);
-  const [resultVisibilityChanged, setResultVisibilityChanged] = useState<number>(Date.now());
+  const [engineResultUpdateTimeStamp, updateTimeStamp] = useState<number>(Date.now());
   const resultRef = useRef<any>();
 
   const updateResult = useCallback((newResult) => {
@@ -139,23 +92,31 @@ const App = (props, ref) => {
     setSelectedResult(newSelectedResult);
   }, []);
 
-  const triggerVisibilityChange = useCallback(() => {
-    setResultVisibilityChanged(Date.now());
+  const syncResultToEngine = useCallback(() => {
+    updateTimeStamp(Date.now());
   }, []);
 
   // 所有工具的标注结果
   const allToolResult = useMemo(() => extractResult(result), [result]);
   // 图形标注工具的标注结果
   const graphicResult = useMemo(() => extractResult(result, [EToolName.Tag, EToolName.Text]), [result]);
+  const tools = useMemo(() => {
+    return config?.tools ?? [];
+  }, [config?.tools]);
+  const commonAttributes = useMemo(() => {
+    return config?.attributes ?? [];
+  }, [config?.attributes]);
 
-  const textConfig = useMemo(
-    () => _.chain(config).get('tools').find({ tool: 'textTool' }).get('config.texts').value(),
-    [config],
-  );
-  const tagConfigList = useMemo(
-    () => _.chain(config).get('tools').find({ tool: 'tagTool' }).get('config.tags').value(),
-    [config],
-  );
+  const textConfig = useMemo(() => {
+    const textTool = tools.find((item) => item.tool === EToolName.Text);
+
+    return textTool?.config?.texts ?? [];
+  }, [tools]);
+  const tagConfigList = useMemo(() => {
+    const tagTool = tools.find((item) => item.tool === EToolName.Tag);
+
+    return tagTool?.config?.tags ?? [];
+  }, [tools]);
   const allAttributesMap = useMemo(() => {
     const mapping = new Map<string, any>();
 
@@ -168,7 +129,7 @@ const App = (props, ref) => {
       });
 
       if (configItem.config?.attributes) {
-        _.forEach([...configItem.config?.attributes, ...(config.attributes || [])], (item: Attribute) => {
+        _.forEach([...configItem.config?.attributes, ...(commonAttributes || [])], (item: Attribute) => {
           attributeMap.set(item.value, item);
         });
       }
@@ -177,10 +138,13 @@ const App = (props, ref) => {
     });
 
     return mapping;
-  }, [config.attributes, tools]);
+  }, [commonAttributes, tools]);
 
   const updateEngine = useCallback(
     (container: HTMLDivElement) => {
+      if (!tools.length || !toolName || engine) {
+        return;
+      }
       const _toolName = toolName || tools[0].tool;
       const toolConfig = _.find(tools, { tool: _toolName });
 
@@ -196,12 +160,12 @@ const App = (props, ref) => {
           imgNode: new Image(),
           config: toolConfig?.config,
           style: initialToolStyle,
-          tagConfigList: tagConfigList!,
+          tagConfigList,
           allAttributesMap,
         }),
       );
     },
-    [allAttributesMap, orderVisible, tagConfigList, toolName, tools],
+    [allAttributesMap, engine, orderVisible, tagConfigList, toolName, tools],
   );
 
   useEffect(() => {
@@ -209,6 +173,10 @@ const App = (props, ref) => {
   }, [defaultLang]);
 
   useEffect(() => {
+    if (!tools.length) {
+      return;
+    }
+
     if (!currentToolName) {
       setToolName(tools[0].tool);
     } else {
@@ -217,9 +185,7 @@ const App = (props, ref) => {
   }, [currentToolName, tools]);
 
   useEffect(() => {
-    if (parsedResult) {
-      updateResult(parsedResult);
-    }
+    updateResult(parsedResult);
   }, [parsedResult, updateResult]);
 
   useEffect(() => {
@@ -264,7 +230,7 @@ const App = (props, ref) => {
       updateResult({});
       setSelectedResult(null);
     };
-  }, [parsedResult, sample.id, updateResult]);
+  }, [parsedResult, sample?.id, updateResult]);
 
   useEffect(() => {
     if (!engine || !imgNode) {
@@ -294,7 +260,7 @@ const App = (props, ref) => {
     engine.toolInstance.history.initRecord(currentToolResult, true);
     engine.toolInstance.renderBasicCanvas();
     engine.toolInstance.render();
-  }, [engine, toolName, parsedResult, resultVisibilityChanged, sample.id]);
+  }, [engine, toolName, parsedResult, engineResultUpdateTimeStamp, sample?.id]);
 
   useEffect(() => {
     if (!engine || !toolName) {
@@ -306,7 +272,10 @@ const App = (props, ref) => {
     if (selectedResult && selectedResult.toolName === toolName && engine.toolName === toolName) {
       if (engine.toolName === EToolName.Line) {
         const lineResult = currentToolResult.result.find((item: any) => item.id === selectedResult.id);
-        engine.toolInstance.setActiveAreaByPoint(lineResult.pointList[0]);
+
+        if (lineResult) {
+          engine.toolInstance.setActiveAreaByPoint(lineResult.pointList[0]);
+        }
       } else {
         engine.toolInstance.setSelectedID(selectedResult.id);
       }
@@ -364,12 +333,10 @@ const App = (props, ref) => {
 
     document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', syncResultToContext);
     engine?.toolInstance.singleOn('updateResult', syncResultToContext);
-    // engine?.toolInstance.on('changeAttributeSidebar', syncResultToContext);
 
     return () => {
       document.getElementById('toolContainer')?.removeEventListener('saveLabelResultToImg', syncResultToContext);
       engine?.toolInstance?.off?.('updateResult', syncResultToContext);
-      // engine?.toolInstance?.off?.('changeAttributeSidebar', syncResultToContext);
     };
   }, [engine?.toolInstance, allToolResult, toolName, result, selectedResult, updateResult]);
 
@@ -400,8 +367,8 @@ const App = (props, ref) => {
       setToolStyle,
       selectedResult,
       setSelectedResult: updateSelectedResult,
-      triggerVisibilityChange,
-      resultVisibilityChanged,
+      syncResultToEngine,
+      engineResultUpdateTimeStamp,
       graphicResult,
       isPreview,
     };
@@ -424,8 +391,8 @@ const App = (props, ref) => {
     toolStyle,
     selectedResult,
     updateSelectedResult,
-    triggerVisibilityChange,
-    resultVisibilityChanged,
+    syncResultToEngine,
+    engineResultUpdateTimeStamp,
     graphicResult,
     isPreview,
   ]);
@@ -453,6 +420,6 @@ const App = (props, ref) => {
       </div>
     </ViewContext.Provider>
   );
-};
+});
 
 export default App;

@@ -1,4 +1,4 @@
-import type { ToolConfig, cTool } from '@label-u/annotation';
+import type { ToolConfig, cTool, Attribute, EToolName } from '@label-u/annotation';
 
 export type { ToolConfig } from '@label-u/annotation';
 export type { PolygonConfig } from '@label-u/annotation';
@@ -21,18 +21,41 @@ export interface StepConfigState {
 }
 
 export interface BasicConfig {
-  step: number;
-  dataSourceStep: number;
   tool: string;
   config: ToolConfig;
 }
 
+export type ToolNameType = EToolName[keyof EToolName];
+
+export interface LabelUAnnotationConfig {
+  commonAttributeConfigurable?: boolean;
+  attributes?: Attribute[];
+  drawOutsideTarget?: boolean;
+  tools: BasicConfig[];
+}
+
+export enum StringType {
+  Text = 'text',
+  Number = 'number',
+  Order = 'order',
+  Regexp = 'regexp',
+  English = 'english',
+}
+
+export enum CategoryType {
+  Enum = 'enum',
+  Tuple = 'tuple',
+  String = 'string',
+}
+
 export interface IConfigListItem {
-  label: string;
   key: string;
-  required: boolean;
-  default: string;
+  value: string;
+  type: keyof typeof CategoryType;
   maxLength: number;
+  stringType: keyof typeof StringType;
+  required?: boolean;
+  defaultValue?: string;
 }
 
 export type TextConfig = IConfigListItem[];

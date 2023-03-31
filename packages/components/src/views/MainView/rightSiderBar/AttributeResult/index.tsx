@@ -270,28 +270,10 @@ const AttributeResult = () => {
     setToolName,
     selectedResult,
     setSelectedResult,
-    triggerVisibilityChange,
+    syncResultToEngine,
     graphicResult,
     annotationEngine,
   } = useContext(ViewContext);
-
-  // 删除标注结果
-  const doClearAllResult = () => {
-    const newResult = cloneDeep(result);
-    for (const tool of labelTool) {
-      const tmpResult = newResult[tool]?.result;
-      if (tmpResult && tmpResult.length > 0) {
-        newResult[tool].result = [];
-      }
-    }
-
-    setResult(newResult);
-    triggerVisibilityChange();
-  };
-
-  const handleOk = () => {
-    doClearAllResult();
-  };
 
   const dragModalRef = useRef<any>();
 
@@ -309,7 +291,7 @@ const AttributeResult = () => {
         _result.push({
           ...resultItem,
           toolName: item.toolName,
-          color: allAttributesMap.get(item.toolName).get(resultItem.attribute)?.color,
+          color: allAttributesMap?.get(item.toolName)?.get(resultItem.attribute)?.color,
           icon: find(toolList, { toolName: item.toolName })?.Icon,
         });
       }
@@ -326,7 +308,7 @@ const AttributeResult = () => {
         resultAttributeMapping.set(item.attribute, []);
       }
 
-      resultAttributeMapping.get(item.attribute).push(item);
+      resultAttributeMapping?.get(item.attribute)?.push(item);
     }
 
     return resultAttributeMapping;
@@ -353,7 +335,7 @@ const AttributeResult = () => {
     });
 
     setResult(newResult);
-    setTimeout(triggerVisibilityChange);
+    setTimeout(syncResultToEngine);
   };
 
   // 批量删除标注
@@ -368,7 +350,7 @@ const AttributeResult = () => {
     }
 
     setResult(newResult);
-    setTimeout(triggerVisibilityChange);
+    setTimeout(syncResultToEngine);
   };
 
   // 切换单个标注的显示隐藏
@@ -391,7 +373,7 @@ const AttributeResult = () => {
     }
 
     setResult(newResult);
-    setTimeout(triggerVisibilityChange);
+    setTimeout(syncResultToEngine);
   };
 
   // 切换批量标注的显示隐藏
@@ -416,7 +398,7 @@ const AttributeResult = () => {
     }
 
     setResult(newResult);
-    setTimeout(triggerVisibilityChange);
+    setTimeout(syncResultToEngine);
   };
 
   const handleEdit = useCallback(
@@ -467,6 +449,20 @@ const AttributeResult = () => {
         return Promise.reject();
       });
   }, [result, selectedResult, setResult, setSelectedResult]);
+
+  // 删除标注结果
+  const clearAllResult = () => {
+    const newResult = cloneDeep(result);
+    for (const tool of labelTool) {
+      const tmpResult = newResult[tool]?.result;
+      if (tmpResult && tmpResult.length > 0) {
+        newResult[tool].result = [];
+      }
+    }
+
+    setResult(newResult);
+    syncResultToEngine();
+  };
 
   // 绘制结束后，显示标注属性编辑
   useEffect(() => {
@@ -598,7 +594,7 @@ const AttributeResult = () => {
             })}
           </Collapse>
         </div>
-        <Popconfirm title="确认清空标注？" okText="确认" cancelText="取消" onConfirm={handleOk}>
+        <Popconfirm title="确认清空标注？" okText="确认" cancelText="取消" onConfirm={clearAllResult}>
           <Button className="clear" type="link" icon={<Icon component={DeleteIcon} />}>
             清空
           </Button>

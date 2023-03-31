@@ -44,7 +44,17 @@ const TextWrapper = styled.div`
   }
 `;
 
-function TextItem({ form, config, name }: { form: FormInstance; config: any; name: NamePath }) {
+function TextItem({
+  form,
+  config,
+  name,
+  isPreview,
+}: {
+  form: FormInstance;
+  config: any;
+  name: NamePath;
+  isPreview: boolean;
+}) {
   const { maxLength, required, key, stringType, regexp } = config;
   const tipRef = useRef<HTMLDivElement>(null);
   const rules = useMemo(() => {
@@ -71,7 +81,7 @@ function TextItem({ form, config, name }: { form: FormInstance; config: any; nam
       e.nativeEvent.stopPropagation();
       e.nativeEvent.stopImmediatePropagation();
 
-      if (e.ctrlKey && e.keyCode === EKeyCode.Enter) {
+      if (e.ctrlKey && e.keyCode === EKeyCode.Enter && !isPreview) {
         e.preventDefault();
         form
           .validateFields()
@@ -83,7 +93,7 @@ function TextItem({ form, config, name }: { form: FormInstance; config: any; nam
           });
       }
     },
-    [form],
+    [form, isPreview],
   );
 
   const handleFocus = () => {
@@ -125,7 +135,7 @@ function TextItem({ form, config, name }: { form: FormInstance; config: any; nam
 }
 
 const TextToolSidebar = () => {
-  const { result, setResult, textConfig } = useContext(ViewContext);
+  const { result, setResult, textConfig, isPreview } = useContext(ViewContext);
   const textValues = useMemo(() => {
     return result?.textTool?.result ?? [];
   }, [result.textTool]);
@@ -169,6 +179,7 @@ const TextToolSidebar = () => {
             name={['list', index, 'value', configItem.value]}
             config={configItem}
             form={form}
+            isPreview={isPreview}
           />
         ))}
       </Form>

@@ -18,6 +18,7 @@ import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
 import TagUtils from '@/utils/tool/TagUtils';
+import uuid from '@/utils/uuid';
 
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
@@ -195,6 +196,7 @@ export default class BasicToolOperation extends EventListener {
   constructor(props: IBasicToolOperationProps) {
     super();
 
+    this._id = uuid();
     this.saveDataEvent = new CustomEvent('saveLabelResultToImg', {});
     this.renderReady = false;
     this.container = props.container;
