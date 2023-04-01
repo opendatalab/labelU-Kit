@@ -83,6 +83,7 @@ const App = forwardRef<
   const [selectedResult, setSelectedResult] = useState<string | null>(null);
   const [engineResultUpdateTimeStamp, updateTimeStamp] = useState<number>(Date.now());
   const resultRef = useRef<any>();
+  const engineRef = useRef<AnnotationEngine | null>(null);
 
   const updateResult = useCallback((newResult) => {
     setResult(newResult);
@@ -142,30 +143,37 @@ const App = forwardRef<
 
   const updateEngine = useCallback(
     (container: HTMLDivElement) => {
-      if (!tools.length || !toolName || engine) {
+      if (!tools.length || !toolName) {
         return;
       }
+
       const _toolName = toolName || tools[0].tool;
       const toolConfig = _.find(tools, { tool: _toolName });
 
-      setEngine(
-        new AnnotationEngine({
-          container,
-          isShowOrder: orderVisible,
-          toolName: _toolName,
-          size: {
-            with: 1,
-            height: 1,
-          },
-          imgNode: new Image(),
-          config: toolConfig?.config,
-          style: initialToolStyle,
-          tagConfigList,
-          allAttributesMap,
-        }),
-      );
+      if (engineRef.current) {
+        engineRef.current.toolInstance.destroy();
+      }
+
+      const newEngine = new AnnotationEngine({
+        container,
+        isShowOrder: orderVisible,
+        toolName: _toolName,
+        size: {
+          with: 1,
+          height: 1,
+        },
+        imgNode: new Image(),
+        config: toolConfig?.config,
+        style: initialToolStyle,
+        tagConfigList,
+        allAttributesMap,
+      });
+
+      engineRef.current = newEngine;
+
+      setEngine(newEngine);
     },
-    [allAttributesMap, engine, orderVisible, tagConfigList, toolName, tools],
+    [allAttributesMap, orderVisible, tagConfigList, toolName, tools],
   );
 
   useEffect(() => {
