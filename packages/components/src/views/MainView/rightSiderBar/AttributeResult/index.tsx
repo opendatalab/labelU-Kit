@@ -443,12 +443,15 @@ const AttributeResult = () => {
         });
         setResult(newResult);
 
+        // 属性设置完后需要将结果同步到标注引擎中
+        syncResultToEngine();
+
         return Promise.resolve();
       })
       .catch(() => {
         return Promise.reject();
       });
-  }, [result, selectedResult, setResult, setSelectedResult]);
+  }, [result, selectedResult, setResult, setSelectedResult, syncResultToEngine]);
 
   // 删除标注结果
   const clearAllResult = () => {
