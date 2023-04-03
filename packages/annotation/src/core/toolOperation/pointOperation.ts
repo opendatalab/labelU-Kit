@@ -282,7 +282,6 @@ export default class PointOperation extends BasicToolOperation {
     // 当前目标下没有 hoverId 才进行标注
     if (e.button === 0 && !this.hoverID) {
       // 超出边界则不绘制
-      // REVIEW: 这里的 config.drawOutsideTarget 跟 lineToolOperation里的 config.drawOutSideTarget 中的「s」大小写不一致
       if (
         !this.imgInfo ||
         (!this.drawOutsideTarget && this.isPointOutOfBoundary(this.getCoordinateUnderZoom(e), { x: 0, y: 0 }))

@@ -163,7 +163,7 @@ const App = forwardRef<
           height: 1,
         },
         imgNode: new Image(),
-        config: toolConfig?.config,
+        config: { ...toolConfig?.config, drawOutsideTarget: config?.drawOutsideTarget },
         style: initialToolStyle,
         tagConfigList,
         allAttributesMap,
@@ -173,7 +173,7 @@ const App = forwardRef<
 
       setEngine(newEngine);
     },
-    [allAttributesMap, orderVisible, tagConfigList, toolName, tools],
+    [allAttributesMap, config?.drawOutsideTarget, orderVisible, tagConfigList, toolName, tools],
   );
 
   useEffect(() => {
