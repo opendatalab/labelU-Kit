@@ -7,7 +7,7 @@ export default {
       config: {
         textConfigurable: false,
         textCheckType: 0,
-        tags: {
+        attributes: {
           key: '标签-1',
           value: 'value-1',
           type: 'string',

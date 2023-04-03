@@ -30,7 +30,7 @@ export default [
       {
         type: 'category-attribute',
         key: 'field',
-        field: 'texts',
+        field: 'attributes',
         label: '',
         addStringText: '新建',
         disabledStringOptions: ['order'],

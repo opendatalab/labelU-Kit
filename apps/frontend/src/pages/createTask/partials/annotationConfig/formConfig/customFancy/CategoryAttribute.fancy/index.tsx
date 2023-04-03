@@ -15,7 +15,7 @@ import { duplicatedValueValidator, listOmitWithId, listWrapWithId, wrapWithId } 
 
 export enum CategoryType {
   Enum = 'enum',
-  Tuple = 'tuple',
+  Array = 'array',
   String = 'string',
 }
 
@@ -193,13 +193,13 @@ const nestedWithId = map((item: CategoryAttributeItem) => {
 
 const tagTitleMapping: Record<CategoryType, string> = {
   [CategoryType.Enum]: '单选',
-  [CategoryType.Tuple]: '多选',
+  [CategoryType.Array]: '多选',
   [CategoryType.String]: '文本',
 };
 
 const tooltipTitleMapping: Record<CategoryType, string> = {
   [CategoryType.Enum]: '切换多选',
-  [CategoryType.Tuple]: '切换单选',
+  [CategoryType.Array]: '切换单选',
   [CategoryType.String]: '文本描述',
 };
 
@@ -346,7 +346,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
     const handleToggleMultiple = useCallback(
       (cateIndex: number) => () => {
         let newValue = update(`[${cateIndex}].type`)((itemType: CategoryType) => {
-          return itemType === CategoryType.Enum ? CategoryType.Tuple : CategoryType.Enum;
+          return itemType === CategoryType.Enum ? CategoryType.Array : CategoryType.Enum;
         })(stateValue) as CategoryAttributeStateItem[];
 
         // 如果 isMultiple 由 true 变为 false，需要把所有 isDefault 为 true 的选项都变为 false
@@ -451,7 +451,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
             }
           });
 
-          if (Array.isArray(item.options) && [CategoryType.Enum, CategoryType.Tuple].includes(itemType)) {
+          if (Array.isArray(item.options) && [CategoryType.Enum, CategoryType.Array].includes(itemType)) {
             return {
               title: (
                 <div className="category">

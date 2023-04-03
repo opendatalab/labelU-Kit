@@ -30,7 +30,7 @@ export default [
       {
         type: 'category-attribute',
         key: 'field',
-        field: 'tags',
+        field: 'attributes',
         label: '',
         addTagText: '新建',
         showAddString: false,
