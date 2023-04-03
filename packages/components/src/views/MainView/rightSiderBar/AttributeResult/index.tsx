@@ -106,7 +106,7 @@ const AttributeResultWrapper = styled.div<{
 `;
 
 interface AttributeResultProps {
-  type: 'enum' | 'tuple' | 'string';
+  type: 'enum' | 'array' | 'string';
   options?: any[];
   label: string;
   value: string;
@@ -147,7 +147,7 @@ function AttributeFormItem({
     }
   }
 
-  if (type === 'tuple') {
+  if (type === 'array') {
     if (isEmpty(options)) {
       child = <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
     } else {

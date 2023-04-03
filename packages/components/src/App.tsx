@@ -111,12 +111,12 @@ const App = forwardRef<
   const textConfig = useMemo(() => {
     const textTool = tools.find((item) => item.tool === EToolName.Text);
 
-    return textTool?.config?.texts ?? [];
+    return textTool?.config?.attributes ?? [];
   }, [tools]);
   const tagConfigList = useMemo(() => {
     const tagTool = tools.find((item) => item.tool === EToolName.Tag);
 
-    return tagTool?.config?.tags ?? [];
+    return tagTool?.config?.attributes ?? [];
   }, [tools]);
   const allAttributesMap = useMemo(() => {
     const mapping = new Map<string, any>();

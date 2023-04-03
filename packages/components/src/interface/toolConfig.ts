@@ -44,7 +44,7 @@ export enum StringType {
 
 export enum CategoryType {
   Enum = 'enum',
-  Tuple = 'tuple',
+  Array = 'array',
   String = 'string',
 }
 

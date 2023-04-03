@@ -200,7 +200,7 @@ const TagSidebar = () => {
   }, [sample.id]);
 
   const handleOnChange = useCallback(
-    (type: 'tuple' | 'enum', path: string[]) => (e: CheckboxChangeEvent) => {
+    (type: 'array' | 'enum', path: string[]) => (e: CheckboxChangeEvent) => {
       let newTagResult = cloneDeep(tagResult.values);
 
       if (type === 'enum') {
@@ -238,7 +238,7 @@ const TagSidebar = () => {
   );
 
   const makeTreeData = useCallback(
-    (inputs, optionType: 'enum' | 'tuple' | undefined, path: string[] = []) => {
+    (inputs, optionType: 'enum' | 'array' | undefined, path: string[] = []) => {
       return inputs.map((input: any) => {
         const { options, value, key, type } = input;
         if (Array.isArray(options) && options.length > 0) {
@@ -262,12 +262,12 @@ const TagSidebar = () => {
               {key}
             </Radio>
           );
-        } else if (optionType === 'tuple') {
+        } else if (optionType === 'array') {
           leaf = (
             <Checkbox
               value={value}
               checked={get(tagResult.values, path, []).includes(value)}
-              onChange={handleOnChange('tuple', path)}
+              onChange={handleOnChange('array', path)}
             >
               {key}
             </Checkbox>
