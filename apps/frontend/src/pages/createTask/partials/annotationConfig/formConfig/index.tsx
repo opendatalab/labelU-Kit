@@ -7,7 +7,7 @@ import _, { cloneDeep } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 
-import { MediaType } from '@/services/types';
+import { MediaType, TaskStatus } from '@/services/types';
 import FancyForm from '@/components/FancyForm';
 import FancyInput, { add } from '@/components/FancyInput';
 import type { RootState } from '@/store';
@@ -68,7 +68,18 @@ const FormConfig: FC<IProps> = ({ form }) => {
   const [hasAttributes, setHasAttributes] = useState(false);
 
   const config = useSelector((state: RootState) => state.task.config);
+  const taskStatus = useSelector((state: RootState) => state.task.item.status);
+  const taskDoneAmount = useSelector((state: RootState) => state.task.item.stats?.done);
   const { tools } = config || {};
+
+  // 进行中和已完成的任务不允许删除工具
+  const deletable = useMemo(() => {
+    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
+      return false;
+    }
+
+    return true;
+  }, [taskStatus, taskDoneAmount]);
 
   useEffect(() => {
     setSelectedTools(_.chain(tools).compact().map('tool').value());
@@ -123,7 +134,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
         forceRender: true,
         children: (
           <div className={styles.innerForm}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ display: deletable ? 'flex' : 'none', justifyContent: 'flex-end' }}>
               <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
                 <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
                   删除工具
@@ -135,7 +146,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
         ),
       };
     });
-  }, [handleRemoveTool, selectedTools]);
+  }, [deletable, handleRemoveTool, selectedTools]);
 
   // TODO: 增加表单数据类型
   const handleFormValuesChange: FormProps['onValuesChange'] = useCallback(
