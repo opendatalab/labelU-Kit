@@ -123,7 +123,9 @@ export default class PolygonOperation extends BasicToolOperation {
   }
 
   public get selectedText() {
-    return this.selectedPolygon?.textAttribute;
+    const selectedResult = this.dataList.find((i) => i.id === this.selectedID);
+
+    return this.getStringAttributes(selectedResult, EToolName.Polygon);
   }
 
   // 是否直接执行操作
@@ -458,7 +460,7 @@ export default class PolygonOperation extends BasicToolOperation {
    * 初始化的添加的数据
    * @returns
    */
-  public addDrawingPointToPolygonList(isRect?: boolean, e: MouseEvent) {
+  public addDrawingPointToPolygonList(isRect: boolean, e: MouseEvent) {
     let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
@@ -1432,7 +1434,7 @@ export default class PolygonOperation extends BasicToolOperation {
           return;
         }
         if (polygon.isVisible) {
-          const { textAttribute, attribute } = polygon;
+          const { attribute } = polygon;
           const toolColor = this.getColor(attribute, this.config, EToolName.Polygon);
           const toolData = this.getRenderStyle(polygon.attribute, polygon.valid, {
             color: toolColor,
@@ -1464,6 +1466,7 @@ export default class PolygonOperation extends BasicToolOperation {
           });
 
           // 文本输入
+          const textAttribute = this.getStringAttributes(polygon, EToolName.Polygon);
           if (this.isShowAttributeText) {
             const endPoint = transformPointList[transformPointList.length - 1];
             if (endPoint && endPoint.x) {

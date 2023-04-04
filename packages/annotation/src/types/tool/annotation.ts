@@ -23,6 +23,20 @@ export interface IRenderEnhance {
   creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
 }
 
+export enum InnerAttributeType {
+  Enum = 'enum',
+  Array = 'array',
+  String = 'string',
+}
+
+export enum StringType {
+  Text = 'text',
+  Number = 'number',
+  Order = 'order',
+  Regexp = 'regexp',
+  English = 'english',
+}
+
 /**
  * 创建时数据时的增强
  */

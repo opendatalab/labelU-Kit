@@ -5,6 +5,7 @@ export interface Attribute {
   key: string;
   value: string;
   color: string;
+  attributes?: Attribute[];
 }
 
 interface CommonConfig {

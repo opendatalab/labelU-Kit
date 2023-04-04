@@ -8,6 +8,7 @@ import { DEFAULT_FONT, EToolName } from '@/constant/tool';
 import type { Attribute, PrevResult, ToolConfig } from '@/interface/combineTool';
 import type { IImageAttribute } from '@/types/imgAttributeStore';
 import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
+import { InnerAttributeType } from '@/types/tool/annotation';
 import type { ICoordinate, ISize } from '@/types/tool/common';
 import type { ILinePoint } from '@/types/tool/lineTool';
 import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
@@ -18,7 +19,7 @@ import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
 import TagUtils from '@/utils/tool/TagUtils';
-import uuid from '@/utils/uuid';
+import type { Result } from '@/types/annotationTask';
 
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
@@ -196,7 +197,6 @@ export default class BasicToolOperation extends EventListener {
   constructor(props: IBasicToolOperationProps) {
     super();
 
-    this._id = uuid();
     this.saveDataEvent = new CustomEvent('saveLabelResultToImg', {});
     this.renderReady = false;
     this.container = props.container;
@@ -309,6 +309,24 @@ export default class BasicToolOperation extends EventListener {
   /** 数据列表，根据其判断是否可以旋转 */
   get dataList(): any[] {
     return [];
+  }
+
+  public getStringAttributes(result: Result, toolName: EToolName) {
+    if (!result) {
+      return '';
+    }
+
+    const attributeMap = toolName ? this.allAttributesMap?.get(toolName) : this.config.attributeMap;
+
+    const innerAttributes = attributeMap?.get(result.attribute)?.attributes ?? [];
+
+    const onlyStringAttributes = innerAttributes.filter(
+      (innerAttribute: any) => innerAttribute.type === InnerAttributeType.String,
+    );
+
+    return onlyStringAttributes
+      .map((innerAttribute: any) => result.attributes?.[innerAttribute.value] ?? '')
+      .join('\n');
   }
 
   hasAttributeInConfig(attribute: string) {
@@ -1344,8 +1362,6 @@ export default class BasicToolOperation extends EventListener {
 
                   const color = toolStyle.stroke;
                   const transformRect = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
-                  const rectSize = `${Math.round(item.width)} * ${Math.round(item.height)}`;
-                  const textSizeWidth = rectSize.length * 7;
                   DrawUtils.drawRect(
                     this.canvas,
                     // @ts-ignore
@@ -1360,14 +1376,13 @@ export default class BasicToolOperation extends EventListener {
                   );
                   if (this.isShowAttributeText) {
                     const marginTop = 0;
-                    const textWidth = Math.max(20, transformRect.width - textSizeWidth);
                     DrawUtils.drawText(
                       this.canvas,
                       { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
-                      item.textAttribute,
+                      this.getStringAttributes(item, EToolName.Rect),
                       {
                         color: color,
-                        textMaxWidth: textWidth,
+                        textMaxWidth: transformRect.width,
                         // ...DEFAULT_TEXT_SHADOW,
                       },
                     );
@@ -1413,7 +1428,7 @@ export default class BasicToolOperation extends EventListener {
                     DrawUtils.drawText(
                       this.canvas,
                       { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
-                      item.textAttribute,
+                      this.getStringAttributes(item, EToolName.Polygon),
                       {
                         color: toolStyle.stroke,
                         ...DEFAULT_TEXT_OFFSET,
@@ -1463,7 +1478,7 @@ export default class BasicToolOperation extends EventListener {
                   ctx.strokeStyle = toolStyle.stroke;
                   DrawUtils.wrapText(
                     this.canvas,
-                    item.textAttribute,
+                    this.getStringAttributes(item, EToolName.Line),
                     transformPointList[1].x - LINE_ORDER_OFFSET.x,
                     transformPointList[1].y - LINE_ORDER_OFFSET.y,
                     200,
@@ -1512,7 +1527,7 @@ export default class BasicToolOperation extends EventListener {
                     DrawUtils.drawText(
                       this.canvas,
                       { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
-                      item.textAttribute,
+                      this.getStringAttributes(item, EToolName.Point),
                       {
                         color: toolStyle.stroke,
                         ...DEFAULT_TEXT_OFFSET,

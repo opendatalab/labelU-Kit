@@ -214,7 +214,9 @@ export default class PointOperation extends BasicToolOperation {
   };
 
   public get selectedText() {
-    return this.pointList.find((item) => item.id === this.selectedID)?.textAttribute;
+    const selectedResult = this.pointList.find((i) => i.id === this.selectedID);
+
+    return this.getStringAttributes(selectedResult, EToolName.Point);
   }
 
   public setStyle(toolStyle: any) {
@@ -509,6 +511,7 @@ export default class PointOperation extends BasicToolOperation {
         CommonToolUtils.getAllToolsMaxOrder(this.pointList, this.prevResultList) + 1,
     } as IPointUnit;
 
+    // TODO：移除
     // 文本注入
     if (this.config.textConfigurable) {
       let textAttribute = '';
@@ -710,7 +713,7 @@ export default class PointOperation extends BasicToolOperation {
     this.dragStatus = EDragStatus.Wait;
     return {
       width: TEXTAREA_WIDTH * this.zoom * 0.6,
-      textAttribute: point?.textAttribute || '',
+      textAttribute: this.selectedText,
       color,
     };
   }
@@ -775,7 +778,7 @@ export default class PointOperation extends BasicToolOperation {
     if (!point.isVisible) {
       return;
     }
-    const { textAttribute = '', attribute } = point;
+    const { attribute } = point;
     const selected = point.id === this.selectedID;
     const hovered = point.id === this.hoverID;
     const toolColor = this.getColor(attribute, this.config, EToolName.Point);
@@ -832,7 +835,7 @@ export default class PointOperation extends BasicToolOperation {
       DrawUtils.drawText(
         this.canvas,
         { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
-        textAttribute,
+        this.getStringAttributes(point, EToolName.Point),
         {
           color: toolData.stroke,
           ...DEFAULT_TEXT_OFFSET,

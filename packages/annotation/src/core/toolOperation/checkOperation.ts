@@ -199,7 +199,7 @@ export default class CheckOperation extends BasicToolOperation {
       DrawUtils.drawText(
         this.canvas,
         { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
-        polygon?.textAttribute,
+        this.getStringAttributes(polygon, EToolName.Polygon),
         {
           color: toolData.stroke,
           ...DEFAULT_TEXT_OFFSET,
