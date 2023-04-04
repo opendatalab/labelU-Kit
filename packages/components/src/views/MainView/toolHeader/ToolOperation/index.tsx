@@ -44,19 +44,20 @@ export const toolList = [
 const notShowIconTool = [EToolName.Tag, EToolName.Text];
 
 const ToolOperation = () => {
-  const { config, currentToolName, setToolName } = useContext(ViewContext);
+  const { config, currentToolName, setToolName, setSelectedResult } = useContext(ViewContext);
   const { t } = useTranslation();
   const tools = config?.tools;
 
   const toolNodes = map(
-    filter(tools, (item) => !notShowIconTool.includes(item.tool)),
+    filter(tools, (item) => !notShowIconTool.includes(item.tool as EToolName)),
     (toolItem) => {
       const renderTool = toolList?.find((tItem) => tItem?.toolName === toolItem.tool);
       return (
         <Popover key={toolItem.tool} content={t(toolItem.tool)}>
           <a
             onClick={(e) => {
-              setToolName(toolItem.tool);
+              setToolName(toolItem.tool as EToolName);
+              setSelectedResult(null);
               e.stopPropagation();
             }}
           >

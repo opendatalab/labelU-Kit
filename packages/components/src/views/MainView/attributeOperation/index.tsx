@@ -40,7 +40,7 @@ const AttributeOperation = () => {
       const newResult = cloneDeep(result);
 
       update(newResult, [currentToolName, 'result'], (items) => {
-        return items.map((resultItem: any) => {
+        return items?.map((resultItem: any) => {
           if (resultItem.id === selectedResult.id && attributeName !== resultItem.attribute) {
             return {
               ...resultItem,

@@ -105,6 +105,20 @@ const AttributeResultWrapper = styled.div<{
   }
 `;
 
+const StyledForm = styled(Form)`
+  .attribute__checkbox-group {
+    flex-wrap: wrap;
+  }
+
+  .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+    margin-inline-start: 0;
+  }
+
+  .ant-checkbox-wrapper {
+    margin-right: 0.25rem;
+  }
+`;
+
 interface AttributeResultProps {
   type: 'enum' | 'array' | 'string';
   options?: any[];
@@ -151,12 +165,14 @@ function AttributeFormItem({
     if (isEmpty(options)) {
       child = <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
     } else {
-      child = <Checkbox.Group options={finalOptions} />;
+      child = <Checkbox.Group className="attribute__checkbox-group" options={finalOptions} />;
     }
   }
 
   if (type === 'string') {
-    child = <Input.TextArea onKeyDown={(e: React.MouseEvent) => e.stopPropagation()} maxLength={maxLength} showCount />;
+    child = (
+      <Input.TextArea onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()} maxLength={maxLength} showCount />
+    );
 
     if (required) {
       rules.push({ required: true, message: `${label}为不可为空` });
@@ -202,7 +218,7 @@ const ResultAttributeForm = forwardRef((props, ref) => {
       return options;
     }
 
-    allAttributesMap?.get(selectedResult.toolName).forEach((item: any) => {
+    allAttributesMap?.get(selectedResult.toolName)?.forEach((item: any) => {
       options.push({
         label: item.key,
         value: item.value,
@@ -217,7 +233,7 @@ const ResultAttributeForm = forwardRef((props, ref) => {
       console.log(allValues);
 
       if ('attribute' in changedValues) {
-        const attribute = allAttributesMap.get(selectedResult.toolName).get(changedValues.attribute);
+        const attribute = allAttributesMap?.get(selectedResult.toolName)?.get(changedValues.attribute);
         setSelectedAttribute(attribute);
       }
     },
@@ -231,13 +247,13 @@ const ResultAttributeForm = forwardRef((props, ref) => {
 
     if (selectedResult) {
       form.setFieldsValue(cloneDeep(selectedResult));
-      const attribute = allAttributesMap.get(selectedResult.toolName).get(selectedResult.attribute);
+      const attribute = allAttributesMap?.get(selectedResult.toolName)?.get(selectedResult.attribute);
       setSelectedAttribute(attribute);
     }
   }, [allAttributesMap, form, selectedResult]);
 
   return (
-    <Form form={form} layout="vertical" autoComplete="off" onValuesChange={handleAttributeChange}>
+    <StyledForm form={form} layout="vertical" autoComplete="off" onValuesChange={handleAttributeChange}>
       <Form.Item
         label="标签"
         name="attribute"
@@ -258,7 +274,7 @@ const ResultAttributeForm = forwardRef((props, ref) => {
       {map(resultAttributeOptions, (attributeOptionItem: any) => (
         <AttributeFormItem key={attributeOptionItem.value} {...attributeOptionItem} label={attributeOptionItem.key} />
       ))}
-    </Form>
+    </StyledForm>
   );
 });
 

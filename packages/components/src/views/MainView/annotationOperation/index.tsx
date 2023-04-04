@@ -75,7 +75,7 @@ const AnnotationOperation: React.FC<any> = () => {
     }
 
     ImgUtils.load(sample.url).then((imgNode) => {
-      annotationEngine.setImgNode(imgNode as HTMLImageElement);
+      annotationEngine?.setImgNode(imgNode as HTMLImageElement);
     });
   };
 
