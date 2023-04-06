@@ -538,7 +538,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                           onChange={handleOnChange(`[${index}].stringType`)}
                         />
                       </Form.Item>
-                      <Form.Item name={[...path, index, 'required']} label="是否必填">
+                      <Form.Item valuePropName="checked" name={[...path, index, 'required']} label="是否必填">
                         <Switch onChange={handleOnChange(`[${index}].required`)} />
                       </Form.Item>
                       {(item.stringType as StringType) === StringType.Regexp && (

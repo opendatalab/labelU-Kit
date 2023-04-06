@@ -6,6 +6,10 @@ body,
   margin: 0;
 }
 
+:root {
+  --header-height: 3.5rem;
+}
+
 body {
   font-size: 14px;
   color: #333 !important;
