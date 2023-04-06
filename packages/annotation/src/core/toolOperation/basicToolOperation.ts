@@ -1573,9 +1573,10 @@ export default class BasicToolOperation extends EventListener {
                 `,
               );
               const preTagDom = document.getElementById('tagToolTag');
-              if (!this.canvas?.parentNode?.contains(preTagDom)) {
-                this.canvas?.parentNode?.appendChild(dom);
+              if (this.canvas?.parentNode?.contains(preTagDom)) {
+                preTagDom?.remove();
               }
+              this.canvas?.parentNode?.appendChild(dom);
             }
             break;
           }
