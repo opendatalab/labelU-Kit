@@ -11,7 +11,7 @@ import React, {
 import type { SelectProps } from 'antd';
 import { Empty, Checkbox, Radio, Button, Collapse, Form, Input, Popconfirm, Select } from 'antd';
 import classNames from 'classnames';
-import { isEmpty, find, sortBy, cloneDeep, map, update, every } from 'lodash-es';
+import { isEmpty, find, sortBy, cloneDeep, map, update, every, compact } from 'lodash-es';
 import Icon, { EditFilled, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import styled, { css } from 'styled-components';
 import type { FormInstance, Rule } from 'antd/es/form';
@@ -127,6 +127,7 @@ interface AttributeResultProps {
   required?: boolean;
   regexp?: string;
   maxLength?: number;
+  defaultValue?: string | boolean;
   stringType?: 'number' | 'english' | 'regexp' | 'order';
 }
 
@@ -135,11 +136,13 @@ function AttributeFormItem({
   options,
   label,
   value,
+  defaultValue,
   required,
   regexp,
   maxLength,
   stringType,
 }: AttributeResultProps) {
+  let finalDefaultValue: string[] | string | boolean | undefined = defaultValue;
   const finalOptions = useMemo(() => {
     return map(options, (item) => {
       return {
@@ -158,6 +161,13 @@ function AttributeFormItem({
       child = <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
     } else {
       child = <Radio.Group options={finalOptions} />;
+      finalDefaultValue = compact(
+        map(options, (item) => {
+          if (item.isDefault) {
+            return item.value;
+          }
+        }),
+      );
     }
   }
 
@@ -166,6 +176,13 @@ function AttributeFormItem({
       child = <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
     } else {
       child = <Checkbox.Group className="attribute__checkbox-group" options={finalOptions} />;
+      finalDefaultValue = compact(
+        map(options, (item) => {
+          if (item.isDefault) {
+            return item.value;
+          }
+        }),
+      );
     }
   }
 
@@ -196,7 +213,7 @@ function AttributeFormItem({
   }
 
   return (
-    <Form.Item key={value} label={label} name={['attributes', value]} rules={rules}>
+    <Form.Item key={value} label={label} initialValue={finalDefaultValue} name={['attributes', value]} rules={rules}>
       {child}
     </Form.Item>
   );

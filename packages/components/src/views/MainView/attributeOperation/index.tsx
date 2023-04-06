@@ -1,11 +1,85 @@
 import { BasicToolOperation } from '@label-u/annotation';
 import { useContext, useMemo, useCallback, useEffect, useState } from 'react';
-import { Button, Dropdown, Space, Menu } from 'antd';
+import type { ButtonProps, MenuProps } from 'antd';
+import { Button, Dropdown, Space } from 'antd';
 import { cloneDeep, find, isEqual, update } from 'lodash-es';
+import styled, { css } from 'styled-components';
+import Icon from '@ant-design/icons';
+import classNames from 'classnames';
 
-import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
-import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
+import { ReactComponent as DropdownIcon } from '@/assets/svg/dropdown.svg';
 import ViewContext from '@/view.context';
+
+const attributeHighlightStyle = css`
+  .attribute-item__highlight-color {
+    width: 3px;
+    height: 13px;
+    background-color: var(--attribute-color);
+    margin-right: 0.25rem;
+  }
+`;
+
+const StyledAttributeButton = styled<
+  React.FC<
+    ButtonProps & {
+      active?: boolean;
+    }
+  >
+>(Button)`
+  border: 0;
+  border-radius: var(--border-radius-xs);
+  background-color: var(--attribute-color);
+  padding: 0 8px 0 0;
+
+  ${({ active }) =>
+    active
+      ? css`
+          color: #ffffff;
+          background-color: var(--attribute-color) !important;
+
+          &:hover {
+            color: #ffffff !important;
+          }
+        `
+      : css`
+          background-color: #fff;
+
+          &:hover {
+            color: var(--attribute-color) !important;
+          }
+        `}
+  ${attributeHighlightStyle}
+`;
+
+const AttributeWrapper = styled.div``;
+
+const AttributeDropdown = styled.div`
+  .ant-dropdown-menu-item {
+    padding: 0 !important;
+    margin-bottom: 0.25rem !important;
+
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  .attribute-menu-item {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-xs);
+
+    &:hover {
+      background-color: var(--attribute-color) !important;
+      color: #ffffff !important;
+    }
+
+    &.active {
+      background-color: var(--attribute-color) !important;
+      color: #ffffff !important;
+    }
+  }
+
+  ${attributeHighlightStyle}
+`;
 
 const AttributeOperation = () => {
   const { currentToolName, config, annotationEngine, selectedResult, setSelectedResult, result, setResult } =
@@ -16,7 +90,6 @@ const AttributeOperation = () => {
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [showAttributeCount, setShowAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
-  const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
   const attributeMap = useMemo(
     () => toolInstance?.config?.attributeMap ?? new Map(),
     [toolInstance?.config?.attributeMap],
@@ -62,6 +135,22 @@ const AttributeOperation = () => {
     [chooseAttribute, result, selectedResult, currentToolName, setResult, setSelectedResult],
   );
 
+  const handleAttributeClick = useCallback(
+    ({ domEvent, key }) => {
+      domEvent.stopPropagation();
+      toolInstance.setDefaultAttribute(key);
+      setActiveAttribute(key);
+      if (selectedResult) {
+        document.dispatchEvent(
+          new CustomEvent('set-attribute', {
+            detail: { result: { ...selectedResult, attribute: key }, e: domEvent },
+          }),
+        );
+      }
+    },
+    [selectedResult, setActiveAttribute, toolInstance],
+  );
+
   useEffect(() => {
     if (!selectedResult) {
       setActiveAttribute(toolInstance?.defaultAttribute);
@@ -101,119 +190,77 @@ const AttributeOperation = () => {
     }
   }, [attributeBoxLength, currentAttributes]);
 
-  const drowpDownIcon = <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIcon} />;
-  const drowpUpIconA = <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIconA} />;
-
-  const attributeMenue = useCallback(() => {
+  const attributeMenu: MenuProps | undefined = useMemo(() => {
     if (currentAttributes.length >= showAttributeCount) {
       const items = currentAttributes.slice(showAttributeCount).map((item) => {
         return {
           label: (
             <a
+              className={classNames('attribute-menu-item', {
+                active: item.value === chooseAttribute,
+              })}
               style={{
-                background: item.value === chooseAttribute ? item.color : '#fff',
-                color: item.value === chooseAttribute ? '#fff' : '#000',
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                toolInstance.setDefaultAttribute(item.value);
-                setActiveAttribute(item.value);
-
-                if (selectedResult) {
-                  document.dispatchEvent(
-                    new CustomEvent('set-attribute', {
-                      detail: { result: { ...selectedResult, attribute: item.value }, e },
-                    }),
-                  );
-                }
+                // @ts-ignore
+                '--attribute-color': item.color,
               }}
             >
-              <div
-                className="circle"
-                style={{
-                  backgroundColor: item.color,
-                  marginRight: 5,
-                }}
-              />
+              <div className="attribute-item__highlight-color" />
               <span className="attributeName">{item?.key}</span>
             </a>
           ),
           key: item.value,
         };
       });
-      return <Menu items={items} />;
-    } else {
-      return <div />;
+      return {
+        items: items,
+        onClick: handleAttributeClick,
+      };
     }
-  }, [currentAttributes, showAttributeCount, chooseAttribute, toolInstance, setActiveAttribute, selectedResult]);
+  }, [currentAttributes, showAttributeCount, handleAttributeClick, chooseAttribute]);
 
   return (
-    <div className="attributeBox" key={chooseAttribute}>
+    <AttributeWrapper className="attributeBox" key={chooseAttribute}>
       {currentAttributes &&
         currentAttributes.length > 0 &&
         currentAttributes.map((attribute, index) => {
-          const buttomDom = (
-            <Button
-              onClick={(e: MouseEvent) => {
-                e.stopPropagation();
-                toolInstance.setDefaultAttribute(attribute.value);
-                setActiveAttribute(attribute.value);
-                if (selectedResult) {
-                  document.dispatchEvent(
-                    new CustomEvent('set-attribute', {
-                      detail: { result: { ...selectedResult, attribute: attribute.value }, e },
-                    }),
-                  );
-                }
+          const buttonNode = (
+            <StyledAttributeButton
+              onClick={(e: React.MouseEvent) => {
+                handleAttributeClick?.({ domEvent: e, key: attribute.value });
               }}
+              active={attribute.value === chooseAttribute}
               style={{
-                border: '0px',
-                borderRadius: '4px',
-                padding: '1px 8px',
-                backgroundColor: attribute.value === chooseAttribute ? attribute.color : '#FFFFFF',
-                color: attribute.value === chooseAttribute ? '#ffffff' : '',
+                // @ts-ignore
+                '--attribute-color': attribute.color,
               }}
               key={attribute.value}
             >
-              <div
-                className="circle"
-                style={{
-                  backgroundColor: attribute.color,
-                  marginRight: 5,
-                }}
-              />
+              <div className="attribute-item__highlight-color" />
               <span title={attribute.value} className="attributeName">{`${attributeMap.get(attribute.value)?.key} ${
                 index <= 8 ? index + 1 : ''
               }`}</span>
-            </Button>
+            </StyledAttributeButton>
           );
           if (index < showAttributeCount) {
-            return buttomDom;
+            return buttonNode;
           }
           return <div key={index} />;
         })}
       {currentAttributes && showAttributeCount < currentAttributes.length && (
-        <Dropdown overlay={attributeMenue()} trigger={['click']}>
-          <a
-            onMouseEnter={(e) => {
-              e.preventDefault();
-              setIsHoverDropdown(true);
-            }}
-            onMouseLeave={(e) => {
-              e.preventDefault();
-              setIsHoverDropdown(false);
-            }}
-            onClick={(e) => e.preventDefault()}
-            className="dropdowm-a"
-          >
+        <Dropdown
+          menu={attributeMenu}
+          trigger={['click']}
+          dropdownRender={(menu) => <AttributeDropdown>{menu}</AttributeDropdown>}
+        >
+          <Button type="link">
             <Space style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
               更多
-              {isHoverDropdown ? drowpUpIconA : drowpDownIcon}
+              <Icon component={DropdownIcon} />
             </Space>
-          </a>
+          </Button>
         </Dropdown>
       )}
-    </div>
+    </AttributeWrapper>
   );
 };
 

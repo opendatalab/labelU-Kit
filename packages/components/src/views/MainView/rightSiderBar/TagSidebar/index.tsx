@@ -2,7 +2,7 @@ import { Checkbox, Radio, Tree } from 'antd';
 import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { cloneDeep, get, isEmpty, isEqual, omit, set, update } from 'lodash-es';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { TagUtils, uuid } from '@label-u/annotation';
+import { uuid } from '@label-u/annotation';
 import { dfsEach, objectEach } from '@label-u/utils';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -20,72 +20,13 @@ export const expandIconFuc = ({ isActive }: any) => (
 );
 
 const TagSidebar = () => {
-  const { sample, result: allResult, tagConfigList, setResult } = useContext(ViewContext);
+  const { sample, result: allResult, tagConfigList, setResult, syncResultToEngine } = useContext(ViewContext);
   const defaultTagInjected = useRef(false);
   const [tagResult, setTagResult] = useState<ITagResult>({
     values: {},
   });
   const sidebarRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
-
-  const clearTag = () => {
-    const parentNode = document.getElementById('toolContainer');
-    const oldDom = window.self.document.getElementById('tagToolTag');
-    if (oldDom && parentNode && parentNode.contains(oldDom)) {
-      parentNode?.removeChild(oldDom);
-    }
-  };
-
-  const renderTag = useCallback(() => {
-    clearTag();
-    if (isEmpty(tagResult.values)) {
-      return;
-    }
-
-    // TODO: 此处的dom操作与TagToolOperation中的dom操作重复，需要优化
-    const parentNode = document.getElementById('toolContainer');
-    const dom = document.createElement('div');
-    const tagValuesInString = cloneDeep(tagResult.values);
-    objectEach(tagValuesInString, (value, keyPath) => {
-      if (Array.isArray(value)) {
-        set(tagValuesInString, keyPath, value.join(';'));
-      }
-    });
-    const tagInfoList = TagUtils.getTagNameList(tagValuesInString ?? {}, tagConfigList);
-
-    dom.innerHTML =
-      tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {
-        return `${acc}${cur.keyName}: ${cur.value.join(` 、 `)}\n`;
-      }, '') ?? '';
-
-    dom.setAttribute('id', 'tagToolTag');
-    dom.setAttribute(
-      'style',
-      `
-        position: absolute;
-        top: 0;
-        right: 0;
-        z-index: 5;
-        padding: 0 20px;
-        font-size: 15px;
-        color: white;
-        text-align: right;
-        line-height: 32px;
-        white-space: pre;
-        background: rgba(102, 111, 255, 1);
-        opacity: 0.6;
-        clear: both;
-      `,
-    );
-    const preTagToolTag = document.getElementById('tagToolTag');
-    if (!parentNode?.contains(preTagToolTag)) {
-      parentNode?.appendChild(dom);
-    }
-  }, [tagConfigList, tagResult]);
-
-  useEffect(() => {
-    renderTag();
-  }, [renderTag, sample]);
 
   const syncToStore = useCallback(
     (newTagResult) => {
@@ -233,8 +174,10 @@ const TagSidebar = () => {
         values: newTagResult,
       }));
       syncToStore(newTagResult);
+      // 标签分类变化，需要手动同步到引擎
+      syncResultToEngine();
     },
-    [syncToStore, tagResult.values],
+    [syncToStore, tagResult.values, syncResultToEngine],
   );
 
   const makeTreeData = useCallback(
