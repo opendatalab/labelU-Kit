@@ -106,12 +106,12 @@ const CreateTask = () => {
       {
         title: stepTitleMapping[StepEnum.Upload],
         value: StepEnum.Upload,
-        isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+        isFinished: taskStatus !== TaskStatus.DRAFT,
       },
       {
         title: stepTitleMapping[StepEnum.Config],
         value: StepEnum.Config,
-        isFinished: [TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+        isFinished: [TaskStatus.CONFIGURED, TaskStatus.FINISHED, TaskStatus.INPROGRESS].includes(taskStatus),
       },
     ],
     [isExistTask, taskStatus],
@@ -253,6 +253,7 @@ const CreateTask = () => {
           ...taskData,
           ...basicFormValues,
           media_type: annotationConfig.media_type,
+          status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
           config: omit(['media_type'])(annotationConfig),
         },
       });
