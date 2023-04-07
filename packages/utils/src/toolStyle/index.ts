@@ -2,8 +2,6 @@
  * Config2Color
  */
 
-import ToolStyleUtils from './ToolStyleUtils';
-
 /**
  * 默认基础 5 配置
  */
@@ -32,15 +30,6 @@ export const ATTRIBUTE_COLORS = [
 export const INVALID_COLOR = 'rgba(255, 51, 51, 1)';
 export const NULL_COLOR = 'rgba(204, 204, 204, 1)';
 
-interface IToolStyle {
-  stroke: string;
-  fill: string;
-}
-
-type IToolConfig = Record<string, any>;
-
-type IResult = Record<string, any>;
-
 class ToolStyleConverter {
   private _defaultColors: string[]; // 默认颜色列表
   private _attributeColors: string[]; // 默认属性列表
@@ -55,87 +44,6 @@ class ToolStyleConverter {
 
   get attributeColors() {
     return this._attributeColors;
-  }
-
-  /**
-   * 获取指定配置下的颜色
-   * @param result
-   * @param config
-   * @param styleConfig
-   * @param options
-   * @returns
-   */
-  public getColorFromConfig(
-    result: IResult,
-    config: IToolConfig,
-    styleConfig: {
-      borderOpacity: number; // 范围：[0, 1]
-      fillOpacity: number; // 范围：[0, 1]
-      colorIndex: number; // 范围：0 1 2 3 4
-    },
-    options?: Partial<{
-      hover: boolean;
-      selected: boolean;
-      multiColorIndex: number; // 循环使用
-    }>,
-  ): IToolStyle {
-    if (Object.prototype.toString.call(config) !== '[object Object]') {
-      throw Error('Config must be Object');
-    }
-
-    if (Object.prototype.toString.call(result) !== '[object Object]') {
-      throw Error('Result must be Object');
-    }
-
-    const { borderOpacity = 1, fillOpacity = 0.6, colorIndex = 0 } = styleConfig;
-
-    if (!options) {
-      // eslint-disable-next-line no-param-reassign
-      options = {};
-    }
-
-    const valid = result?.valid ?? true;
-
-    const { multiColorIndex = -1, selected, hover } = options;
-
-    const defaultStatus = {
-      selected,
-      hover,
-      borderOpacity,
-      fillOpacity,
-    };
-
-    let colorList = this.defaultColors;
-    if (config?.attributeConfigurable === true || multiColorIndex > -1) {
-      colorList = this.attributeColors;
-    }
-
-    if (valid === false) {
-      // 无效设置
-      return ToolStyleUtils.getToolStrokeAndFill(INVALID_COLOR, defaultStatus);
-    }
-
-    // 属性标注
-    if (config?.attributeConfigurable === true) {
-      const attributeIndex = ToolStyleUtils.getAttributeIndex(result?.attribute, config?.attributeList);
-
-      let color = colorList[attributeIndex % colorList.length];
-
-      // 找不到则开启为无标签
-      if (attributeIndex === -1) {
-        color = NULL_COLOR;
-      }
-
-      return ToolStyleUtils.getToolStrokeAndFill(color, defaultStatus);
-    }
-
-    // 多色
-    if (multiColorIndex > -1) {
-      return ToolStyleUtils.getToolStrokeAndFill(colorList[multiColorIndex % colorList.length], defaultStatus);
-    }
-
-    // 默认属性
-    return ToolStyleUtils.getToolStrokeAndFill(colorList[colorIndex % colorList.length], defaultStatus);
   }
 }
 

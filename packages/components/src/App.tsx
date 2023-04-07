@@ -1,234 +1,438 @@
 import { i18n } from '@label-u/utils';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, useDispatch, useSelector } from 'react-redux';
-import { BasicToolOperation } from '@label-u/annotation';
-import _ from 'lodash-es';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
+import _, { cloneDeep, isEmpty, set } from 'lodash-es';
 
 import MainView from '@/views/MainView';
-import type { BasicConfig, Attribute, OneTag, TextConfig } from '@/interface/toolConfig';
+import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@/interface/toolConfig';
 
-import { store } from '.';
-import type { AppState } from './store';
-import { ANNOTATION_ACTIONS } from './store/Actions';
-import { ChangeCurrentTool, InitTaskData, loadImgList } from './store/annotation/actionCreators';
-import { LoadFileAndFileData } from './store/annotation/reducer';
-import type { ToolInstance } from './store/annotation/types';
-import type { GetFileData, OnSave, OnSubmit, IFileItem, OnPageChange, OnStepChange, LoadFileList } from './types/data';
-import type { Footer, Header, Sider } from './types/main';
-import type { IStepInfo } from './types/step';
-
-interface IAnnotationStyle {
-  strokeColor: string;
-  fillColor: string;
-  textColor: string;
-  toolColor: any;
-}
+import type { IFileItem } from './types/data';
+import ViewContext from './view.context';
+import { jsonParser } from './utils';
+import type { BasicResult, ImageAttribute, SelectedResult, ToolStyle } from './interface/base';
 
 export interface AppProps {
-  toolStyle?: IAnnotationStyle;
-  exportData?: (data: any[]) => void;
-  goBack?: (data: any) => void;
-  imgList?: IFileItem[];
-  config?: string;
-  stepList?: IStepInfo[];
-  step?: number;
+  config?: LabelUAnnotationConfig;
   isPreview?: boolean; // if preview
-  onSubmit?: OnSubmit;
-  onSave?: OnSave;
-  onPageChange?: OnPageChange;
-  onStepChange?: OnStepChange;
-  getFileData?: GetFileData;
-  pageSize?: number;
-  loadFileList?: LoadFileList;
-  headerName?: string;
-  initialIndex?: number;
   className?: string;
-  toolInstance?: ToolInstance;
-  currentToolName?: string; // redux
-  header?: Header;
-  footer?: Footer;
-  sider?: Sider;
-  style?: {
-    layout?: Record<string, any>;
-    header?: Record<string, any>;
-    sider?: Record<string, any>;
-    footer?: Record<string, any>;
-  };
-  setToolInstance?: (tool: ToolInstance) => void;
-  mode?: 'light' | 'dark'; // 临时需求应用于 toolFooter 的操作
   showTips?: boolean; // 是否展示 tips
   defaultLang?: 'en' | 'cn'; // 国际化设置
   leftSiderContent?: React.ReactNode | React.ReactNode; // 左侧图片列表操作空间
   topActionContent?: React.ReactNode | React.ReactNode; // 顶部操作空间
-  tagConfigList?: OneTag[]; // 配置tag 信息，工具共享一套tag
-  attributeList?: Attribute[]; // 标签配置选项，工具共享一套标签
-  toolsBasicConfig: BasicConfig[]; // 多工具配置
-  textConfig: TextConfig;
-  // 标注信息扩展的功能
-  dataInjectionAtCreation?: (annotationData: any) => {};
   // 是否显示标注顺序
   isShowOrder?: boolean;
-  // 渲染增强
-  renderEnhance?: {
-    staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
-    selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
-    creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
-  };
+  currentToolName?: EToolName;
+  sample: IFileItem;
+  // TODO 暂未支持
+  isSidebarCollapsed?: boolean;
 }
 
-const App: React.FC<AppProps> = (props) => {
+const initialToolStyle: ToolStyle = {
+  color: 1,
+  width: 2,
+  borderOpacity: 9,
+  fillOpacity: 9,
+};
+
+// 所有工具的标注结果
+const extractResult = (input: any, excludeToolNames?: string[]) =>
+  Object.keys(input).reduce((res, key) => {
+    if (key.indexOf('Tool') > 0) {
+      if (excludeToolNames && !excludeToolNames.includes(key)) {
+        // @ts-ignore
+        res.push(input[key]);
+      } else if (!excludeToolNames) {
+        // @ts-ignore
+        res.push(input[key]);
+      }
+    }
+    return res;
+  }, []);
+
+const App = forwardRef<
+  {
+    getResult: () => any;
+    toolInstance: any;
+  },
+  AppProps
+>((props, ref) => {
   const {
-    imgList,
-    step = 1,
-    stepList,
-    onSubmit,
-    onSave,
-    toolStyle,
     currentToolName,
-    onPageChange,
-    onStepChange,
-    // @ts-ignore
-    initialIndex = BasicToolOperation.Cache.get('nextIndex') || 0,
-    toolInstance,
-    tagConfigList,
-    attributeList,
-    toolsBasicConfig,
-    textConfig,
-    setToolInstance,
-    getFileData,
-    pageSize = 10,
-    loadFileList,
+    config,
+    isShowOrder,
+    sample,
+    isPreview = false,
+    leftSiderContent,
+    topActionContent,
+    isSidebarCollapsed = false,
     defaultLang = 'cn',
   } = props;
-  //@ts-ignore
-  if (props.imgList && props.imgList.length > 0) {
-    console.info('result', props.imgList[0].result);
-  }
+  const [imgNode, setImgNode] = useState<HTMLImageElement | null>(null);
+  const parsedResult = useMemo(() => {
+    return jsonParser(sample?.result);
+  }, [sample?.result]);
+  const [engine, setEngine] = useState<AnnotationEngine | null>(null);
+  const [toolName, setToolName] = useState<EToolName>(currentToolName!);
+  const [imageAttribute, setImageAttribute] = useState<ImageAttribute>({
+    brightness: 1,
+    contrast: 1,
+    isOriginalSize: false,
+    saturation: 1,
+    zoomRatio: 1,
+  });
+  const [toolStyle, setToolStyle] = useState<ToolStyle>(initialToolStyle);
+  const [result, setResult] = useState<BasicResult>({} as BasicResult);
+  const [orderVisible, toggleOrderVisible] = useState<boolean>(!!isShowOrder);
+  const [selectedResult, setSelectedResult] = useState<SelectedResult | null>(null);
+  const [engineResultUpdateTimeStamp, updateTimeStamp] = useState<number>(Date.now());
+  const resultRef = useRef<BasicResult | null>();
+  const engineRef = useRef<AnnotationEngine | null>(null);
 
-  // 初始化imgList 优先以loadFileList方式加载数据
-  const initImgList = useCallback(() => {
-    if (loadFileList) {
-      loadImgList(store.dispatch, store.getState, initialIndex as number, true).then((isSuccess) => {
-        if (isSuccess) {
-          store.dispatch(LoadFileAndFileData(initialIndex as number));
-        }
+  const updateResult = useCallback((newResult) => {
+    setResult(newResult);
+  }, []);
+
+  const updateSelectedResult = useCallback((newSelectedResult: SelectedResult | null) => {
+    setSelectedResult(newSelectedResult);
+  }, []);
+
+  const syncResultToEngine = useCallback(() => {
+    updateTimeStamp(Date.now());
+  }, []);
+
+  // 所有工具的标注结果
+  const allToolResult = useMemo(() => extractResult(result), [result]);
+  // 图形标注工具的标注结果
+  const graphicResult = useMemo(() => extractResult(result, [EToolName.Tag, EToolName.Text]), [result]);
+  const tools = useMemo(() => {
+    return config?.tools ?? [];
+  }, [config?.tools]);
+  const commonAttributes = useMemo(() => {
+    return config?.attributes ?? [];
+  }, [config?.attributes]);
+
+  const textConfig = useMemo(() => {
+    const textTool = tools.find((item) => item.tool === EToolName.Text);
+
+    return (textTool?.config?.attributes as TextAttribute[]) ?? [];
+  }, [tools]);
+  const tagConfigList = useMemo(() => {
+    const tagTool = tools.find((item) => item.tool === EToolName.Tag);
+
+    return (tagTool?.config?.attributes as InnerAttribute[]) ?? [];
+  }, [tools]);
+  const allAttributesMap = useMemo(() => {
+    const mapping = new Map<string, any>();
+
+    _.forEach(tools, (configItem) => {
+      const attributeMap = new Map<string, any>();
+      attributeMap.set(BasicToolOperation.NONE_ATTRIBUTE, {
+        key: '无标签',
+        value: BasicToolOperation.NONE_ATTRIBUTE,
+        color: '#ccc',
       });
-    } else if (imgList && imgList.length > 0) {
-      store.dispatch({
-        type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
-        payload: {
-          imgList,
+
+      if (configItem.config?.attributes) {
+        _.forEach([...configItem.config?.attributes, ...(commonAttributes || [])], (item) => {
+          attributeMap.set(item.value, item);
+        });
+      }
+
+      mapping.set(configItem.tool, attributeMap);
+    });
+
+    return mapping;
+  }, [commonAttributes, tools]);
+
+  const updateEngine = useCallback(
+    (container: HTMLDivElement) => {
+      if (!tools.length || !toolName) {
+        return;
+      }
+
+      const _toolName = toolName || tools[0].tool;
+      const toolConfig = _.find(tools, { tool: _toolName });
+
+      if (engineRef.current) {
+        engineRef.current.toolInstance.destroy();
+      }
+
+      const newEngine = new AnnotationEngine({
+        container,
+        isShowOrder: orderVisible,
+        toolName: _toolName,
+        size: {
+          with: 1,
+          height: 1,
         },
+        imgNode: new Image(),
+        config: { ...toolConfig?.config, drawOutsideTarget: config?.drawOutsideTarget },
+        style: initialToolStyle,
+        tagConfigList,
+        allAttributesMap,
       });
-      store.dispatch(LoadFileAndFileData(initialIndex as number));
-    }
-  }, [imgList, initialIndex, loadFileList]);
 
-  const dispatch = useDispatch();
+      engineRef.current = newEngine;
 
-  const { isShowOrder } = useSelector((state: AppState) => state.annotation);
-  const [imgUrl, setImgUrl] = useState<string>();
-
-  useEffect(() => {
-    if (imgList && imgList?.length > 0 && imgList[0].url) {
-      setImgUrl(imgList[0].url);
-    }
-  }, [imgList]);
-
-  // unmount时销毁BasicToolOperation.Cache
-  useEffect(
-    () => () => {
-      // @ts-ignore
-      BasicToolOperation.Cache.clear();
+      setEngine(newEngine);
     },
-    [],
+    [allAttributesMap, config?.drawOutsideTarget, orderVisible, tagConfigList, toolName, tools],
   );
 
-  const shouldInitial = useMemo(() => {
-    return _.size(imgList) > 0 && _.size(props.toolsBasicConfig) > 0;
-  }, [imgList, props.toolsBasicConfig]);
+  useEffect(() => {
+    i18n.changeLanguage(defaultLang);
+  }, [defaultLang]);
 
   useEffect(() => {
-    if (!shouldInitial) {
+    if (!tools.length) {
       return;
     }
 
-    let initToolName = currentToolName;
-    const findToolConfigByToolName = toolsBasicConfig.filter((item) => {
-      return item.tool === currentToolName;
-    });
-    // 当工具配置中不包含currentToolName时，重置currentToolName
-    if (findToolConfigByToolName && findToolConfigByToolName.length === 0) {
-      initToolName = toolsBasicConfig[0].tool;
-      dispatch(ChangeCurrentTool(initToolName));
+    if (!currentToolName) {
+      setToolName(tools[0].tool as EToolName);
+    } else {
+      setToolName(currentToolName);
     }
-
-    store.dispatch(
-      InitTaskData({
-        toolStyle,
-        // NOTE: 切换工具必须重新初始化AnnotationEngine
-        initToolName,
-        onSubmit,
-        stepList: stepList || [],
-        tagConfigList,
-        attributeList,
-        toolsBasicConfig,
-        textConfig,
-        step,
-        getFileData,
-        pageSize,
-        loadFileList,
-        onSave,
-        onPageChange,
-        onStepChange,
-      }),
-    );
-    initImgList();
-    // 初始化国际化语言
-    i18n.changeLanguage(defaultLang);
-  }, [
-    defaultLang,
-    dispatch,
-    getFileData,
-    initImgList,
-    loadFileList,
-    currentToolName,
-    onPageChange,
-    onSave,
-    onStepChange,
-    onSubmit,
-    pageSize,
-    step,
-    stepList,
-    shouldInitial,
-    // ====
-    attributeList,
-    tagConfigList,
-    textConfig,
-    toolStyle,
-    toolsBasicConfig,
-    // REVIEW: 尚不清楚imgUrl为何要加在deps中
-    imgUrl,
-  ]);
+  }, [currentToolName, tools]);
 
   useEffect(() => {
-    if (toolInstance) {
-      setToolInstance?.(toolInstance);
-      toolInstance.setIsShowOrder(isShowOrder);
+    updateResult(parsedResult);
+  }, [parsedResult, updateResult]);
+
+  useEffect(() => {
+    if (engine?.toolInstance) {
+      engine?.toolInstance.setImgAttribute(imageAttribute);
     }
-  }, [toolInstance, isShowOrder, setToolInstance]);
+  }, [engine?.toolInstance, imageAttribute]);
+
+  useEffect(() => {
+    if (engine) {
+      engine.setStyle(toolStyle);
+    }
+  }, [engine, toolStyle]);
+
+  useEffect(() => {
+    if (!sample || !engine) {
+      return;
+    }
+
+    ImgUtils.load(sample.url!).then((_imgNode) => {
+      setImgNode(_imgNode);
+      engine.setImgNode(_imgNode as HTMLImageElement, {
+        rotate: result?.rotate ?? 0,
+        valid: result?.valid ?? true,
+      });
+    });
+  }, [engine, result?.rotate, result?.valid, sample]);
+
+  useEffect(() => {
+    resultRef.current = result;
+
+    return () => {
+      resultRef.current = null;
+    };
+  }, [result]);
+
+  useEffect(() => {
+    resultRef.current = parsedResult;
+    return () => {
+      // 切换样本后，清空ref
+      resultRef.current = null;
+      updateResult({});
+      setSelectedResult(null);
+    };
+  }, [parsedResult, sample?.id, updateResult]);
+
+  useEffect(() => {
+    if (!engine || !imgNode) {
+      return;
+    }
+
+    engine.setImgNode(imgNode as HTMLImageElement, {
+      rotate: result?.rotate ?? 0,
+      valid: result?.valid ?? true,
+    });
+  }, [engine, imgNode, result?.rotate, result?.valid, toolName]);
+
+  useEffect(() => {
+    if (!engine || engine.toolName !== toolName) {
+      return;
+    }
+
+    /**
+     * state中的result不实时回写到annotation engine中
+     * 当工具切换时，从ref中获取最新的result，并将其回写到annotation engine中
+     * ref会在result更新时更新
+     */
+    const finalResult = isEmpty(resultRef.current) ? parsedResult : resultRef.current;
+    const currentToolResult = finalResult[toolName] || [];
+    engine.setPrevResultList(extractResult(finalResult, [toolName]));
+    engine.toolInstance.setResult(currentToolResult.result || []);
+    engine.toolInstance.history.initRecord(currentToolResult, true);
+    engine.toolInstance.renderBasicCanvas();
+    engine.toolInstance.render();
+  }, [engine, toolName, parsedResult, engineResultUpdateTimeStamp, sample?.id]);
+
+  useEffect(() => {
+    if (!engine || !toolName) {
+      return;
+    }
+
+    const currentToolResult = result[toolName] || {};
+
+    if (selectedResult && selectedResult.toolName === toolName && engine.toolName === toolName) {
+      if (engine.toolName === EToolName.Line) {
+        const lineResult = currentToolResult.result.find((item: any) => item.id === selectedResult.id);
+
+        if (lineResult) {
+          engine.toolInstance.setActiveAreaByPoint(lineResult.pointList![0]);
+        }
+      } else {
+        engine.toolInstance.setSelectedID(selectedResult.id);
+      }
+
+      engine.toolInstance.setDefaultAttribute(selectedResult.attribute);
+    }
+  }, [engine, engine?.toolName, result, selectedResult, toolName]);
+
+  useEffect(() => {
+    if (!engine || !result || !toolName) {
+      return;
+    }
+
+    const handleSelectedChange = () => {
+      const currentToolResult = result[toolName] || [];
+
+      if (!currentToolResult.result) {
+        return;
+      }
+
+      const correctItem = currentToolResult.result.find((item: any) => item.id === engine?.toolInstance.selectedID);
+
+      if (correctItem && correctItem.id !== selectedResult?.id) {
+        setSelectedResult({
+          ...correctItem,
+          toolName,
+        });
+      } else if (!correctItem) {
+        setSelectedResult(null);
+      }
+    };
+
+    engine.toolInstance.singleOn('selectedChange', handleSelectedChange);
+
+    return () => {
+      engine?.toolInstance?.off?.('selectedChange', handleSelectedChange);
+    };
+  }, [engine, result, selectedResult?.id, toolName]);
+
+  useEffect(() => {
+    const syncResultToContext = () => {
+      if (!toolName) {
+        return;
+      }
+
+      setTimeout(() => {
+        const [newResultAdded] = engine?.toolInstance.exportData();
+        const newResult = cloneDeep(result);
+
+        set(newResult, [toolName, 'result'], newResultAdded);
+        set(newResult, [toolName, 'toolName'], toolName);
+        updateResult(newResult);
+      });
+    };
+
+    document.getElementById('toolContainer')?.addEventListener('saveLabelResultToImg', syncResultToContext);
+    engine?.toolInstance.singleOn('updateResult', syncResultToContext);
+
+    return () => {
+      document.getElementById('toolContainer')?.removeEventListener('saveLabelResultToImg', syncResultToContext);
+      engine?.toolInstance?.off?.('updateResult', syncResultToContext);
+    };
+  }, [engine?.toolInstance, allToolResult, toolName, result, selectedResult, updateResult]);
+
+  const viewContextValue = useMemo(() => {
+    return {
+      imageAttribute,
+      // 工具配置
+      config,
+      annotationEngine: engine,
+      // TODO: 先支持一个样本
+      sample,
+      currentToolName: toolName,
+      updateEngine,
+      leftSiderContent: leftSiderContent,
+      topActionContent: topActionContent,
+      result,
+      currentToolResult: result[toolName],
+      textConfig,
+      tagConfigList,
+      setResult: updateResult,
+      setToolName,
+      allToolResult,
+      allAttributesMap,
+      isShowOrder: orderVisible,
+      setIsShowOrder: toggleOrderVisible,
+      setImageAttribute,
+      toolStyle,
+      setToolStyle,
+      selectedResult,
+      setSelectedResult: updateSelectedResult,
+      syncResultToEngine,
+      engineResultUpdateTimeStamp,
+      graphicResult,
+      isPreview,
+      isSidebarCollapsed,
+    };
+  }, [
+    imageAttribute,
+    config,
+    engine,
+    sample,
+    toolName,
+    updateEngine,
+    leftSiderContent,
+    topActionContent,
+    result,
+    textConfig,
+    tagConfigList,
+    updateResult,
+    allToolResult,
+    allAttributesMap,
+    orderVisible,
+    toolStyle,
+    selectedResult,
+    updateSelectedResult,
+    syncResultToEngine,
+    engineResultUpdateTimeStamp,
+    graphicResult,
+    isPreview,
+    isSidebarCollapsed,
+  ]);
+
+  // 暴露给 ref 的一些方法
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        toolInstance: engine?.toolInstance,
+        getResult: () => {
+          return new Promise((resolve) => {
+            resolve(result);
+          });
+        },
+      };
+    },
+    [engine?.toolInstance, result],
+  );
 
   return (
-    <div id="annotationCotentAreaIdtoGetBox">
-      <MainView {...props} currentToolName={currentToolName as string} />
-    </div>
+    <ViewContext.Provider value={viewContextValue}>
+      <div id="annotation-content-area-to-get-box">
+        <MainView />
+      </div>
+    </ViewContext.Provider>
   );
-};
-
-const mapStateToProps = (state: AppState) => ({
-  toolInstance: state.annotation.toolInstance,
-  currentToolName: state.annotation.currentToolName,
-  toolStyle: state.toolStyle,
 });
 
-export default connect(mapStateToProps)(App);
+export default App;

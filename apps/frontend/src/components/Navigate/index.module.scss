@@ -1,9 +1,6 @@
-@import '../../utils/common/common.module';
-
 .navigator {
-  --header-height: 3.5rem;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   height: var(--header-height);
@@ -13,8 +10,8 @@
 }
 
 .left {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   margin-left: 30px;
@@ -27,6 +24,7 @@
   width: 120px;
   height: 32px;
 }
+
 .shortCutButton {
   background-image: url('../../assets/png/threeLines.png');
   background-size: 24px 24px;
@@ -35,12 +33,14 @@
   height: 24px;
   margin-left: 18px;
 }
+
 .breadcrumb {
   margin-left: 39px;
 }
+
 .right {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   font-weight: 400;
@@ -60,21 +60,24 @@
     margin-bottom: 0;
   }
 }
+
 .signOutItem {
   position: absolute;
   top: 0;
   right: 0;
-  border: 1px solid #cccccc;
-  background-color: #cccccc;
+  border: 1px solid #ccc;
+  background-color: #ccc;
   cursor: pointer;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
   z-index: 100000;
 }
+
 .username {
   cursor: pointer;
   text-align: center;
 }
+
 .quit {
   text-align: center;
   padding: 0.75rem 0;

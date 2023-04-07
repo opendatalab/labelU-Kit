@@ -51,7 +51,7 @@ export const composeResult = (
             ...info.result.filter((v: { sourceID: string }) => !(v.sourceID && v.sourceID === basicRectID)),
             ...rect.filter((v) => v.sourceID && v.sourceID === basicRectID),
           ];
-        } else if (stepName !== 'tagTool') {
+        } else if (!['tagTool', 'textTool'].includes(stepName)) {
           info.result = rect;
         }
 

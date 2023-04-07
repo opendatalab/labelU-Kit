@@ -1,10 +1,7 @@
-import { cKeyCode, toolUtils } from '@label-u/annotation';
+import { cKeyCode } from '@label-u/annotation';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { connect } from 'react-redux';
 
 import { editStepWidth, footerHeight, headerHeight, sidebarWidth } from '@/data/enums/AnnotationSize';
-import type { AppState } from '@/store';
-import { UpdateRotate, PageBackward, PageForward } from '@/store/annotation/actionCreators';
 import type { ISize } from '@/types/main';
 
 const EKeyCode = cKeyCode.default;
@@ -18,28 +15,15 @@ export const viewportContext = React.createContext<{
 });
 
 export const ViewportProviderComponent = (props: any) => {
-  const { children, dispatch } = props;
+  const { children } = props;
   const [width] = useState(typeof window !== 'undefined' ? window.innerWidth : 800);
   const [height] = useState(typeof window !== 'undefined' ? window.innerHeight : 400);
 
-  const keydown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!toolUtils.hotkeyFilter(e)) {
-        return;
-      }
-      if (e.keyCode === EKeyCode.M) {
-        dispatch(PageBackward());
-      }
-
-      if (e.keyCode === EKeyCode.N) {
-        dispatch(PageForward());
-      }
-      if (e.keyCode === EKeyCode.R) {
-        dispatch(UpdateRotate());
-      }
-    },
-    [dispatch],
-  );
+  const keydown = useCallback((e: KeyboardEvent) => {
+    if (e.keyCode === EKeyCode.R) {
+      // TODO: 旋转
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -55,9 +39,7 @@ export const ViewportProviderComponent = (props: any) => {
   return <viewportContext.Provider value={size}>{children}</viewportContext.Provider>;
 };
 
-export const ViewportProvider = connect((state: AppState) => ({
-  annotation: state.annotation,
-}))(ViewportProviderComponent);
+export const ViewportProvider = ViewportProviderComponent;
 
 export const useViewport = () => {
   const { width, height } = useContext(viewportContext);

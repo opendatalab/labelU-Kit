@@ -1,9 +1,10 @@
 import { cTool } from '@label-u/annotation';
 import { Popover } from 'antd/es';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { EToolName } from '@/data/enums/ToolType';
+import ViewContext from '@/view.context';
 
 import { footerCls } from '../index';
 import lineToolShortCutTable from './line';
@@ -32,11 +33,12 @@ const shortCutTable: any = {
   [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
 };
 
-const ToolHotKey: React.FC<IProps> = ({ style, toolName }) => {
+const ToolHotKey: React.FC<IProps> = ({ style }) => {
+  const { currentToolName } = useContext(ViewContext);
   const [, setFlag] = useState(false);
   const { t } = useTranslation();
 
-  if (!toolName) {
+  if (!currentToolName) {
     return null;
   }
 
@@ -153,13 +155,13 @@ const ToolHotKey: React.FC<IProps> = ({ style, toolName }) => {
 
   const content = (
     <div className={`${footerCls}__hotkey-content`}>
-      {shortCutTable[toolName]?.map((info: any, index: number) => setHotKey(info, index))}
+      {shortCutTable[currentToolName]?.map((info: any, index: number) => setHotKey(info, index))}
     </div>
   );
   const containerStyle = style || { width: 100 };
 
   // 不存在对应的工具则不展示的快捷键
-  if (!shortCutTable[toolName]) {
+  if (!shortCutTable[currentToolName]) {
     return null;
   }
 
@@ -177,7 +179,6 @@ const ToolHotKey: React.FC<IProps> = ({ style, toolName }) => {
         offset: [20, 0],
       }}
       overlayClassName="tool-hotkeys-popover"
-      // visible={svgFlag}
     >
       <div
         className="shortCutTitle"
@@ -185,18 +186,7 @@ const ToolHotKey: React.FC<IProps> = ({ style, toolName }) => {
         onMouseLeave={() => setFlag(false)}
         style={containerStyle}
       >
-        {/* {title ?? (
-          <a className='svg'>
-            <img
-              src={svgFlag ? hotKeyHoverSvg : hotKeySvg}
-              width={15}
-              height={13}
-              style={{ marginRight: '5px' }}
-            /> */}
-
         <a>{t('Hotkeys')}</a>
-        {/* </a>
-        )} */}
       </div>
     </Popover>
   );

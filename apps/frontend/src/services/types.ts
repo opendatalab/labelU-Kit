@@ -143,6 +143,7 @@ export interface LogoutResponse {
 export enum MediaType {
   IMAGE = 'IMAGE',
   VIDEO = 'VIDEO',
+  POINT_CLOUD = 'POINT_CLOUD',
 }
 
 export interface MetaData {

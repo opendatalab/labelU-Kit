@@ -1,342 +1,256 @@
-import { CaretRightOutlined } from '@ant-design/icons';
-import { Collapse, Tooltip } from 'antd/es';
-import { cloneDeep, pickBy } from 'lodash-es';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { OneTag } from '@label-u/annotation';
-import { CommonToolUtils, TagUtils, uuid } from '@label-u/annotation';
-import { connect, useDispatch } from 'react-redux';
+import { Checkbox, Radio, Tree } from 'antd';
+import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
+import { cloneDeep, get, isEmpty, isEqual, omit, set, update } from 'lodash-es';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { EToolName, uuid } from '@label-u/annotation';
+import { dfsEach, objectEach } from '@label-u/utils';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 
-import type { AppState } from '@/store';
-import type { IInputList } from '@/types/main';
-import type { ObjectString } from '@/components/videoPlayer/types';
-import type { IFileItem } from '@/types/data';
-import { ChangeSave, UpdateImgList } from '@/store/annotation/actionCreators';
-import CheckBoxList from '@/components/checkboxList';
-import RadioList from '@/components/attributeList';
+import ViewContext from '@/view.context';
+import type { BasicResult } from '@/interface/base';
 
-interface IProps {
-  imgIndex: number;
-  tagConfigList: OneTag[];
-  imgList: IFileItem[];
-  isPreview: boolean;
+interface ITagResult {
+  id?: string;
+  values: Record<string, string[]>;
 }
-
-declare interface ITagResult {
-  id: string;
-  sourceID: string;
-  result: Record<string, string>;
-}
-
-const { Panel } = Collapse;
 
 export const expandIconFuc = ({ isActive }: any) => (
   <CaretRightOutlined rotate={isActive ? 90 : 0} style={{ color: 'rgba(0, 0, 0, 0.36)' }} />
 );
 
-const TagSidebar: React.FC<IProps> = ({ imgList, tagConfigList, imgIndex, isPreview }) => {
-  const [expandKeyList, setExpandKeyList] = useState<string[]>([]);
-  const [tagResult, setTagResult] = useState<ITagResult[]>([]);
+const TagSidebar = () => {
+  const { sample, result: allResult, tagConfigList, setResult, syncResultToEngine } = useContext(ViewContext);
+  const defaultTagInjected = useRef(false);
+  const [tagResult, setTagResult] = useState<ITagResult>({
+    values: {},
+  });
   const sidebarRef = useRef<HTMLDivElement>(null);
-  // const [, forceRender] = useState<number>(0);
-  // const [hoverDeleteIndex, setHoverDeleteIndex] = useState(-1);
   const { t } = useTranslation();
-  // const height = window?.innerHeight - 61 - 200;
 
-  const dispatch = useDispatch();
-
-  //   /**
-  //  * 当前页面的标注结果
-  //  */
-  //   const currentTagResult = useMemo(()=>{
-  //     return (
-  //       tagResult.filter((v) => {
-  //         const basicSourceID = `${v.sourceID}`;
-  //         // return CommonToolUtils.isSameSourceID(basicSourceID, this.sourceID);
-  //         return true;
-  //       })[0] ?? {}
-  //     );
-  //   },[tagResult])
-
-  const clearTag = () => {
-    const parentNode = document.getElementById('toolContainer');
-    const oldDom = window.self.document.getElementById('tagToolTag');
-    if (oldDom && parentNode && parentNode.contains(oldDom)) {
-      parentNode?.removeChild(oldDom);
-    }
-  };
-
-  useEffect(() => {
-    if (imgList && imgList.length > 0) {
-      const currentImgResult = JSON.parse(imgList[imgIndex].result as string);
-      const tagResult_ = currentImgResult?.tagTool ? currentImgResult?.tagTool?.result : [];
-      setTagResult(tagResult_);
-    }
-  }, [imgIndex, imgList]);
-
-  const renderTag = useCallback(() => {
-    clearTag();
-    if (!(tagResult?.length > 0)) {
-      return;
-    }
-    const parentNode = document.getElementById('toolContainer');
-    const dom = document.createElement('div');
-    const tagInfoList = TagUtils.getTagNameList(tagResult[0]?.result ?? {}, tagConfigList);
-
-    dom.innerHTML =
-      tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {
-        return `${acc}${cur.keyName}: ${cur.value.join(` 、 `)}\n`;
-      }, '') ?? '';
-
-    dom.setAttribute('id', 'tagToolTag');
-    dom.setAttribute(
-      'style',
-      `
-        position: absolute;
-        top: 0;
-        right: 0;
-        z-index: 5;
-        padding: 0 20px;
-        font-size: 15px;
-        color: white;
-        text-align: right;
-        line-height: 32px;
-        white-space: pre;
-        background: rgba(102, 111, 255, 1);
-        opacity: 0.6;
-        clear: both;
-      `,
-    );
-    const preTagToolTag = document.getElementById('tagToolTag');
-    if (!parentNode?.contains(preTagToolTag)) {
-      parentNode?.appendChild(dom);
-    }
-  }, [tagConfigList, tagResult]);
-
-  useEffect(() => {
-    renderTag();
-  }, [renderTag, tagResult]);
-
-  const getTagResultByCode = (num1: number, num2?: number) => {
-    try {
-      const inputList = tagConfigList;
-      const mulitTags = inputList.length > 1;
-      const keycode1 = num2 !== undefined ? num1 : 0;
-      const keycode2 = num2 !== undefined ? num2 : num1;
-      const primaryTagConfig = mulitTags ? inputList[keycode1] : inputList[0];
-      const secondaryTagConfig = (primaryTagConfig.subSelected ?? [])[keycode2];
-
-      if (primaryTagConfig && secondaryTagConfig) {
-        return {
-          value: {
-            key: primaryTagConfig.value,
-            value: secondaryTagConfig.value,
-          },
-          isMulti: primaryTagConfig.isMulti,
-        };
-      }
-    } catch {
-      return;
-    }
-  };
-
-  const combineResult = (
-    inputValue: { value: { key: string; value: string }; isMulti: boolean },
-    existValue: ObjectString = {},
-  ) => {
-    const { isMulti } = inputValue;
-    const { key, value } = inputValue.value;
-
-    if (isMulti) {
-      let valuesArray = existValue[key]?.split(';') ?? [];
-      if (valuesArray.includes(value)) {
-        valuesArray = valuesArray.filter((i) => i !== value);
-      } else {
-        valuesArray.push(value);
+  const syncToStore = useCallback(
+    (newTagResult) => {
+      // 保存至store
+      if (isEmpty(newTagResult)) {
+        return;
       }
 
-      const valuesSet = new Set(valuesArray);
-      existValue[key] = Array.from(valuesSet).join(';');
-      return pickBy(existValue, (v) => v);
-    }
+      const tagsInString = cloneDeep(newTagResult);
+      objectEach(tagsInString, (value, keyPath) => {
+        if (Array.isArray(value)) {
+          set(tagsInString, keyPath, value.join(';'));
+        }
+      });
 
-    existValue[key] = existValue[key] === value ? undefined : value;
-
-    return pickBy(existValue, (v) => v);
-  };
-
-  const setLabelBySelectedList = (num1: number, num2?: number) => {
-    const newTagConfig = getTagResultByCode(num1, num2);
-    if (newTagConfig) {
-      const tagRes = combineResult(newTagConfig, tagResult[0]?.result ?? {});
-      const result = [
-        {
-          sourceID: CommonToolUtils.getSourceID(),
-          id: uuid(8, 62),
-          result: tagRes,
-        },
-      ];
-      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
       const currentImgResult = {
-        ...oldImgResult,
+        ...allResult,
         tagTool: {
-          toolName: 'tagTool',
-          result: [...result],
+          toolName: EToolName.Tag,
+          result: [
+            {
+              id: tagResult.id || uuid(8, 62),
+              result: tagsInString,
+            },
+          ],
         },
       };
-      imgList[imgIndex].result = JSON.stringify(currentImgResult);
-      dispatch(UpdateImgList(imgList));
-      setTagResult(result as ITagResult[]);
-      dispatch(ChangeSave);
-    }
-  };
 
-  const setLabel = (num1: number, num2: number) => {
-    setLabelBySelectedList(num1, num2);
-  };
-
-  const setExpendKeyList = useCallback(
-    (index: number, value: string, expend?: boolean) => {
-      const newKeyList = cloneDeep(expandKeyList);
-      if (newKeyList[index] === '' || expend === true) {
-        newKeyList[index] = value;
-      } else {
-        newKeyList[index] = '';
-      }
-      setExpandKeyList(newKeyList);
+      setResult(currentImgResult as unknown as BasicResult);
     },
-    [expandKeyList],
+    [allResult, setResult, tagResult.id],
   );
 
-  // basicIndex 到底是那一层
-  const labelPanel = (labelInfoSet: IInputList[], basicIndex = -1) => {
-    if (!labelInfoSet) {
-      return null;
+  const tagValues = useMemo(() => {
+    const stateValue: ITagResult = {
+      values: {},
+    };
+
+    // 填入默认选中的值
+    dfsEach(
+      tagConfigList,
+      (item, path) => {
+        if (item.isDefault) {
+          const fieldPath = [];
+
+          const walkedPath = [];
+          // 末尾的值不需要设置到 fieldPath 中
+          for (let i = 0; i < path.length - 1; i++) {
+            walkedPath.push(path[i]);
+
+            if (typeof path[i] === 'number') {
+              const configItem = get(tagConfigList, walkedPath);
+              fieldPath.push(configItem.value);
+            }
+          }
+
+          if (get(stateValue.values, fieldPath)) {
+            update(stateValue.values, fieldPath, (items) => {
+              return [...items, item.value];
+            });
+          } else {
+            set(stateValue.values, fieldPath, [item.value]);
+          }
+        }
+      },
+      {
+        childrenField: 'options',
+      },
+    );
+
+    if (!sample) {
+      return stateValue;
     }
 
-    return labelInfoSet.map((info: IInputList, index: number) => {
-      if (info.subSelected) {
-        // 判断是否有数据
-        // const isResult = TagUtils.judgeResultIsInInputList(
-        //   info.value,
-        //   currentTagResult?.result?.[info.value],
-        //   tagConfigList,
-        // );
+    try {
+      const tagResult_ = allResult?.tagTool ? allResult?.tagTool?.result : [];
 
-        return (
-          <Collapse
-            bordered={false}
-            expandIcon={expandIconFuc}
-            key={`collapse_${index}_${basicIndex + 1}`}
-            onChange={() => setExpendKeyList(index, info.value)}
-            activeKey={[info.value]}
-          >
-            <Panel
-              header={
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flex: 1,
-                  }}
-                >
-                  <span>
-                    {info.key}
-                    <Tooltip placement="bottom" title={t('ClearThisOption')}>
-                      <img
-                        style={{ marginLeft: 5, cursor: 'pointer' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // toolInstance.clearResult(true, info.value);
-                        }}
-                        // src={hoverDeleteIndex === index || isResult ? clearSmallA : clearSmall}
-                        // onMouseEnter={() => {
-                        //   setHoverDeleteIndex(index);
-                        // }}
-                        // onMouseLeave={() => {
-                        //   setHoverDeleteIndex(-1);
-                        // }}
-                      />
-                    </Tooltip>
-                    {/* {isResult && expandKeyList[index] === '' && <Badge color='#87d068' />} */}
-                  </span>
+      if (tagResult_.length === 0) {
+        return stateValue;
+      }
 
-                  {/* {tagConfigList?.length > 1 && selectedButton(index)} */}
-                </div>
-              }
-              key={info.value}
+      const result: Record<string, string[]> = {};
+      const tagResult_0 = tagResult_[0].result;
+
+      if (tagResult_0) {
+        Object.keys(tagResult_0).forEach((item) => {
+          result[item] = tagResult_0[item].split(';');
+        });
+      }
+
+      stateValue.id = tagResult_[0].id;
+      stateValue.values = result;
+
+      return stateValue;
+    } catch (err) {
+      return stateValue;
+    }
+  }, [allResult?.tagTool, sample, tagConfigList]);
+
+  useEffect(() => {
+    if (isEqual(tagValues, tagResult)) {
+      return;
+    }
+
+    setTagResult(tagValues);
+
+    if (!defaultTagInjected.current) {
+      syncToStore(tagValues.values);
+      defaultTagInjected.current = true;
+    }
+  }, [syncToStore, tagResult, tagValues]);
+
+  useEffect(() => {
+    defaultTagInjected.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sample.id]);
+
+  const handleOnChange = useCallback(
+    (type: 'array' | 'enum', path: string[]) => (e: CheckboxChangeEvent) => {
+      let newTagResult = cloneDeep(tagResult.values);
+
+      if (type === 'enum') {
+        if (get(newTagResult, [...path, 0]) === e.target.value) {
+          // @ts-ignore
+          newTagResult = omit(newTagResult, [[...path, 0]]);
+        } else {
+          set(newTagResult, [...path, 0], e.target.value);
+        }
+      } else {
+        const index = get(newTagResult, path, []).indexOf(e.target.value);
+        if (index > -1) {
+          update(newTagResult, path, (items) => {
+            return items.filter((item: any) => item !== e.target.value);
+          });
+
+          if (get(newTagResult, path, []).length === 0) {
+            // @ts-ignore
+            newTagResult = omit(newTagResult, [path]);
+          }
+        } else {
+          update(newTagResult, path, (items = []) => {
+            return [...items, e.target.value];
+          });
+        }
+      }
+
+      setTagResult((pre) => ({
+        ...pre,
+        values: newTagResult,
+      }));
+      syncToStore(newTagResult);
+      // 标签分类变化，需要手动同步到引擎
+      syncResultToEngine();
+    },
+    [syncToStore, tagResult.values, syncResultToEngine],
+  );
+
+  const makeTreeData = useCallback(
+    (inputs, optionType: 'enum' | 'array' | undefined, path: string[] = []) => {
+      return inputs.map((input: any) => {
+        const { options, value, key, type } = input;
+        if (Array.isArray(options) && options.length > 0) {
+          return {
+            title: key,
+            value,
+            key: value,
+            children: makeTreeData(options, type, [...path, value]),
+          };
+        }
+
+        let leaf = key;
+
+        if (optionType === 'enum') {
+          leaf = (
+            <Radio
+              value={value}
+              checked={get(tagResult.values, [...path, 0]) === value}
+              onChange={handleOnChange('enum', path)}
             >
-              <div
-                className="level"
-                // style={{
-                //   backgroundColor:
-                //     labelSelectedList.length > 0 && labelSelectedList[0] === index
-                //       ? 'rgba(158, 158, 158, 0.18)'
-                //       : '',
-                // }}
-              >
-                {labelPanel(info.subSelected, index)}
-              </div>
-            </Panel>
-          </Collapse>
-        );
-      }
-      const key = tagConfigList?.[basicIndex] ? tagConfigList?.[basicIndex].value : 0;
-      const selectedAttribute = tagResult[0]?.result?.[key]?.split(';')?.indexOf(info.value) > -1 ? info.value : '';
+              {key}
+            </Radio>
+          );
+        } else if (optionType === 'array') {
+          leaf = (
+            <Checkbox
+              value={value}
+              checked={get(tagResult.values, path, []).includes(value)}
+              onChange={handleOnChange('array', path)}
+            >
+              {key}
+            </Checkbox>
+          );
+        }
 
-      if (tagConfigList?.[basicIndex]?.isMulti === true) {
-        return (
-          <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
-            <CheckBoxList
-              attributeChanged={() => {
-                setLabel(basicIndex, index);
-              }}
-              selectedAttribute={[selectedAttribute]}
-              list={[{ value: info.value, label: info.key }]}
-              num={index + 1}
-            />
-          </div>
-        );
-      }
-      return (
-        <div className="singleBar" key={`${key}_${basicIndex}_${index}`}>
-          <RadioList
-            forbidColor
-            attributeChanged={() => setLabel(basicIndex, index)}
-            selectedAttribute={selectedAttribute}
-            list={[{ value: info.value, label: info.key }]}
-            num={index + 1}
-          />
-        </div>
-      );
-    });
-  };
+        return {
+          title: leaf,
+          value,
+          key: value,
+        };
+      });
+    },
+    [handleOnChange, tagResult.values],
+  );
+
+  const treeData = useMemo(() => {
+    return makeTreeData(tagConfigList, undefined, undefined);
+  }, [makeTreeData, tagConfigList]);
 
   return (
     <div
       className={classNames({
         tagOperationMenu: true,
-        tagOperationMenuPreview: isPreview,
+        tagOperationMenuPreview: false,
       })}
       ref={sidebarRef}
     >
       {tagConfigList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
-        <div>{labelPanel(tagConfigList)}</div>
+        <Tree selectable={false} switcherIcon={<CaretDownOutlined />} blockNode defaultExpandAll treeData={treeData} />
       )}
     </div>
   );
 };
 
-function mapStateToProps(state: AppState) {
-  return {
-    imgList: state.annotation.imgList,
-    tagConfigList: state.annotation.tagConfigList,
-    imgIndex: state.annotation.imgIndex,
-  };
-}
-
-export default connect(mapStateToProps)(TagSidebar);
+export default TagSidebar;

@@ -1,19 +1,17 @@
-@import '@/utils/common/common.module';
-
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
+
 .left {
   width: 300px;
   width: 74px;
   height: 32px;
-  //background: var(--primary-color);
+  //background: var(--color-primary);
 
   text-align: center;
-  line-height: 32px;
   line-height: 32px;
   cursor: pointer;
   //color: #ffffff;
@@ -23,8 +21,8 @@
 }
 
 .right {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }

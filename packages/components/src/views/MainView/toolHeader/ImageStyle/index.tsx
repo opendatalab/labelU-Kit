@@ -19,26 +19,8 @@ const ImageStyle: FC = () => {
   );
 
   return (
-    <Popover
-      placement="topLeft"
-      content={content}
-      // visible={visible}
-      // @ts-ignore
-      // onMouseMove={() => setFlag(true)}
-      // onMouseLeave={() => {
-      //   setFlag(false);
-      // }}
-      overlayClassName="tool-hotkeys-popover"
-      // visible={svgFlag}
-    >
-      <div
-        className="item"
-        //   onMouseMove={() => setFlag(true)}
-        //   onMouseLeave={() => setFlag(false)}
-        //   style={containerStyle}
-      >
-        工具样式
-      </div>
+    <Popover placement="topLeft" content={content} overlayClassName="tool-hotkeys-popover">
+      <div className="item">工具样式</div>
     </Popover>
   );
 };

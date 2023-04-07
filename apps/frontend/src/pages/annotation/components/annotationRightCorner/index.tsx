@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
-import _ from 'lodash-es';
+import _, { debounce, throttle } from 'lodash-es';
 import { set } from 'lodash/fp';
 
 import commonController from '@/utils/common/common';
@@ -15,6 +15,7 @@ import AnnotationContext from '../../annotation.context';
 
 interface AnnotationRightCornerProps {
   isLastSample: boolean;
+  isFirstSample: boolean;
 }
 
 export const SAMPLE_CHANGED = 'sampleChanged';
@@ -48,12 +49,11 @@ export interface AnnotationLoaderData {
   samples: SampleListResponse;
 }
 
-const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => {
+const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightCornerProps) => {
   const navigate = useNavigate();
   const routeParams = useParams();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  // TODO： 此处使用 useSelector 会获取到labelu/components中的store，后期需要修改
   const { samples, setSamples } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const currentSample = samples[sampleIndex];
@@ -107,14 +107,14 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     if (currentSample?.state === SampleState.SKIPPED) {
       return;
     }
+
     // @ts-ignore
-    const cResult = await annotationRef?.current?.getResult();
-    const rResult = cResult[0].result;
-    const body = set('data.result')(rResult)(currentSample);
+    const result = await annotationRef?.current?.getResult();
+    const body = set('data.result')(JSON.stringify(result))(currentSample);
 
     await updateSampleAnnotationResult(+taskId!, +sampleId!, {
       ...body,
-      annotated_count: getAnnotationCount(JSON.parse(body.data!.result)),
+      annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
   }, [currentSample, sampleId, taskId]);
@@ -146,7 +146,7 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     (e: KeyboardEvent) => {
       const keyCode = e.keyCode;
       if (keyCode === 65 && sampleIndex > 0) {
-        commonController.debounce(handlePrevSample, 1000)('');
+        handlePrevSample();
       } else if (keyCode === 68) {
         handleNextSample();
       }
@@ -155,12 +155,31 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
   );
 
   useEffect(() => {
-    document.addEventListener('keyup', onKeyDown);
+    document.addEventListener('keydown', onKeyDown);
 
     return () => {
-      document.removeEventListener('keyup', onKeyDown);
+      document.removeEventListener('keydown', onKeyDown);
     };
   }, [onKeyDown]);
+
+  // 从外部触发上下翻页，比如快捷键，不知道上下sample的id
+  useEffect(() => {
+    const handleSampleChanged = (e: CustomEvent) => {
+      const changeType = _.get(e, 'detail');
+
+      if (changeType === 'next') {
+        handleNextSample();
+      } else if (changeType === 'prev') {
+        handlePrevSample();
+      }
+    };
+
+    document.addEventListener(SAMPLE_CHANGED, handleSampleChanged as EventListener);
+
+    return () => {
+      document.removeEventListener(SAMPLE_CHANGED, handleSampleChanged as EventListener);
+    };
+  }, [handleNextSample, handlePrevSample]);
 
   // 监听标注主页的左侧样本切换
   useEffect(() => {
@@ -187,14 +206,15 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     <div className={currentStyles.outerFrame} id="rightCorner">
       <div className={currentStyles.right}>
         {isSampleSkipped ? (
-          <Button id={'skipped'} onClick={commonController.debounce(handleCancelSkipSample, 100)}>
+          <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)}>
             取消跳过
           </Button>
         ) : (
-          <Button id={'skipped'} onClick={commonController.debounce(handleSkipSample, 100)}>
+          <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)}>
             跳过
           </Button>
         )}
+        {!isFirstSample && <Button onClick={commonController.debounce(handlePrevSample, 100)}>上一页</Button>}
         {isLastSample ? (
           <Button type="primary" onClick={commonController.debounce(handleComplete, 100)}>
             完成

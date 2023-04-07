@@ -6,7 +6,7 @@ import type { ICoordinate } from '@/types/tool/common';
 
 import { EDragStatus, ESortDirection } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
-import { EDragTarget } from '../../constant/tool';
+import { EDragTarget, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
@@ -18,7 +18,6 @@ import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
-import TextAttributeClass from './textAttributeClass';
 
 export interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
@@ -53,8 +52,6 @@ export default class RectOperation extends BasicToolOperation {
 
   public markerIndex: number; // 用于列表标签定位
 
-  private _textAttributInstance?: TextAttributeClass;
-
   private dragInfo?: {
     dragStartCoord: ICoordinate;
     dragTarget: EDragTarget;
@@ -78,7 +75,6 @@ export default class RectOperation extends BasicToolOperation {
     this.getDrawingRectWithRectList = this.getDrawingRectWithRectList.bind(this);
     this.setSelectedIdAfterAddingDrawingRect = this.setSelectedIdAfterAddingDrawingRect.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
-    this.updateSelectedRectTextAttribute = this.updateSelectedRectTextAttribute.bind(this);
     this.setSelectedID = this.setSelectedID.bind(this);
   }
 
@@ -98,11 +94,9 @@ export default class RectOperation extends BasicToolOperation {
 
   public destroy() {
     super.destroy();
-    if (this._textAttributInstance) {
-      this._textAttributInstance.clearTextAttribute();
-    }
   }
 
+  // @ts-ignore
   public setConfig(config: IRectConfig, isClear = false) {
     this.config = config;
     if (isClear === true) {
@@ -139,7 +133,13 @@ export default class RectOperation extends BasicToolOperation {
   }
 
   public get selectedText() {
-    return this.selectedRect?.textAttribute;
+    const selectedResult = this.dataList.find((i) => i.id === this.selectedID);
+
+    if (!selectedResult) {
+      return '';
+    }
+
+    return this.getStringAttributes(selectedResult, EToolName.Rect);
   }
 
   get dataList() {
@@ -204,17 +204,6 @@ export default class RectOperation extends BasicToolOperation {
   }
 
   public setSelectedRectID(newID?: string) {
-    const oldID = this.selectedRectID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
-
-      this._textAttributInstance?.changeSelected();
-    }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-
     this.selectedRectID = newID;
 
     this.render();
@@ -223,11 +212,6 @@ export default class RectOperation extends BasicToolOperation {
 
   public setStyle(toolStyle: any) {
     super.setStyle(toolStyle);
-
-    // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
-    }
   }
 
   /**
@@ -261,35 +245,6 @@ export default class RectOperation extends BasicToolOperation {
     }
     this.emit('markIndexChange');
   };
-
-  /** 更新文本输入，并且进行关闭 */
-  public updateSelectedRectTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute) {
-      // 切换的时候如果存在
-
-      let textAttribute = newTextAttribute;
-      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
-        textAttribute = '';
-      }
-
-      this.setRectList(
-        this.rectList.map((v) => {
-          if (v.id === this.selectedRectID) {
-            return {
-              ...v,
-              textAttribute,
-            };
-          }
-          return v;
-        }),
-        true,
-      );
-
-      this.emit('updateTextAttribute');
-      this.render();
-    }
-  }
 
   public getHoverRectID = (e: MouseEvent) => {
     const coordinate = this.getCoordinateUnderZoom(e);
@@ -884,7 +839,6 @@ export default class RectOperation extends BasicToolOperation {
       isVisible: true,
       id: uuid(8, 62),
       sourceID: basicSourceID,
-      textAttribute: '',
     };
 
     if (this.hasMarkerConfig) {
@@ -908,20 +862,6 @@ export default class RectOperation extends BasicToolOperation {
         this.emit('messageInfo', locale.getMessagesByLocale(EMessage.MarkerFinish, this.lang));
         this.drawingRect = undefined;
         return;
-      }
-    }
-
-    if (this.config.textConfigurable) {
-      let textAttribute = '';
-      textAttribute = AttributeUtils.getTextAttribute(
-        this.rectList.filter((rect) => CommonToolUtils.isSameSourceID(rect.sourceID, basicSourceID)),
-        this.config.textCheckType,
-      );
-      if (this.drawingRect) {
-        this.drawingRect = {
-          ...this.drawingRect,
-          textAttribute,
-        };
       }
     }
 
@@ -957,7 +897,7 @@ export default class RectOperation extends BasicToolOperation {
    * 将绘制中的框体添加进 rectList 中
    * @returns
    */
-  public addDrawingRectToRectList() {
+  public addDrawingRectToRectList(e: MouseEvent) {
     if (!this.drawingRect) {
       return;
     }
@@ -991,6 +931,7 @@ export default class RectOperation extends BasicToolOperation {
     this.drawingRect = undefined;
     this.dragInfo = undefined;
     this.dragStatus = EDragStatus.Wait;
+    this.emit('drawEnd', newRectList[newRectList.length - 1], e);
   }
 
   public setSelectedIdAfterAddingDrawingRect() {
@@ -1105,7 +1046,7 @@ export default class RectOperation extends BasicToolOperation {
     const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
     if (this.drawingRect) {
       // 结束框的绘制
-      this.addDrawingRectToRectList();
+      this.addDrawingRectToRectList(e);
       this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
@@ -1282,77 +1223,14 @@ export default class RectOperation extends BasicToolOperation {
       return;
     }
 
-    const toolColor = this.getColor(selectedRect.attribute);
-    const color = selectedRect.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(selectedRect.attribute, selectedRect.valid);
+    const color = toolStyle.stroke;
+
     return {
       width: selectedRect.width * this.zoom * 0.6,
-      textAttribute: selectedRect.textAttribute,
+      textAttribute: this.selectedText,
       color,
     };
-  }
-
-  /**
-   * 获取当前渲染的样式
-   * @param rect
-   * @returns
-   */
-  public getRenderStyle(rect: IRect) {
-    const toolColor = this.getColor(rect.attribute);
-    let strokeColor;
-    let fillColor;
-
-    // 是否为有效框;
-    if (rect.valid === false) {
-      strokeColor = toolColor?.invalid.stroke;
-      fillColor = toolColor?.invalid.fill;
-    } else {
-      strokeColor = toolColor?.valid.stroke;
-      fillColor = toolColor?.valid.fill;
-    }
-    return {
-      strokeColor,
-      fillColor,
-      textColor: strokeColor,
-      toolColor,
-    };
-  }
-
-  public renderTextAttribute() {
-    const { selectedRect } = this;
-    if (!this.ctx || this.config.textConfigurable !== true || !selectedRect) {
-      return;
-    }
-
-    const { x, y, width, height, attribute, valid } = selectedRect;
-
-    const newWidth = width * this.zoom * 0.6;
-    const coordinate = AxisUtils.getOffsetCoordinate({ x, y: y + height }, this.currentPos, this.zoom);
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    const distance = 4;
-    if (!this._textAttributInstance) {
-      // 属性文本示例
-
-      this._textAttributInstance = new TextAttributeClass({
-        width: newWidth,
-        container: this.container,
-        icon: this.getTextIconSvg(attribute),
-        color,
-        getCurrentSelectedData: this.getCurrentSelectedData,
-        updateSelectedTextAttribute: this.updateSelectedRectTextAttribute,
-      });
-    }
-
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
-    }
-
-    this._textAttributInstance.update(`${selectedRect.textAttribute}`, {
-      left: coordinate.x,
-      top: coordinate.y + distance,
-      color,
-      width: newWidth,
-    });
   }
 
   public renderSelectedRect(rect?: IRect) {
@@ -1365,7 +1243,7 @@ export default class RectOperation extends BasicToolOperation {
     let radius = 10;
     const pointList = RectUtils.getRectPointList(selectedRect);
     const len = pointList.length;
-    const toolColor = this.getColor(rect.attribute);
+    const toolStyle = this.getRenderStyle(rect.attribute, rect.valid);
 
     pointList.forEach((v: ICoordinate, i: number) => {
       ctx.save();
@@ -1378,14 +1256,8 @@ export default class RectOperation extends BasicToolOperation {
         radius = scope;
       }
 
-      // 是否为有效框;
-      if (rect.valid === false) {
-        ctx.strokeStyle = toolColor?.invalid.stroke;
-        ctx.fillStyle = toolColor?.invalid.stroke;
-      } else {
-        ctx.strokeStyle = toolColor?.valid.stroke;
-        ctx.fillStyle = toolColor?.valid.stroke;
-      }
+      ctx.strokeStyle = toolStyle.stroke;
+      ctx.fillStyle = toolStyle.stroke;
 
       ctx.arc(v.x * this.zoom + this.currentPos.x, v.y * this.zoom + this.currentPos.y, radius, 0, 2 * Math.PI);
       ctx.fill();
@@ -1394,8 +1266,8 @@ export default class RectOperation extends BasicToolOperation {
       if (this.hoverRectEdgeIndex === i) {
         ctx.beginPath();
         ctx.lineWidth = 10;
-        const lineColor = this.getColor(rect.attribute);
-        const strokeStyle = rect.valid === false ? lineColor?.invalid?.stroke : lineColor?.valid?.stroke;
+
+        const strokeStyle = toolStyle.stroke;
 
         ctx.strokeStyle = strokeStyle;
 
@@ -1408,8 +1280,6 @@ export default class RectOperation extends BasicToolOperation {
       }
       ctx.restore();
     });
-
-    // this.renderTextAttribute();
   }
 
   /**
@@ -1426,7 +1296,7 @@ export default class RectOperation extends BasicToolOperation {
 
       ctx.save();
 
-      const { strokeColor, fillColor, textColor } = this.getRenderStyle(rect);
+      const { stroke, fill, text } = this.getRenderStyle(rect.attribute, rect.valid);
 
       ctx.font = 'lighter 14px Arial';
       let showText = '';
@@ -1441,7 +1311,7 @@ export default class RectOperation extends BasicToolOperation {
       }
 
       if (rect.attribute) {
-        showText = `${showText}  ${this.config.attributeMap.get(rect.attribute) || rect.attribute}`;
+        showText = `${showText}  ${this.getAttributeKey(rect.attribute)}`;
       }
 
       const transformRect = AxisUtils.changeRectByZoom(rect, isZoom ? zoom : this.zoom, this.currentPos);
@@ -1449,7 +1319,7 @@ export default class RectOperation extends BasicToolOperation {
       if (!hiddenText) {
         // 框体上方展示
         DrawUtils.drawText(this.canvas, { x: transformRect.x, y: transformRect.y - 5 }, showText, {
-          color: strokeColor,
+          color: stroke,
           // font: 'normal normal 900 14px SourceHanSansCN-Regular',
           // ...DEFAULT_TEXT_SHADOW,
           textMaxWidth: 300,
@@ -1459,43 +1329,23 @@ export default class RectOperation extends BasicToolOperation {
       const lineWidth = this.style?.width ?? 2;
 
       if (rect.id === this.hoverRectID || rect.id === this.selectedRectID) {
-        DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fillColor });
+        DrawUtils.drawRectWithFill(this.canvas, transformRect, { color: fill });
       }
 
-      DrawUtils.drawRect(this.canvas, transformRect, { color: strokeColor, thickness: lineWidth, hiddenText: true });
+      DrawUtils.drawRect(this.canvas, transformRect, { color: stroke, thickness: lineWidth, hiddenText: true });
       ctx.restore();
 
-      // 框大小数值显示
-      let rectSize = `${Math.round(rect.width)} * ${Math.round(rect.height)}`;
-
-      if (isZoom === true) {
-        // 说明绘制的是缩放后的比例
-        rectSize = `${Math.round(rect.width / this.zoom)} * ${Math.round(transformRect.height / this.zoom)}`;
-      }
-
-      const textSizeWidth = rectSize.length * 7;
-      // if (!hiddenText) {
-      //   DrawUtils.drawText(
-      //     this.canvas,
-      //     { x: transformRect.x + transformRect.width - textSizeWidth, y: transformRect.y + transformRect.height + 15 },
-      //     rectSize,
-      //     {
-      //       color: textColor,
-      //       font: 'normal normal 600 14px Arial',
-      //       ...DEFAULT_TEXT_SHADOW,
-      //     },
-      //   );
-      // }
+      const textAttribute = this.getStringAttributes(rect, EToolName.Rect);
       // 文本的输入
-      if (!hiddenText && rect.textAttribute && rect.id !== this.selectedRectID && this.isShowAttributeText) {
+      if (!hiddenText && textAttribute && rect.id !== this.selectedRectID && this.isShowAttributeText) {
         const marginTop = 0;
-        const textWidth = Math.max(20, transformRect.width - textSizeWidth);
+        const textWidth = Math.max(20, transformRect.width);
         DrawUtils.drawText(
           this.canvas,
           { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
-          rect.textAttribute,
+          textAttribute,
           {
-            color: textColor,
+            color: text,
             // font: 'italic normal 900 14px Arial',
             textMaxWidth: textWidth,
             // ...DEFAULT_TEXT_SHADOW,
@@ -1529,7 +1379,7 @@ export default class RectOperation extends BasicToolOperation {
             renderEnhance.staticRender(
               this.canvas,
               AxisUtils.changeRectByZoom(rect, this.zoom, this.currentPos),
-              this.getRenderStyle(rect),
+              this.getRenderStyle(rect.attribute, rect.valid),
             );
           }
         }
@@ -1545,7 +1395,7 @@ export default class RectOperation extends BasicToolOperation {
         renderEnhance.selectedRender(
           this.canvas,
           AxisUtils.changeRectByZoom(selectedRect, this.zoom, this.currentPos),
-          this.getRenderStyle(selectedRect),
+          this.getRenderStyle(selectedRect.attribute, selectedRect.valid),
         );
       }
     }
@@ -1568,7 +1418,7 @@ export default class RectOperation extends BasicToolOperation {
       renderEnhance.creatingRender(
         this.canvas,
         AxisUtils.changeRectByZoom(this.drawingRect, 1, this.currentPos),
-        this.getRenderStyle(this.drawingRect),
+        this.getRenderStyle(this.drawingRect.attribute, this.drawingRect.valid),
       );
     }
   }
@@ -1635,23 +1485,7 @@ export default class RectOperation extends BasicToolOperation {
         };
         this.render();
       }
-
-      if (this._textAttributInstance) {
-        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(this.defaultAttribute)) {
-          // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
-          return;
-        }
-
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
-      }
     }
-  }
-
-  public setValid(valid: boolean) {
-    super.setValid(valid);
-
-    this.emit('updateResult');
   }
 
   /**
@@ -1692,7 +1526,6 @@ export default class RectOperation extends BasicToolOperation {
     );
     this.history.pushHistory(this.rectList);
     this.setSelectedRectID(undefined);
-    this._textAttributInstance?.clearTextAttribute();
     this.render();
   }
 
