@@ -1,6 +1,5 @@
 import { Slider } from 'antd/es';
-import { useContext, useEffect } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { keys } from 'lodash-es';
 
@@ -8,17 +7,10 @@ import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
 import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
-import type { AppState } from '@/store';
-import type { ToolStyleState } from '@/store/toolStyle/types';
 import ViewContext from '@/view.context';
+import type { ToolStyle } from '@/interface/base';
 
-interface IProps {
-  toolStyle: ToolStyleState;
-  config: string;
-}
-type ToolStyleKey = keyof ToolStyleState;
-
-const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyleState> => {
+const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyle> => {
   const key = keys(params)![0];
   if (!key) return params;
   const res: Record<string, number> = {};
@@ -155,8 +147,8 @@ const getDefaultValue = (value: string) => {
  */
 const getStyleType = (info: string): boolean => ['width', 'color'].includes(info);
 
-const ToolStyle = () => {
-  const { toolStyle, config, setToolStyle } = useContext(ViewContext);
+const HeaderToolStyle = () => {
+  const { toolStyle, setToolStyle } = useContext(ViewContext);
   const { width, borderOpacity, fillOpacity } = toolStyle;
   const styleConfig = {
     width,
@@ -165,8 +157,8 @@ const ToolStyle = () => {
   };
   const { t } = useTranslation();
 
-  const changeToolStyle = (params: Record<string, number>) => {
-    setToolStyle((pre: any) => ({
+  const changeToolStyle = (params: Partial<ToolStyle>) => {
+    setToolStyle((pre) => ({
       ...pre,
       ...enlargeToolParam(params),
     }));
@@ -175,7 +167,7 @@ const ToolStyle = () => {
   return (
     <div className="toolStyle">
       {Object.entries(styleConfig).map((item: any[]) => {
-        const key: ToolStyleKey = item[0];
+        const key: keyof ToolStyle = item[0];
 
         return (
           <div id={`style-${key}`} className="styleSlider" key={key}>
@@ -201,4 +193,4 @@ const ToolStyle = () => {
   );
 };
 
-export default ToolStyle;
+export default HeaderToolStyle;

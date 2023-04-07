@@ -2,13 +2,14 @@ import { Checkbox, Radio, Tree } from 'antd';
 import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { cloneDeep, get, isEmpty, isEqual, omit, set, update } from 'lodash-es';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { uuid } from '@label-u/annotation';
+import { EToolName, uuid } from '@label-u/annotation';
 import { dfsEach, objectEach } from '@label-u/utils';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 
 import ViewContext from '@/view.context';
+import type { BasicResult } from '@/interface/base';
 
 interface ITagResult {
   id?: string;
@@ -45,7 +46,7 @@ const TagSidebar = () => {
       const currentImgResult = {
         ...allResult,
         tagTool: {
-          toolName: 'tagTool',
+          toolName: EToolName.Tag,
           result: [
             {
               id: tagResult.id || uuid(8, 62),
@@ -55,7 +56,7 @@ const TagSidebar = () => {
         },
       };
 
-      setResult(currentImgResult);
+      setResult(currentImgResult as unknown as BasicResult);
     },
     [allResult, setResult, tagResult.id],
   );
@@ -109,9 +110,13 @@ const TagSidebar = () => {
       }
 
       const result: Record<string, string[]> = {};
-      Object.keys(tagResult_[0].result).forEach((item) => {
-        result[item] = tagResult_[0].result[item].split(';');
-      });
+      const tagResult_0 = tagResult_[0].result;
+
+      if (tagResult_0) {
+        Object.keys(tagResult_0).forEach((item) => {
+          result[item] = tagResult_0[item].split(';');
+        });
+      }
 
       stateValue.id = tagResult_[0].id;
       stateValue.values = result;

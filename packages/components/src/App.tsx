@@ -4,11 +4,12 @@ import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@labe
 import _, { cloneDeep, isEmpty, set } from 'lodash-es';
 
 import MainView from '@/views/MainView';
-import type { Attribute, LabelUAnnotationConfig } from '@/interface/toolConfig';
+import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@/interface/toolConfig';
 
 import type { IFileItem } from './types/data';
 import ViewContext from './view.context';
 import { jsonParser } from './utils';
+import type { BasicResult, ImageAttribute, SelectedResult, ToolStyle } from './interface/base';
 
 export interface AppProps {
   config?: LabelUAnnotationConfig;
@@ -22,14 +23,15 @@ export interface AppProps {
   isShowOrder?: boolean;
   currentToolName?: EToolName;
   sample: IFileItem;
+  // TODO 暂未支持
+  isSidebarCollapsed?: boolean;
 }
 
-const initialToolStyle = {
+const initialToolStyle: ToolStyle = {
   color: 1,
   width: 2,
   borderOpacity: 9,
   fillOpacity: 9,
-  imgListCollapse: true,
 };
 
 // 所有工具的标注结果
@@ -62,6 +64,7 @@ const App = forwardRef<
     isPreview = false,
     leftSiderContent,
     topActionContent,
+    isSidebarCollapsed = false,
     defaultLang = 'cn',
   } = props;
   const [imgNode, setImgNode] = useState<HTMLImageElement | null>(null);
@@ -70,26 +73,26 @@ const App = forwardRef<
   }, [sample?.result]);
   const [engine, setEngine] = useState<AnnotationEngine | null>(null);
   const [toolName, setToolName] = useState<EToolName>(currentToolName!);
-  const [imageAttribute, setImageAttribute] = useState({
+  const [imageAttribute, setImageAttribute] = useState<ImageAttribute>({
     brightness: 1,
     contrast: 1,
     isOriginalSize: false,
     saturation: 1,
     zoomRatio: 1,
   });
-  const [toolStyle, setToolStyle] = useState<any>(initialToolStyle);
-  const [result, setResult] = useState<any>({});
+  const [toolStyle, setToolStyle] = useState<ToolStyle>(initialToolStyle);
+  const [result, setResult] = useState<BasicResult>({} as BasicResult);
   const [orderVisible, toggleOrderVisible] = useState<boolean>(!!isShowOrder);
-  const [selectedResult, setSelectedResult] = useState<string | null>(null);
+  const [selectedResult, setSelectedResult] = useState<SelectedResult | null>(null);
   const [engineResultUpdateTimeStamp, updateTimeStamp] = useState<number>(Date.now());
-  const resultRef = useRef<any>();
+  const resultRef = useRef<BasicResult | null>();
   const engineRef = useRef<AnnotationEngine | null>(null);
 
   const updateResult = useCallback((newResult) => {
     setResult(newResult);
   }, []);
 
-  const updateSelectedResult = useCallback((newSelectedResult) => {
+  const updateSelectedResult = useCallback((newSelectedResult: SelectedResult | null) => {
     setSelectedResult(newSelectedResult);
   }, []);
 
@@ -111,12 +114,12 @@ const App = forwardRef<
   const textConfig = useMemo(() => {
     const textTool = tools.find((item) => item.tool === EToolName.Text);
 
-    return textTool?.config?.attributes ?? [];
+    return (textTool?.config?.attributes as TextAttribute[]) ?? [];
   }, [tools]);
   const tagConfigList = useMemo(() => {
     const tagTool = tools.find((item) => item.tool === EToolName.Tag);
 
-    return tagTool?.config?.attributes ?? [];
+    return (tagTool?.config?.attributes as InnerAttribute[]) ?? [];
   }, [tools]);
   const allAttributesMap = useMemo(() => {
     const mapping = new Map<string, any>();
@@ -130,7 +133,7 @@ const App = forwardRef<
       });
 
       if (configItem.config?.attributes) {
-        _.forEach([...configItem.config?.attributes, ...(commonAttributes || [])], (item: Attribute) => {
+        _.forEach([...configItem.config?.attributes, ...(commonAttributes || [])], (item) => {
           attributeMap.set(item.value, item);
         });
       }
@@ -186,7 +189,7 @@ const App = forwardRef<
     }
 
     if (!currentToolName) {
-      setToolName(tools[0].tool);
+      setToolName(tools[0].tool as EToolName);
     } else {
       setToolName(currentToolName);
     }
@@ -282,7 +285,7 @@ const App = forwardRef<
         const lineResult = currentToolResult.result.find((item: any) => item.id === selectedResult.id);
 
         if (lineResult) {
-          engine.toolInstance.setActiveAreaByPoint(lineResult.pointList[0]);
+          engine.toolInstance.setActiveAreaByPoint(lineResult.pointList![0]);
         }
       } else {
         engine.toolInstance.setSelectedID(selectedResult.id);
@@ -379,6 +382,7 @@ const App = forwardRef<
       engineResultUpdateTimeStamp,
       graphicResult,
       isPreview,
+      isSidebarCollapsed,
     };
   }, [
     imageAttribute,
@@ -403,6 +407,7 @@ const App = forwardRef<
     engineResultUpdateTimeStamp,
     graphicResult,
     isPreview,
+    isSidebarCollapsed,
   ]);
 
   // 暴露给 ref 的一些方法

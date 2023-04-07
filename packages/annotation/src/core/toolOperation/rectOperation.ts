@@ -18,7 +18,6 @@ import { getPolygonPointUnderZoom } from '../../utils/tool/polygonTool';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
-import type TextAttributeClass from './textAttributeClass';
 
 export interface IRectOperationProps extends IBasicToolOperationProps {
   drawOutSideTarget: boolean; // 是否可以在边界外进行标注
@@ -52,8 +51,6 @@ export default class RectOperation extends BasicToolOperation {
   public config: IRectConfig;
 
   public markerIndex: number; // 用于列表标签定位
-
-  private _textAttributInstance?: TextAttributeClass;
 
   private dragInfo?: {
     dragStartCoord: ICoordinate;
@@ -97,9 +94,6 @@ export default class RectOperation extends BasicToolOperation {
 
   public destroy() {
     super.destroy();
-    if (this._textAttributInstance) {
-      this._textAttributInstance.clearTextAttribute();
-    }
   }
 
   // @ts-ignore
@@ -140,6 +134,10 @@ export default class RectOperation extends BasicToolOperation {
 
   public get selectedText() {
     const selectedResult = this.dataList.find((i) => i.id === this.selectedID);
+
+    if (!selectedResult) {
+      return '';
+    }
 
     return this.getStringAttributes(selectedResult, EToolName.Rect);
   }
@@ -206,17 +204,6 @@ export default class RectOperation extends BasicToolOperation {
   }
 
   public setSelectedRectID(newID?: string) {
-    const oldID = this.selectedRectID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
-
-      this._textAttributInstance?.changeSelected();
-    }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-
     this.selectedRectID = newID;
 
     this.render();
@@ -225,11 +212,6 @@ export default class RectOperation extends BasicToolOperation {
 
   public setStyle(toolStyle: any) {
     super.setStyle(toolStyle);
-
-    // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
-    }
   }
 
   /**
@@ -857,7 +839,6 @@ export default class RectOperation extends BasicToolOperation {
       isVisible: true,
       id: uuid(8, 62),
       sourceID: basicSourceID,
-      textAttribute: '',
     };
 
     if (this.hasMarkerConfig) {
@@ -881,20 +862,6 @@ export default class RectOperation extends BasicToolOperation {
         this.emit('messageInfo', locale.getMessagesByLocale(EMessage.MarkerFinish, this.lang));
         this.drawingRect = undefined;
         return;
-      }
-    }
-
-    if (this.config.textConfigurable) {
-      let textAttribute = '';
-      textAttribute = AttributeUtils.getTextAttribute(
-        this.rectList.filter((rect) => CommonToolUtils.isSameSourceID(rect.sourceID, basicSourceID)),
-        this.config.textCheckType,
-      );
-      if (this.drawingRect) {
-        this.drawingRect = {
-          ...this.drawingRect,
-          textAttribute,
-        };
       }
     }
 
@@ -1518,16 +1485,6 @@ export default class RectOperation extends BasicToolOperation {
         };
         this.render();
       }
-
-      if (this._textAttributInstance) {
-        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(this.defaultAttribute)) {
-          // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
-          return;
-        }
-
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
-      }
     }
   }
 
@@ -1569,7 +1526,6 @@ export default class RectOperation extends BasicToolOperation {
     );
     this.history.pushHistory(this.rectList);
     this.setSelectedRectID(undefined);
-    this._textAttributInstance?.clearTextAttribute();
     this.render();
   }
 

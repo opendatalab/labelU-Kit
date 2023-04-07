@@ -155,7 +155,7 @@ const AttributeOperation = () => {
     if (!selectedResult) {
       setActiveAttribute(toolInstance?.defaultAttribute);
     } else {
-      setActiveAttribute(selectedResult.attribute);
+      setActiveAttribute(selectedResult.attribute!);
     }
   }, [selectedResult, setActiveAttribute, toolInstance]);
 
@@ -163,7 +163,7 @@ const AttributeOperation = () => {
   useEffect(() => {
     const toolContainerWidth = document.getElementById('toolContainer')?.offsetWidth as number;
     setAttributeBoxLength(toolContainerWidth - 30);
-  }, [config?.attributes, config?.imgListCollapse]);
+  }, [config?.attributes]);
 
   // 计算可显示 attribute 个数
   useEffect(() => {

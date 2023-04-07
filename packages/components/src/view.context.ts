@@ -2,8 +2,9 @@ import type { Dispatch, SetStateAction } from 'react';
 import React from 'react';
 import type { AnnotationEngine, Attribute, EToolName } from '@label-u/annotation';
 
-import type { LabelUAnnotationConfig, TextConfig } from './interface/toolConfig';
+import type { BasicConfig, InnerAttribute, LabelUAnnotationConfig, TextConfig } from './interface/toolConfig';
 import type { IFileItem } from './types/data';
+import type { BasicResult, ImageAttribute, SelectedResult, ToolResult, ToolStyle } from './interface/base';
 
 export interface ViewContextProps {
   imageAttribute: {
@@ -23,24 +24,25 @@ export interface ViewContextProps {
   topActionContent?: React.ReactNode | React.ReactNode; // 顶部操作空间
 
   isPreview: boolean;
-  result: any;
-  currentToolResult: any;
+  result: BasicResult;
+  currentToolResult: ToolResult;
   textConfig: TextConfig;
-  tagConfigList: any[];
-  setResult: (result: any) => void;
+  tagConfigList: InnerAttribute[];
+  setResult: (result: BasicResult) => void;
   setToolName: Dispatch<SetStateAction<EToolName>>;
-  allToolResult: any[];
+  allToolResult: BasicConfig[];
   allAttributesMap: Map<string, Map<Attribute['value'], Attribute>>;
   isShowOrder: boolean;
-  setIsShowOrder: (isShowOrder: boolean) => void;
-  setImageAttribute: (imageAttribute: any) => void;
-  toolStyle: any;
-  setToolStyle: (toolStyle: any) => void;
-  selectedResult: any;
-  setSelectedResult: (selectedResult: any) => void;
+  setIsShowOrder: React.Dispatch<React.SetStateAction<boolean>>;
+  setImageAttribute: React.Dispatch<React.SetStateAction<ImageAttribute>>;
+  toolStyle: ToolStyle;
+  setToolStyle: React.Dispatch<React.SetStateAction<ToolStyle>>;
+  selectedResult: SelectedResult | null;
+  setSelectedResult: (selectedResult: SelectedResult | null) => void;
   syncResultToEngine: () => void;
   engineResultUpdateTimeStamp: number;
-  graphicResult: any;
+  graphicResult: ToolResult[];
+  isSidebarCollapsed: boolean;
 }
 
 const ViewContext = React.createContext({} as ViewContextProps);

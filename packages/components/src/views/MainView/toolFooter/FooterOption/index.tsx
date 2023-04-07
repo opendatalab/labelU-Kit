@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { ImgAttributeState } from '@/store/imgAttribute/types';
 import ViewContext from '@/view.context';
+import type { ImageAttribute } from '@/interface/base';
 
 import rotateSvg from '../../../../assets/annotation/common/icon_r.svg';
 import rotateHighlightSvg from '../../../../assets/annotation/common/icon_rA.svg';
@@ -33,7 +33,7 @@ const FooterOption = () => {
       commonSvg: '',
       click: () => {
         const payload = { isOriginalSize: true };
-        setImageAttribute(payload as ImgAttributeState);
+        setImageAttribute(payload as ImageAttribute);
       },
       style: {
         marginRight: '4px',

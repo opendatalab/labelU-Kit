@@ -5,21 +5,24 @@ import { rgba, darken } from 'polished';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
-import type { Attribute, PrevResult, ToolConfig } from '@/interface/combineTool';
+import type { Attribute, ToolConfig } from '@/interface/config';
 import type { IImageAttribute } from '@/types/imgAttributeStore';
 import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
 import { InnerAttributeType } from '@/types/tool/annotation';
 import type { ICoordinate, ISize } from '@/types/tool/common';
-import type { ILinePoint } from '@/types/tool/lineTool';
+import type { ILine, ILinePoint } from '@/types/tool/lineTool';
 import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
-import type { IRectConfig } from '@/types/tool/rectTool';
+import type { IRect, IRectConfig } from '@/types/tool/rectTool';
 import MathUtils from '@/utils/MathUtils';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
 import TagUtils from '@/utils/tool/TagUtils';
-import type { Result } from '@/types/annotationTask';
+import type { AnnotationResult, ToolResult } from '@/interface/result';
+import type { IPointUnit } from '@/types/tool/pointTool';
+import type { ITagResult } from '@/types/tool/tagTool';
+import type { ITextResult } from '@/types/tool/textTool';
 
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
@@ -188,7 +191,7 @@ export default class BasicToolOperation extends EventListener {
 
   public coordUtils: CoordinateUtils;
 
-  public prevResultList?: PrevResult[];
+  public prevResultList?: ToolResult[];
 
   public renderReady: boolean | undefined;
 
@@ -311,7 +314,7 @@ export default class BasicToolOperation extends EventListener {
     return [];
   }
 
-  public getStringAttributes(result: Result, toolName: EToolName) {
+  public getStringAttributes(result: Exclude<AnnotationResult, ITagResult | ITextResult>, toolName: EToolName) {
     if (!result) {
       return '';
     }
@@ -344,7 +347,7 @@ export default class BasicToolOperation extends EventListener {
   /**
    * 设置此前工具标注结果信息
    */
-  public setPrevResultList(prevResultList: PrevResult[]) {
+  public setPrevResultList(prevResultList: ToolResult[]) {
     this.prevResultList = prevResultList;
   }
 
@@ -1130,6 +1133,18 @@ export default class BasicToolOperation extends EventListener {
     return this.config.attributeMap.get(attribute)?.key ?? attribute;
   }
 
+  public getAttributeKeyByToolName(toolName: EToolName, attribute?: string) {
+    if (!attribute) {
+      return '';
+    }
+
+    if (!toolName) {
+      return this.getAttributeKey(attribute);
+    }
+
+    return this.allAttributesMap.get(toolName)?.get(attribute)?.key || attribute;
+  }
+
   public setImgAttribute(imgAttribute: IImageAttribute) {
     const oldImgAttribute = this._imgAttribute;
     this._imgAttribute = imgAttribute;
@@ -1350,11 +1365,11 @@ export default class BasicToolOperation extends EventListener {
     // }
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
-        const currentReulst = this.prevResultList[i];
-        switch (currentReulst.toolName) {
+        const currentResult = this.prevResultList[i];
+        switch (currentResult.toolName) {
           case EToolName.Rect: {
-            if (currentReulst.result && currentReulst.result.length > 0) {
-              currentReulst.result.forEach((item) => {
+            if (currentResult.result && currentResult.result.length > 0) {
+              (currentResult.result as IRect[]).forEach((item) => {
                 if (item.isVisible) {
                   const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
                     toolName: EToolName.Rect,
@@ -1393,7 +1408,7 @@ export default class BasicToolOperation extends EventListener {
             break;
           }
           case EToolName.Polygon: {
-            currentReulst.result.forEach((item) => {
+            (currentResult.result as IPolygonData[]).forEach((item) => {
               if (item.isVisible) {
                 const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
                   toolName: EToolName.Polygon,
@@ -1441,8 +1456,7 @@ export default class BasicToolOperation extends EventListener {
             break;
           }
           case EToolName.Line: {
-            // @ts-ignore
-            currentReulst.result.forEach((item) => {
+            (currentResult.result as unknown as ILine[]).forEach((item) => {
               if (item.isVisible) {
                 const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
                   toolName: EToolName.Line,
@@ -1461,7 +1475,7 @@ export default class BasicToolOperation extends EventListener {
                     thickness,
                   },
                 );
-                let showText = this.allAttributesMap.get(EToolName.Line)?.get(item.attribute)?.key || item.attribute;
+                let showText = this.getAttributeKeyByToolName(EToolName.Line, item.attribute);
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
@@ -1490,11 +1504,12 @@ export default class BasicToolOperation extends EventListener {
           }
           case EToolName.Point: {
             // @ts-ignore
-            if (currentReulst.result && currentReulst.result.length > 0) {
-              currentReulst.result.forEach((item) => {
+            if (currentResult.result && currentResult.result.length > 0) {
+              (currentResult.result as IPointUnit[]).forEach((item) => {
                 if (item.isVisible) {
                   const { width = 2 } = this.style;
                   const transformPoint = AxisUtils.changePointByZoom(item, this.zoom, this.currentPos);
+                  // @ts-ignore
                   const points = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
 
                   const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
@@ -1508,7 +1523,7 @@ export default class BasicToolOperation extends EventListener {
                     color: toolStyle.stroke,
                     fill: 'transparent',
                   });
-                  let showText = this.allAttributesMap.get(EToolName.Point)?.get(item.attribute)?.key || item.attribute;
+                  let showText = this.getAttributeKeyByToolName(EToolName.Point, item.attribute);
                   if (this.isShowOrder) {
                     showText = `${item.order}  ${showText}`;
                   }
@@ -1540,13 +1555,14 @@ export default class BasicToolOperation extends EventListener {
             break;
           }
           case EToolName.Tag: {
-            if (currentReulst.result && currentReulst.result.length > 0) {
-              if (!(currentReulst.result?.length > 0)) {
+            if (currentResult.result && currentResult.result.length > 0) {
+              if (!(currentResult.result?.length > 0)) {
                 return;
               }
               const dom = document.createElement('div');
               const tagInfoList = TagUtils.getTagNameList(
-                currentReulst?.result[0].result ?? {},
+                // @ts-ignore
+                currentResult?.result[0].result ?? {},
                 this.config.tagConfigList,
               );
               dom.innerHTML =

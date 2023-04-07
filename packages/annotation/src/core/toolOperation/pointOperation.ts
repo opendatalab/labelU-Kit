@@ -18,7 +18,6 @@ import DrawUtils from '../../utils/tool/DrawUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
-import TextAttributeClass from './textAttributeClass';
 
 const TEXTAREA_WIDTH = 200;
 
@@ -39,8 +38,6 @@ export default class PointOperation extends BasicToolOperation {
 
   public markerIndex: number; // 用于列表标签定位
 
-  private _textAttributInstance?: TextAttributeClass;
-
   constructor(props: IPointOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
@@ -51,7 +48,6 @@ export default class PointOperation extends BasicToolOperation {
 
     this.createPoint = this.createPoint.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
-    this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
     this.setSelectedID = this.setSelectedID.bind(this);
   }
 
@@ -185,16 +181,6 @@ export default class PointOperation extends BasicToolOperation {
         this.history.pushHistory(this.pointList);
         this.render();
       }
-
-      if (this._textAttributInstance) {
-        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(defaultAttribute)) {
-          // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
-          return;
-        }
-
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
-      }
     }
   }
 
@@ -216,30 +202,18 @@ export default class PointOperation extends BasicToolOperation {
   public get selectedText() {
     const selectedResult = this.pointList.find((i) => i.id === this.selectedID);
 
+    if (!selectedResult) {
+      return '';
+    }
+
     return this.getStringAttributes(selectedResult, EToolName.Point);
   }
 
   public setStyle(toolStyle: any) {
     super.setStyle(toolStyle);
-
-    // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
-    }
   }
 
   public setSelectedID(newID?: string) {
-    const oldID = this.selectedID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
-
-      this._textAttributInstance?.changeSelected();
-    }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-
     this.selectedID = newID;
 
     this.render();
@@ -511,21 +485,6 @@ export default class PointOperation extends BasicToolOperation {
         CommonToolUtils.getAllToolsMaxOrder(this.pointList, this.prevResultList) + 1,
     } as IPointUnit;
 
-    // TODO：移除
-    // 文本注入
-    if (this.config.textConfigurable) {
-      let textAttribute = '';
-      textAttribute = AttributeUtils.getTextAttribute(
-        this.pointList.filter((point) => CommonToolUtils.isSameSourceID(point.sourceID, basicSourceID)),
-        this.config.textCheckType,
-      );
-      // const { x, y } = AxisUtils.changePointByZoom(newDrawingPoint, 1 / this.zoom);
-      newDrawingPoint = {
-        ...newDrawingPoint,
-        textAttribute,
-      };
-    }
-
     if (this.hasMarkerConfig) {
       const nextMarkInfo = CommonToolUtils.getNextMarker(
         this.currentPageResult,
@@ -669,7 +628,6 @@ export default class PointOperation extends BasicToolOperation {
     if (this.selectedID) {
       this.setPointList(this.pointList.filter((point) => point.id !== this.selectedID));
       this.history.pushHistory(this.pointList);
-      this._textAttributInstance?.clearTextAttribute();
       this.emit('selectedChange');
       this.render();
       this.container.dispatchEvent(this.saveDataEvent);
@@ -716,59 +674,6 @@ export default class PointOperation extends BasicToolOperation {
       textAttribute: this.selectedText,
       color,
     };
-  }
-
-  /** 更新文本输入，并且进行关闭 */
-  public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute && this.selectedID) {
-      let textAttribute = newTextAttribute;
-      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
-        textAttribute = '';
-      }
-
-      this.setPointList(AttributeUtils.textChange(textAttribute, this.selectedID, this.pointList));
-
-      this.emit('updateTextAttribute');
-      this.render();
-    }
-  }
-
-  public renderTextAttribute() {
-    const point = this.pointList?.find((item) => item.id === this.selectedID);
-    if (!this.ctx || this.config.textConfigurable !== true || !point) {
-      return;
-    }
-    const { x, y, attribute, valid } = point;
-
-    const newWidth = TEXTAREA_WIDTH * this.zoom * 0.6;
-    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
-    const toolStyle = this.getRenderStyle(attribute, Boolean(valid));
-    const color = toolStyle.stroke;
-    const distance = 4;
-    if (!this._textAttributInstance) {
-      // 属性文本示例
-
-      this._textAttributInstance = new TextAttributeClass({
-        width: newWidth,
-        container: this.container,
-        icon: this.getTextIconSvg(attribute),
-        color,
-        getCurrentSelectedData: this.getCurrentSelectedData,
-        updateSelectedTextAttribute: this.updateSelectedTextAttribute,
-      });
-    }
-
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
-    }
-
-    this._textAttributInstance.update(`${point.textAttribute}`, {
-      left: coordinate.x,
-      top: coordinate.y + distance,
-      color,
-      width: newWidth,
-    });
   }
 
   /**
@@ -830,7 +735,6 @@ export default class PointOperation extends BasicToolOperation {
 
     // 文本
     if (selected) {
-      // this.renderTextAttribute();
     } else if (!hiddenText && this.isShowAttributeText) {
       DrawUtils.drawText(
         this.canvas,

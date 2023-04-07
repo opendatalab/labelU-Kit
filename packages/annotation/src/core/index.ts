@@ -7,10 +7,11 @@ import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import type { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
-import type { OneTag, PrevResult, ToolConfig } from '@/interface/combineTool';
+import type { TextAttribute, ToolConfig } from '@/interface/config';
 import type { ISize } from '@/types/tool/common';
 import type { IRect } from '@/types/tool/rectTool';
 import type { IRenderEnhance } from '@/types/tool/annotation';
+import type { ToolResult } from '@/interface/result';
 
 export interface IProps {
   isShowOrder: boolean;
@@ -20,7 +21,7 @@ export interface IProps {
   imgNode?: HTMLImageElement; // 展示图片的内容
   config?: ToolConfig; // 任务配置
   style?: any;
-  tagConfigList: OneTag[];
+  tagConfigList: TextAttribute[];
   allAttributesMap: Map<string, any>;
 }
 
@@ -56,7 +57,7 @@ export default class AnnotationEngine {
 
   private style: any; // 定义 TODO！！
 
-  private tagConfigList: OneTag[]; // 配置tag 信息，工具共享一套tag
+  private tagConfigList: TextAttribute[]; // 配置tag 信息，工具共享一套tag
 
   private imgNode?: HTMLImageElement;
 
@@ -211,7 +212,7 @@ export default class AnnotationEngine {
   /**
    * 设置此前工具绘制结果信息
    */
-  public setPrevResultList(prevResultList: PrevResult[]) {
+  public setPrevResultList(prevResultList: ToolResult[]) {
     this.toolInstance.setPrevResultList(prevResultList);
   }
 

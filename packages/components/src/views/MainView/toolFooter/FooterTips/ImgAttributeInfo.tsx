@@ -3,18 +3,18 @@ import { throttle } from 'lodash-es';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { ImgAttributeState } from '@/store/imgAttribute/types';
 import saturationSvg from '@/assets/annotation/image/saturation.svg';
 import contrastSvg from '@/assets/annotation/image/contrast.svg';
 import brightnessSvg from '@/assets/annotation/image/brightness.svg';
 import ViewContext from '@/view.context';
+import type { ImageAttribute } from '@/interface/base';
 
 const ImgAttributeInfo = () => {
   const { t } = useTranslation();
   const { imageAttribute, setImageAttribute } = useContext(ViewContext);
 
   const imgAttributeChange = throttle(
-    (payload: Partial<ImgAttributeState>) => {
+    (payload: Partial<ImageAttribute>) => {
       setImageAttribute((pre) => ({
         ...pre,
         ...payload,

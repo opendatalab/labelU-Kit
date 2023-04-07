@@ -21,13 +21,6 @@ export default [
         initialValue: false,
       },
       {
-        field: 'textCheckType',
-        key: 'textCheckType',
-        type: 'enum',
-        hidden: true,
-        initialValue: 0,
-      },
-      {
         type: 'category-attribute',
         key: 'field',
         field: 'attributes',

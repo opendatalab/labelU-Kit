@@ -5,7 +5,7 @@ import AnnotationView from '@/components/AnnotationView';
 import App from './App';
 import './index.scss';
 
-export type { StepConfig, StepConfigState, BasicConfig, TextConfig, FileInfo } from '@/interface/toolConfig';
+export type { BasicConfig, TextConfig, FileInfo } from '@/interface/toolConfig';
 
 export type { AppProps } from '@/App';
 

@@ -9,8 +9,8 @@ export interface IPolygonData {
   valid: boolean;
   isVisible: boolean;
   order: number;
-  textAttribute: string;
   attribute: string;
+  attributes?: Record<string, string>;
   isRect?: boolean; // 用于判断当前多边形矩形模式生成
 }
 

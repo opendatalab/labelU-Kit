@@ -144,7 +144,14 @@ const TextToolSidebar = () => {
   const handleChange = (values: any) => {
     const newResult = cloneDeep(result);
 
-    set(newResult, `textTool.result`, values.list);
+    set(
+      newResult,
+      `textTool.result`,
+      map(values.list, (item) => ({
+        ...item,
+        id: item.id || uuid(8, 62),
+      })),
+    );
     setResult(newResult);
   };
 
@@ -155,7 +162,7 @@ const TextToolSidebar = () => {
     if (_textValues.length === 0) {
       _textValues = map(textConfig, (configItem) => {
         return {
-          id: uuid(),
+          id: uuid(8, 62),
           value: {
             [configItem.value]: configItem.defaultValue,
           },
@@ -174,13 +181,18 @@ const TextToolSidebar = () => {
     >
       <Form form={form} onFinish={handleChange} name="list" layout="vertical">
         {map(textConfig, (configItem, index) => (
-          <TextItem
-            key={configItem.value}
-            name={['list', index, 'value', configItem.value]}
-            config={configItem}
-            form={form}
-            isPreview={isPreview}
-          />
+          <>
+            <Form.Item name={['list', index, 'id']} hidden initialValue={uuid(8, 62)}>
+              <Input />
+            </Form.Item>
+            <TextItem
+              key={configItem.value}
+              name={['list', index, 'value', configItem.value]}
+              config={configItem}
+              form={form}
+              isPreview={isPreview}
+            />
+          </>
         ))}
       </Form>
     </TextWrapper>

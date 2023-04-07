@@ -21,13 +21,6 @@ export default [
         initialValue: true,
       },
       {
-        field: 'textCheckType',
-        key: 'textCheckType',
-        type: 'enum',
-        hidden: true,
-        initialValue: 0,
-      },
-      {
         type: 'number',
         key: 'upperLimit',
         field: 'upperLimit',

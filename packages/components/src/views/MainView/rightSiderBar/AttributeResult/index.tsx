@@ -222,7 +222,7 @@ function AttributeFormItem({
 const ResultAttributeForm = forwardRef((props, ref) => {
   const [form] = Form.useForm();
   const [selectedAttribute, setSelectedAttribute] = useState<any>();
-  const { selectedResult, allAttributesMap } = useContext(ViewContext);
+  const { selectedResult, allAttributesMap, currentToolName } = useContext(ViewContext);
 
   const resultAttributeOptions = useMemo(() => {
     return Array.from(selectedAttribute?.attributes ?? []);
@@ -250,11 +250,11 @@ const ResultAttributeForm = forwardRef((props, ref) => {
       console.log(allValues);
 
       if ('attribute' in changedValues) {
-        const attribute = allAttributesMap?.get(selectedResult.toolName)?.get(changedValues.attribute);
+        const attribute = allAttributesMap?.get(currentToolName)?.get(changedValues.attribute);
         setSelectedAttribute(attribute);
       }
     },
-    [allAttributesMap, selectedResult?.toolName],
+    [allAttributesMap, currentToolName],
   );
 
   useImperativeHandle(ref, () => form);
@@ -264,7 +264,7 @@ const ResultAttributeForm = forwardRef((props, ref) => {
 
     if (selectedResult) {
       form.setFieldsValue(cloneDeep(selectedResult));
-      const attribute = allAttributesMap?.get(selectedResult.toolName)?.get(selectedResult.attribute);
+      const attribute = allAttributesMap?.get(selectedResult.toolName)?.get(selectedResult.attribute!);
       setSelectedAttribute(attribute);
     }
   }, [allAttributesMap, form, selectedResult]);
@@ -324,7 +324,7 @@ const AttributeResult = () => {
         _result.push({
           ...resultItem,
           toolName: item.toolName,
-          color: allAttributesMap?.get(item.toolName)?.get(resultItem.attribute)?.color,
+          color: allAttributesMap?.get(item.toolName)?.get(resultItem.attribute!)?.color,
           icon: find(toolList, { toolName: item.toolName })?.Icon,
         });
       }
@@ -402,7 +402,7 @@ const AttributeResult = () => {
     });
 
     if (attribute.id === selectedResult?.id && attribute.isVisible) {
-      setSelectedResult(undefined);
+      setSelectedResult(null);
     }
 
     setResult(newResult);
@@ -427,7 +427,7 @@ const AttributeResult = () => {
     }
 
     if (find(attributes, { id: selectedResult?.id }) && visible) {
-      setSelectedResult(undefined);
+      setSelectedResult(null);
     }
 
     setResult(newResult);
@@ -457,9 +457,9 @@ const AttributeResult = () => {
       .then((values) => {
         const newResult = cloneDeep(result);
 
-        update(newResult, [selectedResult.toolName, 'result'], (results: any) => {
+        update(newResult, [selectedResult!.toolName, 'result'], (results: any) => {
           return results.map((item: any) => {
-            if (item.id === selectedResult.id) {
+            if (item.id === selectedResult!.id) {
               return {
                 ...item,
                 ...values,

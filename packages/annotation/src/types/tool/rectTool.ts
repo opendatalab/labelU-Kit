@@ -12,7 +12,7 @@ export interface IRect {
   isVisible: boolean;
   order?: number;
   attribute: string;
-  textAttribute: string;
+  attributes?: Record<string, string>;
   disableDelete?: boolean; // 是否允许被删除
 
   label?: string; // 列表标签

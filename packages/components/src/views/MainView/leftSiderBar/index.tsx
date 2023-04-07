@@ -22,7 +22,7 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
   const { style = {} } = props;
   const { leftSiderContent } = useContext(ViewContext);
 
-  const [imgListCollapse, setImgListCollapse] = useState<boolean>(false);
+  const [collapsed, toggleCollapse] = useState<boolean>(false);
   const sliderBoxRef = useRef<HTMLDivElement | null>(null);
 
   // 将左侧属性栏高度设置为剩余高度
@@ -42,15 +42,13 @@ const LeftSider: React.FC<LeftSiderProps> = (props) => {
 
   return (
     <div className="sliderBox" id="sliderBoxId" style={style} ref={sliderBoxRef}>
-      <div className={imgListCollapse ? `${layoutCls}__left_sider_hide` : `${layoutCls}__left_sider`}>
-        {leftSiderContent}
-      </div>
+      <div className={collapsed ? `${layoutCls}__left_sider_hide` : `${layoutCls}__left_sider`}>{leftSiderContent}</div>
 
       <img
         className="itemOpIcon"
-        src={imgListCollapse ? SpreadIcon : CollapseIcon}
+        src={collapsed ? SpreadIcon : CollapseIcon}
         onClick={(e) => {
-          setImgListCollapse(!imgListCollapse);
+          toggleCollapse(!collapsed);
           e.stopPropagation();
         }}
       />

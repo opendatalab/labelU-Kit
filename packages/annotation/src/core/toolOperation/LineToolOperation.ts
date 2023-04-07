@@ -11,7 +11,7 @@ import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
-import type { LineToolConfig } from '@/interface/combineTool';
+import type { LineToolConfig } from '@/interface/config';
 import type { ICoordinate, IPoint, IRectArea } from '@/types/tool/common';
 import type { ILine, ILinePoint } from '@/types/tool/lineTool';
 
@@ -27,7 +27,6 @@ import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import CanvasUtils from '../../utils/tool/CanvasUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
-import type TextAttributeClass from './textAttributeClass';
 
 enum EStatus {
   Create = 0,
@@ -156,8 +155,6 @@ export default class LineToolOperation extends BasicToolOperation {
   private dependToolConfig?: any;
 
   private isReference: boolean = false;
-
-  private _textAttributeInstance?: TextAttributeClass;
 
   private textEditingID?: string;
 
@@ -322,6 +319,10 @@ export default class LineToolOperation extends BasicToolOperation {
   // 当前选中线条的文本
   get selectedText() {
     const selectedLine = this.lineList.find((i) => i.id === this.selectedID);
+
+    if (!selectedLine) {
+      return '';
+    }
 
     return this.getStringAttributes(selectedLine, EToolName.Line);
   }
@@ -1437,6 +1438,7 @@ export default class LineToolOperation extends BasicToolOperation {
       pointList: cloneDeep(this.activeLine),
       id,
       valid: this.isLineValid,
+      attributes: {},
       // order: this.nextOrder(),
       order: CommonToolUtils.getAllToolsMaxOrder(this.lineList, this.prevResultList) + 1,
       isVisible: true,
@@ -1745,7 +1747,7 @@ export default class LineToolOperation extends BasicToolOperation {
   }
 
   /** 更新线条的属性 */
-  public setLineAttribute(key: 'attribute' | 'textAttribute', value: string, id?: string) {
+  public setLineAttribute(key: 'attribute', value: string, id?: string) {
     const targetID = id || this.selectedID;
 
     if (targetID) {
@@ -1799,16 +1801,6 @@ export default class LineToolOperation extends BasicToolOperation {
   public setSelectedLineID(id?: string) {
     if (this.selectedID === id) {
       return;
-    }
-
-    const oldID = this.selectedID;
-
-    if (id !== oldID && oldID) {
-      this._textAttributeInstance?.changeSelected();
-    }
-
-    if (!id) {
-      this._textAttributeInstance?.clearTextAttribute();
     }
 
     this.selectedID = id;

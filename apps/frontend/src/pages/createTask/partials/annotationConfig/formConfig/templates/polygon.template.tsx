@@ -24,13 +24,6 @@ export default [
         initialValue: true,
       },
       {
-        field: 'textCheckType',
-        key: 'textCheckType',
-        type: 'enum',
-        hidden: true,
-        initialValue: 0,
-      },
-      {
         field: 'lineColor',
         key: 'lineColor',
         type: 'enum',

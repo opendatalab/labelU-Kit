@@ -82,7 +82,7 @@ const HeaderOption = () => {
     for (const tool of labelTool) {
       const tmpResult = newResult[tool]?.result;
       if (tmpResult && tmpResult.length > 0) {
-        const newTmpResult = tmpResult.reduce((res: any[], item: { order: number }) => {
+        const newTmpResult = tmpResult.reduce((res, item) => {
           if (item.order !== count) {
             res.push(item);
           } else {
@@ -91,6 +91,7 @@ const HeaderOption = () => {
           }
           return res;
         }, [] as any[]);
+
         newResult[tool].result = newTmpResult;
       }
     }

@@ -114,6 +114,7 @@ const DraggableModel = (props: Iprops, ref: any) => {
       onCancel={handleCancel}
       width={width}
     >
+      {/* @ts-ignore */}
       {children}
     </Modal>
   );

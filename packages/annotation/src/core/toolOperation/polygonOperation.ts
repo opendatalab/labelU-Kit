@@ -29,7 +29,6 @@ import PolygonUtils from '../../utils/tool/PolygonUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
-import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -70,8 +69,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
   private isAlt: boolean; // 当前是否按住了 alt
 
-  private _textAttributInstance?: TextAttributeClass;
-
   constructor(props: IPolygonOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
@@ -87,7 +84,6 @@ export default class PolygonOperation extends BasicToolOperation {
     this.pattern = EPolygonPattern.Normal;
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
-    this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
   }
 
   public eventBinding() {
@@ -106,9 +102,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
   public destroy() {
     super.destroy();
-    if (this._textAttributInstance) {
-      this._textAttributInstance.clearTextAttribute();
-    }
   }
 
   public get selectedPolygon() {
@@ -124,6 +117,10 @@ export default class PolygonOperation extends BasicToolOperation {
 
   public get selectedText() {
     const selectedResult = this.dataList.find((i) => i.id === this.selectedID);
+
+    if (!selectedResult) {
+      return '';
+    }
 
     return this.getStringAttributes(selectedResult, EToolName.Polygon);
   }
@@ -368,17 +365,6 @@ export default class PolygonOperation extends BasicToolOperation {
   }
 
   public setSelectedID(newID?: string) {
-    const oldID = this.selectedID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
-
-      this._textAttributInstance?.changeSelected();
-    }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-
     this.selectedID = newID;
 
     this.render();
@@ -410,26 +396,11 @@ export default class PolygonOperation extends BasicToolOperation {
         this.history.pushHistory(this.polygonList);
         this.render();
       }
-
-      if (this._textAttributInstance) {
-        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(defaultAttribute)) {
-          // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
-          return;
-        }
-
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
-      }
     }
   }
 
   public setStyle(toolStyle: any) {
     super.setStyle(toolStyle);
-
-    // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
-    }
   }
 
   public setPolygonValidAndRender(id: string) {
@@ -492,22 +463,10 @@ export default class PolygonOperation extends BasicToolOperation {
         sourceID: basicSourceID,
         valid: !this.isCtrl,
         isVisible: true,
-        textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
         order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1,
       };
-      if (this.config.textConfigurable) {
-        let textAttribute = '';
-        textAttribute = AttributeUtils.getTextAttribute(
-          this.polygonList.filter((polygon) => CommonToolUtils.isSameSourceID(polygon.sourceID, basicSourceID)),
-          this.config.textCheckType,
-        );
-        newPolygon = {
-          ...newPolygon,
-          textAttribute,
-        };
-      }
 
       if (this.pattern === EPolygonPattern.Rect && isRect === true) {
         newPolygon = {
@@ -592,7 +551,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
     this.setPolygonList(this.polygonList.filter((polygon) => polygon.id !== id));
     this.history.pushHistory(this.polygonList);
-    this._textAttributInstance?.clearTextAttribute();
     this.emit('selectedChange');
     this.render();
   }
@@ -962,13 +920,11 @@ export default class PolygonOperation extends BasicToolOperation {
       let defaultAttribute = '';
       let valid = true;
       const sourceID = CommonToolUtils.getSourceID(this.basicResult);
-      let textAttribute = '';
 
       newPolygonList = this.polygonList.map((v) => {
         if (v.id === this.selectedID) {
           defaultAttribute = v.attribute;
           valid = v?.valid ?? true;
-          textAttribute = v?.textAttribute ?? '';
           return {
             ...v,
             pointList: newPointList,
@@ -989,7 +945,6 @@ export default class PolygonOperation extends BasicToolOperation {
             isVisible: true,
             order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1 + i,
             attribute: defaultAttribute,
-            textAttribute,
           });
         });
       }
@@ -1365,65 +1320,8 @@ export default class PolygonOperation extends BasicToolOperation {
     const color = toolStyle.stroke;
     return {
       width: TEXT_MAX_WIDTH,
-      textAttribute: selectedPolygon.textAttribute,
       color,
     };
-  }
-
-  /** 更新文本输入，并且进行关闭 */
-  public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute && this.selectedID) {
-      // 切换的时候如果存在
-
-      let textAttribute = newTextAttribute;
-      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
-        textAttribute = '';
-      }
-
-      this.setPolygonList(AttributeUtils.textChange(textAttribute, this.selectedID, this.polygonList));
-      this.emit('updateTextAttribute');
-      this.render();
-    }
-  }
-
-  public renderTextAttribute() {
-    const { selectedPolygon } = this;
-    if (!this.ctx || this.config.textConfigurable === false || !selectedPolygon) {
-      return;
-    }
-
-    const { pointList, attribute, valid, textAttribute } = selectedPolygon;
-
-    const { x, y } = pointList[pointList.length - 1];
-
-    const newWidth = TEXT_MAX_WIDTH;
-    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
-    const toolStyle = this.getRenderStyle(attribute, valid);
-    const color = toolStyle.stroke;
-    if (!this._textAttributInstance) {
-      // 属性文本示例
-
-      this._textAttributInstance = new TextAttributeClass({
-        width: newWidth,
-        container: this.container,
-        icon: this.getTextIconSvg(attribute),
-        color,
-        getCurrentSelectedData: this.getCurrentSelectedData,
-        updateSelectedTextAttribute: this.updateSelectedTextAttribute,
-      });
-    }
-
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
-    }
-
-    this._textAttributInstance.update(`${textAttribute}`, {
-      left: coordinate.x,
-      top: coordinate.y,
-      color,
-      width: newWidth,
-    });
   }
 
   public renderPolygon() {
@@ -1541,8 +1439,6 @@ export default class PolygonOperation extends BasicToolOperation {
             ...DEFAULT_TEXT_OFFSET,
           },
         );
-
-        // this.renderTextAttribute();
       }
     }
 

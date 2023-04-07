@@ -27,13 +27,6 @@ export default [
             initialValue: true,
           },
           {
-            field: 'textCheckType',
-            key: 'textCheckType',
-            type: 'enum',
-            hidden: true,
-            initialValue: 0,
-          },
-          {
             field: 'minWidth',
             key: 'minWidth',
             type: 'number',

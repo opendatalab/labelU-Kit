@@ -57,9 +57,9 @@ class TextToolOperation extends BasicToolOperation {
   /** 获取单个初始值 */
   public getSingleResult = (sourceID?: string) => {
     const initValue: any = {};
-    if (this.config.configList.length > 0) {
-      this.config.configList.forEach((i: { key: string; default: string }) => {
-        initValue[i.key] = i.default ?? '';
+    if (this.config.attributes.length > 0) {
+      this.config.attributes.forEach((i: { key: string; defaultValue: string }) => {
+        initValue[i.key] = i.defaultValue ?? '';
       });
     }
 
@@ -130,7 +130,7 @@ class TextToolOperation extends BasicToolOperation {
 
     dom.setAttribute('id', this.textValueContainerID);
 
-    this.config.configList.forEach((i: any) => {
+    this.config.attributes.forEach((i: any) => {
       const div = document.createElement('div');
       const label = document.createElement('div');
       const value = document.createElement('div');
