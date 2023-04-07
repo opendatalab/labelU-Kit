@@ -1,286 +1,232 @@
-import type { OneTag } from '@label-u/annotation';
-import type { BasicConfig } from '@label-u/components';
-import { Button, Dropdown, Form, Menu, Select, Tabs } from 'antd';
+import { EToolName, TOOL_NAME } from '@label-u/annotation';
+import type { FormInstance, FormProps, MenuProps, TabsProps } from 'antd';
+import { Empty, Popconfirm, Button, Dropdown, Form, Tabs } from 'antd';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import _ from 'lodash-es';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import _, { cloneDeep } from 'lodash-es';
+import { PlusOutlined } from '@ant-design/icons';
+import { useSelector } from 'react-redux';
 
-import type { ToolsConfigState } from '@/types/toolConfig';
-import { validateTools } from '@/utils/tool/common';
+import { MediaType, TaskStatus } from '@/services/types';
+import FancyForm from '@/components/FancyForm';
+import FancyInput, { add } from '@/components/FancyInput';
+import type { RootState } from '@/store';
 
-import { toolnames, types, toolnameT, toolnameC } from './constants';
-import FormEngine from './formEngine';
-import CommonFormItem from '../components/commonFormItems';
-import { LoadInitConfig } from '../configTemplate/config';
+import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
+import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
+import styles from './index.module.scss';
+import lineTemplate from './templates/line.template';
+import rectTemplate from './templates/rect.template';
+import polygonTemplate from './templates/polygon.template';
+import pointTemplate from './templates/point.template';
+import tagTemplate from './templates/tag.template';
+import textTemplate from './templates/text.template';
 
-const { Option } = Select;
+// 注册fancyInput自定义输入组件
+add('list-attribute', FancyAttributeList);
+add('category-attribute', FancyCategoryAttribute);
 
-const noCommonConfigTools = ['tagTool', 'textTool'];
+const validTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line, EToolName.Tag, EToolName.Text];
 
-// instead of useState
-let activeTabKey = '1';
+const toolOptions = validTools.map((item) => {
+  return {
+    label: TOOL_NAME[item],
+    value: item,
+  };
+});
 
-function setActiveTabKey(value: string) {
-  activeTabKey = value;
-}
+const mediaTypeMapping = {
+  [MediaType.IMAGE]: '图片',
+  [MediaType.VIDEO]: '视频',
+  [MediaType.POINT_CLOUD]: '点云',
+};
+
+const mediaOptions = Object.values(MediaType).map((item) => {
+  return {
+    label: mediaTypeMapping[item],
+    value: item,
+    disabled: [MediaType.VIDEO, MediaType.POINT_CLOUD].includes(item),
+  };
+});
+
+const templateMapping: Record<string, any> = {
+  [EToolName.Line]: lineTemplate,
+  [EToolName.Rect]: rectTemplate,
+  [EToolName.Polygon]: polygonTemplate,
+  [EToolName.Point]: pointTemplate,
+  [EToolName.Tag]: tagTemplate,
+  [EToolName.Text]: textTemplate,
+};
 
 interface IProps {
-  config: ToolsConfigState;
-  updateConfig: (field: string) => (value: any) => void;
+  form: FormInstance;
 }
 
-const FormConfig: FC<IProps> = ({ config, updateConfig }) => {
-  const { tools = [], tagList = [], attribute = [], textConfig = [], commonAttributeConfigurable } = config || {};
-  const children = [];
-  const [media, setMedia] = useState<string>('图片');
-  const [selectTools, setSelectTools] = useState<string[]>([]);
-  const [isConfigLoad, setIsConfigLoad] = useState<boolean>(true);
+const FormConfig: FC<IProps> = ({ form }) => {
+  const [activeTool, setActiveTool] = useState<string>(toolOptions[0].value);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [hasAttributes, setHasAttributes] = useState(false);
 
-  const updateTools = useMemo(() => updateConfig('tools'), [updateConfig]);
-  const updateTagList = useMemo(() => updateConfig('tagList'), [updateConfig]);
-  const updateTextConfig = useMemo(() => updateConfig('textConfig'), [updateConfig]);
-  const updateAttribute = useMemo(() => updateConfig('attribute'), [updateConfig]);
-  const updateCommonAttributeConfigurable = useMemo(() => updateConfig('commonAttributeConfigurable'), [updateConfig]);
+  const config = useSelector((state: RootState) => state.task.config);
+  const taskStatus = useSelector((state: RootState) => state.task.item.status);
+  const taskDoneAmount = useSelector((state: RootState) => state.task.item.stats?.done);
+  const { tools } = config || {};
 
-  for (let i = 0; i < types.length; i++) {
-    children.push(<Option key={types[i]}>{types[i]}</Option>);
-  }
-  const [force, forceSet] = useState(0);
+  // 进行中和已完成的任务不允许删除工具
+  const deletable = useMemo(() => {
+    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
+      return false;
+    }
 
-  const updateSelectTools = useCallback(
-    (toolname: string) => {
-      const tmp = selectTools;
-      if (tmp.indexOf(toolname) >= 0) {
-        tmp.splice(tmp.indexOf(toolname), 1);
-      } else {
-        tmp.push(toolname);
-      }
-      setSelectTools(tmp);
-    },
-    [selectTools],
-  );
+    return true;
+  }, [taskStatus, taskDoneAmount]);
 
-  const loadInitConfig = useCallback(
-    async (toolname: string, _tools: BasicConfig[]) => {
-      setIsConfigLoad(false);
-      await new Promise(async (resolve) => {
-        if (toolname) {
-          const defaultConfig = (await LoadInitConfig(toolname)) as any;
-          const keys = Object.keys(defaultConfig);
+  useEffect(() => {
+    setSelectedTools(_.chain(tools).compact().map('tool').value());
+    setActiveTool((tools || [])[0]?.tool);
+    setHasAttributes(config?.commonAttributeConfigurable ?? false);
+  }, [config, tools]);
 
-          for (const key of keys) {
-            if (key === 'tools') {
-              updateConfig(key)([..._tools].concat(defaultConfig[key]));
-            } else if (_.chain(config).get(key).size().value() === 0) {
-              updateConfig(key)(defaultConfig[key]);
-            }
-          }
-          resolve(defaultConfig);
-        }
-      });
-      setIsConfigLoad(true);
-    },
-    [config, updateConfig],
-  );
+  // ======================== 以下为新增代码 ========================
+  const handleToolItemClick: MenuProps['onClick'] = async ({ key }) => {
+    setSelectedTools((pre) => [...pre, key]);
+    setActiveTool(key);
+  };
 
-  const toolMenuItems = useMemo(() => {
-    const _items = [];
-    for (let i = 0; i < toolnames.length; i++) {
-      if (selectTools.indexOf(toolnameT[toolnames[i]]) < 0) {
-        _items.push({
-          key: toolnameT[toolnames[i]],
-          label: (
-            <div
-              onClick={(e) => {
-                updateSelectTools(toolnameT[toolnames[i]]);
-                loadInitConfig(toolnameT[toolnames[i]], tools);
-                e.stopPropagation();
-              }}
-              style={{ paddingTop: 5, paddingBottom: 5, paddingLeft: 12 }}
-            >
-              <span>{toolnames[i]}</span>
-            </div>
-          ),
+  const handleRemoveTool = useCallback(
+    (toolName: EToolName) => () => {
+      const newTools = selectedTools.filter((item) => item !== toolName);
+      setSelectedTools(newTools);
+      setActiveTool(newTools[0]);
+
+      // 因为antd的form的特殊性，删除数组元素时，需要手动调用setFieldsValue
+      const prevValues = cloneDeep(form.getFieldsValue());
+
+      setTimeout(() => {
+        form.setFieldsValue({
+          ...prevValues,
+          tools: prevValues.tools.filter((item: any) => item.tool !== toolName),
         });
+      });
+    },
+    [form, selectedTools],
+  );
+
+  const toolsMenu: MenuProps['items'] = useMemo(
+    () =>
+      _.chain(toolOptions)
+        .filter((item) => !selectedTools.includes(item.value))
+        .map(({ value, label }) => ({
+          key: value,
+          label: <span>{label}</span>,
+        }))
+        .value(),
+    [selectedTools],
+  );
+
+  const tabItems: TabsProps['items'] = useMemo(() => {
+    return _.map(selectedTools, (tool, index) => {
+      const fancyFormTemplate = templateMapping[tool] || null;
+
+      return {
+        key: tool,
+        label: TOOL_NAME[tool],
+        forceRender: true,
+        children: (
+          <div className={styles.innerForm}>
+            <div style={{ display: deletable ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+              <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
+                <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
+                  删除工具
+                </Button>
+              </Popconfirm>
+            </div>
+            <FancyForm template={fancyFormTemplate} name={['tools', index]} />
+          </div>
+        ),
+      };
+    });
+  }, [deletable, handleRemoveTool, selectedTools]);
+
+  // TODO: 增加表单数据类型
+  const handleFormValuesChange: FormProps['onValuesChange'] = useCallback(
+    (changedValue: any) => {
+      if ('commonAttributeConfigurable' in changedValue) {
+        if (!changedValue.commonAttributeConfigurable) {
+          form.setFieldValue('attributes', []);
+        }
+        setHasAttributes(changedValue.commonAttributeConfigurable);
       }
-    }
-    return _items;
-  }, [loadInitConfig, selectTools, tools, updateSelectTools]);
+    },
+    [form],
+  );
 
-  // 删除工具后，selectTools中的工具也要更新
-  useEffect(() => {
-    const toolNames = _.map(tools, 'tool');
-    if (_.isEmpty(tools) || _.isEqual(toolNames, selectTools)) {
-      return;
-    }
+  // ========================= end ==============================
 
-    setSelectTools(toolNames);
-  }, [selectTools, tagList?.length, textConfig?.length, tools]);
-
-  const [height, setHeight] = useState<number>(0);
-
-  useEffect(() => {
-    const leftSiderDom = document.getElementById('lefeSiderId');
-    const _height = leftSiderDom?.getBoundingClientRect().height as number;
-    setHeight(_height - 128);
-  }, []);
-
-  const handleChange = (e: React.SetStateAction<string>) => {
-    setMedia(e);
-  };
-
-  const updateCombineToolsConfig = (_tools: BasicConfig[], toolConfig: Record<string, unknown>, toolname: string) => {
-    const newTools = _tools.reduce((res, item) => {
-      if (item.tool === toolname || toolname === 'commonForm') {
-        const copyItem = { ...item };
-        const newConfig = {
-          ...copyItem.config,
-          ...toolConfig,
-        };
-        copyItem.config = newConfig;
-        res.push(copyItem);
-      } else {
-        res.push(item);
-      }
-      return res;
-    }, [] as BasicConfig[]);
-    updateTools(newTools);
-  };
-
-  const actUpdateToolsConfig = (name: string, info: any) => {
-    if (name && Object.keys(toolnameC).indexOf(name) >= 0) {
-      if (name === 'tagTool') {
-        updateTagList(info.values.tagList as OneTag[]);
-      } else if (name === 'textTool') {
-        updateTextConfig(info.values.textConfig);
-      } else {
-        updateCombineToolsConfig(tools, info.values, name);
-      }
-    }
-    if (name === 'commonForm') {
-      if (info.values.attribute !== undefined) {
-        updateAttribute(info.values.attribute);
-      }
-
-      updateCommonAttributeConfigurable(info.values.commonAttributeConfigurable);
-      let commonToolConfig = {};
-      if (info.values.drawOutsideTarget !== undefined) {
-        commonToolConfig = Object.assign(commonToolConfig, { drawOutsideTarget: info.values.drawOutsideTarget });
-      }
-      if (info.values.textConfigurableContext !== undefined) {
-        commonToolConfig = Object.assign(commonToolConfig, info.values.textConfigurableContext);
-      }
-      updateCombineToolsConfig(tools, commonToolConfig, name);
-    }
-  };
   return (
-    <div className="formConfig" style={{ height: height }}>
-      <div className="oneRow">
-        <label>标注类型</label>
-        <Select size="middle" value={media} onChange={handleChange} listItemHeight={10} listHeight={250}>
-          {children}
-        </Select>
-      </div>
-      <div className="oneRow">
-        <label>标注工具</label>
-        <Dropdown overlay={<Menu items={toolMenuItems} />} placement="bottomLeft" trigger={['click']}>
-          <Button type="primary" ghost>
-            <span style={{ fontSize: 22, marginTop: -7 }}>+ </span> 新增工具
+    <Form
+      form={form}
+      labelCol={{ span: 4 }}
+      wrapperCol={{ span: 20 }}
+      colon={false}
+      className={styles.formConfig}
+      initialValues={config}
+      onValuesChange={handleFormValuesChange}
+    >
+      <Form.Item label="标注类型" name="media_type" rules={[{ required: true, message: '标注类型不可为空' }]}>
+        <FancyInput
+          type="enum"
+          size="middle"
+          options={mediaOptions}
+          listItemHeight={10}
+          listHeight={250}
+          defaultValue={MediaType.IMAGE}
+        />
+      </Form.Item>
+      <Form.Item label="标注工具">
+        <Dropdown menu={{ items: toolsMenu, onClick: handleToolItemClick }} placement="bottomLeft" trigger={['click']}>
+          <Button type="primary" ghost icon={<PlusOutlined />}>
+            新增工具
           </Button>
         </Dropdown>
-      </div>
-      {selectTools && selectTools.length > 0 && validateTools(tools) && (
-        <div className="formTabBox">
-          <Tabs
-            type="card"
-            activeKey={String(Math.min(Number(activeTabKey), selectTools.length))}
-            onChange={(e) => {
-              setActiveTabKey(e);
-              forceSet(new Date().getTime());
-            }}
-            items={selectTools.map((tool, i) => {
-              const id = String(i + 1);
-              // 配置初始化
-              let initC = {} as BasicConfig;
-              let configArr = [];
-              let isShow = true;
-              configArr = tools.filter((item: any) => {
-                return item.tool === tool;
-              });
-              initC = configArr[0];
-              // 公共配置
-              let commonConfig = {
-                drawOutsideTarget: false,
-                textCheckType: 1,
-                customFormat: '',
-                textConfigurable: false,
-              };
+      </Form.Item>
+      <Form.Item wrapperCol={{ offset: 4 }}>
+        {selectedTools.length > 0 ? (
+          <div className="formTabBox">
+            <Tabs
+              type="card"
+              size="small"
+              activeKey={activeTool}
+              destroyInactiveTabPane={false}
+              onChange={(tabKey) => {
+                setActiveTool(tabKey);
+              }}
+              items={tabItems}
+            />
+          </div>
+        ) : (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="请选择工具" />
+        )}
+      </Form.Item>
+      <Form.Item label="画布外标注" name="drawOutsideTarget" tooltip="开启后可以在媒体文件画布范围外进行标注">
+        <FancyInput type="boolean" />
+      </Form.Item>
 
-              if (noCommonConfigTools.indexOf(tool) >= 0) {
-                //@ts-ignore
-                isShow = false;
-              } else {
-                if (initC && initC.config) {
-                  commonConfig = {
-                    //@ts-ignore
-                    drawOutsideTarget: initC.config.drawOutsideTarget,
-                    //@ts-ignore
-                    textCheckType: initC.config.textCheckType,
-                    //@ts-ignore
-                    customFormat: initC.config.customFormat,
-                    //@ts-ignore
-                    textConfigurable: initC.config.textConfigurable,
-                  };
-                }
-              }
-
-              return {
-                //@ts-ignore
-                label: `${toolnameC[tool]}`,
-                key: id,
-                children: (
-                  <div className="toolConfigPane">
-                    <Form.Provider
-                      onFormFinish={(name, info) => {
-                        if (Object.keys(info.forms).length > 0) {
-                          // todo 统一处理表单 和  标注工具之间联动
-                          actUpdateToolsConfig(name, info);
-                        }
-                      }}
-                    >
-                      {
-                        <FormEngine
-                          toolName={tool}
-                          toolConfig={initC || {}}
-                          {...{
-                            updateTagList,
-                            updateTextConfig,
-                            updateTools,
-                          }}
-                          config={config}
-                        />
-                      }
-
-                      {isConfigLoad && (
-                        <CommonFormItem
-                          key={force}
-                          commonAttributeConfigurable={commonAttributeConfigurable}
-                          attribute={attribute}
-                          {...commonConfig}
-                          name="commonForm"
-                          toolName={tool}
-                          isShow={isShow}
-                        />
-                      )}
-                    </Form.Provider>
-                  </div>
-                ),
-              };
-            })}
-          />
+      <Form.Item
+        label={<span className="formTitle">通用标签</span>}
+        name="commonAttributeConfigurable"
+        tooltip="已经配置的所有标注工具均可以使用通用标签"
+      >
+        <FancyInput type="boolean" />
+      </Form.Item>
+      <Form.Item wrapperCol={{ offset: 4 }} className={styles.attributes} hidden={!hasAttributes}>
+        <div className={styles.attributesBox}>
+          <Form.Item name="attributes">
+            <FancyInput type="list-attribute" fullField={['attributes']} />
+          </Form.Item>
         </div>
-      )}
-    </div>
+      </Form.Item>
+    </Form>
   );
 };
 

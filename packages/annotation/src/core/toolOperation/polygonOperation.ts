@@ -26,11 +26,9 @@ import CanvasUtils from '../../utils/tool/CanvasUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import PolygonUtils from '../../utils/tool/PolygonUtils';
-import StyleUtils from '../../utils/tool/StyleUtils';
 import uuid from '../../utils/uuid';
 import type { IBasicToolOperationProps } from './basicToolOperation';
 import BasicToolOperation from './basicToolOperation';
-import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
 
@@ -71,8 +69,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
   private isAlt: boolean; // 当前是否按住了 alt
 
-  private _textAttributInstance?: TextAttributeClass;
-
   constructor(props: IPolygonOperationProps) {
     super(props);
     this.config = CommonToolUtils.jsonParser(props.config);
@@ -88,7 +84,6 @@ export default class PolygonOperation extends BasicToolOperation {
     this.pattern = EPolygonPattern.Normal;
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
-    this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
   }
 
   public eventBinding() {
@@ -107,9 +102,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
   public destroy() {
     super.destroy();
-    if (this._textAttributInstance) {
-      this._textAttributInstance.clearTextAttribute();
-    }
   }
 
   public get selectedPolygon() {
@@ -124,7 +116,13 @@ export default class PolygonOperation extends BasicToolOperation {
   }
 
   public get selectedText() {
-    return this.selectedPolygon?.textAttribute;
+    const selectedResult = this.dataList.find((i) => i.id === this.selectedID);
+
+    if (!selectedResult) {
+      return '';
+    }
+
+    return this.getStringAttributes(selectedResult, EToolName.Polygon);
   }
 
   // 是否直接执行操作
@@ -280,7 +278,7 @@ export default class PolygonOperation extends BasicToolOperation {
       AxisUtils.changePointListByZoom(this.drawingPointList, this.zoom),
     );
     if (calculateHoverPointIndex === 0) {
-      this.addDrawingPointToPolygonList();
+      this.addDrawingPointToPolygonList(false, e);
       return;
     }
 
@@ -315,7 +313,7 @@ export default class PolygonOperation extends BasicToolOperation {
         }
       }
       // 创建多边形
-      this.addDrawingPointToPolygonList(true);
+      this.addDrawingPointToPolygonList(true, e);
       return;
     }
 
@@ -367,17 +365,6 @@ export default class PolygonOperation extends BasicToolOperation {
   }
 
   public setSelectedID(newID?: string) {
-    const oldID = this.selectedID;
-    if (newID !== oldID && oldID) {
-      // 触发文本切换的操作
-
-      this._textAttributInstance?.changeSelected();
-    }
-
-    if (!newID) {
-      this._textAttributInstance?.clearTextAttribute();
-    }
-
     this.selectedID = newID;
 
     this.render();
@@ -399,7 +386,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
-      this.container.dispatchEvent(this.saveDataEvent);
 
       // 如有选中目标，则需更改当前选中的属性
       const { selectedID } = this;
@@ -410,26 +396,11 @@ export default class PolygonOperation extends BasicToolOperation {
         this.history.pushHistory(this.polygonList);
         this.render();
       }
-
-      if (this._textAttributInstance) {
-        if (this.attributeLockList.length > 0 && !this.attributeLockList.includes(defaultAttribute)) {
-          // 属性隐藏
-          this._textAttributInstance.clearTextAttribute();
-          return;
-        }
-
-        this._textAttributInstance.updateIcon(this.getTextIconSvg(defaultAttribute));
-      }
     }
   }
 
   public setStyle(toolStyle: any) {
     super.setStyle(toolStyle);
-
-    // 当存在文本 icon 的时候需要更改当前样式
-    if (this._textAttributInstance && this.config.attributeConfigurable === false) {
-      this._textAttributInstance?.updateIcon(this.getTextIconSvg());
-    }
   }
 
   public setPolygonValidAndRender(id: string) {
@@ -460,7 +431,7 @@ export default class PolygonOperation extends BasicToolOperation {
    * 初始化的添加的数据
    * @returns
    */
-  public addDrawingPointToPolygonList(isRect?: boolean) {
+  public addDrawingPointToPolygonList(isRect: boolean, e: MouseEvent) {
     let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
@@ -492,22 +463,10 @@ export default class PolygonOperation extends BasicToolOperation {
         sourceID: basicSourceID,
         valid: !this.isCtrl,
         isVisible: true,
-        textAttribute: '',
         pointList: this.drawingPointList,
         attribute: this.defaultAttribute,
         order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1,
       };
-      if (this.config.textConfigurable) {
-        let textAttribute = '';
-        textAttribute = AttributeUtils.getTextAttribute(
-          this.polygonList.filter((polygon) => CommonToolUtils.isSameSourceID(polygon.sourceID, basicSourceID)),
-          this.config.textCheckType,
-        );
-        newPolygon = {
-          ...newPolygon,
-          textAttribute,
-        };
-      }
 
       if (this.pattern === EPolygonPattern.Rect && isRect === true) {
         newPolygon = {
@@ -519,6 +478,7 @@ export default class PolygonOperation extends BasicToolOperation {
       polygonList.push(newPolygon);
 
       this.setSelectedIdAfterAddingDrawing(id);
+      this.emit('drawEnd', newPolygon, e);
     }
 
     this.setPolygonList(polygonList);
@@ -591,7 +551,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
     this.setPolygonList(this.polygonList.filter((polygon) => polygon.id !== id));
     this.history.pushHistory(this.polygonList);
-    this._textAttributInstance?.clearTextAttribute();
     this.emit('selectedChange');
     this.render();
   }
@@ -798,10 +757,10 @@ export default class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public rightMouseUp() {
+  public rightMouseUp(e: MouseEvent) {
     // 标注中的数据结束
     if (this.drawingPointList.length > 0) {
-      this.addDrawingPointToPolygonList();
+      this.addDrawingPointToPolygonList(false, e);
       // this.container.dispatchEvent(this.saveDataEvent);
     }
 
@@ -961,13 +920,11 @@ export default class PolygonOperation extends BasicToolOperation {
       let defaultAttribute = '';
       let valid = true;
       const sourceID = CommonToolUtils.getSourceID(this.basicResult);
-      let textAttribute = '';
 
       newPolygonList = this.polygonList.map((v) => {
         if (v.id === this.selectedID) {
           defaultAttribute = v.attribute;
           valid = v?.valid ?? true;
-          textAttribute = v?.textAttribute ?? '';
           return {
             ...v,
             pointList: newPointList,
@@ -988,7 +945,6 @@ export default class PolygonOperation extends BasicToolOperation {
             isVisible: true,
             order: CommonToolUtils.getAllToolsMaxOrder(this.polygonList, this.prevResultList) + 1 + i,
             attribute: defaultAttribute,
-            textAttribute,
           });
         });
       }
@@ -1315,7 +1271,7 @@ export default class PolygonOperation extends BasicToolOperation {
       }
 
       case 2: {
-        this.rightMouseUp();
+        this.rightMouseUp(e);
 
         break;
       }
@@ -1360,69 +1316,12 @@ export default class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    const toolColor = this.getColor(selectedPolygon.attribute);
-    const color = selectedPolygon.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+    const toolStyle = this.getRenderStyle(selectedPolygon.attribute, selectedPolygon.valid);
+    const color = toolStyle.stroke;
     return {
       width: TEXT_MAX_WIDTH,
-      textAttribute: selectedPolygon.textAttribute,
       color,
     };
-  }
-
-  /** 更新文本输入，并且进行关闭 */
-  public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributInstance && newTextAttribute && this.selectedID) {
-      // 切换的时候如果存在
-
-      let textAttribute = newTextAttribute;
-      if (AttributeUtils.textAttributeValidate(this.config.textCheckType, '', textAttribute) === false) {
-        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
-        textAttribute = '';
-      }
-
-      this.setPolygonList(AttributeUtils.textChange(textAttribute, this.selectedID, this.polygonList));
-      this.emit('updateTextAttribute');
-      this.render();
-    }
-  }
-
-  public renderTextAttribute() {
-    const { selectedPolygon } = this;
-    if (!this.ctx || this.config.textConfigurable === false || !selectedPolygon) {
-      return;
-    }
-
-    const { pointList, attribute, valid, textAttribute } = selectedPolygon;
-
-    const { x, y } = pointList[pointList.length - 1];
-
-    const newWidth = TEXT_MAX_WIDTH;
-    const coordinate = AxisUtils.getOffsetCoordinate({ x, y }, this.currentPos, this.zoom);
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    if (!this._textAttributInstance) {
-      // 属性文本示例
-
-      this._textAttributInstance = new TextAttributeClass({
-        width: newWidth,
-        container: this.container,
-        icon: this.getTextIconSvg(attribute),
-        color,
-        getCurrentSelectedData: this.getCurrentSelectedData,
-        updateSelectedTextAttribute: this.updateSelectedTextAttribute,
-      });
-    }
-
-    if (this._textAttributInstance && !this._textAttributInstance?.isExit) {
-      this._textAttributInstance.appendToContainer();
-    }
-
-    this._textAttributInstance.update(`${textAttribute}`, {
-      left: coordinate.x,
-      top: coordinate.y,
-      color,
-      width: newWidth,
-    });
   }
 
   public renderPolygon() {
@@ -1433,9 +1332,11 @@ export default class PolygonOperation extends BasicToolOperation {
           return;
         }
         if (polygon.isVisible) {
-          const { textAttribute, attribute } = polygon;
-          const toolColor = this.getColor(attribute);
-          const toolData = StyleUtils.getStrokeAndFill(toolColor, polygon.valid);
+          const { attribute } = polygon;
+          const toolColor = this.getColor(attribute, this.config, EToolName.Polygon);
+          const toolData = this.getRenderStyle(polygon.attribute, polygon.valid, {
+            color: toolColor,
+          });
           const transformPointList = AxisUtils.changePointListByZoom(
             polygon.pointList || [],
             this.zoom,
@@ -1452,7 +1353,7 @@ export default class PolygonOperation extends BasicToolOperation {
             lineType: this.config?.lineType,
           });
 
-          let showText = `${this.config.attributeMap.get(attribute) || attribute}`;
+          let showText = `${this.getAttributeKey(attribute)}`;
           if (this.isShowOrder && polygon?.order > 0) {
             showText = `${polygon.order} ${showText}`;
           }
@@ -1463,6 +1364,7 @@ export default class PolygonOperation extends BasicToolOperation {
           });
 
           // 文本输入
+          const textAttribute = this.getStringAttributes(polygon, EToolName.Polygon);
           if (this.isShowAttributeText) {
             const endPoint = transformPointList[transformPointList.length - 1];
             if (endPoint && endPoint.x) {
@@ -1485,13 +1387,9 @@ export default class PolygonOperation extends BasicToolOperation {
     if (this.hoverID && this.hoverID !== this.editPolygonID) {
       const hoverPolygon = this.polygonList.find((v) => v.id === this.hoverID && v.id !== this.selectedID);
       if (hoverPolygon) {
-        let color = '';
-        const toolColor = this.getColor(hoverPolygon.attribute);
-        if (hoverPolygon.valid) {
-          color = toolColor.validHover.fill;
-        } else {
-          color = StyleUtils.getStrokeAndFill(toolColor, false, { isHover: true }).fill;
-        }
+        const color = this.getRenderStyle(hoverPolygon.attribute, hoverPolygon.valid, {
+          isHovered: true,
+        }).fill;
 
         DrawUtils.drawPolygonWithFill(
           this.canvas,
@@ -1509,8 +1407,9 @@ export default class PolygonOperation extends BasicToolOperation {
       const selectdPolygon = this.selectedPolygon;
 
       if (selectdPolygon) {
-        const toolColor = this.getColor(selectdPolygon.attribute);
-        const toolData = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
+        const toolData = this.getRenderStyle(selectdPolygon.attribute, selectdPolygon.valid, {
+          isSelected: true,
+        });
 
         DrawUtils.drawSelectedPolygonWithFillAndLine(
           this.canvas,
@@ -1526,7 +1425,7 @@ export default class PolygonOperation extends BasicToolOperation {
           },
         );
 
-        let showText = `${this.config.attributeMap.get(selectdPolygon.attribute) || selectdPolygon.attribute}`;
+        let showText = `${this.getAttributeKey(selectdPolygon.attribute)}`;
         if (this.isShowOrder && selectdPolygon?.order > 0) {
           showText = `${selectdPolygon.order} ${showText}`;
         }
@@ -1540,13 +1439,10 @@ export default class PolygonOperation extends BasicToolOperation {
             ...DEFAULT_TEXT_OFFSET,
           },
         );
-
-        // this.renderTextAttribute();
       }
     }
 
-    const defaultColor = this.getColor(this.defaultAttribute);
-    const toolData = StyleUtils.getStrokeAndFill(defaultColor, !this.isCtrl);
+    const toolData = this.getRenderStyle(this.defaultAttribute, !this.isCtrl);
     // 4. 编辑中的多边形
     if (this.drawingPointList?.length > 0) {
       // 渲染绘制中的多边形
@@ -1592,13 +1488,15 @@ export default class PolygonOperation extends BasicToolOperation {
       if (!selectdPolygon) {
         return;
       }
-      const hoverColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+      const selectedColor = this.getRenderStyle(this.defaultAttribute, selectdPolygon.valid, {
+        isSelected: true,
+      });
 
       const point = selectdPolygon?.pointList[this.hoverPointIndex];
       if (point) {
         const { x, y } = AxisUtils.changePointByZoom(point, this.zoom, this.currentPos);
         DrawUtils.drawCircleWithFill(this.canvas, { x, y }, 5, {
-          color: hoverColor.fill,
+          color: selectedColor.fill,
         });
       }
     }
@@ -1609,7 +1507,10 @@ export default class PolygonOperation extends BasicToolOperation {
       if (!selectdPolygon) {
         return;
       }
-      const selectedColor = StyleUtils.getStrokeAndFill(defaultColor, selectdPolygon.valid, { isSelected: true });
+
+      const selectedColor = this.getRenderStyle(this.defaultAttribute, selectdPolygon.valid, {
+        isSelected: true,
+      });
 
       DrawUtils.drawLineWithPointList(
         this.canvas,
@@ -1633,8 +1534,8 @@ export default class PolygonOperation extends BasicToolOperation {
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   }
 
-  public renderCursorLine(lineColor: string) {
-    super.renderCursorLine(lineColor);
+  public renderCursorLine(color: string) {
+    super.renderCursorLine(color);
     if (this.isCombined) {
       const { x, y } = this.coord;
       const padding = 10; // 框的边界

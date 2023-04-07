@@ -1,8 +1,6 @@
-@import '@/utils/common/common.module';
-
 .outerFrameActive {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 220px;
@@ -12,8 +10,8 @@
 }
 
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 220px;
@@ -22,35 +20,36 @@
 }
 
 .contentActive {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 200px;
   height: 120px;
   position: relative;
   margin-bottom: 10px;
-  background: #ffffff;
+  background: #fff;
   border-radius: 2px;
-  border: 3px solid var(--primary-color);
+  border: 3px solid var(--color-primary);
   overflow: hidden;
 }
+
 .idHighlight {
-  background-color: var(--primary-color);
+  background-color: var(--color-primary);
   color: white;
   border-radius: 2px;
 }
+
 .content {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 200px;
   height: 120px;
   position: relative;
   margin-bottom: 10px;
-  background: #ffffff;
-
+  background: #fff;
   overflow: hidden;
 }
 
@@ -61,10 +60,9 @@
   z-index: 100;
   width: 32px;
   height: 32px;
-  -ms-transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
   transform: rotate(-45deg);
-  background-color: var(--primary-color);
+  transform: rotate(-45deg);
+  background-color: var(--color-primary);
 }
 
 .tagTop {
@@ -81,8 +79,8 @@
   top: 0;
   right: 0;
   z-index: 1000;
-  background: #ff8800;
-  border-radius: 0px 4px;
+  background: #f80;
+  border-radius: 0 4px;
   width: 36px;
   height: 25px;
   color: white;

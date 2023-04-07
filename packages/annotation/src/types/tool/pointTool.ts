@@ -7,8 +7,8 @@ export interface IPointUnit extends IPoint {
   valid: boolean;
   label?: string;
   attribute?: string;
+  attributes?: Record<string, string>;
   order: number;
-  textAttribute?: string;
   isVisible: boolean;
 }
 

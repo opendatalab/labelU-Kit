@@ -4,7 +4,6 @@ import PointOperation from './core/toolOperation/pointOperation';
 import LineToolOperation from './core/toolOperation/LineToolOperation';
 import TextToolOperation from './core/toolOperation/TextToolOperation';
 import PolygonOperation from './core/toolOperation/polygonOperation';
-import MeasureOperation from './core/toolOperation/measureOperation';
 import BasicToolOperation from './core/toolOperation/basicToolOperation';
 import ViewOperation from './core/toolOperation/ViewOperation';
 import * as cAnnotation from './constant/annotation';
@@ -32,7 +31,7 @@ import AttributeUtils from './utils/tool/AttributeUtils';
 const toolUtils = CommonToolUtils;
 
 // 工具对外暴露配置统一定义
-export * from './interface/combineTool';
+export * from './interface/config';
 
 export {
   // 各类图形操作
@@ -43,7 +42,6 @@ export {
   PolygonOperation,
   TextToolOperation,
   BasicToolOperation,
-  MeasureOperation,
   ViewOperation,
   // 固定操作
   cAnnotation,

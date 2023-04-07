@@ -1,279 +1,267 @@
-import type { Attribute } from '@label-u/annotation';
-import { BasicToolOperation, AttributeUtils } from '@label-u/annotation';
-import type { FC } from 'react';
-import { useMemo, useCallback, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import { Button, Dropdown, Space, Menu } from 'antd';
+import { BasicToolOperation } from '@label-u/annotation';
+import { useContext, useMemo, useCallback, useEffect, useState } from 'react';
+import type { ButtonProps, MenuProps } from 'antd';
+import { Button, Dropdown, Space } from 'antd';
+import { cloneDeep, find, isEqual, update } from 'lodash-es';
+import styled, { css } from 'styled-components';
+import Icon from '@ant-design/icons';
 import classNames from 'classnames';
 
-import DropdowmIcon from '@/assets/toolStyle/dropdowm.svg';
-import DropdowmIconA from '@/assets/toolStyle/dropdowmA.svg';
+import { ReactComponent as DropdownIcon } from '@/assets/svg/dropdown.svg';
+import ViewContext from '@/view.context';
 
-import type { BasicConfig } from '../../../interface/toolConfig';
-import type { AppState } from '../../../store';
+const attributeHighlightStyle = css`
+  .attribute-item__highlight-color {
+    width: 3px;
+    height: 13px;
+    background-color: var(--attribute-color);
+    margin-right: 0.25rem;
+  }
+`;
 
-interface AttributeOperationProps {
-  attributeList: Attribute[];
-  toolsBasicConfig: BasicConfig[];
-  currentToolName: string;
-  toolInstance: any;
-  copytoolInstance: any;
-  imgListCollapse: boolean;
-  toolStyle: any;
-}
+const StyledAttributeButton = styled<
+  React.FC<
+    ButtonProps & {
+      active?: boolean;
+    }
+  >
+>(Button)`
+  border: 0;
+  border-radius: var(--border-radius-xs);
+  background-color: var(--attribute-color);
+  padding: 0 8px 0 0;
 
-const AttributeOperation: FC<AttributeOperationProps> = (props) => {
-  const { attributeList, toolsBasicConfig, currentToolName, toolInstance, copytoolInstance, toolStyle } = props;
-  const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
+  ${({ active }) =>
+    active
+      ? css`
+          color: #ffffff;
+          background-color: var(--attribute-color) !important;
+
+          &:hover {
+            color: #ffffff !important;
+          }
+        `
+      : css`
+          background-color: #fff;
+
+          &:hover {
+            color: var(--attribute-color) !important;
+          }
+        `}
+  ${attributeHighlightStyle}
+`;
+
+const AttributeWrapper = styled.div``;
+
+const AttributeDropdown = styled.div`
+  .ant-dropdown-menu-item {
+    padding: 0 !important;
+    margin-bottom: 0.25rem !important;
+
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  .attribute-menu-item {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-xs);
+
+    &:hover {
+      background-color: var(--attribute-color) !important;
+      color: #ffffff !important;
+    }
+
+    &.active {
+      background-color: var(--attribute-color) !important;
+      color: #ffffff !important;
+    }
+  }
+
+  ${attributeHighlightStyle}
+`;
+
+const AttributeOperation = () => {
+  const { currentToolName, config, annotationEngine, selectedResult, setSelectedResult, result, setResult } =
+    useContext(ViewContext);
+  const toolInstance = annotationEngine?.toolInstance;
+  const tools = config?.tools;
+  // const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
-  const [shwoAttributeCount, setShwoAttributeCount] = useState<number>(0);
+  const [showAttributeCount, setShowAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
-  const [isHoverDropdown, setIsHoverDropdown] = useState<boolean>(false);
-  const [allAttributeList, setAllAttributeList] = useState<Attribute[]>([]);
   const attributeMap = useMemo(
     () => toolInstance?.config?.attributeMap ?? new Map(),
     [toolInstance?.config?.attributeMap],
   );
 
-  const setActiveAttribute = (attributeName: string) => {
-    BasicToolOperation.Cache.set('activeAttribute', attributeName);
-    setChoseAttribute(attributeName);
-  };
+  const currentAttributes = useMemo(() => {
+    const currentToolConfig = find(tools, { tool: currentToolName });
+
+    return [...(config?.attributes ?? []), ...(currentToolConfig?.config?.attributes ?? [])];
+  }, [config?.attributes, currentToolName, tools]);
+
+  const setActiveAttribute = useCallback(
+    (attributeName: string) => {
+      setChoseAttribute(attributeName);
+
+      if (!selectedResult || chooseAttribute === attributeName) {
+        return;
+      }
+
+      BasicToolOperation.Cache.set('activeAttribute', attributeName);
+      const newResult = cloneDeep(result);
+
+      update(newResult, [currentToolName, 'result'], (items) => {
+        return items?.map((resultItem: any) => {
+          if (resultItem.id === selectedResult.id && attributeName !== resultItem.attribute) {
+            return {
+              ...resultItem,
+              attribute: attributeName,
+            };
+          }
+          return resultItem;
+        });
+      });
+      if (!isEqual(newResult, result)) {
+        setResult(newResult);
+      }
+
+      setSelectedResult({
+        ...selectedResult,
+        attribute: attributeName,
+      });
+    },
+    [chooseAttribute, result, selectedResult, currentToolName, setResult, setSelectedResult],
+  );
+
+  const handleAttributeClick = useCallback(
+    ({ domEvent, key }) => {
+      domEvent.stopPropagation();
+      toolInstance.setDefaultAttribute(key);
+      setActiveAttribute(key);
+      if (selectedResult) {
+        document.dispatchEvent(
+          new CustomEvent('set-attribute', {
+            detail: { result: { ...selectedResult, attribute: key }, e: domEvent },
+          }),
+        );
+      }
+    },
+    [selectedResult, setActiveAttribute, toolInstance],
+  );
 
   useEffect(() => {
-    if (copytoolInstance && copytoolInstance?.defaultAttribute) {
-      setActiveAttribute(copytoolInstance?.defaultAttribute);
+    if (!selectedResult) {
+      setActiveAttribute(toolInstance?.defaultAttribute);
+    } else {
+      setActiveAttribute(selectedResult.attribute!);
     }
-  }, [copytoolInstance]);
-
-  useEffect(() => {
-    const handleAttributeChange = ({ detail }: CustomEvent<any>) => {
-      toolInstance.setDefaultAttribute(detail);
-      setActiveAttribute(detail);
-    };
-
-    document.addEventListener('attribute::change', handleAttributeChange as EventListener);
-
-    return () => {
-      document.removeEventListener('attribute::change', handleAttributeChange as EventListener);
-    };
-  }, [toolInstance]);
+  }, [selectedResult, setActiveAttribute, toolInstance]);
 
   // 计算attribute栏目 宽度
   useEffect(() => {
-    // if (attributeList && attributeList.length > 0) {
-    // const leftSliderDomWidth = document.getElementById('sliderBoxId')?.offsetWidth as number;
-    // const rightSliderDomWidth = 240;
-    // const attributeBoxLength = window.innerWidth - leftSliderDomWidth - rightSliderDomWidth;
     const toolContainerWidth = document.getElementById('toolContainer')?.offsetWidth as number;
     setAttributeBoxLength(toolContainerWidth - 30);
-    // }
-  }, [attributeList, props.imgListCollapse]);
+  }, [config?.attributes]);
 
   // 计算可显示 attribute 个数
   useEffect(() => {
-    if (attributeBoxLength > 0 && currentAttributeList && currentAttributeList.length > 0) {
+    if (attributeBoxLength > 0 && currentAttributes && currentAttributes.length > 0) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       // @ts-ignore
       ctx.font = '16px';
       let totalWidth = 0;
       let count = 0;
-      for (let i = 0; i < currentAttributeList.length; i++) {
+      for (let i = 0; i < currentAttributes.length; i++) {
         count++;
         if (totalWidth + 200 < attributeBoxLength) {
-          let textMeasure = ctx?.measureText(currentAttributeList[i].value + ' ' + i + 1);
-          if (currentAttributeList[i].value.length > 6) {
-            textMeasure = ctx?.measureText(currentAttributeList[i].value.substring(0, 6) + '... ' + i + 1);
+          let textMeasure = ctx?.measureText(currentAttributes[i].value + ' ' + i + 1);
+          if (currentAttributes[i].value.length > 6) {
+            textMeasure = ctx?.measureText(currentAttributes[i].value.substring(0, 6) + '... ' + i + 1);
           }
           totalWidth += Number(textMeasure?.width) * 1.38 + 26 + 8 + 5;
         } else {
           break;
         }
       }
-      setShwoAttributeCount(count);
+      setShowAttributeCount(count);
     }
-  }, [attributeBoxLength, currentAttributeList]);
+  }, [attributeBoxLength, currentAttributes]);
 
-  const drowpDownIcon = <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIcon} />;
-  const drowpUpIconA = <img style={{ width: 14, marginLeft: -4, marginBottom: 3 }} src={DropdowmIconA} />;
-
-  const attributeMenue = useCallback(() => {
-    if (currentAttributeList.length >= shwoAttributeCount) {
-      const items = currentAttributeList.slice(shwoAttributeCount).map((item) => {
+  const attributeMenu: MenuProps | undefined = useMemo(() => {
+    if (currentAttributes.length >= showAttributeCount) {
+      const items = currentAttributes.slice(showAttributeCount).map((item) => {
         return {
           label: (
             <a
-              className={classNames({
-                chooseAttribute: item.value === chooseAttribute,
+              className={classNames('attribute-menu-item', {
+                active: item.value === chooseAttribute,
               })}
-              onClick={(e) => {
-                e.stopPropagation();
-                toolInstance.setDefaultAttribute(item.value);
-                setActiveAttribute(item.value);
+              style={{
+                // @ts-ignore
+                '--attribute-color': item.color,
               }}
             >
-              <div
-                className="circle"
-                style={{
-                  backgroundColor:
-                    toolStyle.attributeColor[AttributeUtils.getAttributeIndex(item.value, allAttributeList ?? []) + 1]
-                      .valid.stroke,
-                  marginRight: 5,
-                }}
-              />
-              <span className="attributeName">{attributeMap.get(item.value)}</span>
+              <div className="attribute-item__highlight-color" />
+              <span className="attributeName">{item?.key}</span>
             </a>
           ),
           key: item.value,
         };
       });
-      return <Menu items={items} />;
-    } else {
-      return <div />;
+      return {
+        items: items,
+        onClick: handleAttributeClick,
+      };
     }
-  }, [
-    currentAttributeList,
-    shwoAttributeCount,
-    chooseAttribute,
-    toolStyle.attributeColor,
-    allAttributeList,
-    attributeMap,
-    toolInstance,
-  ]);
-
-  // 根据工具名称的修改情况获取最新的attributeList
-  useEffect(() => {
-    let currentToolConfig: BasicConfig[] = [];
-    let tmpCurrentAttributeList: Attribute[] = [];
-    if (currentToolName && toolsBasicConfig && toolsBasicConfig.length > 0) {
-      currentToolConfig = toolsBasicConfig.filter((item) => {
-        return item.tool === currentToolName;
-      });
-      if (currentToolConfig?.[0].config && Object.keys(currentToolConfig?.[0].config).indexOf('attributeList') > 0) {
-        // @ts-ignore
-        tmpCurrentAttributeList = attributeList.concat(currentToolConfig?.[0].config.attributeList);
-      }
-    } else {
-      tmpCurrentAttributeList = attributeList;
-    }
-    // tmpCurrentAttributeList.unshift({ key: t('NoAttribute'), value: '' });
-    setCurrentAttributeList(tmpCurrentAttributeList);
-  }, [attributeList, toolsBasicConfig, currentToolName]);
-
-  useEffect(() => {
-    if (toolInstance) {
-      let tmpAttributesList: Attribute[] = [];
-      if (props.attributeList && props.attributeList.length > 0) {
-        tmpAttributesList = [...tmpAttributesList, ...props.attributeList];
-      }
-      if (props.toolsBasicConfig && props.toolsBasicConfig.length > 0) {
-        for (let i = 0; i < props.toolsBasicConfig.length; i++) {
-          // @ts-ignore
-          if (props.toolsBasicConfig[i].config?.attributeList) {
-            // @ts-ignore
-            tmpAttributesList = [...tmpAttributesList, ...props.toolsBasicConfig[i].config?.attributeList];
-          }
-        }
-      }
-
-      /**
-       * TODO: 为了兼容历史配置数据，此处过滤掉空的属性；但是后续应该在保存配置的时候就过滤掉，或者校验空值。
-       * 修正：https://project.feishu.cn/bigdata_03/issue/detail/3877218?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
-       **/
-      tmpAttributesList = tmpAttributesList.filter((item) => item.key !== '' && item.value !== '');
-      toolInstance?.setAllAttributes(tmpAttributesList);
-      setAllAttributeList(tmpAttributesList);
-    }
-  }, [
-    currentToolName,
-    toolInstance?.isShowOrder,
-    toolsBasicConfig,
-    attributeList,
-    toolInstance,
-    props.attributeList,
-    props.toolsBasicConfig,
-  ]);
+  }, [currentAttributes, showAttributeCount, handleAttributeClick, chooseAttribute]);
 
   return (
-    <div className="attributeBox" key={chooseAttribute}>
-      {currentAttributeList &&
-        currentAttributeList.length > 0 &&
-        currentAttributeList.map((attribute, index) => {
-          const buttomDom = (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                toolInstance.setDefaultAttribute(attribute.value);
-                setActiveAttribute(attribute.value);
+    <AttributeWrapper className="attributeBox" key={chooseAttribute}>
+      {currentAttributes &&
+        currentAttributes.length > 0 &&
+        currentAttributes.map((attribute, index) => {
+          const buttonNode = (
+            <StyledAttributeButton
+              onClick={(e: React.MouseEvent) => {
+                handleAttributeClick?.({ domEvent: e, key: attribute.value });
               }}
+              active={attribute.value === chooseAttribute}
               style={{
-                border: '0px',
-                borderRadius: '4px',
-                padding: '1px 8px',
-                backgroundColor:
-                  attribute.value === chooseAttribute
-                    ? toolStyle.attributeColor[
-                        AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? []) + 1
-                      ].valid.stroke
-                    : '#FFFFFF',
-                color: attribute.value === chooseAttribute ? '#ffffff' : '',
+                // @ts-ignore
+                '--attribute-color': attribute.color,
               }}
               key={attribute.value}
             >
-              <div
-                className="circle"
-                style={{
-                  backgroundColor:
-                    toolStyle.attributeColor[
-                      AttributeUtils.getAttributeIndex(attribute.value, allAttributeList ?? []) + 1
-                    ].valid.stroke,
-                  marginRight: 5,
-                }}
-              />
-              <span title={attribute.value} className="attributeName">{`${attributeMap.get(attribute.value)} ${
+              <div className="attribute-item__highlight-color" />
+              <span title={attribute.value} className="attributeName">{`${attributeMap.get(attribute.value)?.key} ${
                 index <= 8 ? index + 1 : ''
               }`}</span>
-            </Button>
+            </StyledAttributeButton>
           );
-          if (index < shwoAttributeCount) {
-            return buttomDom;
+          if (index < showAttributeCount) {
+            return buttonNode;
           }
           return <div key={index} />;
         })}
-      {shwoAttributeCount < currentAttributeList.length && (
-        <Dropdown overlay={attributeMenue()} trigger={['click']}>
-          <a
-            onMouseEnter={(e) => {
-              e.preventDefault();
-              setIsHoverDropdown(true);
-            }}
-            onMouseLeave={(e) => {
-              e.preventDefault();
-              setIsHoverDropdown(false);
-            }}
-            onClick={(e) => e.preventDefault()}
-            className="dropdowm-a"
-          >
+      {currentAttributes && showAttributeCount < currentAttributes.length && (
+        <Dropdown
+          menu={attributeMenu}
+          trigger={['click']}
+          dropdownRender={(menu) => <AttributeDropdown>{menu}</AttributeDropdown>}
+        >
+          <Button type="link">
             <Space style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
               更多
-              {isHoverDropdown ? drowpUpIconA : drowpDownIcon}
+              <Icon component={DropdownIcon} />
             </Space>
-          </a>
+          </Button>
         </Dropdown>
       )}
-    </div>
+    </AttributeWrapper>
   );
 };
 
-const mapStateToProps = (appState: AppState) => ({
-  copytoolInstance: { ...appState.annotation.toolInstance },
-  toolInstance: appState.annotation.toolInstance,
-  attributeList: appState.annotation.attributeList,
-  toolsBasicConfig: appState.annotation.toolsBasicConfig,
-  currentToolName: appState.annotation.currentToolName,
-  imgListCollapse: appState.toolStyle.imgListCollapse,
-  toolStyle: appState.toolStyle,
-});
-
-export default connect(mapStateToProps)(AttributeOperation);
+export default AttributeOperation;

@@ -47,7 +47,7 @@ export const BreadcrumbItem = styled(CustomLink).attrs((props: BreadcrumbItemPro
     !isCurrent &&
     css`
       &:hover {
-        color: var(--primary-color);
+        color: var(--color-primary);
       }
     `}
 `;

@@ -14,6 +14,6 @@ export interface ILine {
   label?: string;
   sourceID?: string;
   attribute?: string;
-  textAttribute?: string;
+  attributes?: Record<string, string>;
   isReference?: boolean;
 }

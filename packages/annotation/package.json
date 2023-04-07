@@ -66,6 +66,7 @@
     "eventemitter3": "^5.0.0",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.20",
+    "polished": "^4.2.2",
     "rimraf": "^3.0.2",
     "shx": "^0.3.4"
   }

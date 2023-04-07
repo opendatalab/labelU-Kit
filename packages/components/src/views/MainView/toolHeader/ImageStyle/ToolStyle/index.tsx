@@ -1,6 +1,5 @@
 import { Slider } from 'antd/es';
-import { useEffect } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { keys } from 'lodash-es';
 
@@ -8,19 +7,10 @@ import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
 import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
-import styleString from '@/constant/styleString';
-import { UpdateToolStyleConfig } from '@/store/toolStyle/actionCreators';
-import { store } from '@/index';
-import type { AppState } from '@/store';
-import type { ToolStyleState } from '@/store/toolStyle/types';
+import ViewContext from '@/view.context';
+import type { ToolStyle } from '@/interface/base';
 
-interface IProps {
-  toolStyle: ToolStyleState;
-  config: string;
-}
-type ToolStyleKey = keyof ToolStyleState;
-
-const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyleState> => {
+const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyle> => {
   const key = keys(params)![0];
   if (!key) return params;
   const res: Record<string, number> = {};
@@ -157,40 +147,28 @@ const getDefaultValue = (value: string) => {
  */
 const getStyleType = (info: string): boolean => ['width', 'color'].includes(info);
 
-const ToolStyle = (props: IProps) => {
-  const { toolStyle } = props;
-  const { width, color, borderOpacity, fillOpacity } = toolStyle;
+const HeaderToolStyle = () => {
+  const { toolStyle, setToolStyle } = useContext(ViewContext);
+  const { width, borderOpacity, fillOpacity } = toolStyle;
   const styleConfig = {
     width,
-    color,
     borderOpacity,
     fillOpacity,
   };
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
-
-  // 初始化工具样式配置
-  useEffect(() => {
-    const toolStyles = JSON.parse(styleString);
-    dispatch(UpdateToolStyleConfig(toolStyles));
-  }, [dispatch]);
-
-  // TODO - 样式标准的定义
-  const annotationConfig: any = props.config;
-
-  const changeToolStyle = (params: Record<string, number>) => {
-    store.dispatch(UpdateToolStyleConfig(enlargeToolParam(params)));
+  const changeToolStyle = (params: Partial<ToolStyle>) => {
+    setToolStyle((pre) => ({
+      ...pre,
+      ...enlargeToolParam(params),
+    }));
   };
 
   return (
     <div className="toolStyle">
       {Object.entries(styleConfig).map((item: any[]) => {
-        const key: ToolStyleKey = item[0];
-        // 判断是否需要 color 的使用，现在暂时默认不需要
-        if (annotationConfig?.attributeConfigurable === true && key === 'color') {
-          return null;
-        }
+        const key: keyof ToolStyle = item[0];
+
         return (
           <div id={`style-${key}`} className="styleSlider" key={key}>
             <span className="title" style={{ fontSize: 16 }}>
@@ -214,8 +192,5 @@ const ToolStyle = (props: IProps) => {
     </div>
   );
 };
-const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({
-  toolStyle,
-  config: annotation.toolInstance.config,
-});
-export default connect(mapStateToProps)(ToolStyle);
+
+export default HeaderToolStyle;

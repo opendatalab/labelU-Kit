@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Pagination, Button } from 'antd';
 import _ from 'lodash-es';
-import moment from 'moment';
+import formatter from '@label-u/formatter';
 
 import type { Dispatch, RootState } from '@/store';
 import { SampleState, TaskStatus } from '@/services/types';
@@ -164,7 +164,8 @@ const Samples = () => {
         if (!isTaskReadyToAnnotate) {
           return '';
         }
-        return moment(updated_at).format('YYYY-MM-DD HH:MM');
+
+        return formatter.format('dateTime', new Date(updated_at), { style: 'YYYY-MM-DD HH:mm' });
       },
     },
     {

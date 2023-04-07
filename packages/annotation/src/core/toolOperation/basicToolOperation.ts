@@ -1,22 +1,28 @@
 import { isNumber } from 'lodash-es';
+import { rgba, darken } from 'polished';
 // TODO: 将eventBus替换成eventEmitter3
 // import EventEmitter from 'eventemitter3';
 
 import { styleDefaultConfig } from '@/constant/defaultConfig';
 import { DEFAULT_FONT, EToolName } from '@/constant/tool';
-import type { Attribute, PrevResult, ToolConfig } from '@/interface/combineTool';
+import type { Attribute, ToolConfig } from '@/interface/config';
 import type { IImageAttribute } from '@/types/imgAttributeStore';
 import type { IRenderEnhance, TDataInjectionAtCreateion } from '@/types/tool/annotation';
+import { InnerAttributeType } from '@/types/tool/annotation';
 import type { ICoordinate, ISize } from '@/types/tool/common';
-import type { ILinePoint } from '@/types/tool/lineTool';
+import type { ILine, ILinePoint } from '@/types/tool/lineTool';
 import type { IPolygonConfig, IPolygonData } from '@/types/tool/polygon';
-import type { IRectConfig } from '@/types/tool/rectTool';
+import type { IRect, IRectConfig } from '@/types/tool/rectTool';
 import MathUtils from '@/utils/MathUtils';
 import AxisUtils, { CoordinateUtils } from '@/utils/tool/AxisUtils';
 import CanvasUtils from '@/utils/tool/CanvasUtils';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import LineToolUtils, { LINE_ORDER_OFFSET } from '@/utils/tool/LineToolUtils';
 import TagUtils from '@/utils/tool/TagUtils';
+import type { AnnotationResult, ToolResult } from '@/interface/result';
+import type { IPointUnit } from '@/types/tool/pointTool';
+import type { ITagResult } from '@/types/tool/tagTool';
+import type { ITextResult } from '@/types/tool/textTool';
 
 import { DEFAULT_TEXT_OFFSET, EDragStatus, EGrowthMode, ELang, TEXT_ATTRIBUTE_OFFSET } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
@@ -24,7 +30,6 @@ import { BASE_ICON, COLORS_ARRAY } from '../../constant/style';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import ActionsHistory from '../../utils/ActionsHistory';
-import AttributeUtils from '../../utils/tool/AttributeUtils';
 import DblClickEventListener from '../../utils/tool/DblClickEventListener';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import ImgPosUtils from '../../utils/tool/ImgPosUtils';
@@ -134,7 +139,7 @@ export default class BasicToolOperation extends EventListener {
 
   public allAttributes!: Attribute[]; // 多工具所有标签集合
 
-  public allAttributesMap!: Map<Attribute['value'], Attribute['key']>; // 多工具所有标签Map集合
+  public allAttributesMap!: Map<string, Map<Attribute['value'], Attribute>>; // 多工具所有标签Map集合
 
   public dblClickListener: DblClickEventListener;
 
@@ -186,7 +191,7 @@ export default class BasicToolOperation extends EventListener {
 
   public coordUtils: CoordinateUtils;
 
-  public prevResultList?: PrevResult[];
+  public prevResultList?: ToolResult[];
 
   public renderReady: boolean | undefined;
 
@@ -309,6 +314,24 @@ export default class BasicToolOperation extends EventListener {
     return [];
   }
 
+  public getStringAttributes(result: Exclude<AnnotationResult, ITagResult | ITextResult>, toolName: EToolName) {
+    if (!result) {
+      return '';
+    }
+
+    const attributeMap = toolName ? this.allAttributesMap?.get(toolName) : this.config.attributeMap;
+
+    const innerAttributes = attributeMap?.get(result.attribute)?.attributes ?? [];
+
+    const onlyStringAttributes = innerAttributes.filter(
+      (innerAttribute: any) => innerAttribute.type === InnerAttributeType.String,
+    );
+
+    return onlyStringAttributes
+      .map((innerAttribute: any) => result.attributes?.[innerAttribute.value] ?? '')
+      .join('\n');
+  }
+
   hasAttributeInConfig(attribute: string) {
     if (attribute === '') {
       return false;
@@ -324,22 +347,15 @@ export default class BasicToolOperation extends EventListener {
   /**
    * 设置此前工具标注结果信息
    */
-  public setPrevResultList(prevResultList: PrevResult[]) {
+  public setPrevResultList(prevResultList: ToolResult[]) {
     this.prevResultList = prevResultList;
   }
 
   /**
    * 多工具全量标签设置
    */
-  public setAllAttributes(allAttributes: Attribute[]) {
-    this.allAttributes = allAttributes;
-    this.allAttributesMap = new Map();
-
-    this.allAttributesMap.set(this.NoneAttribute, locale.getMessagesByLocale(EMessage.NoneAttribute, this.lang));
-
-    this.allAttributes.forEach((attribute) => {
-      this.allAttributesMap.set(attribute.value, attribute.key);
-    });
+  public setAllAttributesMap(allAttributesMap: Map<string, any>) {
+    this.allAttributesMap = allAttributesMap;
   }
 
   /**
@@ -1073,14 +1089,14 @@ export default class BasicToolOperation extends EventListener {
     this.renderBasicCanvas();
   };
 
-  public renderCursorLine(lineColor = this.style.lineColor[0] ?? '') {
+  public renderCursorLine(color: string) {
     if (!this.ctx || this.forbidCursorLine) {
       return;
     }
 
     const { x, y } = this.coord;
-    DrawUtils.drawLine(this.canvas, { x: 0, y }, { x: 10000, y }, { color: lineColor });
-    DrawUtils.drawLine(this.canvas, { x, y: 0 }, { x, y: 10000 }, { color: lineColor });
+    DrawUtils.drawLine(this.canvas, { x: 0, y }, { x: 10000, y }, { color });
+    DrawUtils.drawLine(this.canvas, { x, y: 0 }, { x, y: 10000 }, { color });
     DrawUtils.drawCircleWithFill(this.canvas, { x, y }, 1, { color: 'white' });
   }
 
@@ -1111,6 +1127,22 @@ export default class BasicToolOperation extends EventListener {
         this.renderInvalidPage();
       }
     }
+  }
+
+  public getAttributeKey(attribute: string) {
+    return this.config.attributeMap.get(attribute)?.key ?? attribute;
+  }
+
+  public getAttributeKeyByToolName(toolName: EToolName, attribute?: string) {
+    if (!attribute) {
+      return '';
+    }
+
+    if (!toolName) {
+      return this.getAttributeKey(attribute);
+    }
+
+    return this.allAttributesMap.get(toolName)?.get(attribute)?.key || attribute;
   }
 
   public setImgAttribute(imgAttribute: IImageAttribute) {
@@ -1210,11 +1242,15 @@ export default class BasicToolOperation extends EventListener {
   }
 
   /** 获取当前属性颜色 */
-  public getColor(attribute = '', config = this.config) {
-    if (config?.attributeConfigurable === true && this.style.attributeColor) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
-      return this.style.attributeColor[attributeIndex];
+  public getColor(attribute = '', config = this.config, toolName: EToolName) {
+    if (config?.attributeConfigurable === true) {
+      if (!toolName) {
+        return config.attributeMap.get(attribute)?.color ?? '#000';
+      }
+
+      return this.allAttributesMap.get(toolName)?.get(attribute)?.color ?? '#000';
     }
+
     const { color, toolColor } = this.style;
     if (toolColor) {
       return toolColor[color];
@@ -1222,15 +1258,63 @@ export default class BasicToolOperation extends EventListener {
     return styleDefaultConfig.toolColor['1'];
   }
 
+  /**
+   * 获取当前渲染的样式
+   * @param rect
+   * @returns
+   */
+  public getRenderStyle(
+    attribute: string | undefined,
+    isValid: boolean | undefined = false,
+    opts?: {
+      color?: string;
+      isHovered?: boolean;
+      isSelected?: boolean;
+      toolName?: EToolName;
+    },
+  ) {
+    const { borderOpacity = 10, fillOpacity = 5 } = this.style;
+    const { color, isHovered, isSelected, toolName } = opts || {};
+    const toolColor = color || this.getColor(attribute, this.config, toolName as EToolName);
+
+    if (typeof toolColor === 'object') {
+      return {
+        stroke: '#000',
+        fill: 'rgba(0, 0, 0, 0.5)',
+        text: '#000',
+        toolColor: '#000',
+      };
+    }
+
+    let stroke = rgba(toolColor, borderOpacity / 10);
+    let fill = rgba(toolColor, fillOpacity / 10);
+
+    // 是否为有效框;
+    if (isValid === false) {
+      stroke = rgba(toolColor, 0.3);
+      fill = rgba(toolColor, 0.15);
+    } else if (isHovered) {
+      stroke = darken(0.1, toolColor);
+      fill = rgba(toolColor, 0.8);
+    } else if (isSelected) {
+      stroke = darken(0.1, toolColor);
+      fill = rgba(toolColor, 0.8);
+    }
+
+    return {
+      stroke,
+      fill,
+      text: stroke,
+      toolColor,
+    };
+  }
+
   public getLineColor(attribute = '') {
     if (this.config?.attributeConfigurable === true) {
-      const attributeIndex = AttributeUtils.getAttributeIndex(attribute, this.allAttributes ?? []) + 1;
-      return this.style.attributeLineColor ? this.style.attributeLineColor[attributeIndex] : '';
+      return this.config.attributeMap.get(attribute)?.color ?? '';
     }
-    const { color, lineColor } = this.style;
-    if (color && lineColor) {
-      return lineColor[color];
-    }
+
+    // TODO: 颜色还可以不用配置颜色？
     return '';
   }
 
@@ -1281,17 +1365,18 @@ export default class BasicToolOperation extends EventListener {
     // }
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
-        const currentReulst = this.prevResultList[i];
-        switch (currentReulst.toolName) {
+        const currentResult = this.prevResultList[i];
+        switch (currentResult.toolName) {
           case EToolName.Rect: {
-            if (currentReulst.result && currentReulst.result.length > 0) {
-              currentReulst.result.forEach((item) => {
+            if (currentResult.result && currentResult.result.length > 0) {
+              (currentResult.result as IRect[]).forEach((item) => {
                 if (item.isVisible) {
-                  const toolColor = this.getColor(item.attribute);
-                  const color = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                    toolName: EToolName.Rect,
+                  });
+
+                  const color = toolStyle.stroke;
                   const transformRect = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
-                  const rectSize = `${Math.round(item.width)} * ${Math.round(item.height)}`;
-                  const textSizeWidth = rectSize.length * 7;
                   DrawUtils.drawRect(
                     this.canvas,
                     // @ts-ignore
@@ -1301,19 +1386,18 @@ export default class BasicToolOperation extends EventListener {
                       order: item.order,
                       color,
                       thickness,
-                      allAttributesMap: this.allAttributesMap,
+                      text: this.allAttributesMap.get(EToolName.Rect)?.get(item.attribute)?.key,
                     },
                   );
                   if (this.isShowAttributeText) {
                     const marginTop = 0;
-                    const textWidth = Math.max(20, transformRect.width - textSizeWidth);
                     DrawUtils.drawText(
                       this.canvas,
                       { x: transformRect.x, y: transformRect.y + transformRect.height + 20 + marginTop },
-                      item.textAttribute,
+                      this.getStringAttributes(item, EToolName.Rect),
                       {
                         color: color,
-                        textMaxWidth: textWidth,
+                        textMaxWidth: transformRect.width,
                         // ...DEFAULT_TEXT_SHADOW,
                       },
                     );
@@ -1324,9 +1408,11 @@ export default class BasicToolOperation extends EventListener {
             break;
           }
           case EToolName.Polygon: {
-            currentReulst.result.forEach((item) => {
+            (currentResult.result as IPolygonData[]).forEach((item) => {
               if (item.isVisible) {
-                const toolColor = this.getColor(item.attribute);
+                const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                  toolName: EToolName.Polygon,
+                });
                 const transformPointList = AxisUtils.changePointListByZoom(
                   item.pointList || [],
                   this.zoom,
@@ -1336,19 +1422,19 @@ export default class BasicToolOperation extends EventListener {
                   this.canvas,
                   AxisUtils.changePointListByZoom(item.pointList, this.zoom, this.currentPos),
                   {
-                    fillColor: item.valid ? toolColor?.valid.fill : toolColor?.invalid.fill,
-                    strokeColor: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                    fillColor: toolStyle.fill,
+                    strokeColor: toolStyle.stroke,
                     isClose: true,
                     thickness,
                   },
                 );
-                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
+                let showText = this.allAttributesMap.get(EToolName.Polygon)?.get(item.attribute)?.key || item.attribute;
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
 
                 DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
-                  color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                  color: toolStyle.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
                 if (this.isShowAttributeText) {
@@ -1357,9 +1443,9 @@ export default class BasicToolOperation extends EventListener {
                     DrawUtils.drawText(
                       this.canvas,
                       { x: endPoint.x + TEXT_ATTRIBUTE_OFFSET.x, y: endPoint.y + TEXT_ATTRIBUTE_OFFSET.y },
-                      item.textAttribute,
+                      this.getStringAttributes(item, EToolName.Polygon),
                       {
-                        color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        color: toolStyle.stroke,
                         ...DEFAULT_TEXT_OFFSET,
                       },
                     );
@@ -1370,11 +1456,11 @@ export default class BasicToolOperation extends EventListener {
             break;
           }
           case EToolName.Line: {
-            // @ts-ignore
-            currentReulst.result.forEach((item) => {
+            (currentResult.result as unknown as ILine[]).forEach((item) => {
               if (item.isVisible) {
-                const toolColor = this.getColor(item.attribute);
-                // const toolColor = item && this.getLineColorByAttribute(item);
+                const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                  toolName: EToolName.Line,
+                });
                 const transformPointList = AxisUtils.changePointListByZoom(
                   item.pointList || [],
                   this.zoom,
@@ -1385,16 +1471,16 @@ export default class BasicToolOperation extends EventListener {
                   // @ts-ignore
                   AxisUtils.changePointListByZoom(item.pointList, this.zoom, this.currentPos),
                   {
-                    color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                    color: toolStyle.stroke,
                     thickness,
                   },
                 );
-                let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
+                let showText = this.getAttributeKeyByToolName(EToolName.Line, item.attribute);
                 if (this.isShowOrder) {
                   showText = `${item.order} ${showText}`;
                 }
                 DrawUtils.drawText(this.canvas, transformPointList[0], showText, {
-                  color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                  color: toolStyle.stroke,
                   ...DEFAULT_TEXT_OFFSET,
                 });
                 if (this.isShowAttributeText) {
@@ -1402,11 +1488,11 @@ export default class BasicToolOperation extends EventListener {
                   ctx?.save();
                   // this.ctx.font = 'italic bold 14px SourceHanSansCN-Regular';
                   ctx.font = DEFAULT_FONT;
-                  ctx.fillStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-                  ctx.strokeStyle = item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
+                  ctx.fillStyle = toolStyle.stroke;
+                  ctx.strokeStyle = toolStyle.stroke;
                   DrawUtils.wrapText(
                     this.canvas,
-                    item.textAttribute,
+                    this.getStringAttributes(item, EToolName.Line),
                     transformPointList[1].x - LINE_ORDER_OFFSET.x,
                     transformPointList[1].y - LINE_ORDER_OFFSET.y,
                     200,
@@ -1418,21 +1504,26 @@ export default class BasicToolOperation extends EventListener {
           }
           case EToolName.Point: {
             // @ts-ignore
-            if (currentReulst.result && currentReulst.result.length > 0) {
-              currentReulst.result.forEach((item) => {
+            if (currentResult.result && currentResult.result.length > 0) {
+              (currentResult.result as IPointUnit[]).forEach((item) => {
                 if (item.isVisible) {
                   const { width = 2 } = this.style;
                   const transformPoint = AxisUtils.changePointByZoom(item, this.zoom, this.currentPos);
+                  // @ts-ignore
                   const points = AxisUtils.changeRectByZoom(item, this.zoom, this.currentPos);
-                  const toolColor = this.getColor(item.attribute);
+
+                  const toolStyle = this.getRenderStyle(item.attribute, item.valid, {
+                    toolName: EToolName.Point,
+                  });
+
                   DrawUtils.drawCircle(this.canvas, points, width, {
                     startAngleDeg: 0,
                     endAngleDeg: 360,
                     thickness: 1,
-                    color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                    color: toolStyle.stroke,
                     fill: 'transparent',
                   });
-                  let showText = this.allAttributesMap.get(item.attribute) || item.attribute;
+                  let showText = this.getAttributeKeyByToolName(EToolName.Point, item.attribute);
                   if (this.isShowOrder) {
                     showText = `${item.order}  ${showText}`;
                   }
@@ -1443,7 +1534,7 @@ export default class BasicToolOperation extends EventListener {
                     showText,
                     {
                       textAlign: 'center',
-                      color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                      color: toolStyle.stroke,
                     },
                   );
 
@@ -1451,9 +1542,9 @@ export default class BasicToolOperation extends EventListener {
                     DrawUtils.drawText(
                       this.canvas,
                       { x: transformPoint.x + width, y: transformPoint.y + width + 24 },
-                      item.textAttribute,
+                      this.getStringAttributes(item, EToolName.Point),
                       {
-                        color: item.valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke,
+                        color: toolStyle.stroke,
                         ...DEFAULT_TEXT_OFFSET,
                       },
                     );
@@ -1464,13 +1555,14 @@ export default class BasicToolOperation extends EventListener {
             break;
           }
           case EToolName.Tag: {
-            if (currentReulst.result && currentReulst.result.length > 0) {
-              if (!(currentReulst.result?.length > 0)) {
+            if (currentResult.result && currentResult.result.length > 0) {
+              if (!(currentResult.result?.length > 0)) {
                 return;
               }
               const dom = document.createElement('div');
               const tagInfoList = TagUtils.getTagNameList(
-                currentReulst?.result[0].result ?? {},
+                // @ts-ignore
+                currentResult?.result[0].result ?? {},
                 this.config.tagConfigList,
               );
               dom.innerHTML =
@@ -1497,9 +1589,10 @@ export default class BasicToolOperation extends EventListener {
                 `,
               );
               const preTagDom = document.getElementById('tagToolTag');
-              if (!this.canvas?.parentNode?.contains(preTagDom)) {
-                this.canvas?.parentNode?.appendChild(dom);
+              if (this.canvas?.parentNode?.contains(preTagDom)) {
+                preTagDom?.remove();
               }
+              this.canvas?.parentNode?.appendChild(dom);
             }
             break;
           }
@@ -1517,55 +1610,6 @@ export default class BasicToolOperation extends EventListener {
     }
     this.clearBasicCanvas();
     this.drawImg();
-
-    //  无多步骤，无需依赖，因此注释
-    // if (this.basicResult && this.dependToolName) {
-    //   switch (this.dependToolName) {
-    //     case EToolName.Rect: {
-    //       DrawUtils.drawRect(
-    //         this.basicCanvas,
-    //         AxisUtils.changeRectByZoom(this.basicResult, this.zoom, this.currentPos),
-    //         {
-    //           color: 'rgba(204,204,204,1.00)',
-    //           thickness,
-    //         },
-    //       );
-    //       break;
-    //     }
-
-    //     case EToolName.Polygon: {
-    //       DrawUtils.drawPolygonWithFillAndLine(
-    //         this.basicCanvas,
-    //         AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
-    //         {
-    //           fillColor: 'transparent',
-    //           strokeColor: 'rgba(204,204,204,1.00)',
-    //           isClose: true,
-    //           thickness,
-    //         },
-    //       );
-
-    //       break;
-    //     }
-
-    //     case EToolName.Line: {
-    //       DrawUtils.drawLineWithPointList(
-    //         this.basicCanvas,
-    //         AxisUtils.changePointListByZoom(this.basicResult.pointList, this.zoom, this.currentPos),
-    //         {
-    //           color: 'rgba(204,204,204,1.00)',
-    //           thickness,
-    //         },
-    //       );
-
-    //       break;
-    //     }
-
-    //     default: {
-    //       //
-    //     }
-    //   }
-    // }
   }
 
   public render() {

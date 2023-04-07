@@ -1,8 +1,6 @@
-@import '@/utils/common/common.module';
-
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionColumn;
+  display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   //height : 56px;
@@ -11,27 +9,27 @@
 }
 
 .stepsRow {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   height: 56px;
   width: 100%;
-  background: #ffffff;
-  box-shadow: inset 0px 1px 0px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 5%);
 }
 
 .left {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   margin-left: 30px;
 }
 
 .right {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   font-weight: 400;
@@ -57,6 +55,7 @@
   //background-color: white;
   background: #fbfcff;
   background: #f4f5f7;
+
   :global {
     .ant-table-thead .ant-table-cell {
       background-color: white;
@@ -64,7 +63,7 @@
       font-weight: 400;
       font-size: 14px;
       line-height: 22px;
-      color: rgba(0, 0, 0, 0.87);
+      color: rgb(0 0 0 / 87%);
     }
   }
 }
@@ -77,10 +76,12 @@
     //justify-content: center;
   }
 }
+
 .dataProcess {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
 }
+
 .dataProcessDelete {
   color: #f5483b;
   font-style: normal;
@@ -92,8 +93,9 @@
   cursor: pointer;
   margin-right: 32px;
 }
+
 .dataProcessOutput {
-  color: var(--primary-color);
+  color: var(--color-primary);
   font-style: normal;
   font-weight: 400;
   font-size: 14px;
@@ -102,10 +104,11 @@
   height: 22px;
   cursor: pointer;
 }
+
 .pagination {
   width: 100%;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   margin-top: 24px;
   padding-bottom: 48px;
@@ -117,16 +120,17 @@
 }
 
 .optionItem {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
 }
+
 .optionItemEnter {
   align-items: center;
 
   /* 蓝色/蓝色-默认 */
 
-  color: var(--primary-color);
+  color: var(--color-primary);
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
@@ -151,9 +155,8 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 22px;
-  color: rgba(0, 0, 0, 0.87);
+  color: rgb(0 0 0 / 87%);
   align-items: center;
-  width: 94px;
   height: 24px;
   margin-right: 50px;
   width: 100%;
@@ -164,8 +167,8 @@
 
 .dateColumn {
   width: 140px;
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
 }

@@ -1,4 +1,4 @@
-import { message } from 'antd';
+import { message } from '@/StaticAnt';
 
 import { ErrorMessages } from '../../services/errorMessage';
 

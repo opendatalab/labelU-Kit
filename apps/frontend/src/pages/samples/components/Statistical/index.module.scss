@@ -1,8 +1,6 @@
-@import '@/utils/common/common.module';
-
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   height: 56px;
@@ -11,38 +9,44 @@
 }
 
 .left {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   margin-left: 30px;
 }
+
 .leftTitle {
   width: 56px;
   height: 22px;
   font-weight: 500;
   font-size: 14px;
   line-height: 22px;
+
   /* identical to box height, or 157% */
+
   /* 中性色/87% */
-  color: rgba(0, 0, 0, 0.87);
+  color: rgb(0 0 0 / 87%);
   margin-right: 56px;
 }
+
 .leftTitleContent {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
 }
+
 .leftTitleContentOption {
   font-weight: 500;
   font-size: 14px;
   line-height: 22px;
+
   /* identical to box height, or 157% */
 
   /* 中性色/87% */
 
-  color: rgba(0, 0, 0, 0.87);
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  color: rgb(0 0 0 / 87%);
+  display: flex;
+  flex-direction: row;
   align-items: center;
   height: 24px;
   margin-right: 50px;
@@ -53,11 +57,12 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 22px;
+
   /* identical to box height, or 157% */
 
   /* 中性色/87% */
 
-  font-color: rgba(0, 0, 0, 0.87);
+  color: rgb(0 0 0 / 87%);
   margin-right: 6px;
   font-style: normal;
 }
@@ -66,28 +71,31 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--primary-color);
+  background-color: var(--color-primary);
   margin-right: 6px;
 }
+
 .leftTitleContentOptionGrayIcon {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.24);
+  background: rgb(0 0 0 / 24%);
   margin-right: 6px;
 }
+
 .leftTitleContentOptionOrangeIcon {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ff8800;
+  background: #f80;
   margin-right: 6px;
 }
+
 .leftTitleContentOptionWhiteIcon {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: #fff;
   margin-right: 6px;
 }
 
@@ -98,6 +106,7 @@
   width: 120px;
   height: 32px;
 }
+
 .shortCutButton {
   background-image: url('../../assets/png/threeLines.png');
   background-size: 24px 24px;
@@ -106,12 +115,14 @@
   height: 24px;
   margin-left: 18px;
 }
+
 .breadcrumb {
   margin-left: 39px;
 }
+
 .right {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   font-weight: 400;

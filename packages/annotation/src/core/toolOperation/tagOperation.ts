@@ -1,5 +1,5 @@
-import type { TagToolConfig } from '@/interface/combineTool';
-import type { ITagConfig, ITagResult } from '@/types/tool/tagTool';
+import type { TagToolConfig } from '@/interface/config';
+import type { ITagResult } from '@/types/tool/tagTool';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 
 import TagUtils from '../../utils/tool/TagUtils';
@@ -12,7 +12,7 @@ interface ITagOperationProps extends IBasicToolOperationProps {
 }
 
 export default class TagOperation extends BasicToolOperation {
-  public config: ITagConfig;
+  public config: TagToolConfig;
 
   public tagResult: ITagResult[]; // 当前图片下所有的标签集合
 
@@ -41,7 +41,7 @@ export default class TagOperation extends BasicToolOperation {
       return [];
     }
 
-    return TagUtils.getDefaultTagResult(this.config.inputList, basicResultList);
+    return TagUtils.getDefaultTagResult(this.config.attributes, basicResultList);
   };
 
   public setResult(tagResult: any[]) {
@@ -93,7 +93,7 @@ export default class TagOperation extends BasicToolOperation {
 
         // 数字键 0 - 9 48 - 57 / 97 - 105
         // 数字键检测
-        if (this.config.inputList.length === 1) {
+        if (this.config.attributes.length === 1) {
           // 说明标签只有一层
           this.labelSelectedList = [0, keyCode];
           this.setLabel(0, keyCode);
@@ -133,7 +133,7 @@ export default class TagOperation extends BasicToolOperation {
       return;
     }
 
-    const labelInfoSet = this.config.inputList;
+    const labelInfoSet = this.config.attributes;
 
     if (!labelInfoSet[i]) {
       return;
@@ -143,13 +143,13 @@ export default class TagOperation extends BasicToolOperation {
      *  注意：这里固定如果依赖原图的话 sourceID 就指定为  '0'
      *  2021-08-26 改成  ‘’
      *  */
-    const { subSelected } = labelInfoSet[i];
+    const { options } = labelInfoSet[i];
 
     // 需要判断 i j 是否能找到 labelInfoSet 的值
-    if (i < labelInfoSet.length && labelInfoSet[i].subSelected && subSelected && j < subSelected.length) {
+    if (i < labelInfoSet.length && labelInfoSet[i].options && options && j < options.length) {
       const key = labelInfoSet[i].value;
-      let value = subSelected[j]?.value;
-      const isMulti = labelInfoSet[i]?.isMulti;
+      let value = options[j]?.value;
+      const isMulti = labelInfoSet[i]?.type === 'array';
 
       const basicTagResult = this.tagResult.filter((v) => {
         const basicSourceID = `${v.sourceID}`;
@@ -304,7 +304,7 @@ export default class TagOperation extends BasicToolOperation {
 
   exportData() {
     let { tagResult } = this;
-    // let tagResult = TagUtils.getTagNameList(this.currentTagResult?.result ?? {}, this.config.inputList);
+    // let tagResult = TagUtils.getTagNameList(this.currentTagResult?.result ?? {}, this.config.attributes);
     if (this.isImgError) {
       tagResult = [];
     }
