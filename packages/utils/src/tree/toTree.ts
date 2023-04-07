@@ -1,4 +1,4 @@
-import { deepCopy } from '@/deepCopy';
+import { deepCopy } from '../deepCopy';
 
 export function toTree(
   entry: Record<string, any>[],
