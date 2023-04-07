@@ -1,8 +1,15 @@
 import type { Dispatch, SetStateAction } from 'react';
 import React from 'react';
-import type { AnnotationEngine, Attribute, EToolName } from '@label-u/annotation';
+import type {
+  AnnotationEngine,
+  Attribute,
+  EToolName,
+  BasicConfig,
+  InnerAttribute,
+  LabelUAnnotationConfig,
+  TextConfig,
+} from '@label-u/annotation';
 
-import type { BasicConfig, InnerAttribute, LabelUAnnotationConfig, TextConfig } from './interface/toolConfig';
 import type { IFileItem } from './types/data';
 import type { BasicResult, ImageAttribute, SelectedResult, ToolResult, ToolStyle } from './interface/base';
 

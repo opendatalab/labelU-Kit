@@ -1,10 +1,10 @@
 import { i18n } from '@label-u/utils';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@label-u/annotation';
 import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
 import _, { cloneDeep, isEmpty, set } from 'lodash-es';
 
 import MainView from '@/views/MainView';
-import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@/interface/toolConfig';
 
 import type { IFileItem } from './types/data';
 import ViewContext from './view.context';
