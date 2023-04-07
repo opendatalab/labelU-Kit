@@ -1,4 +1,3 @@
-@import url('./components/dragModal/index.scss');
 @import url('./styles/reset-antd.scss');
 
 $headerHeight: 60px;
@@ -447,7 +446,6 @@ body {
         // margin: 0 21px;
         cursor: pointer;
         user-select: none;
-        user-select: none;
       }
     }
 
@@ -494,7 +492,6 @@ body {
   display: flex;
   position: relative;
   flex-direction: column;
-  user-select: none;
   user-select: none;
   text-align: left;
 
@@ -1235,7 +1232,6 @@ $hotkey-container-padding: 7px;
   border-top: 1px solid #eee;
   box-shadow: 0 15px 10px 0 #eee;
   user-select: none;
-  user-select: none;
 
   .item {
     text-align: center;
@@ -1301,7 +1297,6 @@ $hotkey-container-padding: 7px;
   .main {
     padding: 8px;
     overflow: auto;
-    user-select: none;
     user-select: none;
   }
 
@@ -1596,7 +1591,6 @@ $hotkey-container-padding: 7px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      user-select: none;
       user-select: none;
       margin: 0 21px 4px;
 
