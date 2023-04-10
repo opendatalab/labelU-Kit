@@ -1,12 +1,12 @@
 import { Checkbox, Radio, Tree } from 'antd';
 import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { cloneDeep, get, isEmpty, isEqual, omit, set, update } from 'lodash-es';
+import { cloneDeep, get, isEqual, omit, set, update } from 'lodash-es';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { EToolName, uuid } from '@label-u/annotation';
 import { dfsEach, objectEach } from '@label-u/utils';
 import { useTranslation } from 'react-i18next';
-import classNames from 'classnames';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
+import styled from 'styled-components';
 
 import ViewContext from '@/view.context';
 import type { BasicResult } from '@/interface/base';
@@ -15,6 +15,26 @@ interface ITagResult {
   id?: string;
   values: Record<string, string[]>;
 }
+
+const TagWrapper = styled.div`
+  padding: 4px 10px;
+
+  .ant-tree-node-content-wrapper {
+    &:hover {
+      background-color: transparent;
+      cursor: default;
+    }
+  }
+
+  .ant-tree-switcher-icon {
+    font-size: 12px !important;
+    color: rgba(0, 0, 0, 0.36);
+  }
+
+  .ant-tree-switcher-noop {
+    display: none;
+  }
+`;
 
 export const expandIconFuc = ({ isActive }: any) => (
   <CaretRightOutlined rotate={isActive ? 90 : 0} style={{ color: 'rgba(0, 0, 0, 0.36)' }} />
@@ -32,10 +52,6 @@ const TagSidebar = () => {
   const syncToStore = useCallback(
     (newTagResult) => {
       // 保存至store
-      if (isEmpty(newTagResult)) {
-        return;
-      }
-
       const tagsInString = cloneDeep(newTagResult);
       objectEach(tagsInString, (value, keyPath) => {
         if (Array.isArray(value)) {
@@ -132,13 +148,15 @@ const TagSidebar = () => {
       return;
     }
 
-    setTagResult(tagValues);
-
     if (!defaultTagInjected.current) {
       syncToStore(tagValues.values);
       defaultTagInjected.current = true;
     }
   }, [syncToStore, tagResult, tagValues]);
+
+  useEffect(() => {
+    setTagResult(tagValues);
+  }, [tagValues]);
 
   useEffect(() => {
     defaultTagInjected.current = false;
@@ -237,19 +255,13 @@ const TagSidebar = () => {
   }, [makeTreeData, tagConfigList]);
 
   return (
-    <div
-      className={classNames({
-        tagOperationMenu: true,
-        tagOperationMenuPreview: false,
-      })}
-      ref={sidebarRef}
-    >
+    <TagWrapper ref={sidebarRef}>
       {tagConfigList?.length === 0 ? (
         <div style={{ padding: 20, textAlign: 'center' }}>{t('NoConfiguration')}</div>
       ) : (
         <Tree selectable={false} switcherIcon={<CaretDownOutlined />} blockNode defaultExpandAll treeData={treeData} />
       )}
-    </div>
+    </TagWrapper>
   );
 };
 
