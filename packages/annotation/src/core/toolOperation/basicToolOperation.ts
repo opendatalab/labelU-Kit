@@ -1466,6 +1466,11 @@ export default class BasicToolOperation extends EventListener {
                   this.zoom,
                   this.currentPos,
                 );
+
+                if (transformPointList.length === 0) {
+                  return;
+                }
+
                 DrawUtils.drawLineWithPointList(
                   this.canvas,
                   // @ts-ignore
