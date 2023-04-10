@@ -200,7 +200,9 @@ const CreateTask = () => {
       .then(() => {
         setPreviewVisible(true);
       })
-      .catch(() => {});
+      .catch(() => {
+        commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
+      });
   };
 
   const transformedSample = useMemo(() => {

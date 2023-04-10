@@ -3,7 +3,7 @@ const { Octokit } = require('@octokit/rest');
 const nodeFetch = require('node-fetch');
 
 const octokit = new Octokit({
-  auth: process.env.GH_TOKEN_FOR_WORKFLOW_DISPATCH,
+  auth: process.env.GH_TOKEN,
 });
 
 function sendMessageToWechat(content) {
