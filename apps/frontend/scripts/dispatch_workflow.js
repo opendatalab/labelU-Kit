@@ -2,7 +2,7 @@ const minimist = require('minimist');
 const { Octokit } = require('@octokit/rest');
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
+  auth: process.env.GH_TOKEN_FOR_WORKFLOW_DISPATCH,
 });
 
 function findLatestVersion(versions) {
