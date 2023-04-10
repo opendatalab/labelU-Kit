@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Input, Form } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -15,8 +14,6 @@ const Login = (props: any) => {
   const [form] = Form.useForm();
 
   const dispatch = useDispatch<Dispatch>();
-  // REVIEW: checkMessage 没有设置值的地方
-  const [checkMessage] = useState<any>({});
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -63,7 +60,6 @@ const Login = (props: any) => {
             onPressEnter={handleLogin}
           />
         </Form.Item>
-        <div className={styles.loginAndSignUpNotice}>{checkMessage.email}</div>
       </div>
 
       <div className={styles.email_m}>
@@ -84,7 +80,6 @@ const Login = (props: any) => {
             onPressEnter={handleLogin}
           />
         </Form.Item>
-        <div className={styles.loginAndSignUpNotice}>{checkMessage.password}</div>
       </div>
 
       <div className={styles.loginButton} onClick={handleLogin}>
