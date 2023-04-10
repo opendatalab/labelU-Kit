@@ -173,7 +173,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
       initialValues={config}
       onValuesChange={handleFormValuesChange}
     >
-      <Form.Item label="标注类型" name="media_type" rules={[{ required: true, message: '标注类型不可为空' }]}>
+      <Form.Item label="标注类型" name="media_type" rules={[{ required: true, message: '请选择标注类型' }]}>
         <FancyInput
           type="enum"
           size="middle"

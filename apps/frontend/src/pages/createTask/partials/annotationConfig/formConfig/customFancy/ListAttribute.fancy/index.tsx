@@ -117,8 +117,8 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
   const handleAddAttribute = useCallback(() => {
     const newAttribute = wrapWithId({
       color: colorPalette.pick(),
-      key: `标签-${size(stateValue) + 1}`,
-      value: `label-${size(stateValue) + 1}`,
+      key: '',
+      value: '',
     });
     const newValue = [...stateValue, newAttribute];
 
@@ -212,7 +212,7 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
             <Form.Item
               name={[...preFields, index, 'key']}
               className="input"
-              rules={[{ required: true, message: 'key不可为空' }]}
+              rules={[{ required: true, message: '请填写完整' }]}
             >
               <Input placeholder="前端显示（中文）" value={item.key} onChange={handleOnChange(`[${index}].key`)} />
             </Form.Item>
@@ -221,7 +221,7 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
               className="input"
               dependencies={otherValueFields}
               // @ts-ignore
-              rules={[{ required: true, message: 'value不可为空' }, duplicatedValueValidator(preFields, index)]}
+              rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(preFields, index)]}
             >
               <Input placeholder="保存结果（英文）" value={item.value} onChange={handleOnChange(`[${index}].value`)} />
             </Form.Item>

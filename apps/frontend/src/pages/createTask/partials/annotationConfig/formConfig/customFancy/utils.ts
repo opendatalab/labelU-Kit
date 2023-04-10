@@ -17,7 +17,7 @@ export const listWrapWithId = map(wrapWithId);
 export const duplicatedValueValidator =
   (path: NamePath, index: number) =>
   ({ getFieldValue }: FormInstance) => ({
-    validator(unused: any, _value: number) {
+    validator(unused: any, _value: string) {
       const values = getFieldValue(path);
 
       for (let i = 0; i < values.length; i++) {
@@ -25,8 +25,8 @@ export const duplicatedValueValidator =
           continue;
         }
 
-        if (values[i].value === _value) {
-          return Promise.reject(new Error('value不可重复'));
+        if (values[i].value === _value && _value !== undefined && _value !== '') {
+          return Promise.reject(new Error('请勿填写重复值'));
         }
       }
 
