@@ -202,6 +202,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
           setStateValue(allValues);
         }}
         style={{ display: isValueEmpty ? 'none' : 'block', width: '100%' }}
+        validateTrigger="onBlur"
       >
         <Form.Item name="list" label="">
           <FancyCategoryAttribute

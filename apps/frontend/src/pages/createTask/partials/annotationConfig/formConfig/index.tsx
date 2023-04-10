@@ -172,6 +172,7 @@ const FormConfig: FC<IProps> = ({ form }) => {
       className={styles.formConfig}
       initialValues={config}
       onValuesChange={handleFormValuesChange}
+      validateTrigger="onBlur"
     >
       <Form.Item label="标注类型" name="media_type" rules={[{ required: true, message: '请选择标注类型' }]}>
         <FancyInput
