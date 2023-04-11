@@ -1567,7 +1567,7 @@ export default class BasicToolOperation extends EventListener {
               const dom = document.createElement('div');
               const tagInfoList = TagUtils.getTagNameList(
                 // @ts-ignore
-                currentResult?.result[0].result ?? {},
+                currentResult?.result[0].attributes ?? {},
                 this.config.tagConfigList,
               );
               dom.innerHTML =

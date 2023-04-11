@@ -159,7 +159,7 @@ export default class TagOperation extends BasicToolOperation {
       // 判断是否有数据， 有则需要检测覆盖
       if (basicTagResult) {
         let times = 0;
-        const { result } = basicTagResult;
+        const { attributes } = basicTagResult;
 
         // 对已有数据强制转换格式
         // @ts-ignore
@@ -168,13 +168,13 @@ export default class TagOperation extends BasicToolOperation {
         }
 
         // eslint-disable-next-line no-restricted-syntax
-        for (const oldKey in basicTagResult.result) {
+        for (const oldKey in basicTagResult.attributes) {
           if (oldKey === labelInfoSet[i].value) {
             times++;
 
             // 需要区分是否为多选
             if (isMulti === true) {
-              const keyList = result[oldKey].split(';').filter((v) => v !== ''); // 注意： 需要过滤 '' 空字符串分割出现 ['']
+              const keyList = attributes[oldKey].split(';').filter((v) => v !== ''); // 注意： 需要过滤 '' 空字符串分割出现 ['']
               const index = keyList.indexOf(value);
 
               if (index === -1) {
@@ -188,24 +188,24 @@ export default class TagOperation extends BasicToolOperation {
 
             if (value === '') {
               // 如果当前数据仅当前的数据， 则过滤当前结果
-              if (Object.keys(result).length === 1) {
+              if (Object.keys(attributes).length === 1) {
                 this.tagResult = this.tagResult.filter((v) => {
                   const basicSourceID = `${v.sourceID}`;
                   return CommonToolUtils.isDifferSourceID(basicSourceID, this.sourceID);
                 });
-              } else if (Object.keys(result).length > 1) {
+              } else if (Object.keys(attributes).length > 1) {
                 // 清除当前的标签的 key
-                delete result[oldKey];
+                delete attributes[oldKey];
               }
             } else {
-              result[oldKey] = value;
+              attributes[oldKey] = value;
             }
           }
         }
 
         // 如果都不在的说明为新的,需要往里面嵌入新的信息
         if (times === 0) {
-          Object.assign(basicTagResult.result, { [key]: value });
+          Object.assign(basicTagResult.attributes, { [key]: value });
         }
       } else {
         // 注意，如果是单图情况的 hover 需要检测是否存在
@@ -217,7 +217,7 @@ export default class TagOperation extends BasicToolOperation {
           {
             sourceID: this.sourceID,
             id: uuid(8, 62),
-            result: {
+            attributes: {
               [key]: value,
             },
           },
@@ -233,8 +233,8 @@ export default class TagOperation extends BasicToolOperation {
     // 依赖原图
     if (value) {
       this.tagResult = this.tagResult.map((v) => {
-        if (v?.result[value]) {
-          delete v.result[value];
+        if (v?.attributes[value]) {
+          delete v.attributes[value];
         }
         return v;
       });
@@ -264,7 +264,7 @@ export default class TagOperation extends BasicToolOperation {
     const dom = document.createElement('div');
     // TODO: 增加tagConfigList类型
     // @ts-ignore
-    const tagInfoList = TagUtils.getTagNameList(this.tagResult[0]?.result ?? {}, this.config.tagConfigList);
+    const tagInfoList = TagUtils.getTagNameList(this.tagResult[0]?.attributes ?? {}, this.config.tagConfigList);
 
     dom.innerHTML =
       tagInfoList.reduce((acc: string, cur: { keyName: string; value: string[] }) => {
@@ -304,7 +304,7 @@ export default class TagOperation extends BasicToolOperation {
 
   exportData() {
     let { tagResult } = this;
-    // let tagResult = TagUtils.getTagNameList(this.currentTagResult?.result ?? {}, this.config.attributes);
+
     if (this.isImgError) {
       tagResult = [];
     }
