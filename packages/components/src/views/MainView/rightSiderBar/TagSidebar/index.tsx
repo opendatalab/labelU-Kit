@@ -66,7 +66,7 @@ const TagSidebar = () => {
           result: [
             {
               id: tagResult.id || uuid(8, 62),
-              result: tagsInString,
+              attributes: tagsInString,
             },
           ],
         },
@@ -126,7 +126,7 @@ const TagSidebar = () => {
       }
 
       const result: Record<string, string[]> = {};
-      const tagResult_0 = tagResult_[0].result;
+      const tagResult_0 = tagResult_[0].attributes;
 
       if (tagResult_0) {
         Object.keys(tagResult_0).forEach((item) => {
