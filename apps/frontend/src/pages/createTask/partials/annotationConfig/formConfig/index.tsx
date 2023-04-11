@@ -3,7 +3,7 @@ import type { FormInstance, FormProps, MenuProps, TabsProps } from 'antd';
 import { Empty, Popconfirm, Button, Dropdown, Form, Tabs } from 'antd';
 import type { FC } from 'react';
 import React, { useEffect, useCallback, useMemo, useState } from 'react';
-import _, { cloneDeep } from 'lodash-es';
+import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 
@@ -74,12 +74,18 @@ const FormConfig: FC<IProps> = ({ form }) => {
 
   // 进行中和已完成的任务不允许删除工具
   const deletable = useMemo(() => {
+    const isNewTool = !find(tools, { tool: activeTool });
+
+    if (isNewTool) {
+      return true;
+    }
+
     if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
       return false;
     }
 
     return true;
-  }, [taskStatus, taskDoneAmount]);
+  }, [tools, activeTool, taskStatus, taskDoneAmount]);
 
   useEffect(() => {
     setSelectedTools(_.chain(tools).compact().map('tool').value());

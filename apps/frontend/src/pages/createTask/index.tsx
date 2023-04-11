@@ -106,7 +106,7 @@ const CreateTask = () => {
       {
         title: stepTitleMapping[StepEnum.Upload],
         value: StepEnum.Upload,
-        isFinished: taskStatus !== TaskStatus.DRAFT,
+        isFinished: taskStatus && taskStatus !== TaskStatus.DRAFT,
       },
       {
         title: stepTitleMapping[StepEnum.Config],
