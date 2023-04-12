@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Button, Form } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import _, { size } from 'lodash-es';
+import _, { isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import AnnotationOperation from '@label-u/components';
@@ -344,7 +344,7 @@ const CreateTask = () => {
       }
       return (
         <>
-          <Button onClick={handleOpenPreview} disabled={previewDisabled}>
+          <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples.data)}>
             进入预览
             <ArrowRightOutlined />
           </Button>
@@ -374,6 +374,7 @@ const CreateTask = () => {
     loading,
     previewDisabled,
     previewVisible,
+    samples.data,
   ]);
 
   const taskCreationContextValue = useMemo(

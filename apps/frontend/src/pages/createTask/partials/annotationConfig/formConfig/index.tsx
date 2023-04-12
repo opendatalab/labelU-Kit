@@ -171,12 +171,8 @@ const FormConfig = () => {
         }
         setHasAttributes(changedValue.commonAttributeConfigurable);
       }
-
-      if (typeof onAnnotationFormChange === 'function') {
-        setTimeout(onAnnotationFormChange);
-      }
     },
-    [annotationFormInstance, onAnnotationFormChange],
+    [annotationFormInstance],
   );
 
   // ========================= end ==============================
@@ -227,14 +223,6 @@ const FormConfig = () => {
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="请选择工具" />
         )}
       </Form.Item>
-      <Form.Item
-        label="画布外标注"
-        name="drawOutsideTarget"
-        tooltip="开启后可以在媒体文件画布范围外进行标注"
-        hidden={!graphicTools.includes(activeTool as EToolName)}
-      >
-        <FancyInput type="boolean" />
-      </Form.Item>
 
       <Form.Item
         label={<span className="formTitle">通用标签</span>}
@@ -254,6 +242,15 @@ const FormConfig = () => {
             <FancyInput type="list-attribute" fullField={['attributes']} />
           </Form.Item>
         </div>
+      </Form.Item>
+
+      <Form.Item
+        label="画布外标注"
+        name="drawOutsideTarget"
+        tooltip="开启后可以在媒体文件画布范围外进行标注"
+        hidden={!graphicTools.includes(activeTool as EToolName)}
+      >
+        <FancyInput type="boolean" />
       </Form.Item>
     </Form>
   );

@@ -37,7 +37,7 @@ const AnnotationConfig = () => {
     <div className={styles.wrapper}>
       <div className={styles.innerWrapper}>
         <div className={styles.header}>
-          <span className={styles.title}>配置方式</span>
+          <span className={styles.title}>标注配置</span>
           <TemplateModal onSelect={handleSelect} />
         </div>
         <div className={styles.content}>

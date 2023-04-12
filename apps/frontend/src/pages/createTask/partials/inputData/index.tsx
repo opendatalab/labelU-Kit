@@ -6,6 +6,7 @@ import _ from 'lodash-es';
 import formatter from '@label-u/formatter';
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import type { RcFile } from 'antd/lib/upload/interface';
+import { useDispatch } from 'react-redux';
 
 import IconText from '@/components/IconText';
 import type { StatusType } from '@/components/Status';
@@ -14,6 +15,7 @@ import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
 import commonController from '@/utils/common/common';
 import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
+import type { Dispatch } from '@/store';
 
 import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
@@ -81,6 +83,7 @@ const normalizeFiles = (files: File[]) => {
 };
 
 const InputData = () => {
+  const dispatch = useDispatch<Dispatch>();
   // 上传队列，包括成功和失败的任务
   const { uploadFileList: fileQueue, setUploadFileList: setFileQueue, task = {} } = useContext(TaskCreationContext);
   const taskId = task.id;
@@ -162,6 +165,10 @@ const InputData = () => {
         }
       }
 
+      dispatch.sample.fetchSamples({
+        task_id: taskId!,
+      });
+
       if (succeed > 0 && failed > 0) {
         commonController.notificationWarnMessage({ message: `${succeed} 个文件上传成功，${failed} 个文件上传失败` }, 3);
       } else if (succeed > 0 && failed === 0) {
@@ -170,7 +177,7 @@ const InputData = () => {
         commonController.notificationWarnMessage({ message: `${failed} 个文件上传失败` }, 3);
       }
     },
-    [setFileQueue, taskId],
+    [dispatch.sample, setFileQueue, taskId],
   );
 
   const handleFilesChange = (files: RcFile[]) => {
