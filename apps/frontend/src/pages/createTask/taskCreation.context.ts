@@ -11,6 +11,7 @@ export interface TaskCreationContextValue {
   setUploadFileList: React.Dispatch<React.SetStateAction<QueuedFile[]>>;
   annotationFormInstance: FormInstance;
   basicFormInstance: FormInstance;
+  onAnnotationFormChange: () => void;
 }
 
 export const TaskCreationContext = React.createContext<TaskCreationContextValue>({} as TaskCreationContextValue);

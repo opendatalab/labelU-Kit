@@ -1,8 +1,7 @@
 import { EToolName, TOOL_NAME } from '@label-u/annotation';
-import type { FormInstance, FormProps, MenuProps, TabsProps } from 'antd';
+import type { FormProps, MenuProps, TabsProps } from 'antd';
 import { Empty, Popconfirm, Button, Dropdown, Form, Tabs } from 'antd';
-import type { FC } from 'react';
-import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
 import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
@@ -11,6 +10,7 @@ import { MediaType, TaskStatus } from '@/services/types';
 import FancyForm from '@/components/FancyForm';
 import FancyInput, { add } from '@/components/FancyInput';
 import type { RootState } from '@/store';
+import { TaskCreationContext } from '@/pages/createTask/taskCreation.context';
 
 import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
 import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
@@ -27,6 +27,7 @@ add('list-attribute', FancyAttributeList);
 add('category-attribute', FancyCategoryAttribute);
 
 const validTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line, EToolName.Tag, EToolName.Text];
+const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line];
 
 const toolOptions = validTools.map((item) => {
   return {
@@ -37,15 +38,17 @@ const toolOptions = validTools.map((item) => {
 
 const mediaTypeMapping = {
   [MediaType.IMAGE]: '图片',
-  [MediaType.VIDEO]: '视频',
-  [MediaType.POINT_CLOUD]: '点云',
+  // TODO: 后续支持视频和点云
+  // [MediaType.VIDEO]: '视频',
+  // [MediaType.POINT_CLOUD]: '点云',
 };
 
 const mediaOptions = Object.values(MediaType).map((item) => {
   return {
     label: mediaTypeMapping[item],
     value: item,
-    disabled: [MediaType.VIDEO, MediaType.POINT_CLOUD].includes(item),
+    // TODO: 后续支持视频和点云
+    // disabled: [MediaType.VIDEO, MediaType.POINT_CLOUD].includes(item),
   };
 });
 
@@ -58,11 +61,8 @@ const templateMapping: Record<string, any> = {
   [EToolName.Text]: textTemplate,
 };
 
-interface IProps {
-  form: FormInstance;
-}
-
-const FormConfig: FC<IProps> = ({ form }) => {
+const FormConfig = () => {
+  const { annotationFormInstance, onAnnotationFormChange } = useContext(TaskCreationContext);
   const [activeTool, setActiveTool] = useState<string>(toolOptions[0].value);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [hasAttributes, setHasAttributes] = useState(false);
@@ -97,6 +97,10 @@ const FormConfig: FC<IProps> = ({ form }) => {
   const handleToolItemClick: MenuProps['onClick'] = async ({ key }) => {
     setSelectedTools((pre) => [...pre, key]);
     setActiveTool(key);
+
+    if (typeof onAnnotationFormChange === 'function') {
+      setTimeout(onAnnotationFormChange);
+    }
   };
 
   const handleRemoveTool = useCallback(
@@ -106,16 +110,20 @@ const FormConfig: FC<IProps> = ({ form }) => {
       setActiveTool(newTools[0]);
 
       // 因为antd的form的特殊性，删除数组元素时，需要手动调用setFieldsValue
-      const prevValues = cloneDeep(form.getFieldsValue());
+      const prevValues = cloneDeep(annotationFormInstance.getFieldsValue());
 
       setTimeout(() => {
-        form.setFieldsValue({
+        annotationFormInstance.setFieldsValue({
           ...prevValues,
           tools: prevValues.tools.filter((item: any) => item.tool !== toolName),
         });
+
+        if (typeof onAnnotationFormChange === 'function') {
+          setTimeout(onAnnotationFormChange);
+        }
       });
     },
-    [form, selectedTools],
+    [annotationFormInstance, onAnnotationFormChange, selectedTools],
   );
 
   const toolsMenu: MenuProps['items'] = useMemo(
@@ -159,19 +167,23 @@ const FormConfig: FC<IProps> = ({ form }) => {
     (changedValue: any) => {
       if ('commonAttributeConfigurable' in changedValue) {
         if (!changedValue.commonAttributeConfigurable) {
-          form.setFieldValue('attributes', []);
+          annotationFormInstance.setFieldValue('attributes', []);
         }
         setHasAttributes(changedValue.commonAttributeConfigurable);
       }
+
+      if (typeof onAnnotationFormChange === 'function') {
+        setTimeout(onAnnotationFormChange);
+      }
     },
-    [form],
+    [annotationFormInstance, onAnnotationFormChange],
   );
 
   // ========================= end ==============================
 
   return (
     <Form
-      form={form}
+      form={annotationFormInstance}
       labelCol={{ span: 4 }}
       wrapperCol={{ span: 20 }}
       colon={false}
@@ -215,7 +227,12 @@ const FormConfig: FC<IProps> = ({ form }) => {
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="请选择工具" />
         )}
       </Form.Item>
-      <Form.Item label="画布外标注" name="drawOutsideTarget" tooltip="开启后可以在媒体文件画布范围外进行标注">
+      <Form.Item
+        label="画布外标注"
+        name="drawOutsideTarget"
+        tooltip="开启后可以在媒体文件画布范围外进行标注"
+        hidden={!graphicTools.includes(activeTool as EToolName)}
+      >
         <FancyInput type="boolean" />
       </Form.Item>
 
@@ -223,10 +240,15 @@ const FormConfig: FC<IProps> = ({ form }) => {
         label={<span className="formTitle">通用标签</span>}
         name="commonAttributeConfigurable"
         tooltip="已经配置的所有标注工具均可以使用通用标签"
+        hidden={!graphicTools.includes(activeTool as EToolName)}
       >
         <FancyInput type="boolean" />
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 4 }} className={styles.attributes} hidden={!hasAttributes}>
+      <Form.Item
+        wrapperCol={{ offset: 4 }}
+        className={styles.attributes}
+        hidden={!hasAttributes || !graphicTools.includes(activeTool as EToolName)}
+      >
         <div className={styles.attributesBox}>
           <Form.Item name="attributes">
             <FancyInput type="list-attribute" fullField={['attributes']} />

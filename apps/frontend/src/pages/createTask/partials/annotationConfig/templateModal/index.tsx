@@ -185,14 +185,15 @@ export default function TemplateModal({ onSelect }: TemplateModalProps) {
         key: MediaType.IMAGE,
         label: '图片',
       },
-      {
-        key: MediaType.POINT_CLOUD,
-        label: '点云',
-      },
-      {
-        key: MediaType.VIDEO,
-        label: '视频',
-      },
+      // TODO：暂时不支持
+      // {
+      //   key: MediaType.POINT_CLOUD,
+      //   label: '点云',
+      // },
+      // {
+      //   key: MediaType.VIDEO,
+      //   label: '视频',
+      // },
     ];
   }, []);
 
