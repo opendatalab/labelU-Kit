@@ -10,28 +10,53 @@ import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
 import ViewContext from '@/view.context';
 import type { ToolStyle } from '@/interface/base';
-import slideIcon from '@/assets/cssIcon/slide_btn.svg';
 
 const StyledSlider = styled.div`
+  .ant-slider:hover .ant-slider-handle::after {
+    box-shadow: none;
+  }
   .ant-slider-handle {
-    background-image: url(${() => slideIcon});
-    background-repeat: no-repeat;
-    background-size: 30px 30px;
-    width: 40px;
-    height: 40px;
-    background-color: transparent;
-    border-color: transparent;
-    background-position: 3px 2px;
-    margin-top: -15px;
+    top: -6px;
+    width: 16px;
+    height: 12px;
+    background-color: #fff;
+    box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
 
-    &::after,
+    &:after {
+      position: absolute;
+      display: block;
+      top: 100%;
+      left: 0;
+      content: ' ';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-right: 8px solid transparent;
+      border-left: 8px solid transparent;
+      border-top: 8px solid #fff;
+      border-bottom: 0;
+      background-color: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      cursor: pointer;
+    }
+    &:hover::after,
+    &:focus::after {
+      box-shadow: none;
+      width: 0;
+      height: 0;
+      top: 12px;
+      inset-inline-start: 0;
+      inset-block-start: 1;
+    }
+
+    &:focus {
+      box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
+    }
+
     &::before {
       display: none;
     }
-  }
-
-  .ant-slider-handle:focus {
-    box-shadow: none;
   }
 
   .ant-slider-rail {
