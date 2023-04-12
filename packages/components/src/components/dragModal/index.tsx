@@ -50,35 +50,8 @@ const ModalRenderer = forwardRef<
     });
   };
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     const targetRect = dragRef.current?.getBoundingClientRect();
-  //     const { clientHeight, clientWidth } = window.document.documentElement;
-
-  //     if (!targetRect) {
-  //       return;
-  //     }
-
-  //     if (targetRect?.bottom > clientHeight) {
-  //       setPosition((pre) => ({
-  //         ...pre,
-  //         y: pre.y - (targetRect.bottom - clientHeight),
-  //       }));
-  //     }
-
-  //     if (targetRect?.right > clientWidth) {
-  //       setPosition((pre) => ({
-  //         ...pre,
-  //         x: pre.x - targetRect.width,
-  //       }));
-  //     }
-  //   });
-  // }, [position, setPosition]);
-
   useEffect(() => {
-    const dragObserver = new MutationObserver((mutations) => {
-      console.log('dragObserver', mutations);
-
+    const dragObserver = new MutationObserver(() => {
       const targetRect = dragRef.current?.getBoundingClientRect();
       const { clientHeight, clientWidth } = window.document.documentElement;
 

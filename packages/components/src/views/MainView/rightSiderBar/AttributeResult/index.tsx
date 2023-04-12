@@ -247,9 +247,7 @@ const ResultAttributeForm = forwardRef((props, ref) => {
   }, [allAttributesMap, selectedResult]);
 
   const handleAttributeChange = useCallback(
-    (changedValues, allValues) => {
-      console.log(allValues);
-
+    (changedValues) => {
       if ('attribute' in changedValues) {
         const attribute = allAttributesMap?.get(currentToolName)?.get(changedValues.attribute);
         setSelectedAttribute(attribute);

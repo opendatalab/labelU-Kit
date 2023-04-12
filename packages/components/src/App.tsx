@@ -3,6 +3,7 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo
 import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@label-u/annotation';
 import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
 import _, { cloneDeep, isEmpty, set } from 'lodash-es';
+import { I18nextProvider } from 'react-i18next';
 
 import MainView from '@/views/MainView';
 
@@ -427,11 +428,13 @@ const App = forwardRef<
   );
 
   return (
-    <ViewContext.Provider value={viewContextValue}>
-      <div id="annotation-content-area-to-get-box">
-        <MainView />
-      </div>
-    </ViewContext.Provider>
+    <I18nextProvider i18n={i18n}>
+      <ViewContext.Provider value={viewContextValue}>
+        <div id="annotation-content-area-to-get-box">
+          <MainView />
+        </div>
+      </ViewContext.Provider>
+    </I18nextProvider>
   );
 });
 
