@@ -25,13 +25,13 @@ export interface TextAttribute {
   value: string;
   type: InnerAttributeType[keyof InnerAttributeType];
   maxLength: number;
-  stringType: keyof typeof StringType;
+  stringType: StringType[keyof StringType];
   required?: boolean;
   defaultValue?: string;
 }
 
 export interface EnumerableAttribute extends AttributeItem {
-  type: InnerAttributeType;
+  type: InnerAttributeType[keyof InnerAttributeType];
   options: AttributeOption[];
 }
 
