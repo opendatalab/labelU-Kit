@@ -841,27 +841,6 @@ body {
         border: none;
       }
 
-      .ant-slider-handle {
-        background-image: url('./assets/cssIcon/slide_btn.svg');
-        background-repeat: no-repeat;
-        background-size: 30px 30px;
-        width: 40px;
-        height: 40px;
-        background-color: transparent;
-        border-color: transparent;
-        background-position: 3px 2px;
-        margin-top: -15px;
-
-        &::after,
-        &::before {
-          display: none;
-        }
-      }
-
-      .ant-slider-handle:focus {
-        box-shadow: none;
-      }
-
       // 新版本的 antd 的错误兼容
       .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
         color: inherit;
@@ -903,81 +882,6 @@ body {
       .ant-slider-track {
         background: none;
       }
-    }
-  }
-
-  #style-radius,
-  #style-width {
-    .ant-slider-step {
-      .ant-slider-dot {
-        height: 12px;
-        background: #666;
-        border-radius: 0;
-        margin-left: -2px;
-      }
-
-      .ant-slider-dot:nth-of-type(1) {
-        width: 1px;
-      }
-
-      .ant-slider-dot:nth-of-type(2) {
-        width: 2px;
-      }
-
-      .ant-slider-dot:nth-of-type(3) {
-        width: 3px;
-      }
-
-      .ant-slider-dot:nth-of-type(4) {
-        width: 4px;
-      }
-
-      .ant-slider-dot:nth-of-type(5) {
-        width: 5px;
-      }
-    }
-
-    .ant-slider:hover {
-      .ant-slider-rail {
-        background: #f5f5f5;
-      }
-    }
-  }
-
-  #style-color {
-    .ant-slider-rail {
-      background: linear-gradient(
-        to right,
-        rgb(0 0 255) 0%,
-        rgb(0 0 255) 20%,
-        rgb(0 255 255) 20%,
-        rgb(0 255 255) 40%,
-        rgb(0 255 0) 40%,
-        rgb(0 255 0) 60%,
-        rgb(255 255 0) 60%,
-        rgb(255 255 0) 80%,
-        rgb(255 0 255) 80%,
-        rgb(255 0 255) 100%
-      );
-    }
-  }
-
-  #style-fill-opacity,
-  #style-border-opacity {
-    .ant-slider-rail {
-      background: linear-gradient(
-        to right,
-        rgb(0 0 0 / 20%) 0%,
-        rgb(0 0 0 / 20%) 20%,
-        rgb(0 0 0 / 40%) 20%,
-        rgb(0 0 0 / 40%) 40%,
-        rgb(0 0 0 / 60%) 40%,
-        rgb(0 0 0 / 60%) 60%,
-        rgb(0 0 0 / 80%) 60%,
-        rgb(0 0 0 / 80%) 80%,
-        rgb(0 0 0 / 100%) 80%,
-        rgb(0 0 0 / 100%) 100%
-      );
     }
   }
 }
