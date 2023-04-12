@@ -62,7 +62,7 @@ const CreateTask = () => {
   const [currentStep, setCurrentStep] = useState<StepEnum>(
     location.hash ? (location.hash.replace('#', '') as StepEnum) : StepEnum.Basic,
   );
-  const [previewDisabled, setPreviewDisabled] = useState<boolean>(true);
+  const [isAnnotationFormValid, toggleAnnotationFormValidation] = useState<boolean>(true);
   const attachmentsConnected = useRef<boolean>(false);
 
   // 缓存上传的文件清单
@@ -147,7 +147,7 @@ const CreateTask = () => {
 
   const onAnnotationFormChange = useCallback(() => {
     annotationFormInstance.validateFields().then((values) => {
-      setPreviewDisabled(size(values.tools) === 0);
+      toggleAnnotationFormValidation(size(values.tools) > 0);
     });
   }, [annotationFormInstance]);
 
@@ -342,6 +342,7 @@ const CreateTask = () => {
           </Button>
         );
       }
+      const previewDisabled = !isAnnotationFormValid || isEmpty(samples.data) || isEmpty(toolsConfig.tools);
       return (
         <>
           <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples.data)}>
@@ -368,13 +369,14 @@ const CreateTask = () => {
   }, [
     currentStep,
     handleCancel,
+    loading,
     handleNextStep,
+    previewVisible,
+    isAnnotationFormValid,
+    samples.data,
+    toolsConfig.tools,
     handleOpenPreview,
     handleSave,
-    loading,
-    previewDisabled,
-    previewVisible,
-    samples.data,
   ]);
 
   const taskCreationContextValue = useMemo(
