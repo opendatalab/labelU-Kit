@@ -4,13 +4,16 @@ import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@lab
 import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
 import _, { cloneDeep, isEmpty, set } from 'lodash-es';
 import { I18nextProvider } from 'react-i18next';
+import { App as AntApp, ConfigProvider } from 'antd';
 
 import MainView from '@/views/MainView';
 
+import themeToken from './theme.json';
 import type { IFileItem } from './types/data';
 import ViewContext from './view.context';
 import { jsonParser } from './utils';
 import type { BasicResult, ImageAttribute, SelectedResult, ToolStyle } from './interface/base';
+import StaticAnt from './StaticAnt';
 
 export interface AppProps {
   config?: LabelUAnnotationConfig;
@@ -428,13 +431,18 @@ const App = forwardRef<
   );
 
   return (
-    <I18nextProvider i18n={i18n}>
-      <ViewContext.Provider value={viewContextValue}>
-        <div id="annotation-content-area-to-get-box">
-          <MainView />
-        </div>
-      </ViewContext.Provider>
-    </I18nextProvider>
+    <ConfigProvider componentSize="middle" theme={{ token: themeToken.token }}>
+      <AntApp>
+        <StaticAnt />
+        <I18nextProvider i18n={i18n}>
+          <ViewContext.Provider value={viewContextValue}>
+            <div id="annotation-content-area-to-get-box">
+              <MainView />
+            </div>
+          </ViewContext.Provider>
+        </I18nextProvider>
+      </AntApp>
+    </ConfigProvider>
   );
 });
 

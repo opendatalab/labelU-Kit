@@ -86,6 +86,7 @@ const ModalRenderer = forwardRef<
   }, [setPosition]);
 
   return (
+    // @ts-ignore
     <Draggable disabled={disabled} bounds={bounds} onStart={onStart} positionOffset={position}>
       <div ref={dragRef}>{children}</div>
     </Draggable>
