@@ -258,6 +258,10 @@ const CreateTask = () => {
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
 
+        dispatch.sample.fetchSamples({
+          task_id: taskId!,
+        });
+
         return dispatch.task.updateTaskConfig({
           taskId: taskId,
           body: {
@@ -280,6 +284,7 @@ const CreateTask = () => {
       annotationFormInstance,
       basicFormInstance,
       currentStep,
+      dispatch.sample,
       dispatch.task,
       isExistTask,
       navigate,
