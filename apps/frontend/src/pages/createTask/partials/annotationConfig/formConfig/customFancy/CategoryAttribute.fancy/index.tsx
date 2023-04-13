@@ -456,10 +456,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                 <div className="category">
                   <div className="sn">{index + 1}</div>
                   <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '请填写完整' }]}>
-                    <Input
-                      placeholder={`中文选项 ${index + 1}（前端显示）`}
-                      onChange={handleOnChange(`[${index}].key`)}
-                    />
+                    <Input placeholder={`前端显示（中文）`} onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
                   <Form.Item
                     name={[...path, index, 'value']}
@@ -467,10 +464,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                     // @ts-ignore
                     rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
                   >
-                    <Input
-                      placeholder={`英文选项 ${index + 1}（保存结果）`}
-                      onChange={handleOnChange(`[${index}].value`)}
-                    />
+                    <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <div className="should-align-center">
                     <Tooltip title={tooltipTitleMapping[itemType]}>
@@ -504,10 +498,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                 <div className="category">
                   <div className="sn">{index + 1}</div>
                   <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '请填写完整' }]}>
-                    <Input
-                      placeholder={`中文名称 ${index + 1}（前端显示）`}
-                      onChange={handleOnChange(`[${index}].key`)}
-                    />
+                    <Input placeholder={`前端显示（中文）`} onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
                   <Form.Item
                     name={[...path, index, 'value']}
@@ -515,10 +506,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                     // @ts-ignore
                     rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
                   >
-                    <Input
-                      placeholder={`英文名称 ${index + 1}（保存结果）`}
-                      onChange={handleOnChange(`[${index}].value`)}
-                    />
+                    <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <div className="should-align-center">
                     <Tag>{tagTitleMapping[itemType]}</Tag>
@@ -573,15 +561,23 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
           return {
             title: (
               <div className="option">
-                <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '请填写完整' }]}>
+                <Form.Item
+                  name={[...path, index, 'key']}
+                  // @ts-ignore
+                  rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
+                >
                   <Input
-                    placeholder={`中文选项 ${index + 1}（前端显示）`}
+                    placeholder={`前端显示（中文）`}
                     onChange={handleOnChange(`[${preIndex}]options[${index}].key`)}
                   />
                 </Form.Item>
-                <Form.Item name={[...path, index, 'value']} rules={[{ required: true, message: '请填写完整' }]}>
+                <Form.Item
+                  name={[...path, index, 'value']}
+                  // @ts-ignore
+                  rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
+                >
                   <Input
-                    placeholder={`英文选项 ${index + 1}（保存结果）`}
+                    placeholder={`保存结果（英文）`}
                     onChange={handleOnChange(`[${preIndex}]options[${index}].value`)}
                   />
                 </Form.Item>

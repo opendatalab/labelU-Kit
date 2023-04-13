@@ -2,6 +2,13 @@ import { Modal } from 'antd';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type { DraggableData, DraggableEvent } from 'react-draggable';
 import Draggable from 'react-draggable';
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+  .labelu-draggable-modal {
+    overflow: hidden !important;
+  }
+`;
 
 interface Iprops {
   // 弹框左上角位置
@@ -63,6 +70,13 @@ const ModalRenderer = forwardRef<
         setPosition((pre) => ({
           ...pre,
           y: pre.y - (targetRect.bottom - clientHeight) - EXTRA_SPACE,
+        }));
+      }
+
+      if (targetRect?.top < 0) {
+        setPosition((pre) => ({
+          ...pre,
+          y: 0,
         }));
       }
 
@@ -140,53 +154,57 @@ const DraggableModel = (props: Iprops, ref: any) => {
 
   const bodyStyle = useMemo(() => {
     return {
-      maxHeight: '90vh',
+      maxHeight: '65vh',
       overflow: 'auto',
     };
   }, []);
 
   return (
-    <Modal
-      mask={false}
-      footer={null}
-      destroyOnClose
-      modalRender={(modal) => (
-        <ModalRenderer disabled={disabled} position={position} setPosition={setPosition}>
-          {modal}
-        </ModalRenderer>
-      )}
-      bodyStyle={bodyStyle}
-      title={
-        <div
-          style={{
-            width: '100%',
-            cursor: 'move',
-          }}
-          onMouseOver={() => {
-            if (disabled) {
-              setDisabled(false);
-            }
-          }}
-          onMouseOut={() => {
-            setDisabled(true);
-          }}
-          onFocus={() => {}}
-          onBlur={() => {}} // end
-        >
-          {title}
-        </div>
-      }
-      open={isVisible}
-      okText={okText}
-      cancelText={cancelText}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      width={width}
-      wrapClassName="labelu-draggable-modal"
-    >
-      {/* @ts-ignore */}
-      {children}
-    </Modal>
+    <>
+      <GlobalStyle />
+
+      <Modal
+        mask={false}
+        footer={null}
+        destroyOnClose
+        modalRender={(modal) => (
+          <ModalRenderer disabled={disabled} position={position} setPosition={setPosition}>
+            {modal}
+          </ModalRenderer>
+        )}
+        bodyStyle={bodyStyle}
+        title={
+          <div
+            style={{
+              width: '100%',
+              cursor: 'move',
+            }}
+            onMouseOver={() => {
+              if (disabled) {
+                setDisabled(false);
+              }
+            }}
+            onMouseOut={() => {
+              setDisabled(true);
+            }}
+            onFocus={() => {}}
+            onBlur={() => {}} // end
+          >
+            {title}
+          </div>
+        }
+        open={isVisible}
+        okText={okText}
+        cancelText={cancelText}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        width={width}
+        wrapClassName="labelu-draggable-modal"
+      >
+        {/* @ts-ignore */}
+        {children}
+      </Modal>
+    </>
   );
 };
 
