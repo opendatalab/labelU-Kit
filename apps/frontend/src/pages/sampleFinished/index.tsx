@@ -27,13 +27,13 @@ const SamplesFinished = () => {
     <div className={styles.finishedWrapper}>
       <div className={styles.innerWrapper}>
         <div className={styles.check}>
-          <CheckOutlined style={{ color: '#64ba64', fontSize: '40px' }} />
+          <CheckOutlined style={{ color: 'var(--color-success)', fontSize: '40px' }} />
         </div>
         <div className={styles.txt}>标注完成</div>
         <div className={styles.stat}>
-          <div className={styles.statItem}>已标注： {taskData?.stats?.done},</div>
+          <div className={styles.statItem}>已标注： {taskData?.stats?.done}，</div>
           <div className={styles.statItem}>
-            未标注： <div style={{ color: 'red' }}>{taskData?.stats?.new}</div>,
+            未标注： <div style={{ color: 'red' }}>{taskData?.stats?.new}</div>，
           </div>
           <div className={styles.statItem}>跳过：{taskData?.stats?.skipped}</div>
         </div>
