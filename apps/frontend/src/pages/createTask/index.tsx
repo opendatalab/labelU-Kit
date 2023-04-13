@@ -145,6 +145,12 @@ const CreateTask = () => {
     }
   }, [dispatch.task, isExistTask, taskData, taskId]);
 
+  useEffect(() => {
+    if (isEmpty(toolsConfig.tools)) {
+      toggleAnnotationFormValidation(false);
+    }
+  }, [toolsConfig.tools]);
+
   const onAnnotationFormChange = useCallback(() => {
     annotationFormInstance.validateFields().then((values) => {
       toggleAnnotationFormValidation(size(values.tools) > 0);
@@ -342,7 +348,7 @@ const CreateTask = () => {
           </Button>
         );
       }
-      const previewDisabled = !isAnnotationFormValid || isEmpty(samples.data) || isEmpty(toolsConfig.tools);
+      const previewDisabled = !isAnnotationFormValid || isEmpty(samples.data);
       return (
         <>
           <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples.data)}>
@@ -374,7 +380,6 @@ const CreateTask = () => {
     previewVisible,
     isAnnotationFormValid,
     samples.data,
-    toolsConfig?.tools,
     handleOpenPreview,
     handleSave,
   ]);
