@@ -146,10 +146,10 @@ const CreateTask = () => {
   }, [dispatch.task, isExistTask, taskData, taskId]);
 
   useEffect(() => {
-    if (isEmpty(toolsConfig.tools)) {
+    if (isEmpty(toolsConfig?.tools)) {
       toggleAnnotationFormValidation(false);
     }
-  }, [toolsConfig.tools]);
+  }, [toolsConfig?.tools]);
 
   const onAnnotationFormChange = useCallback(() => {
     annotationFormInstance.validateFields().then((values) => {
