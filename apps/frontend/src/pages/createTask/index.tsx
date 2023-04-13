@@ -374,7 +374,7 @@ const CreateTask = () => {
     previewVisible,
     isAnnotationFormValid,
     samples.data,
-    toolsConfig.tools,
+    toolsConfig?.tools,
     handleOpenPreview,
     handleSave,
   ]);
