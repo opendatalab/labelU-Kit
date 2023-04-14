@@ -56,6 +56,7 @@ const extractResult = (input: any, excludeToolNames?: string[]) =>
 const App = forwardRef<
   {
     getResult: () => any;
+    getSample: () => any;
     toolInstance: any;
   },
   AppProps
@@ -420,6 +421,7 @@ const App = forwardRef<
     () => {
       return {
         toolInstance: engine?.toolInstance,
+        getSample: () => sample,
         getResult: () => {
           return new Promise((resolve) => {
             resolve(result);
@@ -427,7 +429,7 @@ const App = forwardRef<
         },
       };
     },
-    [engine?.toolInstance, result],
+    [engine?.toolInstance, result, sample],
   );
 
   return (
