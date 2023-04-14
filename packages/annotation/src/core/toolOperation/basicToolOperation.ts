@@ -1360,9 +1360,7 @@ export default class BasicToolOperation extends EventListener {
 
   public renderOtherAnnotation() {
     const thickness = this.style?.width ?? 2;
-    // if (this.forbidBasicResultRender) {
-    //   return;
-    // }
+
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentResult = this.prevResultList[i];
@@ -1605,6 +1603,11 @@ export default class BasicToolOperation extends EventListener {
             // empty
           }
         }
+      }
+    } else {
+      const preTagDom = document.getElementById('tagToolTag');
+      if (this.canvas?.parentNode?.contains(preTagDom)) {
+        preTagDom?.remove();
       }
     }
   }
