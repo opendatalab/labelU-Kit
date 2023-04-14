@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Button, Form } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import _, { isEmpty, size } from 'lodash-es';
+import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import AnnotationOperation from '@label-u/components';
@@ -258,10 +258,6 @@ const CreateTask = () => {
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
 
-        dispatch.sample.fetchSamples({
-          task_id: taskId!,
-        });
-
         return dispatch.task.updateTaskConfig({
           taskId: taskId,
           body: {
@@ -284,7 +280,6 @@ const CreateTask = () => {
       annotationFormInstance,
       basicFormInstance,
       currentStep,
-      dispatch.sample,
       dispatch.task,
       isExistTask,
       navigate,
@@ -314,7 +309,11 @@ const CreateTask = () => {
       }
 
       // 如果是从「数据导入」到下一步，没有样本时不可进入下一步
-      if (isEmpty(samples.data)) {
+      if (
+        currentStep === StepEnum.Upload &&
+        isEmpty(samples.data) &&
+        filter(uploadFileList, (item) => item.status === UploadStatus.Success).length === 0
+      ) {
         message.error('请至少上传一个样本');
         return;
       }
@@ -325,7 +324,7 @@ const CreateTask = () => {
         })
         .catch(() => {});
     },
-    [basicFormInstance, currentStep, samples.data, stepDataSource, submitForm, updateCurrentStep],
+    [basicFormInstance, currentStep, samples.data, stepDataSource, submitForm, updateCurrentStep, uploadFileList],
   );
 
   const handlePrevStep = async (step: TaskStep, lastStep: TaskStep) => {
