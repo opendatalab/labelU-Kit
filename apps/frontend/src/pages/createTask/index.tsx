@@ -313,13 +313,19 @@ const CreateTask = () => {
         }
       }
 
+      // 如果是从「数据导入」到下一步，没有样本时不可进入下一步
+      if (isEmpty(samples.data)) {
+        message.error('请至少上传一个样本');
+        return;
+      }
+
       submitForm()
         .then(() => {
           updateCurrentStep((nextStep as TaskStep).value);
         })
         .catch(() => {});
     },
-    [basicFormInstance, currentStep, stepDataSource, submitForm, updateCurrentStep],
+    [basicFormInstance, currentStep, samples.data, stepDataSource, submitForm, updateCurrentStep],
   );
 
   const handlePrevStep = async (step: TaskStep, lastStep: TaskStep) => {

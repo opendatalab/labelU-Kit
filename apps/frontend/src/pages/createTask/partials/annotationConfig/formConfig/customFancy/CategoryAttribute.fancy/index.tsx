@@ -564,7 +564,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                 <Form.Item
                   name={[...path, index, 'key']}
                   // @ts-ignore
-                  rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
+                  rules={[{ required: true, message: '请填写完整' }]}
                 >
                   <Input
                     placeholder={`前端显示（中文）`}
