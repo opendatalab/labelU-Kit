@@ -211,7 +211,7 @@ const TagSidebar = () => {
           return {
             title: key,
             value,
-            key: value,
+            key: [...path, value].join('-'),
             children: makeTreeData(options, type, [...path, value]),
           };
         }
@@ -243,7 +243,7 @@ const TagSidebar = () => {
         return {
           title: leaf,
           value,
-          key: value,
+          key: [...path, value].join('-'),
         };
       });
     },
