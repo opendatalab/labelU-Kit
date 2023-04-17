@@ -180,6 +180,8 @@ export const synchronizeSideView = async (
     boxParams,
     EPerspectiveView.Left,
   );
+  console.log('cameraPositionVector', cameraPositionVector);
+
   newPoints.name = 'selectedPointCloud';
   pointCloudInstance.scene.add(newPoints);
   pointCloudInstance.setInitCameraPosition(cameraPositionVector);

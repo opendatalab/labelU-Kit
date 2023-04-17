@@ -8,7 +8,8 @@ import moment from 'moment';
 import 'moment/locale/zh-cn';
 import RenderRouter from './routes';
 import { useSelector } from 'react-redux';
-import { history, HistoryRouter } from './routes/history';
+// import { history, HistoryRouter } from './routes/history';
+import { BrowserRouter } from 'react-router-dom';
 
 const App: React.FC = () => {
   const { locale } = useSelector(state => state.user);
@@ -22,6 +23,7 @@ const App: React.FC = () => {
       moment.locale('zh-cn');
     }
   }, [locale]);
+
   /**
    * handler function that passes locale
    * information to ConfigProvider for
@@ -38,9 +40,12 @@ const App: React.FC = () => {
   return (
     <ConfigProvider locale={getAntdLocale()} componentSize="middle">
       <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
-        <HistoryRouter history={history}>
+        {/* <HistoryRouter history={history}> */}
+        <BrowserRouter>
           <RenderRouter />
-        </HistoryRouter>
+        </BrowserRouter>
+
+        {/* </HistoryRouter> */}
       </IntlProvider>
     </ConfigProvider>
   );

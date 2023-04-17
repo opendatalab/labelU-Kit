@@ -2,12 +2,12 @@
  * AnnotationEngine 标注引擎 - 各类标注工具管理
  */
 
-import { EToolName } from '@/constant/tool';
+import type { EToolName } from '@/constant/tool';
 import { getConfig, styleDefaultConfig } from '@/constant/defaultConfig';
 import CommonToolUtils from '@/utils/tool/CommonToolUtils';
-import { IPolygonData } from '@/types/tool/polygon';
+import type { IPolygonData } from '@/types/tool/polygon';
 import { ELang } from '@/constant/annotation';
-import { ToolConfig } from '@/interface/conbineTool';
+import type { ToolConfig } from '@/interface/conbineTool';
 
 export interface IProps {
   isShowOrder: boolean;

@@ -694,6 +694,7 @@ export class PointCloud extends EventListener {
     pointsMaterial.onBeforeCompile = this.overridePointShader;
     this.pointsUuid = points.uuid;
     points.material = pointsMaterial;
+
     this.filterZAxisPoints(points);
     this.removeObjectByName(this.pointCloudObjectName);
 
@@ -1035,14 +1036,21 @@ export class PointCloud extends EventListener {
     const vectorList = this.boxParams2ViewPolygon(boxParams, perspectiveView);
     const { width, height, depth } = boxParams;
 
-    const projectMatrix = new THREE.Matrix4()
-      .premultiply(this.camera.matrixWorldInverse)
-      .premultiply(this.camera.projectionMatrix);
+    // const projectMatrix = new THREE.Matrix4()
+    //   .premultiply(this.camera.matrixWorldInverse)
+    //   .premultiply(this.camera.projectionMatrix);
+
+    // const boxSideMatrix = new THREE.Matrix4()
+    //   .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update every times
+    //   .premultiply(projectMatrix)
+    //   .premultiply(this.basicCoordinate2CanvasMatrix4);
 
     const boxSideMatrix = new THREE.Matrix4()
-      .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update every times
-      .premultiply(projectMatrix)
-      .premultiply(this.basicCoordinate2CanvasMatrix4);
+      .multiply(this.basicCoordinate2CanvasMatrix4)
+      .multiply(this.camera.projectionMatrix)
+      .multiply(this.camera.matrixWorldInverse)
+      .multiply(this.getModelTransformationMatrix(boxParams));
+
     this.sideMatrix = boxSideMatrix;
 
     const polygon2d = vectorList

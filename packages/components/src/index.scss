@@ -2054,11 +2054,17 @@ $hotkey-container-padding: 7px;
       overflow: hidden;
 
       .#{$ptPrefix}-2d-image {
-        flex: 1;
+        // flex: 1;
+        height: 300px;
         background-color: $pointCloudBg;
       }
     }
 
+    .#{$ptPrefix}-left-top {
+      position: absolute;
+      width: 20%;
+      z-index: 10;
+    }
     .#{$ptPrefix}-3d-container {
       display: flex;
       flex-direction: column;

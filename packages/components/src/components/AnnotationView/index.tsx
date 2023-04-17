@@ -106,8 +106,9 @@ const AnnotationView = (props: IProps, ref: any) => {
         size,
         style,
         annotations,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         config: {} as ToolConfig, // TODO，暂时不需要
-        isShowOrder:false
+        isShowOrder: false,
       });
 
       viewOperation.current.init();
@@ -183,6 +184,7 @@ const AnnotationView = (props: IProps, ref: any) => {
 
   return (
     <Spin spinning={showLoading || loading} delay={300} style={globalStyle}>
+      {/* <img src={src} /> */}
       {mainRender}
     </Spin>
   );
