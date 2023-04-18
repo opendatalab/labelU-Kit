@@ -125,7 +125,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
         modal.info({
           title: '请填写完整的属性内容',
           okText: '我知道了',
-          content: get('errorFields[0].errors[0]')(error),
+          content: '请填写完整属性内容再选择保存',
           icon: <ExclamationCircleFilled style={{ color: 'var(--color-warning)' }} />,
           onOk: () => {
             form.scrollToField(error.errorFields[0].name);
