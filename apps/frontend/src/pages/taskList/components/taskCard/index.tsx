@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Modal, Progress, Tooltip } from 'antd';
 import { useNavigate } from 'react-router';
-import moment from 'moment';
 import Icon, { ExclamationOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import formatter from '@label-u/formatter';
 
+import { modal } from '@/StaticAnt';
 import type { Dispatch, RootState } from '@/store';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import { ReactComponent as OutputIcon } from '@/assets/svg/outputData.svg';
@@ -45,7 +46,7 @@ const TaskCard = (props: any) => {
   const handleDeleteTask = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    Modal.confirm({
+    modal.confirm({
       title: '删除任务',
       icon: <ExclamationOutlined />,
       content: '确定删除该任务吗？',
@@ -90,7 +91,7 @@ const TaskCard = (props: any) => {
             <div className={currentStyles.itemTaskName}>{cardInfo.name}</div>
             {cardInfo.status !== 'DRAFT' && cardInfo.status !== 'IMPORTED' && (
               <div className={currentStyles.mediaType}>
-                <div style={{ color: 'var(--primary-color)' }}>图片</div>
+                <div style={{ color: 'var(--color-primary)' }}>图片</div>
               </div>
             )}
             {(cardInfo.status === 'DRAFT' || cardInfo.status === 'IMPORTED') && (
@@ -120,7 +121,7 @@ const TaskCard = (props: any) => {
           {cardInfo.created_by?.username}
         </div>
         <div className={currentStyles.item} style={{ marginTop: '8px' }}>
-          {moment(cardInfo.created_at).format('YYYY-MM-DD HH:MM')}
+          {formatter.format('dateTime', cardInfo.created_at, { style: 'YYYY-MM-DD HH:mm' })}
         </div>
         {doneSample === total && status !== 'DRAFT' && status !== 'IMPORTED' && (
           <div className={currentStyles.item41}>

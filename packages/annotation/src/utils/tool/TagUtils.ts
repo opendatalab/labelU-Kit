@@ -1,4 +1,4 @@
-import type { IInputList } from '@/types/tool/tagTool';
+import type { EnumerableAttribute } from '@/interface/config';
 
 import uuid from '../uuid';
 
@@ -11,7 +11,7 @@ export default class TagUtil {
    * @param {IInputList[]} labelInfoSet
    * @returns
    */
-  public static getTagKeyName(key: string, labelInfoSet: IInputList[]) {
+  public static getTagKeyName(key: string, labelInfoSet: EnumerableAttribute[]) {
     if (!labelInfoSet) {
       return;
     }
@@ -21,19 +21,19 @@ export default class TagUtil {
 
   // 获取 TagName
   // 获取当前标签名
-  public static getTagName([key = '', value = ''], labelInfoSet: IInputList[]) {
+  public static getTagName([key = '', value = ''], labelInfoSet: EnumerableAttribute[]) {
     if (!labelInfoSet) {
       return;
     }
 
     for (const i of labelInfoSet) {
       if (i.value === key) {
-        if (!i.subSelected) {
+        if (!i.options) {
           console.error('标签解析错误', key, value);
           return '';
         }
 
-        for (const j of i.subSelected) {
+        for (const j of i.options) {
           if (j.value === value) {
             return j.key;
           }
@@ -50,7 +50,7 @@ export default class TagUtil {
    * @param {IInputList[]} labelInfoSet
    * @returns
    */
-  public static getTagNameList(result: Object, labelInfoSet: IInputList[]) {
+  public static getTagNameList(result: Record<string, unknown>, labelInfoSet: EnumerableAttribute[]) {
     // 获取当前的标签结果的所有结果
     if (Object.keys(result).length <= 0) {
       return [];
@@ -101,15 +101,15 @@ export default class TagUtil {
    * @param inputList
    * @returns
    */
-  static judgeResultIsInInputList(key: string, value: string, inputList: IInputList[]) {
+  static judgeResultIsInInputList(key: string, value: string, inputList: EnumerableAttribute[]) {
     if (!key || !value || !inputList) {
       return false;
     }
 
     const a = inputList.filter((v) => {
-      if (v.value === key && v.subSelected) {
+      if (v.value === key && v.options) {
         const resultValue = value?.split(';');
-        return v?.subSelected.filter((i) => resultValue.indexOf(i.value) > -1).length > 0;
+        return v?.options.filter((i) => resultValue.indexOf(i.value) > -1).length > 0;
       }
 
       return false;
@@ -123,10 +123,10 @@ export default class TagUtil {
    * @param inputList
    * @returns
    */
-  public static getDefaultResultByConfig(inputList: IInputList[]) {
-    return inputList.reduce((acc: Record<string, string>, cur: IInputList) => {
-      if (cur.subSelected) {
-        cur.subSelected.forEach((data) => {
+  public static getDefaultResultByConfig(inputList: EnumerableAttribute[]) {
+    return inputList.reduce((acc: Record<string, string>, cur) => {
+      if (cur.options) {
+        cur.options.forEach((data) => {
           if (data.isDefault) {
             const originResult = acc[cur.value] ?? '';
 
@@ -151,7 +151,7 @@ export default class TagUtil {
    * @param basicResultList
    * @returns
    */
-  public static getDefaultTagResult(inputList: IInputList[], basicResultList: any[]) {
+  public static getDefaultTagResult(inputList: EnumerableAttribute[], basicResultList: any[]) {
     const defaultResult: any = this.getDefaultResultByConfig(inputList);
 
     if (basicResultList.length > 0) {

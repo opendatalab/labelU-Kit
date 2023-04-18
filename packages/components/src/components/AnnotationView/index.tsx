@@ -4,10 +4,9 @@
  */
 
 import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
+import type { ToolConfig } from '@label-u/annotation';
 import { ViewOperation, ImgUtils } from '@label-u/annotation';
-import { Spin } from 'antd/es';
-
-import type { ToolConfig } from '@/interface/toolConfig';
+import { Spin } from 'antd';
 
 interface IProps {
   src: string; // 图片路径

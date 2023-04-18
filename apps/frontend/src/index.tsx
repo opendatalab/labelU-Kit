@@ -1,7 +1,6 @@
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import React from 'react';
 import { Provider } from 'react-redux';
-import 'antd/dist/antd.css';
 
 import './polyfills';
 import App from './App';
@@ -11,9 +10,8 @@ import './styles/index.scss';
 
 window.React = React;
 
-ReactDOM.render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
     <App />
   </Provider>,
-  document.getElementById('root'),
 );

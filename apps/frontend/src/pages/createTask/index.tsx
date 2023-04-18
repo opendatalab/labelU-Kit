@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Modal } from 'antd';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { Button, Form } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import _ from 'lodash-es';
-import { omit, set } from 'lodash/fp';
-import type { TagToolConfig, TextToolConfig, ToolConfig } from '@label-u/annotation';
+import _, { filter, isEmpty, size } from 'lodash-es';
+import { omit } from 'lodash/fp';
+import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import AnnotationOperation from '@label-u/components';
 
+import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
-import { TaskStatus, MediaType } from '@/services/types';
+import { MediaType, TaskStatus } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
 import type { QueuedFile } from '@/pages/createTask/partials/inputData';
@@ -19,7 +21,6 @@ import currentStyles from './index.module.scss';
 import type { StepData } from './components/Step';
 import Step from './components/Step';
 import commonController from '../../utils/common/common';
-import type { TaskFormData } from './taskCreation.context';
 import { TaskCreationContext } from './taskCreation.context';
 
 enum StepEnum {
@@ -40,33 +41,12 @@ const partialMapping = {
   [StepEnum.Config]: AnnotationConfig,
 };
 
-export const CHECK_INPUT_VALUE = 'checkInputValue';
-
-const isValidConfig = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
-  const attributeList = config.attributeList;
-  if (attributeList && attributeList?.length) {
-    return _.every(attributeList, (attribute) => attribute.key !== '' && attribute.value !== '');
-  }
-  return true;
-};
-
-const isAttributeKeyOrValueDuplicated = (config: Exclude<ToolConfig, TextToolConfig | TagToolConfig>) => {
-  const attributeList = config.attributeList;
-  if (_.isEmpty(attributeList)) {
-    return false;
-  }
-  const keys = attributeList.map((attribute) => attribute.key);
-  const values = attributeList.map((attribute) => attribute.value);
-  return keys.length > _.uniq(keys)?.length || values?.length > _.uniq(values)?.length;
-};
-
 interface TaskStep extends StepData {
   value: StepEnum;
 }
 
 export interface PartialConfigProps {
   task: TaskResponse;
-  formData: TaskFormData;
   updateFormData: (field: string) => (value: string) => void;
 }
 
@@ -75,30 +55,45 @@ const CreateTask = () => {
   const navigate = useNavigate();
   const routeParams = useParams();
   const location = useLocation();
+  const [annotationFormInstance] = Form.useForm();
+  const [basicFormInstance] = Form.useForm();
 
   const taskId = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
   const [currentStep, setCurrentStep] = useState<StepEnum>(
     location.hash ? (location.hash.replace('#', '') as StepEnum) : StepEnum.Basic,
   );
-  const [formData, setFormData] = useState<TaskFormData>({} as TaskFormData);
+  const [isAnnotationFormValid, toggleAnnotationFormValidation] = useState<boolean>(true);
   const attachmentsConnected = useRef<boolean>(false);
 
   // 缓存上传的文件清单
   const [uploadFileList, setUploadFileList] = useState<QueuedFile[]>([]);
 
-  const updateCurrentStep = (step: StepEnum) => {
-    setCurrentStep(step);
-    navigate({
-      pathname: location.pathname,
-      hash: step,
-    });
-  };
+  const updateCurrentStep = useCallback(
+    (step: StepEnum) => {
+      setCurrentStep(step);
+      navigate({
+        pathname: location.pathname,
+        hash: step,
+      });
+    },
+    [location.pathname, navigate],
+  );
 
-  const Partial = useMemo(() => {
-    return partialMapping[currentStep];
+  const partials = useMemo(() => {
+    return _.chain(partialMapping)
+      .toPairs()
+      .map(([key, Partial], index) => {
+        return (
+          <div key={index} style={{ display: currentStep === key ? 'block' : 'none' }}>
+            <Partial />
+          </div>
+        );
+      })
+      .value();
   }, [currentStep]);
 
   const toolsConfig = useSelector((state: RootState) => state.task.config);
+  const samples = useSelector((state: RootState) => state.sample.list);
   const taskData = useSelector((state: RootState) => state.task.item);
   const loading = useSelector(
     (state: RootState) => state.loading.effects.task.updateTaskConfig || state.loading.effects.task.createTask,
@@ -115,31 +110,15 @@ const CreateTask = () => {
       {
         title: stepTitleMapping[StepEnum.Upload],
         value: StepEnum.Upload,
-        isFinished: [TaskStatus.IMPORTED, TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+        isFinished: taskStatus && taskStatus !== TaskStatus.DRAFT,
       },
       {
         title: stepTitleMapping[StepEnum.Config],
         value: StepEnum.Config,
-        isFinished: [TaskStatus.CONFIGURED, TaskStatus.FINISHED].includes(taskStatus),
+        isFinished: [TaskStatus.CONFIGURED, TaskStatus.FINISHED, TaskStatus.INPROGRESS].includes(taskStatus),
       },
     ],
     [isExistTask, taskStatus],
-  );
-
-  const updateFormData = (field: string) => (value: any) => {
-    setFormData(set(field)(value));
-  };
-
-  const taskCreationContextValue = useMemo(
-    () => ({
-      uploadFileList,
-      setUploadFileList,
-      setFormData,
-      updateFormData,
-      formData,
-      task: taskData,
-    }),
-    [uploadFileList, formData, taskData],
   );
 
   useEffect(() => {
@@ -152,20 +131,13 @@ const CreateTask = () => {
 
   // 将store中的task toolConfig数据同步到本地页面中
   useEffect(() => {
-    updateFormData('config')(toolsConfig);
-  }, [toolsConfig]);
+    annotationFormInstance.setFieldsValue(toolsConfig);
+  }, [annotationFormInstance, toolsConfig]);
 
-  // 将store中的task数据同步到本地页面中
   useEffect(() => {
-    if (!isExistTask) {
-      return;
-    }
-
-    setFormData((pre) => ({
-      ...omit(['config'])(taskData),
-      ...pre,
-    }));
-  }, [isExistTask, taskData]);
+    basicFormInstance.setFieldsValue(taskData);
+    annotationFormInstance.setFieldValue('media_type', taskData.media_type || MediaType.IMAGE);
+  }, [annotationFormInstance, basicFormInstance, taskData]);
 
   useEffect(() => {
     if (isExistTask && _.isEmpty(taskData)) {
@@ -173,124 +145,269 @@ const CreateTask = () => {
     }
   }, [dispatch.task, isExistTask, taskData, taskId]);
 
-  const handleSave = async function () {
-    if (_.chain(formData).get('config.tools').isEmpty().value()) {
-      commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
-      return;
+  useEffect(() => {
+    if (isEmpty(toolsConfig?.tools)) {
+      toggleAnnotationFormValidation(false);
     }
+  }, [toolsConfig?.tools]);
 
-    const toolsWithoutTagAndText = _.filter(
-      formData?.config?.tools,
-      (tool) => !['tagTool', 'textTool'].includes(tool.tool),
-    );
+  const onAnnotationFormChange = useCallback(() => {
+    annotationFormInstance.validateFields().then((values) => {
+      toggleAnnotationFormValidation(size(values.tools) > 0);
+    });
+  }, [annotationFormInstance]);
 
-    if (_.some(toolsWithoutTagAndText, (tool) => !isValidConfig(tool.config))) {
-      commonController.notificationErrorMessage({ message: '标签配置的值不能为空' }, 1);
-      document.dispatchEvent(new CustomEvent(CHECK_INPUT_VALUE, {}));
-      return;
-    }
+  const handleSave = useCallback(
+    async function () {
+      try {
+        await annotationFormInstance.validateFields();
+      } catch (err) {
+        commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
+        return;
+      }
 
-    if (
-      formData?.config?.commonAttributeConfigurable &&
-      !isValidConfig({ attributeList: formData?.config?.attribute } as any)
-    ) {
-      commonController.notificationErrorMessage({ message: '通用标签配置的值不能为空' }, 1);
-      return;
-    }
+      const annotationConfig = annotationFormInstance.getFieldsValue();
 
-    if (
-      _.some(toolsWithoutTagAndText, (tool) => isAttributeKeyOrValueDuplicated(tool.config)) ||
-      isAttributeKeyOrValueDuplicated({ attributeList: formData?.config?.attribute } as any)
-    ) {
-      commonController.notificationErrorMessage({ message: '标签配置的值key, value不能重复' }, 1);
-      return;
-    }
+      if (_.chain(annotationConfig).get('tools').isEmpty().value()) {
+        commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
+        return;
+      }
 
-    return dispatch.task
-      .updateTaskConfig({
-        taskId: taskId,
-        body: {
-          ...formData,
-          media_type: MediaType.IMAGE,
-        },
-      })
-      .then(() => {
-        navigate('/tasks');
-      });
-  };
+      return dispatch.task
+        .updateTaskConfig({
+          taskId: taskId,
+          body: {
+            ...taskData,
+            ...basicFormInstance.getFieldsValue(),
+            media_type: annotationConfig.media_type,
+            config: omit(['media_type'])(annotationConfig),
+          },
+        })
+        .then(() => {
+          navigate('/tasks');
+        });
+    },
+    [annotationFormInstance, basicFormInstance, dispatch.task, navigate, taskData, taskId],
+  );
 
-  const handleCancel = () => {
-    Modal.confirm({
+  const handleCancel = useCallback(() => {
+    modal.confirm({
       title: '确定要取消吗？',
       content: '取消后，当前任务将不会被保存',
       okText: '保存并退出',
       cancelText: '取消',
       onOk: handleSave,
     });
-  };
+  }, [handleSave]);
 
-  const submitForm: () => Promise<unknown> = async function () {
-    if (!formData.name) {
-      commonController.notificationErrorMessage({ message: '请填入任务名称' }, 1);
-      return Promise.reject();
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const handleOpenPreview = useCallback(() => {
+    dispatch.sample.fetchSamples({ task_id: taskId });
+    annotationFormInstance
+      .validateFields()
+      .then(() => {
+        setPreviewVisible(true);
+      })
+      .catch(() => {
+        commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
+      });
+  }, [annotationFormInstance, dispatch.sample, taskId]);
+
+  const transformedSample = useMemo(() => {
+    const sample = samples?.data?.[0];
+    if (!sample) {
+      return [];
     }
 
-    if (isExistTask) {
-      if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList) && !attachmentsConnected.current) {
-        await createSamples(
-          taskId,
-          _.chain(uploadFileList)
-            .filter((item) => item.status === UploadStatus.Success)
-            .map((item) => ({
-              attachement_ids: [item.id!],
-              data: {
-                fileNames: {
-                  [item.id!]: item.name!,
-                },
-                result: '{}',
-                urls: {
-                  [item.id!]: item.url!,
-                },
-              },
-            }))
-            .value(),
-        );
+    return commonController.transformFileList(sample.data, +sample.id!);
+  }, [samples]);
 
-        // 切换到其他步骤后，再切换回来，不会再次创建样本
-        attachmentsConnected.current = true;
+  const submitForm: () => Promise<unknown> = useCallback(
+    async function () {
+      let basicFormValues;
+      try {
+        basicFormValues = await basicFormInstance.validateFields();
+      } catch (err) {
+        return Promise.reject();
       }
 
-      return dispatch.task.updateTaskConfig({
-        taskId: taskId,
-        body: formData,
-      });
-    } else {
-      const newTask = await dispatch.task.createTask(formData);
+      if (isExistTask) {
+        if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList) && !attachmentsConnected.current) {
+          await createSamples(
+            taskId,
+            _.chain(uploadFileList)
+              .filter((item) => item.status === UploadStatus.Success)
+              .map((item) => ({
+                attachement_ids: [item.id!],
+                data: {
+                  fileNames: {
+                    [item.id!]: item.name!,
+                  },
+                  result: '{}',
+                  urls: {
+                    [item.id!]: item.url!,
+                  },
+                },
+              }))
+              .value(),
+          );
 
-      navigate(`/tasks/${newTask.id}/edit#${StepEnum.Upload}`);
+          // 切换到其他步骤后，再切换回来，不会再次创建样本
+          attachmentsConnected.current = true;
+        }
 
-      return Promise.reject();
+        const annotationConfig = annotationFormInstance.getFieldsValue();
+
+        dispatch.sample.fetchSamples({ task_id: taskId });
+
+        return dispatch.task.updateTaskConfig({
+          taskId: taskId,
+          body: {
+            ...taskData,
+            ...basicFormValues,
+            media_type: annotationConfig.media_type,
+            status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
+            config: omit(['media_type'])(annotationConfig),
+          },
+        });
+      } else {
+        const newTask = await dispatch.task.createTask(basicFormValues);
+
+        navigate(`/tasks/${newTask.id}/edit#${StepEnum.Upload}`);
+
+        return Promise.reject();
+      }
+    },
+    [
+      annotationFormInstance,
+      basicFormInstance,
+      currentStep,
+      dispatch.sample,
+      dispatch.task,
+      isExistTask,
+      navigate,
+      taskData,
+      taskId,
+      uploadFileList,
+    ],
+  );
+
+  const handleNextStep = useCallback(
+    async function (step: TaskStep | React.MouseEvent) {
+      let nextStep = step;
+      // 点击下一步时，step为事件参数
+      if ((step as React.MouseEvent).target) {
+        const stepIndex = stepDataSource.findIndex((item) => item.value === currentStep);
+        nextStep = stepDataSource[stepIndex + 1];
+      }
+
+      // 如果是从基本信息步骤到下一步，需要校验基本信息表单
+      if (currentStep === StepEnum.Basic) {
+        try {
+          await basicFormInstance.validateFields();
+        } catch (err) {
+          message.error('请填入任务名称');
+          return;
+        }
+      }
+
+      // 如果是从「数据导入」到下一步，没有样本时不可进入下一步
+      if (
+        currentStep === StepEnum.Upload &&
+        isEmpty(samples.data) &&
+        filter(uploadFileList, (item) => item.status === UploadStatus.Success).length === 0
+      ) {
+        message.error('请至少上传一个样本');
+        return;
+      }
+
+      submitForm()
+        .then(() => {
+          updateCurrentStep((nextStep as TaskStep).value);
+        })
+        .catch(() => {});
+    },
+    [basicFormInstance, currentStep, samples.data, stepDataSource, submitForm, updateCurrentStep, uploadFileList],
+  );
+
+  const handlePrevStep = async (step: TaskStep, lastStep: TaskStep) => {
+    // 如果是从标注配置步骤回到上一步，需要校验配置表单
+    if (lastStep.value === StepEnum.Config) {
+      try {
+        await annotationFormInstance.validateFields();
+      } catch (err) {
+        message.error('请检查标注配置');
+        return;
+      }
+
+      if (previewVisible) {
+        setPreviewVisible(false);
+      }
     }
+    submitForm()
+      .then(() => {
+        updateCurrentStep(step.value);
+      })
+      .catch(() => {});
   };
 
-  const handleNextStep = async function (step: TaskStep | React.MouseEvent) {
-    let nextStep = step;
-    // 点击下一步时，step为事件参数
-    if ((step as React.MouseEvent).target) {
-      const stepIndex = stepDataSource.findIndex((item) => item.value === currentStep);
-      nextStep = stepDataSource[stepIndex + 1];
+  const actionNodes = useMemo(() => {
+    if (currentStep === StepEnum.Config) {
+      if (previewVisible) {
+        return (
+          <Button onClick={() => setPreviewVisible(false)}>
+            <ArrowLeftOutlined />
+            退出预览
+          </Button>
+        );
+      }
+      const previewDisabled = !isAnnotationFormValid || isEmpty(samples.data);
+      return (
+        <>
+          <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples.data)}>
+            进入预览
+            <ArrowRightOutlined />
+          </Button>
+          <Button onClick={handleCancel}>取消</Button>
+          <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
+            保存
+          </Button>
+        </>
+      );
     }
 
-    submitForm().then(() => {
-      updateCurrentStep((nextStep as TaskStep).value);
-    });
-  };
+    return (
+      <>
+        <Button onClick={handleCancel}>取消</Button>
 
-  const handlePrevStep = async (step: TaskStep) => {
-    submitForm().then(() => {
-      updateCurrentStep(step.value);
-    });
-  };
+        <Button loading={loading} type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
+          下一步
+        </Button>
+      </>
+    );
+  }, [
+    currentStep,
+    handleCancel,
+    loading,
+    handleNextStep,
+    previewVisible,
+    isAnnotationFormValid,
+    samples.data,
+    handleOpenPreview,
+    handleSave,
+  ]);
+
+  const taskCreationContextValue = useMemo(
+    () => ({
+      uploadFileList,
+      setUploadFileList,
+      annotationFormInstance,
+      basicFormInstance,
+      task: taskData,
+      onAnnotationFormChange,
+    }),
+    [uploadFileList, annotationFormInstance, basicFormInstance, taskData, onAnnotationFormChange],
+  );
 
   return (
     <div className={currentStyles.outerFrame}>
@@ -298,24 +415,24 @@ const CreateTask = () => {
         <div className={currentStyles.left}>
           <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
         </div>
-        <div className={currentStyles.right}>
-          <Button type="primary" ghost onClick={handleCancel}>
-            取消
-          </Button>
-          {currentStep === StepEnum.Config ? (
-            <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
-              保存
-            </Button>
-          ) : (
-            <Button loading={loading} type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
-              下一步
-            </Button>
-          )}
-        </div>
+        <div className={currentStyles.right}>{actionNodes}</div>
       </div>
       <div className={currentStyles.content}>
         <TaskCreationContext.Provider value={taskCreationContextValue}>
-          <Partial />
+          <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
+            {partials}
+          </div>
+          {previewVisible && (
+            <div className="preview-content">
+              <AnnotationOperation
+                topActionContent={null}
+                isPreview
+                sample={transformedSample[0]}
+                config={annotationFormInstance.getFieldsValue()}
+                isShowOrder={false}
+              />
+            </div>
+          )}
         </TaskCreationContext.Provider>
       </div>
     </div>

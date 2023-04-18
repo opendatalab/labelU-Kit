@@ -27,6 +27,7 @@ const AnnotationPage = () => {
   const sampleId = routeParams.sampleId;
 
   const sample = useSelector((state: RootState) => state.sample.item);
+  const sampleLoading = useSelector((state: RootState) => state.loading.models.sample);
 
   useEffect(() => {
     if (routeParams.sampleId) {
@@ -73,10 +74,10 @@ const AnnotationPage = () => {
   }, [dispatch.task, routeParams.taskId]);
 
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
+  const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
 
   const leftSiderContent = <SlideLoader />;
-  // NOTE: labelu/components包裹了store，在AnnotationRightCorner里获取store不是应用的store！有冲突！
-  const topActionContent = <AnnotationRightCorner isLastSample={isLastSample} />;
+  const topActionContent = <AnnotationRightCorner isLastSample={isLastSample} isFirstSample={isFirstSample} />;
 
   const annotationContextValue = useMemo(() => {
     return {
@@ -87,19 +88,17 @@ const AnnotationPage = () => {
   }, [samples, setSamples, totalCount]);
 
   return (
-    <Spin className={currentStyles.annotationPage} spinning={loading} style={{ height: '100%' }}>
+    <Spin className={currentStyles.annotationPage} spinning={loading || sampleLoading} style={{ height: '100%' }}>
       <AnnotationContext.Provider value={annotationContextValue}>
         {!_.isEmpty(transformed) && !_.isEmpty(taskConfig.tools) && (
           <AnnotationOperation
             leftSiderContent={leftSiderContent}
             topActionContent={topActionContent}
+            loading={loading || sampleLoading}
             ref={annotationRef}
             isPreview={false}
-            imgList={[transformed[0]]}
-            attributeList={taskConfig.commonAttributeConfigurable ? taskConfig.attribute : []}
-            tagConfigList={taskConfig.tagList}
-            toolsBasicConfig={taskConfig.tools}
-            textConfig={taskConfig.textConfig}
+            sample={transformed[0]}
+            config={taskConfig}
             isShowOrder={false}
           />
         )}

@@ -1,20 +1,23 @@
 import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
-import _ from 'lodash-es';
+import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
+import { useSelector } from 'react-redux';
 
 import commonController from '@/utils/common/common';
 import { annotationRef } from '@/pages/annotation';
 import type { SampleListResponse, SampleResponse } from '@/services/types';
 import { SampleState } from '@/services/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
+import type { RootState } from '@/store';
 
 import currentStyles from './index.module.scss';
 import AnnotationContext from '../../annotation.context';
 
 interface AnnotationRightCornerProps {
   isLastSample: boolean;
+  isFirstSample: boolean;
 }
 
 export const SAMPLE_CHANGED = 'sampleChanged';
@@ -48,12 +51,12 @@ export interface AnnotationLoaderData {
   samples: SampleListResponse;
 }
 
-const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => {
+const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightCornerProps) => {
+  const isGlobalLoading = useSelector((state: RootState) => state.loading.global);
   const navigate = useNavigate();
   const routeParams = useParams();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  // TODO： 此处使用 useSelector 会获取到labelu/components中的store，后期需要修改
   const { samples, setSamples } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const currentSample = samples[sampleIndex];
@@ -107,17 +110,19 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     if (currentSample?.state === SampleState.SKIPPED) {
       return;
     }
-    // @ts-ignore
-    const cResult = await annotationRef?.current?.getResult();
-    const rResult = cResult[0].result;
-    const body = set('data.result')(rResult)(currentSample);
 
-    await updateSampleAnnotationResult(+taskId!, +sampleId!, {
+    // @ts-ignore
+    const result = await annotationRef?.current?.getResult();
+    // 防止sampleid保存错乱，使用标注时传入的sampleid
+    const innerSample = await annotationRef?.current?.getSample();
+    const body = set('data.result')(JSON.stringify(result))(currentSample);
+
+    await updateSampleAnnotationResult(+taskId!, +innerSample.id!, {
       ...body,
-      annotated_count: getAnnotationCount(JSON.parse(body.data!.result)),
+      annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, sampleId, taskId]);
+  }, [currentSample, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
@@ -142,25 +147,47 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex - 1}].id`)}`);
   }, [saveCurrentSample, navigate, sampleIndex, samples, taskId]);
 
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      const keyCode = e.keyCode;
-      if (keyCode === 65 && sampleIndex > 0) {
-        commonController.debounce(handlePrevSample, 1000)('');
-      } else if (keyCode === 68) {
-        handleNextSample();
-      }
-    },
-    [handleNextSample, handlePrevSample, sampleIndex],
+  const onKeyDown = debounce(
+    useCallback(
+      (e: KeyboardEvent) => {
+        const keyCode = e.keyCode;
+        if (keyCode === 65 && sampleIndex > 0) {
+          handlePrevSample();
+        } else if (keyCode === 68) {
+          handleNextSample();
+        }
+      },
+      [handleNextSample, handlePrevSample, sampleIndex],
+    ),
+    500,
   );
 
   useEffect(() => {
-    document.addEventListener('keyup', onKeyDown);
+    document.addEventListener('keydown', onKeyDown);
 
     return () => {
-      document.removeEventListener('keyup', onKeyDown);
+      document.removeEventListener('keydown', onKeyDown);
     };
   }, [onKeyDown]);
+
+  // 从外部触发上下翻页，比如快捷键，不知道上下sample的id
+  useEffect(() => {
+    const handleSampleChanged = (e: CustomEvent) => {
+      const changeType = _.get(e, 'detail');
+
+      if (changeType === 'next') {
+        handleNextSample();
+      } else if (changeType === 'prev') {
+        handlePrevSample();
+      }
+    };
+
+    document.addEventListener(SAMPLE_CHANGED, handleSampleChanged as EventListener);
+
+    return () => {
+      document.removeEventListener(SAMPLE_CHANGED, handleSampleChanged as EventListener);
+    };
+  }, [handleNextSample, handlePrevSample]);
 
   // 监听标注主页的左侧样本切换
   useEffect(() => {
@@ -187,20 +214,29 @@ const AnnotationRightCorner = ({ isLastSample }: AnnotationRightCornerProps) => 
     <div className={currentStyles.outerFrame} id="rightCorner">
       <div className={currentStyles.right}>
         {isSampleSkipped ? (
-          <Button id={'skipped'} onClick={commonController.debounce(handleCancelSkipSample, 100)}>
+          <Button
+            type="text"
+            onClick={commonController.debounce(handleCancelSkipSample, 100)}
+            disabled={isGlobalLoading}
+          >
             取消跳过
           </Button>
         ) : (
-          <Button id={'skipped'} onClick={commonController.debounce(handleSkipSample, 100)}>
+          <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
             跳过
           </Button>
         )}
+        {!isFirstSample && (
+          <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
+            上一页
+          </Button>
+        )}
         {isLastSample ? (
-          <Button type="primary" onClick={commonController.debounce(handleComplete, 100)}>
+          <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
             完成
           </Button>
         ) : (
-          <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)}>
+          <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
             下一页
           </Button>
         )}

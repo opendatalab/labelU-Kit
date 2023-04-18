@@ -1,128 +1,211 @@
 import { Modal } from 'antd';
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import type { DraggableData, DraggableEvent } from 'react-draggable';
+import Draggable from 'react-draggable';
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+  .labelu-draggable-modal {
+    overflow: hidden !important;
+  }
+`;
 
 interface Iprops {
   // 弹框左上角位置
   width: number;
-  content: React.ReactElement;
+  children: React.ReactNode;
   title: string;
-  okWord: string;
-  cancelWord: string;
-  okEvent?: () => void;
-  cancelEvent?: () => void;
+  okText: string;
+  cancelText: string;
+  beforeClose?: () => Promise<unknown>;
 }
 
-interface Bounds {
-  left: number;
-  top: number;
+interface Position {
+  x: number;
+  y: number;
 }
 
-const DrageModel = (props: Iprops, ref: any) => {
-  const { title, okWord, content, cancelWord } = props;
+interface ModalRendererProps {
+  disabled: boolean;
+  children: React.ReactNode;
+  position: Position;
+  setPosition: React.Dispatch<React.SetStateAction<Position>>;
+}
 
-  const [isVisble, setIsVisible] = useState(false);
-  //   const [coordinate,setCoordinate] = useState<Coordinate>({
-  //     x:100,
-  //     y:100
-  //   })
+const DEFAULT_OFFSET_TOP_OF_ANT_MODAL = 100;
+const EXTRA_SPACE = 56;
+
+const ModalRenderer = forwardRef<
+  {
+    setPosition: React.Dispatch<React.SetStateAction<Position>>;
+  },
+  ModalRendererProps
+>(function RefedModalRenderer({ disabled, children, setPosition, position }: ModalRendererProps) {
+  const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
+  const dragRef = useRef<HTMLDivElement>(null);
+  const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
+    const { clientWidth, clientHeight } = window.document.documentElement;
+    const targetRect = dragRef.current?.getBoundingClientRect();
+    if (!targetRect) {
+      return;
+    }
+    setBounds({
+      left: -targetRect.left + uiData.x,
+      right: clientWidth - (targetRect.right - uiData.x),
+      top: -targetRect.top + uiData.y,
+      bottom: clientHeight - (targetRect.bottom - uiData.y),
+    });
+  };
+
+  useEffect(() => {
+    const dragObserver = new MutationObserver(() => {
+      const targetRect = dragRef.current?.getBoundingClientRect();
+      const { clientHeight, clientWidth } = window.document.documentElement;
+
+      if (!targetRect) {
+        return;
+      }
+
+      if (targetRect?.bottom > clientHeight) {
+        setPosition((pre) => ({
+          ...pre,
+          y: pre.y - (targetRect.bottom - clientHeight) - EXTRA_SPACE,
+        }));
+      }
+
+      if (targetRect?.top < 0) {
+        setPosition((pre) => ({
+          ...pre,
+          y: 0,
+        }));
+      }
+
+      if (targetRect?.right > clientWidth) {
+        setPosition((pre) => ({
+          ...pre,
+          x: pre.x - targetRect.width,
+        }));
+      }
+    });
+
+    dragObserver.observe(dragRef.current as Element, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+    });
+
+    return () => {
+      dragObserver.disconnect();
+    };
+  }, [setPosition]);
+
+  return (
+    // @ts-ignore
+    <Draggable disabled={disabled} bounds={bounds} onStart={onStart} positionOffset={position}>
+      <div ref={dragRef}>{children}</div>
+    </Draggable>
+  );
+});
+
+const DraggableModel = (props: Iprops, ref: any) => {
+  const { title, width = 500, okText, children, cancelText, beforeClose } = props;
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [bounds, setBounds] = useState<Bounds>({
-    left: 0,
-    top: 0,
-  });
 
   const handleOk = () => {
     setIsVisible(false);
   };
 
   const handleCancel = () => {
-    setIsVisible(false);
-  };
-
-  useImperativeHandle(ref, () => ({
-    switchModal: (isVisible: boolean) => {
-      setIsVisible(isVisible);
-    },
-    switchSetBounds: (bounds_: Bounds) => {
-      setBounds(bounds_);
-    },
-  }));
-
-  // 计算是否超出屏幕;超出后
-  const inWindow = (left: number, top: number, startPosX: number, startPosY: number) => {
-    const H = document.body.clientHeight;
-    const W = document.body.clientWidth;
-    if (
-      (left < 20 && startPosX > left) ||
-      (left > W - 20 && startPosX < left) ||
-      (top < 20 && startPosY > top) ||
-      (top > H - 20 && startPosY < top)
-    ) {
-      document.body.onmousemove = null;
-      document.body.onmouseup = null;
-      return false;
+    if (beforeClose) {
+      Promise.resolve(beforeClose())
+        .then(() => {
+          setIsVisible(false);
+        })
+        .catch(() => {});
+    } else {
+      setIsVisible(false);
     }
-    return true;
   };
-  const onMouseDown = (e: { preventDefault: () => void; clientX: any; clientY: any }) => {
-    e.preventDefault(); // 记录初始移动的鼠标位置
-    const startPosX = e.clientX;
-    const startPosY = e.clientY; // 添加鼠标移动事件
-    document.body.onmousemove = (e_: MouseEvent) => {
-      const left = e_.clientX - startPosX + bounds.left;
-      const top = e_.clientY - startPosY + bounds.top;
-      if (inWindow(e_.clientX, e_.clientY, startPosX, startPosY)) {
-        setBounds({
-          left: left,
-          top: top,
-        });
-      }
-    }; // 鼠标放开时去掉移动事件
-    document.body.onmouseup = function () {
-      document.body.onmousemove = null;
+
+  const updatePosition = useCallback(
+    (newPosition: Position) => {
+      const { clientWidth } = window.document.documentElement;
+
+      setPosition({
+        x: -clientWidth / 2 + newPosition.x - width / 2,
+        y: -DEFAULT_OFFSET_TOP_OF_ANT_MODAL + newPosition.y + EXTRA_SPACE,
+      });
+    },
+    [width],
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      switchModal: (value: boolean) => {
+        setIsVisible(value);
+      },
+      setPosition: updatePosition,
+    }),
+    [updatePosition],
+  );
+
+  const bodyStyle = useMemo(() => {
+    return {
+      maxHeight: '65vh',
+      overflow: 'auto',
     };
-  };
+  }, []);
 
   return (
-    <Modal
-      mask={false}
-      footer={null}
-      style={{
-        top: `${bounds.top}px`,
-        left: `${bounds.left - props.width - 150}px`,
-        margin: '0px 0px',
-        maxWidth: props.width,
-      }}
-      title={
-        <div
-          onMouseDown={onMouseDown}
-          style={{
-            width: '100%',
-            cursor: 'move',
-          }}
-          onMouseOver={() => {
-            if (disabled) {
-              setDisabled(false);
-            }
-          }}
-          onMouseOut={() => {
-            setDisabled(true);
-          }}
-          onFocus={() => {}}
-          onBlur={() => {}} // end
-        >
-          {title}
-        </div>
-      }
-      visible={isVisble}
-      okText={okWord}
-      cancelText={cancelWord}
-      onOk={handleOk}
-      onCancel={handleCancel}
-    >
-      {content}
-    </Modal>
+    <>
+      <GlobalStyle />
+
+      <Modal
+        mask={false}
+        footer={null}
+        destroyOnClose
+        modalRender={(modal) => (
+          <ModalRenderer disabled={disabled} position={position} setPosition={setPosition}>
+            {modal}
+          </ModalRenderer>
+        )}
+        bodyStyle={bodyStyle}
+        title={
+          <div
+            style={{
+              width: '100%',
+              cursor: 'move',
+            }}
+            onMouseOver={() => {
+              if (disabled) {
+                setDisabled(false);
+              }
+            }}
+            onMouseOut={() => {
+              setDisabled(true);
+            }}
+            onFocus={() => {}}
+            onBlur={() => {}} // end
+          >
+            {title}
+          </div>
+        }
+        open={isVisible}
+        okText={okText}
+        cancelText={cancelText}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        width={width}
+        wrapClassName="labelu-draggable-modal"
+      >
+        {/* @ts-ignore */}
+        {children}
+      </Modal>
+    </>
   );
 };
 
-export default forwardRef(DrageModel);
+export default forwardRef(DraggableModel);

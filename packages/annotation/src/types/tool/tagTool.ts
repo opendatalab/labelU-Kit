@@ -1,14 +1,16 @@
+import type { EnumerableAttribute } from '@/interface/config';
+
 import type { IToolConfig } from './common';
 
 export interface ITagConfig extends IToolConfig {
   pageSize: number;
-  inputList: IInputList[];
+  inputList: EnumerableAttribute[];
 }
 
 export interface ITagResult {
   id: string;
   sourceID: string;
-  result: Record<string, string>;
+  attributes: Record<string, string>;
 }
 
 export interface IInputList {

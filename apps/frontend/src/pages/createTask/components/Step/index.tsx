@@ -42,8 +42,8 @@ const StepItem = ({ step, index, isEnd, onClick, active }: StepItemProps) => {
 interface StepProps {
   steps: StepData[];
   currentStep: any;
-  onNext: (step: StepData) => void;
-  onPrev: (step: StepData) => void;
+  onNext: (step: StepData, lastStep: StepData) => void;
+  onPrev: (step: StepData, lastStep: StepData) => void;
 }
 
 export default function Step({ steps, currentStep, onNext, onPrev }: StepProps) {
@@ -52,11 +52,11 @@ export default function Step({ steps, currentStep, onNext, onPrev }: StepProps) 
 
   const handleOnClick = (step: StepData, index: number) => {
     if (index > currentStepIndex && typeof onNext === 'function') {
-      onNext(step);
+      onNext(step, currentStepData);
     }
 
     if (index < currentStepIndex && typeof onPrev === 'function') {
-      onPrev(step);
+      onPrev(step, currentStepData);
     }
   };
 

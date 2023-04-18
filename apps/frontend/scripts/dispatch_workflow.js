@@ -2,7 +2,7 @@ const minimist = require('minimist');
 const { Octokit } = require('@octokit/rest');
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
+  auth: process.env.GH_TOKEN,
 });
 
 function findLatestVersion(versions) {
@@ -18,7 +18,7 @@ function findLatestVersion(versions) {
 
 async function main() {
   const args = minimist(process.argv.slice(2));
-  const [branch, nextVersion] = args._;
+  const [branch, nextVersion, releaseTime, releaseNotes] = args._;
   const version = `v${nextVersion}`;
   const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${version}/frontend.zip`;
 
@@ -27,6 +27,7 @@ async function main() {
     branch,
     name: 'frontend',
     assets_url: url,
+    changelog: releaseNotes,
   };
 
   console.log('inputs', inputs);

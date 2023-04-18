@@ -1,7 +1,6 @@
-@import '@/utils/common/common.module';
 .outerFrame {
-  @extend .displayFlex;
-  @extend .flexDirectionRow;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   height: 56px;
@@ -10,7 +9,7 @@
 }
 
 .txt {
-  color: rgba(0, 0, 0, 0.87);
+  color: rgb(0 0 0 / 87%);
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;

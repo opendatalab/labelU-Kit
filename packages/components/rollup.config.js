@@ -1,5 +1,6 @@
 import path from 'path';
 
+import json from '@rollup/plugin-json';
 import svgr from '@svgr/rollup';
 import url from 'rollup-plugin-url';
 import esbuild from 'rollup-plugin-esbuild';
@@ -82,6 +83,7 @@ export default () => {
         svgr({
           svgo: false,
         }),
+        json(),
       ],
       external: ['react', 'antd'],
     },

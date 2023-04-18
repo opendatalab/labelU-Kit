@@ -8,9 +8,9 @@ import type { ITagResult } from './tagTool';
  * 标注渲染样式
  */
 export interface IAnnotationStyle {
-  strokeColor: string;
-  fillColor: string;
-  textColor: string;
+  stroke: string;
+  fill: string;
+  text: string;
   toolColor: any;
 }
 
@@ -21,6 +21,20 @@ export interface IRenderEnhance {
   staticRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void; //
   selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
   creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
+}
+
+export enum InnerAttributeType {
+  Enum = 'enum',
+  Array = 'array',
+  String = 'string',
+}
+
+export enum StringType {
+  Text = 'text',
+  Number = 'number',
+  Order = 'order',
+  Regexp = 'regexp',
+  English = 'english',
 }
 
 /**

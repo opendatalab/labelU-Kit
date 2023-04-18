@@ -3,6 +3,11 @@ body,
 #root,
 #root > * {
   height: 100%;
+  margin: 0;
+}
+
+:root {
+  --header-height: 3.5rem;
 }
 
 body {

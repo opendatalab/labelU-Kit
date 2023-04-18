@@ -507,7 +507,6 @@ export default class ViewOperation extends BasicToolOperation {
                 id: '',
                 sourceID: '',
                 valid: true,
-                textAttribute: '',
                 attribute: '',
                 isVisible: true,
               },

@@ -11,7 +11,7 @@ import ActionsHistory from '@/utils/ActionsHistory';
 import uuid from '@/utils/uuid';
 import EKeyCode from '@/constant/keyCode';
 import MathUtils from '@/utils/MathUtils';
-import type { LineToolConfig } from '@/interface/combineTool';
+import type { LineToolConfig } from '@/interface/config';
 import type { ICoordinate, IPoint, IRectArea } from '@/types/tool/common';
 import type { ILine, ILinePoint } from '@/types/tool/lineTool';
 
@@ -26,9 +26,7 @@ import {
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import CanvasUtils from '../../utils/tool/CanvasUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
-import StyleUtils from '../../utils/tool/StyleUtils';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
-import TextAttributeClass from './textAttributeClass';
 
 enum EStatus {
   Create = 0,
@@ -158,8 +156,6 @@ export default class LineToolOperation extends BasicToolOperation {
 
   private isReference: boolean = false;
 
-  private _textAttributeInstance?: TextAttributeClass;
-
   private textEditingID?: string;
 
   private isLineValid: boolean;
@@ -178,7 +174,6 @@ export default class LineToolOperation extends BasicToolOperation {
       y: 0,
     };
     this.textEditingID = '';
-    this.updateSelectedTextAttribute = this.updateSelectedTextAttribute.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.actionsHistory = new ActionsHistory();
 
@@ -235,6 +230,7 @@ export default class LineToolOperation extends BasicToolOperation {
     return this.config.attributeConfigurable;
   }
 
+  // TODO: 应该由是否含有标签属性决定
   get isTextConfigurable() {
     return this.config.textConfigurable;
   }
@@ -322,7 +318,13 @@ export default class LineToolOperation extends BasicToolOperation {
 
   // 当前选中线条的文本
   get selectedText() {
-    return this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
+    const selectedLine = this.lineList.find((i) => i.id === this.selectedID);
+
+    if (!selectedLine) {
+      return '';
+    }
+
+    return this.getStringAttributes(selectedLine, EToolName.Line);
   }
 
   /**
@@ -608,7 +610,9 @@ export default class LineToolOperation extends BasicToolOperation {
   };
 
   public getLineColorByAttribute(line: { attribute: string; valid: boolean } | ILine, isSelected: boolean = false) {
-    return StyleUtils.getStrokeAndFill(this.getColor(line.attribute), line.valid, { isSelected }).stroke;
+    return this.getRenderStyle(line.attribute, line.valid, {
+      isSelected,
+    }).stroke;
   }
 
   public drawLines = () => {
@@ -632,7 +636,7 @@ export default class LineToolOperation extends BasicToolOperation {
           this.drawLine(line.pointList, undefined, color, false);
           this.drawLineNumber(line.pointList[0], displayOrder, color, label, line.attribute, line.valid);
           if (line.id !== this.textEditingID && this.isShowAttributeText) {
-            this.drawLineTextAttribute(line.pointList[1], color, line?.textAttribute);
+            this.drawLineTextAttribute(line.pointList[1], color, this.getStringAttributes(line, EToolName.Line));
           }
         }
       });
@@ -653,7 +657,6 @@ export default class LineToolOperation extends BasicToolOperation {
     super.render();
     this.drawLines();
     this.drawActivatedLine(nextPoint, undefined, true);
-    // this.renderTextAttribute();
     this.renderCursorLine(this.getLineColor(this.defaultAttribute));
   };
 
@@ -690,7 +693,7 @@ export default class LineToolOperation extends BasicToolOperation {
       let text = this.isShowOrder ? order.toString() : `${label}`;
 
       if (this.attributeConfigurable) {
-        const keyForAttribute = attribute ? this.config.attributeMap.get(attribute) || attribute : '';
+        const keyForAttribute = attribute ? this.getAttributeKey(attribute) : '';
 
         text = [text, `${!valid && keyForAttribute ? '无效' : ''}${keyForAttribute}`].filter((i) => i).join(' ');
       }
@@ -1147,7 +1150,7 @@ export default class LineToolOperation extends BasicToolOperation {
         // message.info(`顶点数不能少于${this.lowerLimitPointNum}`);
         return;
       }
-      this.stopLineCreating(true);
+      this.stopLineCreating(true, e);
       this.container.dispatchEvent(this.saveDataEvent);
       return;
     }
@@ -1435,6 +1438,7 @@ export default class LineToolOperation extends BasicToolOperation {
       pointList: cloneDeep(this.activeLine),
       id,
       valid: this.isLineValid,
+      attributes: {},
       // order: this.nextOrder(),
       order: CommonToolUtils.getAllToolsMaxOrder(this.lineList, this.prevResultList) + 1,
       isVisible: true,
@@ -1447,7 +1451,7 @@ export default class LineToolOperation extends BasicToolOperation {
    * 停止当前的线条绘制
    * @param isAppend
    */
-  public stopLineCreating(isAppend: boolean = true) {
+  public stopLineCreating(isAppend: boolean = true, e: MouseEvent) {
     /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
     const setActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
     let selectedID;
@@ -1477,6 +1481,8 @@ export default class LineToolOperation extends BasicToolOperation {
 
     this.actionsHistory?.empty();
     this.emit('dataUpdated', this.lineList);
+    this.emit('drawEnd', this.lineList[this.lineList.length - 1], e);
+
     this.render();
   }
 
@@ -1526,7 +1532,10 @@ export default class LineToolOperation extends BasicToolOperation {
     this.hoverLineSegmentIndex = -1;
 
     if (e.keyCode === EKeyCode.Esc) {
-      this.stopLineCreating(false);
+      this.stopLineCreating(false, {
+        clientY: this.coord.x,
+        clientX: this.coord.y,
+      } as MouseEvent);
       return;
     }
 
@@ -1737,16 +1746,8 @@ export default class LineToolOperation extends BasicToolOperation {
     }
   }
 
-  /** 设置线条文本标注属性 */
-  public setTextAttribute(text: string) {
-    if (this.isTextConfigurable) {
-      this.setLineAttribute('textAttribute', text);
-      this.history?.applyAttribute(this.selectedID, 'textAttribute', text);
-    }
-  }
-
   /** 更新线条的属性 */
-  public setLineAttribute(key: 'attribute' | 'textAttribute', value: string, id?: string) {
+  public setLineAttribute(key: 'attribute', value: string, id?: string) {
     const targetID = id || this.selectedID;
 
     if (targetID) {
@@ -1772,11 +1773,6 @@ export default class LineToolOperation extends BasicToolOperation {
       this.updateAttribute(attribute);
     }
 
-    if (this.isTextConfigurable && line) {
-      const text = line?.textAttribute || '';
-      this.updateTextAttribute(text);
-    }
-
     this.history?.updateHistory(this.lineList);
   }
 
@@ -1787,20 +1783,12 @@ export default class LineToolOperation extends BasicToolOperation {
     });
   }
 
-  public updateTextAttribute(text: string) {
-    if (this.selectedID) {
-      const line = this.lineList.find((i) => i.id === this.selectedID);
-      if (line) {
-        line.textAttribute = text;
-      }
-    }
-
-    this.emit('updateText', text);
-  }
-
   /** 保存当前绘制的数据, 避免创建中的数据不会被保存到 */
   public saveData() {
-    this.stopLineCreating();
+    this.stopLineCreating(false, {
+      clientY: this.coord.x,
+      clientX: this.coord.y,
+    } as MouseEvent);
     this.setNoneStatus();
     this.render();
   }
@@ -1813,16 +1801,6 @@ export default class LineToolOperation extends BasicToolOperation {
   public setSelectedLineID(id?: string) {
     if (this.selectedID === id) {
       return;
-    }
-
-    const oldID = this.selectedID;
-
-    if (id !== oldID && oldID) {
-      this._textAttributeInstance?.changeSelected();
-    }
-
-    if (!id) {
-      this._textAttributeInstance?.clearTextAttribute();
     }
 
     this.selectedID = id;
@@ -1916,47 +1894,14 @@ export default class LineToolOperation extends BasicToolOperation {
   public getCurrentSelectedData() {
     const valid = this.isActiveLineValid();
     const attribute = this.defaultAttribute;
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
+    const toolStyle = this.getRenderStyle(attribute, Boolean(valid));
+
+    const color = toolStyle.stroke;
 
     return {
       color,
-      textAttribute,
+      textAttribute: this.selectedText,
     };
-  }
-
-  public renderTextAttribute() {
-    if (!this.ctx || !this.activeLine || this.activeLine?.length < 2 || this.isCreate) {
-      return;
-    }
-    const valid = this.isActiveLineValid();
-    const attribute = this.defaultAttribute;
-    const { x, y } = this.activeLine[1];
-    const coordinate = this.coordUtils.getRenderCoord({ x, y });
-    const toolColor = this.getColor(attribute);
-    const color = valid ? toolColor?.valid.stroke : toolColor?.invalid.stroke;
-    const textAttribute = this.lineList.find((i) => i.id === this.selectedID)?.textAttribute ?? '';
-    if (!this._textAttributeInstance) {
-      this._textAttributeInstance = new TextAttributeClass({
-        container: this.container,
-        icon: this.getTextIconSvg(attribute),
-        color,
-        getCurrentSelectedData: this.getCurrentSelectedData,
-        updateSelectedTextAttribute: this.updateSelectedTextAttribute,
-      });
-    }
-
-    if (this._textAttributeInstance && !this._textAttributeInstance?.isExit) {
-      this._textAttributeInstance.appendToContainer();
-    }
-
-    this._textAttributeInstance.update(`${textAttribute}`, {
-      left: coordinate.x,
-      top: coordinate.y,
-      color,
-    });
-    this._textAttributeInstance.updateIcon(this.getTextIconSvg(attribute));
   }
 
   public getTextIconSvg(attribute = '') {
@@ -1967,31 +1912,4 @@ export default class LineToolOperation extends BasicToolOperation {
       this.baseIcon,
     );
   }
-
-  /** 更新文本输入，并且进行关闭 */
-  public updateSelectedTextAttribute(newTextAttribute?: string) {
-    if (this._textAttributeInstance && newTextAttribute && this.selectedID) {
-      let textAttribute = newTextAttribute;
-      const textAttributeInvalid = !AttributeUtils.textAttributeValidate(
-        this.config.textCheckType,
-        this.customFormat,
-        textAttribute,
-      );
-      if (textAttributeInvalid) {
-        this.emit('messageError', AttributeUtils.getErrorNotice(this.config.textCheckType, this.lang));
-        textAttribute = '';
-      }
-      this.setTextAttribute(textAttribute);
-      this.emit('updateTextAttribute');
-      this.render();
-    }
-  }
-
-  public textChange = (v: string) => {
-    if (this.config.textConfigurable === false || !this.selectedID) {
-      return;
-    }
-    this.updateSelectedTextAttribute(v);
-    this.emit('selectedChange'); // 触发外层的更新
-  };
 }

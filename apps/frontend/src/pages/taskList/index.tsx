@@ -40,7 +40,7 @@ const TaskList = () => {
   useEffect(() => {
     dispatch.task.fetchTasks({
       page: Number(searchParams.get('page')) - 1,
-      size: pageSize,
+      size: searchParams.get('size') ? +searchParams.get('size')! : pageSize,
     });
   }, [dispatch.task, pageSize, searchParams]);
 
@@ -68,8 +68,8 @@ const TaskList = () => {
               defaultCurrent={1}
               total={meta_data?.total ?? 0}
               pageSize={+searchParams.get('size')!}
-              onChange={(value: number) => {
-                searchParams.set('page', String(value));
+              onChange={(value: number, _pageSize: number) => {
+                searchParams.set('size', String(_pageSize));
                 setSearchParams(searchParams);
               }}
             />

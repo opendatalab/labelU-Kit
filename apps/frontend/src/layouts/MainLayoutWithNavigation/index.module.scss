@@ -1,4 +1,3 @@
-@import '../../utils/common/common.module';
 .main {
   display: flex;
   flex-direction: column;
@@ -14,11 +13,5 @@
     .ant-spin-container {
       height: 100%;
     }
-  }
-}
-:global {
-  .ant-modal-footer {
-    padding-top: 24px;
-    padding-bottom: 24px;
   }
 }

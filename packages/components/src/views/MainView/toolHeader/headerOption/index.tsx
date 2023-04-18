@@ -1,34 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PrevResult } from '@label-u/annotation';
 import { cTool, EKeyCode } from '@label-u/annotation';
 import { Popover } from 'antd';
+import { cloneDeep } from 'lodash-es';
 
-import type { AppState } from '@/store';
-// import rotateSvg from '@/assets/annotation/common/icon_r.svg';
 import revocationSvg from '@/assets/annotation/common/icon_next.svg';
 import restoreSvg from '@/assets/annotation/common/icon_back.svg';
-// import rotateHighlightSvg from '@/assets/annotation/common/icon_rA.svg';
 import revocationHighlightSvg from '@/assets/annotation/common/icon_nextA.svg';
 import restoreHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
-// import saveSvg from '@/assets/annotation/common/icon_save.svg';
-// import saveLightSvg from '@/assets/annotation/common/icon_saveA.svg';
 import { prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
-// import { ChangeSave } from '@/store/annotation/actionCreators';
-import type { IStepInfo } from '@/types/step';
-import { UpdateImgList } from '@/store/annotation/actionCreators';
+import ViewContext from '@/view.context';
 
-import { toolList } from '../ToolOperation';
 const { EVideoToolName } = cTool;
 
 import './index.scss';
-
-interface IProps {
-  isBegin?: boolean;
-  stepInfo: IStepInfo;
-}
 
 enum EColor {
   Hover = '#666fff',
@@ -37,38 +23,18 @@ enum EColor {
 
 export const labelTool = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];
 
-const HeaderOption: React.FC<IProps> = (props) => {
+const HeaderOption = () => {
+  const { currentToolName, sample, result, setResult } = useContext(ViewContext);
   const [toolHover, setToolHover] = useState('');
   const [historyRevocation, setHistoryRevocation] = useState<any>([]);
-  const { stepInfo } = props;
-  const dispatch = useDispatch();
   const undoRef = useRef<HTMLElement>();
   const redoRef = useRef<HTMLElement>();
 
   const { t } = useTranslation();
-  const {
-    annotation: { toolInstance, imgList, imgIndex, currentToolName },
-  } = useSelector((state: AppState) => ({
-    annotation: state.annotation,
-    imgAttribute: state.imgAttribute,
-  }));
 
-  const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
-  // const isVideo = [EVideoToolName.VideoTagTool].includes(stepInfo?.tool as any);
+  const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(currentToolName as any);
 
-  const isBegin = props.isBegin || isTagTool;
-
-  // const updateRotate = () => {
-  //   /**
-  //    * 1. 非第一步无法旋转
-  //    * 2. 单步骤不存在 dataSourceStep
-  //    */
-  //   if (stepInfo.dataSourceStep !== 0 && stepInfo.dataSourceStep !== undefined) {
-  //     return;
-  //   }
-
-  //   toolInstance?.updateRotate();
-  // };
+  const isBegin = isTagTool;
 
   // 快捷键处理
   const keydownEvent = (e: KeyboardEvent) => {
@@ -100,59 +66,43 @@ const HeaderOption: React.FC<IProps> = (props) => {
     };
   }, []);
 
-  // 更新pre 标注结果
-  const updateCanvasView = (newLabelResult: any) => {
-    const prevResult: PrevResult[] = [];
-    for (const oneTool of toolList) {
-      if (oneTool.toolName !== currentToolName && newLabelResult[oneTool.toolName]) {
-        const onePrevResult = {
-          toolName: oneTool.toolName,
-          result: newLabelResult[oneTool.toolName].result,
-        };
-        prevResult.push(onePrevResult);
-      }
-      if (oneTool.toolName === currentToolName) {
-        toolInstance.setResult(newLabelResult[oneTool.toolName].result);
-      }
-    }
-    toolInstance.setPrevResultList(prevResult);
-    toolInstance.render();
-  };
-
   // 统一处理撤回
   const restore = () => {
-    if (imgList && imgList.length > 0 && imgList.length > imgIndex) {
-      let count = 0;
-      const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
-      for (const tool of labelTool) {
-        if (oldImgResult[tool]?.result) {
-          count += oldImgResult[tool]?.result.length;
-        }
-      }
-      for (const tool of labelTool) {
-        const tmpResult = oldImgResult[tool]?.result;
-        if (tmpResult && tmpResult.length > 0) {
-          const newTmpResult = tmpResult.reduce((res: any[], item: { order: number }) => {
-            if (item.order !== count) {
-              res.push(item);
-            } else {
-              historyRevocation.push({ ...item, toolName: tool });
-              setHistoryRevocation(historyRevocation);
-            }
-            return res;
-          }, [] as any[]);
-          oldImgResult[tool].result = newTmpResult;
-        }
-      }
-      imgList[imgIndex].result = JSON.stringify(oldImgResult);
-      dispatch(UpdateImgList(imgList));
-      updateCanvasView(oldImgResult);
+    if (!sample) {
+      return;
     }
+    let count = 0;
+    const newResult = cloneDeep(result);
+
+    for (const tool of labelTool) {
+      if (result[tool]?.result) {
+        count += result[tool]?.result.length;
+      }
+    }
+    for (const tool of labelTool) {
+      const tmpResult = newResult[tool]?.result;
+      if (tmpResult && tmpResult.length > 0) {
+        const newTmpResult = tmpResult.reduce((res, item) => {
+          if (item.order !== count) {
+            res.push(item);
+          } else {
+            historyRevocation.push({ ...item, toolName: tool });
+            setHistoryRevocation(historyRevocation);
+          }
+          return res;
+        }, [] as any[]);
+
+        newResult[tool].result = newTmpResult;
+      }
+    }
+
+    setResult(newResult);
   };
 
   // 统一处理重做
   const revocation = () => {
-    const oldImgResult = JSON.parse(imgList[imgIndex].result as string);
+    const newResult = cloneDeep(result);
+
     const lastRestore = historyRevocation.pop();
     if (!lastRestore) {
       setHistoryRevocation([]);
@@ -161,14 +111,14 @@ const HeaderOption: React.FC<IProps> = (props) => {
     // 获取最大序号
     let maxOrder = 0;
     for (const tool of labelTool) {
-      const tmpResult = oldImgResult[tool]?.result;
+      const tmpResult = newResult[tool]?.result;
       if (tmpResult && tmpResult.length > 0) {
         maxOrder += tmpResult.length;
       }
     }
     lastRestore.order = maxOrder + 1;
     for (const tool of labelTool) {
-      let tmpResult = oldImgResult[tool]?.result;
+      let tmpResult = newResult[tool]?.result;
 
       if (lastRestore.toolName === tool) {
         delete lastRestore.toolName;
@@ -177,29 +127,14 @@ const HeaderOption: React.FC<IProps> = (props) => {
         } else {
           tmpResult = [lastRestore];
         }
-        oldImgResult[tool].result = tmpResult;
+        newResult[tool].result = tmpResult;
       }
     }
-    imgList[imgIndex].result = JSON.stringify(oldImgResult);
-    dispatch(UpdateImgList(imgList));
-    updateCanvasView(oldImgResult);
+
+    setResult(newResult);
   };
 
   const commonOptionList: any = [
-    // {
-    //   toolName: 'save',
-    //   title: 'Save',
-    //   show: !!onSave,
-    //   commonSvg: saveSvg,
-    //   selectedSvg: saveLightSvg,
-    //   click: () => {
-    //     dispatch(ChangeSave);
-    //   },
-    //   style: {
-    //     fontSize: '12px',
-    //     color: !isBegin && toolHover === 'save' ? EColor.Hover : EColor.Normal,
-    //   },
-    // },
     {
       toolName: 'revocation',
       // title: 'Redo',
@@ -238,27 +173,6 @@ const HeaderOption: React.FC<IProps> = (props) => {
       },
       ref: redoRef,
     },
-
-    // {
-    //   toolName: 'rotate',
-    //   title: 'Rotate',
-    //   show: true,
-    //   selectedSvg: rotateHighlightSvg,
-    //   commonSvg: rotateSvg,
-    //   click: () => {
-    //     if (isVideo) {
-    //       // VideoTool don't need to rotate
-    //       return;
-    //     }
-
-    //     updateRotate();
-    //   },
-    //   style: {
-    //     opacity: isVideo === true ? 0.4 : 1,
-    //     fontSize: '12px',
-    //     color: !isBegin && toolHover === 'rotate' ? EColor.Hover : EColor.Normal,
-    //   },
-    // },
   ];
   return (
     <div className={`${prefix}-header__hotKey`}>

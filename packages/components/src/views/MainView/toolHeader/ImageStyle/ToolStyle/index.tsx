@@ -1,26 +1,134 @@
 import { Slider } from 'antd/es';
-import { useEffect } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { keys } from 'lodash-es';
+import styled from 'styled-components';
 
 import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
 import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
-import styleString from '@/constant/styleString';
-import { UpdateToolStyleConfig } from '@/store/toolStyle/actionCreators';
-import { store } from '@/index';
-import type { AppState } from '@/store';
-import type { ToolStyleState } from '@/store/toolStyle/types';
+import ViewContext from '@/view.context';
+import type { ToolStyle } from '@/interface/base';
 
-interface IProps {
-  toolStyle: ToolStyleState;
-  config: string;
-}
-type ToolStyleKey = keyof ToolStyleState;
+const StyledSlider = styled.div`
+  .ant-slider:hover .ant-slider-handle::after {
+    box-shadow: none;
+  }
+  .ant-slider-handle {
+    top: -6px;
+    width: 16px;
+    height: 12px;
+    background-color: #fff;
+    box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
 
-const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyleState> => {
+    &:after {
+      position: absolute;
+      display: block;
+      top: 100%;
+      left: 0;
+      content: ' ';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-right: 8px solid transparent;
+      border-left: 8px solid transparent;
+      border-top: 8px solid #fff;
+      border-bottom: 0;
+      background-color: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      cursor: pointer;
+    }
+    &:hover::after,
+    &:focus::after {
+      box-shadow: none;
+      width: 0;
+      height: 0;
+      top: 12px;
+      inset-inline-start: 0;
+      inset-block-start: 1;
+    }
+
+    &:focus {
+      box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
+    }
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .ant-slider-rail {
+    height: 8px;
+  }
+
+  #style_fillOpacity,
+  #style_borderOpacity {
+    .ant-slider-rail {
+      background: linear-gradient(
+        to right,
+        rgb(0 0 0 / 20%) 0%,
+        rgb(0 0 0 / 20%) 20%,
+        rgb(0 0 0 / 40%) 20%,
+        rgb(0 0 0 / 40%) 40%,
+        rgb(0 0 0 / 60%) 40%,
+        rgb(0 0 0 / 60%) 60%,
+        rgb(0 0 0 / 80%) 60%,
+        rgb(0 0 0 / 80%) 80%,
+        rgb(0 0 0 / 100%) 80%,
+        rgb(0 0 0 / 100%) 100%
+      );
+    }
+
+    .ant-slider-dot {
+      display: none;
+    }
+  }
+
+  #style_width {
+    .ant-slider-dot {
+      height: 12px;
+      background: #666666;
+      border-radius: 0;
+      margin-left: -2px;
+      border: none;
+    }
+    .ant-slider-dot:nth-of-type(1) {
+      width: 1px;
+    }
+
+    .ant-slider-dot:nth-of-type(2) {
+      width: 2px;
+    }
+
+    .ant-slider-dot:nth-of-type(3) {
+      width: 3px;
+    }
+
+    .ant-slider-dot:nth-of-type(4) {
+      width: 4px;
+    }
+
+    .ant-slider-dot:nth-of-type(5) {
+      width: 5px;
+    }
+  }
+
+  .style-slider {
+    margin-bottom: 12px;
+  }
+
+  .ant-slider-track {
+    background-color: transparent;
+  }
+
+  .ant-slider:hover .ant-slider-track {
+    background-color: transparent;
+  }
+`;
+
+const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyle> => {
   const key = keys(params)![0];
   if (!key) return params;
   const res: Record<string, number> = {};
@@ -157,42 +265,30 @@ const getDefaultValue = (value: string) => {
  */
 const getStyleType = (info: string): boolean => ['width', 'color'].includes(info);
 
-const ToolStyle = (props: IProps) => {
-  const { toolStyle } = props;
-  const { width, color, borderOpacity, fillOpacity } = toolStyle;
+const HeaderToolStyle = () => {
+  const { toolStyle, setToolStyle } = useContext(ViewContext);
+  const { width, borderOpacity, fillOpacity } = toolStyle;
   const styleConfig = {
     width,
-    color,
     borderOpacity,
     fillOpacity,
   };
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
-
-  // 初始化工具样式配置
-  useEffect(() => {
-    const toolStyles = JSON.parse(styleString);
-    dispatch(UpdateToolStyleConfig(toolStyles));
-  }, [dispatch]);
-
-  // TODO - 样式标准的定义
-  const annotationConfig: any = props.config;
-
-  const changeToolStyle = (params: Record<string, number>) => {
-    store.dispatch(UpdateToolStyleConfig(enlargeToolParam(params)));
+  const changeToolStyle = (params: Partial<ToolStyle>) => {
+    setToolStyle((pre) => ({
+      ...pre,
+      ...enlargeToolParam(params),
+    }));
   };
 
   return (
-    <div className="toolStyle">
-      {Object.entries(styleConfig).map((item: any[]) => {
-        const key: ToolStyleKey = item[0];
-        // 判断是否需要 color 的使用，现在暂时默认不需要
-        if (annotationConfig?.attributeConfigurable === true && key === 'color') {
-          return null;
-        }
+    <StyledSlider className="toolStyle">
+      {Object.entries(styleConfig).map((item: any[], index) => {
+        const key: keyof ToolStyle = item[0];
+
         return (
-          <div id={`style-${key}`} className="styleSlider" key={key}>
+          <div id={`style_${key}`} className={`style-slider ${index > 0 ? 'style-slider__opacity' : ''}`} key={key}>
             <span className="title" style={{ fontSize: 16 }}>
               <img src={getImage(key)} className="icon" style={{ width: 16, marginRight: 10 }} />
               {t(getTitle(key))}
@@ -211,11 +307,8 @@ const ToolStyle = (props: IProps) => {
           </div>
         );
       })}
-    </div>
+    </StyledSlider>
   );
 };
-const mapStateToProps = ({ toolStyle, annotation }: AppState) => ({
-  toolStyle,
-  config: annotation.toolInstance.config,
-});
-export default connect(mapStateToProps)(ToolStyle);
+
+export default HeaderToolStyle;

@@ -1,0 +1,28 @@
+.formConfig {
+  :global(.ant-tabs-nav) {
+    margin-bottom: 0;
+  }
+}
+
+.attributes {
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+}
+
+.attributesBox {
+  padding: 1rem;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius);
+}
+
+.innerForm {
+  padding: 1rem;
+  border: 1px solid var(--color-border-secondary);
+  border-top: 0;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+
+  & > :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+}
