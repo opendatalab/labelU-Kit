@@ -78,6 +78,7 @@ const StyledAttributesWrapper = styled.div`
 
     .ant-badge-count {
       color: var(--text-color);
+      margin-left: 0.5rem;
     }
   }
 

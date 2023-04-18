@@ -114,6 +114,7 @@ const StyledTree = styled<React.FC<TreeProps>>(Tree)`
 
   .add-option {
     padding-left: 0;
+    margin-bottom: 0.5rem;
   }
 
   .remove {
@@ -159,12 +160,12 @@ export const StyledFancyAttributeWrapper = styled.div`
 `;
 
 const StyledStar = styled<React.FC<ButtonProps & { active: boolean }>>(Button)`
-  color: ${(props) => (props.active ? 'var(--color-primary)' : 'var(--color-text-tertiary)')};
+  color: ${(props) => (props.active ? 'var(--color-warning)' : 'var(--color-text-tertiary)')};
   margin-right: 0.5rem;
 
   &:hover .star-icon,
   &:active .star-icon {
-    color: ${(props) => (props.active ? 'var(--color-primary)' : 'var(--color-text-tertiary)')};
+    color: ${(props) => (props.active ? 'var(--color-warning)' : 'var(--color-text-tertiary)')};
   }
 `;
 // ======================= end =======================

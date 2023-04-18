@@ -43,7 +43,7 @@ const SamplesFinished = () => {
               导出数据
             </Button>
           </ExportPortal>
-          <Button type="text" size="large" onClick={handleGoHome}>
+          <Button type="default" size="large" onClick={handleGoHome}>
             返回主页
           </Button>
         </div>

@@ -229,7 +229,7 @@ export default function TemplateModal({ onSelect }: TemplateModalProps) {
   return (
     <>
       {shouldShowTemplate && (
-        <Button type="link" onClick={handleOpenModal}>
+        <Button type="default" style={{ color: 'var(--color-primary)' }} onClick={handleOpenModal}>
           选择模板
         </Button>
       )}

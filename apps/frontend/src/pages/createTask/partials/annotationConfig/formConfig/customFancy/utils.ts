@@ -43,7 +43,7 @@ export const duplicatedValueValidator =
       }
 
       for (let i = 0; i < commonAttributes.length; i++) {
-        if (commonAttributes[i].value === _value) {
+        if (commonAttributes[i].value === _value && _value !== undefined && _value !== '') {
           return Promise.reject(new Error('不可与通用标签的value重复'));
         }
       }
