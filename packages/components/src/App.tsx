@@ -35,7 +35,7 @@ const initialToolStyle: ToolStyle = {
   color: 1,
   width: 2,
   borderOpacity: 9,
-  fillOpacity: 9,
+  fillOpacity: 6,
 };
 
 // 所有工具的标注结果

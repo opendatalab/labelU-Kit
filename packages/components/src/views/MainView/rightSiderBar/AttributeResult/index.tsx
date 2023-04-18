@@ -103,6 +103,7 @@ const AttributeResultWrapper = styled.div<{
     align-items: center;
     justify-content: center;
     background: #fff;
+    color: var(--color-text);
   }
 `;
 
