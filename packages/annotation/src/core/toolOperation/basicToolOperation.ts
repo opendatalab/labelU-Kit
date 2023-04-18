@@ -1360,9 +1360,7 @@ export default class BasicToolOperation extends EventListener {
 
   public renderOtherAnnotation() {
     const thickness = this.style?.width ?? 2;
-    // if (this.forbidBasicResultRender) {
-    //   return;
-    // }
+
     if (this.prevResultList && this.prevResultList?.length > 0) {
       for (let i = 0; i < this.prevResultList.length; i++) {
         const currentResult = this.prevResultList[i];
@@ -1466,6 +1464,11 @@ export default class BasicToolOperation extends EventListener {
                   this.zoom,
                   this.currentPos,
                 );
+
+                if (transformPointList.length === 0) {
+                  return;
+                }
+
                 DrawUtils.drawLineWithPointList(
                   this.canvas,
                   // @ts-ignore
@@ -1562,7 +1565,7 @@ export default class BasicToolOperation extends EventListener {
               const dom = document.createElement('div');
               const tagInfoList = TagUtils.getTagNameList(
                 // @ts-ignore
-                currentResult?.result[0].result ?? {},
+                currentResult?.result[0].attributes ?? {},
                 this.config.tagConfigList,
               );
               dom.innerHTML =
@@ -1600,6 +1603,11 @@ export default class BasicToolOperation extends EventListener {
             // empty
           }
         }
+      }
+    } else {
+      const preTagDom = document.getElementById('tagToolTag');
+      if (this.canvas?.parentNode?.contains(preTagDom)) {
+        preTagDom?.remove();
       }
     }
   }

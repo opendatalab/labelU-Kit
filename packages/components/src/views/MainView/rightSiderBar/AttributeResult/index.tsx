@@ -11,10 +11,11 @@ import React, {
 import type { SelectProps } from 'antd';
 import { Empty, Checkbox, Radio, Button, Collapse, Form, Input, Popconfirm, Select } from 'antd';
 import classNames from 'classnames';
-import { isEmpty, find, sortBy, cloneDeep, map, update, every, compact } from 'lodash-es';
+import { isEmpty, find, sortBy, cloneDeep, map, update, every, compact, size } from 'lodash-es';
 import Icon, { EditFilled, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import styled, { css } from 'styled-components';
 import type { FormInstance, Rule } from 'antd/es/form';
+import type { AnnotationResult, Attribute, AttributeOption, InnerAttributeType, StringType } from '@label-u/annotation';
 
 import emptyAttributeImg from '@/assets/common/emptyAttribute.png';
 import DraggableModel from '@/components/dragModal';
@@ -102,6 +103,7 @@ const AttributeResultWrapper = styled.div<{
     align-items: center;
     justify-content: center;
     background: #fff;
+    color: var(--color-text);
   }
 `;
 
@@ -120,15 +122,15 @@ const StyledForm = styled(Form)`
 `;
 
 interface AttributeResultProps {
-  type: 'enum' | 'array' | 'string';
-  options?: any[];
+  type: InnerAttributeType[keyof InnerAttributeType];
+  options?: AttributeOption[];
   label: string;
   value: string;
   required?: boolean;
   regexp?: string;
   maxLength?: number;
   defaultValue?: string | boolean;
-  stringType?: 'number' | 'english' | 'regexp' | 'order';
+  stringType?: StringType[keyof StringType];
 }
 
 function AttributeFormItem({
@@ -221,7 +223,7 @@ function AttributeFormItem({
 
 const ResultAttributeForm = forwardRef((props, ref) => {
   const [form] = Form.useForm();
-  const [selectedAttribute, setSelectedAttribute] = useState<any>();
+  const [selectedAttribute, setSelectedAttribute] = useState<Attribute>();
   const { selectedResult, allAttributesMap, currentToolName } = useContext(ViewContext);
 
   const resultAttributeOptions = useMemo(() => {
@@ -235,7 +237,7 @@ const ResultAttributeForm = forwardRef((props, ref) => {
       return options;
     }
 
-    allAttributesMap?.get(selectedResult.toolName)?.forEach((item: any) => {
+    allAttributesMap?.get(selectedResult.toolName)?.forEach((item) => {
       options.push({
         label: item.key,
         value: item.value,
@@ -246,9 +248,7 @@ const ResultAttributeForm = forwardRef((props, ref) => {
   }, [allAttributesMap, selectedResult]);
 
   const handleAttributeChange = useCallback(
-    (changedValues, allValues) => {
-      console.log(allValues);
-
+    (changedValues) => {
       if ('attribute' in changedValues) {
         const attribute = allAttributesMap?.get(currentToolName)?.get(changedValues.attribute);
         setSelectedAttribute(attribute);
@@ -288,8 +288,9 @@ const ResultAttributeForm = forwardRef((props, ref) => {
           }}
         />
       </Form.Item>
-      {map(resultAttributeOptions, (attributeOptionItem: any) => (
-        <AttributeFormItem key={attributeOptionItem.value} {...attributeOptionItem} label={attributeOptionItem.key} />
+      {size(resultAttributeOptions) > 0 && <h3>属性</h3>}
+      {map(resultAttributeOptions, (attributeOptionItem) => (
+        <AttributeFormItem {...attributeOptionItem} label={attributeOptionItem.key} key={attributeOptionItem.value} />
       ))}
     </StyledForm>
   );
@@ -506,12 +507,15 @@ const AttributeResult = () => {
       return;
     }
 
-    const handleOpenAttributeEditAfterDraw = (resultCreated: any, e: MouseEvent) => {
-      dragModalRef.current?.switchModal(true);
-      dragModalRef.current.setPosition({
-        x: e.clientX + 350,
-        y: e.clientY - 100,
-      });
+    const handleOpenAttributeEditAfterDraw = (resultCreated: AnnotationResult, e: MouseEvent) => {
+      // 如果标注属性有值，则显示标注属性编辑
+      if (size(allAttributesMap?.get(annotationEngine.toolName)?.get(resultCreated.attribute!)?.attributes) > 0) {
+        dragModalRef.current?.switchModal(true);
+        dragModalRef.current.setPosition({
+          x: e.clientX + 350,
+          y: e.clientY - 100,
+        });
+      }
 
       setTimeout(() => {
         setSelectedResult({
@@ -534,7 +538,7 @@ const AttributeResult = () => {
       annotationEngine?.toolInstance?.off?.('drawEnd', handleOpenAttributeEditAfterDraw);
       document.removeEventListener('set-attribute', handleSetAttribute as EventListener);
     };
-  }, [annotationEngine, setSelectedResult]);
+  }, [allAttributesMap, annotationEngine, setSelectedResult]);
 
   return (
     <>

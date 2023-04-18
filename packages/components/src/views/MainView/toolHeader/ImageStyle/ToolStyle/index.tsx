@@ -2,6 +2,7 @@ import { Slider } from 'antd/es';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { keys } from 'lodash-es';
+import styled from 'styled-components';
 
 import widthSvg from '@/assets/toolStyle/icon_border.svg';
 import colorSvg from '@/assets/toolStyle/icon_borderColor.svg';
@@ -9,6 +10,123 @@ import borderOpacitySvg from '@/assets/toolStyle/icon_opacityStroke.svg';
 import fillOpacitySvg from '@/assets/toolStyle/icon_opacityFill.svg';
 import ViewContext from '@/view.context';
 import type { ToolStyle } from '@/interface/base';
+
+const StyledSlider = styled.div`
+  .ant-slider:hover .ant-slider-handle::after {
+    box-shadow: none;
+  }
+  .ant-slider-handle {
+    top: -6px;
+    width: 16px;
+    height: 12px;
+    background-color: #fff;
+    box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
+
+    &:after {
+      position: absolute;
+      display: block;
+      top: 100%;
+      left: 0;
+      content: ' ';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-right: 8px solid transparent;
+      border-left: 8px solid transparent;
+      border-top: 8px solid #fff;
+      border-bottom: 0;
+      background-color: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      cursor: pointer;
+    }
+    &:hover::after,
+    &:focus::after {
+      box-shadow: none;
+      width: 0;
+      height: 0;
+      top: 12px;
+      inset-inline-start: 0;
+      inset-block-start: 1;
+    }
+
+    &:focus {
+      box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
+    }
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .ant-slider-rail {
+    height: 8px;
+  }
+
+  #style_fillOpacity,
+  #style_borderOpacity {
+    .ant-slider-rail {
+      background: linear-gradient(
+        to right,
+        rgb(0 0 0 / 20%) 0%,
+        rgb(0 0 0 / 20%) 20%,
+        rgb(0 0 0 / 40%) 20%,
+        rgb(0 0 0 / 40%) 40%,
+        rgb(0 0 0 / 60%) 40%,
+        rgb(0 0 0 / 60%) 60%,
+        rgb(0 0 0 / 80%) 60%,
+        rgb(0 0 0 / 80%) 80%,
+        rgb(0 0 0 / 100%) 80%,
+        rgb(0 0 0 / 100%) 100%
+      );
+    }
+
+    .ant-slider-dot {
+      display: none;
+    }
+  }
+
+  #style_width {
+    .ant-slider-dot {
+      height: 12px;
+      background: #666666;
+      border-radius: 0;
+      margin-left: -2px;
+      border: none;
+    }
+    .ant-slider-dot:nth-of-type(1) {
+      width: 1px;
+    }
+
+    .ant-slider-dot:nth-of-type(2) {
+      width: 2px;
+    }
+
+    .ant-slider-dot:nth-of-type(3) {
+      width: 3px;
+    }
+
+    .ant-slider-dot:nth-of-type(4) {
+      width: 4px;
+    }
+
+    .ant-slider-dot:nth-of-type(5) {
+      width: 5px;
+    }
+  }
+
+  .style-slider {
+    margin-bottom: 12px;
+  }
+
+  .ant-slider-track {
+    background-color: transparent;
+  }
+
+  .ant-slider:hover .ant-slider-track {
+    background-color: transparent;
+  }
+`;
 
 const enlargeToolParam = (params: Record<string, number>): Partial<ToolStyle> => {
   const key = keys(params)![0];
@@ -165,12 +283,12 @@ const HeaderToolStyle = () => {
   };
 
   return (
-    <div className="toolStyle">
-      {Object.entries(styleConfig).map((item: any[]) => {
+    <StyledSlider className="toolStyle">
+      {Object.entries(styleConfig).map((item: any[], index) => {
         const key: keyof ToolStyle = item[0];
 
         return (
-          <div id={`style-${key}`} className="styleSlider" key={key}>
+          <div id={`style_${key}`} className={`style-slider ${index > 0 ? 'style-slider__opacity' : ''}`} key={key}>
             <span className="title" style={{ fontSize: 16 }}>
               <img src={getImage(key)} className="icon" style={{ width: 16, marginRight: 10 }} />
               {t(getTitle(key))}
@@ -189,7 +307,7 @@ const HeaderToolStyle = () => {
           </div>
         );
       })}
-    </div>
+    </StyledSlider>
   );
 };
 

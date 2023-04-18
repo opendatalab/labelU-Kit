@@ -1,14 +1,16 @@
 import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
-import _, { debounce, throttle } from 'lodash-es';
+import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
+import { useSelector } from 'react-redux';
 
 import commonController from '@/utils/common/common';
 import { annotationRef } from '@/pages/annotation';
 import type { SampleListResponse, SampleResponse } from '@/services/types';
 import { SampleState } from '@/services/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
+import type { RootState } from '@/store';
 
 import currentStyles from './index.module.scss';
 import AnnotationContext from '../../annotation.context';
@@ -50,6 +52,7 @@ export interface AnnotationLoaderData {
 }
 
 const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightCornerProps) => {
+  const isGlobalLoading = useSelector((state: RootState) => state.loading.global);
   const navigate = useNavigate();
   const routeParams = useParams();
   const taskId = routeParams.taskId;
@@ -110,14 +113,16 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
 
     // @ts-ignore
     const result = await annotationRef?.current?.getResult();
+    // 防止sampleid保存错乱，使用标注时传入的sampleid
+    const innerSample = await annotationRef?.current?.getSample();
     const body = set('data.result')(JSON.stringify(result))(currentSample);
 
-    await updateSampleAnnotationResult(+taskId!, +sampleId!, {
+    await updateSampleAnnotationResult(+taskId!, +innerSample.id!, {
       ...body,
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, sampleId, taskId]);
+  }, [currentSample, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
@@ -142,16 +147,19 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex - 1}].id`)}`);
   }, [saveCurrentSample, navigate, sampleIndex, samples, taskId]);
 
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      const keyCode = e.keyCode;
-      if (keyCode === 65 && sampleIndex > 0) {
-        handlePrevSample();
-      } else if (keyCode === 68) {
-        handleNextSample();
-      }
-    },
-    [handleNextSample, handlePrevSample, sampleIndex],
+  const onKeyDown = debounce(
+    useCallback(
+      (e: KeyboardEvent) => {
+        const keyCode = e.keyCode;
+        if (keyCode === 65 && sampleIndex > 0) {
+          handlePrevSample();
+        } else if (keyCode === 68) {
+          handleNextSample();
+        }
+      },
+      [handleNextSample, handlePrevSample, sampleIndex],
+    ),
+    500,
   );
 
   useEffect(() => {
@@ -206,21 +214,29 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     <div className={currentStyles.outerFrame} id="rightCorner">
       <div className={currentStyles.right}>
         {isSampleSkipped ? (
-          <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)}>
+          <Button
+            type="text"
+            onClick={commonController.debounce(handleCancelSkipSample, 100)}
+            disabled={isGlobalLoading}
+          >
             取消跳过
           </Button>
         ) : (
-          <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)}>
+          <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
             跳过
           </Button>
         )}
-        {!isFirstSample && <Button onClick={commonController.debounce(handlePrevSample, 100)}>上一页</Button>}
+        {!isFirstSample && (
+          <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
+            上一页
+          </Button>
+        )}
         {isLastSample ? (
-          <Button type="primary" onClick={commonController.debounce(handleComplete, 100)}>
+          <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
             完成
           </Button>
         ) : (
-          <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)}>
+          <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
             下一页
           </Button>
         )}

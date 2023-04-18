@@ -7,6 +7,8 @@
   width: 100%;
   line-height: var(--header-height);
   overflow-y: visible;
+  border-bottom: solid var(--color-border-secondary) 1px;
+  box-sizing: border-box;
 }
 
 .left {

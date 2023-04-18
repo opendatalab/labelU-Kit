@@ -1,15 +1,19 @@
 import { i18n } from '@label-u/utils';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@label-u/annotation';
 import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
 import _, { cloneDeep, isEmpty, set } from 'lodash-es';
+import { I18nextProvider } from 'react-i18next';
+import { App as AntApp, ConfigProvider } from 'antd';
 
 import MainView from '@/views/MainView';
-import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@/interface/toolConfig';
 
+import themeToken from './theme.json';
 import type { IFileItem } from './types/data';
 import ViewContext from './view.context';
 import { jsonParser } from './utils';
 import type { BasicResult, ImageAttribute, SelectedResult, ToolStyle } from './interface/base';
+import StaticAnt from './StaticAnt';
 
 export interface AppProps {
   config?: LabelUAnnotationConfig;
@@ -31,7 +35,7 @@ const initialToolStyle: ToolStyle = {
   color: 1,
   width: 2,
   borderOpacity: 9,
-  fillOpacity: 9,
+  fillOpacity: 6,
 };
 
 // 所有工具的标注结果
@@ -52,6 +56,7 @@ const extractResult = (input: any, excludeToolNames?: string[]) =>
 const App = forwardRef<
   {
     getResult: () => any;
+    getSample: () => any;
     toolInstance: any;
   },
   AppProps
@@ -416,6 +421,7 @@ const App = forwardRef<
     () => {
       return {
         toolInstance: engine?.toolInstance,
+        getSample: () => sample,
         getResult: () => {
           return new Promise((resolve) => {
             resolve(result);
@@ -423,15 +429,22 @@ const App = forwardRef<
         },
       };
     },
-    [engine?.toolInstance, result],
+    [engine?.toolInstance, result, sample],
   );
 
   return (
-    <ViewContext.Provider value={viewContextValue}>
-      <div id="annotation-content-area-to-get-box">
-        <MainView />
-      </div>
-    </ViewContext.Provider>
+    <ConfigProvider componentSize="middle" theme={{ token: themeToken.token }}>
+      <AntApp>
+        <StaticAnt />
+        <I18nextProvider i18n={i18n}>
+          <ViewContext.Provider value={viewContextValue}>
+            <div id="annotation-content-area-to-get-box">
+              <MainView />
+            </div>
+          </ViewContext.Provider>
+        </I18nextProvider>
+      </AntApp>
+    </ConfigProvider>
   );
 });
 

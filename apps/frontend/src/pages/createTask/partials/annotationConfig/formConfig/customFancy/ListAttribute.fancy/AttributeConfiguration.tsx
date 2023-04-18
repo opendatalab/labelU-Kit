@@ -38,12 +38,11 @@ const StyledDrawer = styled<React.FC<DrawerProps>>(Drawer)`
     flex-direction: column;
     border-style: dashed;
     border-width: 1px;
-    background-color: var(--color-primary-bg);
-    border-color: var(--color-primary-border);
+    background-color: #fafcff;
+    border-color: #d0dfff;
     transition: all var(--motion-duration-fast);
 
     &:hover {
-      background-color: var(--color-primary-bg-hover);
       border-color: var(--color-primary-border-hover);
     }
 
@@ -125,6 +124,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
       .catch((error) => {
         modal.info({
           title: '请填写完整的属性内容',
+          okText: '我知道了',
           content: get('errorFields[0].errors[0]')(error),
           icon: <ExclamationCircleFilled style={{ color: 'var(--color-warning)' }} />,
           onOk: () => {
@@ -143,7 +143,6 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
     if (!isEqual(value)(form.getFieldsValue().list)) {
       modal.confirm({
         title: '关联属性将不会保存，是否确认退出',
-        content: '当前属性配置已修改',
         onOk: handleCancel,
         okText: '退出',
         cancelText: '继续编辑',
@@ -202,6 +201,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
           setStateValue(allValues);
         }}
         style={{ display: isValueEmpty ? 'none' : 'block', width: '100%' }}
+        validateTrigger="onBlur"
       >
         <Form.Item name="list" label="">
           <FancyCategoryAttribute
@@ -222,9 +222,9 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
     <StyledDrawer
       open={visible}
       title="属性配置"
-      width={800}
+      width={600}
       onClose={handleClose}
-      footer={footer}
+      footer={isValueEmpty ? null : footer}
       bodyStyle={{ display: 'flex', justifyContent: 'center' }}
     >
       {isValueEmpty && emptyPlaceholder}

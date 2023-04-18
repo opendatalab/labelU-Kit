@@ -114,6 +114,7 @@ const StyledTree = styled<React.FC<TreeProps>>(Tree)`
 
   .add-option {
     padding-left: 0;
+    margin-bottom: 0.5rem;
   }
 
   .remove {
@@ -159,12 +160,12 @@ export const StyledFancyAttributeWrapper = styled.div`
 `;
 
 const StyledStar = styled<React.FC<ButtonProps & { active: boolean }>>(Button)`
-  color: ${(props) => (props.active ? 'var(--color-primary)' : 'var(--color-text-tertiary)')};
+  color: ${(props) => (props.active ? 'var(--color-warning)' : 'var(--color-text-tertiary)')};
   margin-right: 0.5rem;
 
   &:hover .star-icon,
   &:active .star-icon {
-    color: ${(props) => (props.active ? 'var(--color-primary)' : 'var(--color-text-tertiary)')};
+    color: ${(props) => (props.active ? 'var(--color-warning)' : 'var(--color-text-tertiary)')};
   }
 `;
 // ======================= end =======================
@@ -258,14 +259,14 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
         const newAttribute =
           cateType === CategoryType.Enum
             ? wrapWithId({
-                key: `分类-${size(stateValue) + 1}`,
-                value: `label-${size(stateValue) + 1}`,
+                key: '',
+                value: '',
                 type: cateType,
                 options: [],
               })
             : wrapWithId({
-                key: `分类-${size(stateValue) + 1}`,
-                value: `label-${size(stateValue) + 1}`,
+                key: '',
+                value: '',
                 type: cateType,
                 maxLength: 1000,
                 stringType: StringType.Text,
@@ -292,10 +293,9 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
 
     const handleAddOption = useCallback(
       (cateIndex: number) => () => {
-        const currentOptionSize = size(stateValue[cateIndex].options);
         const newOption = wrapWithId({
-          key: `选项-${cateIndex + 1}-${currentOptionSize + 1}`,
-          value: `option-${cateIndex + 1}-${currentOptionSize + 1}`,
+          key: '',
+          value: '',
         });
         const newValue = update(`[${cateIndex}]`)((cate) => {
           return {
@@ -456,16 +456,16 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
               title: (
                 <div className="category">
                   <div className="sn">{index + 1}</div>
-                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: 'key不可为空' }]}>
-                    <Input onChange={handleOnChange(`[${index}].key`)} />
+                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '请填写完整' }]}>
+                    <Input placeholder={`前端显示（中文）`} onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
                   <Form.Item
                     name={[...path, index, 'value']}
                     dependencies={otherValueFields}
                     // @ts-ignore
-                    rules={[{ required: true, message: 'value不可为空' }, duplicatedValueValidator(path, index)]}
+                    rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
                   >
-                    <Input onChange={handleOnChange(`[${index}].value`)} />
+                    <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <div className="should-align-center">
                     <Tooltip title={tooltipTitleMapping[itemType]}>
@@ -498,16 +498,16 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
               title: (
                 <div className="category">
                   <div className="sn">{index + 1}</div>
-                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: 'key不可为空' }]}>
-                    <Input onChange={handleOnChange(`[${index}].key`)} />
+                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '请填写完整' }]}>
+                    <Input placeholder={`前端显示（中文）`} onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
                   <Form.Item
                     name={[...path, index, 'value']}
                     dependencies={otherValueFields}
                     // @ts-ignore
-                    rules={[{ required: true, message: 'value不可为空' }, duplicatedValueValidator(path, index)]}
+                    rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
                   >
-                    <Input onChange={handleOnChange(`[${index}].value`)} />
+                    <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <div className="should-align-center">
                     <Tag>{tagTitleMapping[itemType]}</Tag>
@@ -562,11 +562,25 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
           return {
             title: (
               <div className="option">
-                <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '选项key不可为空' }]}>
-                  <Input onChange={handleOnChange(`[${preIndex}]options[${index}].key`)} />
+                <Form.Item
+                  name={[...path, index, 'key']}
+                  // @ts-ignore
+                  rules={[{ required: true, message: '请填写完整' }]}
+                >
+                  <Input
+                    placeholder={`前端显示（中文）`}
+                    onChange={handleOnChange(`[${preIndex}]options[${index}].key`)}
+                  />
                 </Form.Item>
-                <Form.Item name={[...path, index, 'value']} rules={[{ required: true, message: '选项value不可为空' }]}>
-                  <Input onChange={handleOnChange(`[${preIndex}]options[${index}].value`)} />
+                <Form.Item
+                  name={[...path, index, 'value']}
+                  // @ts-ignore
+                  rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
+                >
+                  <Input
+                    placeholder={`保存结果（英文）`}
+                    onChange={handleOnChange(`[${preIndex}]options[${index}].value`)}
+                  />
                 </Form.Item>
                 <StyledStar
                   active={Boolean(item.isDefault)}

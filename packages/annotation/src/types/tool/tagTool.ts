@@ -10,7 +10,7 @@ export interface ITagConfig extends IToolConfig {
 export interface ITagResult {
   id: string;
   sourceID: string;
-  result: Record<string, string>;
+  attributes: Record<string, string>;
 }
 
 export interface IInputList {

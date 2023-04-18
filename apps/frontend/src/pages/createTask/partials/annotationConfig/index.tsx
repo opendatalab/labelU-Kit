@@ -11,7 +11,7 @@ import TemplateModal from './templateModal';
 // 配置页的config统一使用此组件的state
 const AnnotationConfig = () => {
   const dispatch = useDispatch<Dispatch>();
-  const { task = {}, annotationFormInstance } = useContext(TaskCreationContext);
+  const { task = {} } = useContext(TaskCreationContext);
   const taskId = task.id;
 
   useEffect(() => {
@@ -37,11 +37,11 @@ const AnnotationConfig = () => {
     <div className={styles.wrapper}>
       <div className={styles.innerWrapper}>
         <div className={styles.header}>
-          <span className={styles.title}>配置方式</span>
+          <span className={styles.title}>标注配置</span>
           <TemplateModal onSelect={handleSelect} />
         </div>
         <div className={styles.content}>
-          <FormConfig form={annotationFormInstance} />
+          <FormConfig />
         </div>
       </div>
     </div>

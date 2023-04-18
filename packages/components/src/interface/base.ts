@@ -1,13 +1,4 @@
-import type { EToolName } from '@label-u/annotation';
-
-// TODO
-export interface AnnotationResult {
-  attribute?: string;
-  id: string;
-  result?: Record<string, string>;
-  order?: number;
-  pointList?: number[];
-}
+import type { EToolName, AnnotationResult } from '@label-u/annotation';
 
 export interface ToolResult {
   toolName: EToolName;

@@ -10,8 +10,6 @@ import AnnotationContext from '../../annotation.context';
 export const slideRef = React.createRef<HTMLDivElement>();
 
 const SlideLoader = () => {
-  const { isEnd } = useContext(AnnotationContext);
-
   const handleSampleClick = (sample: SampleResponse) => {
     document.dispatchEvent(
       new CustomEvent(SAMPLE_CHANGED, {
@@ -35,11 +33,9 @@ const SlideLoader = () => {
 
   return (
     <div className={currentStyles.leftBar} ref={slideRef}>
-      <div className={currentStyles.tips}>已到第一张</div>
       {samplesFromContext?.map((item: SampleResponse) => {
         return <SliderCard cardInfo={item} key={item.id} onClick={handleSampleClick} />;
       })}
-      {isEnd && <div className={currentStyles.tips}>已到最后一张</div>}
     </div>
   );
 };
