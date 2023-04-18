@@ -39,6 +39,10 @@
   box-shadow: none !important;
 }
 
+.ant-select-focused .ant-select-selector {
+  box-shadow: none !important;
+}
+
 .ant-btn-default {
   border: 0;
   background-color: #f4f5f9;
@@ -51,4 +55,8 @@
 
 .ant-form-item:last-child {
   margin-bottom: 0;
+}
+
+.ant-form-item .ant-form-item-label > label .ant-form-item-tooltip {
+  font-size: 1rem;
 }
