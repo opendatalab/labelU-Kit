@@ -19,6 +19,7 @@
 
 .email_m {
   width: inherit;
+  margin-bottom: 1rem;
 
   :global {
     .ant-input-affix-wrapper {
@@ -42,6 +43,7 @@
   cursor: pointer;
   background: var(--color-primary);
   color: white;
+  margin-top: 24px;
 }
 
 .signUpButton {
