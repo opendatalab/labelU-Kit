@@ -6,10 +6,11 @@ const octokit = new Octokit({
 });
 
 function findLatestVersion(versions) {
+  const maxVersionLength = Math.max(...versions.map((version) => version.split('.').length));
   const versionNumbers = versions.map((version) => {
     const versionParts = version.split('.');
     return versionParts.reduce((total, part, index) => {
-      return total + parseInt(part.replace('release/v', '')) * Math.pow(10, (versionParts.length - index - 1) * 3);
+      return total + parseInt(part.replace('release/v', '')) * Math.pow(10, (maxVersionLength - index - 1) * 3);
     }, 0);
   });
 
