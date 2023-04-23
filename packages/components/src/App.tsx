@@ -338,8 +338,11 @@ const App = forwardRef<
       }
 
       setTimeout(() => {
-        const [newResultAdded] = engine?.toolInstance.exportData();
-        const newResult = cloneDeep(result);
+        const [newResultAdded, basicImgInfo] = engine?.toolInstance.exportData();
+        const newResult = {
+          ...basicImgInfo,
+          ...cloneDeep(result),
+        };
 
         set(newResult, [toolName, 'result'], newResultAdded);
         set(newResult, [toolName, 'toolName'], toolName);
