@@ -98,7 +98,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
         sample.id === +sampleId! ? { ...sample, state: SampleState.SKIPPED } : sample,
       ),
     );
-    // 切换到下一个样本
+    // 切换到下一个文件
     if (!isLastSample) {
       navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
     } else {
@@ -189,7 +189,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     };
   }, [handleNextSample, handlePrevSample]);
 
-  // 监听标注主页的左侧样本切换
+  // 监听标注主页的左侧文件切换
   useEffect(() => {
     const saveCurrentSampleFromOutside = (e: CustomEvent) => {
       const _sampleId = _.get(e, 'detail.sampleId');

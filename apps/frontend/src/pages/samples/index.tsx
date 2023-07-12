@@ -39,7 +39,7 @@ const Samples = () => {
     data: samples,
   } = useSelector((state: RootState) => state.sample.list);
 
-  // 初始化获取样本列表
+  // 初始化获取文件列表
   useEffect(() => {
     dispatch.sample.fetchSamples({
       task_id: +taskId!,
