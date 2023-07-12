@@ -252,7 +252,7 @@ const CreateTask = () => {
               .value(),
           );
 
-          // 切换到其他步骤后，再切换回来，不会再次创建样本
+          // 切换到其他步骤后，再切换回来，不会再次创建文件
           attachmentsConnected.current = true;
         }
 
@@ -311,13 +311,13 @@ const CreateTask = () => {
         }
       }
 
-      // 如果是从「数据导入」到下一步，没有样本时不可进入下一步
+      // 如果是从「数据导入」到下一步，没有文件时不可进入下一步
       if (
         currentStep === StepEnum.Upload &&
         isEmpty(samples.data) &&
         filter(uploadFileList, (item) => item.status === UploadStatus.Success).length === 0
       ) {
-        message.error('请至少上传一个样本');
+        message.error('请至少上传一个文件');
         return;
       }
 

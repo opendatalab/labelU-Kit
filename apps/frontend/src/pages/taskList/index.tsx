@@ -70,6 +70,7 @@ const TaskList = () => {
               pageSize={+searchParams.get('size')!}
               onChange={(value: number, _pageSize: number) => {
                 searchParams.set('size', String(_pageSize));
+                searchParams.set('page', String(value));
                 setSearchParams(searchParams);
               }}
             />
