@@ -5,3 +5,75 @@
   align-items: center;
   justify-content: center;
 }
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 380px;
+  margin: 0 auto;
+}
+
+.title {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  height: 32px;
+  line-height: 32px;
+  font-weight: 400;
+  font-size: 24px;
+  text-align: center;
+}
+
+.email_m {
+  width: inherit;
+  margin-bottom: 1rem;
+
+  :global {
+    .ant-input-affix-wrapper {
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid rgb(0 0 0 / 10%);
+    }
+
+    .ant-input-affix-wrapper > .ant-input:not(textarea) {
+      padding-left: 20px;
+    }
+  }
+}
+
+.loginButton {
+  height: 48px;
+  width: inherit;
+  border-radius: 8px;
+  line-height: 48px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: white;
+  margin-top: 24px;
+}
+
+.signUpButton {
+  margin-top: 10px;
+  color: var(--color-primary);
+  height: 48px;
+  width: inherit;
+  text-align: right;
+}
+
+.loginAndSignUpNotice {
+  width: inherit;
+  height: 10px;
+  color: red;
+}
+
+.commonButton {
+  background-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.cancelButton {
+  background-color: #f2f3f5;
+  cursor: pointer;
+}

@@ -9,6 +9,7 @@ import TaskEdit from '@/pages/tasks.[id].edit';
 import TaskAnnotation from '@/pages/tasks.[id].samples.[id]';
 import Samples from '@/pages/tasks.[id]';
 import TaskSamplesFinished from '@/pages/tasks.[id].samples.finished';
+import Page404 from '@/pages/404';
 import type { TaskResponse } from '@/services/types';
 import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
@@ -115,6 +116,10 @@ const routes: RouteObject[] = [
         return '注册';
       },
     },
+  },
+  {
+    path: '*',
+    element: <Page404 />,
   },
 ];
 

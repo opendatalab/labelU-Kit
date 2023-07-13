@@ -3,9 +3,9 @@ import { Button, Card, Col, Empty, Menu, Modal, Row } from 'antd';
 import _ from 'lodash-es';
 import styled from 'styled-components';
 
-import { TaskCreationContext } from '@/pages/createTask/taskCreation.context';
 import { MediaType, TaskStatus } from '@/services/types';
 
+import { TaskCreationContext } from '../../../taskCreation.context';
 import * as presetConfigs from './presetConfigs';
 import * as covers from './covers';
 
