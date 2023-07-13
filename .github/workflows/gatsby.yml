@@ -28,6 +28,7 @@ concurrency:
 defaults:
   run:
     shell: bash
+    working-directory: ./apps/docs
 
 jobs:
   # Build job
@@ -52,7 +53,7 @@ jobs:
             exit 1
           fi
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v3        
         with:
           node-version: "18"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
@@ -77,7 +78,7 @@ jobs:
         run: npm config set registry https://npm.shlab.tech/
         
       - name: Install dependencies
-        run: cd apps/docs && ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Gatsby
         env:
           PREFIX_PATHS: 'true'
