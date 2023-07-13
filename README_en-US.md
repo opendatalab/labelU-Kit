@@ -24,6 +24,13 @@
 pnpm install
 ```
 
+### Start development environment
+
+```bash
+cd apps/frontend
+npm start
+```
+
 ## Usage
 
 [Development documents](https://opendatalab.github.io/labelU-Kit)。
