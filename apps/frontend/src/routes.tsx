@@ -3,16 +3,16 @@ import { Outlet } from 'react-router';
 import { redirect } from 'react-router-dom';
 
 import Login from '@/pages/login/index';
-import SignUp from '@/pages/signUp';
-import TaskList from '@/pages/taskList';
-import CreateTask from '@/pages/createTask';
-import TaskAnnotation from '@/pages/annotation';
-import Samples from '@/pages/samples';
-import TaskSamplesFinished from '@/pages/sampleFinished';
+import Register from '@/pages/register';
+import Tasks from '@/pages/tasks';
+import TaskEdit from '@/pages/tasks.[id].edit';
+import TaskAnnotation from '@/pages/tasks.[id].samples.[id]';
+import Samples from '@/pages/tasks.[id]';
+import TaskSamplesFinished from '@/pages/tasks.[id].samples.finished';
 import type { TaskResponse } from '@/services/types';
 import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
-import { taskLoader } from './loaders';
+import { taskLoader } from './loaders/task.loader';
 
 const routes: RouteObject[] = [
   {
@@ -44,7 +44,7 @@ const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <TaskList />,
+        element: <Tasks />,
       },
       {
         path: ':taskId',
@@ -63,7 +63,7 @@ const routes: RouteObject[] = [
           },
           {
             path: 'edit',
-            element: <CreateTask />,
+            element: <TaskEdit />,
             loader: async ({ params }) => {
               return params.taskId !== '0' ? '任务编辑' : '新建任务';
             },
@@ -108,8 +108,8 @@ const routes: RouteObject[] = [
     element: <Login />,
   },
   {
-    path: '/register',
-    element: <SignUp />,
+    path: 'register',
+    element: <Register />,
     handle: {
       crumb: () => {
         return '注册';
