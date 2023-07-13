@@ -20,6 +20,7 @@
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "antd": "^5.3.2",
+    "react-draggable": "^4.4.5",
     "react-dom": "^17.0.2",
     "styled-components": "^5.3.5"
   },
