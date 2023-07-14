@@ -1,15 +1,21 @@
-.loginForm {
+.signUpWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.outerFrame {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
   width: 380px;
-  margin: 0 auto;
+  height: 348px;
 }
 
 .title {
-  margin-top: 24px;
-  margin-bottom: 24px;
   height: 32px;
   line-height: 32px;
   font-weight: 400;
@@ -19,7 +25,6 @@
 
 .email_m {
   width: inherit;
-  margin-bottom: 1rem;
 
   :global {
     .ant-input-affix-wrapper {
@@ -47,25 +52,9 @@
 }
 
 .signUpButton {
-  margin-top: 10px;
-  color: var(--color-primary);
-  height: 48px;
+  //color:var(--color-primary);
+  //height : 48px;
   width: inherit;
   text-align: right;
-}
-
-.loginAndSignUpNotice {
-  width: inherit;
-  height: 10px;
-  color: red;
-}
-
-.commonButton {
-  background-color: var(--color-primary);
-  cursor: pointer;
-}
-
-.cancelButton {
-  background-color: #f2f3f5;
-  cursor: pointer;
+  //cursor:pointer;
 }

@@ -11,11 +11,11 @@ import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
 import { MediaType, TaskStatus } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
-import AnnotationConfig from '@/pages/createTask/partials/annotationConfig';
-import type { QueuedFile } from '@/pages/createTask/partials/inputData';
-import InputData, { UploadStatus } from '@/pages/createTask/partials/inputData';
 import { createSamples } from '@/services/samples';
 
+import type { QueuedFile } from './partials/inputData';
+import InputData, { UploadStatus } from './partials/inputData';
+import AnnotationConfig from './partials/annotationConfig';
 import InputInfoConfig from './partials/InputInfoConfig';
 import currentStyles from './index.module.scss';
 import type { StepData } from './components/Step';

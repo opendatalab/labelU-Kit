@@ -6,7 +6,7 @@ import { set } from 'lodash/fp';
 import { useSelector } from 'react-redux';
 
 import commonController from '@/utils/common/common';
-import { annotationRef } from '@/pages/annotation';
+import { annotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/services/types';
 import { SampleState } from '@/services/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';

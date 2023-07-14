@@ -10,8 +10,8 @@ import { MediaType, TaskStatus } from '@/services/types';
 import FancyForm from '@/components/FancyForm';
 import FancyInput, { add } from '@/components/FancyInput';
 import type { RootState } from '@/store';
-import { TaskCreationContext } from '@/pages/createTask/taskCreation.context';
 
+import { TaskCreationContext } from '../../../taskCreation.context';
 import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
 import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
 import styles from './index.module.scss';

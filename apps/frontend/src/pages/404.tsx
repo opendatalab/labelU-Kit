@@ -1,19 +1,16 @@
 import { Button, Result } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-import { useLocale } from '../locales';
-
 const NotFoundPage: React.FC<Record<string, unknown>> = () => {
   const navigate = useNavigate();
-  const { formatMessage } = useLocale();
   return (
     <Result
       status="404"
       title="404"
-      subTitle={formatMessage({ id: 'gloabal.tips.notfound' })}
+      subTitle="访问的页面暂时不存在"
       extra={
         <Button type="primary" onClick={() => navigate('/')}>
-          {formatMessage({ id: 'gloabal.tips.backHome' })}
+          返回首页
         </Button>
       }
     />

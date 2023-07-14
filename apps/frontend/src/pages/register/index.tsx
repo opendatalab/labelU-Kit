@@ -3,18 +3,20 @@ import { Form, Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import intl from 'react-intl-universal';
 
+import styles from './index.module.scss';
+import LogoTitle from '../../components/logoTitle';
 import CommonController from '../../utils/common/common';
 import { signUp } from '../../services/user';
-import currentStyles from '../signUp/index.module.scss';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
-const SignUp = (props: any) => {
-  const { turnToLogin } = props;
+
+const SignUpPage = () => {
   const [form] = Form.useForm();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const navigate = useNavigate();
+
   if (navigator.language.indexOf('zh-CN') > -1) {
     intl.init({
       currentLocale: 'zh-CN',
@@ -84,17 +86,10 @@ const SignUp = (props: any) => {
         password,
       });
       CommonController.notificationSuccessMessage({ message: '注册成功' }, 1);
-      // localStorage.setItem('token', token);
-      navigate(turnToLogin);
+      navigate('/login');
     } catch (error) {
       CommonController.notificationErrorMessage(error, 1);
     }
-
-    // try {
-    //     let res = await signUp({username,password})
-    // }catch{
-    //
-    // }
   };
   const changeRepeatPassword = (event: any, _repeatPassword?: any) => {
     const targetValue = event ? event.target.value : _repeatPassword;
@@ -105,45 +100,48 @@ const SignUp = (props: any) => {
   };
 
   return (
-    <Form className={currentStyles.outerFrame} form={form}>
-      <div className={currentStyles.title}>{intl.get('signUp')}</div>
-      <div className={currentStyles.email_m}>
-        <Input
-          placeholder={intl.get('requestEmail')}
-          prefix={<img src="/src/icons/email.svg" alt="" />}
-          onBlur={CommonController.debounce(CommonController.checkEmail, 500)}
-          onChange={changeEmail}
-          className={'email'}
-        />
-      </div>
+    <div className={styles.signUpWrapper}>
+      <LogoTitle />
+      <Form className={styles.outerFrame} form={form}>
+        <div className={styles.title}>{intl.get('signUp')}</div>
+        <div className={styles.email_m}>
+          <Input
+            placeholder={intl.get('requestEmail')}
+            prefix={<img src="/src/icons/email.svg" alt="" />}
+            onBlur={CommonController.debounce(CommonController.checkEmail, 500)}
+            onChange={changeEmail}
+            className={'email'}
+          />
+        </div>
 
-      <div className={currentStyles.email_m}>
-        <Input.Password
-          placeholder={intl.get('requestPassword')}
-          onChange={changePassword}
-          onBlur={CommonController.debounce(CommonController.checkPassword, 500)}
-          prefix={<img src="/src/icons/password.svg" alt="" />}
-          visibilityToggle={false}
-        />
-      </div>
+        <div className={styles.email_m}>
+          <Input.Password
+            placeholder={intl.get('requestPassword')}
+            onChange={changePassword}
+            onBlur={CommonController.debounce(CommonController.checkPassword, 500)}
+            prefix={<img src="/src/icons/password.svg" alt="" />}
+            visibilityToggle={false}
+          />
+        </div>
 
-      <div className={currentStyles.email_m}>
-        <Input.Password
-          placeholder={intl.get('requestRepeatPassword')}
-          onChange={changeRepeatPassword}
-          onBlur={CommonController.debounce(checkRepeatPassword, 500)}
-          visibilityToggle={false}
-          prefix={<img src="/src/icons/password.svg" alt="" />}
-        />
-      </div>
+        <div className={styles.email_m}>
+          <Input.Password
+            placeholder={intl.get('requestRepeatPassword')}
+            onChange={changeRepeatPassword}
+            onBlur={CommonController.debounce(checkRepeatPassword, 500)}
+            visibilityToggle={false}
+            prefix={<img src="/src/icons/password.svg" alt="" />}
+          />
+        </div>
 
-      <div className={currentStyles.loginButton} onClick={register}>
-        {intl.get('signUpButton')}
-      </div>
-      <div className={currentStyles.signUpButton}>
-        {intl.get('hasAccount')}？<Link to={'/'}>{intl.get('login123')}</Link>
-      </div>
-    </Form>
+        <div className={styles.loginButton} onClick={register}>
+          {intl.get('signUpButton')}
+        </div>
+        <div className={styles.signUpButton}>
+          {intl.get('hasAccount')}？<Link to={'/'}>{intl.get('login123')}</Link>
+        </div>
+      </Form>
+    </div>
   );
 };
-export default SignUp;
+export default SignUpPage;
