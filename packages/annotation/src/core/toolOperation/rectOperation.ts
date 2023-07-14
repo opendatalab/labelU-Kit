@@ -76,6 +76,12 @@ export default class RectOperation extends BasicToolOperation {
     this.setSelectedIdAfterAddingDrawingRect = this.setSelectedIdAfterAddingDrawingRect.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.setSelectedID = this.setSelectedID.bind(this);
+
+    // esc取消绘制
+    this.on('cancel', () => {
+      this.drawingRect = undefined;
+      this.firstClickCoord = undefined;
+    });
   }
 
   public setResult(rectList: IRect[]) {
@@ -1153,14 +1159,6 @@ export default class RectOperation extends BasicToolOperation {
       }
 
       default: {
-        if (this.config.attributeConfigurable) {
-          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
-
-          if (keyCode2Attribute !== undefined) {
-            this.setDefaultAttribute(keyCode2Attribute);
-          }
-        }
-
         break;
       }
     }
