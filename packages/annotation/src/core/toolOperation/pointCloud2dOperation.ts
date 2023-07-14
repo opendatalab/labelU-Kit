@@ -1,5 +1,5 @@
 import { ESortDirection } from '@/constant/annotation';
-import { edgeAdsorptionScope, EPolygonPattern } from '@/constant/tool';
+import { EPolygonPattern } from '@/constant/tool';
 import type { ToolConfig } from '@/interface/conbineTool';
 import type { IPolygonData, IPolygonPoint } from '@/types/tool/polygon';
 import MathUtils from '@/utils/MathUtils';
@@ -8,6 +8,8 @@ import CommonToolUtils from '@/utils/tool/CommonToolUtils';
 import DrawUtils from '@/utils/tool/DrawUtils';
 import PolygonUtils from '@/utils/tool/PolygonUtils';
 import StyleUtils from '@/utils/tool/StyleUtils';
+import uuid from '@/utils/uuid';
+import Vector from '@/utils/VectorUtils';
 import { Vector2 } from 'three';
 import { zoomInfo } from './basicToolOperation';
 import type { IPolygonOperationProps } from './polygonOperation';
@@ -43,6 +45,10 @@ class PointCloud2dOperation extends PolygonOperation {
   public rotatePointList: IPolygonPoint[] | undefined;
 
   public rotation: number = 0;
+
+  public cursorEnableChange: boolean = true;
+
+  protected isUncheckedApproachBoundary = false;
 
   constructor(props: IPolygonOperationProps & IPointCloud2dOperationProps) {
     super(props);
@@ -86,32 +92,62 @@ class PointCloud2dOperation extends PolygonOperation {
 
   public onMouseUp(e: MouseEvent) {
     super.onMouseUp(e);
+    this.cursorEnableChange = true;
     this.setCustomCursor('none');
     this.rotatePointList = undefined;
     return undefined;
   }
 
   public setCursorWhenMove(event: MouseEvent) {
-    // hover 框内
-    if (this.getHoverID(event) && !this.rotatePointList) {
-      if (this.hoverEdgeIndex > -1) {
-        // TODO: resize polygon with resize icon
-        this.setCustomCursor('grab');
+    if (this.getHoverID(event) && !this.rotatePointList && this.selectedPolygon) {
+      if (this.cursorEnableChange === false) {
+        return;
+      }
+      // resize
+      if (this.hoverPointIndex > -1) {
+        let nexIndex = this.hoverPointIndex + 1;
+        if (this.hoverPointIndex === 3) {
+          nexIndex = 0;
+        }
+        let preIndex = this.hoverPointIndex - 1;
+        if (this.hoverPointIndex === 0) {
+          preIndex = 3;
+        }
+        const nextVetor = Vector.getVector(
+          this.selectedPolygon.pointList[this.hoverPointIndex],
+          this.selectedPolygon.pointList[nexIndex],
+        );
+        const prevVector = Vector.getVector(
+          this.selectedPolygon.pointList[this.hoverPointIndex],
+          this.selectedPolygon.pointList[preIndex],
+        );
+        const vetor = new Vector2(nextVetor.x + prevVector.x, nextVetor.y + prevVector.y);
+        const angle = Math.abs((new Vector2(vetor.x, vetor.y).angle() / Math.PI) * 180);
+        if ((angle > 270 && angle < 360) || (angle > 90 && angle < 180)) {
+          this.setCustomCursor('nesw-resize');
+        } else {
+          this.setCustomCursor('nwse-resize');
+        }
+        // four side resize
+      } else if (this.hoverEdgeIndex === 0 || this.hoverEdgeIndex === 2) {
+        this.setCustomCursor('ew-resize');
+      } else if (this.hoverEdgeIndex === 1 || this.hoverEdgeIndex === 3) {
+        this.setCustomCursor('ns-resize');
       } else if (event.buttons === 1) {
         this.setCustomCursor('grab');
       } else {
         this.setCustomCursor('pointer');
       }
-    }
-    // hover 箭头 或者 调整方向
-    else if (this.isArrowHover || this.rotatePointList) {
+
+      // hover 箭头 或者 调整方向
+    } else if (this.isArrowHover || this.rotatePointList) {
       if (event.buttons === 1) {
-        this.setCustomCursor('grab');
+        this.setCustomCursor('default');
       } else {
-        this.setCustomCursor('pointer');
+        this.setCustomCursor('ns-resize');
       }
     } else {
-      this.setCustomCursor('none');
+      this.setCustomCursor('default');
     }
   }
 
@@ -181,9 +217,11 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   public onMouseDown(e: MouseEvent) {
+    this.cursorEnableChange = false;
     if (super.onMouseDown(e) || this.forbidMouseOperation || e.ctrlKey === true) {
       return;
     }
+
     if (this.isArrowHover) {
       this.firstClickPoint = this.getCoordinate(e);
     }
@@ -228,12 +266,11 @@ class PointCloud2dOperation extends PolygonOperation {
     //   this.addDrawingPointToPolygonList();
     //   return;
     // }
-    // if (e.ctrlKey && this.hoverID) {
-    //   this.emit('addSelectedIDs', this.hoverID);
-    // } else {
-    //   this.emit('setSelectedIDs', this.hoverID);
-    // }
   };
+
+  public setIsUncheckedApproachBoundary(isUncheckedApproachBoundary: boolean) {
+    this.isUncheckedApproachBoundary = isUncheckedApproachBoundary;
+  }
 
   public get selectedPolygons() {
     return PolygonUtils.getPolygonByIDs(this.polygonList, this.selectedIDs);
@@ -256,6 +293,64 @@ class PointCloud2dOperation extends PolygonOperation {
   }
 
   /**
+   * 初始化的添加的数据
+   * @returns
+   */
+  public addDrawingPointToTopviewPolygonList(angle: number, isRect?: boolean, paramId?: string) {
+    let { lowerLimitPointNum = 3 } = this.config;
+
+    if (lowerLimitPointNum < 3) {
+      lowerLimitPointNum = 3;
+    }
+
+    if (this.drawingPointList.length < lowerLimitPointNum) {
+      // 小于下线点无法闭合, 直接清除数据
+      this.drawingPointList = [];
+      this.editPolygonID = '';
+
+      return;
+    }
+    const basicSourceID = CommonToolUtils.getSourceID(this.basicResult);
+    const polygonList = [...this.polygonList];
+
+    const id = paramId || uuid(8, 62);
+    let newPolygon: IPolygonData = {
+      id,
+      sourceID: basicSourceID,
+      valid: !this.isCtrl,
+      textAttribute: '',
+      pointList: this.drawingPointList,
+      attribute: this.defaultAttribute,
+      order:
+        CommonToolUtils.getMaxOrder(
+          polygonList.filter((v) => CommonToolUtils.isSameSourceID(v.sourceID, basicSourceID)),
+        ) + 1,
+      isVisible: true,
+      angle,
+    };
+    if (this.pattern === EPolygonPattern.Rect && isRect === true) {
+      newPolygon = {
+        ...newPolygon,
+        isRect: true,
+      };
+    }
+
+    polygonList.push(newPolygon);
+    const createPolygon = newPolygon;
+
+    this.setSelectedIdAfterAddingDrawing(id);
+    this.setPolygonList(polygonList);
+
+    this.isCtrl = false;
+    this.drawingPointList = [];
+    this.history.pushHistory(polygonList);
+
+    if (createPolygon) {
+      this.emit('polygonCreated', createPolygon, this.zoom, this.currentPos);
+    }
+  }
+
+  /**
    * do no draw by this tool when left mouse click and move
    * @param e
    * @returns
@@ -267,10 +362,9 @@ class PointCloud2dOperation extends PolygonOperation {
       const newPolygonList = [];
       // Todo: rotate set for polygon
       // this.selectedPolygon?.pointList = this.rotatePointList
-      // this.emit('rotate',this.rotation)
       const newPolygon = {
         ...this.selectedPolygon,
-        pointList: [...this.rotatePointList],
+        angle: (this.rotation / Math.PI) * 180 + (this.selectedPolygon.angle as number),
       };
       for (let i = 0; i < polygonList.length; i++) {
         if (polygonList[i].id === this.selectedID) {
@@ -335,6 +429,28 @@ class PointCloud2dOperation extends PolygonOperation {
     }
   }
 
+  public onDragMove(e: MouseEvent) {
+    super.onDragMove(e);
+    if (Array.isArray(this.selectedPolygon?.pointList)) {
+      this.selectedPolygon?.pointList.forEach((point) => {
+        const pointInCanvas = {
+          x: this.currentPos.x + point.x * this.zoom,
+          y: this.currentPos.y + point.y * this.zoom,
+        };
+        if (pointInCanvas.x <= 0 || pointInCanvas.x >= this.container.clientWidth) {
+          this.onMouseUp(e);
+        }
+        if (pointInCanvas.y <= 0 || pointInCanvas.y >= this.container.clientHeight) {
+          this.onMouseUp(e);
+        }
+      });
+
+      if (this.isApproachBund(e) && this.isUncheckedApproachBoundary) {
+        this.onMouseUp(e);
+      }
+    }
+  }
+
   public renderPolygon() {
     const selectdPolygon = this.selectedPolygon;
     if (!selectdPolygon) {
@@ -380,44 +496,6 @@ class PointCloud2dOperation extends PolygonOperation {
       }
     }
 
-    // 4. 编辑中的多边形
-    if (this.drawingPointList?.length > 0) {
-      // 渲染绘制中的多边形
-      let drawingPointList = [...this.drawingPointList];
-      let coordinate = AxisUtils.getOriginCoordinateWithOffsetCoordinate(this.coord, this.zoom, this.currentPos);
-
-      if (this.pattern === EPolygonPattern.Rect && drawingPointList.length === 2) {
-        // 矩形模式特殊绘制
-        drawingPointList = MathUtils.getRectangleByRightAngle(coordinate, drawingPointList);
-      } else {
-        if (this.config?.edgeAdsorption && this.isAlt === false) {
-          const { dropFoot } = PolygonUtils.getClosestPoint(
-            coordinate,
-            this.polygonList,
-            this.config?.lineType,
-            edgeAdsorptionScope / this.zoom,
-          );
-          if (dropFoot) {
-            coordinate = dropFoot;
-          }
-        }
-        drawingPointList.push(coordinate);
-      }
-
-      DrawUtils.drawSelectedPolygonWithFillAndLine(
-        this.canvas,
-        AxisUtils.changePointListByZoom(drawingPointList, this.zoom, this.currentPos),
-        {
-          fillColor: toolData.fill,
-          strokeColor: toolData.stroke,
-          pointColor: 'white',
-          thickness: 2,
-          lineCap: 'round',
-          isClose: false,
-          lineType: this.config.lineType,
-        },
-      );
-    }
     // 5. 编辑中高亮的点
     if (this.hoverPointIndex > -1 && this.selectedID) {
       const hoverColor = StyleUtils.getStrokeAndFill(toolColor, selectdPolygon.valid, { isSelected: true });
@@ -439,7 +517,7 @@ class PointCloud2dOperation extends PolygonOperation {
         AxisUtils.changePointListByZoom(selectdPolygon.pointList, this.zoom, this.currentPos),
         {
           color: selectedColor.stroke,
-          thickness: 10,
+          thickness: 4,
           hoverEdgeIndex: this.hoverEdgeIndex,
           lineType: this.config?.lineType,
         },

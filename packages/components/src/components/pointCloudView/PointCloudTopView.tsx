@@ -6,7 +6,7 @@ import {
   PointCloudConfig,
   ToolConfig,
 } from '@label-u/annotation';
-import { IPointCloudBox, IPolygonData } from '@label-u/utils';
+import { IPointCloudBox } from '@label-u/utils';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { PointCloudContext } from './PointCloudContext';
 import { useRotate } from './hooks/useRotate';
@@ -17,12 +17,13 @@ import { usePolygon } from './hooks/usePolygon';
 import { useZoom } from './hooks/useZoom';
 import { aMapStateToProps, IAnnotationStateProps } from '@/store/annotation/map';
 import { connect } from 'react-redux';
-import { useSelector, LabelUContext } from '@/store/ctx';
+import { LabelUContext } from '@/store/ctx';
 import { usePointCloudViews } from './hooks/usePointCloudViews';
 import useSize from '@/hooks/useSize';
 import { useTranslation } from 'react-i18next';
-import { AppState } from '@/store';
 import { BasicConfig } from '@/interface/toolConfig';
+import { IPolygonData } from '@label-u/annotation/es/types/types/tool/polygon.d';
+import * as THREE from 'three';
 
 const { EPolygonPattern } = cTool;
 
@@ -156,16 +157,26 @@ const PointCloudTopView: React.FC<
         addPolygon(polygon);
         return;
       }
-      pointCloudViews.topViewAddBox(polygon, size, ptCtx.mainViewInstance?.attribute as string);
+      pointCloudViews.updateViewByTopPolygon(
+        polygon,
+        size,
+        ptCtx.mainViewInstance?.attribute as string,
+      );
     });
 
-    TopView2dOperation.singleOn('polygonUpdate', (polygon: IPolygonData) => {
-      if (TopView2dOperation.pattern === EPolygonPattern.Normal || !currentData?.url) {
+    TopView2dOperation.singleOn('polygonUpdate', async (polygon: IPolygonData) => {
+      if (
+        TopView2dOperation.pattern === EPolygonPattern.Normal ||
+        !currentData?.url ||
+        !ptCtx?.topViewInstance?.pointCloudInstance
+      ) {
         updatePolygon(polygon);
         return;
       }
+
+      ptCtx?.topViewInstance?.pointCloudInstance.setAngle(polygon.angle as number);
       if (ptCtx.selectedPointCloudBox) {
-        pointCloudViews.topViewAddBox(
+        pointCloudViews.updateViewByTopPolygon(
           polygon,
           size,
           ptCtx.selectedPointCloudBox.attribute,
@@ -196,8 +207,8 @@ const PointCloudTopView: React.FC<
       ptCtx.setSelectedIDs(selectedIDs);
     });
 
-    TopView2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon }: any) => {
-      pointCloudViews.topViewUpdateBox?.(newPolygon, size);
+    TopView2dOperation.singleOn('updatePolygonByDrag', ({ newPolygon, originPolygon }: any) => {
+      pointCloudViews.topViewUpdateBox?.(newPolygon, originPolygon, size);
     });
 
     const validUpdate = (id: string) => {
@@ -224,12 +235,14 @@ const PointCloudTopView: React.FC<
       topViewInstance: { pointCloudInstance: pointCloud, pointCloud2dOperation: polygonOperation },
     } = ptCtx;
 
-    polygonOperation.singleOn('resetView', (box: IPointCloudBox) => {
+    polygonOperation.singleOn('resetView', async (box: IPointCloudBox) => {
       if (!ptCtx.topViewInstance) {
         return;
       }
+
       const polygonOperation = ptCtx.topViewInstance.pointCloud2dOperation;
       const pointCloud = ptCtx.topViewInstance?.pointCloudInstance;
+      await pointCloud.loadPCDFile(currentData.url as string);
       const { zoom } = pointCloud.getBoxTopPolygon2DCoordinate(box);
       const size = {
         width: polygonOperation.container.clientWidth,
@@ -262,6 +275,7 @@ const PointCloudTopView: React.FC<
       };
       polygonOperation.setCurrentPos(newCurrentPros);
 
+      pointCloud.rotatePointCloud({ x: box.center.x, y: box.center.y, z: 0 }, pointCloud.angle);
       pointCloud.camera.zoom = zoom;
       pointCloud.camera.updateProjectionMatrix();
       pointCloud.render();

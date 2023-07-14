@@ -101,7 +101,7 @@ const ToolOperation: React.FC<IProps> = (props) => {
           }
           return <div key={item.tool} />;
         })}
-      <ImageStyle />
+      {currentToolName !== 'pointCloudTool' ? <ImageStyle /> : ''}
     </div>
   );
 };

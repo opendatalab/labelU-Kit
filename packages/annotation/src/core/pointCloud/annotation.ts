@@ -4,6 +4,8 @@ import { EPolygonPattern } from '@/constant/tool';
 import { CanvasScheduler } from '@/newCore';
 import type { IPolygonData } from '@/types/tool/polygon';
 import type { ToolConfig } from '@/interface/conbineTool';
+import AxisUtils from '@/utils/tool/AxisUtils';
+import MathUtils from '@/utils/MathUtils';
 import { PointCloud } from '.';
 import type { IPointCloud2dOperationProps } from '../toolOperation/pointCloud2dOperation';
 import PointCloud2dOperation from '../toolOperation/pointCloud2dOperation';
@@ -89,6 +91,7 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     polygonOperation.setPattern(EPolygonPattern.Rect);
     polygonOperation.setIsEnableDrag(false);
     polygonOperation.setIsUncheckedApproachBoundary(true);
+    polygonOperation.setIsShowCursor(false);
     canvasScheduler.createCanvas(polygonOperation.canvas, { size });
 
     // // 3. Data record
@@ -161,12 +164,22 @@ export class PointCloudAnnotation implements IPointCloudAnnotationOperation {
     };
     let polygonList = pointCloudDataList.map((v) => {
       const { polygon2d: pointList } = this.pointCloudInstance.getBoxTopPolygon2DCoordinateFromBox(v, sizeTop);
+
+      const rotateion = AxisUtils.getAngleFromRect(pointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate]);
+      const newDrawingPoint = MathUtils.rotateRectPointList(
+        -rotateion,
+        pointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+      );
+
       return {
         id: v.id,
         sourceID: '',
-        pointList,
+        pointList: newDrawingPoint,
         isRect: true,
+        angle: rotateion,
         valid: v.valid ?? true,
+        attribute: v.attribute,
+        order: v.order,
       };
     }) as IPolygonData[];
 

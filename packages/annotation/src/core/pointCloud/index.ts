@@ -90,6 +90,8 @@ export class PointCloud extends EventListener {
 
   public radiuses: number[] = [Radiuses];
 
+  public angle: number = 0;
+
   constructor({
     container,
     noAppend,
@@ -180,6 +182,10 @@ export class PointCloud extends EventListener {
     this.camera.updateProjectionMatrix();
   }
 
+  public setAngle(angle: number) {
+    this.angle = angle;
+  }
+
   /**
    * Init PerspectiveCamera to default config by size
    * @returns
@@ -198,7 +204,6 @@ export class PointCloud extends EventListener {
   public initCamera() {
     // Camera setting must be set before Control's initial.
     const { camera } = this;
-
     // TODO
     if (this.isOrthographicCamera) {
       const { x, y, z } = this.initCameraPosition;
@@ -650,6 +655,15 @@ export class PointCloud extends EventListener {
     return ellipse;
   }
 
+  public rotatePointCloud(center: { x: number; y: number; z: number }, angle: number) {
+    const TOMatrix = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
+    const TBMatrix = new THREE.Matrix4().makeTranslation(center.x, center.y, center.z);
+    const RMatrix = new THREE.Matrix4().makeRotationZ((angle / 180) * Math.PI);
+    const applyMatrix = new THREE.Matrix4().multiply(TBMatrix).multiply(RMatrix).multiply(TOMatrix);
+    const points = this.scene.getObjectByName('pointCloud');
+    points?.applyMatrix4(applyMatrix);
+  }
+
   public overridePointShader = (shader: Shader) => {
     shader.vertexShader = `
     attribute float sizes;
@@ -678,15 +692,9 @@ export class PointCloud extends EventListener {
       size: this.pointSize,
     });
     pointsMaterial.onBeforeCompile = this.overridePointShader;
-    if (Array.isArray(this.radiuses)) {
-      for (const redius of this.radiuses) {
-        const circle = this.createRange(redius);
-        this.scene.add(circle);
-      }
-    }
-
     this.pointsUuid = points.uuid;
     points.material = pointsMaterial;
+
     this.filterZAxisPoints(points);
     this.removeObjectByName(this.pointCloudObjectName);
 
@@ -1028,14 +1036,21 @@ export class PointCloud extends EventListener {
     const vectorList = this.boxParams2ViewPolygon(boxParams, perspectiveView);
     const { width, height, depth } = boxParams;
 
-    const projectMatrix = new THREE.Matrix4()
-      .premultiply(this.camera.matrixWorldInverse)
-      .premultiply(this.camera.projectionMatrix);
+    // const projectMatrix = new THREE.Matrix4()
+    //   .premultiply(this.camera.matrixWorldInverse)
+    //   .premultiply(this.camera.projectionMatrix);
+
+    // const boxSideMatrix = new THREE.Matrix4()
+    //   .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update every times
+    //   .premultiply(projectMatrix)
+    //   .premultiply(this.basicCoordinate2CanvasMatrix4);
 
     const boxSideMatrix = new THREE.Matrix4()
-      .premultiply(this.getModelTransformationMatrix(boxParams)) // need to update every times
-      .premultiply(projectMatrix)
-      .premultiply(this.basicCoordinate2CanvasMatrix4);
+      .multiply(this.basicCoordinate2CanvasMatrix4)
+      .multiply(this.camera.projectionMatrix)
+      .multiply(this.camera.matrixWorldInverse)
+      .multiply(this.getModelTransformationMatrix(boxParams));
+
     this.sideMatrix = boxSideMatrix;
 
     const polygon2d = vectorList
@@ -1078,7 +1093,7 @@ export class PointCloud extends EventListener {
     const hZoom = this.containerHeight / height;
     return {
       polygon2d,
-      zoom: Math.min(wZoom, hZoom) / 1.8,
+      zoom: Math.min(wZoom, hZoom) / 1.5,
     };
   }
 
@@ -1093,7 +1108,7 @@ export class PointCloud extends EventListener {
 
     return {
       polygon2d,
-      zoom: Math.min(wZoom, hZoom) / 2,
+      zoom: Math.min(wZoom, hZoom) / 1.2,
     };
   }
 
@@ -1252,10 +1267,14 @@ export class PointCloud extends EventListener {
     this.renderPointCloud(points);
   };
 
-  public applyCircle = (radiuses: number[]) => {
-    const points: any = this.scene.children.find((i) => i.uuid === this.pointsUuid);
-    this.radiuses = radiuses;
-    this.renderPointCloud(points);
+  public clearCircle = () => {
+    if (Array.isArray(this.scene.children)) {
+      for (const tmpMesh of this.scene.children) {
+        if (tmpMesh.name.startsWith('noticeCircle')) {
+          tmpMesh.removeFromParent();
+        }
+      }
+    }
   };
 
   /**

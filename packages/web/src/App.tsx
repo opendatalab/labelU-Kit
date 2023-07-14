@@ -9,6 +9,7 @@ import 'moment/locale/zh-cn';
 import RenderRouter from './routes';
 import { useSelector } from 'react-redux';
 import { history, HistoryRouter } from './routes/history';
+// import { BrowserRouter } from 'react-router-dom';
 
 const App: React.FC = () => {
   const { locale } = useSelector(state => state.user);
@@ -22,6 +23,7 @@ const App: React.FC = () => {
       moment.locale('zh-cn');
     }
   }, [locale]);
+
   /**
    * handler function that passes locale
    * information to ConfigProvider for

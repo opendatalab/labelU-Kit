@@ -85,6 +85,12 @@ const utils = {
     return mesh;
   },
 
+  async getSvgFont() {
+    const { default: tmpl } = await import('../../assets/font/labelU_font_Regular.json');
+    const tFont = new Font(tmpl);
+    return tFont;
+  },
+
   getMeshLine(vectors: any, color: THREE.ColorRepresentation | undefined, lineWidth = 5) {
     const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
     const geometry = new THREE.BufferGeometry().setFromPoints(vectors);

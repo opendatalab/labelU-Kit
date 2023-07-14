@@ -134,10 +134,16 @@ export const useAttributes = () => {
     }
     imgList[imgIndex].result = JSON.stringify(oldImgResult);
     dispatch(UpdateImgList(imgList));
-    setTimeout(() => {
-      ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
-    }, 100);
-    updateCanvasView(oldImgResult);
+    if (!ptCtx?.mainViewInstance) {
+      updateCanvasView(oldImgResult);
+    }
+    // if(ptCtx?.mainViewInstance){
+    //   setTimeout(() => {
+    //     ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
+    //   }, 100);
+    // }else{
+    //   updateCanvasView(oldImgResult);
+    // }
   };
 
   return {

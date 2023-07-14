@@ -84,7 +84,7 @@ export const {
   updateAllAttributeConfigList,
   updateTextConfig,
   clearConfig,
-  updateAllConfig,
+  updateAllConfig
 } = toolsConfigSlice.actions;
 
 export default toolsConfigSlice.reducer;

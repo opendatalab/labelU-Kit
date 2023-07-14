@@ -1,4 +1,4 @@
-import { ELineColor, ELineTypes } from '../../constant/tool';
+import type { ELineColor, ELineTypes } from '../../constant/tool';
 
 export interface IPolygonData {
   sourceID: string;
@@ -10,6 +10,7 @@ export interface IPolygonData {
   textAttribute: string;
   attribute: string;
   isRect?: boolean; // 用于判断当前多边形矩形模式生成
+  angle?: number; // 框旋转角度
 }
 
 export interface IPolygonPoint {

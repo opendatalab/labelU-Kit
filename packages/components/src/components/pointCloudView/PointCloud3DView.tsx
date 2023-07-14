@@ -1,5 +1,6 @@
 import { getClassName } from '@/utils/dom';
 import {
+  AxisUtils,
   ICoordinate,
   MathUtils,
   PointCloudOperation,
@@ -144,7 +145,14 @@ const PointCloud3D: React.FC<
 
   useEffect(() => {
     refreshtPointCloud3DView();
-  }, [currentData?.url, showSettingConfig]);
+  }, [currentData?.url]);
+
+  useEffect(() => {
+    ptCtx.mainViewInstance?.setShowSettings(showSettingConfig);
+    ptCtx.mainViewInstance?.cleanShowSettingStuff();
+    ptCtx.mainViewInstance?.refreshAttributeWithBoxList();
+    ptCtx.mainViewInstance?.refreshArrowDirection();
+  }, [showSettingConfig]);
 
   useEffect(() => {
     if (!size || !ptCtx.topViewInstance || !ptCtx.sideViewInstance || !ptCtx.mainViewInstance) {
@@ -190,19 +198,29 @@ const PointCloud3D: React.FC<
         order: number,
         textAttribute: string,
       ) => {
-        // const currentPolygonList = TopView2dOperation.polygonList;
         const cavasPointList = pointList.map((point) => {
           return MathUtils.transerWord2Canvas(point, sizeTop);
         });
-        // bacause top view should only show the selected box so we should clear the previous polygon list
-        // TopView2dOperation.setPolygonList([]);
+
+        const rotateion = AxisUtils.getAngleFromRect(
+          cavasPointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+        );
+        const newDrawingPoint = MathUtils.rotateRectPointList(
+          -rotateion,
+          cavasPointList as [ICoordinate, ICoordinate, ICoordinate, ICoordinate],
+        );
+        ptCtx.topViewInstance?.pointCloudInstance.setAngle(rotateion);
+
         TopView2dOperation.setDefaultAttribute(attribute);
-        TopView2dOperation.drawingPointList = cavasPointList;
-        TopView2dOperation.addDrawingPointToPolygonList(true, id);
+        TopView2dOperation.drawingPointList = newDrawingPoint;
+        TopView2dOperation.addDrawingPointToTopviewPolygonList(rotateion, true, id);
         TopView2dOperation.setSelectedIDs([id]);
         TopView2dOperation.render();
         ptCtx.setSelectedIDs([id]);
 
+        if (!screenPoints) {
+          return;
+        }
         const topRitghtPoint = MathUtils.getRightTopPoints(screenPoints);
         const bounds = {
           left: topRitghtPoint.x,
@@ -225,7 +243,6 @@ const PointCloud3D: React.FC<
     );
 
     mainViewInstance.singleOn('savePcResult', (boxList: IPointCloudBox[]) => {
-      mainViewInstance?.updatePointCloudByAttributes(currentData.url as string, boxList);
       dispatch({
         type: ANNOTATION_ACTIONS.UPDATE_IMG_LIST,
         payload: {
@@ -248,8 +265,9 @@ const PointCloud3D: React.FC<
         let [polygon] = TopView2dOperation.polygonList.filter((p) => p.id === selectedIDs);
         let [box] = mainViewInstance.boxList.filter((p: { id: string }) => p.id === selectedIDs);
         if (box) {
+          ptCtx.topViewInstance?.pointCloudInstance.setAngle(polygon.angle as number);
           ptCtx.topViewInstance?.pointCloud2dOperation.setDefaultAttribute(box.attribute);
-          pointCloudViews.topViewAddBox(
+          pointCloudViews.updateViewByTopPolygon(
             polygon,
             sizeTop,
             box.attribute,
@@ -261,7 +279,7 @@ const PointCloud3D: React.FC<
       }
     });
 
-    mainViewInstance.singleOn('resetAllView', async () => {
+    mainViewInstance.singleOn('resetAllView', () => {
       let selectedId = mainViewInstance.selectedId;
       if (selectedId) {
         mainViewInstance.emit('updateSelectedBox', selectedId);
@@ -289,8 +307,8 @@ const PointCloud3D: React.FC<
         });
         ptCtx.setMainViewInstance(pointCloud);
         pointCloud.setAllAttributes(config.config.attributeList);
+        pointCloud.setShowSettings(showSettingConfig);
       }
-      pointCloud.setShowSettings(showSettingConfig);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
@@ -322,17 +340,25 @@ const PointCloud3D: React.FC<
         });
         ptCtx.setMainViewInstance(pointCloud);
         pointCloud.setAllAttributes(config.config.attributeList);
+        pointCloud.setShowSettings(showSettingConfig);
       }
-      pointCloud.setShowSettings(showSettingConfig);
       pointCloud.setStyle(toolStyle);
       if (currentData.result) {
         const boxParamsList = PointCloudUtils.getBoxParamsFromResultList(currentData.result);
         pointCloud.setBoxList(boxParamsList);
-        // Add Init Box
+
+        let boxList: IPointCloudBox[] = [];
+        // refresh box in scene
         boxParamsList.forEach((v: IPointCloudBox) => {
-          // to do change color by attribute
+          // to change color by attribute
           if (v.isVisible) {
-            pointCloud?.doUpateboxInScene(v.rect, v.zInfo, v.attribute, v.id, v.textAttribute);
+            boxList = (pointCloud as PointCloudOperation).doUpateboxInScene(
+              v.rect,
+              v.zInfo,
+              v.attribute,
+              v.id,
+              v.textAttribute,
+            );
           } else {
             pointCloud?.clearBoxInSceneById(v.id);
             if (unSetSelectId && v.id === ptCtx.mainViewInstance?.selectedId) {
@@ -340,6 +366,10 @@ const PointCloud3D: React.FC<
             }
           }
         });
+
+        pointCloud.render();
+        pointCloud?.emit('savePcResult', boxList);
+
         ptCtx.setPointCloudResult(boxParamsList);
         ptCtx.setPointCloudValid(jsonParser(currentData.result)?.valid);
         pointCloud?.updatePointCloudByAttributes(currentData.url, boxParamsList);
@@ -371,6 +401,11 @@ const PointCloud3D: React.FC<
         okWord='确认'
         isSetPosition={true}
         cancelWord='取消'
+        cancelEvent={() => {
+          setTimeout(() => {
+            ptCtx?.mainViewInstance?.emit('refreshPointCloud3dView');
+          }, 50);
+        }}
         content={content}
       />
       <PointCloudContainer

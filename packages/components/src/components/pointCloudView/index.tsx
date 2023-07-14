@@ -65,6 +65,9 @@ const PointCloudView: React.FC<IProps> = (props) => {
       <div className={getClassName('point-cloud-layout')} onContextMenu={(e) => e.preventDefault()}>
         <div className={getClassName('point-cloud-wrapper')}>
           <div className={getClassName('point-cloud-container', 'left')}>
+            {/* <div className={getClassName('point-cloud-left-top')}>
+              <PointCloud2DView />
+            </div> */}
             <PointCloud3DView config={pcConfig} showSettingConfig={showSettings} />
           </div>
 

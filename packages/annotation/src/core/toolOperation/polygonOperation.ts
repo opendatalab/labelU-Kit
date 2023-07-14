@@ -28,7 +28,7 @@ import { BasicToolOperation } from './basicToolOperation';
 import TextAttributeClass from './textAttributeClass';
 
 const TEXT_MAX_WIDTH = 164;
-const BOUND_DISTANCE = 5;
+const BOUND_DISTANCE = 10;
 
 export type IPolygonOperationProps = IBasicToolOperationProps;
 
@@ -72,8 +72,6 @@ class PolygonOperation extends BasicToolOperation {
   public _textAttributInstance?: TextAttributeClass;
 
   public forbidAddNewPolygonFuc?: (e: MouseEvent) => boolean;
-
-  protected isUncheckedApproachBoundary = false;
 
   constructor(props: IPolygonOperationProps) {
     super(props);
@@ -157,10 +155,6 @@ class PolygonOperation extends BasicToolOperation {
     }
 
     this.pattern = pattern;
-  }
-
-  public setIsUncheckedApproachBoundary(isUncheckedApproachBoundary: boolean) {
-    this.isUncheckedApproachBoundary = isUncheckedApproachBoundary;
   }
 
   /**
@@ -428,12 +422,8 @@ class PolygonOperation extends BasicToolOperation {
       //  触发侧边栏同步
       this.emit('changeAttributeSidebar');
 
-      // 如有选中目标，则需更改当前选中的属性
       const { selectedID } = this;
       if (selectedID) {
-        if (this.selectedPolygon) {
-          this.selectedPolygon.attribute = defaultAttribute;
-        }
         this.history.pushHistory(this.polygonList);
         this.render();
       }
@@ -1293,10 +1283,6 @@ class PolygonOperation extends BasicToolOperation {
 
     this.setPolygonList(newPolygonList);
     this.render();
-
-    if (this.isApproachBund(e) && this.isUncheckedApproachBoundary) {
-      this.onMouseUp(e);
-    }
   }
 
   public onMouseMove(e: MouseEvent) {
@@ -1306,7 +1292,7 @@ class PolygonOperation extends BasicToolOperation {
       return;
     }
 
-    if (this.selectedID && this.dragInfo && this.hoverEdgeIndex < 0) {
+    if (this.selectedID && this.dragInfo && this.hoverEdgeIndex < 0 && this.hoverPointIndex < 0) {
       this.onDragMove(e);
       return;
     }

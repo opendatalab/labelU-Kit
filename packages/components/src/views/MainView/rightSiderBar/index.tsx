@@ -105,7 +105,7 @@ const RightSiderbar: React.FC<IProps> = (props) => {
     dispatch(UpdateImgList(imgList));
     setTimeout(() => {
       ptCtx?.mainViewInstance?.emit('deleteBoxes', deleteBoxArray);
-    }, 100);
+    }, 50);
     updateCanvasView(oldImgResult);
   };
 
