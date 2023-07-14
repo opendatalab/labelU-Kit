@@ -4,6 +4,7 @@ import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useSelector } from 'react-redux';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import commonController from '@/utils/common/common';
 import { annotationRef } from '@/pages/tasks.[id].samples.[id]';
@@ -105,6 +106,16 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
       navigate(`/tasks/${taskId}/samples/finished`);
     }
   };
+
+  useHotkeys(
+    'ctrl+space,cmd+space',
+    handleSkipSample,
+    {
+      keyup: true,
+      keydown: false,
+    },
+    [handleSkipSample],
+  );
 
   const saveCurrentSample = useCallback(async () => {
     if (currentSample?.state === SampleState.SKIPPED) {
