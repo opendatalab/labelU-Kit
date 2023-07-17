@@ -276,6 +276,10 @@ export default class PointOperation extends BasicToolOperation {
       this.dragStatus = EDragStatus.Start;
     }
 
+    if (e.button === 0) {
+      this.selectPoint();
+    }
+
     this.render();
     return true;
   }
@@ -300,9 +304,6 @@ export default class PointOperation extends BasicToolOperation {
   public onMouseUp(e: MouseEvent) {
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return true;
-    }
-    if (e.button === 2) {
-      this.rightMouseUp();
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
@@ -362,6 +363,7 @@ export default class PointOperation extends BasicToolOperation {
     const { keyCode } = e;
     switch (keyCode) {
       case EKeyCode.Delete:
+      case EKeyCode.BackSpace:
         this.deletePoint();
         break;
       case EKeyCode.Tab: {
@@ -373,13 +375,6 @@ export default class PointOperation extends BasicToolOperation {
       //   this.render();
       //   break;
       default: {
-        if (this.config.attributeConfigurable) {
-          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config?.attributeList);
-
-          if (keyCode2Attribute !== undefined) {
-            this.setDefaultAttribute(keyCode2Attribute);
-          }
-        }
         break;
       }
     }
@@ -527,18 +522,7 @@ export default class PointOperation extends BasicToolOperation {
     return selectPoint?.id;
   }
 
-  public rightMouseUp() {
-    // 删除操作
-    if (this.selectedID === this.hoverID) {
-      const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
-      this.setPointList(pointList);
-      this.history.pushHistory(pointList);
-      this.setSelectedID('');
-      this.hoverID = '';
-      this.container.dispatchEvent(this.saveDataEvent);
-      return;
-    }
-
+  public selectPoint() {
     // 选中操作
     const hoverPoint = this.pointList.find((point) => point.id === this.hoverID);
     this.setSelectedID(this.hoverID);

@@ -180,6 +180,10 @@ export default class LineToolOperation extends BasicToolOperation {
     this.dependToolConfig = {
       lineType: ELineTypes.Line,
     };
+
+    this.on('cancel', () => {
+      this.stopLineCreating(true);
+    });
   }
 
   /** 创建状态 */
@@ -1397,7 +1401,7 @@ export default class LineToolOperation extends BasicToolOperation {
       this.isMousedown = false;
       this.hoverPointID = undefined;
       this.cursor = undefined;
-      this.selectedPoint = undefined;
+      // this.selectedPoint = undefined;
     };
 
     this.hoverPointID = undefined;
@@ -1451,7 +1455,7 @@ export default class LineToolOperation extends BasicToolOperation {
    * 停止当前的线条绘制
    * @param isAppend
    */
-  public stopLineCreating(isAppend: boolean = true, e: MouseEvent) {
+  public stopLineCreating(isAppend: boolean = true, e?: MouseEvent) {
     /** 新建线条后在文本标注未开启时默认不选中, 续标后默认选中 */
     const setActiveAfterCreating = this.selectedID ? true : !!this.isTextConfigurable;
     let selectedID;
@@ -1481,7 +1485,10 @@ export default class LineToolOperation extends BasicToolOperation {
 
     this.actionsHistory?.empty();
     this.emit('dataUpdated', this.lineList);
-    this.emit('drawEnd', this.lineList[this.lineList.length - 1], e);
+
+    if (e) {
+      this.emit('drawEnd', this.lineList[this.lineList.length - 1], e);
+    }
 
     this.render();
   }
@@ -1540,19 +1547,16 @@ export default class LineToolOperation extends BasicToolOperation {
     }
 
     if (this.isActive) {
-      if (e.keyCode === EKeyCode.Delete) {
-        this.deleteLine();
-        return;
-      }
-
-      if (e.keyCode === EKeyCode.F) {
+      if (e.keyCode === EKeyCode.Delete || e.keyCode === EKeyCode.BackSpace) {
+        if (this.selectedPoint) {
+          this.deleteSelectedLinePoint(this.selectedPoint.id);
+        } else {
+          this.deleteLine();
+        }
+      } else if (e.keyCode === EKeyCode.F) {
         this.setInvalidLine(this.selectedID);
-        return;
-      }
-
-      if (e.keyCode === EKeyCode.Space) {
+      } else if (e.keyCode === EKeyCode.Space) {
         this.continueToEdit();
-        return;
       }
     }
 
@@ -1595,14 +1599,6 @@ export default class LineToolOperation extends BasicToolOperation {
 
     if (this.isCreate) {
       this.keyboardEventWhileLineCreating(e);
-    }
-
-    if (this.config.attributeConfigurable) {
-      const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(e.keyCode, this.config?.attributeList);
-
-      if (keyCode2Attribute !== undefined) {
-        this.setDefaultAttribute(keyCode2Attribute);
-      }
     }
   }
 

@@ -1,21 +1,7 @@
-import { cTool } from '@label-u/annotation';
-import { Popover } from 'antd/es';
-import React, { useContext, useState } from 'react';
+import { Menu, Popover, Row } from 'antd/es';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { EToolName } from '@/data/enums/ToolType';
-import ViewContext from '@/view.context';
-
-import { footerCls } from '../index';
-import lineToolShortCutTable from './line';
-import pointToolShortcutTable from './point';
-import polygonToolShortcutTable from './polygon';
-import rectToolShortcutTable from './rectToolShortCutTable';
-import tagToolSingleShortCutTable from './tag';
-import textToolShortCutTable from './text';
-import videoToolShortCutTable from './videoTag';
-
-const { EVideoToolName } = cTool;
+import styled, { createGlobalStyle } from 'styled-components';
 
 interface IProps {
   style?: any;
@@ -23,171 +9,214 @@ interface IProps {
   toolName?: string;
 }
 
-const shortCutTable: any = {
-  [EToolName.Rect]: rectToolShortcutTable,
-  [EToolName.Tag]: tagToolSingleShortCutTable,
-  [EToolName.Point]: pointToolShortcutTable,
-  [EToolName.Polygon]: polygonToolShortcutTable,
-  [EToolName.Line]: lineToolShortCutTable,
-  [EToolName.Text]: textToolShortCutTable,
-  [EVideoToolName.VideoTagTool]: videoToolShortCutTable,
-};
+const GlobalStyle = createGlobalStyle`
+  .tool-hotkeys-popover {
 
-const ToolHotKey: React.FC<IProps> = ({ style }) => {
-  const { currentToolName } = useContext(ViewContext);
-  const [, setFlag] = useState(false);
-  const { t } = useTranslation();
+    .ant-popover-inner {
+      padding: 1.5rem;
+    }
+  }
+`;
 
-  if (!currentToolName) {
-    return null;
+const StyledWrapper = styled.div`
+  display: flex;
+  align-items: stretch;
+
+  .left {
+    width: 8.625rem;
+    flex-shrink: 0;
   }
 
-  const iconStyle = {
-    marginRight: 10,
-  };
-
-  const renderImg = (info: Element | string) => {
-    if (typeof info === 'string') {
-      return <img width={16} height={16} src={info} style={iconStyle} />;
+  .ant-menu-item-selected {
+    position: relative;
+    &:before {
+      position: absolute;
+      display: block;
+      width: 3px;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      height: 1rem;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      content: ' ';
+      background-color: var(--color-primary);
     }
-    return info;
-  };
-  const shortCutStyle = {
-    width: 320,
-    display: 'flex',
-    justifyContent: 'space-between',
-    margin: '23px 21px',
-  };
+  }
 
-  const shortCutNameStyles: React.CSSProperties = {
-    display: 'block',
-    padding: '0 3px',
-    minWidth: '20px',
-    marginRight: '3px',
-    border: '1px solid rgba(204,204,204,1)',
-    verticalAlign: 'middle',
-    fontSize: '12px',
-    textAlign: 'center',
-  };
+  .menu {
+    height: 100%;
+    padding: 0.625rem 0.5rem;
+    background-color: #fbfbfb;
+    border-inline-end: 0 !important;
+    border-radius: var(--border-radius-lg);
 
-  const setSVG = (list: any[], useDangerInnerHtml = false, linkSymbol?: string) => {
-    const listDom = list.map((item, index) => {
-      if (useDangerInnerHtml) {
-        return (
-          <span key={index} style={{ display: 'flex' }}>
-            <span style={shortCutNameStyles} dangerouslySetInnerHTML={{ __html: item }} />
-          </span>
-        );
-      }
+    .ant-menu-sub {
+      background-color: transparent !important;
+    }
+  }
 
-      if (index < list.length - 1) {
-        if (typeof item === 'number') {
-          return (
-            <span key={index} style={{ display: 'flex' }}>
-              <span style={shortCutNameStyles}>{item}</span>
-              <span style={{ marginRight: '3px' }}>~</span>
-            </span>
-          );
-        }
+  .right {
+    flex-grow: 1;
+    margin-left: 3.5rem;
+  }
 
-        if (item?.startsWith('data')) {
-          return (
-            <span key={index} style={{ display: 'flex' }}>
-              <span className="shortCutButton" style={{ marginRight: '3px' }}>
-                <img width={16} height={23} src={item} />
-              </span>
-              <span style={{ marginRight: '3px' }}>+</span>
-            </span>
-          );
-        }
-        return (
-          <span key={index} style={{ display: 'flex' }}>
-            <span style={shortCutNameStyles}>{item}</span>
-            <span style={{ marginRight: '3px' }}>{linkSymbol || '+'}</span>
-          </span>
-        );
-      }
-      if (typeof item === 'number') {
-        return (
-          <span key={index} style={{ display: 'flex' }}>
-            <span style={shortCutNameStyles}>{item}</span>
-          </span>
-        );
-      }
-      if (item?.startsWith('data')) {
-        return (
-          <span className="shortCutButton" key={index} style={{ marginRight: '3px' }}>
-            <img width={16} height={23} src={item} />
-          </span>
-        );
-      }
-      return (
-        <span style={shortCutNameStyles} key={index}>
-          {item}
-        </span>
-      );
+  .title {
+    .ant-card-meta-title {
+      font-weight: normal;
+    }
+  }
+
+  .empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ant-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overlay {
+    opacity: 0;
+    transition: opacity var(--motion-duration-mid);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+
+    button {
+      margin-top: 4rem;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .card {
+    .ant-card-cover {
+      height: 10rem;
+    }
+  }
+
+  .hotkeys-table {
+    td {
+      padding-right: 7.5rem;
+      padding-left: 0.75rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+  }
+`;
+
+const ToolHotKey: React.FC<IProps> = ({ style }) => {
+  const [activeType, setActiveType] = useState<string>('common');
+  const { t } = useTranslation();
+  const [hotkeyTexts, setHotkeyTexts] = useState<any>({});
+
+  useEffect(() => {
+    import('./hotkeys.const').then((res) => {
+      setHotkeyTexts(res);
     });
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-        }}
-      >
-        {listDom}
-      </div>
-    );
-  };
+  }, [t]);
 
-  const setHotKey = (info: any, index: number) => (
-    <div style={shortCutStyle} key={index}>
-      <span style={{ display: 'flex', alignItems: 'center' }}>
-        {renderImg(info.icon)}
-        {t(info.name)}
-      </span>
-      <span style={{ display: 'flex', alignItems: 'center' }}>
-        {info.noticeInfo && <span style={{ marginRight: '5px', color: '#CCCCCC' }}>{t(info.noticeInfo)}</span>}
-        {setSVG(info.shortCut, info.shortCutUseHtml, info.linkSymbol)}
-      </span>
-    </div>
-  );
+  const handleMenuClick = useCallback(({ key }: { key: string }) => {
+    setActiveType(key);
+  }, []);
+
+  const menuItems = useMemo(() => {
+    return [
+      {
+        key: 'common',
+        label: t('Common'),
+      },
+      {
+        key: 'action',
+        label: t('Action'),
+      },
+      {
+        key: 'tools',
+        label: t('Tools'),
+        children: [
+          {
+            key: 'rect',
+            label: t('Rect'),
+          },
+          {
+            key: 'polygon',
+            label: t('Polygon'),
+          },
+          {
+            key: 'point',
+            label: t('Point'),
+          },
+          {
+            key: 'line',
+            label: t('Line'),
+          },
+        ],
+      },
+    ];
+  }, [t]);
+
+  const currentKeyDescs = (hotkeyTexts as unknown as Record<string, any>)[activeType];
 
   const content = (
-    <div className={`${footerCls}__hotkey-content`}>
-      {shortCutTable[currentToolName]?.map((info: any, index: number) => setHotKey(info, index))}
-    </div>
+    <StyledWrapper className="wrapper">
+      <div className="left">
+        <Menu
+          className="menu"
+          defaultSelectedKeys={[activeType]}
+          mode="inline"
+          onClick={handleMenuClick}
+          defaultOpenKeys={['tools']}
+          items={menuItems}
+        />
+      </div>
+      <div className="right">
+        <Row gutter={[24, 24]}>
+          <table className="hotkeys-table">
+            <thead>
+              <tr>
+                <td>{t('Operation')}</td>
+                <td>{t('Shortcut')}</td>
+              </tr>
+            </thead>
+            <tbody>
+              {currentKeyDescs?.map((item: any) => {
+                return (
+                  <tr key={item.action}>
+                    <td>{t(item.name)}</td>
+                    <td>{item.title}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Row>
+      </div>
+    </StyledWrapper>
   );
   const containerStyle = style || { width: 100 };
 
-  // 不存在对应的工具则不展示的快捷键
-  if (!shortCutTable[currentToolName]) {
-    return null;
-  }
-
   return (
-    // @ts-ignore
     <Popover
       placement="topLeft"
       content={content}
-      // @ts-ignore
-      onMouseMove={() => setFlag(true)}
-      onMouseLeave={() => {
-        setFlag(false);
-      }}
       align={{
         offset: [20, 0],
       }}
       overlayClassName="tool-hotkeys-popover"
     >
-      <div
-        className="shortCutTitle"
-        onMouseMove={() => setFlag(true)}
-        onMouseLeave={() => setFlag(false)}
-        style={containerStyle}
-      >
+      <div className="shortCutTitle" style={containerStyle}>
         <a>{t('Hotkeys')}</a>
       </div>
+      <GlobalStyle />
     </Popover>
   );
 };

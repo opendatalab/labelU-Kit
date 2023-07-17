@@ -1,10 +1,7 @@
-import { cKeyCode } from '@label-u/annotation';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 
 import { editStepWidth, footerHeight, headerHeight, sidebarWidth } from '@/data/enums/AnnotationSize';
 import type { ISize } from '@/types/main';
-
-const EKeyCode = cKeyCode.default;
 
 export const viewportContext = React.createContext<{
   width: number;
@@ -18,21 +15,6 @@ export const ViewportProviderComponent = (props: any) => {
   const { children } = props;
   const [width] = useState(typeof window !== 'undefined' ? window.innerWidth : 800);
   const [height] = useState(typeof window !== 'undefined' ? window.innerHeight : 400);
-
-  const keydown = useCallback((e: KeyboardEvent) => {
-    if (e.keyCode === EKeyCode.R) {
-      // TODO: 旋转
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window?.addEventListener('keydown', keydown);
-      return () => {
-        window?.removeEventListener('keydown', keydown);
-      };
-    }
-  }, [keydown]);
 
   const size = useMemo(() => ({ width, height }), [width, height]);
 
