@@ -92,7 +92,7 @@ export const rect: HotkeyDesc[] = [
     name: 'MoveEdge',
     title: (
       <div>
-        {i18n.t('Select edge and press')} <MouseLeftClick /> {i18n.t('then drag')}
+        {i18n.t('Select edge, Press and hold')} <MouseLeftClick /> {i18n.t('then drag')}
       </div>
     ),
   },
@@ -100,7 +100,7 @@ export const rect: HotkeyDesc[] = [
     name: 'MovePoint',
     title: (
       <div>
-        {i18n.t('Select point and press')} <MouseLeftClick /> {i18n.t('then drag')}
+        {i18n.t('Select point, Press and hold')} <MouseLeftClick /> {i18n.t('then drag')}
       </div>
     ),
   },
@@ -123,7 +123,7 @@ export const polygon: HotkeyDesc[] = [
     name: 'MoveEdge',
     title: (
       <div>
-        {i18n.t('Select edge and press')} <MouseLeftClick /> {i18n.t('then drag')}
+        {i18n.t('Select edge, Press and hold')} <MouseLeftClick /> {i18n.t('then drag')}
       </div>
     ),
   },
@@ -131,13 +131,13 @@ export const polygon: HotkeyDesc[] = [
     name: 'MovePoint',
     title: (
       <div>
-        {i18n.t('Select point and press')} <MouseLeftClick /> {i18n.t('then drag')}
+        {i18n.t('Select point, Press and hold')} <MouseLeftClick /> {i18n.t('then drag')}
       </div>
     ),
   },
   {
     name: 'ContinueToLabel',
-    title: <div>{i18n.t('Select and press')}Space</div>,
+    title: <div>{i18n.t('Select and press')} Space</div>,
   },
   {
     name: 'InsertPoint',
@@ -166,7 +166,7 @@ export const point: HotkeyDesc[] = [
     name: 'MovePoint',
     title: (
       <div>
-        {i18n.t('Select point and press')} <MouseLeftClick /> {i18n.t('then drag')}
+        {i18n.t('Select point, Press and hold')} <MouseLeftClick /> {i18n.t('then drag')}
       </div>
     ),
   },
@@ -189,7 +189,7 @@ export const line: HotkeyDesc[] = [
     name: 'MovePoint',
     title: (
       <div>
-        {i18n.t('Select point and press')} <MouseLeftClick /> {i18n.t('then drag')}
+        {i18n.t('Select point, Press and hold')} <MouseLeftClick /> {i18n.t('then drag')}
       </div>
     ),
   },
@@ -207,6 +207,6 @@ export const line: HotkeyDesc[] = [
   },
   {
     name: 'ContinueToLabel',
-    title: <div>{i18n.t('Select and press')}Space</div>,
+    title: <div>{i18n.t('Select and press')} Space</div>,
   },
 ];
