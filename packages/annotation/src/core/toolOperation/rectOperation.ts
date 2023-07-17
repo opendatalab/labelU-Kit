@@ -1116,6 +1116,7 @@ export default class RectOperation extends BasicToolOperation {
       //   break;
 
       case EKeyCode.Delete:
+      case EKeyCode.BackSpace:
         this.deleteRect(this.selectedRectID);
         break;
 
