@@ -71,7 +71,7 @@ export const sample = createModel<RootModel>()({
       body: PatchSampleCommand;
     }) {
       await updateSampleState(params, body);
-      // 更新完状态后重新获取样本列表
+      // 更新完状态后重新获取文件列表
       await dispatch.sample.fetchSamples(params);
     },
   }),

@@ -8,33 +8,28 @@
 
 ## feature
 
-- 📝This project includes 4 projects：@label-u/annotation, @label-u/components, @label-u/utils, @label-u/web.
-
-- 📝Rollup esbuild plug-in and vite compilation are used to make developers develop more efficiently.
-
-- 📝Multi project management with lerna.
-
-- 📝Reasonable code layering：
-
-  - 📝@label-u/utils provides Software Internationalization 。
-
-  - 📝@label-u/annotation is a tool layer，which mainly realizes the encapsulation of annotation capabilities, and provides AnnotationEngine for calling annotation capabilities.
-
-  - 📝@label-u/components realizes annotation capability integration. As a directly exposed annotation component, users can realize annotation interface by configuring AnnotationOperation, supporting multi tool annotation, and annotation result visualization (Currently, mainly for image annotation, video, audio, text and point cloud are also under development).
-
+- Rollup esbuild plug-in and vite compilation are used to make developers develop more efficiently.
+- Multi project management with lerna.
+- Reasonable code layering：
+  - @label-u/utils provides Software Internationalization 。
+  - @label-u/annotation is a tool layer，which mainly realizes the encapsulation of annotation capabilities, and provides AnnotationEngine for calling annotation capabilities.
+  - @label-u/components realizes annotation capability integration. As a directly exposed annotation component, users can realize annotation interface by configuring AnnotationOperation, supporting multi tool annotation, and annotation result visualization (Currently, mainly for image annotation, video, audio, text and point cloud are also under development).
 
 ## Install
 
-```bash
-# npm
-npm install lerna -g
-npm install
-npm run bootstrap
-npm run build
-npm run start
+(node version >= 14.8.0)
 
+```bash
+# pnpm
+pnpm install
 ```
 
+### Start development environment
+
+```bash
+cd apps/frontend
+npm start
+```
 
 ## Usage
 

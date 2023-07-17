@@ -9,9 +9,10 @@ import intl from 'react-intl-universal';
 import enUS1 from './locales/en-US';
 import zhCN1 from './locales/zh-CN';
 import { localeConfig } from './locales';
-import Router from './router';
+import RouterContainer from './components/RouterContainer';
 import themeToken from './styles/theme.json';
 import StaticAnt from './StaticAnt';
+import routes from './routes';
 
 const App: React.FC = () => {
   // @ts-ignore
@@ -55,7 +56,7 @@ const App: React.FC = () => {
         <StaticAnt />
         {/* @ts-ignore */}
         <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
-          <Router />
+          <RouterContainer routes={routes} />
         </IntlProvider>
       </AntApp>
     </ConfigProvider>

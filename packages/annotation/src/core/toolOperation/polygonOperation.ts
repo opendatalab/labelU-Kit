@@ -84,6 +84,14 @@ export default class PolygonOperation extends BasicToolOperation {
     this.pattern = EPolygonPattern.Normal;
 
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
+
+    // esc取消绘制
+    this.on('cancel', () => {
+      if (this.drawingPointList.length > 0) {
+        this.addDrawingPointToPolygonList(false);
+        // this.container.dispatchEvent(this.saveDataEvent);
+      }
+    });
   }
 
   public eventBinding() {
@@ -92,7 +100,7 @@ export default class PolygonOperation extends BasicToolOperation {
     this.container.removeEventListener('mouseup', this.onMouseUp);
 
     this.container.addEventListener('mouseup', this.dragMouseUp);
-    this.dblClickListener.addEvent(this.onMouseUp, this.onLeftDblClick, this.onRightDblClick, this.isAllowDouble);
+    this.dblClickListener.addEvent(this.onMouseUp, undefined, undefined, () => false);
   }
 
   public eventUnbinding() {
@@ -124,19 +132,6 @@ export default class PolygonOperation extends BasicToolOperation {
 
     return this.getStringAttributes(selectedResult, EToolName.Polygon);
   }
-
-  // 是否直接执行操作
-  public isAllowDouble = (e: MouseEvent) => {
-    const { selectedID } = this;
-
-    const currentSelectedID = this.getHoverID(e);
-    // 仅在选中的时候需要 double click
-    if (selectedID && selectedID === currentSelectedID) {
-      return true;
-    }
-
-    return false;
-  };
 
   public get dataList() {
     return this.polygonList;
@@ -431,7 +426,7 @@ export default class PolygonOperation extends BasicToolOperation {
    * 初始化的添加的数据
    * @returns
    */
-  public addDrawingPointToPolygonList(isRect: boolean, e: MouseEvent) {
+  public addDrawingPointToPolygonList(isRect: boolean, e?: MouseEvent) {
     let { lowerLimitPointNum = 3 } = this.config;
 
     if (lowerLimitPointNum < 3) {
@@ -478,7 +473,10 @@ export default class PolygonOperation extends BasicToolOperation {
       polygonList.push(newPolygon);
 
       this.setSelectedIdAfterAddingDrawing(id);
-      this.emit('drawEnd', newPolygon, e);
+
+      if (e) {
+        this.emit('drawEnd', newPolygon, e);
+      }
     }
 
     this.setPolygonList(polygonList);
@@ -692,8 +690,19 @@ export default class PolygonOperation extends BasicToolOperation {
       //   break;
 
       case EKeyCode.Delete:
-        this.deletePolygon(this.selectedID);
+      case EKeyCode.BackSpace:
+        this.dragInfo = undefined;
+        this.clearImgDrag();
+
+        if (this.hoverPointIndex > -1) {
+          this.deletePolygonPoint(this.hoverPointIndex);
+          this.dragInfo = undefined;
+          this.hoverPointIndex = -1;
+        } else {
+          this.deletePolygon(this.selectedID);
+        }
         this.render();
+        this.container.dispatchEvent(this.saveDataEvent);
         break;
 
       case EKeyCode.Ctrl:
@@ -722,13 +731,6 @@ export default class PolygonOperation extends BasicToolOperation {
         break;
 
       default: {
-        if (this.config.attributeConfigurable) {
-          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config?.attributeList);
-
-          if (keyCode2Attribute !== undefined) {
-            this.setDefaultAttribute(keyCode2Attribute);
-          }
-        }
         break;
       }
     }
@@ -772,7 +774,7 @@ export default class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public onLeftDblClick(e: MouseEvent) {
+  public insertPoint(e: MouseEvent) {
     if (this.hoverEdgeIndex > -1) {
       const currentCoord = this.getCoordinateUnderZoom(e);
       const { selectedPolygon } = this;
@@ -814,28 +816,6 @@ export default class PolygonOperation extends BasicToolOperation {
       this.render();
     }
     this.dragInfo = undefined;
-  }
-
-  public onRightDblClick(e: MouseEvent) {
-    this.dragInfo = undefined;
-    this.clearImgDrag();
-
-    const hoverID = this.getHoverID(e);
-    const hoverPointIndex = this.getHoverPointIndex(e);
-    if (this.hoverPointIndex > -1 && this.hoverPointIndex === hoverPointIndex) {
-      this.deletePolygonPoint(hoverPointIndex);
-      this.dragInfo = undefined;
-      this.hoverPointIndex = -1;
-      this.render();
-      return;
-    }
-
-    if (this.hoverID === this.selectedID) {
-      this.deletePolygon(hoverID);
-    }
-
-    this.render();
-    this.container.dispatchEvent(this.saveDataEvent);
   }
 
   public onMouseDown(e: MouseEvent) {
@@ -1225,11 +1205,13 @@ export default class PolygonOperation extends BasicToolOperation {
     if (this.drawingPointList.length === 0 && e.ctrlKey === true && hoverID) {
       // ctrl + 左键 + hover存在，更改框属性
       this.setPolygonValidAndRender(hoverID);
-      return;
+    } else if (this.drawingPointList.length === 0 && hoverID) {
+      // 鼠标左键 + hover存在，插入点
+      this.insertPoint(e);
+    } else {
+      // 创建多边形
+      this.addPointInDrawing(e);
     }
-
-    // 创建多边形
-    this.addPointInDrawing(e);
   }
 
   public onMouseUp(e: MouseEvent) {

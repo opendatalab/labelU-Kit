@@ -5,7 +5,7 @@ node_modules
 .DS_Store
 
 # lock file
-package-lock.json
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 gptcommit.toml
@@ -14,7 +14,7 @@ gptcommit.toml
 .idea
 
 # lock file
-package-lock.json
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
