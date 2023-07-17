@@ -1062,13 +1062,6 @@ $hotkey-container-padding: 7px;
   display: flex;
   height: 100%;
 
-  :global {
-    .ant-popover.tool-hotkeys-popover .ant-popover-inner-content {
-      max-height: $hotkey-item-height * 10 + $hotkey-container-padding * 2;
-      overflow-y: auto;
-    }
-  }
-
   .hotKeyIconGray,
   .helpIconGray {
     width: 15px;
