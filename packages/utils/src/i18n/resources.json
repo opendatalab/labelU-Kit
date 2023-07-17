@@ -139,7 +139,15 @@
     "NoDependency": "This image does not need to be labeled",
     "TextCheckNumberOnly": "Please enter the number",
     "TextCheckEnglishOnly": "Please enter English",
-    "TextCheckCustomFormat": "Please enter data in custom format"
+    "TextCheckCustomFormat": "Please enter data in custom format",
+    "Select target and press Delete": "Select target and press Delete",
+    "Select and press": "Select and press",
+    "Select edge, Press and hold": "Select edge, Press and hold",
+    "Select point, Press and hold": "Select point, Press and hold",
+    "then drag": "then drag",
+    "Select and": "Select and",
+    "Select, Press and hold": "Select, Press and hold",
+    "Select and click": "Select and click"
   },
   "cn": {
     "MoreSettings": "更多设置",
@@ -291,11 +299,12 @@
     "TextCheckEnglishOnly": "请按仅英文的格式输入",
     "TextCheckCustomFormat": "请按要求的格式输入",
     "Select target and press Delete": "选中标记，按Delete键",
-    "Select edge and press": "选中边，长按",
-    "Select point and press": "选中点，长按",
+    "Select and press": "选中，按",
+    "Select edge, Press and hold": "选中边，长按",
+    "Select point, Press and hold": "选中点，长按",
     "then drag": "，然后拖拽",
     "Select and": "选中后",
-    "Select and press": "选中标记，长按",
+    "Select, Press and hold": "选中标记，长按",
     "Select and click": "选中标记，点击"
   }
 }
