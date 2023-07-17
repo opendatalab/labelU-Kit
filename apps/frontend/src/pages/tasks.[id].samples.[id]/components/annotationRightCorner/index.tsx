@@ -109,12 +109,18 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
 
   useHotkeys(
     'ctrl+space,cmd+space',
-    handleSkipSample,
+    () => {
+      if (currentSample.state === SampleState.SKIPPED) {
+        handleCancelSkipSample();
+      } else {
+        handleSkipSample();
+      }
+    },
     {
       keyup: true,
       keydown: false,
     },
-    [handleSkipSample],
+    [handleSkipSample, handleCancelSkipSample, currentSample],
   );
 
   const saveCurrentSample = useCallback(async () => {
