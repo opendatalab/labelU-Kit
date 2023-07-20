@@ -192,13 +192,16 @@ const CreateTask = () => {
 
   const handleCancel = useCallback(() => {
     modal.confirm({
-      title: '确定要取消吗？',
-      content: '取消后，当前任务将不会被保存',
+      title: '提示',
+      content: '是否保存已编辑的内容？',
       okText: '保存并退出',
-      cancelText: '取消',
+      cancelText: '不保存',
       onOk: handleSave,
+      onCancel: () => {
+        navigate('/tasks');
+      },
     });
-  }, [handleSave]);
+  }, [handleSave, navigate]);
 
   const [previewVisible, setPreviewVisible] = useState(false);
   const handleOpenPreview = useCallback(() => {
