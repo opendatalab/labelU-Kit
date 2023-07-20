@@ -1591,12 +1591,6 @@ export default class LineToolOperation extends BasicToolOperation {
       this.render();
     }
 
-    if (e.keyCode === EKeyCode.Tab) {
-      e.preventDefault();
-      this.selectToNextLine(e);
-      return;
-    }
-
     if (this.isCreate) {
       this.keyboardEventWhileLineCreating(e);
     }
