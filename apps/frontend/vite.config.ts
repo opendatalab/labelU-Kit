@@ -2,7 +2,6 @@ import { resolve } from 'path';
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-// import { viteMockServe } from 'vite-plugin-mock';
 import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
@@ -20,6 +19,7 @@ export default defineConfig({
       },
     },
   },
+  envDir: resolve(__dirname, 'env'),
 
   optimizeDeps: {
     include: ['react/jsx-runtime'],

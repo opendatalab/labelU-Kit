@@ -12,6 +12,7 @@ import type { SampleListResponse, SampleResponse } from '@/services/types';
 import { SampleState } from '@/services/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
 import type { RootState } from '@/store';
+import { message } from '@/StaticAnt';
 
 import currentStyles from './index.module.scss';
 import AnnotationContext from '../../annotation.context';
@@ -108,7 +109,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   };
 
   useHotkeys(
-    'ctrl+space,cmd+space',
+    'ctrl+space',
     () => {
       if (currentSample.state === SampleState.SKIPPED) {
         handleCancelSkipSample();
@@ -146,12 +147,13 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     navigate(`/tasks/${taskId}/samples/finished`);
   }, [saveCurrentSample, navigate, taskId]);
 
-  const handleNextSample = useCallback(async () => {
+  const handleNextSample = useCallback(() => {
     if (isLastSample) {
       handleComplete();
     } else {
-      await saveCurrentSample();
-      navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+      saveCurrentSample().then(() => {
+        navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+      });
     }
   }, [handleComplete, saveCurrentSample, isLastSample, navigate, sampleIndex, samples, taskId]);
 
@@ -167,10 +169,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   const onKeyDown = debounce(
     useCallback(
       (e: KeyboardEvent) => {
-        const keyCode = e.keyCode;
-        if (keyCode === 65 && sampleIndex > 0) {
+        const key = e.key;
+        if (key === 'a' && sampleIndex > 0) {
           handlePrevSample();
-        } else if (keyCode === 68) {
+        } else if (key === 'd') {
           handleNextSample();
         }
       },
@@ -186,6 +188,19 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [onKeyDown]);
+
+  useHotkeys(
+    'ctrl+s,meta+s',
+    () => {
+      saveCurrentSample().then(() => {
+        message.success('已保存');
+      });
+    },
+    {
+      preventDefault: true,
+    },
+    [saveCurrentSample],
+  );
 
   // 从外部触发上下翻页，比如快捷键，不知道上下sample的id
   useEffect(() => {

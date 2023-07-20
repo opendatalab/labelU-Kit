@@ -1,9 +1,9 @@
 const sso = {
   clientId: import.meta.env.VITE_SSO_CLIENT_ID,
-  auth: 'https://sso.openxlab.org.cn/authentication',
-  login: 'https://sso.openxlab.org.cn/login',
-  register: 'https://sso.openxlab.org.cn/register',
-  origin: 'https://sso.openxlab.org.cn',
+  auth: `${import.meta.env.VITE_SSO_ORIGIN}/authentication`,
+  login: `${import.meta.env.VITE_SSO_ORIGIN}/login`,
+  register: `${import.meta.env.VITE_SSO_ORIGIN}/register`,
+  origin: import.meta.env.VITE_SSO_ORIGIN,
 };
 
 /** 获取 UAA 平台链接 */

@@ -179,7 +179,7 @@ const InputData = () => {
     if (!isCorrectCondition) {
       return;
     } else {
-      commonController.notificationSuccessMessage({ message: '已添加' + files.length + '个项目至上传列表' }, 3);
+      commonController.notificationSuccessMessage({ message: '已添加' + files.length + '个文件至上传列表' }, 3);
     }
 
     processUpload(normalizeFiles(files));
