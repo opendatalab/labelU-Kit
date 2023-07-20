@@ -17,14 +17,12 @@ import styled, { css } from 'styled-components';
 import type { FormInstance, Rule } from 'antd/es/form';
 import type { AnnotationResult, Attribute, AttributeOption, InnerAttributeType, StringType } from '@label-u/annotation';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useTranslation } from 'react-i18next';
 
 import emptyAttributeImg from '@/assets/common/emptyAttribute.png';
 import DraggableModel from '@/components/dragModal';
 import MemoToolIcon from '@/components/ToolIcon';
 import ViewContext from '@/view.context';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
-import { message } from '@/StaticAnt';
 import { labelTool } from '@/constant';
 
 import { toolList } from '../../toolHeader/ToolOperation';
@@ -311,7 +309,6 @@ const AttributeResult = () => {
     graphicResult,
     annotationEngine,
   } = useContext(ViewContext);
-  const { t } = useTranslation();
   const dragModalRef = useRef<any>();
 
   // 以下为新代码
@@ -373,25 +370,22 @@ const AttributeResult = () => {
 
       if (direction === 'prev') {
         if (index === 0) {
-          message.info(t('Already the first annotation'));
-          return;
+          index = resultWithToolName.length - 1;
+        } else {
+          index -= 1;
         }
-
-        index -= 1;
       } else {
         if (index === resultWithToolName.length - 1) {
-          message.info(t('Already the last annotation'));
-          return;
+          index = 0;
+        } else {
+          index += 1;
         }
-
-        index += 1;
       }
 
-      const nextResult = resultWithToolName[index];
-      setToolName(nextResult.toolName);
-      setSelectedResult(nextResult);
+      setToolName(resultWithToolName[index].toolName);
+      setSelectedResult(resultWithToolName[index]);
     },
-    [resultWithToolName, selectedResult, setSelectedResult, setToolName, t],
+    [resultWithToolName, selectedResult, setSelectedResult, setToolName],
   );
 
   // 删除单个标注
