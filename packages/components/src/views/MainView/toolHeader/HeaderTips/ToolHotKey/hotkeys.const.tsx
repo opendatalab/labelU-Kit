@@ -197,7 +197,7 @@ export const line: HotkeyDesc[] = [
     name: 'InsertPoint',
     title: (
       <span>
-        {i18n.t('Select point and clock')} <MouseLeftClick />
+        {i18n.t('Select point and click')} <MouseLeftClick />
       </span>
     ),
   },

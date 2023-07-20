@@ -11,20 +11,23 @@ import React, {
 import type { SelectProps } from 'antd';
 import { Empty, Checkbox, Radio, Button, Collapse, Form, Input, Popconfirm, Select } from 'antd';
 import classNames from 'classnames';
-import { isEmpty, find, sortBy, cloneDeep, map, update, every, compact, size } from 'lodash-es';
+import { isEmpty, find, sortBy, cloneDeep, map, update, every, compact, size, findIndex } from 'lodash-es';
 import Icon, { EditFilled, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import styled, { css } from 'styled-components';
 import type { FormInstance, Rule } from 'antd/es/form';
 import type { AnnotationResult, Attribute, AttributeOption, InnerAttributeType, StringType } from '@label-u/annotation';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 
 import emptyAttributeImg from '@/assets/common/emptyAttribute.png';
 import DraggableModel from '@/components/dragModal';
 import MemoToolIcon from '@/components/ToolIcon';
 import ViewContext from '@/view.context';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
+import { message } from '@/StaticAnt';
+import { labelTool } from '@/constant';
 
 import { toolList } from '../../toolHeader/ToolOperation';
-import { labelTool } from '../../toolHeader/headerOption';
 import { expandIconFuc } from '../TagSidebar';
 const { Panel } = Collapse;
 
@@ -308,7 +311,7 @@ const AttributeResult = () => {
     graphicResult,
     annotationEngine,
   } = useContext(ViewContext);
-
+  const { t } = useTranslation();
   const dragModalRef = useRef<any>();
 
   // 以下为新代码
@@ -358,6 +361,38 @@ const AttributeResult = () => {
     setToolName(resultItem.toolName);
     setSelectedResult(resultItem);
   };
+
+  // 快捷键切换标注
+  const handleResultItemSelectByShortcut = useCallback(
+    (direction: 'prev' | 'next') => () => {
+      if (!selectedResult) {
+        return;
+      }
+
+      let index = findIndex(resultWithToolName, { id: selectedResult.id });
+
+      if (direction === 'prev') {
+        if (index === 0) {
+          message.info(t('Already the first annotation'));
+          return;
+        }
+
+        index -= 1;
+      } else {
+        if (index === resultWithToolName.length - 1) {
+          message.info(t('Already the last annotation'));
+          return;
+        }
+
+        index += 1;
+      }
+
+      const nextResult = resultWithToolName[index];
+      setToolName(nextResult.toolName);
+      setSelectedResult(nextResult);
+    },
+    [resultWithToolName, selectedResult, setSelectedResult, setToolName, t],
+  );
 
   // 删除单个标注
   const handleResultItemDelete = (attribute: any) => (e: React.MouseEvent) => {
@@ -500,6 +535,9 @@ const AttributeResult = () => {
     setResult(newResult);
     syncResultToEngine();
   };
+
+  useHotkeys('ArrowUp', handleResultItemSelectByShortcut('prev'), [handleResultItemSelectByShortcut]);
+  useHotkeys('ArrowDown', handleResultItemSelectByShortcut('next'), [handleResultItemSelectByShortcut]);
 
   // 绘制结束后，显示标注属性编辑
   useEffect(() => {
