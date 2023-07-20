@@ -106,14 +106,14 @@ const HeaderOption = () => {
   };
 
   useHotkeys(
-    'ctrl+z',
+    'ctrl+z, meta+z',
     () => {
       undoRef.current?.click();
     },
     [],
   );
   useHotkeys(
-    'ctrl+shift+z',
+    'ctrl+shift+z, meta+shift+z',
     () => {
       redoRef.current?.click();
     },
