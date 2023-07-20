@@ -1,14 +1,15 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cTool, EKeyCode } from '@label-u/annotation';
+import { cTool } from '@label-u/annotation';
 import { Popover } from 'antd';
 import { cloneDeep } from 'lodash-es';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import revocationSvg from '@/assets/annotation/common/icon_next.svg';
 import restoreSvg from '@/assets/annotation/common/icon_back.svg';
 import revocationHighlightSvg from '@/assets/annotation/common/icon_nextA.svg';
 import restoreHighlightSvg from '@/assets/annotation/common/icon_backA.svg';
-import { prefix } from '@/constant';
+import { labelTool, prefix } from '@/constant';
 import { EToolName } from '@/data/enums/ToolType';
 import ViewContext from '@/view.context';
 
@@ -21,10 +22,8 @@ enum EColor {
   Normal = '#cccccc',
 }
 
-export const labelTool = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];
-
 const HeaderOption = () => {
-  const { currentToolName, sample, result, setResult } = useContext(ViewContext);
+  const { currentToolName, sample, result, setResult, syncResultToEngine } = useContext(ViewContext);
   const [toolHover, setToolHover] = useState('');
   const [historyRevocation, setHistoryRevocation] = useState<any>([]);
   const undoRef = useRef<HTMLElement>();
@@ -35,36 +34,6 @@ const HeaderOption = () => {
   const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(currentToolName as any);
 
   const isBegin = isTagTool;
-
-  // 快捷键处理
-  const keydownEvent = (e: KeyboardEvent) => {
-    if (e.keyCode === EKeyCode.Alt) {
-      e.preventDefault();
-    }
-    switch (e.keyCode) {
-      case EKeyCode.Z:
-        if (e.ctrlKey) {
-          if (e.shiftKey) {
-            redoRef.current?.click();
-          } else {
-            undoRef.current?.click();
-          }
-
-          return false;
-        }
-        break;
-      default: {
-        break;
-      }
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('keydown', keydownEvent);
-    return () => {
-      document.removeEventListener('keydown', keydownEvent);
-    };
-  }, []);
 
   // 统一处理撤回
   const restore = () => {
@@ -97,6 +66,7 @@ const HeaderOption = () => {
     }
 
     setResult(newResult);
+    setTimeout(syncResultToEngine);
   };
 
   // 统一处理重做
@@ -132,12 +102,27 @@ const HeaderOption = () => {
     }
 
     setResult(newResult);
+    setTimeout(syncResultToEngine);
   };
+
+  useHotkeys(
+    'ctrl+z, meta+z',
+    () => {
+      undoRef.current?.click();
+    },
+    [],
+  );
+  useHotkeys(
+    'ctrl+shift+z, meta+shift+z',
+    () => {
+      redoRef.current?.click();
+    },
+    [],
+  );
 
   const commonOptionList: any = [
     {
       toolName: 'revocation',
-      // title: 'Redo',
       show: true,
       commonSvg: restoreSvg,
       selectedSvg: restoreHighlightSvg,
@@ -156,7 +141,6 @@ const HeaderOption = () => {
     },
     {
       toolName: 'restore',
-      // title: 'Undo',
       show: true,
       commonSvg: revocationSvg,
       selectedSvg: revocationHighlightSvg,

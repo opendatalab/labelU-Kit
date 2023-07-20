@@ -23,10 +23,9 @@ import DraggableModel from '@/components/dragModal';
 import MemoToolIcon from '@/components/ToolIcon';
 import ViewContext from '@/view.context';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
-import { message } from '@/StaticAnt';
+import { labelTool } from '@/constant';
 
 import { toolList } from '../../toolHeader/ToolOperation';
-import { labelTool } from '../../toolHeader/headerOption';
 import { expandIconFuc } from '../TagSidebar';
 const { Panel } = Collapse;
 
@@ -310,7 +309,6 @@ const AttributeResult = () => {
     graphicResult,
     annotationEngine,
   } = useContext(ViewContext);
-
   const dragModalRef = useRef<any>();
 
   // 以下为新代码
@@ -372,23 +370,20 @@ const AttributeResult = () => {
 
       if (direction === 'prev') {
         if (index === 0) {
-          message.info('已经是第一个标注了');
-          return;
+          index = resultWithToolName.length - 1;
+        } else {
+          index -= 1;
         }
-
-        index -= 1;
       } else {
         if (index === resultWithToolName.length - 1) {
-          message.info('已经是最后一个标注了');
-          return;
+          index = 0;
+        } else {
+          index += 1;
         }
-
-        index += 1;
       }
 
-      const nextResult = resultWithToolName[index];
-      setToolName(nextResult.toolName);
-      setSelectedResult(nextResult);
+      setToolName(resultWithToolName[index].toolName);
+      setSelectedResult(resultWithToolName[index]);
     },
     [resultWithToolName, selectedResult, setSelectedResult, setToolName],
   );
