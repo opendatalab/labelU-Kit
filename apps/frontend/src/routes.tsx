@@ -37,6 +37,7 @@ const routes: RouteObject[] = [
   {
     path: '/tasks',
     element: <MainLayout />,
+    errorElement: <Page404 />,
     handle: {
       crumb: () => {
         return '任务列表';

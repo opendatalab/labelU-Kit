@@ -50,6 +50,10 @@
   margin-right: 40px;
   overflow-y: visible;
   z-index: 99;
+
+  & > * {
+    margin-left: 20px;
+  }
 }
 
 .dropDownOverlay {

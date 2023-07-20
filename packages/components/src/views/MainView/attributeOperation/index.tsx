@@ -1,3 +1,4 @@
+import type { EToolName } from '@label-u/annotation';
 import { BasicToolOperation } from '@label-u/annotation';
 import { useContext, useMemo, useCallback, useEffect, useState } from 'react';
 import type { ButtonProps, MenuProps } from 'antd';
@@ -9,6 +10,7 @@ import classNames from 'classnames';
 
 import { ReactComponent as DropdownIcon } from '@/assets/svg/dropdown.svg';
 import ViewContext from '@/view.context';
+import { labelTool } from '@/constant';
 
 const attributeHighlightStyle = css`
   .attribute-item__highlight-color {
@@ -86,7 +88,6 @@ const AttributeOperation = () => {
     useContext(ViewContext);
   const toolInstance = annotationEngine?.toolInstance;
   const tools = config?.tools;
-  // const [currentAttributeList, setCurrentAttributeList] = useState<Attribute[]>([] as Attribute[]);
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [showAttributeCount, setShowAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
@@ -96,7 +97,8 @@ const AttributeOperation = () => {
   );
 
   const currentAttributes = useMemo(() => {
-    const currentToolConfig = find(tools, { tool: currentToolName });
+    const labelTools = tools?.filter((tool) => labelTool.includes(tool.tool as EToolName));
+    const currentToolConfig = find(labelTools, { tool: currentToolName });
 
     return [...(config?.attributes ?? []), ...(currentToolConfig?.config?.attributes ?? [])];
   }, [config?.attributes, currentToolName, tools]);

@@ -62,14 +62,6 @@ export const action: HotkeyDesc[] = [
     title: i18n.t('Select target and press Delete')!,
   },
   {
-    name: 'ToggleSelected',
-    title: 'Tab',
-  },
-  {
-    name: 'ToggleSelectedReverse',
-    title: 'Shift + Tab',
-  },
-  {
     name: 'Upper',
     title: '↑',
   },
@@ -197,7 +189,7 @@ export const line: HotkeyDesc[] = [
     name: 'InsertPoint',
     title: (
       <span>
-        {i18n.t('Select point and clock')} <MouseLeftClick />
+        {i18n.t('Select point and click')} <MouseLeftClick />
       </span>
     ),
   },
