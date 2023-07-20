@@ -11,7 +11,6 @@ import {
   EDragStatus,
   EDragTarget,
   ERotateDirection,
-  ESortDirection,
   TEXT_ATTRIBUTE_OFFSET,
 } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
@@ -22,7 +21,6 @@ import type { IPolygonConfig, IPolygonData, IPolygonPoint } from '../../types/to
 import ActionsHistory from '../../utils/ActionsHistory';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
 import AxisUtils from '../../utils/tool/AxisUtils';
-import CanvasUtils from '../../utils/tool/CanvasUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import PolygonUtils from '../../utils/tool/PolygonUtils';
@@ -605,51 +603,6 @@ export default class PolygonOperation extends BasicToolOperation {
     }
   }
 
-  public onTabKeyDown(e: KeyboardEvent) {
-    e.preventDefault();
-    if (this.drawingPointList.length > 0) {
-      // 如果正在编辑则不允许使用 Tab 切换
-      return;
-    }
-
-    let sort = ESortDirection.ascend;
-    if (e.shiftKey) {
-      sort = ESortDirection.descend;
-    }
-
-    const [showingResult, selectedResult] = CommonToolUtils.getRenderResultList<IPolygonData>(
-      this.polygonList,
-      CommonToolUtils.getSourceID(this.basicResult),
-      this.attributeLockList,
-      this.selectedID,
-    );
-
-    let polygonList = [...showingResult];
-    if (selectedResult) {
-      polygonList = [...polygonList, selectedResult];
-    }
-
-    const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
-
-    const sortList = polygonList
-      .map((v) => ({
-        ...v,
-        x: v.pointList[0]?.x ?? 0,
-        y: v.pointList[0]?.y ?? 0,
-      }))
-      .filter((polygon) => CanvasUtils.inViewPort({ x: polygon.x, y: polygon.y }, viewPort));
-
-    const nextSelectedResult = CommonToolUtils.getNextSelectedRectID(sortList, sort, this.selectedID);
-    if (nextSelectedResult) {
-      this.setSelectedID(nextSelectedResult.id);
-      const { selectedPolygon } = this;
-      if (selectedPolygon) {
-        this.setDefaultAttribute(selectedPolygon.attribute);
-      }
-    }
-    this.render();
-  }
-
   public onKeyDown(e: KeyboardEvent) {
     if (!CommonToolUtils.hotkeyFilter(e)) {
       // 如果为输入框则进行过滤
@@ -717,11 +670,6 @@ export default class PolygonOperation extends BasicToolOperation {
         }
 
         break;
-
-      case EKeyCode.Tab: {
-        this.onTabKeyDown(e);
-        break;
-      }
 
       case EKeyCode.X:
         if (e.altKey) {

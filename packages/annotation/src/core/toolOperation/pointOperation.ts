@@ -6,7 +6,7 @@ import MathUtils from '@/utils/MathUtils';
 import type { IPointToolConfig, IPointUnit } from '@/types/tool/pointTool';
 import type { ICoordinate } from '@/types/tool/common';
 
-import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
+import { DEFAULT_TEXT_OFFSET, EDragStatus } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
@@ -366,10 +366,6 @@ export default class PointOperation extends BasicToolOperation {
       case EKeyCode.BackSpace:
         this.deletePoint();
         break;
-      case EKeyCode.Tab: {
-        this.onTabKeyDown(e);
-        break;
-      }
       // case EKeyCode.Z:
       //   this.setIsHidden(!this.isHidden);
       //   this.render();
@@ -536,37 +532,6 @@ export default class PointOperation extends BasicToolOperation {
       }
     }
     this.container.dispatchEvent(this.saveDataEvent);
-  }
-
-  public onTabKeyDown(e: KeyboardEvent) {
-    e.preventDefault();
-    // 拖拽中 禁止操作
-    if (this.dragStatus === EDragStatus.Move || this.dragStatus === EDragStatus.Start) {
-      return;
-    }
-    let sort = ESortDirection.ascend;
-    if (e.shiftKey) {
-      sort = ESortDirection.descend;
-    }
-    const [showingResult, selectedResult] = CommonToolUtils.getRenderResultList<IPolygonData>(
-      this.pointList,
-      CommonToolUtils.getSourceID(this.basicResult),
-      this.attributeLockList,
-      this.selectedID,
-    );
-
-    let pointList = [...showingResult];
-    if (selectedResult) {
-      pointList = [...pointList, selectedResult];
-    }
-    const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(pointList as any, sort, this.selectedID);
-    if (nextSelectedRect) {
-      this.setSelectedID(nextSelectedRect.id);
-      // 设置当前属性为默认属性
-      // if (nextSelectedRect.attribute) {
-      //   this.setDefaultAttribute(nextSelectedRect.attribute);
-      // }
-    }
   }
 
   /**

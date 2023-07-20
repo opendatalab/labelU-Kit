@@ -4,13 +4,12 @@ import MathUtils from '@/utils/MathUtils';
 import type { IRect, IRectConfig } from '@/types/tool/rectTool';
 import type { ICoordinate } from '@/types/tool/common';
 
-import { EDragStatus, ESortDirection } from '../../constant/annotation';
+import { EDragStatus } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { EDragTarget, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
-import CanvasUtils from '../../utils/tool/CanvasUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import MarkerUtils from '../../utils/tool/MarkerUtils';
@@ -1119,45 +1118,6 @@ export default class RectOperation extends BasicToolOperation {
       case EKeyCode.BackSpace:
         this.deleteRect(this.selectedRectID);
         break;
-
-      case EKeyCode.Tab: {
-        e.preventDefault();
-
-        if (this.drawingRect) {
-          // 如果正在编辑则不允许使用 Tab 切换
-          return;
-        }
-
-        let sort = ESortDirection.ascend;
-        if (e.shiftKey) {
-          sort = ESortDirection.descend;
-        }
-
-        const [showingRect, selectedRect] = CommonToolUtils.getRenderResultList<IRect>(
-          this.rectList,
-          CommonToolUtils.getSourceID(this.basicResult),
-          this.attributeLockList,
-          this.selectedRectID,
-        );
-
-        let rectList = [...showingRect];
-        if (selectedRect) {
-          rectList = [...rectList, selectedRect];
-        }
-
-        const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
-        rectList = rectList.filter((rect) => CanvasUtils.inViewPort({ x: rect.x, y: rect.y }, viewPort));
-
-        const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(rectList, sort, this.selectedRectID) as IRect;
-        if (nextSelectedRect) {
-          this.setSelectedRectID(nextSelectedRect.id);
-          if (this.config.attributeConfigurable === true) {
-            this.setDefaultAttribute(nextSelectedRect.attribute);
-          }
-        }
-
-        break;
-      }
 
       default: {
         break;
