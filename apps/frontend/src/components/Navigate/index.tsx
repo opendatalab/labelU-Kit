@@ -1,5 +1,5 @@
 import { Button, Dropdown } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon, { PoweroffOutlined } from '@ant-design/icons';
 
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
@@ -24,7 +24,9 @@ const Homepage = () => {
   return (
     <div className={styles.navigator}>
       <div className={styles.left}>
-        <div className={styles.logo} />
+        <Link to="/">
+          <div className={styles.logo} />
+        </Link>
         <div className={styles.breadcrumb}>
           <Breadcrumb style={{ fontSize: 14 }} />
         </div>
