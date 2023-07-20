@@ -276,7 +276,7 @@ export default class PointOperation extends BasicToolOperation {
       this.dragStatus = EDragStatus.Start;
     }
 
-    if (e.button === 0) {
+    if (e.button === 2) {
       this.selectPoint();
     }
 
