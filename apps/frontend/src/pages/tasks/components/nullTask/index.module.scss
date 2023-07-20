@@ -1,6 +1,7 @@
 .wrapper {
   display: flex;
   align-items: center;
+  width: 100%;
   justify-content: center;
   height: calc(100vh - var(--header-height));
 }

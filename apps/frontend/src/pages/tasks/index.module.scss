@@ -5,6 +5,10 @@
   flex-direction: column;
   overflow: auto;
   box-sizing: border-box;
+
+  .alert {
+    margin-bottom: 1rem;
+  }
 }
 
 .createTaskButton {

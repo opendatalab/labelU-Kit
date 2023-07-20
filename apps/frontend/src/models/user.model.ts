@@ -1,7 +1,7 @@
 import { createModel } from '@rematch/core';
 
 import type { UserResp, LoginCommand } from '@/services/types';
-import { login, logout } from '@/services/user';
+import { getUserInfo, login } from '@/services/user';
 
 import type { RootModel } from './index';
 
@@ -24,14 +24,19 @@ export const user = createModel<RootModel>()({
     async login(params: LoginCommand) {
       const { data } = await login(params);
 
-      dispatch.user.setUser(params);
       localStorage.setItem('token', data.token);
-      localStorage.setItem('username', params.username);
+    },
+
+    async getUserInfo() {
+      const { data } = await getUserInfo();
+
+      dispatch.user.setUser(data);
+      localStorage.setItem('username', data.username);
+
+      return data;
     },
 
     async logout() {
-      await logout();
-
       dispatch.user.setUser({} as UserResp);
       localStorage.removeItem('token');
       localStorage.removeItem('username');

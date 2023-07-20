@@ -4,11 +4,16 @@ import type {
   OkRespLoginResponse,
   OkRespLogoutResponse,
   OkRespSignupResponse,
+  OkRespUserInfo,
   SignupCommand,
 } from './types';
 
 export async function login(params: LoginCommand): Promise<OkRespLoginResponse> {
-  return await request.post('/v1/users/login', params);
+  return await request.post(`/v1/users/token?code=${params.code}`);
+}
+
+export async function getUserInfo(): Promise<OkRespUserInfo> {
+  return await request.post('/v1/users/me');
 }
 
 export async function logout(): Promise<OkRespLogoutResponse> {

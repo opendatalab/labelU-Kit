@@ -3,6 +3,8 @@ import { get } from 'lodash-es';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 
+import { goLogin } from '@/utils/sso';
+
 import commonController from '../utils/common/common';
 
 /**
@@ -47,9 +49,7 @@ const authorizationBearerSuccess = (config: any) => {
 const authorizationBearerFailed = (error: any) => {
   // 401一秒后跳转到登录页
   if (error?.response?.status === 401) {
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 1000);
+    goLogin();
   }
 
   return Promise.reject(error);

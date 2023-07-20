@@ -124,10 +124,7 @@ export interface ListByApiV1TasksTaskIdSamplesGetParams {
 }
 
 export interface LoginCommand {
-  /** Username */
-  username: string;
-  /** Password */
-  password: string;
+  code: string;
 }
 
 export interface LoginResponse {
@@ -170,6 +167,10 @@ export interface OkRespCreateSampleResponse {
 
 export interface OkRespLoginResponse {
   data: LoginResponse;
+}
+
+export interface OkRespUserInfo {
+  data: SignupResponse;
 }
 
 export interface OkRespLogoutResponse {

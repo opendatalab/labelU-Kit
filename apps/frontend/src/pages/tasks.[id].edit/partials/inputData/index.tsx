@@ -14,6 +14,7 @@ import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
 import commonController from '@/utils/common/common';
 import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
+import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 
 import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
@@ -292,7 +293,8 @@ const InputData = () => {
         <div className={styles.left}>
           <div className={styles.leftTitle}>本地上传</div>
           <div className={styles.dragAndDrop}>
-            <div className={styles.survey} />
+            <UploadBg className={styles.survey} />
+
             <div className={styles.buttons}>
               <Button type="primary" icon={<FileOutlined />}>
                 <NativeUpload

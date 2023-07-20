@@ -3,14 +3,13 @@ import type { LinkProps } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
-import BlockContainer from '@/layouts/BlockContainer';
-
 import type { BreadcrumbProps } from './index';
 
-const StyledBreadcrumb = styled(BlockContainer).attrs((props: BreadcrumbProps) => ({
+const StyledBreadcrumb = styled.div.attrs((props: BreadcrumbProps) => ({
   ...props,
   className: 'breadcrumbs',
 }))`
+  padding: 0 0.5rem;
   display: flex;
   justify-content: flex-start;
   font-size: 1rem;

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, Pagination } from 'antd';
+import { Alert, Button, Pagination } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -45,6 +45,7 @@ const TaskList = () => {
   }, [dispatch.task, pageSize, searchParams]);
 
   const { meta_data, data: tasks = [] } = useSelector((state: RootState) => state.task.list);
+  const loading = useSelector((state: RootState) => state.loading.effects.task.fetchTasks);
 
   const createTask = () => {
     dispatch.task.clearTaskItemAndConfig();
@@ -53,31 +54,44 @@ const TaskList = () => {
 
   return (
     <React.Fragment>
-      {tasks.length > 0 && (
-        <div className={currentStyles.tasksWrapper}>
+      <div className={currentStyles.tasksWrapper}>
+        <Alert
+          className={currentStyles.alert}
+          type="info"
+          showIcon
+          message={
+            <div>
+              当前为体验版，每日凌晨数据将自动清空，请及时备份重要数据。如需完整使用，建议
+              <a href="https://github.com/opendatalab/labelU#getting-started" target="_blank" rel="noreferrer">
+                本地部署
+              </a>
+            </div>
+          }
+        />
+        {tasks.length > 0 && (
           <Button className={currentStyles.createTaskButton} type="primary" onClick={createTask}>
             新建任务
           </Button>
-          <div className={currentStyles.cards}>
-            {tasks.map((cardInfo: any, cardInfoIndex: number) => {
-              return <TaskCard key={cardInfoIndex} cardInfo={cardInfo} />;
-            })}
-          </div>
-          <div className={currentStyles.pagination}>
-            <Pagination
-              defaultCurrent={1}
-              total={meta_data?.total ?? 0}
-              pageSize={+searchParams.get('size')!}
-              onChange={(value: number, _pageSize: number) => {
-                searchParams.set('size', String(_pageSize));
-                searchParams.set('page', String(value));
-                setSearchParams(searchParams);
-              }}
-            />
-          </div>
+        )}
+        <div className={currentStyles.cards}>
+          {tasks.map((cardInfo: any, cardInfoIndex: number) => {
+            return <TaskCard key={cardInfoIndex} cardInfo={cardInfo} />;
+          })}
+          {tasks.length === 0 && !loading && <NullTask />}
         </div>
-      )}
-      {tasks.length === 0 && <NullTask />}
+        <div className={currentStyles.pagination}>
+          <Pagination
+            defaultCurrent={1}
+            total={meta_data?.total ?? 0}
+            pageSize={+searchParams.get('size')!}
+            onChange={(value: number, _pageSize: number) => {
+              searchParams.set('size', String(_pageSize));
+              searchParams.set('page', String(value));
+              setSearchParams(searchParams);
+            }}
+          />
+        </div>
+      </div>
     </React.Fragment>
   );
 };
