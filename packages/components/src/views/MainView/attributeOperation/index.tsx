@@ -220,6 +220,30 @@ const AttributeOperation = () => {
     }
   }, [currentAttributes, showAttributeCount, handleAttributeClick, chooseAttribute]);
 
+  // 1-9数字键切换attribute
+  useEffect(() => {
+    if (!selectedResult) {
+      return;
+    }
+
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (!/^[1-9]$/.test(e.key)) {
+        return;
+      }
+
+      const index = Number(e.key) - 1;
+      if (index < currentAttributes.length) {
+        setActiveAttribute(currentAttributes[index].value);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeydown);
+    };
+  }, [currentAttributes, selectedResult, setActiveAttribute]);
+
   return (
     <AttributeWrapper className="attributeBox" key={chooseAttribute}>
       {currentAttributes &&
