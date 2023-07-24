@@ -48,7 +48,7 @@ const TaskList = () => {
 
   const createTask = () => {
     dispatch.task.clearTaskItemAndConfig();
-    navigate('/tasks/0/edit');
+    navigate('/tasks/0/edit?isNew=true');
   };
 
   return (
