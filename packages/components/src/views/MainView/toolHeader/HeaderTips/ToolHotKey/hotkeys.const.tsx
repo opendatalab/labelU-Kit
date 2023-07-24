@@ -38,6 +38,10 @@ export const common: HotkeyDesc[] = [
     name: 'Scale',
     title: <ScaleShortCutSvg />,
   },
+  {
+    name: 'SelectTop9Attributes',
+    title: '1 ~ 9',
+  },
 ];
 
 export const action: HotkeyDesc[] = [

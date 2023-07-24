@@ -12,6 +12,7 @@ import type { TaskResponse } from '@/services/types';
 import { MediaType, TaskStatus } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import { createSamples } from '@/services/samples';
+import { deleteFile } from '@/services/task';
 
 import type { QueuedFile } from './partials/inputData';
 import InputData, { UploadStatus } from './partials/inputData';
@@ -62,6 +63,8 @@ const CreateTask = () => {
   const [currentStep, setCurrentStep] = useState<StepEnum>(
     location.hash ? (location.hash.replace('#', '') as StepEnum) : StepEnum.Basic,
   );
+  const searchParams = new URLSearchParams(location.search);
+  const isCreateNewTask = searchParams.get('isNew') === 'true';
   const [isAnnotationFormValid, toggleAnnotationFormValidation] = useState<boolean>(true);
   const attachmentsConnected = useRef<boolean>(false);
 
@@ -74,9 +77,10 @@ const CreateTask = () => {
       navigate({
         pathname: location.pathname,
         hash: step,
+        search: location.search,
       });
     },
-    [location.pathname, navigate],
+    [location.pathname, location.search, navigate],
   );
 
   const partials = useMemo(() => {
@@ -168,7 +172,7 @@ const CreateTask = () => {
 
       const annotationConfig = annotationFormInstance.getFieldsValue();
 
-      if (_.chain(annotationConfig).get('tools').isEmpty().value()) {
+      if (_.chain(annotationConfig).get('tools').isEmpty().value() && currentStep === StepEnum.Config) {
         commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
         return;
       }
@@ -187,21 +191,8 @@ const CreateTask = () => {
           navigate('/tasks');
         });
     },
-    [annotationFormInstance, basicFormInstance, dispatch.task, navigate, taskData, taskId],
+    [annotationFormInstance, basicFormInstance, currentStep, dispatch.task, navigate, taskData, taskId],
   );
-
-  const handleCancel = useCallback(() => {
-    modal.confirm({
-      title: '提示',
-      content: '是否保存已编辑的内容？',
-      okText: '保存并退出',
-      cancelText: '不保存',
-      onOk: handleSave,
-      onCancel: () => {
-        navigate('/tasks');
-      },
-    });
-  }, [handleSave, navigate]);
 
   const [previewVisible, setPreviewVisible] = useState(false);
   const handleOpenPreview = useCallback(() => {
@@ -225,8 +216,8 @@ const CreateTask = () => {
     return commonController.transformFileList(sample.data, +sample.id!);
   }, [samples]);
 
-  const submitForm: () => Promise<unknown> = useCallback(
-    async function () {
+  const submitForm: (isFromCancel?: boolean) => Promise<unknown> = useCallback(
+    async function (isFromCancel) {
       let basicFormValues;
       try {
         basicFormValues = await basicFormInstance.validateFields();
@@ -276,7 +267,12 @@ const CreateTask = () => {
       } else {
         const newTask = await dispatch.task.createTask(basicFormValues);
 
-        navigate(`/tasks/${newTask.id}/edit#${StepEnum.Upload}`);
+        // 取消并保存时，跳转到任务列表页
+        if (isFromCancel) {
+          navigate('/tasks');
+        } else {
+          navigate(`/tasks/${newTask.id}/edit${location.search}#${StepEnum.Upload}`);
+        }
 
         return Promise.reject();
       }
@@ -288,12 +284,57 @@ const CreateTask = () => {
       dispatch.sample,
       dispatch.task,
       isExistTask,
+      location.search,
       navigate,
       taskData,
       taskId,
       uploadFileList,
     ],
   );
+
+  const handleCancel = useCallback(() => {
+    modal.confirm({
+      title: '提示',
+      content: '是否保存已编辑的内容？',
+      okText: '保存并退出',
+      cancelText: '不保存',
+      onOk: async () => {
+        if (currentStep === StepEnum.Basic) {
+          submitForm(true);
+        } else {
+          handleSave();
+        }
+      },
+      onCancel: async () => {
+        // 在上传数据界面取消时，需要删除已上传的文件\删除已创建的任务
+        const uploadedFiles = filter(uploadFileList, (item) => item.status === UploadStatus.Success);
+        if (uploadedFiles.length > 0) {
+          await deleteFile(
+            { task_id: taskId },
+            {
+              attachment_ids: uploadedFiles.map((item) => item.id!),
+            },
+          );
+        }
+
+        if (isCreateNewTask && isExistTask) {
+          await dispatch.task.deleteTask(taskId);
+        }
+
+        navigate('/tasks');
+      },
+    });
+  }, [
+    currentStep,
+    dispatch.task,
+    handleSave,
+    isCreateNewTask,
+    isExistTask,
+    navigate,
+    submitForm,
+    taskId,
+    uploadFileList,
+  ]);
 
   const handleNextStep = useCallback(
     async function (step: TaskStep | React.MouseEvent) {
