@@ -95,9 +95,11 @@ const RightSiderbar = () => {
             </div>
           </Tabs.TabPane>
         )}
-        <Tabs.TabPane forceRender tab={attributeTab} key="2">
-          <AttributeResult />
-        </Tabs.TabPane>
+        {graphicResult && graphicResult.length > 0 && (
+          <Tabs.TabPane forceRender tab={attributeTab} key="2">
+            <AttributeResult />
+          </Tabs.TabPane>
+        )}
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane forceRender tab={textTab} key="3">
             <div className={`${sidebarCls}`}>
