@@ -20,6 +20,7 @@ const Samples = () => {
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
   const taskData = useSelector((state: RootState) => state.task.item);
+  const taskConfig = useSelector((state: RootState) => state.task.config);
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
@@ -31,7 +32,8 @@ const Samples = () => {
   );
 
   const taskStatus = _.get(taskData, 'status');
-  const isTaskReadyToAnnotate = ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!);
+  const isTaskReadyToAnnotate =
+    ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!) && taskConfig && Object.keys(taskConfig).length > 0;
   const {
     meta_data = {
       total: 0,
