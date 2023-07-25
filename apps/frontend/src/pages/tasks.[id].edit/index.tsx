@@ -216,6 +216,17 @@ const CreateTask = () => {
     return commonController.transformFileList(sample.data, +sample.id!);
   }, [samples]);
 
+  const correctSampleIdsMappings = useMemo(
+    () =>
+      _.chain(samples)
+        .get('data')
+        .mapKeys((item) => {
+          return _.chain(item.data?.fileNames).keys().first().value();
+        })
+        .value(),
+    [samples],
+  );
+
   const submitForm: (isFromCancel?: boolean) => Promise<unknown> = useCallback(
     async function (isFromCancel) {
       let basicFormValues;
@@ -315,6 +326,11 @@ const CreateTask = () => {
               attachment_ids: uploadedFiles.map((item) => item.id!),
             },
           );
+
+          await dispatch.sample.deleteSamples({
+            task_id: taskId,
+            body: { sample_ids: uploadedFiles.map((item) => correctSampleIdsMappings[item.id!].id!) },
+          });
         }
 
         if (isCreateNewTask && isExistTask) {
@@ -326,14 +342,16 @@ const CreateTask = () => {
     });
   }, [
     currentStep,
-    dispatch.task,
+    submitForm,
     handleSave,
+    uploadFileList,
     isCreateNewTask,
     isExistTask,
     navigate,
-    submitForm,
     taskId,
-    uploadFileList,
+    dispatch.sample,
+    dispatch.task,
+    correctSampleIdsMappings,
   ]);
 
   const handleNextStep = useCallback(
