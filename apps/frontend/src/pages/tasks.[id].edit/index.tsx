@@ -162,7 +162,7 @@ const CreateTask = () => {
   }, [annotationFormInstance]);
 
   const handleSave = useCallback(
-    async function () {
+    async function (isFromCancel?: boolean) {
       try {
         await annotationFormInstance.validateFields();
       } catch (err) {
@@ -172,7 +172,11 @@ const CreateTask = () => {
 
       const annotationConfig = annotationFormInstance.getFieldsValue();
 
-      if (_.chain(annotationConfig).get('tools').isEmpty().value() && currentStep === StepEnum.Config) {
+      if (
+        _.chain(annotationConfig).get('tools').isEmpty().value() &&
+        currentStep === StepEnum.Config &&
+        !isFromCancel
+      ) {
         commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
         return;
       }
@@ -265,16 +269,22 @@ const CreateTask = () => {
 
         dispatch.sample.fetchSamples({ task_id: taskId });
 
-        return dispatch.task.updateTaskConfig({
-          taskId: taskId,
-          body: {
-            ...taskData,
-            ...basicFormValues,
-            media_type: annotationConfig.media_type,
-            status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
-            config: omit(['media_type'])(annotationConfig),
-          },
-        });
+        return dispatch.task
+          .updateTaskConfig({
+            taskId: taskId,
+            body: {
+              ...taskData,
+              ...basicFormValues,
+              media_type: annotationConfig.media_type,
+              status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
+              config: omit(['media_type'])(annotationConfig),
+            },
+          })
+          .then(() => {
+            if (isFromCancel) {
+              navigate('/tasks');
+            }
+          });
       } else {
         const newTask = await dispatch.task.createTask(basicFormValues);
 
@@ -310,10 +320,10 @@ const CreateTask = () => {
       okText: '保存并退出',
       cancelText: '不保存',
       onOk: async () => {
-        if (currentStep === StepEnum.Basic) {
+        if (currentStep !== StepEnum.Config) {
           submitForm(true);
         } else {
-          handleSave();
+          handleSave(true);
         }
       },
       onCancel: async () => {
@@ -327,10 +337,16 @@ const CreateTask = () => {
             },
           );
 
-          await dispatch.sample.deleteSamples({
-            task_id: taskId,
-            body: { sample_ids: uploadedFiles.map((item) => correctSampleIdsMappings[item.id!].id!) },
-          });
+          const uploadedSampleIds = uploadedFiles
+            .filter((item) => correctSampleIdsMappings[item.id!])
+            .map((item) => correctSampleIdsMappings[item.id!].id!);
+
+          if (uploadedSampleIds.length > 0) {
+            await dispatch.sample.deleteSamples({
+              task_id: taskId,
+              body: { sample_ids: uploadedSampleIds },
+            });
+          }
         }
 
         if (isCreateNewTask && isExistTask) {
@@ -349,9 +365,9 @@ const CreateTask = () => {
     isExistTask,
     navigate,
     taskId,
+    correctSampleIdsMappings,
     dispatch.sample,
     dispatch.task,
-    correctSampleIdsMappings,
   ]);
 
   const handleNextStep = useCallback(
