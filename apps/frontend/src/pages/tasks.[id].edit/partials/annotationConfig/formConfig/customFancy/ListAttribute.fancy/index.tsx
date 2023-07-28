@@ -28,6 +28,7 @@ interface AttributeItemInState extends AttributeItem {
 export interface FancyAttributeListProps extends FancyInputProps {
   value: AttributeItem[];
   defaultValue: AttributeItem[];
+  deletable?: boolean;
   onChange: (value: AttributeItem[]) => void;
 }
 
@@ -98,7 +99,13 @@ const StyledAttributesWrapper = styled.div`
 
 // ======================= end =======================
 
-export function FancyAttributeList({ value, onChange, defaultValue = [], fullField }: FancyAttributeListProps) {
+export function FancyAttributeList({
+  value,
+  onChange,
+  defaultValue = [],
+  deletable = true,
+  fullField,
+}: FancyAttributeListProps) {
   const defaultValueWithId = useMemo(() => {
     return listWrapWithId(defaultValue);
   }, [defaultValue]);
@@ -232,15 +239,17 @@ export function FancyAttributeList({ value, onChange, defaultValue = [], fullFie
               </Button>
               <Badge count={size(item.attributes)} showZero color="var(--color-fill-secondary)" />
             </div>
-            <Tooltip title="删除">
-              <div className="remove-wrapper">
-                <CloseCircleFilled className="remove" onClick={handleRemoveAttribute(item)} />
-              </div>
-            </Tooltip>
+            {deletable && (
+              <Tooltip title="删除">
+                <div className="remove-wrapper">
+                  <CloseCircleFilled className="remove" onClick={handleRemoveAttribute(item)} />
+                </div>
+              </Tooltip>
+            )}
           </StyledAttributeItem>
         );
       }),
-    [handleOnChange, handleOpenAttributeConfiguration, handleRemoveAttribute, preFields, stateValue],
+    [deletable, handleOnChange, handleOpenAttributeConfiguration, handleRemoveAttribute, preFields, stateValue],
   );
 
   return (
