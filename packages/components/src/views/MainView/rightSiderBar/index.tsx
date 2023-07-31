@@ -73,15 +73,14 @@ const RightSiderbar = () => {
     );
   }, [result, tagConfigList]);
 
+  const labelToolLen = useMemo(
+    () => config?.tools?.filter((tool) => labelTool.includes(tool.tool as EToolName)).length,
+    [config?.tools],
+  );
   const attributeTab = useMemo(() => {
-    const labelToolLen = config?.tools?.filter((tool) => labelTool.includes(tool.tool as EToolName)).length;
     const count = graphicResult?.reduce((acc, cur) => {
       return acc + cur.result.length;
     }, 0);
-
-    if (!labelToolLen) {
-      return null;
-    }
 
     return (
       <div className="rightTab">
@@ -89,7 +88,7 @@ const RightSiderbar = () => {
         <span className="innerWord">{count}件</span>
       </div>
     );
-  }, [config?.tools, graphicResult]);
+  }, [graphicResult]);
 
   return (
     <div className={`${sidebarCls}`} ref={sideRef}>
@@ -102,9 +101,11 @@ const RightSiderbar = () => {
           </Tabs.TabPane>
         )}
 
-        <Tabs.TabPane forceRender tab={attributeTab} key="2">
-          <AttributeResult />
-        </Tabs.TabPane>
+        {labelToolLen && (
+          <Tabs.TabPane forceRender tab={attributeTab} key="2">
+            <AttributeResult />
+          </Tabs.TabPane>
+        )}
 
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane forceRender tab={textTab} key="3">
