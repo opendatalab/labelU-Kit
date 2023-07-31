@@ -63,6 +63,11 @@ const StyledSlider = styled.div`
     height: 8px;
   }
 
+  .title {
+    display: flex;
+    align-items: center;
+  }
+
   #style_fillOpacity,
   #style_borderOpacity {
     .ant-slider-rail {
@@ -289,7 +294,7 @@ const HeaderToolStyle = () => {
 
         return (
           <div id={`style_${key}`} className={`style-slider ${index > 0 ? 'style-slider__opacity' : ''}`} key={key}>
-            <span className="title" style={{ fontSize: 16 }}>
+            <span className="title">
               <img src={getImage(key)} className="icon" style={{ width: 16, marginRight: 10 }} />
               {t(getTitle(key))}
             </span>
