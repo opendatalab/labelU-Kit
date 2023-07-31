@@ -11,9 +11,7 @@ async function main() {
   );
 
   const formData = new URLSearchParams();
-  formData.append('variables[NEXT_VERSION]', nextVersion);
-  formData.append('variables[RELEASE_NOTES]', releaseNotes);
-  formData.append('variables[ASSETS_URL]', url);
+  formData.append('variables[frontend_url]', url);
 
   const options = {
     hostname: gitlabTriggerUrl.hostname,
