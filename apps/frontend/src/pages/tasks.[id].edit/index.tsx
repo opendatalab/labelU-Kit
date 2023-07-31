@@ -6,6 +6,7 @@ import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import AnnotationOperation from '@label-u/components';
+import styled from 'styled-components';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
@@ -42,6 +43,12 @@ const partialMapping = {
   [StepEnum.Config]: AnnotationConfig,
 };
 
+const StyledFooter = styled.div`
+  display: flex;
+  justify-content: end;
+  margin-top: 1rem;
+`;
+
 interface TaskStep extends StepData {
   value: StepEnum;
 }
@@ -58,6 +65,7 @@ const CreateTask = () => {
   const location = useLocation();
   const [annotationFormInstance] = Form.useForm();
   const [basicFormInstance] = Form.useForm();
+  const modalRef = useRef<any>(null);
 
   const taskId = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
   const [currentStep, setCurrentStep] = useState<StepEnum>(
@@ -313,62 +321,74 @@ const CreateTask = () => {
     ],
   );
 
-  const handleCancel = useCallback(() => {
-    modal.confirm({
-      title: '提示',
-      content: '是否保存已编辑的内容？',
-      okText: '保存并退出',
-      cancelText: '不保存',
-      onOk: async () => {
-        if (currentStep !== StepEnum.Config) {
-          submitForm(true);
-        } else {
-          handleSave(true);
-        }
-      },
-      onCancel: async () => {
-        // 在上传数据界面取消时，需要删除已上传的文件\删除已创建的任务
-        const uploadedFiles = filter(uploadFileList, (item) => item.status === UploadStatus.Success);
-        if (uploadedFiles.length > 0) {
-          await deleteFile(
-            { task_id: taskId },
-            {
-              attachment_ids: uploadedFiles.map((item) => item.id!),
-            },
-          );
+  const handleCancel = useCallback(async () => {
+    // 在上传数据界面取消时，需要删除已上传的文件\删除已创建的任务
+    const uploadedFiles = filter(uploadFileList, (item) => item.status === UploadStatus.Success);
+    if (uploadedFiles.length > 0) {
+      await deleteFile(
+        { task_id: taskId },
+        {
+          attachment_ids: uploadedFiles.map((item) => item.id!),
+        },
+      );
 
-          const uploadedSampleIds = uploadedFiles
-            .filter((item) => correctSampleIdsMappings[item.id!])
-            .map((item) => correctSampleIdsMappings[item.id!].id!);
+      const uploadedSampleIds = uploadedFiles
+        .filter((item) => correctSampleIdsMappings[item.id!])
+        .map((item) => correctSampleIdsMappings[item.id!].id!);
 
-          if (uploadedSampleIds.length > 0) {
-            await dispatch.sample.deleteSamples({
-              task_id: taskId,
-              body: { sample_ids: uploadedSampleIds },
-            });
-          }
-        }
+      if (uploadedSampleIds.length > 0) {
+        await dispatch.sample.deleteSamples({
+          task_id: taskId,
+          body: { sample_ids: uploadedSampleIds },
+        });
+      }
+    }
 
-        if (isCreateNewTask && isExistTask) {
-          await dispatch.task.deleteTask(taskId);
-        }
+    if (isCreateNewTask && isExistTask) {
+      await dispatch.task.deleteTask(taskId);
+    }
 
-        navigate('/tasks');
-      },
-    });
+    modalRef.current.destroy();
+    navigate('/tasks');
   }, [
-    currentStep,
-    submitForm,
-    handleSave,
-    uploadFileList,
+    correctSampleIdsMappings,
+    dispatch.sample,
+    dispatch.task,
     isCreateNewTask,
     isExistTask,
     navigate,
     taskId,
-    correctSampleIdsMappings,
-    dispatch.sample,
-    dispatch.task,
+    uploadFileList,
   ]);
+
+  const handleCancelConfirm = useCallback(() => {
+    modalRef.current = modal.confirm({
+      title: '提示',
+      content: '是否保存已编辑的内容？',
+      okText: '保存并退出',
+      cancelText: '不保存',
+      closable: true,
+      footer: (
+        <StyledFooter>
+          <Button onClick={handleCancel}>不保存</Button>
+          <Button
+            type="primary"
+            onClick={async () => {
+              modalRef.current.destroy();
+
+              if (currentStep !== StepEnum.Config) {
+                await submitForm(true);
+              } else {
+                await handleSave(true);
+              }
+            }}
+          >
+            保存并退出
+          </Button>
+        </StyledFooter>
+      ),
+    });
+  }, [handleCancel, currentStep, submitForm, handleSave]);
 
   const handleNextStep = useCallback(
     async function (step: TaskStep | React.MouseEvent) {
@@ -446,7 +466,7 @@ const CreateTask = () => {
             进入预览
             <ArrowRightOutlined />
           </Button>
-          <Button onClick={handleCancel}>取消</Button>
+          <Button onClick={handleCancelConfirm}>取消</Button>
           <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
             保存
           </Button>
@@ -456,7 +476,7 @@ const CreateTask = () => {
 
     return (
       <>
-        <Button onClick={handleCancel}>取消</Button>
+        <Button onClick={handleCancelConfirm}>取消</Button>
 
         <Button loading={loading} type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
           下一步
@@ -465,7 +485,7 @@ const CreateTask = () => {
     );
   }, [
     currentStep,
-    handleCancel,
+    handleCancelConfirm,
     loading,
     handleNextStep,
     previewVisible,
