@@ -80,16 +80,18 @@ const TaskList = () => {
           {tasks.length === 0 && !loading && <NullTask />}
         </div>
         <div className={currentStyles.pagination}>
-          <Pagination
-            defaultCurrent={1}
-            total={meta_data?.total ?? 0}
-            pageSize={+searchParams.get('size')!}
-            onChange={(value: number, _pageSize: number) => {
-              searchParams.set('size', String(_pageSize));
-              searchParams.set('page', String(value));
-              setSearchParams(searchParams);
-            }}
-          />
+          {meta_data && searchParams && meta_data?.total > pageSize && (
+            <Pagination
+              defaultCurrent={1}
+              total={meta_data?.total ?? 0}
+              pageSize={+searchParams.get('size')!}
+              onChange={(value: number, _pageSize: number) => {
+                searchParams.set('size', String(_pageSize));
+                searchParams.set('page', String(value));
+                setSearchParams(searchParams);
+              }}
+            />
+          )}
         </div>
       </div>
     </React.Fragment>

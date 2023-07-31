@@ -52,22 +52,20 @@
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  width: 414px;
+  width: 450px;
+  padding: 1rem 1.5rem 1rem 1rem;
 }
 
 .leftTitle {
   flex: 1;
-  margin-top: 24px;
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
   color: rgb(0 0 0 / 72%);
-  margin-left: 16px;
 }
 
 .dragAndDrop {
-  margin-left: 16px;
-  margin-top: 16px;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -75,7 +73,7 @@
   background: #fbfcff;
   border: 1px dashed #d0dfff;
   border-radius: 8px;
-  height: 354px;
+  width: 100%;
 }
 
 .survey {
@@ -92,7 +90,7 @@
   display: flex;
   flex-direction: column;
   flex: 2;
-  padding: 1.5rem 0 1.5rem 1.5rem;
+  padding: 1.5rem 0 0 1.5rem;
   height: calc(100vh - 230px);
   overflow-y: scroll;
   justify-content: flex-start;

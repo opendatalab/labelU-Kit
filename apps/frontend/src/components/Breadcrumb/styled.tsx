@@ -37,6 +37,7 @@ export const BreadcrumbItem = styled(CustomLink).attrs((props: BreadcrumbItemPro
   className: 'breadcrumb-item',
 }))`
   color: ${({ isCurrent }: BreadcrumbItemProps) => (isCurrent ? '#333' : '#999')};
+  text-decoration: none;
 
   ${({ isCurrent }: BreadcrumbItemProps) =>
     !isCurrent &&

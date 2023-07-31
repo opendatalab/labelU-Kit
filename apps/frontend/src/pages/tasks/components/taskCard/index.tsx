@@ -48,7 +48,6 @@ const TaskCard = (props: any) => {
 
     modal.confirm({
       title: '删除任务',
-      icon: <ExclamationOutlined />,
       content: '确定删除该任务吗？',
       okText: '确定',
       cancelText: '取消',
