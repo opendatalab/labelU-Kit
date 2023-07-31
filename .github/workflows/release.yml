@@ -8,6 +8,8 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   VITE_SSO_CLIENT_ID: ${{ secrets.VITE_SSO_CLIENT_ID }}
   VITE_SSO_ORIGIN: ${{ secrets.VITE_SSO_ORIGIN }}
+  GL_TRIGGER_TOKEN: ${{ secrets.GL_TRIGGER_TOKEN }}
+  GI_LABELU_PROJECT_ID: ${{ secrets.GI_LABELU_PROJECT_ID }}
 
 # Controls when the workflow will run
 on:
