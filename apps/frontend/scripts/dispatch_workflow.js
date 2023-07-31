@@ -1,65 +1,42 @@
 const minimist = require('minimist');
-const { Octokit } = require('@octokit/rest');
-
-const octokit = new Octokit({
-  auth: process.env.GH_TOKEN,
-});
-
-function findLatestVersion(versions) {
-  const maxVersionLength = Math.max(...versions.map((version) => version.split('.').length));
-  const versionNumbers = versions.map((version) => {
-    const versionParts = version.split('.');
-    return versionParts.reduce((total, part, index) => {
-      return total + parseInt(part.replace('release/v', '')) * Math.pow(10, (maxVersionLength - index - 1) * 3);
-    }, 0);
-  });
-
-  return versions[versionNumbers.indexOf(Math.max(...versionNumbers))];
-}
+const https = require('https');
 
 async function main() {
   const args = minimist(process.argv.slice(2));
   const [branch, nextVersion, releaseTime, releaseNotes] = args._;
   const version = `v${nextVersion}`;
   const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${version}/frontend.zip`;
+  const gitlabTriggerUrl = new URL(
+    `https://gitlab.shlab.tech/api/v4/projects/${process.env.GI_LABELU_PROJECT_ID}/trigger/pipeline?token=${process.env.GL_TRIGGER_TOKEN}&ref=self-host`,
+  );
 
-  const inputs = {
-    version: version,
-    branch,
-    name: 'frontend',
-    assets_url: url,
-    changelog: releaseNotes,
+  const formData = new URLSearchParams();
+  formData.append('variables[NEXT_VERSION]', nextVersion);
+  formData.append('variables[RELEASE_NOTES]', releaseNotes);
+  formData.append('variables[ASSETS_URL]', url);
+
+  const options = {
+    hostname: gitlabTriggerUrl.hostname,
+    path: `${gitlabTriggerUrl.pathname}${gitlabTriggerUrl.search}`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   };
 
-  console.log('inputs', inputs);
-
-  const labelUBranches = await octokit.request('GET /repos/opendatalab/labelU/branches', {
-    owner: 'opendatalab',
-    repo: 'labelU',
+  const req = https.request(options, (res) => {
+    if (res.statusCode < 300) {
+      console.log('trigger labelu workflow success');
+    } else {
+      console.log('trigger labelu workflow failed', res);
+    }
   });
 
-  const releaseBranches = (labelUBranches.data || [])
-    .filter((branch) => branch.name.startsWith('release/'))
-    .map((branch) => branch.name);
-  const latestReleaseVersion = findLatestVersion(releaseBranches);
-
-  console.log('labelu latest release version is', latestReleaseVersion);
-
-  octokit.actions
-    .createWorkflowDispatch({
-      owner: 'opendatalab',
-      repo: 'labelU',
-      workflow_id: `${branch === 'release' ? 'release_' : ''}cicd_pipeline.yml`,
-      ref: branch === 'release' ? latestReleaseVersion : 'dev',
-      inputs,
-    })
-    .then((res) => {
-      console.log(res);
-      console.log('trigger labelu workflow success');
-    })
-    .catch((err) => {
-      console.log('trigger labelu workflow failed', err);
-    });
+  req.on('error', (e) => {
+    console.log('trigger labelu workflow error', e);
+  });
+  req.write(formData.toString());
+  req.end();
 }
 
 main();
