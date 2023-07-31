@@ -2,17 +2,18 @@ import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import _, { size } from 'lodash-es';
+import type { EToolName } from '@label-u/annotation';
 
 import ViewContext from '@/view.context';
 
-import { prefix } from '../../../constant';
+import { prefix, labelTool } from '../../../constant';
 import AttributeResult from './AttributeResult';
 import TagSidebar from './TagSidebar';
 import TextToolSidebar from './TextToolSidebar';
 
 const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar = () => {
-  const { result, textConfig, tagConfigList, graphicResult } = useContext(ViewContext);
+  const { result, textConfig, tagConfigList, graphicResult, config } = useContext(ViewContext);
   const sideRef = useRef<HTMLDivElement>(null);
 
   // 将右侧属性栏高度设置为剩余高度
@@ -73,9 +74,14 @@ const RightSiderbar = () => {
   }, [result, tagConfigList]);
 
   const attributeTab = useMemo(() => {
+    const labelToolLen = config?.tools?.filter((tool) => labelTool.includes(tool.tool as EToolName)).length;
     const count = graphicResult?.reduce((acc, cur) => {
       return acc + cur.result.length;
     }, 0);
+
+    if (!labelToolLen) {
+      return null;
+    }
 
     return (
       <div className="rightTab">
@@ -83,7 +89,7 @@ const RightSiderbar = () => {
         <span className="innerWord">{count}件</span>
       </div>
     );
-  }, [graphicResult]);
+  }, [config?.tools, graphicResult]);
 
   return (
     <div className={`${sidebarCls}`} ref={sideRef}>
@@ -95,11 +101,11 @@ const RightSiderbar = () => {
             </div>
           </Tabs.TabPane>
         )}
-        {graphicResult && graphicResult.length > 0 && (
-          <Tabs.TabPane forceRender tab={attributeTab} key="2">
-            <AttributeResult />
-          </Tabs.TabPane>
-        )}
+
+        <Tabs.TabPane forceRender tab={attributeTab} key="2">
+          <AttributeResult />
+        </Tabs.TabPane>
+
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane forceRender tab={textTab} key="3">
             <div className={`${sidebarCls}`}>
