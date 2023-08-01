@@ -45,6 +45,7 @@ const TaskList = () => {
   }, [dispatch.task, pageSize, searchParams]);
 
   const { meta_data, data: tasks = [] } = useSelector((state: RootState) => state.task.list);
+  const loading = useSelector((state: RootState) => state.loading.effects.task.fetchTasks);
 
   const createTask = () => {
     dispatch.task.clearTaskItemAndConfig();
@@ -53,16 +54,19 @@ const TaskList = () => {
 
   return (
     <React.Fragment>
-      {tasks.length > 0 && (
-        <div className={currentStyles.tasksWrapper}>
+      <div className={currentStyles.tasksWrapper}>
+        {tasks.length > 0 && (
           <Button className={currentStyles.createTaskButton} type="primary" onClick={createTask}>
             新建任务
           </Button>
-          <div className={currentStyles.cards}>
-            {tasks.map((cardInfo: any, cardInfoIndex: number) => {
-              return <TaskCard key={cardInfoIndex} cardInfo={cardInfo} />;
-            })}
-          </div>
+        )}
+        <div className={currentStyles.cards}>
+          {tasks.map((cardInfo: any, cardInfoIndex: number) => {
+            return <TaskCard key={cardInfoIndex} cardInfo={cardInfo} />;
+          })}
+          {tasks.length === 0 && !loading && <NullTask />}
+        </div>
+        {meta_data && searchParams && meta_data?.total > pageSize && (
           <div className={currentStyles.pagination}>
             <Pagination
               defaultCurrent={1}
@@ -75,9 +79,8 @@ const TaskList = () => {
               }}
             />
           </div>
-        </div>
-      )}
-      {tasks.length === 0 && <NullTask />}
+        )}
+      </div>
     </React.Fragment>
   );
 };

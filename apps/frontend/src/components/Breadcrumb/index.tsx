@@ -1,4 +1,3 @@
-import { RightOutlined } from '@ant-design/icons';
 import type { Params } from 'react-router-dom';
 import { useMatches } from 'react-router-dom';
 
@@ -48,7 +47,7 @@ function Breadcrumb({ className, hideHome = false, style }: BreadcrumbProps) {
               <BreadcrumbItem to={item.pathname} isCurrent={false}>
                 {item.crumb}
               </BreadcrumbItem>
-              <RightOutlined className="breadcrumb-item-separator" />
+              <span className="breadcrumb-item-separator">/</span>
             </div>
           );
         }

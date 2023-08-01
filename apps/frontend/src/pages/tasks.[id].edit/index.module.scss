@@ -49,9 +49,6 @@
   width: 100%;
   // height : calc(100vh - 136px);
   height: calc(100vh - 136px);
-  margin: 24px 24px 0;
-  //margin-left:24px;
-  //margin-right:24px;
-  //margin-top:24px;
+  border-top: 1px solid var(--color-border-secondary);
   background-color: white;
 }
