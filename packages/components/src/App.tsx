@@ -2,7 +2,7 @@ import { i18n } from '@label-u/utils';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@label-u/annotation';
 import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
-import _, { cloneDeep, isEmpty, set } from 'lodash-es';
+import _, { cloneDeep, isEmpty, set, isEqual } from 'lodash-es';
 import { I18nextProvider } from 'react-i18next';
 import { App as AntApp, ConfigProvider } from 'antd';
 
@@ -93,16 +93,64 @@ const App = forwardRef<
   const resultRef = useRef<BasicResult | null>();
   const engineRef = useRef<AnnotationEngine | null>(null);
 
-  const updateResult = useCallback((newResult) => {
-    setResult(newResult);
+  const syncResultToEngine = useCallback(() => {
+    updateTimeStamp(Date.now());
   }, []);
+
+  // redo undo
+  // const [past, setPast] = useState([]);
+  const pastRef = useRef<any[]>([]);
+  // const [present, setPresent] = useState(null);
+  // const [future, setFuture] = useState([]);
+  const futureRef = useRef<any[]>([]);
+
+  const updateResult = useCallback((newResult) => {
+    setResult((pre) => {
+      if (!isEqual(pre, newResult)) {
+        pastRef.current = [...pastRef.current, pre];
+        console.log('pastRef.current', pastRef.current);
+      }
+
+      return newResult;
+    });
+
+    futureRef.current = [];
+  }, []);
+
+  const undo = useCallback(() => {
+    if (pastRef.current.length === 0) {
+      return;
+    }
+
+    const newPresent = pastRef.current[pastRef.current.length - 1];
+    const newPast = pastRef.current.slice(0, pastRef.current.length - 1);
+
+    console.log('current', newPresent);
+
+    pastRef.current = newPast;
+    setResult(newPresent);
+    syncResultToEngine();
+    futureRef.current = [resultRef.current, ...futureRef.current];
+  }, [syncResultToEngine]);
+
+  const redo = useCallback(() => {
+    if (futureRef.current.length === 0) {
+      return;
+    }
+
+    const newPresent = futureRef.current[0];
+    const newFuture = futureRef.current.slice(1);
+    pastRef.current = [...pastRef.current!, resultRef.current!];
+
+    console.log('current', newPresent);
+
+    setResult(newPresent);
+    futureRef.current = newFuture;
+    syncResultToEngine();
+  }, [syncResultToEngine]);
 
   const updateSelectedResult = useCallback((newSelectedResult: SelectedResult | null) => {
     setSelectedResult(newSelectedResult);
-  }, []);
-
-  const syncResultToEngine = useCallback(() => {
-    updateTimeStamp(Date.now());
   }, []);
 
   // 所有工具的标注结果
@@ -269,7 +317,7 @@ const App = forwardRef<
      * 当工具切换时，从ref中获取最新的result，并将其回写到annotation engine中
      * ref会在result更新时更新
      */
-    const finalResult = isEmpty(resultRef.current) ? parsedResult : resultRef.current;
+    const finalResult = isEmpty(resultRef.current) ? parsedResult : cloneDeep(resultRef.current);
     const currentToolResult = finalResult[toolName] || [];
     engine.setPrevResultList(extractResult(finalResult, [toolName]));
     engine.toolInstance.setResult(currentToolResult.result || []);
@@ -344,7 +392,7 @@ const App = forwardRef<
           ...cloneDeep(result),
         };
 
-        set(newResult, [toolName, 'result'], newResultAdded);
+        set(newResult, [toolName, 'result'], cloneDeep(newResultAdded));
         set(newResult, [toolName, 'toolName'], toolName);
         updateResult(newResult);
       });
@@ -391,6 +439,8 @@ const App = forwardRef<
       graphicResult,
       isPreview,
       isSidebarCollapsed,
+      redo,
+      undo,
     };
   }, [
     imageAttribute,
@@ -416,6 +466,8 @@ const App = forwardRef<
     graphicResult,
     isPreview,
     isSidebarCollapsed,
+    redo,
+    undo,
   ]);
 
   // 暴露给 ref 的一些方法
