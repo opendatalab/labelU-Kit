@@ -49,7 +49,6 @@ const Homepage = () => {
               },
             ],
           }}
-          trigger={['click']}
         >
           <Button icon={<Icon component={ProfileIcon} />} type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }}>
             {username}

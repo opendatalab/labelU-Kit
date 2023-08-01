@@ -96,7 +96,6 @@
 }
 
 .item41Left {
-  margin-right: 10px;
   color: rgb(0 0 0 / 72%);
   font-weight: 400;
   font-size: 14px;
@@ -104,10 +103,11 @@
 }
 
 .item41Right {
-  color: #00b365;
+  color: var(--color-success);
   font-weight: 400;
   font-size: 12px;
   line-height: 18px;
+  margin-left: 10px;
 }
 
 .item42 {
@@ -117,6 +117,11 @@
   justify-content: flex-start;
   align-items: center;
   margin-top: 10px;
+  gap: 0.5rem;
+
+  :global(.ant-progress) {
+    margin-bottom: 0;
+  }
 }
 
 .item42Left {
