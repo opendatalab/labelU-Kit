@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Alert, Button, Pagination } from 'antd';
+import { Button, Pagination } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -55,19 +55,6 @@ const TaskList = () => {
   return (
     <React.Fragment>
       <div className={currentStyles.tasksWrapper}>
-        <Alert
-          className={currentStyles.alert}
-          type="info"
-          showIcon
-          message={
-            <div>
-              当前为体验版，每日凌晨数据将自动清空，请及时备份重要数据。如需完整使用，建议
-              <a href="https://github.com/opendatalab/labelU#getting-started" target="_blank" rel="noreferrer">
-                本地部署
-              </a>
-            </div>
-          }
-        />
         {tasks.length > 0 && (
           <Button className={currentStyles.createTaskButton} type="primary" onClick={createTask}>
             新建任务
