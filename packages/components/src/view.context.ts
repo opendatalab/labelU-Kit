@@ -50,6 +50,8 @@ export interface ViewContextProps {
   engineResultUpdateTimeStamp: number;
   graphicResult: ToolResult[];
   isSidebarCollapsed: boolean;
+  redo: () => void;
+  undo: () => void;
 }
 
 const ViewContext = React.createContext({} as ViewContextProps);

@@ -1,18 +1,18 @@
 import { Button, Dropdown } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon, { PoweroffOutlined } from '@ant-design/icons';
 
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 
 import Breadcrumb from '../Breadcrumb';
-import currentStyles from './index.module.scss';
+import styles from './index.module.scss';
 import HelpTips from '../helpTips';
 
 const Homepage = () => {
   const username = localStorage.getItem('username');
   const navigate = useNavigate();
 
-  const signOut = (e: any) => {
+  const logout = (e: any) => {
     e.stopPropagation();
     e.nativeEvent.stopPropagation();
     e.preventDefault();
@@ -22,36 +22,36 @@ const Homepage = () => {
   };
 
   return (
-    <div className={currentStyles.navigator}>
-      <div className={currentStyles.left}>
-        <div className={currentStyles.logo} />
-        <div className={currentStyles.breadcrumb}>
+    <div className={styles.navigator}>
+      <div className={styles.left}>
+        <Link to="/">
+          <div className={styles.logo} />
+        </Link>
+        <div className={styles.breadcrumb}>
           <Breadcrumb style={{ fontSize: 14 }} />
         </div>
       </div>
-      <div className={currentStyles.right}>
+      <div className={styles.right}>
         <HelpTips />
         <Dropdown
-          overlayClassName={currentStyles.dropDownOverlay}
+          overlayClassName={styles.dropDownOverlay}
           menu={{
             items: [
               {
                 label: (
-                  <div className={currentStyles.quit} onClick={signOut}>
+                  <div className={styles.quit} onClick={logout}>
                     退出登录
                     <PoweroffOutlined />
                   </div>
                 ),
-                key: 'signOut',
+                key: 'logout',
                 title: '退出登录',
               },
             ],
           }}
-          trigger={['click']}
         >
-          <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }}>
+          <Button icon={<Icon component={ProfileIcon} />} type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }}>
             {username}
-            <Icon component={ProfileIcon} />
           </Button>
         </Dropdown>
       </div>

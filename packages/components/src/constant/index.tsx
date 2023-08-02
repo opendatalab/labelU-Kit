@@ -1,3 +1,5 @@
+import { EToolName } from '@label-u/annotation';
+
 export enum EStepType {
   Check = 0, // 查看模式
   ANNOTATION = 1, // 正常标注
@@ -18,3 +20,5 @@ export enum ESubmitType {
 // css 命名前缀
 export const prefix = 'lab';
 export const componentCls = `${prefix}-component`;
+
+export const labelTool = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];

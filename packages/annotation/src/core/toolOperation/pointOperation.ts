@@ -6,7 +6,7 @@ import MathUtils from '@/utils/MathUtils';
 import type { IPointToolConfig, IPointUnit } from '@/types/tool/pointTool';
 import type { ICoordinate } from '@/types/tool/common';
 
-import { DEFAULT_TEXT_OFFSET, EDragStatus, ESortDirection } from '../../constant/annotation';
+import { DEFAULT_TEXT_OFFSET, EDragStatus } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
@@ -276,6 +276,10 @@ export default class PointOperation extends BasicToolOperation {
       this.dragStatus = EDragStatus.Start;
     }
 
+    if (e.button === 2) {
+      this.selectPoint();
+    }
+
     this.render();
     return true;
   }
@@ -300,9 +304,6 @@ export default class PointOperation extends BasicToolOperation {
   public onMouseUp(e: MouseEvent) {
     if (super.onMouseUp(e) || this.forbidMouseOperation || !this.imgInfo) {
       return true;
-    }
-    if (e.button === 2) {
-      this.rightMouseUp();
     }
     // 拖拽停止
     if (this.dragStatus === EDragStatus.Move) {
@@ -362,24 +363,14 @@ export default class PointOperation extends BasicToolOperation {
     const { keyCode } = e;
     switch (keyCode) {
       case EKeyCode.Delete:
+      case EKeyCode.BackSpace:
         this.deletePoint();
         break;
-      case EKeyCode.Tab: {
-        this.onTabKeyDown(e);
-        break;
-      }
       // case EKeyCode.Z:
       //   this.setIsHidden(!this.isHidden);
       //   this.render();
       //   break;
       default: {
-        if (this.config.attributeConfigurable) {
-          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config?.attributeList);
-
-          if (keyCode2Attribute !== undefined) {
-            this.setDefaultAttribute(keyCode2Attribute);
-          }
-        }
         break;
       }
     }
@@ -527,18 +518,7 @@ export default class PointOperation extends BasicToolOperation {
     return selectPoint?.id;
   }
 
-  public rightMouseUp() {
-    // 删除操作
-    if (this.selectedID === this.hoverID) {
-      const pointList = this.pointList.filter((point) => point.id !== this.selectedID);
-      this.setPointList(pointList);
-      this.history.pushHistory(pointList);
-      this.setSelectedID('');
-      this.hoverID = '';
-      this.container.dispatchEvent(this.saveDataEvent);
-      return;
-    }
-
+  public selectPoint() {
     // 选中操作
     const hoverPoint = this.pointList.find((point) => point.id === this.hoverID);
     this.setSelectedID(this.hoverID);
@@ -552,37 +532,6 @@ export default class PointOperation extends BasicToolOperation {
       }
     }
     this.container.dispatchEvent(this.saveDataEvent);
-  }
-
-  public onTabKeyDown(e: KeyboardEvent) {
-    e.preventDefault();
-    // 拖拽中 禁止操作
-    if (this.dragStatus === EDragStatus.Move || this.dragStatus === EDragStatus.Start) {
-      return;
-    }
-    let sort = ESortDirection.ascend;
-    if (e.shiftKey) {
-      sort = ESortDirection.descend;
-    }
-    const [showingResult, selectedResult] = CommonToolUtils.getRenderResultList<IPolygonData>(
-      this.pointList,
-      CommonToolUtils.getSourceID(this.basicResult),
-      this.attributeLockList,
-      this.selectedID,
-    );
-
-    let pointList = [...showingResult];
-    if (selectedResult) {
-      pointList = [...pointList, selectedResult];
-    }
-    const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(pointList as any, sort, this.selectedID);
-    if (nextSelectedRect) {
-      this.setSelectedID(nextSelectedRect.id);
-      // 设置当前属性为默认属性
-      // if (nextSelectedRect.attribute) {
-      //   this.setDefaultAttribute(nextSelectedRect.attribute);
-      // }
-    }
   }
 
   /**

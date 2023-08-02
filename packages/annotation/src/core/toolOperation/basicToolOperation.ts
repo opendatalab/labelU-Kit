@@ -952,6 +952,10 @@ export default class BasicToolOperation extends EventListener {
       e.preventDefault();
     }
 
+    if (e.key === 'Escape') {
+      this.emit('cancel');
+    }
+
     // empty
     switch (e.keyCode) {
       case EKeyCode.Space:

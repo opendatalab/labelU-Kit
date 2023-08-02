@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cTool, EKeyCode } from '@label-u/annotation';
+import { cTool } from '@label-u/annotation';
 import { Popover } from 'antd';
-import { cloneDeep } from 'lodash-es';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import revocationSvg from '@/assets/annotation/common/icon_next.svg';
 import restoreSvg from '@/assets/annotation/common/icon_back.svg';
@@ -21,12 +21,9 @@ enum EColor {
   Normal = '#cccccc',
 }
 
-export const labelTool = [EToolName.Rect, EToolName.Point, EToolName.Line, EToolName.Polygon];
-
 const HeaderOption = () => {
-  const { currentToolName, sample, result, setResult } = useContext(ViewContext);
+  const { currentToolName, redo, undo } = useContext(ViewContext);
   const [toolHover, setToolHover] = useState('');
-  const [historyRevocation, setHistoryRevocation] = useState<any>([]);
   const undoRef = useRef<HTMLElement>();
   const redoRef = useRef<HTMLElement>();
 
@@ -36,108 +33,12 @@ const HeaderOption = () => {
 
   const isBegin = isTagTool;
 
-  // 快捷键处理
-  const keydownEvent = (e: KeyboardEvent) => {
-    if (e.keyCode === EKeyCode.Alt) {
-      e.preventDefault();
-    }
-    switch (e.keyCode) {
-      case EKeyCode.Z:
-        if (e.ctrlKey) {
-          if (e.shiftKey) {
-            redoRef.current?.click();
-          } else {
-            undoRef.current?.click();
-          }
-
-          return false;
-        }
-        break;
-      default: {
-        break;
-      }
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('keydown', keydownEvent);
-    return () => {
-      document.removeEventListener('keydown', keydownEvent);
-    };
-  }, []);
-
-  // 统一处理撤回
-  const restore = () => {
-    if (!sample) {
-      return;
-    }
-    let count = 0;
-    const newResult = cloneDeep(result);
-
-    for (const tool of labelTool) {
-      if (result[tool]?.result) {
-        count += result[tool]?.result.length;
-      }
-    }
-    for (const tool of labelTool) {
-      const tmpResult = newResult[tool]?.result;
-      if (tmpResult && tmpResult.length > 0) {
-        const newTmpResult = tmpResult.reduce((res, item) => {
-          if (item.order !== count) {
-            res.push(item);
-          } else {
-            historyRevocation.push({ ...item, toolName: tool });
-            setHistoryRevocation(historyRevocation);
-          }
-          return res;
-        }, [] as any[]);
-
-        newResult[tool].result = newTmpResult;
-      }
-    }
-
-    setResult(newResult);
-  };
-
-  // 统一处理重做
-  const revocation = () => {
-    const newResult = cloneDeep(result);
-
-    const lastRestore = historyRevocation.pop();
-    if (!lastRestore) {
-      setHistoryRevocation([]);
-      return;
-    }
-    // 获取最大序号
-    let maxOrder = 0;
-    for (const tool of labelTool) {
-      const tmpResult = newResult[tool]?.result;
-      if (tmpResult && tmpResult.length > 0) {
-        maxOrder += tmpResult.length;
-      }
-    }
-    lastRestore.order = maxOrder + 1;
-    for (const tool of labelTool) {
-      let tmpResult = newResult[tool]?.result;
-
-      if (lastRestore.toolName === tool) {
-        delete lastRestore.toolName;
-        if (tmpResult && tmpResult.length > 0) {
-          tmpResult = [...tmpResult, lastRestore];
-        } else {
-          tmpResult = [lastRestore];
-        }
-        newResult[tool].result = tmpResult;
-      }
-    }
-
-    setResult(newResult);
-  };
+  useHotkeys('ctrl+z, meta+z', undo, []);
+  useHotkeys('ctrl+shift+z, meta+shift+z', redo, []);
 
   const commonOptionList: any = [
     {
       toolName: 'revocation',
-      // title: 'Redo',
       show: true,
       commonSvg: restoreSvg,
       selectedSvg: restoreHighlightSvg,
@@ -145,7 +46,7 @@ const HeaderOption = () => {
         if (isTagTool) {
           return;
         }
-        restore();
+        undo();
       },
       style: {
         opacity: isBegin === true ? 0.4 : 1,
@@ -156,7 +57,6 @@ const HeaderOption = () => {
     },
     {
       toolName: 'restore',
-      // title: 'Undo',
       show: true,
       commonSvg: revocationSvg,
       selectedSvg: revocationHighlightSvg,
@@ -164,7 +64,7 @@ const HeaderOption = () => {
         if (isTagTool) {
           return;
         }
-        revocation();
+        redo();
       },
       style: {
         opacity: isBegin === true ? 0.4 : 1,

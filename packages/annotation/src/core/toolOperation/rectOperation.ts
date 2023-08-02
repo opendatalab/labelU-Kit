@@ -4,13 +4,12 @@ import MathUtils from '@/utils/MathUtils';
 import type { IRect, IRectConfig } from '@/types/tool/rectTool';
 import type { ICoordinate } from '@/types/tool/common';
 
-import { EDragStatus, ESortDirection } from '../../constant/annotation';
+import { EDragStatus } from '../../constant/annotation';
 import EKeyCode from '../../constant/keyCode';
 import { EDragTarget, EToolName } from '../../constant/tool';
 import locale from '../../locales';
 import { EMessage } from '../../locales/constants';
 import AttributeUtils from '../../utils/tool/AttributeUtils';
-import CanvasUtils from '../../utils/tool/CanvasUtils';
 import CommonToolUtils from '../../utils/tool/CommonToolUtils';
 import DrawUtils from '../../utils/tool/DrawUtils';
 import MarkerUtils from '../../utils/tool/MarkerUtils';
@@ -76,6 +75,12 @@ export default class RectOperation extends BasicToolOperation {
     this.setSelectedIdAfterAddingDrawingRect = this.setSelectedIdAfterAddingDrawingRect.bind(this);
     this.getCurrentSelectedData = this.getCurrentSelectedData.bind(this);
     this.setSelectedID = this.setSelectedID.bind(this);
+
+    // esc取消绘制
+    this.on('cancel', () => {
+      this.drawingRect = undefined;
+      this.firstClickCoord = undefined;
+    });
   }
 
   public setResult(rectList: IRect[]) {
@@ -1110,57 +1115,11 @@ export default class RectOperation extends BasicToolOperation {
       //   break;
 
       case EKeyCode.Delete:
+      case EKeyCode.BackSpace:
         this.deleteRect(this.selectedRectID);
         break;
 
-      case EKeyCode.Tab: {
-        e.preventDefault();
-
-        if (this.drawingRect) {
-          // 如果正在编辑则不允许使用 Tab 切换
-          return;
-        }
-
-        let sort = ESortDirection.ascend;
-        if (e.shiftKey) {
-          sort = ESortDirection.descend;
-        }
-
-        const [showingRect, selectedRect] = CommonToolUtils.getRenderResultList<IRect>(
-          this.rectList,
-          CommonToolUtils.getSourceID(this.basicResult),
-          this.attributeLockList,
-          this.selectedRectID,
-        );
-
-        let rectList = [...showingRect];
-        if (selectedRect) {
-          rectList = [...rectList, selectedRect];
-        }
-
-        const viewPort = CanvasUtils.getViewPort(this.canvas, this.currentPos, this.zoom);
-        rectList = rectList.filter((rect) => CanvasUtils.inViewPort({ x: rect.x, y: rect.y }, viewPort));
-
-        const nextSelectedRect = CommonToolUtils.getNextSelectedRectID(rectList, sort, this.selectedRectID) as IRect;
-        if (nextSelectedRect) {
-          this.setSelectedRectID(nextSelectedRect.id);
-          if (this.config.attributeConfigurable === true) {
-            this.setDefaultAttribute(nextSelectedRect.attribute);
-          }
-        }
-
-        break;
-      }
-
       default: {
-        if (this.config.attributeConfigurable) {
-          const keyCode2Attribute = AttributeUtils.getAttributeByKeycode(keyCode, this.config.attributeList);
-
-          if (keyCode2Attribute !== undefined) {
-            this.setDefaultAttribute(keyCode2Attribute);
-          }
-        }
-
         break;
       }
     }

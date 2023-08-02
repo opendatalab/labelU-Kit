@@ -98,7 +98,10 @@ export const task = createModel<RootModel>()({
     }) {
       const { data } = await updateTaskConfig(taskId, {
         ...body,
-        config: body.config ? JSON.stringify(body.config) : undefined,
+        config:
+          body.config && Object.values(body.config).filter((item) => item !== undefined).length > 0
+            ? JSON.stringify(body.config)
+            : undefined,
       });
 
       dispatch.task.mergeTask(data);

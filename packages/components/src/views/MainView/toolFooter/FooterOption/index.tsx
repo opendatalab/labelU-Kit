@@ -1,5 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { debounce } from 'lodash-es';
 
 import ViewContext from '@/view.context';
 import type { ImageAttribute } from '@/interface/base';
@@ -20,9 +22,19 @@ const FooterOption = () => {
   // TODO
   const isBegin = false;
 
-  const updateRotate = () => {
+  const updateRotate = debounce(() => {
     annotationEngine?.toolInstance?.updateRotate();
-  };
+  }, 100);
+
+  useHotkeys(
+    'r',
+    updateRotate,
+    {
+      keyup: true,
+      keydown: false,
+    },
+    [updateRotate],
+  );
 
   const commonOptionList: any = [
     {

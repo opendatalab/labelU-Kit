@@ -2,17 +2,18 @@ import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import _, { size } from 'lodash-es';
+import type { EToolName } from '@label-u/annotation';
 
 import ViewContext from '@/view.context';
 
-import { prefix } from '../../../constant';
+import { prefix, labelTool } from '../../../constant';
 import AttributeResult from './AttributeResult';
 import TagSidebar from './TagSidebar';
 import TextToolSidebar from './TextToolSidebar';
 
 const sidebarCls = `${prefix}-sidebar`;
 const RightSiderbar = () => {
-  const { result, textConfig, tagConfigList, graphicResult } = useContext(ViewContext);
+  const { result, textConfig, tagConfigList, graphicResult, config } = useContext(ViewContext);
   const sideRef = useRef<HTMLDivElement>(null);
 
   // 将右侧属性栏高度设置为剩余高度
@@ -72,6 +73,10 @@ const RightSiderbar = () => {
     );
   }, [result, tagConfigList]);
 
+  const labelToolLen = useMemo(
+    () => config?.tools?.filter((tool) => labelTool.includes(tool.tool as EToolName)).length,
+    [config?.tools],
+  );
   const attributeTab = useMemo(() => {
     const count = graphicResult?.reduce((acc, cur) => {
       return acc + cur.result.length;
@@ -95,9 +100,13 @@ const RightSiderbar = () => {
             </div>
           </Tabs.TabPane>
         )}
-        <Tabs.TabPane forceRender tab={attributeTab} key="2">
-          <AttributeResult />
-        </Tabs.TabPane>
+
+        {labelToolLen && (
+          <Tabs.TabPane forceRender tab={attributeTab} key="2">
+            <AttributeResult />
+          </Tabs.TabPane>
+        )}
+
         {textConfig && textConfig.length > 0 && (
           <Tabs.TabPane forceRender tab={textTab} key="3">
             <div className={`${sidebarCls}`}>

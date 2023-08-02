@@ -115,7 +115,6 @@ body {
     overflow-x: hidden;
     position: relative;
     z-index: 10;
-    border-top: 1px solid #e2e2e2;
     // height: calc(100vh - 99px);
     padding: 16px 0;
 
@@ -186,7 +185,7 @@ body {
   .attributeBox {
     padding-left: 16px;
     padding-right: 16px;
-    background-color: #f7f7f7;
+    background-color: #f8f8f8;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -584,11 +583,8 @@ body {
     }
 
     .ant-tabs-nav-list {
-      border-top: 1px solid rgb(0 0 0 / 10%);
-      border-bottom: 1px solid rgb(0 0 0 / 10%);
       height: 64px !important;
       align-items: center;
-      // width: 260px !important;
       width: 100%;
       position: relative;
       display: flex;
@@ -1061,13 +1057,6 @@ $hotkey-container-padding: 7px;
 .tipsBar {
   display: flex;
   height: 100%;
-
-  :global {
-    .ant-popover.tool-hotkeys-popover .ant-popover-inner-content {
-      max-height: $hotkey-item-height * 10 + $hotkey-container-padding * 2;
-      overflow-y: auto;
-    }
-  }
 
   .hotKeyIconGray,
   .helpIconGray {

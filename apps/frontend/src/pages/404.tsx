@@ -1,22 +1,40 @@
-import { Button, Result } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { useLocale } from '../locales';
+import { ReactComponent as NotFoundIcon } from '@/assets/svg/not-found.svg';
+import Navigate from '@/components/Navigate';
+
+const NotFoundWrapper = styled.div`
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: column;
+
+  .content {
+    flex: 1;
+    display: flex;
+    width: 100%;
+    background-color: var(--color-fill-quaternary);
+  }
+
+  .inner {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+`;
 
 const NotFoundPage: React.FC<Record<string, unknown>> = () => {
-  const navigate = useNavigate();
-  const { formatMessage } = useLocale();
   return (
-    <Result
-      status="404"
-      title="404"
-      subTitle={formatMessage({ id: 'gloabal.tips.notfound' })}
-      extra={
-        <Button type="primary" onClick={() => navigate('/')}>
-          {formatMessage({ id: 'gloabal.tips.backHome' })}
-        </Button>
-      }
-    />
+    <NotFoundWrapper>
+      <Navigate />
+      <div className="content">
+        <div className="inner">
+          <NotFoundIcon />
+          <h3>页面不存在</h3>
+        </div>
+      </div>
+    </NotFoundWrapper>
   );
 };
 
