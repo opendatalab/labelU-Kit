@@ -98,17 +98,13 @@ const App = forwardRef<
   }, []);
 
   // redo undo
-  // const [past, setPast] = useState([]);
   const pastRef = useRef<any[]>([]);
-  // const [present, setPresent] = useState(null);
-  // const [future, setFuture] = useState([]);
   const futureRef = useRef<any[]>([]);
 
   const updateResult = useCallback((newResult) => {
     setResult((pre) => {
       if (!isEqual(pre, newResult)) {
         pastRef.current = [...pastRef.current, pre];
-        console.log('pastRef.current', pastRef.current);
       }
 
       return newResult;
@@ -125,8 +121,6 @@ const App = forwardRef<
     const newPresent = pastRef.current[pastRef.current.length - 1];
     const newPast = pastRef.current.slice(0, pastRef.current.length - 1);
 
-    console.log('current', newPresent);
-
     pastRef.current = newPast;
     setResult(newPresent);
     syncResultToEngine();
@@ -141,8 +135,6 @@ const App = forwardRef<
     const newPresent = futureRef.current[0];
     const newFuture = futureRef.current.slice(1);
     pastRef.current = [...pastRef.current!, resultRef.current!];
-
-    console.log('current', newPresent);
 
     setResult(newPresent);
     futureRef.current = newFuture;
