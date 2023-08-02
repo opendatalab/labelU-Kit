@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@label-u/annotation": "2.0.0",
-    "@label-u/components": "2.0.1",
+    "@label-u/annotation": "2.1.0-alpha.3",
+    "@label-u/components": "2.1.0-alpha.7",
     "@label-u/formatter": "1.0.1",
     "@rematch/core": "^2.2.0",
     "@rematch/immer": "^2.1.3",
