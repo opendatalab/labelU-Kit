@@ -11,10 +11,35 @@ import { parseTime, scheduleVideoAnnotationLane, uid } from './utils';
 import GlobalStyle from './GlobalStyle';
 import VideoAnnotationContext from './context';
 
-const BarWrapper = styled.div`
+const BarWrapper = styled.div<{ expanded?: boolean }>`
   position: relative;
-  cursor: pointer;
   user-select: none;
+  --bar-height: 2.5rem;
+
+  .lane-wrapper {
+    max-height: var(--bar-height);
+    ${({ expanded }) =>
+      expanded &&
+      css`
+        max-height: calc(5 * var(--bar-height));
+      `}
+    overflow: auto;
+  }
+
+  .expand-trigger {
+    cursor: pointer;
+    position: absolute;
+    height: 1rem;
+    width: 2rem;
+    font-size: 12px;
+    top: -1rem;
+    border-radius: 2px 2px 0 0;
+    background-color: #333;
+    color: #999;
+    border: solid 1px rgb(86 86 86);
+    left: 50%;
+    border-bottom: 0;
+  }
 
   .player-frame {
     left: 0;
@@ -30,7 +55,7 @@ const BarWrapper = styled.div`
 const ActivityBar = styled.div<{ editingType?: VideoAnnotationType }>`
   position: relative;
   background-color: #333;
-  height: 3rem;
+  height: var(--bar-height);
   border-top: 1px solid #e6e6e633;
   ${({ editingType }) =>
     editingType === 'segment' &&
@@ -69,7 +94,9 @@ export default function Video({
 }: VideoProps) {
   const [duration, setDuration] = useState(0);
   const [selectedAnnotation, setSelectedAnnotation] = useState<VideoAnnotation | null>(null);
+  const [expanded, setExpanded] = useState<boolean>(false);
   const playerRef = useRef<any>(null);
+  const laneRef = useRef<HTMLDivElement | null>(null);
   const editingElementRef = useRef<HTMLDivElement | null>(null);
   const editingAnnotationRef = useRef<VideoAnnotation | null>(null);
   const activityBarRef = useRef<HTMLDivElement | null>(null);
@@ -80,14 +107,46 @@ export default function Video({
 
   const annotationLanes = useMemo(() => scheduleVideoAnnotationLane(annotations), [annotations]);
 
+  const handleExpandTriggerClick = useCallback(() => {
+    setExpanded((prev) => !prev);
+  }, []);
+
   const resetEditingAnnotation = useCallback(() => {
     setEditingAnnotation(null);
     editingAnnotationRef.current = null;
   }, []);
 
-  const handlePlayStatusChange = (isPlaying: boolean) => {
+  const scrollToCurrentAnnotation = useCallback(
+    (_annotation: VideoAnnotation) => {
+      // 滚动到当前轨道
+      setTimeout(() => {
+        if (!laneRef.current || !activityBarRef.current) {
+          return;
+        }
+        const newAnnotationLanes = scheduleVideoAnnotationLane([...annotations, _annotation]);
+        const currentLaneIndex = newAnnotationLanes.findIndex((lane) =>
+          lane.find((item) => item.id === _annotation.id),
+        );
+        laneRef.current.scrollTop = currentLaneIndex * activityBarRef.current.clientHeight;
+      });
+    },
+    [annotations],
+  );
+
+  const finishAnnotation = useCallback(
+    (_annotation: VideoAnnotation, e?: MouseEvent) => {
+      onChange?.([...annotations, _annotation]);
+      onAnnotateEnd?.(_annotation, e);
+      setSelectedAnnotation(_annotation);
+      resetEditingAnnotation();
+      scrollToCurrentAnnotation(_annotation);
+    },
+    [annotations, onAnnotateEnd, onChange, resetEditingAnnotation, scrollToCurrentAnnotation],
+  );
+
+  const handlePlayStatusChange = useCallback((isPlaying: boolean) => {
     isPlayingRef.current = isPlaying;
-  };
+  }, []);
 
   const handlePlaying = () => {
     const frame = frameRef.current;
@@ -106,15 +165,10 @@ export default function Video({
           !annotations.find((item) => item.id === editingAnnotation.id)
         ) {
           isSettingCurrentTimeRef.current = false;
-
-          const newAnnotation = {
+          finishAnnotation({
             ...editingAnnotation,
             end: duration,
-          };
-
-          onChange?.([...annotations, newAnnotation]);
-          onAnnotateEnd?.(newAnnotation);
-          resetEditingAnnotation();
+          });
         }
       }
     }
@@ -163,10 +217,6 @@ export default function Video({
       return;
     }
 
-    if (isPlayingRef.current) {
-      playerRef.current?.play();
-    }
-
     const rect = activityBarRef.current.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
 
@@ -176,30 +226,27 @@ export default function Video({
       return;
     }
 
-    if (editingAnnotationRef.current && (offsetX * duration) / rect.width - editingAnnotationRef.current.start! > 0.2) {
-      const newAnnotation = {
-        ...editingAnnotationRef.current,
-        end: parseTime((offsetX / rect.width) * duration),
-      };
+    if (isPlayingRef.current) {
+      playerRef.current?.play();
+    }
 
-      onChange?.([...annotations, newAnnotation]);
-      onAnnotateEnd?.(newAnnotation, e);
-      setSelectedAnnotation(newAnnotation);
-      resetEditingAnnotation();
+    if (editingAnnotationRef.current && (offsetX * duration) / rect.width - editingAnnotationRef.current.start! > 0.2) {
+      finishAnnotation(
+        {
+          ...editingAnnotationRef.current,
+          end: offsetX > rect.width ? duration : parseTime((offsetX / rect.width) * duration),
+        },
+        e,
+      );
     }
 
     if (editingType === 'frame') {
-      const newAnnotation = {
+      finishAnnotation({
         id: uid(),
         type: 'frame',
         time: parseTime((offsetX / rect.width) * duration),
         label: editingLabel,
-      } as VideoAnnotation;
-
-      onChange?.([...annotations, newAnnotation]);
-      onAnnotateEnd?.(newAnnotation, e);
-      setSelectedAnnotation(newAnnotation);
-      resetEditingAnnotation();
+      });
     }
   };
 
@@ -219,14 +266,13 @@ export default function Video({
 
       if (editingType === 'segment') {
         if (editingAnnotationRef.current && (offsetX * duration) / rect.width > editingAnnotationRef.current.start!) {
-          const newAnnotation = {
-            ...editingAnnotationRef.current,
-            end: parseTime((offsetX / rect.width) * duration),
-          };
-
-          onChange?.([...annotations, newAnnotation]);
-          onAnnotateEnd?.(newAnnotation, e.nativeEvent);
-          resetEditingAnnotation();
+          finishAnnotation(
+            {
+              ...editingAnnotationRef.current,
+              end: parseTime((offsetX / rect.width) * duration),
+            },
+            e.nativeEvent,
+          );
         } else {
           const newAnnotation = {
             id: uid(),
@@ -237,6 +283,7 @@ export default function Video({
           } as VideoAnnotation;
           editingAnnotationRef.current = newAnnotation;
           setEditingAnnotation(newAnnotation);
+          setSelectedAnnotation(newAnnotation);
         }
       }
     }
@@ -254,18 +301,19 @@ export default function Video({
   );
 
   const handleAnnotationChange = useCallback(
-    (annotation: VideoAnnotation) => {
+    (_annotation: VideoAnnotation) => {
       const newAnnotations = annotations.map((item) => {
-        if (item.id === annotation.id) {
-          return annotation;
+        if (item.id === _annotation.id) {
+          return _annotation;
         }
 
         return item;
       });
 
       onChange?.(newAnnotations);
+      scrollToCurrentAnnotation(_annotation);
     },
-    [annotations, onChange],
+    [annotations, onChange, scrollToCurrentAnnotation],
   );
 
   const attributeConfigMapping = useMemo(
@@ -309,26 +357,35 @@ export default function Video({
           onMetaDataLoad={(videoElement) => setDuration(videoElement.duration)}
           onPlaying={handlePlaying}
         >
-          <BarWrapper>
-            {annotationLanes.map((lane, index) => (
-              <AnnotationBar key={index} annotations={lane} />
-            ))}
-            <ActivityBar
-              editingType={disabled ? undefined : editingType}
-              onMouseDown={handleMouseDown}
-              ref={activityBarRef}
-            >
-              {editingAnnotation && (
-                <AttributeItem
-                  ref={editingElementRef}
-                  barWrapperRef={activityBarRef}
-                  key={editingAnnotation.id}
-                  annotation={editingAnnotation}
-                  attributeConfig={attributeConfigMapping?.[editingAnnotation.label] ?? {}}
-                />
-              )}
-            </ActivityBar>
-            <div ref={frameRef} className="player-frame" />
+          <BarWrapper expanded={expanded}>
+            <div className="lane-wrapper" ref={laneRef}>
+              {annotationLanes.map((lane, index) => (
+                <AnnotationBar key={index} annotations={lane} />
+              ))}
+            </div>
+            {annotationLanes.length > 1 && (
+              <div className="expand-trigger" onClick={handleExpandTriggerClick}>
+                {expanded ? '∨' : '∧'}
+              </div>
+            )}
+            <div>
+              <ActivityBar
+                editingType={disabled ? undefined : editingType}
+                onMouseDown={handleMouseDown}
+                ref={activityBarRef}
+              >
+                {editingAnnotation && (
+                  <AttributeItem
+                    ref={editingElementRef}
+                    barWrapperRef={activityBarRef}
+                    key={editingAnnotation.id}
+                    annotation={editingAnnotation}
+                    attributeConfig={attributeConfigMapping?.[editingAnnotation.label] ?? {}}
+                  />
+                )}
+              </ActivityBar>
+              <div ref={frameRef} className="player-frame" />
+            </div>
           </BarWrapper>
         </VideoPlayer>
       </div>

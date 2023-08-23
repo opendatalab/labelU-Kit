@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { rgba } from 'polished';
+import { darken, rgba } from 'polished';
 import type { Attribute, EnumerableAttribute } from '@label-u/annotation';
 import { forwardRef, useContext, useImperativeHandle, useMemo, useRef } from 'react';
 import Tooltip from 'rc-tooltip';
@@ -25,7 +25,8 @@ export interface VideoAnnotation {
 
 const Wrapper = styled.div`
   position: relative;
-  height: 3rem;
+  box-sizing: border-box;
+  height: var(--bar-height);
   background-color: #333333;
   border-top: 1px solid #e6e6e633;
   display: flex;
@@ -104,7 +105,11 @@ const AttributeItemWrapper = styled.div<{
       `}
 
     &:hover {
-      background-color: ${({ color }) => color};
+      background-color: ${({ color }) => rgba(color, 0.8)};
+    }
+
+    &:active {
+      background-color: ${({ color }) => darken(0.1, color)};
     }
 
     &::before {

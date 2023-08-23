@@ -77,34 +77,50 @@ export function parseTime(_input: number) {
  * @returns
  */
 export function scheduleVideoAnnotationLane(annotations: VideoAnnotation[]) {
-  const inputs = annotations.sort((a, b) => (a.start || a.time)! - b.start!);
-  const result: VideoAnnotation[][] = [[inputs[0]]];
+  const inputs = annotations.sort((a, b) => a.start! - b.start!);
+  const segmentResult: VideoAnnotation[][] = [];
+  const frameResult: VideoAnnotation[][] = [];
 
-  for (let i = 1; i < inputs.length; i += 1) {
+  for (let i = 0; i < inputs.length; i += 1) {
     const curr = inputs[i];
-    let inserted = false;
+    let processed = false;
 
-    for (let j = 0; j < result.length; j += 1) {
-      const lane = result[j];
-      const last = lane[lane.length - 1];
+    // 处理时间戳重合
+    if (curr.type === 'frame') {
+      for (let j = 0; j < frameResult.length; j += 1) {
+        const lane = frameResult[j];
+        const last = lane[lane.length - 1];
 
-      if (curr.type === 'segment' && curr.start! > last.end!) {
-        lane.push(curr);
-        inserted = true;
-        break;
+        if (curr.time! !== last.time!) {
+          lane.push(curr);
+          processed = true;
+          break;
+        }
       }
 
-      if (curr.type === 'frame' && curr.time! > last.time!) {
+      if (!processed) {
+        frameResult.push([curr]);
+      }
+
+      continue;
+    }
+
+    // 视频分割片断重合
+    for (let j = 0; j < segmentResult.length; j += 1) {
+      const lane = segmentResult[j];
+      const last = lane[lane.length - 1];
+
+      if (curr.start! > last.end!) {
         lane.push(curr);
-        inserted = true;
+        processed = true;
         break;
       }
     }
 
-    if (!inserted) {
-      result.push([curr]);
+    if (!processed) {
+      segmentResult.push([curr]);
     }
   }
 
-  return result;
+  return [...segmentResult, ...frameResult];
 }

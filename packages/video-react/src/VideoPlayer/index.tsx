@@ -332,4 +332,4 @@ const VideoPlayer = forwardRef<any, React.PropsWithChildren<IProps>>(
   },
 );
 
-export default VideoPlayer;
+export default React.memo(VideoPlayer);
