@@ -1,27 +1,22 @@
 import styled, { css } from 'styled-components';
 import { darken, rgba } from 'polished';
-import type { Attribute, EnumerableAttribute } from '@label-u/annotation';
+import type {
+  VideoAnnotationData,
+  EnumerableAttribute,
+  VideoAnnotationType,
+  VideoFrameAnnotation,
+  Attribute,
+  VideoSegmentAnnotation,
+} from '@label-u/interface';
 import { forwardRef, useContext, useImperativeHandle, useMemo, useRef } from 'react';
 import Tooltip from 'rc-tooltip';
 import 'rc-tooltip/assets/bootstrap.css';
 
 import { parseTime, secondsToMinute } from '@/utils';
+import type { VideoAnnotationInUI } from '@/context';
 import VideoAnnotationContext from '@/context';
 
 import { ReactComponent as VideoFramePin } from '../assets/icons/pin.svg';
-
-export type VideoAnnotationType = 'frame' | 'segment';
-
-export interface VideoAnnotation {
-  id: string;
-  start?: number;
-  end?: number;
-  time?: number;
-  label: string;
-  attributes?: Record<string, string>;
-  visible?: boolean;
-  type: VideoAnnotationType;
-}
 
 const Wrapper = styled.div`
   position: relative;
@@ -34,9 +29,10 @@ const Wrapper = styled.div`
 `;
 
 export interface AttributeItemProps {
-  annotation: VideoAnnotation;
+  annotation: VideoAnnotationData;
   attributeConfig: Attribute;
   active?: boolean;
+  visible?: boolean;
   barWrapperRef: React.RefObject<HTMLDivElement>;
   onClick?: () => void;
 }
@@ -46,6 +42,7 @@ const AttributeItemWrapper = styled.div<{
   type: VideoAnnotationType;
   position: { start: number; end: number };
   active?: boolean;
+  visible?: boolean;
 }>`
   height: 100%;
   position: absolute;
@@ -54,6 +51,12 @@ const AttributeItemWrapper = styled.div<{
   z-index: ${({ active }) => (active ? 999 : 2)};
   left: ${({ position }) => `${position.start * 100}%`};
   overflow: hidden;
+  ${({ visible }) =>
+    typeof visible !== 'undefined' &&
+    !visible &&
+    css`
+      display: none;
+    `}
 
   ${({ type, position }) =>
     type === 'segment'
@@ -85,7 +88,7 @@ const AttributeItemWrapper = styled.div<{
   }
 
   .inner-segment-item {
-    background-color: ${({ color }) => rgba(color, 0.6)};
+    background-color: ${({ color }) => rgba(color, 0.5)};
     position: relative;
     display: flex;
     flex-direction: column;
@@ -98,19 +101,22 @@ const AttributeItemWrapper = styled.div<{
     transition: all 0.2s;
     cursor: pointer;
 
+    &:hover {
+      background-color: ${({ color }) => rgba(color, 0.3)};
+    }
+
+    &:active {
+      background-color: ${({ color }) => darken(0.2, color)};
+    }
+
     ${({ active, color }) =>
       active &&
       css`
         background-color: ${color};
+        &:hover {
+          background-color: ${color};
+        }
       `}
-
-    &:hover {
-      background-color: ${({ color }) => rgba(color, 0.8)};
-    }
-
-    &:active {
-      background-color: ${({ color }) => darken(0.1, color)};
-    }
 
     &::before {
       content: '';
@@ -171,11 +177,28 @@ const TooltipContent = styled.div`
   }
 `;
 
+const AnnotationContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+`;
+
+const OrderWrapper = styled.span`
+  align-items: center;
+  justify-content: center;
+`;
+
+const AnnotationAttribute = styled.div`
+  text-align: left;
+  min-width: 0;
+`;
+
 export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProps>(
-  ({ attributeConfig, active, onClick, barWrapperRef, annotation }, ref) => {
-    const { start, end, type, attributes = {}, time } = annotation;
+  ({ attributeConfig, active, onClick, barWrapperRef, annotation, visible }, ref) => {
+    const { type, attributes = {}, order } = annotation;
     const wrapperRef = useRef<HTMLDivElement | null>(null);
-    const { duration, playerRef, onAnnotationChange, selectAnnotation } = useContext(VideoAnnotationContext);
+    const { duration, playerRef, onAnnotationChange, selectAnnotation, showOrder } = useContext(VideoAnnotationContext);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useImperativeHandle(ref, () => wrapperRef.current as HTMLDivElement, [duration]);
@@ -225,8 +248,10 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
         {Object.entries(attributes).map(([key, value]) => {
           return (
             <span className="attribute-item" key={key}>
-              {currentAttributeMapping[key]?.key ?? 'unknown'}:{' '}
-              {currentAttributeMapping[key]?.optionMapping?.[value]?.key ?? value}
+              {currentAttributeMapping[key]?.key ?? key}:{' '}
+              {(Array.isArray(value)
+                ? value.map((item) => currentAttributeMapping[key]?.optionMapping?.[item]?.key).join(', ')
+                : currentAttributeMapping[key]?.optionMapping?.[value]?.key) || value}
             </span>
           );
         })}
@@ -234,13 +259,15 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
     );
 
     if (type === 'frame') {
+      const { time } = annotation as VideoFrameAnnotation;
       const positionPercentage = time! / duration;
       return (
         <AttributeItemWrapper
-          color={color}
+          color={color || '#666'}
           onClick={onClick}
           type="frame"
           active={active}
+          visible={visible}
           position={{ start: positionPercentage, end: positionPercentage }}
         >
           <Tooltip
@@ -262,6 +289,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
       );
     }
 
+    const { start, end } = annotation as VideoSegmentAnnotation;
     const diff = parseTime(end! - start!);
     const startPositionPercentage = start! / duration;
     const endPositionPercentage = end! / duration;
@@ -310,6 +338,12 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
 
+      const diffX = e.clientX - startPositionRef.current.x;
+
+      if (diffX === 0) {
+        return;
+      }
+
       if (startPositionRef.current.direction === 'left') {
         onAnnotationChange?.({
           ...annotation,
@@ -332,6 +366,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
       e.stopPropagation();
 
       const wrapperStyle = getComputedStyle(wrapperRef.current);
+      playerRef.current.currentTime(duration * (parseFloat(wrapperStyle.left) / parseFloat(wrapperStyle.width)));
 
       selectAnnotation(annotation);
 
@@ -348,8 +383,9 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
     return (
       <AttributeItemWrapper
         onClick={onClick}
-        color={color}
+        color={color || '#666'}
         active={active}
+        visible={visible}
         type="segment"
         position={{ start: startPositionPercentage, end: endPositionPercentage }}
         ref={wrapperRef}
@@ -370,11 +406,16 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
               ref={resizeHandlerLeftRef}
               onMouseDown={handleMouseDown('left')}
             />
-            <div className="duration">{diff}s</div>
-            <div className="attribute-wrap">
-              <div className="attribute-text">{attributeConfig.key}</div>
-              {attributeNodes}
-            </div>
+            <AnnotationContent>
+              {showOrder && <OrderWrapper>{order}.</OrderWrapper>}
+              <AnnotationAttribute>
+                <div className="duration">{diff}s</div>
+                <div className="attribute-wrap">
+                  <div className="attribute-text">{attributeConfig.key}</div>
+                  {attributeNodes}
+                </div>
+              </AnnotationAttribute>
+            </AnnotationContent>
             <span
               className="resize-bar resize-bar_right"
               ref={resizeHandlerRightRef}
@@ -388,14 +429,15 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
 );
 
 export interface AnnotationBarProps {
-  annotations: VideoAnnotation[];
+  annotations: VideoAnnotationInUI[];
 }
 
 export default function AnnotationBar({ annotations }: AnnotationBarProps) {
-  const { selectAnnotation, attributeConfigMapping, selectedAnnotation } = useContext(VideoAnnotationContext);
+  const { selectAnnotation, attributeConfigMapping, selectedAnnotation, playingAnnotationIds } =
+    useContext(VideoAnnotationContext);
   const barWrapperRef = useRef<HTMLDivElement | null>(null);
 
-  const handleAnnotationClick = (_annotation: VideoAnnotation) => () => {
+  const handleAnnotationClick = (_annotation: VideoAnnotationData) => () => {
     selectAnnotation(_annotation);
   };
 
@@ -407,9 +449,10 @@ export default function AnnotationBar({ annotations }: AnnotationBarProps) {
             onClick={handleAnnotationClick(item)}
             key={item.id}
             barWrapperRef={barWrapperRef}
-            active={selectedAnnotation?.id === item.id}
+            visible={item.visible}
+            active={selectedAnnotation?.id === item.id || playingAnnotationIds?.includes(item.id)}
             annotation={item}
-            attributeConfig={attributeConfigMapping?.[item.label] ?? {}}
+            attributeConfig={attributeConfigMapping[item.type][item.label] ?? {}}
           />
         );
       })}

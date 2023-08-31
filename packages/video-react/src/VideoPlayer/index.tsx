@@ -1,4 +1,12 @@
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 
 import 'video.js/dist/video-js.css';
@@ -46,22 +54,20 @@ const StyledVideoPlayer = styled.div.attrs((props) => ({
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
 
   .${videoPlayerClassName}__wrap {
     position: relative;
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
     text-align: center;
+    height: var(--height);
   }
 
   .${videoPlayerClassName}__video {
     display: inline-block;
     flex-grow: 1;
     width: 100%;
-    height: 100%;
     vertical-align: middle;
     outline: none;
     user-select: none;
@@ -98,6 +104,7 @@ interface IProps {
   onPlaying?: (playerInstance: any) => void;
   onPause?: (playerInstance: any) => void;
   onStatusChange?: (isPlaying: boolean) => void;
+  wrapperRef: React.ForwardedRef<HTMLDivElement | null>;
 }
 
 /**
@@ -110,7 +117,6 @@ const VideoPlayer = forwardRef<any, React.PropsWithChildren<IProps>>(
     {
       src,
       paused,
-      size,
       className,
       showControllers = true,
       children,
@@ -118,15 +124,25 @@ const VideoPlayer = forwardRef<any, React.PropsWithChildren<IProps>>(
       onPlaying,
       onPause,
       onStatusChange,
+      wrapperRef: propsWrapperRef,
     },
     ref,
   ) => {
     const playerRef = useRef<any>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const [playing, setPlaying] = useState<boolean>(false);
     const [current, setCurrent] = useState<number>(0);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [, setLoaded] = useState<boolean>(false);
     const videoRef = useRef<any>(undefined); // 记录slider拖动前是否正在播放
+    const [parentHeight, setParentHeight] = useState<number>(0);
+
+    useLayoutEffect(() => {
+      if (!wrapperRef.current) {
+        return;
+      }
+
+      setParentHeight(wrapperRef.current.clientHeight);
+    }, []);
 
     // 暴露给 ref 的一些方法
     useImperativeHandle(
@@ -136,6 +152,15 @@ const VideoPlayer = forwardRef<any, React.PropsWithChildren<IProps>>(
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [playerRef.current],
+    );
+
+    useImperativeHandle(
+      propsWrapperRef,
+      () => {
+        return wrapperRef.current as HTMLDivElement;
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [wrapperRef.current],
     );
 
     const handlePlayerReady = useCallback(() => {
@@ -182,22 +207,19 @@ const VideoPlayer = forwardRef<any, React.PropsWithChildren<IProps>>(
       if (!videoRef.current || !document.contains(videoRef.current)) {
         return;
       }
-
-      if (playerRef.current) {
-        playerRef.current.src([
-          {
-            // @ts-ignore
-            src,
-            type: 'video/mp4',
-          },
-        ]);
-      } else {
-        import('video.js').then((m) => {
+      import('video.js').then((m) => {
+        if (playerRef.current) {
+          playerRef.current.src([
+            {
+              src,
+              type: 'video/mp4',
+            },
+          ]);
+        } else {
           playerRef.current = m.default(
             videoRef.current,
             {
               ...defaultOptions,
-              ...size,
               sources: src
                 ? [
                     {
@@ -209,9 +231,9 @@ const VideoPlayer = forwardRef<any, React.PropsWithChildren<IProps>>(
             },
             handlePlayerReady,
           );
-        });
-      }
-    }, [src, handlePlayerReady, videoRef, size]);
+        }
+      });
+    }, [src, handlePlayerReady, videoRef, parentHeight]);
 
     useEffect(() => {
       if (paused) {
@@ -310,8 +332,10 @@ const VideoPlayer = forwardRef<any, React.PropsWithChildren<IProps>>(
     );
 
     return (
-      <StyledVideoPlayer className={className}>
-        <div className={`${videoPlayerClassName}__wrap`}>
+      // @ts-ignore
+      <StyledVideoPlayer className={className} ref={wrapperRef}>
+        {/* @ts-ignore */}
+        <div className={`${videoPlayerClassName}__wrap`} style={{ '--height': `${parentHeight}px` }}>
           <video
             className={`${videoPlayerClassName}__video video-js vjs-big-play-centered`}
             ref={videoRef}

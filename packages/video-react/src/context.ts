@@ -1,16 +1,21 @@
+import type { Attribute, VideoAnnotationData, VideoFrameName, VideoSegmentName } from '@label-u/interface';
 import { createContext } from 'react';
 
-import type { VideoAnnotation } from './AnnotationBar';
+export type VideoAnnotationInUI = VideoAnnotationData & {
+  visible?: boolean;
+};
 
 export interface VideoAnnotationContextType {
-  selectedAnnotation: VideoAnnotation | null;
-  selectAnnotation: (annotation: VideoAnnotation) => void;
-  editingAnnotation: VideoAnnotation | null;
+  selectedAnnotation: VideoAnnotationInUI | undefined;
+  selectAnnotation: (annotation: VideoAnnotationInUI) => void;
+  editingAnnotation: VideoAnnotationInUI | null;
   duration: number;
+  showOrder: boolean;
   playerRef: any;
-  onChange?: (annotation: VideoAnnotation[]) => void;
-  onAnnotationChange: (annotation: VideoAnnotation) => void;
-  attributeConfigMapping: Record<string, any>;
+  onChange?: (annotation: VideoAnnotationInUI) => void;
+  onAnnotationChange: (annotation: VideoAnnotationInUI) => void;
+  attributeConfigMapping: Record<VideoSegmentName | VideoFrameName, Record<string, Attribute>>;
+  playingAnnotationIds: string[];
 }
 
 const VideoAnnotationContext = createContext<VideoAnnotationContextType>({} as VideoAnnotationContextType);

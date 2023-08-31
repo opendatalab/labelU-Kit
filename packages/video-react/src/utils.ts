@@ -1,4 +1,4 @@
-import type { VideoAnnotation } from './AnnotationBar';
+import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation } from '@label-u/interface';
 
 /**
  * 把毫秒转换成时长
@@ -76,10 +76,28 @@ export function parseTime(_input: number) {
  * @param annotations
  * @returns
  */
-export function scheduleVideoAnnotationLane(annotations: VideoAnnotation[]) {
-  const inputs = annotations.sort((a, b) => a.start! - b.start!);
-  const segmentResult: VideoAnnotation[][] = [];
-  const frameResult: VideoAnnotation[][] = [];
+export function scheduleVideoAnnotationLane(annotations: VideoAnnotationData[]) {
+  const inputs = annotations.sort((a, b) => {
+    if (a.type === 'segment' && b.type === 'frame') {
+      return a.start - b.time;
+    }
+
+    if (a.type === 'frame' && b.type === 'segment') {
+      return a.time - b.start;
+    }
+
+    if (a.type === 'frame' && b.type === 'frame') {
+      return a.time - b.time;
+    }
+
+    if (a.type === 'segment' && b.type === 'segment') {
+      return a.start - b.start;
+    }
+
+    return 0;
+  });
+  const segmentResult: VideoSegmentAnnotation[][] = [];
+  const frameResult: VideoFrameAnnotation[][] = [];
 
   for (let i = 0; i < inputs.length; i += 1) {
     const curr = inputs[i];

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import Video from './Video';
-import type { VideoAnnotation, VideoAnnotationType } from './AnnotationBar';
+import Video from '../Video';
+import type { VideoAnnotation } from '../AnnotationBar';
 
 const mockData: VideoAnnotation[] = [
   {
@@ -9,16 +9,14 @@ const mockData: VideoAnnotation[] = [
     start: 6.087957,
     end: 11.533612,
     label: 'xfasd',
-    attributes: { eeeee: 'ddddasdqwe爱大赛请问', gffffffasd: 'ddd' },
-    visible: true,
+    attributes: { eeeee: 'ddddasdqwe爱大赛请问', gffffffasd: ['ddd'] },
     type: 'segment',
   },
   {
     id: '2',
     time: 14,
     label: 'label-2',
-    attributes: { eeeee: 'vvzxc', gffffffasd: 'ddd' },
-    visible: true,
+    attributes: { eeeee: 'vvzxc', gffffffasd: ['ddd'] },
     type: 'frame',
   },
   { id: 'ciwn339hr7', type: 'segment', start: 14.239382, end: 23.094575, label: 'label-2' },
@@ -105,8 +103,6 @@ export default function Doc() {
       value: item.value,
     };
   });
-
-  console.log(JSON.stringify(annotations));
 
   return (
     <div style={{ width: 800, height: 600 }}>

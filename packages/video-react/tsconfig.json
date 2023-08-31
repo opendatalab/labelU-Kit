@@ -3,11 +3,13 @@
   "compilerOptions": {
     "isolatedModules": false,
     "sourceMap": false,
+    "allowJs": true,
     "outDir": "dist",
     "declarationDir": "dist",
     "baseUrl": "./"
   },
   "include": [
     "./src"
-  ]
+  ],
+  "exclude": ["./src/example"]
 }
