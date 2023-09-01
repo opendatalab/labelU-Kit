@@ -10,7 +10,6 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import styled from 'styled-components';
@@ -167,8 +166,7 @@ function RadioGroup({ onChange, value: propsValue, options }: RadioGroupProps) {
 }
 
 function CheckboxGroup({ onChange, value: propsValue, options }: RadioGroupProps) {
-  const propsValueRef = useRef<string[] | undefined>(propsValue);
-  const [value, setValue] = useState<string[] | undefined>(propsValue || []);
+  const [value, setValue] = useState<string[] | undefined>(propsValue);
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue: string[] | undefined = [];
 
@@ -183,10 +181,6 @@ function CheckboxGroup({ onChange, value: propsValue, options }: RadioGroupProps
   };
 
   useEffect(() => {
-    if (propsValue?.join('') === propsValueRef.current?.join('')) {
-      return;
-    }
-
     setValue(propsValue);
   }, [propsValue]);
 
