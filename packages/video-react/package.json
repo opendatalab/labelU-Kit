@@ -39,6 +39,7 @@
   "dependencies": {
     "polished": "^4.2.2",
     "rc-tooltip": "^6.0.1",
+    "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6",
     "video.js": "^8.3.0"
   },

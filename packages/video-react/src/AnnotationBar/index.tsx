@@ -34,7 +34,7 @@ export interface AttributeItemProps {
   active?: boolean;
   visible?: boolean;
   barWrapperRef: React.RefObject<HTMLDivElement>;
-  onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
 const AttributeItemWrapper = styled.div<{
@@ -195,7 +195,7 @@ const AnnotationAttribute = styled.div`
 `;
 
 export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProps>(
-  ({ attributeConfig, active, onClick, barWrapperRef, annotation, visible }, ref) => {
+  ({ attributeConfig, active, onContextMenu, barWrapperRef, annotation, visible }, ref) => {
     const { type, attributes = {}, order } = annotation;
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const { duration, playerRef, onAnnotationChange, selectAnnotation, showOrder } = useContext(VideoAnnotationContext);
@@ -264,7 +264,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
       return (
         <AttributeItemWrapper
           color={color || '#666'}
-          onClick={onClick}
+          onContextMenu={onContextMenu}
           type="frame"
           active={active}
           visible={visible}
@@ -382,7 +382,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
 
     return (
       <AttributeItemWrapper
-        onClick={onClick}
+        onContextMenu={onContextMenu}
         color={color || '#666'}
         active={active}
         visible={visible}
@@ -437,7 +437,8 @@ export default function AnnotationBar({ annotations }: AnnotationBarProps) {
     useContext(VideoAnnotationContext);
   const barWrapperRef = useRef<HTMLDivElement | null>(null);
 
-  const handleAnnotationClick = (_annotation: VideoAnnotationData) => () => {
+  const handleAnnotationClick = (_annotation: VideoAnnotationData) => (e: React.MouseEvent) => {
+    e.preventDefault();
     selectAnnotation(_annotation);
   };
 
@@ -446,7 +447,7 @@ export default function AnnotationBar({ annotations }: AnnotationBarProps) {
       {annotations?.map((item) => {
         return (
           <AttributeItem
-            onClick={handleAnnotationClick(item)}
+            onContextMenu={handleAnnotationClick(item)}
             key={item.id}
             barWrapperRef={barWrapperRef}
             visible={item.visible}

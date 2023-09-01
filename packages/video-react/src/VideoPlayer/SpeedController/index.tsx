@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { ReactComponent as ArrowUp } from '../icons/arrow-up.svg';
 import { ReactComponent as ArrowDown } from '../icons/arrow-down.svg';
@@ -90,25 +91,8 @@ const SpeedController = (props: IProps) => {
     [MAX_PLAYBACK_RATE_SPEED, MIN_PLAYBACK_RATE_SPEED, PLAYBACK_RATE_SPEED, onChange, rate],
   );
 
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      /* 加速 */
-      if (e.key === 'ArrowUp') {
-        setPlaybackRate(ESpeedChange.Increase);
-      }
-
-      /* 减速 */
-      if (e.key === 'ArrowDown') {
-        setPlaybackRate(ESpeedChange.Reduce);
-      }
-    },
-    [setPlaybackRate],
-  );
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onKeyDown]);
+  useHotkeys('ctrl+right,meta+right', () => setPlaybackRate(ESpeedChange.Increase), [setPlaybackRate]);
+  useHotkeys('ctrl+left,meta+left', () => setPlaybackRate(ESpeedChange.Reduce), [setPlaybackRate]);
 
   return (
     <Wrapper>

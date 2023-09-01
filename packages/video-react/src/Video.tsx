@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 import type {
   VideoAnnotationType,
   VideoSegmentAnnotation,
@@ -161,6 +162,12 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
   useEffect(() => {
     setSelectedAnnotation(undefined);
   }, [editingType]);
+
+  useEffect(() => {
+    if (playerRef.current) {
+      playerRef.current.pause();
+    }
+  }, [src]);
 
   useImperativeHandle(
     propsPlayerRef,
@@ -359,7 +366,6 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
             {
               ...editingSegmentAnnotationRef.current,
               end: parseTime((offsetX / rect.width) * duration),
-              order: maxOrder + 1,
             },
             e.nativeEvent,
           );
@@ -398,6 +404,112 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
       scrollToCurrentAnnotation(_annotation);
     },
     [onChange, scrollToCurrentAnnotation],
+  );
+
+  // ================== 快捷键 ==================
+
+  // 取消标记 和 暂停/播放
+  useHotkeys(
+    'space',
+    () => {
+      if (playerRef.current) {
+        if (playerRef.current.paused()) {
+          playerRef.current.play();
+        } else {
+          playerRef.current.pause();
+        }
+      }
+    },
+    {
+      preventDefault: true,
+    },
+    [],
+  );
+
+  useHotkeys(
+    'escape',
+    resetEditingAnnotation,
+    {
+      preventDefault: true,
+    },
+    [resetEditingAnnotation],
+  );
+
+  // 标记片断
+  useHotkeys(
+    'x',
+    () => {
+      if (editingSegmentAnnotationRef.current) {
+        finishAnnotation({
+          ...editingSegmentAnnotationRef.current,
+          end: playerRef.current.currentTime(),
+        });
+      } else {
+        const newAnnotation = {
+          id: uid(),
+          type: 'segment',
+          start: playerRef.current.currentTime(),
+          end: playerRef.current.currentTime(),
+          order: maxOrder + 1,
+          label: editingLabel,
+        } as VideoSegmentAnnotation;
+        editingSegmentAnnotationRef.current = newAnnotation;
+        setEditingAnnotation(newAnnotation);
+        setSelectedAnnotation(newAnnotation);
+      }
+    },
+    {
+      preventDefault: true,
+      enabled: editingType === 'segment',
+    },
+    [setEditingAnnotation, setSelectedAnnotation, finishAnnotation, editingLabel, maxOrder, editingType],
+  );
+
+  // 标记时间戳
+  useHotkeys(
+    'e',
+    () => {
+      finishAnnotation({
+        id: uid(),
+        type: 'frame',
+        time: playerRef.current.currentTime(),
+        label: editingLabel ?? '',
+        order: maxOrder + 1,
+      });
+    },
+    {
+      preventDefault: true,
+      enabled: editingType === 'frame',
+    },
+    [finishAnnotation, editingLabel, maxOrder, editingType],
+  );
+
+  // 快进10s
+  useHotkeys(
+    'ArrowRight',
+    () => {
+      if (playerRef.current) {
+        playerRef.current.currentTime(playerRef.current.currentTime() + 10);
+      }
+    },
+    {
+      preventDefault: true,
+    },
+    [finishAnnotation, editingLabel, maxOrder, editingType],
+  );
+
+  // 后退10s
+  useHotkeys(
+    'ArrowLeft',
+    () => {
+      if (playerRef.current) {
+        playerRef.current.currentTime(playerRef.current.currentTime() - 10);
+      }
+    },
+    {
+      preventDefault: true,
+    },
+    [finishAnnotation, editingLabel, maxOrder, editingType],
   );
 
   const attributeConfigMapping = useMemo(() => {

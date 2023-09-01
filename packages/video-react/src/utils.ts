@@ -77,7 +77,8 @@ export function parseTime(_input: number) {
  * @returns
  */
 export function scheduleVideoAnnotationLane(annotations: VideoAnnotationData[]) {
-  const inputs = annotations.sort((a, b) => {
+  const _annotations = annotations.slice();
+  const inputs = _annotations.sort((a, b) => {
     if (a.type === 'segment' && b.type === 'frame') {
       return a.start - b.time;
     }
@@ -141,4 +142,27 @@ export function scheduleVideoAnnotationLane(annotations: VideoAnnotationData[]) 
   }
 
   return [...segmentResult, ...frameResult];
+}
+
+type Func = (...args: any[]) => any; // 函数类型
+
+/**
+ * 节流函数
+ * @param fn 节流函数
+ * @param delay 延迟时间 s
+ * @returns
+ */
+export function throttle(fn: Func, delay: number): Func {
+  let timer: ReturnType<typeof setTimeout> | null;
+
+  return function (this: ThisParameterType<Func>, ...args: any[]) {
+    if (timer) {
+      return;
+    }
+
+    timer = setTimeout(() => {
+      fn.call(this, ...args);
+      timer = null;
+    }, delay);
+  };
 }
