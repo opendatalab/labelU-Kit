@@ -42,6 +42,7 @@ export interface EditorContextType {
   currentTool: VideoAnnotationType | undefined;
   samples: VideoSample[];
   config?: VideoEditorConfig;
+  videoAnnotations: VideoAnnotationInEditor[];
   attributes: Attribute[];
   orderVisible: boolean;
   currentSample?: VideoSample;
@@ -59,9 +60,12 @@ export interface EditorContextType {
   onAnnotationChange: (annotation: VideoAnnotationInEditor) => void;
   onOrderVisibleChange: (visible: boolean) => void;
   onAttributeChange: (payload: any) => void;
-  // TODO: 视频标注类型扩展为包含全局标注类型
   onAnnotationsChange: (annotations: VideoWithGlobalAnnotation[]) => void;
   playerRef: React.RefObject<any>;
+  redo: () => void;
+  undo: () => void;
+  pastRef: React.RefObject<VideoSample[]>;
+  futureRef: React.RefObject<VideoSample[]>;
 }
 
 const EditorContext = createContext<EditorContextType>({} as EditorContextType);

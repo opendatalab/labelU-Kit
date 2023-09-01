@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import Video from '@label-u/video-react';
 import type { VideoProps } from '@label-u/video-react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type {
   TagAnnotationEntity,
@@ -52,13 +53,15 @@ export interface EditorProps {
   renderSidebar?: (selectSample: (sample: VideoSample) => void) => React.ReactNode;
   renderAttributes?: () => React.ReactNode;
   editingSample?: VideoSample;
+  maxHistoryCount?: number;
 }
 
-function Editor(
-  { samples = [], renderSidebar, config, renderAttributes, editingSample }: EditorProps,
+function ForwardEditor(
+  { samples = [], renderSidebar, config, renderAttributes, editingSample, maxHistoryCount = 20 }: EditorProps,
   ref: React.Ref<EditorRef>,
 ) {
   const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>('segment');
+  const selectedIndexRef = useRef<number>(-1);
   const attributes = useMemo(() => {
     if (!currentTool) {
       return [];
@@ -107,114 +110,167 @@ function Editor(
     setSelectedAttribute(undefined);
   }, []);
 
-  // ================== sample ==================
+  // ================== sample state ==================
   const [currentSample, setCurrentSample] = useState<VideoSample | undefined>(editingSample);
+  // ================== redo undo ==================
+  const pastRef = useRef<VideoSample[]>([]);
+  const futureRef = useRef<VideoSample[]>([]);
+
+  // 重置历史记录
+  useEffect(() => {
+    pastRef.current = [];
+    futureRef.current = [];
+  }, [editingSample]);
+
+  const updateCurrentSample = useCallback(
+    (_newSample: React.SetStateAction<VideoSample | undefined>) => {
+      setCurrentSample((pre) => {
+        const newSample = typeof _newSample === 'function' ? _newSample(pre) : _newSample;
+
+        if (pre) {
+          pastRef.current = [...pastRef.current, pre].slice(-maxHistoryCount);
+        }
+
+        return newSample;
+      });
+
+      futureRef.current = [];
+    },
+    [maxHistoryCount],
+  );
+
+  const undo = useCallback(() => {
+    if (pastRef.current.length === 0) {
+      return;
+    }
+
+    const newPresent = pastRef.current[pastRef.current.length - 1];
+    const newPast = pastRef.current.slice(0, pastRef.current.length - 1);
+
+    pastRef.current = newPast;
+    setCurrentSample(newPresent);
+    setSelectedAnnotation(undefined);
+    setSelectedAttribute(undefined);
+    if (currentSample) {
+      futureRef.current = [currentSample, ...futureRef.current];
+    }
+  }, [currentSample]);
+
+  const redo = useCallback(() => {
+    if (futureRef.current.length === 0) {
+      return;
+    }
+
+    const newPresent = futureRef.current[0];
+    const newFuture = futureRef.current.slice(1);
+    pastRef.current = [...pastRef.current!, currentSample!];
+
+    setCurrentSample(newPresent);
+    futureRef.current = newFuture;
+  }, [currentSample]);
+
+  // ================== sample ==================
 
   const handleSelectSample = useCallback((sample: VideoSample) => {
     setCurrentSample(sample);
     setSelectedAnnotation(undefined);
+    pastRef.current = [];
+    futureRef.current = [];
   }, []);
 
   useEffect(() => {
-    setCurrentSample(editingSample || samples?.[0]);
-  }, [editingSample, samples]);
-
-  useEffect(() => {
-    const handleKeyup = (e: KeyboardEvent) => {
-      if (!['Delete', 'Backspace'].includes(e.key)) {
-        return;
-      }
-
-      e.preventDefault();
-
-      if (selectedAnnotation) {
-        setCurrentSample((pre) => {
-          return {
-            ...pre!,
-            annotations: pre!.annotations!.filter((i) => i.id !== selectedAnnotation.id),
-          };
-        });
-      }
-    };
-
-    document.addEventListener('keyup', handleKeyup);
-
-    return () => {
-      document.removeEventListener('keyup', handleKeyup);
-    };
-  }, [selectedAnnotation]);
+    updateCurrentSample(editingSample || samples?.[0]);
+  }, [editingSample, samples, updateCurrentSample]);
 
   // ================== annotation ==================
   const videoAnnotations = useMemo(() => {
-    return (
-      currentSample?.annotations?.filter((item) => ['segment', 'frame'].includes(item.type)) ??
-      ([] as VideoAnnotationInEditor[])
-    );
+    const _videoAnnotations = (currentSample?.annotations?.filter((item) => ['segment', 'frame'].includes(item.type)) ??
+      []) as VideoAnnotationInEditor[];
+
+    _videoAnnotations.sort((a, b) => a.order - b.order);
+
+    return _videoAnnotations;
   }, [currentSample?.annotations]);
 
-  const handleAnnotationsChange = useCallback((_annotations: VideoWithGlobalAnnotation[]) => {
-    console.info(JSON.stringify(_annotations, null, 2));
-    setCurrentSample((pre) => {
-      return {
-        ...pre!,
-        annotations: _annotations,
-      };
-    });
-  }, []);
-
-  const handleAnnotationChange = useCallback((_annotation: VideoAnnotationInEditor) => {
-    setCurrentSample((pre) => {
-      const newAnnotations = pre!.annotations!.map((item) => {
-        if (item.id === _annotation?.id) {
-          return _annotation;
-        }
-        return item;
+  const handleAnnotationsChange = useCallback(
+    (_annotations: VideoWithGlobalAnnotation[]) => {
+      console.info(JSON.stringify(_annotations, null, 2));
+      updateCurrentSample((pre) => {
+        return {
+          ...pre!,
+          annotations: _annotations,
+        };
       });
+    },
+    [updateCurrentSample],
+  );
 
-      return {
-        ...pre!,
-        annotations: newAnnotations,
-      };
-    });
-  }, []);
+  const handleAnnotationChange = useCallback(
+    (_annotation: VideoAnnotationInEditor) => {
+      updateCurrentSample((pre) => {
+        const newAnnotations = pre!.annotations!.map((item) => {
+          if (item.id === _annotation?.id) {
+            return _annotation;
+          }
+          return item;
+        });
 
-  const handleVideoAnnotationAdd = useCallback((_annotation: VideoAnnotationInEditor) => {
-    setCurrentSample((pre) => {
-      return {
-        ...pre!,
-        annotations: [...(pre?.annotations ?? []), _annotation],
-      };
-    });
-    setSelectedAnnotation(_annotation);
-  }, []);
+        return {
+          ...pre!,
+          annotations: newAnnotations,
+        };
+      });
+    },
+    [updateCurrentSample],
+  );
 
-  const handleRemoveAnnotation = useCallback((_annotation: VideoAnnotationInEditor) => {
-    setCurrentSample((pre) => {
-      return {
-        ...pre!,
-        annotations: pre!.annotations!.filter((i) => i.id !== _annotation.id),
-      };
-    });
-    setSelectedAnnotation(undefined);
-  }, []);
+  const handleVideoAnnotationAdd = useCallback(
+    (_annotation: VideoAnnotationInEditor) => {
+      updateCurrentSample((pre) => {
+        return {
+          ...pre!,
+          annotations: [...(pre?.annotations ?? []), _annotation],
+        };
+      });
+      setSelectedAnnotation(_annotation);
+    },
+    [updateCurrentSample],
+  );
 
-  const handleRemoveAnnotations = useCallback((_annotations: VideoWithGlobalAnnotation[]) => {
-    setCurrentSample((pre) => {
-      return {
-        ...pre!,
-        annotations: pre!.annotations!.filter((i) => !_annotations.some((j) => j.id === i.id)),
-      };
-    });
-    setSelectedAnnotation(undefined);
-  }, []);
+  const handleRemoveAnnotation = useCallback(
+    (_annotation: VideoAnnotationInEditor) => {
+      updateCurrentSample((pre) => {
+        return {
+          ...pre!,
+          annotations: pre!.annotations!.filter((i) => i.id !== _annotation.id),
+        };
+      });
+      setSelectedAnnotation(undefined);
+    },
+    [updateCurrentSample],
+  );
+
+  const handleRemoveAnnotations = useCallback(
+    (_annotations: VideoWithGlobalAnnotation[]) => {
+      updateCurrentSample((pre) => {
+        return {
+          ...pre!,
+          annotations: pre!.annotations!.filter((i) => !_annotations.some((j) => j.id === i.id)),
+        };
+      });
+      setSelectedAnnotation(undefined);
+    },
+    [updateCurrentSample],
+  );
 
   const handleSelectAnnotation = useCallback(
     (annotation: VideoAnnotationInEditor) => {
       setSelectedAnnotation(annotation);
       setSelectedAttribute(attributeMappingByTool[annotation.type][annotation.label!]);
       setCurrentTool(annotation.type);
+      selectedIndexRef.current = videoAnnotations.findIndex((item) => item.id === annotation.id);
     },
-    [attributeMappingByTool],
+    [attributeMappingByTool, videoAnnotations],
   );
 
   const handleAnnotateEnd: VideoProps['onAnnotateEnd'] = useCallback(
@@ -228,6 +284,11 @@ function Editor(
           },
         }),
       );
+
+      // 标记结束后暂停播放，填完属性后再播放
+      if (playerRef.current && _annotation.label) {
+        playerRef.current.pause();
+      }
     },
     [],
   );
@@ -241,7 +302,7 @@ function Editor(
         label: attribute.value,
       };
 
-      setCurrentSample((pre) => {
+      updateCurrentSample((pre) => {
         const newAnnotations = pre!.annotations!.map((item) => {
           if (item.id === selectedAnnotation?.id) {
             return newAnnotation as VideoAnnotationInEditor;
@@ -265,7 +326,7 @@ function Editor(
         };
       });
     },
-    [selectedAnnotation],
+    [selectedAnnotation, updateCurrentSample],
   );
 
   // ================== attribute ==================
@@ -276,7 +337,7 @@ function Editor(
         ..._attribute,
       };
       setSelectedAnnotation(() => newAnnotation);
-      setCurrentSample((pre) => {
+      updateCurrentSample((pre) => {
         const newAnnotations = pre!.annotations!.map((item) => {
           if (item.id === selectedAnnotation?.id) {
             return newAnnotation as VideoAnnotationInEditor;
@@ -290,7 +351,7 @@ function Editor(
         };
       });
     },
-    [selectedAnnotation],
+    [selectedAnnotation, updateCurrentSample],
   );
 
   const annotationsMapping = useMemo(() => {
@@ -306,12 +367,105 @@ function Editor(
     return mapping;
   }, [currentSample?.annotations]);
 
+  // ================== 快捷键 ==================
+  // 删除标记
+  useHotkeys(
+    'delete, backspace',
+    () => {
+      if (selectedAnnotation) {
+        updateCurrentSample((pre) => {
+          return {
+            ...pre!,
+            annotations: pre!.annotations!.filter((i) => i.id !== selectedAnnotation.id),
+          };
+        });
+      }
+    },
+    {
+      keyup: true,
+      keydown: false,
+    },
+    [selectedAnnotation],
+  );
+
+  useHotkeys(
+    'escape',
+    () => {
+      setSelectedAnnotation(undefined);
+    },
+    {
+      preventDefault: true,
+    },
+    [setSelectedAnnotation],
+  );
+
+  // 上一个标记
+  useHotkeys(
+    'ArrowUp',
+    () => {
+      selectedIndexRef.current = Math.max(selectedIndexRef.current - 1, 0);
+      setSelectedAnnotation((videoAnnotations as VideoAnnotationInEditor[])[selectedIndexRef.current]);
+    },
+    {
+      keyup: true,
+      keydown: false,
+    },
+    [videoAnnotations],
+  );
+
+  // 下一个标记
+  useHotkeys(
+    'ArrowDown',
+    () => {
+      selectedIndexRef.current = Math.min(selectedIndexRef.current + 1, videoAnnotations.length - 1);
+      setSelectedAnnotation((videoAnnotations as VideoAnnotationInEditor[])[selectedIndexRef.current]);
+    },
+    {
+      keyup: true,
+      keydown: false,
+    },
+    [videoAnnotations],
+  );
+
+  // 1 ~ 9 设置标签
+  useHotkeys(
+    '1,2,3,4,5,6,7,8,9',
+    (e) => {
+      const index = Number(e.key) - 1;
+      if (index < attributes.length) {
+        onLabelChange(attributes[index]);
+
+        // 这个newAnnotation不会更新到state中，只用于在标记结束后触发属性编辑框的显示
+        const newAnnotation = {
+          ...selectedAnnotation,
+          label: attributes[index].value,
+        };
+
+        if (playerRef.current) {
+          playerRef.current.pause();
+
+          if (newAnnotation) {
+            document.dispatchEvent(
+              new CustomEvent('annotate-end', {
+                detail: {
+                  annotation: newAnnotation,
+                },
+              }),
+            );
+          }
+        }
+      }
+    },
+    [onLabelChange, attributes, selectedAnnotation],
+  );
+
   const contextValue = useMemo(() => {
     return {
       currentTool,
       samples,
       config,
       currentSample,
+      videoAnnotations,
       orderVisible,
       videoWrapperRef,
       handleSelectSample,
@@ -330,12 +484,17 @@ function Editor(
       annotationsMapping,
       onLabelChange,
       playerRef,
+      undo,
+      redo,
+      pastRef,
+      futureRef,
     };
   }, [
     currentTool,
     samples,
     config,
     currentSample,
+    videoAnnotations,
     orderVisible,
     handleSelectSample,
     selectedAttribute,
@@ -352,6 +511,8 @@ function Editor(
     attributeMappingByTool,
     annotationsMapping,
     onLabelChange,
+    undo,
+    redo,
   ]);
 
   const sidebar = useMemo(() => {
@@ -405,6 +566,4 @@ function Editor(
   );
 }
 
-const ForwardEditor = forwardRef<EditorRef, EditorProps>(Editor);
-
-export default ForwardEditor;
+export const Editor = forwardRef<EditorRef, EditorProps>(ForwardEditor);

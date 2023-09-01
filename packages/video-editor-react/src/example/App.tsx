@@ -189,6 +189,226 @@ const attributeData = [
       },
     ],
   },
+  {
+    color: '#ff6600',
+    key: '标签-1',
+    value: 'xfasdxz',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'eeeee',
+        type: 'string',
+        maxLength: 1000,
+        required: true,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'gffffffasd',
+        type: 'enum',
+        required: true,
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    color: '#ae3688',
+    key: '标签-2',
+    value: 'label-2vv',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'eeeee',
+        type: 'string',
+        maxLength: 1000,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'gffffffasd',
+        type: 'enum',
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    color: '#00b112',
+    key: '标签-3',
+    value: 'label-3zqe',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'vxcsde',
+        type: 'string',
+        maxLength: 1000,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'kyhklh',
+        type: 'enum',
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    color: '#1900ff',
+    key: '标签-4',
+    value: 'label-5123444',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'vxcx',
+        type: 'string',
+        maxLength: 1000,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'xcvsdf',
+        type: 'enum',
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    color: '#ff6600',
+    key: '标签-1',
+    value: 'xfasdxz2',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'eeeee',
+        type: 'string',
+        maxLength: 1000,
+        required: true,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'gffffffasd',
+        type: 'enum',
+        required: true,
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    color: '#ae3688',
+    key: '标签-2',
+    value: 'label-2vv3123',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'eeeee',
+        type: 'string',
+        maxLength: 1000,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'gffffffasd',
+        type: 'enum',
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    color: '#00b112',
+    key: '标签-3',
+    value: 'label-3zqevcx',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'vxcsde',
+        type: 'string',
+        maxLength: 1000,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'kyhklh',
+        type: 'enum',
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    color: '#1900ff',
+    key: '标签-4',
+    value: 'label-ccczx',
+    attributes: [
+      {
+        key: 'asdasd',
+        value: 'vxcx',
+        type: 'string',
+        maxLength: 1000,
+        stringType: 'text' as const,
+        defaultValue: '',
+        regexp: '',
+      },
+      {
+        key: 'vvvv',
+        value: 'xcvsdf',
+        type: 'enum',
+        options: [
+          {
+            key: 'ffff',
+            value: 'ddd',
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const mockData2: VideoAnnotation[] = [

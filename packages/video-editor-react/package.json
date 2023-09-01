@@ -32,6 +32,7 @@
     "@label-u/video-react": "workspace:^1.0.0",
     "polished": "^4.2.2",
     "rc-field-form": "^1.37.0",
+    "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {

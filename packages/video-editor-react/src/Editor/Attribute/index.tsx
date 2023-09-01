@@ -1,20 +1,27 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { AttributeTree, CollapseWrapper, AttributeTreeWrapper } from '@label-u/components-react';
-import type { TagAnnotationEntity, TextAnnotationEntity, VideoAnnotationData } from '@label-u/interface';
+import type {
+  EnumerableAttribute,
+  TagAnnotationEntity,
+  TextAnnotationEntity,
+  TextAttribute,
+  VideoAnnotationData,
+} from '@label-u/interface';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 
 import EditorContext from '../context';
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
-const Wrapper = styled.div`
-  width: 280px;
+const Wrapper = styled.div<{ collapsed: boolean }>`
   grid-area: attribute;
   height: var(--height);
   overflow: auto;
   display: flex;
   flex-direction: column;
+
+  ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 280px;')}
 `;
 
 const AttributeHeaderItem = styled.div<{ active: boolean }>`
@@ -96,31 +103,26 @@ export default function Attribute() {
     onAnnotationsChange,
     annotationsMapping,
     onAnnotationsRemove,
+    videoAnnotations,
     attributes,
     selectedAnnotation,
     attributeMapping,
   } = useContext(EditorContext);
+  const [collapsed, setCollapsed] = useState<boolean>(false);
   const [height, setHeight] = useState<number>(0);
   const [activeKey, setActiveKey] = useState<HeaderType>('global');
-  const { globalAnnotations, videoAnnotations, flattenVideoAnnotations, defaultActiveKeys } = useMemo(() => {
+
+  const { globalAnnotations, videoAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
     const _globalAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
-    const _videoAnnotations: VideoAnnotationData[] = [];
     currentSample?.annotations.forEach((item) => {
       if (['tag', 'text'].includes(item.type)) {
         _globalAnnotations.push(item as TextAnnotationEntity | TagAnnotationEntity);
       }
-
-      if (['segment', 'frame'].includes(item.type)) {
-        _videoAnnotations.push(item as VideoAnnotationData);
-      }
-    });
-    _videoAnnotations.sort((a, b) => {
-      return a.order - b.order;
     });
 
     const videoAnnotationsGroupByLabel = new Map<string, VideoAnnotationData[]>();
 
-    for (const item of _videoAnnotations) {
+    for (const item of videoAnnotations) {
       if (!videoAnnotationsGroupByLabel.has(item.label)) {
         videoAnnotationsGroupByLabel.set(item.label, []);
       }
@@ -130,45 +132,68 @@ export default function Attribute() {
 
     return {
       globalAnnotations: _globalAnnotations,
-      videoAnnotations: videoAnnotationsGroupByLabel,
-      flattenVideoAnnotations: _videoAnnotations,
+      videoAnnotationsGroup: videoAnnotationsGroupByLabel,
       defaultActiveKeys: Array.from(videoAnnotationsGroupByLabel.keys()),
     };
-  }, [currentSample?.annotations]);
+  }, [currentSample?.annotations, videoAnnotations]);
 
-  const titles = [];
-  const globals = [];
+  const globals = useMemo(() => {
+    const _globals: (TextAttribute | EnumerableAttribute)[] = [];
 
-  // 将文本描述和标签分类合并成全局配置
-  if (config?.tag || config?.text) {
-    titles.push({
-      title: '全局',
-      key: 'global' as const,
-      subtitle: globalAnnotations.length > 0 ? '已完成' : '未完成',
-    });
+    if (!config) {
+      return _globals;
+    }
 
     if (config.tag) {
-      globals.push(...config.tag);
+      _globals.push(...config.tag);
     }
 
     if (config.text) {
-      globals.push(...config.text);
+      _globals.push(...config.text);
     }
-  }
 
-  if (attributes) {
-    titles.push({
-      title: '标记',
-      key: 'label' as const,
-      subtitle: `${flattenVideoAnnotations.length}条`,
-    });
-  }
+    return _globals;
+  }, [config]);
+
+  const titles = useMemo(() => {
+    const _titles = [];
+    // 将文本描述和标签分类合并成全局配置
+    if (config?.tag || config?.text) {
+      _titles.push({
+        title: '全局',
+        key: 'global' as const,
+        subtitle: globalAnnotations.length === globals.length ? '已完成' : '未完成',
+      });
+    }
+
+    if (attributes) {
+      _titles.push({
+        title: '标记',
+        key: 'label' as const,
+        subtitle: `${videoAnnotations.length}条`,
+      });
+    }
+
+    return _titles;
+  }, [attributes, config?.tag, config?.text, globalAnnotations.length, globals.length, videoAnnotations.length]);
 
   useEffect(() => {
     setTimeout(() => {
       setHeight(videoWrapperRef.current?.clientHeight || 0);
     });
   });
+
+  useEffect(() => {
+    const handleCollapse = () => {
+      setCollapsed((prev) => !prev);
+    };
+
+    document.addEventListener('attribute-collapse', handleCollapse as EventListener);
+
+    return () => {
+      document.removeEventListener('attribute-collapse', handleCollapse as EventListener);
+    };
+  }, []);
 
   const handleOnChange = (_changedValues: any, values: any[]) => {
     // 只要其中之一不存在，那么所有该类型的标注即不存在
@@ -196,19 +221,19 @@ export default function Attribute() {
     if (activeKey === 'global') {
       onAnnotationsRemove(globalAnnotations);
     } else {
-      onAnnotationsRemove(flattenVideoAnnotations);
+      onAnnotationsRemove(videoAnnotations);
     }
   };
 
   const collapseItems = useMemo(
     () =>
-      Array.from(videoAnnotations).map(([label, annotations]) => {
+      Array.from(videoAnnotationsGroup).map(([label, annotations]) => {
         const found = attributeMapping[annotations[0].type]?.[label];
-        const labelText = found ? found?.key ?? '无标签' : '无标签';
+
         return {
           label: (
             <Header>
-              {labelText}
+              {found ? found?.key ?? '无标签' : '无标签'}
               <AttributeAction annotations={annotations} showEdit={false} />
             </Header>
           ),
@@ -221,15 +246,15 @@ export default function Attribute() {
                   active={item.id === selectedAnnotation?.id}
                   order={item.order}
                   annotation={item}
-                  labelText={labelText}
-                  color={found ? found.color : '#999'}
+                  labelText={attributeMapping[item.type]?.[label]?.key ?? '无标签'}
+                  color={attributeMapping[item.type]?.[label]?.color ?? '#999'}
                 />
               ))}
             </AsideWrapper>
           ),
         };
       }),
-    [attributeMapping, selectedAnnotation?.id, videoAnnotations],
+    [attributeMapping, selectedAnnotation?.id, videoAnnotationsGroup],
   );
 
   if (!height) {
@@ -238,7 +263,7 @@ export default function Attribute() {
 
   return (
     // @ts-ignore
-    <Wrapper style={{ '--height': `${height}px` }}>
+    <Wrapper collapsed={collapsed} style={{ '--height': `${height}px` }}>
       <TabHeader className="attribute-header">
         {titles.map((item) => {
           return (
