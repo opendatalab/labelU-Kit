@@ -1,5 +1,4 @@
 import { CaretRightOutlined } from '@ant-design/icons';
-import { get } from 'lodash-es';
 import React, { useCallback, useRef, useState } from 'react';
 import { secondsToMinute } from '@label-u/video-react';
 
@@ -56,7 +55,10 @@ export function VideoCard({
 
   // *************** handlers start ****************
   const handleTimeUpdate = useCallback(() => {
-    const currentTime = get(videoRef.current, 'currentTime', 0);
+    if (!videoRef.current) {
+      return;
+    }
+    const currentTime = videoRef.current.currentTime;
     const value = +((currentTime / duration) * 100).toFixed(3);
     setPlayedTime(value > 100 ? 100 : value);
   }, [duration]);

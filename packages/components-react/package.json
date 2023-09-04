@@ -1,6 +1,6 @@
 {
   "name": "@label-u/components-react",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.2",
   "description": "basic react components for labelU",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -34,11 +34,13 @@
     "rc-dialog": "^9.2.0",
     "rc-tree": "^5.7.10",
     "react-draggable": "^4.4.5",
+    "rc-field-form": "1.37.0",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@label-u/annotation": "workspace:^2.1.0",
-    "@label-u/interface": "workspace:^1.0.0",
+    "@types/styled-components": "^5.1.26",
+    "@label-u/annotation": "2.2.0-alpha.1",
+    "@label-u/interface": "1.0.0-alpha.1",
     "@types/react": "^18.2.20",
     "@vitejs/plugin-react": "^3.1.0",
     "react": "^18.2.0",
