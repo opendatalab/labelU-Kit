@@ -9,6 +9,7 @@ import type {
   VideoFrameName,
   VideoSegmentToolConfig,
   VideoFrameToolConfig,
+  EnumerableAttribute,
 } from '@label-u/interface';
 
 import VideoPlayer from './VideoPlayer';
@@ -20,6 +21,7 @@ import GlobalStyle from './GlobalStyle';
 import type { VideoAnnotationInUI } from './context';
 import VideoAnnotationContext from './context';
 import { ReactComponent as ExpandIcon } from './assets/icons/arrow.svg';
+import { AttributeOverlay } from './AttributeOverlay';
 
 const ExpandTrigger = styled.div<{ expanded: boolean }>`
   cursor: pointer;
@@ -274,10 +276,11 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
     const rect = activityBarRef.current.getBoundingClientRect();
     const frame = frameRef.current;
     const offsetX = e.clientX - rect.left;
+    const currentTime = (offsetX / rect.width) * duration;
 
     if (frame && playerRef.current) {
       frame.style.left = `${(offsetX / rect.width) * 100}%`;
-      playerRef.current.currentTime((offsetX / rect.width) * duration);
+      playerRef.current.currentTime(currentTime);
     }
 
     if (disabled) {
@@ -292,7 +295,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
     ) {
       if (editingSegmentAnnotationRef.current && editingElementRef.current) {
         editingElementRef.current.style.width = `${
-          ((playerRef.current.currentTime() - editingSegmentAnnotationRef.current.start!) / duration) * 100
+          ((currentTime - editingSegmentAnnotationRef.current.start!) / duration) * 100
         }%`;
       }
     }
@@ -525,11 +528,36 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
     Object.keys(toolConfig).forEach((key) => {
       const _key = key as VideoSegmentName | VideoFrameName;
       const _attributes: Attribute[] = toolConfig?.[_key]?.attributes ?? [];
+      const _mapping: Record<string, Attribute> = {};
 
-      _attributes.reduce((acc, cur) => {
-        acc[cur.value] = cur;
-        return acc;
-      }, mapping[_key]);
+      _attributes.forEach((_item) => {
+        _mapping[_item.value] = { ..._item };
+
+        const _innerMapping: Record<string, any> = {};
+
+        _item.attributes?.forEach((item) => {
+          const newItem = {
+            ...item,
+            optionMapping: {},
+          };
+
+          const attributeWithOptions = item as EnumerableAttribute;
+
+          if (item.type !== 'string') {
+            newItem.optionMapping =
+              attributeWithOptions.options?.reduce((acc1, cur2) => {
+                acc1[cur2.value] = cur2;
+                return acc1;
+              }, {} as Record<string, any>) ?? {};
+          }
+
+          _innerMapping[item.value] = newItem;
+        });
+        // @ts-ignore
+        _mapping[_item.value].attributesMapping = _innerMapping;
+      });
+
+      mapping[_key] = _mapping;
     });
 
     return mapping;
@@ -541,6 +569,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
       duration,
       playerRef,
       onChange,
+      annotations,
       selectedAnnotation,
       selectAnnotation: handleAnnotationSelect,
       onAnnotationChange: handleAnnotationChange,
@@ -555,6 +584,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
     handleAnnotationSelect,
     onChange,
     showOrder,
+    annotations,
     selectedAnnotation,
     attributeConfigMapping,
     playingAnnotationIds,
@@ -572,6 +602,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
         onMetaDataLoad={(videoElement) => setDuration(videoElement.duration)}
         onPlaying={handlePlaying}
       >
+        <AttributeOverlay />
         <BarWrapper expanded={expanded}>
           <div className="lane-wrapper" ref={laneRef}>
             {annotationLanes.map((lane, index) => (

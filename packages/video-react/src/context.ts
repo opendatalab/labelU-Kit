@@ -10,6 +10,7 @@ export interface VideoAnnotationContextType {
   selectAnnotation: (annotation: VideoAnnotationInUI) => void;
   editingAnnotation: VideoAnnotationInUI | null;
   duration: number;
+  annotations: VideoAnnotationInUI[];
   showOrder: boolean;
   playerRef: any;
   onChange?: (annotation: VideoAnnotationInUI) => void;

@@ -2,7 +2,6 @@ import styled, { css } from 'styled-components';
 import { darken, rgba } from 'polished';
 import type {
   VideoAnnotationData,
-  EnumerableAttribute,
   VideoAnnotationType,
   VideoFrameAnnotation,
   Attribute,
@@ -198,7 +197,8 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
   ({ attributeConfig, active, onContextMenu, barWrapperRef, annotation, visible }, ref) => {
     const { type, attributes = {}, order } = annotation;
     const wrapperRef = useRef<HTMLDivElement | null>(null);
-    const { duration, playerRef, onAnnotationChange, selectAnnotation, showOrder } = useContext(VideoAnnotationContext);
+    const { duration, playerRef, onAnnotationChange, selectAnnotation, showOrder, attributeConfigMapping } =
+      useContext(VideoAnnotationContext);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useImperativeHandle(ref, () => wrapperRef.current as HTMLDivElement, [duration]);
@@ -220,23 +220,9 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
 
     const color = attributeConfig.color;
     const currentAttributeMapping = useMemo(() => {
-      return (
-        attributeConfig.attributes?.reduce((acc, cur) => {
-          acc[cur.value] = cur;
-
-          const attributeWithOptions = cur as EnumerableAttribute;
-
-          if (cur.type !== 'string') {
-            acc[attributeWithOptions.value].optionMapping =
-              attributeWithOptions.options?.reduce((acc1, cur2) => {
-                acc1[cur2.value] = cur2;
-                return acc1;
-              }, {} as Record<string, any>) ?? {};
-          }
-          return acc;
-        }, {} as Record<string, any>) ?? {}
-      );
-    }, [attributeConfig]);
+      // @ts-ignore
+      return attributeConfigMapping[type]?.[annotation.label]?.attributesMapping ?? {};
+    }, [annotation.label, attributeConfigMapping, type]);
 
     if (!duration) {
       return null;
