@@ -29,7 +29,7 @@ const HeaderOption = () => {
 
   const { t } = useTranslation();
 
-  const isTagTool = [EToolName.Tag, EVideoToolName.VideoTagTool].includes(currentToolName as any);
+  const isTagTool = [EToolName.Tag, EVideoToolName].includes(currentToolName as any);
 
   const isBegin = isTagTool;
 

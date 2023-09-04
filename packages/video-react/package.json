@@ -6,7 +6,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
     "dev": "vite --port 3001 -c vite.config.app.ts"
   },
