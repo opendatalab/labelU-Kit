@@ -1,6 +1,6 @@
 {
   "name": "@label-u/video-editor-react",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "video annotation editor for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -29,9 +29,9 @@
     "react"
   ],
   "dependencies": {
-    "@label-u/components-react": "workspace:^1.0.0",
-    "@label-u/interface": "workspace:^1.0.0",
-    "@label-u/video-react": "workspace:^1.0.0",
+    "@label-u/components-react": "1.0.0-alpha.1",
+    "@label-u/interface": "1.0.0-alpha.1",
+    "@label-u/video-react": "1.0.0-alpha.1",
     "polished": "^4.2.2",
     "rc-field-form": "^1.37.0",
     "react-hotkeys-hook": "^4.4.1",
@@ -39,7 +39,7 @@
     "@ant-design/icons": "5.2.6"
   },
   "devDependencies": {
-    "@label-u/annotation": "workspace:2.1.0",
+    "@label-u/annotation": "2.2.0-alpha.1",
     "@types/react": "^18.2.20",
     "@types/styled-components": "^5.1.25",
     "@vitejs/plugin-react": "^3.1.0",
