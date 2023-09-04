@@ -38,7 +38,7 @@
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@types/styled-components": "^5.1.25",
+    "@types/styled-components": "^5.1.26",
     "@label-u/annotation": "2.2.0-alpha.1",
     "@label-u/interface": "1.0.0-alpha.1",
     "@types/react": "^18.2.20",
