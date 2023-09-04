@@ -13,3 +13,4 @@ cy-example
 **/*.test.ts
 **/*.test.tsx
 es
+example

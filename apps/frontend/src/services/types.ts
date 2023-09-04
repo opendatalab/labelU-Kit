@@ -142,8 +142,8 @@ export interface LogoutResponse {
 
 export enum MediaType {
   IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
   // TODO: 后续支持
-  // VIDEO = 'VIDEO',
   // POINT_CLOUD = 'POINT_CLOUD',
 }
 

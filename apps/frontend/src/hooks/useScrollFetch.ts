@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash-es';
 import type { Dispatch, SetStateAction } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useEffect, useRef, useState } from 'react';
 
 export interface Option<Data> {
   threshold?: number;
@@ -21,7 +21,7 @@ export interface Option<Data> {
  */
 export function useScrollFetch<T extends any[] | undefined>(
   service: (isReset: boolean) => Promise<T>,
-  container?: HTMLDivElement | undefined,
+  container?: HTMLDivElement | (() => HTMLDivElement | null) | undefined,
   options?: Option<T>,
 ): [T, boolean, Dispatch<SetStateAction<T>>] {
   const { threshold, afterFetching, isEnd, watch } = {
@@ -101,10 +101,11 @@ export function useScrollFetch<T extends any[] | undefined>(
   }, [watch, wrappedService]);
 
   const handleOnScroll = useCallback(() => {
+    const _container = typeof container === 'function' ? container() : container;
     const shouldFetch =
-      (!container
+      (!_container
         ? document.documentElement.scrollHeight - window.scrollY - document.body.offsetHeight <= threshold
-        : container.scrollHeight - container.scrollTop - container.offsetHeight <= threshold) && !isEnd(data);
+        : _container.scrollHeight - _container.scrollTop - _container.offsetHeight <= threshold) && !isEnd(data);
 
     if (shouldFetch && !isFetching.current) {
       wrappedService();
@@ -112,11 +113,12 @@ export function useScrollFetch<T extends any[] | undefined>(
   }, [container, data, isEnd, threshold, wrappedService]);
 
   // 添加事件监听
-  useEffect(() => {
-    (container || document).addEventListener('scroll', handleOnScroll);
+  useLayoutEffect(() => {
+    const _container = typeof container === 'function' ? container() : container;
+    (_container || window).addEventListener('scroll', handleOnScroll, true);
 
     return () => {
-      (container || document).removeEventListener('scroll', handleOnScroll);
+      (_container || window).removeEventListener('scroll', handleOnScroll, true);
     };
   }, [container, handleOnScroll]);
 

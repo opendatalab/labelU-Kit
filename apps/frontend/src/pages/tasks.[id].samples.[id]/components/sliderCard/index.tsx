@@ -1,17 +1,20 @@
 import React from 'react';
 import { useParams } from 'react-router';
 import _ from 'lodash-es';
+import { VideoCard } from '@label-u/video-editor-react';
 
 import type { SampleResponse } from '@/services/types';
+import { MediaType } from '@/services/types';
 
 import styles from './index.module.scss';
 
 interface SliderCardProps {
   cardInfo: SampleResponse;
+  type: MediaType;
   onClick: (sample: SampleResponse) => void;
 }
 
-const SliderCard = ({ cardInfo, onClick }: SliderCardProps) => {
+const SliderCard = ({ type, cardInfo, onClick }: SliderCardProps) => {
   const { id, state, data } = cardInfo;
   const headId = _.chain(data).get('fileNames').keys().head().value();
   const url = _.get(data, `urls.${headId}`);
@@ -31,7 +34,8 @@ const SliderCard = ({ cardInfo, onClick }: SliderCardProps) => {
       {id === sampleId && (
         <div className={styles.outerFrame}>
           <div className={styles.contentActive} onClick={() => handleOnClick(cardInfo)}>
-            <img src={url} alt="" style={{ height: '100%', maxWidth: '100%' }} />
+            {type === MediaType.IMAGE && <img src={url} alt="" style={{ height: '100%', maxWidth: '100%' }} />}
+            {type === MediaType.VIDEO && <VideoCard src={url!} showDuration showPlayIcon />}
             {state === 'DONE' && (
               <React.Fragment>
                 <div className={styles.tagBottom} />
@@ -48,7 +52,8 @@ const SliderCard = ({ cardInfo, onClick }: SliderCardProps) => {
       {id !== sampleId && (
         <div className={styles.outerFrame}>
           <div className={styles.content} onClick={() => handleOnClick(cardInfo)}>
-            <img src={url} alt="" style={{ height: '100%', maxWidth: '100%' }} />
+            {type === MediaType.IMAGE && <img src={url} alt="" style={{ height: '100%', maxWidth: '100%' }} />}
+            {type === MediaType.VIDEO && <VideoCard src={url!} showDuration showPlayIcon />}
             {state === 'DONE' && (
               <React.Fragment>
                 <div className={styles.tagBottom} />
