@@ -55,7 +55,10 @@ export function VideoCard({
 
   // *************** handlers start ****************
   const handleTimeUpdate = useCallback(() => {
-    const currentTime = videoRef.current?.currentTime() ?? 0;
+    if (!videoRef.current) {
+      return;
+    }
+    const currentTime = videoRef.current.currentTime;
     const value = +((currentTime / duration) * 100).toFixed(3);
     setPlayedTime(value > 100 ? 100 : value);
   }, [duration]);
