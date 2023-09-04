@@ -63,6 +63,7 @@ const InnerHeader = styled.div`
   }
 `;
 
+// @ts-ignore
 const StyledVisibilityOffIcon = styled(VisibilityOffIcon)`
   opacity: 1 !important;
 `;

@@ -28,7 +28,7 @@ export type VideoAnnotationInEditor = VideoAnnotationData & {
 export type VideoWithGlobalAnnotation = VideoAnnotationInEditor | TextAnnotationEntity | TagAnnotationEntity;
 
 export interface VideoSample {
-  id: string;
+  id: string | number;
   name?: string;
   url: string;
   annotations: VideoWithGlobalAnnotation[];

@@ -110,7 +110,6 @@ export default function Attribute() {
   } = useContext(EditorContext);
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [height, setHeight] = useState<number>(0);
-  const [activeKey, setActiveKey] = useState<HeaderType>('global');
 
   const { globalAnnotations, videoAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
     const _globalAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
@@ -176,6 +175,7 @@ export default function Attribute() {
 
     return _titles;
   }, [attributes, config?.tag, config?.text, globalAnnotations.length, globals.length, videoAnnotations.length]);
+  const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
   useEffect(() => {
     setTimeout(() => {

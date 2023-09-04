@@ -18,17 +18,20 @@ import type { VideoAnnotationInEditor, VideoEditorConfig, VideoSample, VideoWith
 import EditorContext from './context';
 import Sidebar from './Sidebar';
 import AttributeBar from './Attribute';
-import GlobalStyle from './GlobalStyle';
 import Header from './Header';
 import Toolbar from './Toolbar';
 
-const Wrapper = styled.div`
+const Wrapper = styled.div.attrs((props) => {
+  return {
+    ...props,
+    className: 'labelu-video-editor',
+  };
+})`
   display: flex;
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
-
-  --color-primary: #007aff;
+  background-color: #fff;
 
   .labelu-video-wrapper {
     flex: 1;
@@ -41,23 +44,35 @@ const Content = styled.div`
 `;
 
 export interface EditorRef {
-  getAnnotations: () => VideoAnnotationInEditor[];
-  nextSample: () => void;
-  prevSample: () => void;
+  getAnnotations: () => VideoWithGlobalAnnotation[];
+  getSample: () => VideoSample | undefined;
 }
 
 export interface EditorProps {
   samples: VideoSample[];
   autoPlay?: boolean;
   config?: VideoEditorConfig;
-  renderSidebar?: (selectSample: (sample: VideoSample) => void) => React.ReactNode;
+  renderSidebar?: () => React.ReactNode;
   renderAttributes?: () => React.ReactNode;
   editingSample?: VideoSample;
   maxHistoryCount?: number;
+  primaryColor?: string;
+  toolbarExtra?: React.ReactNode;
+  toolbarRight?: React.ReactNode;
 }
 
 function ForwardEditor(
-  { samples = [], renderSidebar, config, renderAttributes, editingSample, maxHistoryCount = 20 }: EditorProps,
+  {
+    samples,
+    renderSidebar,
+    config,
+    renderAttributes,
+    editingSample,
+    maxHistoryCount = 20,
+    primaryColor = '#007aff',
+    toolbarExtra,
+    toolbarRight,
+  }: EditorProps,
   ref: React.Ref<EditorRef>,
 ) {
   const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>('segment');
@@ -67,7 +82,7 @@ function ForwardEditor(
       return [];
     }
 
-    return config?.[currentTool].attributes ?? [];
+    return config?.[currentTool]?.attributes ?? [];
   }, [config, currentTool]);
   const videoWrapperRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any | null>(null);
@@ -78,7 +93,7 @@ function ForwardEditor(
     const mapping: Record<string, Record<string, Attribute>> = {};
 
     Object.keys(config ?? {}).forEach((key) => {
-      const _attributes: Attribute[] = config?.[key as VideoSegmentName | VideoFrameName].attributes ?? [];
+      const _attributes: Attribute[] = config?.[key as VideoSegmentName | VideoFrameName]?.attributes ?? [];
       mapping[key] = {};
       _attributes.reduce((acc, cur) => {
         acc[cur.value] = cur;
@@ -88,14 +103,6 @@ function ForwardEditor(
 
     return mapping;
   }, [config]);
-
-  useImperativeHandle(ref, () => ({
-    getAnnotations: () => {
-      return [];
-    },
-    nextSample: () => {},
-    prevSample: () => {},
-  }));
 
   // ================== tool ==================
   const [orderVisible, setOrderVisible] = useState<boolean>(true);
@@ -330,6 +337,19 @@ function ForwardEditor(
   );
 
   // ================== attribute ==================
+  const annotationsMapping = useMemo(() => {
+    const mapping: Record<string, VideoAnnotationInEditor | TextAnnotationEntity | TagAnnotationEntity> = {};
+
+    if (currentSample?.annotations) {
+      currentSample?.annotations.reduce((acc, cur) => {
+        acc[cur.id] = cur;
+        return acc;
+      }, mapping);
+    }
+
+    return mapping;
+  }, [currentSample?.annotations]);
+
   const handleAttributeChange = useCallback(
     (_attribute: any) => {
       const newAnnotation = {
@@ -338,6 +358,13 @@ function ForwardEditor(
       };
       setSelectedAnnotation(() => newAnnotation);
       updateCurrentSample((pre) => {
+        if (!(newAnnotation.id in annotationsMapping)) {
+          return {
+            ...pre!,
+            annotations: [...(pre?.annotations ?? []), newAnnotation],
+          };
+        }
+
         const newAnnotations = pre!.annotations!.map((item) => {
           if (item.id === selectedAnnotation?.id) {
             return newAnnotation as VideoAnnotationInEditor;
@@ -351,21 +378,8 @@ function ForwardEditor(
         };
       });
     },
-    [selectedAnnotation, updateCurrentSample],
+    [annotationsMapping, selectedAnnotation, updateCurrentSample],
   );
-
-  const annotationsMapping = useMemo(() => {
-    const mapping: Record<string, VideoAnnotationInEditor | TextAnnotationEntity | TagAnnotationEntity> = {};
-
-    if (currentSample?.annotations) {
-      currentSample?.annotations.reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, mapping);
-    }
-
-    return mapping;
-  }, [currentSample?.annotations]);
 
   // ================== 快捷键 ==================
   // 删除标记
@@ -459,6 +473,13 @@ function ForwardEditor(
     [onLabelChange, attributes, selectedAnnotation],
   );
 
+  useImperativeHandle(ref, () => ({
+    getAnnotations: () => {
+      return currentSample?.annotations ?? [];
+    },
+    getSample: () => currentSample,
+  }));
+
   const contextValue = useMemo(() => {
     return {
       currentTool,
@@ -515,10 +536,6 @@ function ForwardEditor(
     redo,
   ]);
 
-  const sidebar = useMemo(() => {
-    return typeof renderSidebar === 'function' ? renderSidebar(handleSelectSample) : <Sidebar />;
-  }, [handleSelectSample, renderSidebar]);
-
   const attributeSide = useMemo(() => {
     return typeof renderAttributes === 'function' ? renderAttributes() : <AttributeBar />;
   }, [renderAttributes]);
@@ -533,17 +550,17 @@ function ForwardEditor(
 
   return (
     <EditorContext.Provider value={contextValue}>
-      <GlobalStyle />
-      <Wrapper>
-        <Toolbar />
+      {/* @ts-ignore */}
+      <Wrapper style={{ '--color-primary': primaryColor }}>
+        <Toolbar extra={toolbarExtra} right={toolbarRight} />
         <Header />
         <Content>
-          {sidebar}
+          <Sidebar renderSidebar={renderSidebar} />
           {currentSample ? (
             <Video
               playerRef={playerRef}
               className="labelu-video-wrapper"
-              editingLabel={selectedAttribute?.value}
+              editingLabel={selectedAttribute?.value ?? 'noneAttribute'}
               src={currentSample.url}
               editingType={currentTool}
               selectedAnnotation={selectedAnnotation}

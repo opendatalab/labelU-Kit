@@ -9,8 +9,13 @@ import { ReactComponent as CursorIcon } from '@/assets/icons/cursor.svg';
 
 import EditorContext from '../context';
 
-export default function ToolbarInEditor() {
-  const { onToolChange, currentTool, onOrderVisibleChange, orderVisible, redo, undo, pastRef, futureRef } =
+export interface IToolbarInEditorProps {
+  extra?: React.ReactNode;
+  right?: React.ReactNode;
+}
+
+export default function ToolbarInEditor({ extra, right }: IToolbarInEditorProps) {
+  const { onToolChange, currentTool, onOrderVisibleChange, config, orderVisible, redo, undo, pastRef, futureRef } =
     useContext(EditorContext);
 
   const handleToolChange = (tool?: VideoAnnotationType) => () => {
@@ -33,14 +38,20 @@ export default function ToolbarInEditor() {
           <Toolbar.Item active={!currentTool} onClick={handleToolChange()}>
             <CursorIcon />
           </Toolbar.Item>
-          <Toolbar.Item active={currentTool === 'segment'} onClick={handleToolChange('segment')}>
-            <SegmentIcon />
-          </Toolbar.Item>
-          <Toolbar.Item active={currentTool === 'frame'} onClick={handleToolChange('frame')}>
-            <FrameIcon />
-          </Toolbar.Item>
+          {config?.segment && (
+            <Toolbar.Item active={currentTool === 'segment'} onClick={handleToolChange('segment')}>
+              <SegmentIcon />
+            </Toolbar.Item>
+          )}
+          {config?.frame && (
+            <Toolbar.Item active={currentTool === 'frame'} onClick={handleToolChange('frame')}>
+              <FrameIcon />
+            </Toolbar.Item>
+          )}
         </>
       }
+      extra={extra}
+      right={right}
     />
   );
 }

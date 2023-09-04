@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
-import VideoCard from '@/VideoCard';
+import { VideoCard } from '@/VideoCard';
 import StyledVideo from '@/VideoCard/styled';
 
 import EditorContext from '../context';
@@ -17,7 +17,10 @@ const Cards = styled.div`
   overflow: auto;
 `;
 
-const Wrapper = styled.div<{ collapsed: boolean }>`
+const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
+  ...props,
+  className: 'labelu-video-editor__sidebar',
+}))`
   position: relative;
   grid-area: sidebar;
   background-color: #ebecf0;
@@ -84,7 +87,11 @@ const CollapseTrigger = styled.div<{ collapsed: boolean }>`
   }
 `;
 
-export default function Sidebar() {
+export interface SidebarProps {
+  renderSidebar?: () => React.ReactNode;
+}
+
+export default function Sidebar({ renderSidebar }: SidebarProps) {
   const { samples, handleSelectSample, currentSample, videoWrapperRef } = useContext(EditorContext);
   const [height, setHeight] = useState<number>(0);
   const [collapsed, setCollapsed] = useState<boolean>(false);
@@ -106,21 +113,25 @@ export default function Sidebar() {
   return (
     // @ts-ignore
     <Wrapper collapsed={collapsed} style={{ '--height': `${height}px` }}>
-      <Cards>
-        {samples.map((sample, index) => {
-          return (
-            <VideoCardWrapper key={sample.id} selected={currentSample?.id === sample.id}>
-              <VideoCard
-                src={sample.url}
-                showDuration={currentSample?.id !== sample.id}
-                showPlayIcon={currentSample?.id !== sample.id}
-                onClick={() => handleSelectSample(sample)}
-              />
-              <CardIndex>{index + 1}</CardIndex>
-            </VideoCardWrapper>
-          );
-        })}
-      </Cards>
+      {renderSidebar ? (
+        renderSidebar()
+      ) : (
+        <Cards>
+          {samples.map((sample, index) => {
+            return (
+              <VideoCardWrapper key={sample.id} selected={currentSample?.id === sample.id}>
+                <VideoCard
+                  src={sample.url}
+                  showDuration={currentSample?.id !== sample.id}
+                  showPlayIcon={currentSample?.id !== sample.id}
+                  onClick={() => handleSelectSample(sample)}
+                />
+                <CardIndex>{index + 1}</CardIndex>
+              </VideoCardWrapper>
+            );
+          })}
+        </Cards>
+      )}
       <CollapseTrigger collapsed={collapsed} onClick={handleExpandTriggerClick}>
         <ExpandIcon />
       </CollapseTrigger>

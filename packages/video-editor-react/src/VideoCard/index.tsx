@@ -33,7 +33,7 @@ export interface VideoCardProps {
   showDuration?: boolean;
 }
 
-export default function VideoCard({
+export function VideoCard({
   size = {} as Size,
   src,
   onClick,

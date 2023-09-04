@@ -2,9 +2,11 @@
   "name": "@label-u/video-editor-react",
   "version": "1.0.0",
   "description": "video annotation editor for react",
-  "main": "index.js",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
     "dev": "vite -c vite.config.app.ts"
   },
