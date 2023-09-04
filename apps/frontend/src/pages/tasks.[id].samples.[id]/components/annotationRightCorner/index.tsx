@@ -2,14 +2,14 @@ import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
-import { set } from 'lodash/fp';
+import { set, omit } from 'lodash/fp';
 import { useSelector } from 'react-redux';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import commonController from '@/utils/common/common';
-import { annotationRef } from '@/pages/tasks.[id].samples.[id]';
+import { annotationRef, videoAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/services/types';
-import { SampleState } from '@/services/types';
+import { MediaType, SampleState } from '@/services/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
 import type { RootState } from '@/store';
 import { message } from '@/StaticAnt';
@@ -59,7 +59,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   const routeParams = useParams();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  const { samples, setSamples } = useContext(AnnotationContext);
+  const { samples, setSamples, task } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const currentSample = samples[sampleIndex];
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
@@ -129,10 +129,55 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
       return;
     }
 
-    // @ts-ignore
-    const result = await annotationRef?.current?.getResult();
+    let result = {};
+    let innerSample;
+
+    if (task.media_type === MediaType.IMAGE) {
+      // @ts-ignore
+      result = await annotationRef.current?.getResult();
+      innerSample = await annotationRef?.current?.getSample();
+    } else if (task.media_type === MediaType.VIDEO) {
+      const videoAnnotations = await videoAnnotationRef.current?.getAnnotations();
+
+      videoAnnotations.forEach((annotation: any) => {
+        const innerAnnotation = omit(['type', 'visible'])(annotation);
+        if (annotation.type === 'tag') {
+          if (!result.tagTool) {
+            result.tagTool = [];
+          }
+
+          result.tagTool.push(innerAnnotation);
+        }
+
+        if (annotation.type === 'text') {
+          if (!result.textTool) {
+            result.textTool = [];
+          }
+
+          result.textTool.push(innerAnnotation);
+        }
+
+        if (annotation.type === 'frame') {
+          if (!result.videoFrameTool) {
+            result.videoFrameTool = [];
+          }
+
+          result.videoFrameTool.push(innerAnnotation);
+        }
+
+        if (annotation.type === 'segment') {
+          if (!result.videoSegmentTool) {
+            result.videoSegmentTool = [];
+          }
+
+          result.videoSegmentTool.push(innerAnnotation);
+        }
+      });
+
+      innerSample = await videoAnnotationRef?.current?.getSample();
+    }
+
     // 防止sampleid保存错乱，使用标注时传入的sampleid
-    const innerSample = await annotationRef?.current?.getSample();
     const body = set('data.result')(JSON.stringify(result))(currentSample);
 
     await updateSampleAnnotationResult(+taskId!, +innerSample.id!, {
@@ -140,7 +185,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, taskId]);
+  }, [currentSample, task.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();

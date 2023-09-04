@@ -7,6 +7,7 @@
     "@label-u/annotation": "2.1.0",
     "@label-u/components": "2.1.0",
     "@label-u/formatter": "1.0.1",
+    "@label-u/video-editor-react": "workspace:^1.0.0",
     "@rematch/core": "^2.2.0",
     "@rematch/immer": "^2.1.3",
     "@rematch/loading": "^2.1.2",
@@ -37,7 +38,7 @@
   },
   "scripts": {
     "postinstall": "node ./scripts/generate_css_variables_from_antd_theme_token.js",
-    "start": "vite",
+    "start": "vite --port 3004",
     "build": "cross-env CI=false vite build",
     "package:dist": "cross-env DIST=true vite",
     "release": "semantic-release",

@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
-import { MediaType, TaskStatus } from '@/services/types';
+import { TaskStatus } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import { createSamples } from '@/services/samples';
 import { deleteFile } from '@/services/task';
@@ -148,7 +148,6 @@ const CreateTask = () => {
 
   useEffect(() => {
     basicFormInstance.setFieldsValue(taskData);
-    annotationFormInstance.setFieldValue('media_type', taskData.media_type || MediaType.IMAGE);
   }, [annotationFormInstance, basicFormInstance, taskData]);
 
   useEffect(() => {
@@ -195,8 +194,7 @@ const CreateTask = () => {
           body: {
             ...taskData,
             ...basicFormInstance.getFieldsValue(),
-            media_type: annotationConfig.media_type,
-            config: omit(['media_type'])(annotationConfig),
+            config: annotationConfig,
           },
         })
         .then(() => {
@@ -283,7 +281,6 @@ const CreateTask = () => {
             body: {
               ...taskData,
               ...basicFormValues,
-              media_type: annotationConfig.media_type,
               status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
               config: omit(['media_type'])(annotationConfig),
             },
