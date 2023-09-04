@@ -33,6 +33,7 @@ const bottomCss = (width: number, height: number, color: string) => css`
   border-top: ${height}px solid ${color};
 `;
 
+// @ts-ignore
 export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = styled(Collapse)`
   --text-color: #666;
   --border-style: 1px solid #d9d9d9;
