@@ -15,6 +15,7 @@ import commonController from '@/utils/common/common';
 import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
+import { MediaType } from '@/services/types';
 
 import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
@@ -33,6 +34,11 @@ const statusTextMapping = {
   [UploadStatus.Fail]: '上传失败',
 };
 
+const acceptMapping = {
+  [MediaType.IMAGE]: 'image/png,image/jpeg,image/bmp,image/gif',
+  [MediaType.VIDEO]: 'video/mp4,video/h.164',
+};
+
 export interface QueuedFile {
   id?: number;
   url?: string;
@@ -44,7 +50,7 @@ export interface QueuedFile {
   file: File;
 }
 
-const isCorrectFiles = (files: File[]) => {
+const isCorrectFiles = (files: File[], type: MediaType) => {
   let result = true;
   if (files.length > 100) {
     commonController.notificationErrorMessage({ message: '单次上传文件数量超过上限100个，请分批上传' }, 3);
@@ -52,13 +58,13 @@ const isCorrectFiles = (files: File[]) => {
   }
   for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
     const fileUnit = files[fileIndex];
-    const isOverSize = commonController.isOverSize(fileUnit.size);
+    const isOverSize = commonController.isOverSize(fileUnit.size, type);
     if (isOverSize) {
       commonController.notificationErrorMessage({ message: '单个文件大小超过100MB限制' }, 3);
       result = false;
       break;
     }
-    const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name);
+    const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name, type);
     if (!isCorrectFileType) {
       commonController.notificationErrorMessage({ message: '请上传支持的文件类型，类型包括：jpg、png、bmp、gif' }, 3);
       result = false;
@@ -175,7 +181,7 @@ const InputData = () => {
   );
 
   const handleFilesChange = (files: RcFile[]) => {
-    const isCorrectCondition = isCorrectFiles(files);
+    const isCorrectCondition = isCorrectFiles(files, task.media_type);
     if (!isCorrectCondition) {
       return;
     } else {
@@ -283,6 +289,8 @@ const InputData = () => {
     ] as TableColumnType<QueuedFile>[];
   }, [fileQueue, handleFileDelete, processUpload]);
 
+  console.log(task);
+
   return (
     <div className={styles.outerFrame}>
       <div className={styles.title}>
@@ -301,17 +309,13 @@ const InputData = () => {
                   onChange={handleFilesChange}
                   directory={false}
                   multiple={true}
-                  accept={'image/png,image/jpeg,image/bmp,image/gif'}
+                  accept={acceptMapping[task.media_type!]}
                 >
                   上传文件
                 </NativeUpload>
               </Button>
               <Button type="primary" ghost icon={<FolderOpenOutlined />}>
-                <NativeUpload
-                  onChange={handleFilesChange}
-                  directory={true}
-                  accept={'image/jpg,image/jpeg,image/bmp,image/gif'}
-                >
+                <NativeUpload onChange={handleFilesChange} directory={true} accept={acceptMapping[task.media_type!]}>
                   上传文件夹
                 </NativeUpload>
               </Button>

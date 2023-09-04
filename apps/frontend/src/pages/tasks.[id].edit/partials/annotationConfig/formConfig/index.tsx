@@ -1,4 +1,4 @@
-import { EToolName, TOOL_NAME } from '@label-u/annotation';
+import { EToolName, TOOL_NAME, EVideoToolName } from '@label-u/annotation';
 import type { FormProps, MenuProps, TabsProps } from 'antd';
 import { Empty, Popconfirm, Button, Dropdown, Form, Tabs } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
@@ -21,36 +21,31 @@ import polygonTemplate from './templates/polygon.template';
 import pointTemplate from './templates/point.template';
 import tagTemplate from './templates/tag.template';
 import textTemplate from './templates/text.template';
+import videoSegmentTemplate from './templates/segment.template';
+import videoFrameTemplate from './templates/frame.template';
 
 // 注册fancyInput自定义输入组件
 add('list-attribute', FancyAttributeList);
 add('category-attribute', FancyCategoryAttribute);
 
-const validTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line, EToolName.Tag, EToolName.Text];
-const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line];
+const globalTools = [EToolName.Tag, EToolName.Text];
+const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line, ...globalTools];
+const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool, ...globalTools];
 
-const toolOptions = validTools.map((item) => {
-  return {
-    label: TOOL_NAME[item],
-    value: item,
-  };
-});
-
-const mediaTypeMapping = {
-  [MediaType.IMAGE]: '图片',
-  // TODO: 后续支持视频和点云
-  // [MediaType.VIDEO]: '视频',
-  // [MediaType.POINT_CLOUD]: '点云',
+const toolMapping = {
+  [MediaType.IMAGE]: graphicTools.map((item) => {
+    return {
+      label: TOOL_NAME[item],
+      value: item,
+    };
+  }),
+  [MediaType.VIDEO]: videoAnnotationTools.map((item) => {
+    return {
+      label: TOOL_NAME[item],
+      value: item,
+    };
+  }),
 };
-
-const mediaOptions = Object.values(MediaType).map((item) => {
-  return {
-    label: mediaTypeMapping[item],
-    value: item,
-    // TODO: 后续支持视频和点云
-    // disabled: [MediaType.VIDEO, MediaType.POINT_CLOUD].includes(item),
-  };
-});
 
 const templateMapping: Record<string, any> = {
   [EToolName.Line]: lineTemplate,
@@ -59,12 +54,14 @@ const templateMapping: Record<string, any> = {
   [EToolName.Point]: pointTemplate,
   [EToolName.Tag]: tagTemplate,
   [EToolName.Text]: textTemplate,
+  [EVideoToolName.VideoSegmentTool]: videoSegmentTemplate,
+  [EVideoToolName.VideoFrameTool]: videoFrameTemplate,
 };
 
 const FormConfig = () => {
-  const { annotationFormInstance, onAnnotationFormChange } = useContext(TaskCreationContext);
-  const [activeTool, setActiveTool] = useState<string>(toolOptions[0].value);
-  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const { annotationFormInstance, onAnnotationFormChange, task } = useContext(TaskCreationContext);
+  const [activeTool, setActiveTool] = useState<string | undefined>();
+  const [selectedTools, setSelectedTools] = useState<any[]>([]);
   const [hasAttributes, setHasAttributes] = useState(false);
 
   const config = useSelector((state: RootState) => state.task.config);
@@ -95,8 +92,8 @@ const FormConfig = () => {
 
   // ======================== 以下为新增代码 ========================
   const handleToolItemClick: MenuProps['onClick'] = async ({ key }) => {
-    setSelectedTools((pre) => [...pre, key]);
     setActiveTool(key);
+    setSelectedTools((pre) => [...pre, key]);
 
     if (typeof onAnnotationFormChange === 'function') {
       setTimeout(onAnnotationFormChange);
@@ -126,17 +123,17 @@ const FormConfig = () => {
     [annotationFormInstance, onAnnotationFormChange, selectedTools],
   );
 
-  const toolsMenu: MenuProps['items'] = useMemo(
-    () =>
-      _.chain(toolOptions)
-        .filter((item) => !selectedTools.includes(item.value))
-        .map(({ value, label }) => ({
-          key: value,
-          label: <span>{label}</span>,
-        }))
-        .value(),
-    [selectedTools],
-  );
+  const toolsMenu: MenuProps['items'] = useMemo(() => {
+    const toolOptions = toolMapping[task.media_type!];
+
+    return _.chain(toolOptions)
+      .filter((item) => !selectedTools.includes(item.value))
+      .map(({ value, label }) => ({
+        key: value,
+        label: <span>{label}</span>,
+      }))
+      .value();
+  }, [selectedTools, task.media_type]);
 
   const tabItems: TabsProps['items'] = useMemo(() => {
     return _.map(selectedTools, (tool, index) => {
@@ -188,16 +185,6 @@ const FormConfig = () => {
       onValuesChange={handleFormValuesChange}
       validateTrigger="onBlur"
     >
-      <Form.Item label="标注类型" name="media_type" rules={[{ required: true, message: '请选择标注类型' }]}>
-        <FancyInput
-          type="enum"
-          size="middle"
-          options={mediaOptions}
-          listItemHeight={10}
-          listHeight={250}
-          defaultValue={MediaType.IMAGE}
-        />
-      </Form.Item>
       <Form.Item label="标注工具">
         <Dropdown menu={{ items: toolsMenu, onClick: handleToolItemClick }} placement="bottomLeft" trigger={['click']}>
           <Button type="primary" ghost icon={<PlusOutlined />}>
@@ -228,14 +215,14 @@ const FormConfig = () => {
         label={<span className="formTitle">通用标签</span>}
         name="commonAttributeConfigurable"
         tooltip="已经配置的所有标注工具均可以使用通用标签"
-        hidden={!graphicTools.includes(activeTool as EToolName)}
+        hidden={globalTools.includes(activeTool as EToolName)}
       >
         <FancyInput type="boolean" />
       </Form.Item>
       <Form.Item
         wrapperCol={{ offset: 4 }}
         className={styles.attributes}
-        hidden={!hasAttributes || !graphicTools.includes(activeTool as EToolName)}
+        hidden={!hasAttributes || globalTools.includes(activeTool as EToolName)}
       >
         <div className={styles.attributesBox}>
           <Form.Item name="attributes">
@@ -244,14 +231,16 @@ const FormConfig = () => {
         </div>
       </Form.Item>
 
-      <Form.Item
-        label="画布外标注"
-        name="drawOutsideTarget"
-        tooltip="开启后可以在媒体文件画布范围外进行标注"
-        hidden={!graphicTools.includes(activeTool as EToolName)}
-      >
-        <FancyInput type="boolean" />
-      </Form.Item>
+      {task.media_type === MediaType.IMAGE && (
+        <Form.Item
+          label="画布外标注"
+          name="drawOutsideTarget"
+          tooltip="开启后可以在媒体文件画布范围外进行标注"
+          hidden={!graphicTools.includes(activeTool as EToolName)}
+        >
+          <FancyInput type="boolean" />
+        </Form.Item>
+      )}
     </Form>
   );
 };

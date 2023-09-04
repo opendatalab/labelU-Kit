@@ -1,0 +1,292 @@
+import { useContext, useEffect, useMemo, useState } from 'react';
+import styled, { css } from 'styled-components';
+import { AttributeTree, CollapseWrapper, AttributeTreeWrapper } from '@label-u/components-react';
+import type {
+  EnumerableAttribute,
+  TagAnnotationEntity,
+  TextAnnotationEntity,
+  TextAttribute,
+  VideoAnnotationData,
+} from '@label-u/interface';
+
+import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
+
+import EditorContext from '../context';
+import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
+
+const Wrapper = styled.div<{ collapsed: boolean }>`
+  grid-area: attribute;
+  height: var(--height);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+
+  ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 280px;')}
+`;
+
+const AttributeHeaderItem = styled.div<{ active: boolean }>`
+  height: 100%;
+  display: flex;
+  padding: 0 0.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+
+  ${({ active }) =>
+    active &&
+    css`
+      color: var(--color-primary);
+      border-bottom: 2px solid var(--color-primary);
+    `}
+
+  &:hover {
+    color: var(--color-primary);
+  }
+
+  .attribute__status {
+    font-size: 12px;
+    color: #999;
+  }
+`;
+
+const TabHeader = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  width: 100%;
+  align-items: center;
+  justify-content: space-around;
+  height: 68px;
+  border-bottom: #e5e5e5 1px solid;
+`;
+
+const AsideWrapper = styled.div``;
+
+const Content = styled.div<{ activeKey: HeaderType }>`
+  padding: 1rem 0;
+  flex: 1 auto;
+  min-height: 0;
+  overflow: auto;
+
+  & > ${AttributeTreeWrapper} {
+    display: ${({ activeKey }) => (activeKey === 'global' ? 'block' : 'none')};
+  }
+
+  & > ${CollapseWrapper as any} {
+    display: ${({ activeKey }) => (activeKey === 'label' ? 'block' : 'none')};
+  }
+`;
+
+const Footer = styled.div`
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  border-top: #e5e5e5 1px solid;
+  cursor: pointer;
+
+  &:hover {
+    color: red;
+  }
+`;
+
+type HeaderType = 'global' | 'label';
+
+export default function Attribute() {
+  const {
+    videoWrapperRef,
+    config,
+    currentSample,
+    onAnnotationsChange,
+    annotationsMapping,
+    onAnnotationsRemove,
+    videoAnnotations,
+    attributes,
+    selectedAnnotation,
+    attributeMapping,
+  } = useContext(EditorContext);
+  const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [height, setHeight] = useState<number>(0);
+
+  const { globalAnnotations, videoAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
+    const _globalAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
+    currentSample?.annotations.forEach((item) => {
+      if (['tag', 'text'].includes(item.type)) {
+        _globalAnnotations.push(item as TextAnnotationEntity | TagAnnotationEntity);
+      }
+    });
+
+    const videoAnnotationsGroupByLabel = new Map<string, VideoAnnotationData[]>();
+
+    for (const item of videoAnnotations) {
+      if (!videoAnnotationsGroupByLabel.has(item.label)) {
+        videoAnnotationsGroupByLabel.set(item.label, []);
+      }
+
+      videoAnnotationsGroupByLabel?.get(item.label)?.push(item);
+    }
+
+    return {
+      globalAnnotations: _globalAnnotations,
+      videoAnnotationsGroup: videoAnnotationsGroupByLabel,
+      defaultActiveKeys: Array.from(videoAnnotationsGroupByLabel.keys()),
+    };
+  }, [currentSample?.annotations, videoAnnotations]);
+
+  const globals = useMemo(() => {
+    const _globals: (TextAttribute | EnumerableAttribute)[] = [];
+
+    if (!config) {
+      return _globals;
+    }
+
+    if (config.tag) {
+      _globals.push(...config.tag);
+    }
+
+    if (config.text) {
+      _globals.push(...config.text);
+    }
+
+    return _globals;
+  }, [config]);
+
+  const titles = useMemo(() => {
+    const _titles = [];
+    // 将文本描述和标签分类合并成全局配置
+    if (config?.tag || config?.text) {
+      _titles.push({
+        title: '全局',
+        key: 'global' as const,
+        subtitle: globalAnnotations.length === globals.length ? '已完成' : '未完成',
+      });
+    }
+
+    if (attributes) {
+      _titles.push({
+        title: '标记',
+        key: 'label' as const,
+        subtitle: `${videoAnnotations.length}条`,
+      });
+    }
+
+    return _titles;
+  }, [attributes, config?.tag, config?.text, globalAnnotations.length, globals.length, videoAnnotations.length]);
+  const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
+
+  useEffect(() => {
+    setTimeout(() => {
+      setHeight(videoWrapperRef.current?.clientHeight || 0);
+    });
+  });
+
+  useEffect(() => {
+    const handleCollapse = () => {
+      setCollapsed((prev) => !prev);
+    };
+
+    document.addEventListener('attribute-collapse', handleCollapse as EventListener);
+
+    return () => {
+      document.removeEventListener('attribute-collapse', handleCollapse as EventListener);
+    };
+  }, []);
+
+  const handleOnChange = (_changedValues: any, values: any[]) => {
+    // 只要其中之一不存在，那么所有该类型的标注即不存在
+    if (!(values[0].id in annotationsMapping)) {
+      onAnnotationsChange([...(currentSample?.annotations ?? []), ...values]);
+    } else {
+      onAnnotationsChange(
+        currentSample!.annotations.map((item) => {
+          const existIndex = values.findIndex((innerItem) => innerItem.id === item.id);
+          if (existIndex >= 0) {
+            return values[existIndex];
+          }
+
+          return item;
+        }),
+      );
+    }
+  };
+
+  const handleClear = () => {
+    if (!currentSample) {
+      return;
+    }
+
+    if (activeKey === 'global') {
+      onAnnotationsRemove(globalAnnotations);
+    } else {
+      onAnnotationsRemove(videoAnnotations);
+    }
+  };
+
+  const collapseItems = useMemo(
+    () =>
+      Array.from(videoAnnotationsGroup).map(([label, annotations]) => {
+        const found = attributeMapping[annotations[0].type]?.[label];
+
+        return {
+          label: (
+            <Header>
+              {found ? found?.key ?? '无标签' : '无标签'}
+              <AttributeAction annotations={annotations} showEdit={false} />
+            </Header>
+          ),
+          key: label,
+          children: (
+            <AsideWrapper>
+              {annotations.map((item) => (
+                <AsideAttributeItem
+                  key={item.id}
+                  active={item.id === selectedAnnotation?.id}
+                  order={item.order}
+                  annotation={item}
+                  labelText={attributeMapping[item.type]?.[label]?.key ?? '无标签'}
+                  color={attributeMapping[item.type]?.[label]?.color ?? '#999'}
+                />
+              ))}
+            </AsideWrapper>
+          ),
+        };
+      }),
+    [attributeMapping, selectedAnnotation?.id, videoAnnotationsGroup],
+  );
+
+  if (!height) {
+    return null;
+  }
+
+  return (
+    // @ts-ignore
+    <Wrapper collapsed={collapsed} style={{ '--height': `${height}px` }}>
+      <TabHeader className="attribute-header">
+        {titles.map((item) => {
+          return (
+            <AttributeHeaderItem
+              onClick={() => setActiveKey(item.key)}
+              active={item.key === activeKey}
+              key={item.key}
+              className="attribute-header__item"
+            >
+              <div>{item.title}</div>
+              <div className="attribute__status">{item.subtitle}</div>
+            </AttributeHeaderItem>
+          );
+        })}
+      </TabHeader>
+      <Content activeKey={activeKey}>
+        <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
+        <AttributeTree data={globalAnnotations} config={globals} onChange={handleOnChange} />
+      </Content>
+      <Footer onClick={handleClear}>
+        <DeleteIcon />
+        &nbsp; 清空
+      </Footer>
+    </Wrapper>
+  );
+}
