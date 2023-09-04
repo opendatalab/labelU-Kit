@@ -16,12 +16,10 @@ export enum EPointCloudName {
 }
 
 export enum EVideoToolName {
-  /** 视频文本工具 */
-  VideoTextTool = 'videoTextTool',
-  /** 视频标签工具 */
-  VideoTagTool = 'videoTagTool',
   /** 视频截取工具 */
-  VideoClipTool = 'videoClipTool',
+  VideoSegmentTool = 'videoSegmentTool',
+  /** 视频帧工具 */
+  VideoFrameTool = 'videoFrameTool',
 }
 
 /** 新：工具type */
@@ -93,9 +91,8 @@ export const TOOL_NAME: Record<string, string> = {
   [EToolName.Face]: '人脸106工具',
   [EToolName.ClientAttribute]: '客户端属性工具',
   [EToolName.OCRRelation]: 'OCR关联关系工具',
-  [EVideoToolName.VideoTextTool]: '视频文本',
-  [EVideoToolName.VideoTagTool]: '视频标签',
-  [EVideoToolName.VideoClipTool]: '视频截取',
+  [EVideoToolName.VideoSegmentTool]: '片断分割',
+  [EVideoToolName.VideoFrameTool]: '时间戳',
   [EPointCloudName.PointCloud]: '点云',
 };
 
