@@ -1,6 +1,6 @@
 import { EToolName, TOOL_NAME, EVideoToolName } from '@label-u/annotation';
 import type { FormProps, SelectProps, TabsProps } from 'antd';
-import { Empty, Popconfirm, Button, Form, Tabs, Select } from 'antd';
+import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
 import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
@@ -61,7 +61,13 @@ const templateMapping: Record<string, any> = {
 const FormConfig = () => {
   const { annotationFormInstance, onAnnotationFormChange, task } = useContext(TaskCreationContext);
   const [activeTool, setActiveTool] = useState<string | undefined>();
+  // 选中的所有工具
   const [selectedTools, setSelectedTools] = useState<any[]>([]);
+  // 选中的标记工具
+  const [selectedAnnotationTools, setSelectedAnnotationTools] = useState<any[]>([]);
+  // 选中的全局工具
+  const [selectedGlobalTools, setSelectedGlobalTools] = useState<string[]>([]);
+  const [activeGlobalTool, setActiveGlobalTool] = useState<string | undefined>();
   const [hasAttributes, setHasAttributes] = useState(false);
 
   const config = useSelector((state: RootState) => state.task.config);
@@ -72,28 +78,40 @@ const FormConfig = () => {
   // 进行中和已完成的任务不允许删除工具
   const deletable = useMemo(() => {
     const isNewTool = !find(tools, { tool: activeTool });
+    const isNewGlobalTool = !find(tools, { tool: activeGlobalTool });
 
-    if (isNewTool) {
-      return true;
-    }
+    let _result = [isNewTool, isNewGlobalTool];
 
     if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
-      return false;
+      _result = _result.map(() => false);
     }
 
-    return true;
-  }, [tools, activeTool, taskStatus, taskDoneAmount]);
+    return _result;
+  }, [tools, activeTool, activeGlobalTool, taskStatus, taskDoneAmount]);
 
   useEffect(() => {
-    setSelectedTools(_.chain(tools).compact().map('tool').value());
-    setActiveTool((tools || [])[0]?.tool);
+    const toolNames = _.chain(tools).compact().map('tool').value();
+    setSelectedTools(toolNames);
+
+    const annotationToolNames = _.filter(toolNames, (item) => !globalTools.includes(item));
+    setSelectedAnnotationTools(annotationToolNames);
+
+    const globalToolNames = _.filter(toolNames, (item) => globalTools.includes(item));
+    setSelectedGlobalTools(globalToolNames);
     setHasAttributes(config?.commonAttributeConfigurable ?? false);
   }, [config, tools]);
 
   // ======================== 以下为新增代码 ========================
-  const handleToolItemClick: SelectProps['onChange'] = (value) => {
-    setActiveTool(value);
-    setSelectedTools((pre) => [...pre, value]);
+  const handleToolItemClick: SelectProps['onChange'] = (key) => {
+    setSelectedTools((pre) => [...pre, key]);
+
+    if (globalTools.includes(key as EToolName)) {
+      setSelectedGlobalTools((pre) => [...pre, key]);
+      setActiveGlobalTool(key);
+    } else {
+      setActiveTool(key);
+      setSelectedAnnotationTools((pre) => [...pre, key]);
+    }
 
     if (typeof onAnnotationFormChange === 'function') {
       setTimeout(onAnnotationFormChange);
@@ -104,7 +122,16 @@ const FormConfig = () => {
     (toolName: EToolName) => () => {
       const newTools = selectedTools.filter((item) => item !== toolName);
       setSelectedTools(newTools);
-      setActiveTool(newTools[0]);
+
+      if (globalTools.includes(toolName)) {
+        const newGlobalTools = newTools.filter((item) => globalTools.includes(item));
+        setSelectedGlobalTools(newGlobalTools);
+        setActiveGlobalTool(newGlobalTools[0]);
+      } else {
+        const newAnnotationTools = newTools.filter((item) => !globalTools.includes(item));
+        setSelectedAnnotationTools(newAnnotationTools);
+        setActiveTool(newAnnotationTools[0]);
+      }
 
       // 因为antd的form的特殊性，删除数组元素时，需要手动调用setFieldsValue
       const prevValues = cloneDeep(annotationFormInstance.getFieldsValue());
@@ -129,49 +156,79 @@ const FormConfig = () => {
     return [
       {
         label: '全局',
-        options: _.chain(globalTools)
-          .map((toolName) => ({
-            disabled: selectedTools.includes(toolName),
-            value: toolName,
-            label: <span>{TOOL_NAME[toolName]}</span>,
-          }))
-          .value(),
+        options: _.map(globalTools, (toolName) => ({
+          disabled: selectedTools.includes(toolName),
+          value: toolName,
+          label: <span>{TOOL_NAME[toolName]}</span>,
+        })),
       },
       {
         label: '标记',
-        options: _.chain(toolOptions)
-          .map(({ value, label }) => ({
-            disabled: selectedTools.includes(value),
-            value: value,
-            label: <span>{label}</span>,
-          }))
-          .value(),
+        options: _.map(toolOptions, ({ value, label }) => ({
+          disabled: selectedTools.includes(value),
+          value: value,
+          label: <span>{label}</span>,
+        })),
       },
     ];
   }, [selectedTools, task.media_type]);
 
   const tabItems: TabsProps['items'] = useMemo(() => {
-    return _.map(selectedTools, (tool, index) => {
-      const fancyFormTemplate = templateMapping[tool] || null;
-
-      return {
-        key: tool,
-        label: TOOL_NAME[tool],
-        forceRender: true,
-        children: (
-          <div className={styles.innerForm}>
-            <div style={{ display: deletable ? 'flex' : 'none', justifyContent: 'flex-end' }}>
-              <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
-                <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
-                  删除工具
-                </Button>
-              </Popconfirm>
+    return _.chain(selectedTools)
+      .filter((tool) => {
+        return !globalTools.includes(tool);
+      })
+      .map((tool) => {
+        const fancyFormTemplate = templateMapping[tool] || null;
+        const index = _.findIndex(selectedTools, (item) => item === tool);
+        return {
+          key: tool,
+          label: TOOL_NAME[tool],
+          forceRender: true,
+          children: (
+            <div className={styles.innerForm}>
+              <div style={{ display: deletable[0] ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+                <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
+                  <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
+                    删除工具
+                  </Button>
+                </Popconfirm>
+              </div>
+              <FancyForm template={fancyFormTemplate} name={['tools', index]} />
             </div>
-            <FancyForm template={fancyFormTemplate} name={['tools', index]} />
-          </div>
-        ),
-      };
-    });
+          ),
+        };
+      })
+      .value();
+  }, [deletable, handleRemoveTool, selectedTools]);
+
+  const tabGlobalItems: TabsProps['items'] = useMemo(() => {
+    return _.chain(selectedTools)
+      .filter((tool) => {
+        return globalTools.includes(tool);
+      })
+      .map((tool) => {
+        const fancyFormTemplate = templateMapping[tool] || null;
+        const index = _.findIndex(selectedTools, (item) => item === tool);
+        return {
+          key: tool,
+          label: TOOL_NAME[tool],
+          forceRender: true,
+          children: (
+            <div className={styles.innerForm}>
+              <div style={{ display: deletable[1] ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+                <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
+                  <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
+                    删除工具
+                  </Button>
+                </Popconfirm>
+              </div>
+              <FancyForm template={fancyFormTemplate} name={['tools', index]} />
+            </div>
+          ),
+        };
+      })
+      .value();
   }, [deletable, handleRemoveTool, selectedTools]);
 
   // TODO: 增加表单数据类型
@@ -201,35 +258,45 @@ const FormConfig = () => {
       validateTrigger="onBlur"
     >
       <Form.Item label="标注工具">
-        <Select placeholder="新增工具" options={toolsMenu} onChange={handleToolItemClick}>
+        <Select placeholder="新增工具" options={toolsMenu} onSelect={handleToolItemClick}>
           <PlusOutlined />
         </Select>
-        {/* <Dropdown menu={{ items: toolsMenu, onClick: handleToolItemClick }} placement="bottomLeft" trigger={['click']}>
-          <Button type="primary" ghost icon={<PlusOutlined />}>
-            新增工具
-          </Button>
-        </Dropdown> */}
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 4 }}>
-        {selectedTools.length > 0 ? (
+      {selectedGlobalTools.length > 0 && (
+        <Form.Item label="全局" tooltip="通过分类和描述给媒体数据（如图片、视频、音频等）本身打标签">
+          <div className="formTabBox">
+            <Tabs
+              type="card"
+              size="small"
+              activeKey={activeGlobalTool}
+              destroyInactiveTabPane={false}
+              onTabClick={(tabKey) => {
+                console.log('11111');
+                setActiveGlobalTool(tabKey);
+              }}
+              items={tabGlobalItems}
+            />
+          </div>
+        </Form.Item>
+      )}
+      {selectedAnnotationTools.length > 0 && (
+        <Form.Item label="标记" tooltip="通过配置工具在媒体中绘制标记">
           <div className="formTabBox">
             <Tabs
               type="card"
               size="small"
               activeKey={activeTool}
               destroyInactiveTabPane={false}
-              onChange={(tabKey) => {
+              onTabClick={(tabKey) => {
+                console.log('0000');
                 setActiveTool(tabKey);
               }}
               items={tabItems}
             />
           </div>
-        ) : (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="请选择工具" />
-        )}
-      </Form.Item>
-
-      {(videoAnnotationTools.includes(activeTool as EToolName) || graphicTools.includes(activeTool as EToolName)) && (
+        </Form.Item>
+      )}
+      {selectedAnnotationTools.length > 0 && (
         <Form.Item
           label={<span className="formTitle">通用标签</span>}
           name="commonAttributeConfigurable"
