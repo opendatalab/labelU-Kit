@@ -167,6 +167,15 @@ export default function Header() {
           y: videoWrapperRef.current.clientHeight - 136,
         });
       }
+
+      // 标记结束后暂停播放，填完属性后再播放
+      if (playerRef.current) {
+        if (playerRef.current.paused()) {
+          playerRef.current.play();
+        } else {
+          playerRef.current.pause();
+        }
+      }
       // 打开属性编辑框
     };
 
