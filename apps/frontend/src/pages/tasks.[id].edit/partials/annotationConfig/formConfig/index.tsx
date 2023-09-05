@@ -271,7 +271,6 @@ const FormConfig = () => {
               activeKey={activeGlobalTool}
               destroyInactiveTabPane={false}
               onTabClick={(tabKey) => {
-                console.log('11111');
                 setActiveGlobalTool(tabKey);
               }}
               items={tabGlobalItems}
@@ -288,7 +287,6 @@ const FormConfig = () => {
               activeKey={activeTool}
               destroyInactiveTabPane={false}
               onTabClick={(tabKey) => {
-                console.log('0000');
                 setActiveTool(tabKey);
               }}
               items={tabItems}
