@@ -35,8 +35,7 @@
     "polished": "^4.2.2",
     "rc-field-form": "^1.37.0",
     "react-hotkeys-hook": "^4.4.1",
-    "styled-components": "^5.3.6",
-    "@ant-design/icons": "5.2.6"
+    "styled-components": "^5.3.6"
   },
   "devDependencies": {
     "@label-u/annotation": "2.2.0-alpha.1",

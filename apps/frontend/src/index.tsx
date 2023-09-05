@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import React from 'react';
 import { Provider } from 'react-redux';
+import '@label-u/video-react/dist/style.css';
 
 import './polyfills';
 import App from './App';

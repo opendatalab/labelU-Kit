@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import 'video.js/dist/video-js.css';
+import './video-js.css';
 import { secondsToMinute } from '@/utils';
 
 import invalidVideoIcon from './icons/video-error.svg';

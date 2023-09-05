@@ -291,11 +291,6 @@ function ForwardEditor(
           },
         }),
       );
-
-      // 标记结束后暂停播放，填完属性后再播放
-      if (playerRef.current && _annotation.label) {
-        playerRef.current.pause();
-      }
     },
     [],
   );
@@ -455,18 +450,14 @@ function ForwardEditor(
           label: attributes[index].value,
         };
 
-        if (playerRef.current) {
-          playerRef.current.pause();
-
-          if (newAnnotation) {
-            document.dispatchEvent(
-              new CustomEvent('annotate-end', {
-                detail: {
-                  annotation: newAnnotation,
-                },
-              }),
-            );
-          }
+        if (playerRef.current && newAnnotation) {
+          document.dispatchEvent(
+            new CustomEvent('annotate-end', {
+              detail: {
+                annotation: newAnnotation,
+              },
+            }),
+          );
         }
       }
     },

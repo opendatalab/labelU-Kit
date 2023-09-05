@@ -319,7 +319,11 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
     }
 
     if (isPlayingRef.current) {
-      playerRef.current?.play();
+      if (playerRef.current.paused()) {
+        playerRef.current.play();
+      } else {
+        playerRef.current.pause();
+      }
     }
 
     if (
