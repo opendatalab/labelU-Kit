@@ -2,6 +2,7 @@ import { useEffect, useContext, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Dispatch } from '@/store';
+import { MediaType } from '@/services/types';
 
 import FormConfig from './formConfig';
 import { TaskCreationContext } from '../../taskCreation.context';
@@ -38,7 +39,7 @@ const AnnotationConfig = () => {
       <div className={styles.innerWrapper}>
         <div className={styles.header}>
           <span className={styles.title}>标注配置</span>
-          <TemplateModal onSelect={handleSelect} />
+          {task.media_type === MediaType.IMAGE && <TemplateModal onSelect={handleSelect} />}
         </div>
         <div className={styles.content}>
           <FormConfig />

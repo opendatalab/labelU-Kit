@@ -233,7 +233,14 @@ export default function TemplateModal({ onSelect }: TemplateModalProps) {
           选择模板
         </Button>
       )}
-      <Modal title="模板选择" width={980} open={visible} onCancel={handleCloseModal} bodyStyle={{ padding: '1rem 0' }}>
+      <Modal
+        title="模板选择"
+        width={980}
+        open={visible}
+        onCancel={handleCloseModal}
+        bodyStyle={{ padding: '1rem 0' }}
+        footer={null}
+      >
         <StyledWrapper className="wrapper">
           <div className="left">
             <Menu

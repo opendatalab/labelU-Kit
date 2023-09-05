@@ -2,8 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
-import { VideoCard } from '@/VideoCard';
-import StyledVideo from '@/VideoCard/styled';
+import { VideoCard, StyledVideo } from '@/VideoCard';
 
 import EditorContext from '../context';
 

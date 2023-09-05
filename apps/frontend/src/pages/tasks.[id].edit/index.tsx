@@ -401,7 +401,6 @@ const CreateTask = () => {
         try {
           await basicFormInstance.validateFields();
         } catch (err) {
-          message.error('请填入任务名称');
           return;
         }
       }
