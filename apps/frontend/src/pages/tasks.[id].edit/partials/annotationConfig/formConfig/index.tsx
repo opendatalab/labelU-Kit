@@ -1,6 +1,6 @@
 import { EToolName, TOOL_NAME, EVideoToolName } from '@label-u/annotation';
-import type { FormProps, MenuProps, TabsProps } from 'antd';
-import { Empty, Popconfirm, Button, Dropdown, Form, Tabs } from 'antd';
+import type { FormProps, SelectProps, TabsProps } from 'antd';
+import { Empty, Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
 import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
@@ -29,8 +29,8 @@ add('list-attribute', FancyAttributeList);
 add('category-attribute', FancyCategoryAttribute);
 
 const globalTools = [EToolName.Tag, EToolName.Text];
-const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line, ...globalTools];
-const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool, ...globalTools];
+const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line];
+const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool];
 
 const toolMapping = {
   [MediaType.IMAGE]: graphicTools.map((item) => {
@@ -91,9 +91,9 @@ const FormConfig = () => {
   }, [config, tools]);
 
   // ======================== 以下为新增代码 ========================
-  const handleToolItemClick: MenuProps['onClick'] = async ({ key }) => {
-    setActiveTool(key);
-    setSelectedTools((pre) => [...pre, key]);
+  const handleToolItemClick: SelectProps['onChange'] = (value) => {
+    setActiveTool(value);
+    setSelectedTools((pre) => [...pre, value]);
 
     if (typeof onAnnotationFormChange === 'function') {
       setTimeout(onAnnotationFormChange);
@@ -123,16 +123,31 @@ const FormConfig = () => {
     [annotationFormInstance, onAnnotationFormChange, selectedTools],
   );
 
-  const toolsMenu: MenuProps['items'] = useMemo(() => {
+  const toolsMenu = useMemo(() => {
     const toolOptions = toolMapping[task.media_type!];
 
-    return _.chain(toolOptions)
-      .filter((item) => !selectedTools.includes(item.value))
-      .map(({ value, label }) => ({
-        key: value,
-        label: <span>{label}</span>,
-      }))
-      .value();
+    return [
+      {
+        label: '全局',
+        options: _.chain(globalTools)
+          .map((toolName) => ({
+            disabled: selectedTools.includes(toolName),
+            value: toolName,
+            label: <span>{TOOL_NAME[toolName]}</span>,
+          }))
+          .value(),
+      },
+      {
+        label: '标记',
+        options: _.chain(toolOptions)
+          .map(({ value, label }) => ({
+            disabled: selectedTools.includes(value),
+            value: value,
+            label: <span>{label}</span>,
+          }))
+          .value(),
+      },
+    ];
   }, [selectedTools, task.media_type]);
 
   const tabItems: TabsProps['items'] = useMemo(() => {
@@ -186,11 +201,14 @@ const FormConfig = () => {
       validateTrigger="onBlur"
     >
       <Form.Item label="标注工具">
-        <Dropdown menu={{ items: toolsMenu, onClick: handleToolItemClick }} placement="bottomLeft" trigger={['click']}>
+        <Select placeholder="新增工具" options={toolsMenu} onChange={handleToolItemClick}>
+          <PlusOutlined />
+        </Select>
+        {/* <Dropdown menu={{ items: toolsMenu, onClick: handleToolItemClick }} placement="bottomLeft" trigger={['click']}>
           <Button type="primary" ghost icon={<PlusOutlined />}>
             新增工具
           </Button>
-        </Dropdown>
+        </Dropdown> */}
       </Form.Item>
       <Form.Item wrapperCol={{ offset: 4 }}>
         {selectedTools.length > 0 ? (
@@ -211,14 +229,16 @@ const FormConfig = () => {
         )}
       </Form.Item>
 
-      <Form.Item
-        label={<span className="formTitle">通用标签</span>}
-        name="commonAttributeConfigurable"
-        tooltip="已经配置的所有标注工具均可以使用通用标签"
-        hidden={globalTools.includes(activeTool as EToolName)}
-      >
-        <FancyInput type="boolean" />
-      </Form.Item>
+      {(videoAnnotationTools.includes(activeTool as EToolName) || graphicTools.includes(activeTool as EToolName)) && (
+        <Form.Item
+          label={<span className="formTitle">通用标签</span>}
+          name="commonAttributeConfigurable"
+          tooltip="已经配置的所有标注工具均可以使用通用标签"
+          hidden={globalTools.includes(activeTool as EToolName)}
+        >
+          <FancyInput type="boolean" />
+        </Form.Item>
+      )}
       <Form.Item
         wrapperCol={{ offset: 4 }}
         className={styles.attributes}
