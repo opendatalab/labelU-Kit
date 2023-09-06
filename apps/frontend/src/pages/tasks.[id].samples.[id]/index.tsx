@@ -12,7 +12,8 @@ import type { Dispatch, RootState } from '@/store';
 import { MediaType, type SampleResponse } from '@/services/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import { getSamples } from '@/services/samples';
-import { jsonParse } from '@/utils';
+import { convertVideoConfig } from '@/utils/convertVideoConfig';
+import { convertVideoSample } from '@/utils/convertVideoSample';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
@@ -103,53 +104,17 @@ const AnnotationPage = () => {
         return null;
       }
 
-      const parsedResult = jsonParse(transformed[0].result);
-
-      const segments = _.chain(parsedResult)
-        .get('videoSegmentTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'segment',
-          };
-        })
-        .value();
-      const frames = _.chain(parsedResult)
-        .get('videoFrameTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'frame',
-          };
-        })
-        .value();
-      const texts = _.chain(parsedResult)
-        .get('textTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'text',
-          };
-        })
-        .value();
-
-      const tags = _.chain(parsedResult)
-        .get('tagTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'tag',
-          };
-        })
-        .value();
-
-      return {
-        ...transformed[0],
-        url: transformed[0].url.replace('attachment', 'partial'),
-        annotations: [...segments, ...frames, ...texts, ...tags],
-      };
+      return convertVideoSample(sample.data, routeParams.sampleId);
     }
-  }, [task.media_type, transformed]);
+  }, [routeParams.sampleId, sample.data, task.media_type, transformed]);
+
+  const editorConfig = useMemo(() => {
+    if (task.media_type === MediaType.VIDEO) {
+      return convertVideoConfig(taskConfig);
+    }
+
+    return {} as EditorProps['config'];
+  }, [task.media_type, taskConfig]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
@@ -169,50 +134,6 @@ const AnnotationPage = () => {
       />
     );
   } else if (task.media_type === MediaType.VIDEO) {
-    const editorConfig: NonNullable<EditorProps['config']> = {} as NonNullable<EditorProps['config']>;
-
-    taskConfig.tools.forEach((item) => {
-      if (item.tool === 'videoSegmentTool') {
-        editorConfig.segment = {
-          ...editorConfig.segment,
-          ...item.config,
-          type: 'segment',
-        };
-
-        if (taskConfig.attributes) {
-          if (!editorConfig.segment.attributes) {
-            editorConfig.segment.attributes = [];
-          }
-
-          editorConfig.segment.attributes = taskConfig.attributes.concat(editorConfig.segment.attributes);
-        }
-      }
-
-      if (item.tool === 'videoFrameTool') {
-        editorConfig.frame = {
-          ...editorConfig.frame,
-          ...item.config,
-          type: 'frame',
-        };
-
-        if (taskConfig.attributes) {
-          if (!editorConfig.frame.attributes) {
-            editorConfig.frame.attributes = [];
-          }
-
-          editorConfig.frame.attributes = taskConfig.attributes.concat(editorConfig.frame.attributes);
-        }
-      }
-
-      if (item.tool === 'tagTool') {
-        editorConfig.tag = item.config.attributes;
-      }
-
-      if (item.tool === 'textTool') {
-        editorConfig.text = item.config.attributes;
-      }
-    });
-
     content = (
       <Editor
         primaryColor="#0d53de"
