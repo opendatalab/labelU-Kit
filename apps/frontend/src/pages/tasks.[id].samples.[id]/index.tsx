@@ -145,6 +145,7 @@ const AnnotationPage = () => {
 
       return {
         ...transformed[0],
+        url: transformed[0].url.replace('attachment', 'video'),
         annotations: [...segments, ...frames, ...texts, ...tags],
       };
     }
