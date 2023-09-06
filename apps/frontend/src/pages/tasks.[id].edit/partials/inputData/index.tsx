@@ -16,7 +16,7 @@ import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 import type { MediaType } from '@/services/types';
-import { FileExtension, FileMimeType, MediaFileSize } from '@/constants/mediaType';
+import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
 
 import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
@@ -56,13 +56,16 @@ const isCorrectFiles = (files: File[], type: MediaType) => {
     const fileUnit = files[fileIndex];
     const isOverSize = commonController.isOverSize(fileUnit.size, type);
     if (isOverSize) {
-      commonController.notificationErrorMessage({ message: '单个文件大小超过100MB限制' }, 3);
+      commonController.notificationErrorMessage({ message: `单个文件大小超过${MediaFileSize[type]}MB限制` }, 3);
       result = false;
       break;
     }
     const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name, type);
     if (!isCorrectFileType) {
-      commonController.notificationErrorMessage({ message: '请上传支持的文件类型，类型包括：jpg、png、bmp、gif' }, 3);
+      commonController.notificationErrorMessage(
+        { message: `请上传支持的文件类型，类型包括：${FileExtensionText[type]}` },
+        3,
+      );
       result = false;
       break;
     }
@@ -315,7 +318,7 @@ const InputData = () => {
               </Button>
             </div>
             <div className={styles.illustration}>
-              <div className={styles.supportType}>支持文件类型包括：{FileExtension[task.media_type!]}</div>
+              <div className={styles.supportType}>支持文件类型包括：{FileExtensionText[task.media_type!]}</div>
               <div className={styles.advises}>
                 {' '}
                 单次上传文件最大数量为100个，建议单个文件大小不超过{MediaFileSize[task.media_type!]}MB{' '}

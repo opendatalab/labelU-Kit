@@ -6,10 +6,16 @@ export const MediaTypeText = {
   [MediaType.AUDIO]: '音频',
 };
 
-export const FileExtension = {
+export const FileExtensionText = {
   [MediaType.IMAGE]: 'jpg、png、bmp、gif',
   [MediaType.VIDEO]: 'mp4(h.264编码)',
   [MediaType.AUDIO]: 'mp3、wav、ogg',
+};
+
+export const FileExtension = {
+  [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif'],
+  [MediaType.VIDEO]: ['mp4'],
+  [MediaType.AUDIO]: ['mp3', 'wav', 'ogg'],
 };
 
 export const MediaFileSize = {
