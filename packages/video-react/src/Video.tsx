@@ -16,7 +16,7 @@ import VideoPlayer from './VideoPlayer';
 import AnnotationBar, { AttributeItem } from './AnnotationBar';
 import sliceIcon from './assets/icons/cursor-slice.svg';
 import frameIcon from './assets/icons/cursor-frame.svg';
-import { parseTime, scheduleVideoAnnotationLane, uid } from './utils';
+import { parseTime, scheduleVideoAnnotationLane, throttle, uid } from './utils';
 import GlobalStyle from './GlobalStyle';
 import type { VideoAnnotationInUI } from './context';
 import VideoAnnotationContext from './context';
@@ -265,7 +265,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
     }
   }, [annotations, duration, editingAnnotation, editingType, finishAnnotation]);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = throttle((e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -299,7 +299,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
         }%`;
       }
     }
-  };
+  }, 50);
 
   const handleMouseUp = (e: MouseEvent) => {
     document.removeEventListener('mouseup', handleMouseUp);

@@ -11,7 +11,7 @@ import { forwardRef, useContext, useImperativeHandle, useMemo, useRef } from 're
 import Tooltip from 'rc-tooltip';
 import 'rc-tooltip/assets/bootstrap.css';
 
-import { parseTime, secondsToMinute } from '@/utils';
+import { parseTime, secondsToMinute, throttle } from '@/utils';
 import type { VideoAnnotationInUI } from '@/context';
 import VideoAnnotationContext from '@/context';
 
@@ -280,7 +280,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
     const startPositionPercentage = start! / duration;
     const endPositionPercentage = end! / duration;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = throttle((e: MouseEvent) => {
       if (!wrapperRef.current) {
         return;
       }
@@ -317,7 +317,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
           playerRef.current.currentTime(duration * (newRight / barWrapperRef.current.clientWidth));
         }
       }
-    };
+    }, 50);
 
     const handleMouseUp = (e: MouseEvent) => {
       e.preventDefault();
