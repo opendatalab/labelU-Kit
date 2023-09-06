@@ -51,4 +51,8 @@
   height: calc(100vh - 136px);
   border-top: 1px solid var(--color-border-secondary);
   background-color: white;
+
+  :global(.labelu-video-editor) {
+    height: calc(100vh - 113px);
+  }
 }
