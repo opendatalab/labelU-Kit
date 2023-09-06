@@ -169,20 +169,14 @@ const AnnotationPage = () => {
       />
     );
   } else if (task.media_type === MediaType.VIDEO) {
-    const editorConfig: EditorProps['config'] = {
-      segment: {
-        type: 'segment',
-      },
-      frame: {
-        type: 'frame',
-      },
-    };
+    const editorConfig: NonNullable<EditorProps['config']> = {} as NonNullable<EditorProps['config']>;
 
     taskConfig.tools.forEach((item) => {
       if (item.tool === 'videoSegmentTool') {
         editorConfig.segment = {
           ...editorConfig.segment,
           ...item.config,
+          type: 'segment',
         };
 
         if (taskConfig.attributes) {
@@ -198,6 +192,7 @@ const AnnotationPage = () => {
         editorConfig.frame = {
           ...editorConfig.frame,
           ...item.config,
+          type: 'frame',
         };
 
         if (taskConfig.attributes) {
