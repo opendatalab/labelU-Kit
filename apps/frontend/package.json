@@ -8,7 +8,7 @@
     "@label-u/components": "2.1.1-alpha.1",
     "@label-u/components-react": "1.0.0-alpha.2",
     "@label-u/formatter": "1.0.1",
-    "@label-u/video-editor-react": "1.0.0-alpha.5",
+    "@label-u/video-editor-react": "1.0.0-alpha.6",
     "@label-u/video-react": "1.0.0-alpha.4",
     "@rematch/core": "^2.2.0",
     "@rematch/immer": "^2.1.3",
