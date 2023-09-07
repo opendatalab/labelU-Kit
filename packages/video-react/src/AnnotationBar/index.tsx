@@ -8,8 +8,7 @@ import type {
   VideoSegmentAnnotation,
 } from '@label-u/interface';
 import { forwardRef, useContext, useImperativeHandle, useMemo, useRef } from 'react';
-import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap.css';
+import { Tooltip } from '@label-u/components-react';
 
 import { parseTime, secondsToMinute, throttle } from '@/utils';
 import type { VideoAnnotationInUI } from '@/context';
