@@ -132,6 +132,9 @@ export const RadioGroupWrapper = styled.div`
 
   label {
     cursor: pointer;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
   }
 
   input {
