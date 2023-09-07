@@ -131,8 +131,16 @@ export default function Header() {
   const handleSelect = (attribute: Attribute, e: React.MouseEvent) => {
     onLabelChange(attribute);
 
-    if (!dragModalRef.current || !selectedAnnotation) {
+    if (
+      !dragModalRef.current ||
+      !selectedAnnotation ||
+      !attributeMapping[selectedAnnotation.type][attribute.value]?.attributes?.length
+    ) {
       return;
+    }
+
+    if (playerRef.current) {
+      playerRef.current.pause();
     }
 
     const rect = e.currentTarget.getBoundingClientRect();
