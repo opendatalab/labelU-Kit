@@ -202,7 +202,7 @@ const CreateTask = () => {
           },
         })
         .then(() => {
-          navigate('/tasks');
+          navigate(`/tasks/${taskData.id}`);
         });
     },
     [annotationFormInstance, basicFormInstance, currentStep, dispatch.task, navigate, taskData, taskId],

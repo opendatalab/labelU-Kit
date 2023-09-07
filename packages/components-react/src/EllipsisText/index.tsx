@@ -15,13 +15,14 @@ export function EllipsisText({
   } & Omit<TooltipProps, 'overlay'>
 >) {
   const [overflow, setOverflow] = useState(false);
+  const [isEnter, setIsEnter] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     if (ref.current && ref.current.clientWidth >= maxWidth) {
       setOverflow(true);
     }
-  }, [maxWidth]);
+  }, [isEnter, maxWidth]);
 
   if (!children) {
     return null;
@@ -34,6 +35,10 @@ export function EllipsisText({
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
+    },
+    // 当元素初始隐藏时，无法获得其宽度，因此需要在鼠标进入时重新计算
+    onMouseEnter: () => {
+      setIsEnter(true);
     },
   });
 
