@@ -92,7 +92,9 @@ export const StyledVideo = styled.div.attrs((props: StyledVideoProps) => ({
     position: absolute;
     right: 5px;
     bottom: 8px;
-    font-size: 10px;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 0px 0px 10px #0000007a;
     line-height: 1;
     opacity: 1;
     pointer-events: none;

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@label-u/components-react';
-import { DraggableModel, AttributeForm } from '@label-u/components-react';
+import { DraggableModel, AttributeForm, EllipsisText } from '@label-u/components-react';
 import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation, Attribute } from '@label-u/interface';
 import { throttle } from '@label-u/video-react';
 
@@ -17,6 +17,7 @@ const Wrapper = styled.div`
   height: 44px;
   background-color: #f8f8f8;
   padding: 0 1rem;
+  flex-shrink: 0;
 `;
 
 const LABEL_GAP = 8;
@@ -58,7 +59,6 @@ const Labels = styled.div`
 
 const LabelWrapper = styled.div<{ color: string; active: boolean }>`
   --attribute-color: ${({ color }) => color};
-  display: flex;
   position: relative;
   white-space: nowrap;
   padding: 0.25rem 0.5rem;
@@ -66,6 +66,10 @@ const LabelWrapper = styled.div<{ color: string; active: boolean }>`
   background-color: ${({ active }) => (active ? `var(--attribute-color)` : '#fff')};
   color: ${({ active }) => (active ? '#fff' : '#333')};
   border-radius: 2px;
+  max-width: 8em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-sizing: border-box;
 
   &:hover {
     color: ${({ active }) => (active ? '#fff' : 'var(--attribute-color)')};
@@ -99,9 +103,11 @@ function LabelItem({
   };
 
   return (
-    <LabelWrapper active={active} color={attribute.color ?? '#000'} onClick={handleClick}>
-      {children as string}
-    </LabelWrapper>
+    <EllipsisText maxWidth={112} title={children}>
+      <LabelWrapper active={active} color={attribute.color ?? '#000'} onClick={handleClick}>
+        {children as string}
+      </LabelWrapper>
+    </EllipsisText>
   );
 }
 

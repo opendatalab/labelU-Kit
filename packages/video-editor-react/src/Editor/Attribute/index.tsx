@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { AttributeTree, CollapseWrapper, AttributeTreeWrapper } from '@label-u/components-react';
+import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText } from '@label-u/components-react';
 import type {
   EnumerableAttribute,
   TagAnnotationEntity,
@@ -236,11 +236,15 @@ export default function Attribute() {
     () =>
       Array.from(videoAnnotationsGroup).map(([label, annotations]) => {
         const found = attributeMapping[annotations[0].type]?.[label];
+        const labelText = found ? found?.key ?? '无标签' : '无标签';
 
         return {
           label: (
             <Header>
-              {found ? found?.key ?? '无标签' : '无标签'}
+              <EllipsisText maxWidth={180} title={labelText}>
+                <div>{labelText}</div>
+              </EllipsisText>
+
               <AttributeAction annotations={annotations} showEdit={false} />
             </Header>
           ),
