@@ -1,6 +1,6 @@
 {
   "name": "@label-u/video-react",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "label-u video annotation component for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
