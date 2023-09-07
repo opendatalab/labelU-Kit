@@ -176,11 +176,7 @@ export default function Header() {
 
       // 标记结束后暂停播放，填完属性后再播放
       if (playerRef.current) {
-        if (playerRef.current.paused()) {
-          playerRef.current.play();
-        } else {
-          playerRef.current.pause();
-        }
+        playerRef.current.pause();
       }
       // 打开属性编辑框
     };
@@ -201,12 +197,12 @@ export default function Header() {
     ) => {
       const { annotation, mouseEvent } = e.detail;
 
-      if (
-        !dragModalRef.current ||
-        !annotation ||
-        !attributeMapping[annotation.type][annotation.label]?.attributes?.length
-      ) {
+      if (!dragModalRef.current || !annotation || !attributeMapping[annotation.type][annotation.label]) {
         return;
+      }
+
+      if (playerRef.current) {
+        playerRef.current.pause();
       }
 
       dragModalRef.current.toggleVisibility(true);
