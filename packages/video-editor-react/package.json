@@ -1,6 +1,6 @@
 {
   "name": "@label-u/video-editor-react",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.6",
   "description": "video annotation editor for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -31,7 +31,7 @@
   "dependencies": {
     "@label-u/components-react": "1.0.0-alpha.2",
     "@label-u/interface": "1.0.0-alpha.1",
-    "@label-u/video-react": "1.0.0-alpha.2",
+    "@label-u/video-react": "1.0.0-alpha.4",
     "polished": "^4.2.2",
     "rc-field-form": "^1.37.0",
     "react-hotkeys-hook": "^4.4.1",
