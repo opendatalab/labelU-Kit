@@ -102,7 +102,7 @@ const TaskCard = (props: any) => {
             )}
           </div>
           <div className={currentStyles.actions}>
-            <ExportPortal taskId={cardInfo.id}>
+            <ExportPortal taskId={cardInfo.id} mediaType={cardInfo.media_type}>
               <div className={currentStyles.upload}>
                 <Tooltip placement={'top'} title={'数据导出'}>
                   <Icon className={currentStyles.actionIcon} component={OutputIcon} />

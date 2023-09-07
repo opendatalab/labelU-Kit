@@ -279,7 +279,7 @@ const Samples = () => {
         />
         <div className={currentStyles.pagination}>
           <div className={currentStyles.dataProcess}>
-            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds}>
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={taskData.media_type!}>
               <Button type="link" disabled={selectedSampleIds.length === 0}>
                 批量数据导出
               </Button>
