@@ -143,34 +143,46 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
         const innerAnnotation = omit(['type', 'visible'])(annotation);
         if (annotation.type === 'tag') {
           if (!result.tagTool) {
-            result.tagTool = [];
+            result.tagTool = {
+              toolName: 'tagTool',
+              result: [],
+            };
           }
 
-          result.tagTool.push(innerAnnotation);
+          result.tagTool.result.push(innerAnnotation);
         }
 
         if (annotation.type === 'text') {
           if (!result.textTool) {
-            result.textTool = [];
+            result.textTool = {
+              toolName: 'textTool',
+              result: [],
+            };
           }
 
-          result.textTool.push(innerAnnotation);
+          result.textTool.result.push(innerAnnotation);
         }
 
         if (annotation.type === 'frame') {
           if (!result.videoFrameTool) {
-            result.videoFrameTool = [];
+            result.videoFrameTool = {
+              toolName: 'videoFrameTool',
+              result: [],
+            };
           }
 
-          result.videoFrameTool.push(innerAnnotation);
+          result.videoFrameTool.result.push(innerAnnotation);
         }
 
         if (annotation.type === 'segment') {
           if (!result.videoSegmentTool) {
-            result.videoSegmentTool = [];
+            result.videoSegmentTool = {
+              toolName: 'videoSegmentTool',
+              result: [],
+            };
           }
 
-          result.videoSegmentTool.push(innerAnnotation);
+          result.videoSegmentTool.result.push(innerAnnotation);
         }
       });
 

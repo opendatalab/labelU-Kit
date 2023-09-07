@@ -38,7 +38,7 @@ export function convertVideoSample(
     url: url.replace('attachment', 'partial'),
     annotations: _.chain(pool)
       .map(([type, key]) => {
-        const items = _.get(resultParsed, key, []);
+        const items = _.get(resultParsed, [key, 'result'], []);
         return _.map(items, (item) => {
           return {
             ...item,
