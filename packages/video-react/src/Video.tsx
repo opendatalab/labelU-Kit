@@ -317,14 +317,6 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
       return;
     }
 
-    if (isPlayingRef.current) {
-      if (playerRef.current.paused()) {
-        playerRef.current.play();
-      } else {
-        playerRef.current.pause();
-      }
-    }
-
     if (
       editingSegmentAnnotationRef.current &&
       (offsetX * duration) / rect.width - editingSegmentAnnotationRef.current.start! > 0.2

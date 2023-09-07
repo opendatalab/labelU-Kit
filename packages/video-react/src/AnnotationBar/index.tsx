@@ -235,7 +235,10 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
             <span className="attribute-item" key={key}>
               {currentAttributeMapping[key]?.key ?? key}:{' '}
               {(Array.isArray(value)
-                ? value.map((item) => currentAttributeMapping[key]?.optionMapping?.[item]?.key).join(', ')
+                ? value
+                    .map((item) => currentAttributeMapping[key]?.optionMapping?.[item]?.key)
+                    .filter((item) => item)
+                    .join(', ')
                 : currentAttributeMapping[key]?.optionMapping?.[value]?.key) || value}
             </span>
           );
