@@ -63,7 +63,7 @@ export interface EditorProps {
 
 function ForwardEditor(
   {
-    samples,
+    samples: propsSamples,
     renderSidebar,
     config,
     renderAttributes,
@@ -76,6 +76,7 @@ function ForwardEditor(
   ref: React.Ref<EditorRef>,
 ) {
   const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>('segment');
+  const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
   const selectedIndexRef = useRef<number>(-1);
   const attributes = useMemo(() => {
     if (!currentTool) {
