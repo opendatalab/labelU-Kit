@@ -88,7 +88,7 @@ function ForwardEditor(
   const videoWrapperRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any | null>(null);
   const [selectedAnnotation, setSelectedAnnotation] = useState<VideoAnnotationInEditor | undefined>();
-  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | undefined>();
+  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | undefined>(attributes[0]);
 
   const attributeMappingByTool = useMemo(() => {
     const mapping: Record<string, Record<string, Attribute>> = {};
@@ -112,11 +112,19 @@ function ForwardEditor(
     setOrderVisible(value);
   }, []);
 
-  const onToolChange = useCallback((tool?: VideoAnnotationType) => {
-    setCurrentTool(tool);
-    setSelectedAnnotation(undefined);
-    setSelectedAttribute(undefined);
-  }, []);
+  const onToolChange = useCallback(
+    (tool?: VideoAnnotationType) => {
+      setCurrentTool(tool);
+      setSelectedAnnotation(undefined);
+
+      // 默认选中第一个标签
+      if (tool) {
+        const _attributes = config?.[tool]?.attributes ?? [];
+        setSelectedAttribute(_attributes[0]);
+      }
+    },
+    [config],
+  );
 
   // ================== sample state ==================
   const [currentSample, setCurrentSample] = useState<VideoSample | undefined>(editingSample);

@@ -7,6 +7,7 @@ import type { FormProps } from 'rc-field-form';
 import { useForm, Field } from 'rc-field-form';
 
 import { AttributeFormItem, FormWithValidation } from '../AttributeForm';
+import { EllipsisText } from '../EllipsisText';
 
 function uid() {
   return Math.random().toString(36).slice(2);
@@ -220,7 +221,11 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         const attributeConfigItem = attributeMapping[item.value];
         return {
           key: item.value,
-          label: attributeConfigItem.key,
+          label: (
+            <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
+              <div>{attributeConfigItem.key}</div>
+            </EllipsisText>
+          ),
           forceRender: true,
           children: (
             <div>
@@ -248,7 +253,11 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         const attributeConfigItem = attributeMapping[item.value];
         return {
           key: item.value,
-          label: attributeConfigItem.key,
+          label: (
+            <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
+              <div>{attributeConfigItem.key}</div>
+            </EllipsisText>
+          ),
           forceRender: true,
           children: (
             <div>

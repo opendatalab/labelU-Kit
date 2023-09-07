@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Toolbar } from '@label-u/components-react';
+import { Toolbar, Tooltip } from '@label-u/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import type { VideoAnnotationType } from '@label-u/interface';
 
@@ -13,6 +13,12 @@ export interface IToolbarInEditorProps {
   extra?: React.ReactNode;
   right?: React.ReactNode;
 }
+
+const tooltipStyle = {
+  '--arrow-color': '#fff',
+  '--tooltip-color': '#000',
+  '--tooltip-bg': '#fff',
+} as React.CSSProperties;
 
 export default function ToolbarInEditor({ extra, right }: IToolbarInEditorProps) {
   const { onToolChange, currentTool, onOrderVisibleChange, config, orderVisible, redo, undo, pastRef, futureRef } =
@@ -39,14 +45,18 @@ export default function ToolbarInEditor({ extra, right }: IToolbarInEditorProps)
             <CursorIcon />
           </Toolbar.Item>
           {config?.segment && (
-            <Toolbar.Item active={currentTool === 'segment'} onClick={handleToolChange('segment')}>
-              <SegmentIcon />
-            </Toolbar.Item>
+            <Tooltip overlay="片断分割（X）" overlayStyle={tooltipStyle} placement="top">
+              <Toolbar.Item active={currentTool === 'segment'} onClick={handleToolChange('segment')}>
+                <SegmentIcon />
+              </Toolbar.Item>
+            </Tooltip>
           )}
           {config?.frame && (
-            <Toolbar.Item active={currentTool === 'frame'} onClick={handleToolChange('frame')}>
-              <FrameIcon />
-            </Toolbar.Item>
+            <Tooltip overlay="时间戳（E）" overlayStyle={tooltipStyle} placement="top">
+              <Toolbar.Item active={currentTool === 'frame'} onClick={handleToolChange('frame')}>
+                <FrameIcon />
+              </Toolbar.Item>
+            </Tooltip>
           )}
         </>
       }

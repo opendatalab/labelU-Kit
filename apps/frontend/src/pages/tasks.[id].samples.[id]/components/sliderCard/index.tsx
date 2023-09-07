@@ -35,7 +35,7 @@ const SliderCard = ({ type, cardInfo, onClick }: SliderCardProps) => {
         <div className={styles.outerFrame}>
           <div className={styles.contentActive} onClick={() => handleOnClick(cardInfo)}>
             {type === MediaType.IMAGE && <img src={url} alt="" style={{ height: '100%', maxWidth: '100%' }} />}
-            {type === MediaType.VIDEO && <VideoCard src={url!} showPlayIcon />}
+            {type === MediaType.VIDEO && <VideoCard src={url!} showPlayIcon showDuration />}
             {state === 'DONE' && (
               <React.Fragment>
                 <div className={styles.tagBottom} />
@@ -53,7 +53,7 @@ const SliderCard = ({ type, cardInfo, onClick }: SliderCardProps) => {
         <div className={styles.outerFrame}>
           <div className={styles.content} onClick={() => handleOnClick(cardInfo)}>
             {type === MediaType.IMAGE && <img src={url} alt="" style={{ height: '100%', maxWidth: '100%' }} />}
-            {type === MediaType.VIDEO && <VideoCard src={url!} showPlayIcon />}
+            {type === MediaType.VIDEO && <VideoCard src={url!} showPlayIcon showDuration />}
             {state === 'DONE' && (
               <React.Fragment>
                 <div className={styles.tagBottom} />

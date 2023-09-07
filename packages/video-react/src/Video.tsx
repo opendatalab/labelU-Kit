@@ -17,7 +17,6 @@ import AnnotationBar, { AttributeItem } from './AnnotationBar';
 import sliceIcon from './assets/icons/cursor-slice.svg';
 import frameIcon from './assets/icons/cursor-frame.svg';
 import { parseTime, scheduleVideoAnnotationLane, uid } from './utils';
-import GlobalStyle from './GlobalStyle';
 import type { VideoAnnotationInUI } from './context';
 import VideoAnnotationContext from './context';
 import { ReactComponent as ExpandIcon } from './assets/icons/arrow.svg';
@@ -596,7 +595,6 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
 
   return (
     <VideoAnnotationContext.Provider value={contextValue}>
-      <GlobalStyle />
       <VideoPlayer
         src={src}
         className={className}
