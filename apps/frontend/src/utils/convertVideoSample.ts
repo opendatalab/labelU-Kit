@@ -1,13 +1,16 @@
 import _ from 'lodash';
 import type { VideoSample } from '@label-u/video-editor-react/dist/Editor/context';
+import type { EditorProps } from '@label-u/video-editor-react';
 
 import type { SampleData } from '@/services/types';
 
 import { jsonParse } from '.';
+import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
 export function convertVideoSample(
   sample: SampleData | undefined,
   sampleId: string | number | undefined,
+  config: EditorProps['config'],
 ): VideoSample | undefined {
   if (!sample || !sampleId) {
     return;
@@ -19,7 +22,7 @@ export function convertVideoSample(
   for (const _id in sample.urls) {
     url = sample.urls[_id];
   }
-  // delete
+
   let resultParsed: any = {};
   if (sample.result && !_.isNull(sample.result)) {
     resultParsed = jsonParse(sample.result);
@@ -39,6 +42,11 @@ export function convertVideoSample(
     annotations: _.chain(pool)
       .map(([type, key]) => {
         const items = _.get(resultParsed, [key, 'result'], []);
+        if (!items.length && (type === 'tag' || type === 'text')) {
+          // 生成全局工具的默认值
+          return generateDefaultValues(config?.[type]);
+        }
+
         return _.map(items, (item) => {
           return {
             ...item,

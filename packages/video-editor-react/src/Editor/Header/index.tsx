@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@label-u/components-react';
 import { DraggableModel, AttributeForm, EllipsisText } from '@label-u/components-react';
 import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation, Attribute } from '@label-u/interface';
-import { throttle } from '@label-u/video-react';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
@@ -34,7 +33,8 @@ const TriggerWrapper = styled.div`
   cursor: pointer;
 `;
 
-const MoreAttribute = styled.div`
+const MoreAttribute = styled.div<{ visible: boolean }>`
+  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
   position: absolute;
   background-color: #fff;
   right: 0;
@@ -267,7 +267,7 @@ export default function Header() {
   };
 
   useLayoutEffect(() => {
-    const processAttributes = throttle(() => {
+    const processAttributes = () => {
       const maxWidth = window.innerWidth - 280;
       if (!labelsWrapperRef.current) {
         return;
@@ -289,7 +289,7 @@ export default function Header() {
       }
 
       setSliceIndex(index);
-    }, 100);
+    };
 
     processAttributes();
 
@@ -323,20 +323,23 @@ export default function Header() {
             更多
           </MoreTrigger>
         )}
-        {extraAttributes.length > 0 && showMore && (
-          <MoreAttribute onMouseOver={handleOnMouseOver} onMouseOut={handleOnMouseOut}>
-            {extraAttributes.map((attribute) => (
-              <LabelItem
-                attribute={attribute}
-                key={attribute.value}
-                onSelect={handleSelect}
-                active={selectedAttribute?.value === attribute.value}
-              >
-                {attribute.key}
-              </LabelItem>
-            ))}
-          </MoreAttribute>
-        )}
+
+        <MoreAttribute
+          onMouseOver={handleOnMouseOver}
+          visible={extraAttributes.length > 0 && showMore}
+          onMouseOut={handleOnMouseOut}
+        >
+          {extraAttributes.map((attribute) => (
+            <LabelItem
+              attribute={attribute}
+              key={attribute.value}
+              onSelect={handleSelect}
+              active={selectedAttribute?.value === attribute.value}
+            >
+              {attribute.key}
+            </LabelItem>
+          ))}
+        </MoreAttribute>
       </Labels>
       <TriggerWrapper
         onClick={() => {

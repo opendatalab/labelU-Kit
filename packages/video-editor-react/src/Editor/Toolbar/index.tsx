@@ -28,8 +28,8 @@ export default function ToolbarInEditor({ extra, right }: IToolbarInEditorProps)
     onToolChange(tool);
   };
 
-  useHotkeys('ctrl+z, meta+z', undo, []);
-  useHotkeys('ctrl+shift+z, meta+shift+z', redo, []);
+  useHotkeys('ctrl+z, meta+z', undo, [undo]);
+  useHotkeys('ctrl+shift+z, meta+shift+z', redo, [undo]);
 
   return (
     <Toolbar

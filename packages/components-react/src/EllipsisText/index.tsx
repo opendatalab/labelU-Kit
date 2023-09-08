@@ -24,10 +24,6 @@ export function EllipsisText({
     }
   }, [isEnter, maxWidth]);
 
-  if (!children) {
-    return null;
-  }
-
   const newChildren = cloneElement(children as NonNullable<any>, {
     ref,
     style: {

@@ -220,7 +220,6 @@ export function AttributeFormItem({
   options,
   label,
   value,
-  defaultValue,
   required,
   regexp,
   maxLength,
@@ -228,8 +227,7 @@ export function AttributeFormItem({
   className,
   name,
 }: AttributeResultProps) {
-  const { error, form } = useContext(ValidateContext);
-  let finalDefaultValue: string[] | string | boolean | undefined = defaultValue;
+  const { error } = useContext(ValidateContext);
   const fullName = useMemo(() => name || ['attributes', value], [name, value]);
   const finalOptions = useMemo(() => {
     return (
@@ -268,30 +266,10 @@ export function AttributeFormItem({
 
   let child: React.ReactNode = <input />;
 
-  if (type === 'enum' || type === 'array') {
-    if (!options || options.length === 0) {
-      child = <div>no option</div>;
-    } else {
-      let defaultValues;
-
-      for (let i = 0; i < options.length; i++) {
-        if (options[i].isDefault) {
-          if (typeof defaultValues === 'undefined') {
-            defaultValues = [];
-          }
-
-          defaultValues.push(options[i].value);
-        }
-      }
-
-      finalDefaultValue = defaultValues;
-    }
-
-    if (type === 'enum') {
-      child = <RadioGroup options={finalOptions} />;
-    } else {
-      child = <CheckboxGroup options={finalOptions} />;
-    }
+  if (type === 'enum') {
+    child = <RadioGroup options={finalOptions} />;
+  } else {
+    child = <CheckboxGroup options={finalOptions} />;
   }
 
   if (type === 'string') {
@@ -313,16 +291,6 @@ export function AttributeFormItem({
       }
     }
   }, [error.errorFields, value]);
-
-  useEffect(() => {
-    if (!form) {
-      return;
-    }
-
-    if (typeof finalDefaultValue !== 'undefined' && finalDefaultValue !== '' && !form.getFieldValue(fullName)) {
-      form.setFieldValue(fullName, finalDefaultValue);
-    }
-  }, [finalDefaultValue, form, fullName]);
 
   return (
     <FormItem label={label} required={required} errors={errors} className={className}>

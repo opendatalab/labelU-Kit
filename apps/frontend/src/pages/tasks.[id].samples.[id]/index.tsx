@@ -96,6 +96,14 @@ const AnnotationPage = () => {
 
   let content = null;
 
+  const editorConfig = useMemo(() => {
+    if (task.media_type === MediaType.VIDEO) {
+      return convertVideoConfig(taskConfig);
+    }
+
+    return {} as EditorProps['config'];
+  }, [task.media_type, taskConfig]);
+
   const editingSample = useMemo(() => {
     if (task.media_type === MediaType.IMAGE) {
       return transformed[0];
@@ -104,17 +112,9 @@ const AnnotationPage = () => {
         return null;
       }
 
-      return convertVideoSample(sample.data, routeParams.sampleId);
+      return convertVideoSample(sample.data, routeParams.sampleId, editorConfig);
     }
-  }, [routeParams.sampleId, sample.data, task.media_type, transformed]);
-
-  const editorConfig = useMemo(() => {
-    if (task.media_type === MediaType.VIDEO) {
-      return convertVideoConfig(taskConfig);
-    }
-
-    return {} as EditorProps['config'];
-  }, [task.media_type, taskConfig]);
+  }, [editorConfig, routeParams.sampleId, sample.data, task.media_type, transformed]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;

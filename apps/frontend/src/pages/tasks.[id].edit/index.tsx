@@ -518,10 +518,10 @@ const CreateTask = () => {
 
   const videoSamples = useMemo(() => {
     return _.chain(samples.data)
-      .map((item) => convertVideoSample(item.data, item.id))
+      .map((item) => convertVideoSample(item.data, item.id, editorConfig))
       .compact()
       .value();
-  }, [samples.data]);
+  }, [editorConfig, samples.data]);
 
   return (
     <div className={currentStyles.outerFrame}>
