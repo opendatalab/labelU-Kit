@@ -12,6 +12,9 @@ import type {
   VideoFrameName,
   VideoSegmentToolConfig,
   VideoFrameToolConfig,
+  TextAttribute,
+  EnumerableAttribute,
+  AttributeValue,
 } from '@label-u/interface';
 
 import type { VideoAnnotationInEditor, VideoEditorConfig, VideoSample, VideoWithGlobalAnnotation } from './context';
@@ -20,6 +23,32 @@ import Sidebar from './Sidebar';
 import AttributeBar from './Attribute';
 import Header from './Header';
 import Toolbar from './Toolbar';
+
+function generateDefaultValues(attributes?: (TextAttribute | EnumerableAttribute)[]) {
+  const values: AttributeValue = {};
+
+  attributes?.forEach((item) => {
+    const defaultValues = [];
+
+    if ((item as TextAttribute).type === 'string') {
+      const stringItem = item as TextAttribute;
+
+      values[stringItem.value] = stringItem.defaultValue || '';
+    }
+
+    const tagItem = item as EnumerableAttribute;
+
+    for (let i = 0; i < tagItem.options.length; i++) {
+      if (tagItem.options[i].isDefault) {
+        defaultValues.push(tagItem.options[i].value);
+      }
+    }
+
+    values[tagItem.value] = defaultValues;
+  });
+
+  return values;
+}
 
 const Wrapper = styled.div.attrs((props) => {
   return {
@@ -199,6 +228,19 @@ function ForwardEditor(
   }, [editingSample, samples, updateCurrentSample]);
 
   // ================== annotation ==================
+  const annotationsMapping = useMemo(() => {
+    const mapping: Record<string, VideoAnnotationInEditor | TextAnnotationEntity | TagAnnotationEntity> = {};
+
+    if (currentSample?.annotations) {
+      currentSample?.annotations.reduce((acc, cur) => {
+        acc[cur.id] = cur;
+        return acc;
+      }, mapping);
+    }
+
+    return mapping;
+  }, [currentSample?.annotations]);
+
   const videoAnnotations = useMemo(() => {
     const _videoAnnotations = (currentSample?.annotations?.filter((item) => ['segment', 'frame'].includes(item.type)) ??
       []) as VideoAnnotationInEditor[];
@@ -269,9 +311,13 @@ function ForwardEditor(
   const handleRemoveAnnotations = useCallback(
     (_annotations: VideoWithGlobalAnnotation[]) => {
       updateCurrentSample((pre) => {
+        const removedMapping: Record<string, VideoWithGlobalAnnotation> = _annotations.reduce((acc, cur) => {
+          acc[cur.id] = cur;
+          return acc;
+        }, {} as Record<string, VideoWithGlobalAnnotation>);
         return {
           ...pre!,
-          annotations: pre!.annotations!.filter((i) => !_annotations.some((j) => j.id === i.id)),
+          annotations: pre!.annotations!.filter((i) => !removedMapping[i.id]),
         };
       });
       setSelectedAnnotation(undefined);
@@ -291,7 +337,15 @@ function ForwardEditor(
 
   const handleAnnotateEnd: VideoProps['onAnnotateEnd'] = useCallback(
     (_annotation: VideoAnnotationInEditor, e?: MouseEvent) => {
-      setSelectedAnnotation(_annotation);
+      // 生成attributes默认值
+      const _attributes = attributeMappingByTool[_annotation.type][_annotation.label!]?.attributes ?? [];
+
+      const defaultAttributes = generateDefaultValues(_attributes);
+
+      setSelectedAnnotation({
+        ..._annotation,
+        attributes: defaultAttributes,
+      });
       document.dispatchEvent(
         new CustomEvent('annotate-end', {
           detail: {
@@ -301,7 +355,7 @@ function ForwardEditor(
         }),
       );
     },
-    [],
+    [attributeMappingByTool],
   );
 
   // ================== label ==================
@@ -341,18 +395,6 @@ function ForwardEditor(
   );
 
   // ================== attribute ==================
-  const annotationsMapping = useMemo(() => {
-    const mapping: Record<string, VideoAnnotationInEditor | TextAnnotationEntity | TagAnnotationEntity> = {};
-
-    if (currentSample?.annotations) {
-      currentSample?.annotations.reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, mapping);
-    }
-
-    return mapping;
-  }, [currentSample?.annotations]);
 
   const handleAttributeChange = useCallback(
     (_attribute: any) => {
