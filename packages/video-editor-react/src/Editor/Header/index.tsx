@@ -49,7 +49,7 @@ const MoreAttribute = styled.div`
 
 const Labels = styled.div`
   position: relative;
-  max-width: 70%;
+  max-width: calc(100vw - 280px);
   display: flex;
   align-items: center;
   gap: ${LABEL_GAP}px;
@@ -61,6 +61,7 @@ const LabelWrapper = styled.div<{ color: string; active: boolean }>`
   --attribute-color: ${({ color }) => color};
   position: relative;
   white-space: nowrap;
+  flex-shrink: 0;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
   background-color: ${({ active }) => (active ? `var(--attribute-color)` : '#fff')};
