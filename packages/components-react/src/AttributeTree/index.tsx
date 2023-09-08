@@ -156,14 +156,17 @@ export interface AttributeTreeProps {
 export function AttributeTree({ data, config, onChange, className }: AttributeTreeProps) {
   const [tagForm] = useForm();
   const [textForm] = useForm();
-  const attributeMapping = useMemo(() => {
-    const mapping: Record<string, InnerAttribute> = {};
+  const attributeMappingByTool = useMemo(() => {
+    const mapping: Record<string, Record<string, InnerAttribute>> = {};
 
     if (config) {
-      config.reduce((acc, cur) => {
-        acc[cur.value] = cur;
-        return acc;
-      }, mapping);
+      config.forEach((item) => {
+        if (!mapping[item.type as string]) {
+          mapping[item.type as string] = {};
+        }
+
+        mapping[item.type as string][item.value] = item;
+      });
     }
 
     return mapping;
@@ -218,7 +221,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
   const tagFormItems = useMemo(() => {
     return (
       tagConfig?.map((item, index) => {
-        const attributeConfigItem = attributeMapping[item.value];
+        const attributeConfigItem = attributeMappingByTool[item.type as string][item.value];
         return {
           key: item.value,
           label: (
@@ -245,12 +248,13 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         };
       }) ?? []
     );
-  }, [attributeMapping, tagConfig]);
+  }, [attributeMappingByTool, tagConfig]);
 
   const textFormItems = useMemo(() => {
     return (
       textConfig?.map((item, index) => {
-        const attributeConfigItem = attributeMapping[item.value];
+        const attributeConfigItem = attributeMappingByTool[item.type as string][item.value];
+
         return {
           key: item.value,
           label: (
@@ -277,7 +281,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         };
       }) ?? []
     );
-  }, [attributeMapping, textConfig]);
+  }, [attributeMappingByTool, textConfig]);
 
   // 切换样本时，需要更新表单数据
   useEffect(() => {
