@@ -17,6 +17,9 @@ const OverlayItem = styled.div`
   padding: 0.5rem;
   opacity: 0.8;
   color: #fff;
+  max-width: 20em;
+  max-height: 12em;
+  overflow: auto;
 `;
 
 const List = styled.div`
