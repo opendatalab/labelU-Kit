@@ -6,3 +6,6 @@ export * from './Toolbar';
 export * from './Tooltip';
 export * from './EllipsisText';
 export * from './AttributeTree';
+export * from './HotkeyPanel';
+export * from './HotkeyTable';
+export * from './Kbd';
