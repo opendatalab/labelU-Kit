@@ -83,7 +83,7 @@ const Samples = () => {
         if (taskData.media_type === MediaType.IMAGE) {
           return <img src={url} style={{ width: '116px', height: '70px' }} />;
         } else {
-          return <VideoCard size={{ width: 116, height: 70 }} src={url} showDuration showPlayIcon />;
+          return <VideoCard size={{ width: 116, height: 70 }} src={url} showPlayIcon showDuration />;
         }
       },
     },
@@ -279,7 +279,7 @@ const Samples = () => {
         />
         <div className={currentStyles.pagination}>
           <div className={currentStyles.dataProcess}>
-            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds}>
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={taskData.media_type!}>
               <Button type="link" disabled={selectedSampleIds.length === 0}>
                 批量数据导出
               </Button>

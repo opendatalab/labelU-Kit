@@ -1,6 +1,7 @@
 import { secondsToMinute } from '@label-u/video-react';
 import styled, { css } from 'styled-components';
 import { useContext, useMemo } from 'react';
+import { EllipsisText } from '@label-u/components-react';
 
 import { ReactComponent as SegmentIcon } from '@/assets/icons/segment.svg';
 import { ReactComponent as FrameIcon } from '@/assets/icons/frame.svg';
@@ -60,6 +61,7 @@ const InnerHeader = styled.div`
 
   svg {
     font-size: 1.25rem;
+    flex-shrink: 0;
   }
 `;
 
@@ -191,7 +193,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
 export default function AsideAttributeItem({ annotation, active, order, labelText, color }: AttributeItemProps) {
   const { type } = annotation;
-  const { onAnnotationSelect, orderVisible } = useContext(EditorContext);
+  const { onAnnotationSelect } = useContext(EditorContext);
 
   if (type === 'segment') {
     const { start, end } = annotation;
@@ -200,9 +202,11 @@ export default function AsideAttributeItem({ annotation, active, order, labelTex
       <AsideAttributeWrapper color={color} active={active} onClick={() => onAnnotationSelect(annotation)}>
         <Header>
           <InnerHeader>
-            {orderVisible && <div>{order}.</div>}
+            <div>{order}.</div>
             <SegmentIcon color={color} />
-            <div>{labelText}</div>
+            <EllipsisText maxWidth={112} title={labelText}>
+              <div>{labelText}</div>
+            </EllipsisText>
           </InnerHeader>
           <AttributeAction annotation={annotation} />
         </Header>
@@ -219,9 +223,12 @@ export default function AsideAttributeItem({ annotation, active, order, labelTex
     <AsideAttributeWrapper color={color} active={active} onClick={() => onAnnotationSelect(annotation)}>
       <Header>
         <InnerHeader>
-          {orderVisible && <div>{order}.</div>}
+          <div>{order}.</div>
           <FrameIcon color={color} />
           <div>{labelText}</div>
+          <EllipsisText maxWidth={112} title={labelText}>
+            <div>{labelText}</div>
+          </EllipsisText>
         </InnerHeader>
         <AttributeAction annotation={annotation} />
       </Header>

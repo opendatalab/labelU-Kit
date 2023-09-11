@@ -17,7 +17,6 @@ import AnnotationBar, { AttributeItem } from './AnnotationBar';
 import sliceIcon from './assets/icons/cursor-slice.svg';
 import frameIcon from './assets/icons/cursor-frame.svg';
 import { parseTime, scheduleVideoAnnotationLane, uid } from './utils';
-import GlobalStyle from './GlobalStyle';
 import type { VideoAnnotationInUI } from './context';
 import VideoAnnotationContext from './context';
 import { ReactComponent as ExpandIcon } from './assets/icons/arrow.svg';
@@ -58,7 +57,8 @@ const BarWrapper = styled.div<{ expanded?: boolean }>`
       css`
         max-height: calc(5 * var(--bar-height));
       `}
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .player-frame {
@@ -318,10 +318,6 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
       return;
     }
 
-    if (isPlayingRef.current) {
-      playerRef.current?.play();
-    }
-
     if (
       editingSegmentAnnotationRef.current &&
       (offsetX * duration) / rect.width - editingSegmentAnnotationRef.current.start! > 0.2
@@ -329,7 +325,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
       finishAnnotation(
         {
           ...editingSegmentAnnotationRef.current,
-          end: offsetX > rect.width ? duration : parseTime((offsetX / rect.width) * duration),
+          end: offsetX > rect.width ? duration : playerRef.current.currentTime(),
         },
         e,
       );
@@ -339,7 +335,7 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
       finishAnnotation({
         id: uid(),
         type: 'frame',
-        time: parseTime((offsetX / rect.width) * duration),
+        time: (offsetX / rect.width) * duration,
         label: editingLabel ?? '',
         order: maxOrder + 1,
       });
@@ -442,17 +438,20 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
   useHotkeys(
     'x',
     () => {
+      const currentTime = playerRef.current.currentTime();
       if (editingSegmentAnnotationRef.current) {
-        finishAnnotation({
-          ...editingSegmentAnnotationRef.current,
-          end: playerRef.current.currentTime(),
-        });
+        if (currentTime > editingSegmentAnnotationRef.current.start!) {
+          finishAnnotation({
+            ...editingSegmentAnnotationRef.current,
+            end: currentTime,
+          });
+        }
       } else {
         const newAnnotation = {
           id: uid(),
           type: 'segment',
-          start: playerRef.current.currentTime(),
-          end: playerRef.current.currentTime(),
+          start: currentTime,
+          end: currentTime,
           order: maxOrder + 1,
           label: editingLabel,
         } as VideoSegmentAnnotation;
@@ -592,7 +591,6 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
 
   return (
     <VideoAnnotationContext.Provider value={contextValue}>
-      <GlobalStyle />
       <VideoPlayer
         src={src}
         className={className}

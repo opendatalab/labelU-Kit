@@ -17,6 +17,9 @@ const OverlayItem = styled.div`
   padding: 0.5rem;
   opacity: 0.8;
   color: #fff;
+  max-width: 20em;
+  max-height: 12em;
+  overflow: auto;
 `;
 
 const List = styled.div`
@@ -45,7 +48,10 @@ export function AttributeOverlay() {
                 <span key={key}>
                   {index + 1}.&nbsp;{currentAttributeMapping[key]?.key ?? key}:{' '}
                   {(Array.isArray(value)
-                    ? value.map((item) => currentAttributeMapping[key]?.optionMapping?.[item]?.key).join(', ')
+                    ? value
+                        .map((item) => currentAttributeMapping[key]?.optionMapping?.[item]?.key)
+                        .filter((item) => item)
+                        .join(', ')
                     : currentAttributeMapping[key]?.optionMapping?.[value]?.key) || value}
                 </span>
               );

@@ -7,6 +7,7 @@ import type { FormProps } from 'rc-field-form';
 import { useForm, Field } from 'rc-field-form';
 
 import { AttributeFormItem, FormWithValidation } from '../AttributeForm';
+import { EllipsisText } from '../EllipsisText';
 
 function uid() {
   return Math.random().toString(36).slice(2);
@@ -35,7 +36,6 @@ const bottomCss = (width: number, height: number, color: string) => css`
 
 // @ts-ignore
 export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = styled(Collapse)`
-  --text-color: #666;
   --border-style: 1px solid #d9d9d9;
   border-radius: 3px;
   font-size: 14px;
@@ -50,7 +50,6 @@ export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = s
       align-items: center;
       line-height: 22px;
       padding: 4px 16px;
-      color: #666;
       cursor: pointer;
 
       &:hover {
@@ -100,7 +99,6 @@ export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = s
 
   .${prefixCls}-content {
     overflow: hidden;
-    color: var(--text-color);
     background-color: #fff;
 
     .${prefixCls}-box {
@@ -155,14 +153,17 @@ export interface AttributeTreeProps {
 export function AttributeTree({ data, config, onChange, className }: AttributeTreeProps) {
   const [tagForm] = useForm();
   const [textForm] = useForm();
-  const attributeMapping = useMemo(() => {
-    const mapping: Record<string, InnerAttribute> = {};
+  const attributeMappingByTool = useMemo(() => {
+    const mapping: Record<string, Record<string, InnerAttribute>> = {};
 
     if (config) {
-      config.reduce((acc, cur) => {
-        acc[cur.value] = cur;
-        return acc;
-      }, mapping);
+      config.forEach((item) => {
+        if (!mapping[item.type as string]) {
+          mapping[item.type as string] = {};
+        }
+
+        mapping[item.type as string][item.value] = item;
+      });
     }
 
     return mapping;
@@ -217,10 +218,14 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
   const tagFormItems = useMemo(() => {
     return (
       tagConfig?.map((item, index) => {
-        const attributeConfigItem = attributeMapping[item.value];
+        const attributeConfigItem = attributeMappingByTool[item.type as string][item.value];
         return {
           key: item.value,
-          label: attributeConfigItem.key,
+          label: (
+            <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
+              <div>{attributeConfigItem.key}</div>
+            </EllipsisText>
+          ),
           forceRender: true,
           children: (
             <div>
@@ -240,15 +245,20 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         };
       }) ?? []
     );
-  }, [attributeMapping, tagConfig]);
+  }, [attributeMappingByTool, tagConfig]);
 
   const textFormItems = useMemo(() => {
     return (
       textConfig?.map((item, index) => {
-        const attributeConfigItem = attributeMapping[item.value];
+        const attributeConfigItem = attributeMappingByTool[item.type as string][item.value];
+
         return {
           key: item.value,
-          label: attributeConfigItem.key,
+          label: (
+            <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
+              <div>{attributeConfigItem.key}</div>
+            </EllipsisText>
+          ),
           forceRender: true,
           children: (
             <div>
@@ -268,7 +278,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         };
       }) ?? []
     );
-  }, [attributeMapping, textConfig]);
+  }, [attributeMappingByTool, textConfig]);
 
   // 切换样本时，需要更新表单数据
   useEffect(() => {

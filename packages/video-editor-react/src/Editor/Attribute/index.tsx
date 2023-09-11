@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { AttributeTree, CollapseWrapper, AttributeTreeWrapper } from '@label-u/components-react';
+import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText } from '@label-u/components-react';
 import type {
   EnumerableAttribute,
   TagAnnotationEntity,
@@ -104,7 +104,6 @@ export default function Attribute() {
     annotationsMapping,
     onAnnotationsRemove,
     videoAnnotations,
-    attributes,
     selectedAnnotation,
     attributeMapping,
   } = useContext(EditorContext);
@@ -165,7 +164,7 @@ export default function Attribute() {
       });
     }
 
-    if (attributes) {
+    if (config?.segment || config?.frame) {
       _titles.push({
         title: '标记',
         key: 'label' as const,
@@ -174,7 +173,15 @@ export default function Attribute() {
     }
 
     return _titles;
-  }, [attributes, config?.tag, config?.text, globalAnnotations.length, globals.length, videoAnnotations.length]);
+  }, [
+    config?.frame,
+    config?.segment,
+    config?.tag,
+    config?.text,
+    globalAnnotations.length,
+    globals.length,
+    videoAnnotations.length,
+  ]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
   useEffect(() => {
@@ -229,11 +236,15 @@ export default function Attribute() {
     () =>
       Array.from(videoAnnotationsGroup).map(([label, annotations]) => {
         const found = attributeMapping[annotations[0].type]?.[label];
+        const labelText = found ? found?.key ?? '无标签' : '无标签';
 
         return {
           label: (
             <Header>
-              {found ? found?.key ?? '无标签' : '无标签'}
+              <EllipsisText maxWidth={180} title={labelText}>
+                <div>{labelText}</div>
+              </EllipsisText>
+
               <AttributeAction annotations={annotations} showEdit={false} />
             </Header>
           ),

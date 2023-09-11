@@ -1,9 +1,8 @@
 import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@label-u/components-react';
-import { DraggableModel, AttributeForm } from '@label-u/components-react';
+import { DraggableModel, AttributeForm, EllipsisText } from '@label-u/components-react';
 import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation, Attribute } from '@label-u/interface';
-import { throttle } from '@label-u/video-react';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
@@ -17,6 +16,7 @@ const Wrapper = styled.div`
   height: 44px;
   background-color: #f8f8f8;
   padding: 0 1rem;
+  flex-shrink: 0;
 `;
 
 const LABEL_GAP = 8;
@@ -33,7 +33,8 @@ const TriggerWrapper = styled.div`
   cursor: pointer;
 `;
 
-const MoreAttribute = styled.div`
+const MoreAttribute = styled.div<{ visible: boolean }>`
+  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
   position: absolute;
   background-color: #fff;
   right: 0;
@@ -48,7 +49,7 @@ const MoreAttribute = styled.div`
 
 const Labels = styled.div`
   position: relative;
-  max-width: 70%;
+  max-width: calc(100vw - 280px);
   display: flex;
   align-items: center;
   gap: ${LABEL_GAP}px;
@@ -58,14 +59,18 @@ const Labels = styled.div`
 
 const LabelWrapper = styled.div<{ color: string; active: boolean }>`
   --attribute-color: ${({ color }) => color};
-  display: flex;
   position: relative;
   white-space: nowrap;
+  flex-shrink: 0;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
   background-color: ${({ active }) => (active ? `var(--attribute-color)` : '#fff')};
   color: ${({ active }) => (active ? '#fff' : '#333')};
   border-radius: 2px;
+  max-width: 8em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-sizing: border-box;
 
   &:hover {
     color: ${({ active }) => (active ? '#fff' : 'var(--attribute-color)')};
@@ -99,9 +104,11 @@ function LabelItem({
   };
 
   return (
-    <LabelWrapper active={active} color={attribute.color ?? '#000'} onClick={handleClick}>
-      {children as string}
-    </LabelWrapper>
+    <EllipsisText maxWidth={112} title={children}>
+      <LabelWrapper active={active} color={attribute.color ?? '#000'} onClick={handleClick}>
+        {children as string}
+      </LabelWrapper>
+    </EllipsisText>
   );
 }
 
@@ -125,8 +132,16 @@ export default function Header() {
   const handleSelect = (attribute: Attribute, e: React.MouseEvent) => {
     onLabelChange(attribute);
 
-    if (!dragModalRef.current || !selectedAnnotation) {
+    if (
+      !dragModalRef.current ||
+      !selectedAnnotation ||
+      !attributeMapping[selectedAnnotation.type][attribute.value]?.attributes?.length
+    ) {
       return;
+    }
+
+    if (playerRef.current) {
+      playerRef.current.pause();
     }
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -167,6 +182,11 @@ export default function Header() {
           y: videoWrapperRef.current.clientHeight - 136,
         });
       }
+
+      // 标记结束后暂停播放，填完属性后再播放
+      if (playerRef.current) {
+        playerRef.current.pause();
+      }
       // 打开属性编辑框
     };
 
@@ -186,12 +206,12 @@ export default function Header() {
     ) => {
       const { annotation, mouseEvent } = e.detail;
 
-      if (
-        !dragModalRef.current ||
-        !annotation ||
-        !attributeMapping[annotation.type][annotation.label]?.attributes?.length
-      ) {
+      if (!dragModalRef.current || !annotation || !attributeMapping[annotation.type][annotation.label]) {
         return;
+      }
+
+      if (playerRef.current) {
+        playerRef.current.pause();
       }
 
       dragModalRef.current.toggleVisibility(true);
@@ -247,7 +267,7 @@ export default function Header() {
   };
 
   useLayoutEffect(() => {
-    const processAttributes = throttle(() => {
+    const processAttributes = () => {
       const maxWidth = window.innerWidth - 280;
       if (!labelsWrapperRef.current) {
         return;
@@ -269,7 +289,7 @@ export default function Header() {
       }
 
       setSliceIndex(index);
-    }, 100);
+    };
 
     processAttributes();
 
@@ -303,20 +323,23 @@ export default function Header() {
             更多
           </MoreTrigger>
         )}
-        {extraAttributes.length > 0 && showMore && (
-          <MoreAttribute onMouseOver={handleOnMouseOver} onMouseOut={handleOnMouseOut}>
-            {extraAttributes.map((attribute) => (
-              <LabelItem
-                attribute={attribute}
-                key={attribute.value}
-                onSelect={handleSelect}
-                active={selectedAttribute?.value === attribute.value}
-              >
-                {attribute.key}
-              </LabelItem>
-            ))}
-          </MoreAttribute>
-        )}
+
+        <MoreAttribute
+          onMouseOver={handleOnMouseOver}
+          visible={extraAttributes.length > 0 && showMore}
+          onMouseOut={handleOnMouseOut}
+        >
+          {extraAttributes.map((attribute) => (
+            <LabelItem
+              attribute={attribute}
+              key={attribute.value}
+              onSelect={handleSelect}
+              active={selectedAttribute?.value === attribute.value}
+            >
+              {attribute.key}
+            </LabelItem>
+          ))}
+        </MoreAttribute>
       </Labels>
       <TriggerWrapper
         onClick={() => {

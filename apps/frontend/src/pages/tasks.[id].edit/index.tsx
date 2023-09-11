@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import AnnotationOperation from '@label-u/components';
 import styled from 'styled-components';
 
 import { message, modal } from '@/StaticAnt';
@@ -198,7 +197,7 @@ const CreateTask = () => {
           },
         })
         .then(() => {
-          navigate('/tasks');
+          navigate(`/tasks/${taskData.id}`);
         });
     },
     [annotationFormInstance, basicFormInstance, currentStep, dispatch.task, navigate, taskData, taskId],
@@ -216,15 +215,6 @@ const CreateTask = () => {
         commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
       });
   }, [annotationFormInstance, dispatch.sample, taskId]);
-
-  const transformedSample = useMemo(() => {
-    const sample = samples?.data?.[0];
-    if (!sample) {
-      return [];
-    }
-
-    return commonController.transformFileList(sample.data, +sample.id!);
-  }, [samples]);
 
   const correctSampleIdsMappings = useMemo(
     () =>
@@ -401,7 +391,6 @@ const CreateTask = () => {
         try {
           await basicFormInstance.validateFields();
         } catch (err) {
-          message.error('请填入任务名称');
           return;
         }
       }
@@ -518,15 +507,12 @@ const CreateTask = () => {
             {partials}
           </div>
           {previewVisible && (
-            <div className="preview-content">
-              <AnnotationOperation
-                topActionContent={null}
-                isPreview
-                sample={transformedSample[0]}
-                config={annotationFormInstance.getFieldsValue()}
-                isShowOrder={false}
-              />
-            </div>
+            <iframe
+              sandbox="allow-same-origin allow-scripts"
+              referrerPolicy="no-referrer"
+              className={currentStyles.previewIframe}
+              src={`/tasks/${taskData.id}/samples/${samples?.data?.[0].id}?noSave=true`}
+            />
           )}
         </TaskCreationContext.Provider>
       </div>

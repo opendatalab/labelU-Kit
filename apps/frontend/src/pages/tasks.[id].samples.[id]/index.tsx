@@ -7,12 +7,15 @@ import AnnotationOperation from '@label-u/components';
 import type { EditorProps } from '@label-u/video-editor-react';
 import { Editor } from '@label-u/video-editor-react';
 import '@label-u/components/dist/index.css';
+import { useSearchParams } from 'react-router-dom';
+import classNames from 'classnames';
 
 import type { Dispatch, RootState } from '@/store';
 import { MediaType, type SampleResponse } from '@/services/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import { getSamples } from '@/services/samples';
-import { jsonParse } from '@/utils';
+import { convertVideoConfig } from '@/utils/convertVideoConfig';
+import { convertVideoSample } from '@/utils/convertVideoSample';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../utils/common/common';
@@ -25,6 +28,7 @@ export const videoAnnotationRef = createRef();
 
 const AnnotationPage = () => {
   const routeParams = useParams();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch<Dispatch>();
   const taskConfig = useSelector((state: RootState) => state.task.config);
   const task = useSelector((state: RootState) => state.task.item);
@@ -82,7 +86,14 @@ const AnnotationPage = () => {
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
 
   const leftSiderContent = useMemo(() => <SlideLoader />, []);
-  const topActionContent = <AnnotationRightCorner isLastSample={isLastSample} isFirstSample={isFirstSample} />;
+
+  const topActionContent = (
+    <AnnotationRightCorner
+      isLastSample={isLastSample}
+      isFirstSample={isFirstSample}
+      noSave={!!searchParams.get('noSave')}
+    />
+  );
 
   const annotationContextValue = useMemo(() => {
     return {
@@ -95,6 +106,14 @@ const AnnotationPage = () => {
 
   let content = null;
 
+  const editorConfig = useMemo(() => {
+    if (task.media_type === MediaType.VIDEO) {
+      return convertVideoConfig(taskConfig);
+    }
+
+    return {} as EditorProps['config'];
+  }, [task.media_type, taskConfig]);
+
   const editingSample = useMemo(() => {
     if (task.media_type === MediaType.IMAGE) {
       return transformed[0];
@@ -103,52 +122,9 @@ const AnnotationPage = () => {
         return null;
       }
 
-      const parsedResult = jsonParse(transformed[0].result);
-
-      const segments = _.chain(parsedResult)
-        .get('videoSegmentTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'segment',
-          };
-        })
-        .value();
-      const frames = _.chain(parsedResult)
-        .get('videoFrameTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'frame',
-          };
-        })
-        .value();
-      const texts = _.chain(parsedResult)
-        .get('textTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'text',
-          };
-        })
-        .value();
-
-      const tags = _.chain(parsedResult)
-        .get('tagTool', [])
-        .map((item) => {
-          return {
-            ...item,
-            type: 'tag',
-          };
-        })
-        .value();
-
-      return {
-        ...transformed[0],
-        annotations: [...segments, ...frames, ...texts, ...tags],
-      };
+      return convertVideoSample(sample.data, routeParams.sampleId, editorConfig);
     }
-  }, [task.media_type, transformed]);
+  }, [editorConfig, routeParams.sampleId, sample.data, task.media_type, transformed]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
@@ -168,55 +144,6 @@ const AnnotationPage = () => {
       />
     );
   } else if (task.media_type === MediaType.VIDEO) {
-    const editorConfig: EditorProps['config'] = {
-      segment: {
-        type: 'segment',
-      },
-      frame: {
-        type: 'frame',
-      },
-    };
-
-    taskConfig.tools.forEach((item) => {
-      if (item.tool === 'videoSegmentTool') {
-        editorConfig.segment = {
-          ...editorConfig.segment,
-          ...item.config,
-        };
-
-        if (taskConfig.attributes) {
-          if (!editorConfig.segment.attributes) {
-            editorConfig.segment.attributes = [];
-          }
-
-          editorConfig.segment.attributes = taskConfig.attributes.concat(editorConfig.segment.attributes);
-        }
-      }
-
-      if (item.tool === 'videoFrameTool') {
-        editorConfig.frame = {
-          ...editorConfig.frame,
-          ...item.config,
-        };
-
-        if (taskConfig.attributes) {
-          if (!editorConfig.frame.attributes) {
-            editorConfig.frame.attributes = [];
-          }
-
-          editorConfig.frame.attributes = taskConfig.attributes.concat(editorConfig.frame.attributes);
-        }
-      }
-
-      if (item.tool === 'tagTool') {
-        editorConfig.tag = item.config.attributes;
-      }
-
-      if (item.tool === 'textTool') {
-        editorConfig.text = item.config.attributes;
-      }
-    });
-
     content = (
       <Editor
         primaryColor="#0d53de"
@@ -230,7 +157,12 @@ const AnnotationPage = () => {
   }
 
   return (
-    <Spin wrapperClassName={currentStyles.annotationPage} spinning={loading || sampleLoading}>
+    <Spin
+      wrapperClassName={classNames(currentStyles.annotationPage, {
+        [currentStyles.hasHeader]: !searchParams.get('noSave'),
+      })}
+      spinning={loading || sampleLoading}
+    >
       <AnnotationContext.Provider value={annotationContextValue}>
         {!_.isEmpty(transformed) && !_.isEmpty(taskConfig.tools) && content}
       </AnnotationContext.Provider>

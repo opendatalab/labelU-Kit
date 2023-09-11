@@ -8,10 +8,9 @@ import type {
   VideoSegmentAnnotation,
 } from '@label-u/interface';
 import { forwardRef, useContext, useImperativeHandle, useMemo, useRef } from 'react';
-import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap.css';
+import { Tooltip } from '@label-u/components-react';
 
-import { parseTime, secondsToMinute } from '@/utils';
+import { parseTime, secondsToMinute, throttle } from '@/utils';
 import type { VideoAnnotationInUI } from '@/context';
 import VideoAnnotationContext from '@/context';
 
@@ -26,6 +25,27 @@ const Wrapper = styled.div`
   display: flex;
   align-items: center;
 `;
+
+const Order = styled.div``;
+
+const LabelTextWrapper = styled.div`
+  max-width: 20em;
+  max-height: 12em;
+  overflow: auto;
+`;
+
+const AttributesInner = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const AttributeList = styled.div`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const AttributeListItem = styled.span``;
 
 export interface AttributeItemProps {
   annotation: VideoAnnotationData;
@@ -148,6 +168,7 @@ const AttributeItemWrapper = styled.div<{
   .attribute-wrap {
     display: flex;
     width: 100%;
+    gap: 0.5rem;
   }
 
   .attribute-text {
@@ -157,22 +178,36 @@ const AttributeItemWrapper = styled.div<{
     text-overflow: ellipsis;
     max-width: 100%;
   }
+`;
 
-  .attribute-list {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-left: 0.5rem;
+const TooltipSegmentContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  ${AttributeListItem} {
+    white-space: normal;
   }
 
-  .attribute-item {
-    margin-left: 0.5rem;
+  ${AttributeList} {
+    max-width: 20em;
+    max-height: 12em;
+    overflow: auto;
   }
 `;
 
-const TooltipContent = styled.div`
-  .attribute-item {
-    margin-left: 0.5rem;
+const TooltipFrameContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  ${AttributeListItem} {
+    white-space: normal;
+  }
+
+  ${AttributeList} {
+    max-width: 20em;
+    max-height: 12em;
+    overflow: auto;
   }
 `;
 
@@ -229,19 +264,22 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
     }
 
     const attributeNodes = Object.keys(attributes).length > 0 && (
-      <div className="attribute-list">
+      <AttributeList>
         属性：
         {Object.entries(attributes).map(([key, value]) => {
           return (
-            <span className="attribute-item" key={key}>
+            <AttributeListItem key={key}>
               {currentAttributeMapping[key]?.key ?? key}:{' '}
               {(Array.isArray(value)
-                ? value.map((item) => currentAttributeMapping[key]?.optionMapping?.[item]?.key).join(', ')
+                ? value
+                    .map((item) => currentAttributeMapping[key]?.optionMapping?.[item]?.key)
+                    .filter((item) => item)
+                    .join(', ')
                 : currentAttributeMapping[key]?.optionMapping?.[value]?.key) || value}
-            </span>
+            </AttributeListItem>
           );
         })}
-      </div>
+      </AttributeList>
     );
 
     if (type === 'frame') {
@@ -257,14 +295,16 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
           position={{ start: positionPercentage, end: positionPercentage }}
         >
           <Tooltip
-            prefixCls="video-annotation-tooltip"
             placement="top"
             overlay={
-              <TooltipContent>
-                {secondsToMinute(time!)}
-                <div>标签：{attributeConfig.key}</div>
-                {attributeNodes}
-              </TooltipContent>
+              <TooltipFrameContent>
+                <Order>{annotation.order}.</Order>
+                <AttributesInner>
+                  {secondsToMinute(time!)}
+                  <div>标签：{attributeConfig.key}</div>
+                  {attributeNodes}
+                </AttributesInner>
+              </TooltipFrameContent>
             }
           >
             <div className="inner-frame-item">
@@ -280,7 +320,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
     const startPositionPercentage = start! / duration;
     const endPositionPercentage = end! / duration;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = throttle((e: MouseEvent) => {
       if (!wrapperRef.current) {
         return;
       }
@@ -317,7 +357,7 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
           playerRef.current.currentTime(duration * (newRight / barWrapperRef.current.clientWidth));
         }
       }
-    };
+    }, 50);
 
     const handleMouseUp = (e: MouseEvent) => {
       e.preventDefault();
@@ -377,13 +417,14 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
         ref={wrapperRef}
       >
         <Tooltip
-          prefixCls="video-annotation-tooltip"
           placement="top"
           overlay={
-            <TooltipContent>
-              {secondsToMinute(start!)} ~ {secondsToMinute(end!)}，{diff}s<div>标签：{attributeConfig.key}</div>
-              {attributeNodes}
-            </TooltipContent>
+            <TooltipSegmentContent>
+              <LabelTextWrapper>
+                {secondsToMinute(start!)} ~ {secondsToMinute(end!)}，{diff}s<div>标签：{attributeConfig.key}</div>
+              </LabelTextWrapper>
+              <AttributesInner>{attributeNodes}</AttributesInner>
+            </TooltipSegmentContent>
           }
         >
           <div className="inner-segment-item">

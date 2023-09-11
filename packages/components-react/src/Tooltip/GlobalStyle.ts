@@ -1,12 +1,12 @@
 import { createGlobalStyle } from 'styled-components';
 
-const tooltipPrefix = 'video-annotation-tooltip';
+export const tooltipPrefix = 'video-annotation-tooltip';
 
 const GlobalStyle = createGlobalStyle`
 // Base class
 .${tooltipPrefix} {
   --shadow-width: 6px;
-  --tooltip-opacity: 0.85;
+  --tooltip-opacity: 1;
   --tooltip-color: #fff;
   --tooltip-bg: rgba(0, 0, 0, var(--tooltip-opacity));
   --tooltip-arrow-width: 6px;
@@ -33,7 +33,6 @@ const GlobalStyle = createGlobalStyle`
   text-decoration: none;
   background-color: var(--tooltip-bg);
   border-radius: 3px;
-  min-height: 34px;
   box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -51,7 +50,7 @@ const GlobalStyle = createGlobalStyle`
   &-placement-top &-arrow,
   &-placement-topLeft &-arrow,
   &-placement-topRight &-arrow{
-    transform: translate(-50%, var(--tooltip-arrow-width) - var(--shadow-width));
+    transform: translate(-50%, calc(var(--tooltip-arrow-width) - var(--shadow-width)));
     margin-left: calc(0 - var(--tooltip-arrow-width));
     border-width: var(--tooltip-arrow-width) var(--tooltip-arrow-width) 0;
     border-top-color: var(--arrow-color);
@@ -143,7 +142,7 @@ const GlobalStyle = createGlobalStyle`
   &-placement-bottom &-arrow,
   &-placement-bottomLeft &-arrow,
   &-placement-bottomRight &-arrow {
-    transform: translate(-50%, -var(--tooltip-arrow-width) + var(--shadow-width));
+    transform: translate(-50%, calc(0 - var(--tooltip-arrow-width) + var(--shadow-width)));
     margin-left: calc(0 - var(--tooltip-arrow-width));
     border-width: 0 var(--tooltip-arrow-width) var(--tooltip-arrow-width);
     border-bottom-color: var(--arrow-color);
