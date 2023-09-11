@@ -31,7 +31,8 @@ const Order = styled.div``;
 const LabelTextWrapper = styled.div`
   max-width: 20em;
   max-height: 12em;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 `;
 
 const AttributesInner = styled.div`
