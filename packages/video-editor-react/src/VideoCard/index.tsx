@@ -48,6 +48,25 @@ export const StyledVideo = styled.div.attrs((props: StyledVideoProps) => ({
   height: 100%;
   cursor: pointer;
 
+  &:hover {
+    &:before {
+      opacity: 0;
+    }
+  }
+
+  &:before {
+    transition: all 0.2s;
+    content: '';
+    display: block;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #00000036;
+  }
+
   .${videoClassName}__video {
     position: relative;
     width: 100%;
