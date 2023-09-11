@@ -109,7 +109,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   };
 
   useHotkeys(
-    'ctrl+space',
+    'ctrl+space, meta+space',
     () => {
       if (currentSample.state === SampleState.SKIPPED) {
         handleCancelSkipSample();
