@@ -5,6 +5,7 @@ import _, { debounce } from 'lodash-es';
 import { set, omit } from 'lodash/fp';
 import { useSelector } from 'react-redux';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useSearchParams } from 'react-router-dom';
 
 import commonController from '@/utils/common/common';
 import { annotationRef, videoAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
@@ -20,11 +21,14 @@ import AnnotationContext from '../../annotation.context';
 interface AnnotationRightCornerProps {
   isLastSample: boolean;
   isFirstSample: boolean;
+  // 用于标注预览
+  noSave?: boolean;
 }
 
 export const SAMPLE_CHANGED = 'sampleChanged';
 
-function getAnnotationCount(resultParsed: any) {
+function getAnnotationCount(_result: string | object) {
+  const resultParsed = typeof _result !== 'object' ? JSON.parse(_result as string) : _result;
   let result = 0;
 
   for (const key in resultParsed) {
@@ -53,7 +57,7 @@ export interface AnnotationLoaderData {
   samples: SampleListResponse;
 }
 
-const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightCornerProps) => {
+const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: AnnotationRightCornerProps) => {
   const isGlobalLoading = useSelector((state: RootState) => state.loading.global);
   const navigate = useNavigate();
   const routeParams = useParams();
@@ -63,8 +67,26 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const currentSample = samples[sampleIndex];
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
+  const [searchParams] = useSearchParams();
+
+  const navigateWithSearch = useCallback(
+    (to: string) => {
+      const searchStr = searchParams.toString();
+
+      if (searchStr) {
+        navigate(`${to}?${searchStr}`);
+      } else {
+        navigate(to);
+      }
+    },
+    [navigate, searchParams],
+  );
 
   const handleCancelSkipSample = async () => {
+    if (noSave) {
+      return;
+    }
+
     await updateSampleState(
       {
         task_id: +taskId!,
@@ -84,6 +106,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   };
 
   const handleSkipSample = async () => {
+    if (noSave) {
+      return;
+    }
+
     await updateSampleState(
       {
         task_id: +taskId!,
@@ -102,15 +128,19 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     );
     // 切换到下一个文件
     if (!isLastSample) {
-      navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+      navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
     } else {
-      navigate(`/tasks/${taskId}/samples/finished`);
+      navigateWithSearch(`/tasks/${taskId}/samples/finished`);
     }
   };
 
   useHotkeys(
     'ctrl+space, meta+space',
     () => {
+      if (noSave) {
+        return;
+      }
+
       if (currentSample.state === SampleState.SKIPPED) {
         handleCancelSkipSample();
       } else {
@@ -125,7 +155,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   );
 
   const saveCurrentSample = useCallback(async () => {
-    if (currentSample?.state === SampleState.SKIPPED) {
+    if (currentSample?.state === SampleState.SKIPPED || noSave) {
       return;
     }
 
@@ -197,31 +227,40 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, task.media_type, taskId]);
+  }, [currentSample, noSave, task.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
-    navigate(`/tasks/${taskId}/samples/finished`);
-  }, [saveCurrentSample, navigate, taskId]);
+    navigateWithSearch(`/tasks/${taskId}/samples/finished`);
+  }, [saveCurrentSample, navigateWithSearch, taskId]);
 
   const handleNextSample = useCallback(() => {
+    if (noSave) {
+      navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+
+      return;
+    }
+
     if (isLastSample) {
       handleComplete();
     } else {
       saveCurrentSample().then(() => {
-        navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+        navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
       });
     }
-  }, [handleComplete, saveCurrentSample, isLastSample, navigate, sampleIndex, samples, taskId]);
+  }, [noSave, isLastSample, navigateWithSearch, taskId, samples, sampleIndex, handleComplete, saveCurrentSample]);
 
   const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
       return;
     }
 
-    await saveCurrentSample();
-    navigate(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex - 1}].id`)}`);
-  }, [saveCurrentSample, navigate, sampleIndex, samples, taskId]);
+    if (!noSave) {
+      await saveCurrentSample();
+    }
+
+    navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex - 1}].id`)}`);
+  }, [sampleIndex, noSave, navigateWithSearch, taskId, samples, saveCurrentSample]);
 
   const onKeyDown = debounce(
     useCallback(
@@ -249,6 +288,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
   useHotkeys(
     'ctrl+s,meta+s',
     () => {
+      if (noSave) {
+        return;
+      }
+
       saveCurrentSample().then(() => {
         message.success('已保存');
       });
@@ -256,7 +299,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     {
       preventDefault: true,
     },
-    [saveCurrentSample],
+    [saveCurrentSample, noSave],
   );
 
   // 从外部触发上下翻页，比如快捷键，不知道上下sample的id
@@ -283,12 +326,18 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     const saveCurrentSampleFromOutside = (e: CustomEvent) => {
       const _sampleId = _.get(e, 'detail.sampleId');
 
+      if (noSave) {
+        navigateWithSearch(`/tasks/${taskId}/samples/${_sampleId}`);
+
+        return;
+      }
+
       saveCurrentSample().then(() => {
         if (_.isNil(_sampleId)) {
           return;
         }
 
-        navigate(`/tasks/${taskId}/samples/${_sampleId}`);
+        navigateWithSearch(`/tasks/${taskId}/samples/${_sampleId}`);
       });
     };
 
@@ -297,39 +346,45 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample }: AnnotationRightC
     return () => {
       document.removeEventListener(SAMPLE_CHANGED, saveCurrentSampleFromOutside as EventListener);
     };
-  }, [navigate, saveCurrentSample, taskId]);
+  }, [navigateWithSearch, noSave, saveCurrentSample, taskId]);
 
   return (
     <div className={currentStyles.outerFrame} id="rightCorner">
-      <div className={currentStyles.right}>
-        {isSampleSkipped ? (
-          <Button
-            type="text"
-            onClick={commonController.debounce(handleCancelSkipSample, 100)}
-            disabled={isGlobalLoading}
-          >
-            取消跳过
-          </Button>
-        ) : (
-          <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
-            跳过
-          </Button>
-        )}
-        {!isFirstSample && (
-          <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
-            上一页
-          </Button>
-        )}
-        {isLastSample ? (
-          <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
-            完成
-          </Button>
-        ) : (
-          <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
-            下一页
-          </Button>
-        )}
-      </div>
+      {!noSave && (
+        <div className={currentStyles.right}>
+          {isSampleSkipped ? (
+            <Button
+              type="text"
+              onClick={commonController.debounce(handleCancelSkipSample, 100)}
+              disabled={isGlobalLoading}
+            >
+              取消跳过
+            </Button>
+          ) : (
+            <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
+              跳过
+            </Button>
+          )}
+          {!isFirstSample && (
+            <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
+              上一页
+            </Button>
+          )}
+          {isLastSample ? (
+            <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
+              完成
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              onClick={commonController.debounce(handleNextSample, 100)}
+              disabled={isGlobalLoading}
+            >
+              下一页
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
