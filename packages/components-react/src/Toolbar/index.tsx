@@ -1,11 +1,27 @@
 import styled, { css } from 'styled-components';
 import { useEffect, useState } from 'react';
 
+import { getOS } from '../utils';
 import { Divider } from '../Divider';
 import { ReactComponent as UndoIcon } from './undo.svg';
 import { ReactComponent as RedoIcon } from './redo.svg';
 import { Tooltip } from '../Tooltip';
 import { Kbd } from '../Kbd';
+
+const OS = getOS();
+
+const hotkeysMap: Record<string, any> = {
+  Windows: {
+    undo: <Kbd dark>Ctrl Z</Kbd>,
+    redo: <Kbd dark>Ctrl Shift Z</Kbd>,
+  },
+  MacOS: {
+    undo: <Kbd dark>⌘ Z</Kbd>,
+    redo: <Kbd dark>⌘ ⇧ Z</Kbd>,
+  },
+};
+
+const hotkeys = hotkeysMap[OS] || hotkeysMap.Windows;
 
 const Wrapper = styled.div`
   height: 56px;
@@ -151,26 +167,12 @@ export function Toolbar({
       <Left>
         {tools && tools}
         {tools && <Divider direction="vertical" style={{ height: '1.5em' }} />}
-        <Tooltip
-          overlay={
-            <span>
-              撤销 <Kbd dark>Ctrl Z</Kbd> 或 <Kbd dark>⌘ Z</Kbd>
-            </span>
-          }
-          placement="top"
-        >
+        <Tooltip overlay={<span>撤销 {hotkeys.undo}</span>} placement="top">
           <Item disabled={disableUndo} onClick={disableUndo ? undefined : onUndo}>
             <UndoIcon />
           </Item>
         </Tooltip>
-        <Tooltip
-          overlay={
-            <span>
-              重做 <Kbd dark>Ctrl Shift Z</Kbd> 或 <Kbd dark>⌘ ⇧ Z</Kbd>
-            </span>
-          }
-          placement="top"
-        >
+        <Tooltip overlay={<span>重做 {hotkeys.redo}</span>} placement="top">
           <Item disabled={disableRedo} onClick={disableRedo ? undefined : onRedo}>
             <RedoIcon />
           </Item>

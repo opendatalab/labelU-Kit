@@ -36,7 +36,6 @@ const bottomCss = (width: number, height: number, color: string) => css`
 
 // @ts-ignore
 export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = styled(Collapse)`
-  --text-color: #666;
   --border-style: 1px solid #d9d9d9;
   border-radius: 3px;
   font-size: 14px;
@@ -51,7 +50,6 @@ export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = s
       align-items: center;
       line-height: 22px;
       padding: 4px 16px;
-      color: #666;
       cursor: pointer;
 
       &:hover {
@@ -101,7 +99,6 @@ export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = s
 
   .${prefixCls}-content {
     overflow: hidden;
-    color: var(--text-color);
     background-color: #fff;
 
     .${prefixCls}-box {

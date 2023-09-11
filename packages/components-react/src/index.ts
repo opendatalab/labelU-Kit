@@ -9,3 +9,4 @@ export * from './AttributeTree';
 export * from './HotkeyPanel';
 export * from './HotkeyTable';
 export * from './Kbd';
+export * from './utils';
