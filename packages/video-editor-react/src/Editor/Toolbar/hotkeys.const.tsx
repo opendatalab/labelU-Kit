@@ -62,6 +62,34 @@ export default [
     key: 'actions',
     hotkeys: [
       {
+        name: '播放 / 暂停',
+        content: <Kbd>Space</Kbd>,
+      },
+      {
+        name: '增倍率',
+        content: (
+          <>
+            <Kbd>Ctrl →</Kbd> 或 <Kbd>⌘ →</Kbd>
+          </>
+        ),
+      },
+      {
+        name: '减倍率',
+        content: (
+          <>
+            <Kbd>Ctrl ←</Kbd> 或 <Kbd>⌘ ←</Kbd>
+          </>
+        ),
+      },
+      {
+        name: '前进',
+        content: <Kbd>→</Kbd>,
+      },
+      {
+        name: '后退',
+        content: <Kbd>←</Kbd>,
+      },
+      {
         name: '选中标记',
         content: <MouseRightClick />,
       },
