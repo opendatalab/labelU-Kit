@@ -5,19 +5,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import AnnotationOperation from '@label-u/components';
 import styled from 'styled-components';
-import type { EditorProps } from '@label-u/video-editor-react';
-import { Editor } from '@label-u/video-editor-react';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
-import { MediaType, TaskStatus } from '@/services/types';
+import { TaskStatus } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import { createSamples } from '@/services/samples';
 import { deleteFile } from '@/services/task';
-import { convertVideoConfig } from '@/utils/convertVideoConfig';
-import { convertVideoSample } from '@/utils/convertVideoSample';
 
 import type { QueuedFile } from './partials/inputData';
 import InputData, { UploadStatus } from './partials/inputData';
@@ -220,15 +215,6 @@ const CreateTask = () => {
         commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
       });
   }, [annotationFormInstance, dispatch.sample, taskId]);
-
-  const transformedSample = useMemo(() => {
-    const sample = samples?.data?.[0];
-    if (!sample) {
-      return [];
-    }
-
-    return commonController.transformFileList(sample.data, +sample.id!);
-  }, [samples]);
 
   const correctSampleIdsMappings = useMemo(
     () =>
@@ -507,22 +493,6 @@ const CreateTask = () => {
     [uploadFileList, annotationFormInstance, basicFormInstance, taskData, onAnnotationFormChange],
   );
 
-  const editorConfig = useMemo(() => {
-    if (taskData.media_type === MediaType.VIDEO) {
-      return convertVideoConfig(annotationFormInstance.getFieldsValue());
-    }
-
-    return {} as EditorProps['config'];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [annotationFormInstance, taskData.media_type, previewVisible]);
-
-  const videoSamples = useMemo(() => {
-    return _.chain(samples.data)
-      .map((item) => convertVideoSample(item.data, item.id, editorConfig))
-      .compact()
-      .value();
-  }, [editorConfig, samples.data]);
-
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
@@ -536,21 +506,13 @@ const CreateTask = () => {
           <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
             {partials}
           </div>
-          {previewVisible && taskData.media_type === MediaType.IMAGE && (
-            <div className="preview-content">
-              <AnnotationOperation
-                topActionContent={null}
-                isPreview
-                sample={transformedSample[0]}
-                config={annotationFormInstance.getFieldsValue()}
-                isShowOrder={false}
-              />
-            </div>
-          )}
-          {previewVisible && taskData.media_type === MediaType.VIDEO && (
-            <div className="preview-content">
-              <Editor primaryColor="#0d53de" config={editorConfig} samples={videoSamples} />
-            </div>
+          {previewVisible && (
+            <iframe
+              sandbox="allow-same-origin allow-scripts"
+              referrerPolicy="no-referrer"
+              className={currentStyles.previewIframe}
+              src={`/tasks/${taskData.id}/samples/${samples?.data?.[0].id}?noSave=true`}
+            />
           )}
         </TaskCreationContext.Provider>
       </div>

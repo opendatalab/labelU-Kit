@@ -7,6 +7,8 @@ import AnnotationOperation from '@label-u/components';
 import type { EditorProps } from '@label-u/video-editor-react';
 import { Editor } from '@label-u/video-editor-react';
 import '@label-u/components/dist/index.css';
+import { useSearchParams } from 'react-router-dom';
+import classNames from 'classnames';
 
 import type { Dispatch, RootState } from '@/store';
 import { MediaType, type SampleResponse } from '@/services/types';
@@ -26,6 +28,7 @@ export const videoAnnotationRef = createRef();
 
 const AnnotationPage = () => {
   const routeParams = useParams();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch<Dispatch>();
   const taskConfig = useSelector((state: RootState) => state.task.config);
   const task = useSelector((state: RootState) => state.task.item);
@@ -83,7 +86,14 @@ const AnnotationPage = () => {
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
 
   const leftSiderContent = useMemo(() => <SlideLoader />, []);
-  const topActionContent = <AnnotationRightCorner isLastSample={isLastSample} isFirstSample={isFirstSample} />;
+
+  const topActionContent = (
+    <AnnotationRightCorner
+      isLastSample={isLastSample}
+      isFirstSample={isFirstSample}
+      noSave={!!searchParams.get('noSave')}
+    />
+  );
 
   const annotationContextValue = useMemo(() => {
     return {
@@ -147,7 +157,12 @@ const AnnotationPage = () => {
   }
 
   return (
-    <Spin wrapperClassName={currentStyles.annotationPage} spinning={loading || sampleLoading}>
+    <Spin
+      wrapperClassName={classNames(currentStyles.annotationPage, {
+        [currentStyles.hasHeader]: !searchParams.get('noSave'),
+      })}
+      spinning={loading || sampleLoading}
+    >
       <AnnotationContext.Provider value={annotationContextValue}>
         {!_.isEmpty(transformed) && !_.isEmpty(taskConfig.tools) && content}
       </AnnotationContext.Provider>
