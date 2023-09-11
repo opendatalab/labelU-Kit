@@ -296,7 +296,6 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
         >
           <Tooltip
             placement="top"
-            trigger="click"
             overlay={
               <TooltipFrameContent>
                 <Order>{annotation.order}.</Order>
@@ -419,7 +418,6 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
       >
         <Tooltip
           placement="top"
-          trigger="click"
           overlay={
             <TooltipSegmentContent>
               <LabelTextWrapper>

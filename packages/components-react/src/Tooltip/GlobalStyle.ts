@@ -6,7 +6,7 @@ const GlobalStyle = createGlobalStyle`
 // Base class
 .${tooltipPrefix} {
   --shadow-width: 6px;
-  --tooltip-opacity: 0.85;
+  --tooltip-opacity: 1;
   --tooltip-color: #fff;
   --tooltip-bg: rgba(0, 0, 0, var(--tooltip-opacity));
   --tooltip-arrow-width: 6px;
@@ -50,7 +50,7 @@ const GlobalStyle = createGlobalStyle`
   &-placement-top &-arrow,
   &-placement-topLeft &-arrow,
   &-placement-topRight &-arrow{
-    transform: translate(-50%, var(--tooltip-arrow-width) - var(--shadow-width));
+    transform: translate(-50%, calc(var(--tooltip-arrow-width) - var(--shadow-width)));
     margin-left: calc(0 - var(--tooltip-arrow-width));
     border-width: var(--tooltip-arrow-width) var(--tooltip-arrow-width) 0;
     border-top-color: var(--arrow-color);
@@ -142,7 +142,7 @@ const GlobalStyle = createGlobalStyle`
   &-placement-bottom &-arrow,
   &-placement-bottomLeft &-arrow,
   &-placement-bottomRight &-arrow {
-    transform: translate(-50%, -var(--tooltip-arrow-width) + var(--shadow-width));
+    transform: translate(-50%, calc(0 - var(--tooltip-arrow-width) + var(--shadow-width)));
     margin-left: calc(0 - var(--tooltip-arrow-width));
     border-width: 0 var(--tooltip-arrow-width) var(--tooltip-arrow-width);
     border-bottom-color: var(--arrow-color);
