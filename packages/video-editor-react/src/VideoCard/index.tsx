@@ -64,7 +64,7 @@ export const StyledVideo = styled.div.attrs((props: StyledVideoProps) => ({
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #00000036;
+    background-color: rgba(0, 0, 0, 0.3);
   }
 
   .${videoClassName}__video {
@@ -205,7 +205,7 @@ export function VideoCard({
 
   const bodyNodes = isVideoValid ? (
     <>
-      {showPlayIcon && (
+      {showPlayIcon && !isPlaying && (
         <div className={`${videoClassName}__play`}>
           <PlayIcon className={`${videoClassName}__icon`} />
         </div>
@@ -218,8 +218,6 @@ export function VideoCard({
         muted={true}
         onTimeUpdate={handleTimeUpdate}
         preload="preload"
-        onMouseOver={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         onCanPlay={handleCanPlay}
         onClick={onClick}
         onError={handleVideoError}
@@ -236,7 +234,13 @@ export function VideoCard({
   );
 
   return (
-    <StyledVideo isPlaying={isPlaying} className={className} style={cardStyle}>
+    <StyledVideo
+      isPlaying={isPlaying}
+      className={className}
+      style={cardStyle}
+      onMouseOver={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {bodyNodes}
     </StyledVideo>
   );

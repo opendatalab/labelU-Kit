@@ -47,10 +47,10 @@
 
 .content {
   width: 100%;
-  // height : calc(100vh - 136px);
   height: calc(100vh - 136px);
   border-top: 1px solid var(--color-border-secondary);
   background-color: white;
+  overflow: auto;
 
   :global(.labelu-video-editor) {
     height: calc(100vh - 113px);
