@@ -57,7 +57,8 @@ const BarWrapper = styled.div<{ expanded?: boolean }>`
       css`
         max-height: calc(5 * var(--bar-height));
       `}
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .player-frame {
@@ -437,17 +438,20 @@ export default forwardRef<HTMLDivElement | null, VideoProps>(function Video(
   useHotkeys(
     'x',
     () => {
+      const currentTime = playerRef.current.currentTime();
       if (editingSegmentAnnotationRef.current) {
-        finishAnnotation({
-          ...editingSegmentAnnotationRef.current,
-          end: playerRef.current.currentTime(),
-        });
+        if (currentTime > editingSegmentAnnotationRef.current.start!) {
+          finishAnnotation({
+            ...editingSegmentAnnotationRef.current,
+            end: currentTime,
+          });
+        }
       } else {
         const newAnnotation = {
           id: uid(),
           type: 'segment',
-          start: playerRef.current.currentTime(),
-          end: playerRef.current.currentTime(),
+          start: currentTime,
+          end: currentTime,
           order: maxOrder + 1,
           label: editingLabel,
         } as VideoSegmentAnnotation;
