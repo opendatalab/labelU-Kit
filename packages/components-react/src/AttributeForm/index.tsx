@@ -43,6 +43,31 @@ export const AttributeFormItemWrapper = styled.div`
   }
 `;
 
+const Select = styled.select`
+  padding: 0.5rem 0 0.5rem 0.75rem;
+  border: solid 1px #d9d9d9;
+  border-radius: 6px;
+  outline: none;
+
+  &:focus {
+    border-color: var(--color-primary);
+  }
+`;
+
+const TextArea = styled.textarea`
+  padding: 0.25rem 0.75rem;
+  border: solid 1px #d9d9d9;
+  border-radius: 6px;
+  line-height: 22px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+    'Helvetica Neue', sans-serif;
+
+  &:focus {
+    border-color: var(--color-primary);
+    outline: none;
+  }
+`;
+
 export function FormItem({
   children,
   label,
@@ -273,7 +298,7 @@ export function AttributeFormItem({
   }
 
   if (type === 'string') {
-    child = <textarea onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()} maxLength={maxLength} />;
+    child = <TextArea rows={3} onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()} maxLength={maxLength} />;
 
     if (stringType === 'order') {
       child = <input disabled />;
@@ -403,7 +428,7 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
                   },
                 ]}
               >
-                <select>
+                <Select>
                   {attributeOptions.map((item) => {
                     return (
                       <option key={item.value} value={item.value!}>
@@ -411,11 +436,10 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
                       </option>
                     );
                   })}
-                </select>
+                </Select>
               </Field>
             </FormItem>
           )}
-          {labelChangeable && resultAttributeOptions && resultAttributeOptions.length > 0 && <div>属性</div>}
           {Array.isArray(resultAttributeOptions) &&
             resultAttributeOptions.map((attributeOptionItem) => (
               <AttributeFormItem
