@@ -38,9 +38,11 @@ function generateDefaultValues(attributes?: (TextAttribute | EnumerableAttribute
 
     const tagItem = item as EnumerableAttribute;
 
-    for (let i = 0; i < tagItem.options.length; i++) {
-      if (tagItem.options[i].isDefault) {
-        defaultValues.push(tagItem.options[i].value);
+    if (Array.isArray(tagItem.options)) {
+      for (let i = 0; i < tagItem.options.length; i++) {
+        if (tagItem.options[i].isDefault) {
+          defaultValues.push(tagItem.options[i].value);
+        }
       }
     }
 
