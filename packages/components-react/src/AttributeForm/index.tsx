@@ -55,16 +55,16 @@ const Select = styled.select`
 `;
 
 const TextArea = styled.textarea`
-  resize: none;
-  padding: 0.5rem 0.75rem;
+  padding: 0.25rem 0.75rem;
   border: solid 1px #d9d9d9;
   border-radius: 6px;
+  line-height: 22px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+    'Helvetica Neue', sans-serif;
 
   &:focus {
     border-color: var(--color-primary);
     outline: none;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-      'Open Sans', 'Helvetica Neue', sans-serif;
   }
 `;
 
@@ -298,7 +298,7 @@ export function AttributeFormItem({
   }
 
   if (type === 'string') {
-    child = <TextArea onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()} maxLength={maxLength} />;
+    child = <TextArea rows={3} onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()} maxLength={maxLength} />;
 
     if (stringType === 'order') {
       child = <input disabled />;
