@@ -72,7 +72,7 @@ export default function ToolbarInEditor({ right }: IToolbarInEditorProps) {
   return (
     <Toolbar
       disableRedo={!futureRef.current?.length}
-      disableUndo={!pastRef.current?.length}
+      disableUndo={!!pastRef.current && pastRef.current.length <= 1}
       onOrderSwitch={onOrderVisibleChange}
       showOrder={orderVisible}
       onRedo={redo}
