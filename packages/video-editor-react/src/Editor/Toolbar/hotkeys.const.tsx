@@ -1,6 +1,7 @@
-import { Kbd } from '@label-u/components-react';
+import { Kbd, getOS } from '@label-u/components-react';
 
 import { ReactComponent as MouseRightClick } from './mouse-right.svg';
+const os = getOS();
 
 export default [
   {
@@ -9,35 +10,19 @@ export default [
     hotkeys: [
       {
         name: '保存',
-        content: (
-          <span>
-            <Kbd>Ctrl S</Kbd> 或 <Kbd>⌘ S</Kbd>
-          </span>
-        ),
+        content: os === 'MacOS' ? <Kbd>⌘ S</Kbd> : <Kbd>Ctrl S</Kbd>,
       },
       {
         name: '跳过',
-        content: (
-          <span>
-            <Kbd>Ctrl Space</Kbd> 或 <Kbd>⌘ Space</Kbd>
-          </span>
-        ),
+        content: os === 'MacOS' ? <Kbd>⌘ Space</Kbd> : <Kbd>Ctrl Space</Kbd>,
       },
       {
         name: '撤销',
-        content: (
-          <span>
-            <Kbd>Ctrl Z</Kbd> 或 <Kbd>⌘ Z</Kbd>
-          </span>
-        ),
+        content: os === 'MacOS' ? <Kbd>⌘ Z</Kbd> : <Kbd>Ctrl Z</Kbd>,
       },
       {
         name: '重做',
-        content: (
-          <span>
-            <Kbd>Ctrl Shift Z</Kbd> 或 <Kbd>⌘ ⇧ Z</Kbd>
-          </span>
-        ),
+        content: os === 'MacOS' ? <Kbd>⌘ ⇧ Z</Kbd> : <Kbd>Ctrl Shift Z</Kbd>,
       },
       {
         name: '上一张',
@@ -67,19 +52,11 @@ export default [
       },
       {
         name: '增倍率',
-        content: (
-          <>
-            <Kbd>Ctrl →</Kbd> 或 <Kbd>⌘ →</Kbd>
-          </>
-        ),
+        content: os === 'MacOS' ? <Kbd>⌘ →</Kbd> : <Kbd>Ctrl →</Kbd>,
       },
       {
         name: '减倍率',
-        content: (
-          <>
-            <Kbd>Ctrl ←</Kbd> 或 <Kbd>⌘ ←</Kbd>
-          </>
-        ),
+        content: os === 'MacOS' ? <Kbd>⌘ ←</Kbd> : <Kbd>Ctrl ←</Kbd>,
       },
       {
         name: '前进',
@@ -108,10 +85,6 @@ export default [
       {
         name: '下一个标记',
         content: <Kbd>↓</Kbd>,
-      },
-      {
-        name: '取消',
-        content: <Kbd>Esc</Kbd>,
       },
     ],
   },
