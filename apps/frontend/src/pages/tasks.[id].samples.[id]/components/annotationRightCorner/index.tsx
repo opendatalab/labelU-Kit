@@ -24,7 +24,8 @@ interface AnnotationRightCornerProps {
 
 export const SAMPLE_CHANGED = 'sampleChanged';
 
-function getAnnotationCount(resultParsed: any) {
+function getAnnotationCount(_result: string | object) {
+  const resultParsed = typeof _result !== 'object' ? JSON.parse(_result as string) : _result;
   let result = 0;
 
   for (const key in resultParsed) {
