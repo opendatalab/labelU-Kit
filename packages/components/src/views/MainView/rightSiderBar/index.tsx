@@ -79,7 +79,7 @@ const RightSiderbar = () => {
   return (
     <div className={`${sidebarCls}`} ref={sideRef}>
       <Tabs defaultActiveKey="1">
-        {tagConfigList && tagConfigList.length > 0 && (
+        {((tagConfigList && tagConfigList.length > 0) || (textConfig && textConfig.length > 0)) && (
           <Tabs.TabPane forceRender tab={globalTab} key="1">
             <div className={`${sidebarCls}`}>
               <TagSidebar />
