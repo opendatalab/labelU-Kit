@@ -33,45 +33,31 @@ const RightSiderbar = () => {
     contentElem.style.height = `${attributeWrapperHeight}px`;
   }, []);
 
-  const textTab = useMemo(() => {
-    const textResultKeys = result?.textTool ? result?.textTool.result : [];
-
-    return (
-      <div className="rightTab">
-        <p>文本描述</p>
-        <span
-          className={classNames({
-            innerWord: true,
-            finish: textResultKeys && textResultKeys.length > 0 && textResultKeys.length === size(textConfig),
-          })}
-        >
-          {textResultKeys && textResultKeys.length > 0 && textResultKeys.length === size(textConfig)
-            ? '已完成'
-            : '未完成'}
-        </span>
-      </div>
-    );
-  }, [result?.textTool, textConfig]);
-
-  const tagTab = useMemo(() => {
+  const globalTab = useMemo(() => {
     const tagResultKeys = Object.keys(_.get(result, 'tagTool.result[0].result', {}));
+    const textResultKeys = result?.textTool ? result?.textTool.result : [];
+    const isFinished =
+      textResultKeys &&
+      textResultKeys.length > 0 &&
+      textResultKeys.length === size(textConfig) &&
+      tagResultKeys &&
+      tagResultKeys.length > 0 &&
+      tagResultKeys.length === size(tagConfigList);
 
     return (
       <div className="rightTab">
-        <p>分类</p>
+        <p>全局</p>
         <span
           className={classNames({
             innerWord: true,
-            finish: tagResultKeys && tagResultKeys.length > 0 && tagResultKeys.length === size(tagConfigList),
+            finish: isFinished,
           })}
         >
-          {tagResultKeys && tagResultKeys.length > 0 && tagResultKeys.length === size(tagConfigList)
-            ? '已完成'
-            : '未完成'}
+          {isFinished ? '已完成' : '未完成'}
         </span>
       </div>
     );
-  }, [result, tagConfigList]);
+  }, [result, tagConfigList, textConfig]);
 
   const labelToolLen = useMemo(
     () => config?.tools?.filter((tool) => labelTool.includes(tool.tool as EToolName)).length,
@@ -84,7 +70,7 @@ const RightSiderbar = () => {
 
     return (
       <div className="rightTab">
-        <p>标注结果</p>
+        <p>标记</p>
         <span className="innerWord">{count}件</span>
       </div>
     );
@@ -94,9 +80,10 @@ const RightSiderbar = () => {
     <div className={`${sidebarCls}`} ref={sideRef}>
       <Tabs defaultActiveKey="1">
         {tagConfigList && tagConfigList.length > 0 && (
-          <Tabs.TabPane forceRender tab={tagTab} key="1">
+          <Tabs.TabPane forceRender tab={globalTab} key="1">
             <div className={`${sidebarCls}`}>
               <TagSidebar />
+              <TextToolSidebar />
             </div>
           </Tabs.TabPane>
         )}
@@ -104,14 +91,6 @@ const RightSiderbar = () => {
         {labelToolLen && (
           <Tabs.TabPane forceRender tab={attributeTab} key="2">
             <AttributeResult />
-          </Tabs.TabPane>
-        )}
-
-        {textConfig && textConfig.length > 0 && (
-          <Tabs.TabPane forceRender tab={textTab} key="3">
-            <div className={`${sidebarCls}`}>
-              <TextToolSidebar />
-            </div>
           </Tabs.TabPane>
         )}
       </Tabs>
