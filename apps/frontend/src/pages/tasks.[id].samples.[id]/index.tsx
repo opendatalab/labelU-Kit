@@ -132,7 +132,7 @@ const AnnotationPage = () => {
   }, [leftSiderContent]);
 
   // =================== preview config ===================
-  const [configFromParent, setConfigFromParent] = useState({} as any);
+  const [configFromParent, setConfigFromParent] = useState<any>();
   useLayoutEffect(() => {
     const bridge = new Bridge(window.parent);
 
