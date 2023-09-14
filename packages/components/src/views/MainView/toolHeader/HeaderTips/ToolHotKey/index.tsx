@@ -207,6 +207,7 @@ const ToolHotKey: React.FC<IProps> = ({ style }) => {
   return (
     <Popover
       placement="topLeft"
+      trigger="click"
       content={content}
       align={{
         offset: [20, 0],
