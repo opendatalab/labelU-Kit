@@ -140,7 +140,7 @@ const AnnotationPage = () => {
       setConfigFromParent(data);
     });
 
-    bridge.post('ready');
+    bridge.post('ready').catch(() => {});
 
     return () => {
       bridge.destroy();
