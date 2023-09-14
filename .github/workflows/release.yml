@@ -63,6 +63,7 @@ jobs:
       - name: Show env
         run: |
           echo $RELEASE_VERSION
+          npm cache clean -f
       - name: Install dependencies
         run: pnpm install
       - name: Build packages
