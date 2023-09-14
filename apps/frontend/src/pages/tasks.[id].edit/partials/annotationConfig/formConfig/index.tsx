@@ -47,6 +47,17 @@ const toolMapping = {
   }),
 };
 
+const getDefaultActiveTool = (mediaType?: MediaType) => {
+  switch (mediaType) {
+    case MediaType.IMAGE:
+      return EToolName.Rect;
+    case MediaType.VIDEO:
+      return EVideoToolName.VideoSegmentTool;
+    default:
+      return undefined;
+  }
+};
+
 const templateMapping: Record<string, any> = {
   [EToolName.Line]: lineTemplate,
   [EToolName.Rect]: rectTemplate,
@@ -60,14 +71,14 @@ const templateMapping: Record<string, any> = {
 
 const FormConfig = () => {
   const { annotationFormInstance, onAnnotationFormChange, task } = useContext(TaskCreationContext);
-  const [activeTool, setActiveTool] = useState<string | undefined>();
+  const [activeTool, setActiveTool] = useState<string | undefined>(getDefaultActiveTool(task.media_type));
+  const [activeGlobalTool, setActiveGlobalTool] = useState<string | undefined>(globalTools[0]);
   // 选中的所有工具
   const [selectedTools, setSelectedTools] = useState<any[]>([]);
   // 选中的标记工具
   const [selectedAnnotationTools, setSelectedAnnotationTools] = useState<any[]>([]);
   // 选中的全局工具
   const [selectedGlobalTools, setSelectedGlobalTools] = useState<string[]>([]);
-  const [activeGlobalTool, setActiveGlobalTool] = useState<string | undefined>();
   const [hasAttributes, setHasAttributes] = useState(false);
 
   const config = useSelector((state: RootState) => state.task.config);
@@ -76,18 +87,33 @@ const FormConfig = () => {
   const { tools } = config || {};
 
   // 进行中和已完成的任务不允许删除工具
-  const deletable = useMemo(() => {
-    const isNewTool = !find(tools, { tool: activeTool });
-    const isNewGlobalTool = !find(tools, { tool: activeGlobalTool });
+  const isGlobalToolDeletable = useMemo(() => {
+    const isNew = !find(tools, { tool: activeGlobalTool });
 
-    let _result = [isNewTool, isNewGlobalTool];
-
-    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
-      _result = _result.map(() => false);
+    if (isNew) {
+      return true;
     }
 
-    return _result;
-  }, [tools, activeTool, activeGlobalTool, taskStatus, taskDoneAmount]);
+    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
+      return false;
+    }
+
+    return true;
+  }, [tools, activeGlobalTool, taskStatus, taskDoneAmount]);
+
+  const isToolDeletable = useMemo(() => {
+    const isNew = !find(tools, { tool: activeTool });
+
+    if (isNew) {
+      return true;
+    }
+
+    if ([TaskStatus.INPROGRESS, TaskStatus.FINISHED].includes(taskStatus as TaskStatus) || taskDoneAmount) {
+      return false;
+    }
+
+    return true;
+  }, [tools, activeTool, taskStatus, taskDoneAmount]);
 
   useEffect(() => {
     const toolNames = _.chain(tools).compact().map('tool').value();
@@ -187,7 +213,7 @@ const FormConfig = () => {
           forceRender: true,
           children: (
             <div className={styles.innerForm}>
-              <div style={{ display: deletable[0] ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+              <div style={{ display: isToolDeletable ? 'flex' : 'none', justifyContent: 'flex-end' }}>
                 <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
                   <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
                     删除工具
@@ -200,7 +226,7 @@ const FormConfig = () => {
         };
       })
       .value();
-  }, [deletable, handleRemoveTool, selectedTools]);
+  }, [isToolDeletable, handleRemoveTool, selectedTools]);
 
   const tabGlobalItems: TabsProps['items'] = useMemo(() => {
     return _.chain(selectedTools)
@@ -216,7 +242,7 @@ const FormConfig = () => {
           forceRender: true,
           children: (
             <div className={styles.innerForm}>
-              <div style={{ display: deletable[1] ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+              <div style={{ display: isGlobalToolDeletable ? 'flex' : 'none', justifyContent: 'flex-end' }}>
                 <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
                   <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
                     删除工具
@@ -229,7 +255,7 @@ const FormConfig = () => {
         };
       })
       .value();
-  }, [deletable, handleRemoveTool, selectedTools]);
+  }, [isGlobalToolDeletable, handleRemoveTool, selectedTools]);
 
   // TODO: 增加表单数据类型
   const handleFormValuesChange: FormProps['onValuesChange'] = useCallback(
