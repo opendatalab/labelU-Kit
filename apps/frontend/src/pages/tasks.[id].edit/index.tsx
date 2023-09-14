@@ -68,7 +68,7 @@ const CreateTask = () => {
   const [basicFormInstance] = Form.useForm();
   const modalRef = useRef<any>(null);
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
-  const bridgeRef = useRef<Bridge>();
+  const bridgeRef = useRef<Bridge | null>(null);
 
   const taskId = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
   const [currentStep, setCurrentStep] = useState<StepEnum>(
@@ -500,6 +500,11 @@ const CreateTask = () => {
   useLayoutEffect(() => {
     if (!previewIframeRef.current) {
       return;
+    }
+
+    if (bridgeRef.current) {
+      bridgeRef.current.destroy();
+      bridgeRef.current = null;
     }
 
     bridgeRef.current = new Bridge(previewIframeRef.current.contentWindow!);
