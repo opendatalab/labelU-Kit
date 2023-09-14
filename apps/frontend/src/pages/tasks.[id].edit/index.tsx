@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { Button, Form } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -6,13 +6,15 @@ import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
+import { Bridge } from 'iframe-message-bridge';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
-import { TaskStatus } from '@/services/types';
+import { MediaType, TaskStatus } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import { createSamples } from '@/services/samples';
 import { deleteFile } from '@/services/task';
+import { convertVideoConfig } from '@/utils/convertVideoConfig';
 
 import type { QueuedFile } from './partials/inputData';
 import InputData, { UploadStatus } from './partials/inputData';
@@ -65,6 +67,8 @@ const CreateTask = () => {
   const [annotationFormInstance] = Form.useForm();
   const [basicFormInstance] = Form.useForm();
   const modalRef = useRef<any>(null);
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const bridgeRef = useRef<Bridge>();
 
   const taskId = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
   const [currentStep, setCurrentStep] = useState<StepEnum>(
@@ -493,6 +497,24 @@ const CreateTask = () => {
     [uploadFileList, annotationFormInstance, basicFormInstance, taskData, onAnnotationFormChange],
   );
 
+  useLayoutEffect(() => {
+    if (!previewIframeRef.current) {
+      return;
+    }
+
+    bridgeRef.current = new Bridge(previewIframeRef.current.contentWindow!);
+    bridgeRef.current.on('ready', () => {
+      let _config;
+
+      if (taskData.media_type === MediaType.VIDEO) {
+        _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
+      } else if (taskData.media_type === MediaType.IMAGE) {
+        _config = annotationFormInstance.getFieldsValue();
+      }
+      bridgeRef.current!.post('preview', _config);
+    });
+  }, [previewVisible, annotationFormInstance, taskData.media_type]);
+
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
@@ -506,10 +528,11 @@ const CreateTask = () => {
           <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
             {partials}
           </div>
+
           {previewVisible && (
             <iframe
-              sandbox="allow-same-origin allow-scripts"
               referrerPolicy="no-referrer"
+              ref={previewIframeRef}
               className={currentStyles.previewIframe}
               src={`/tasks/${taskData.id}/samples/${samples?.data?.[0].id}?noSave=true`}
             />
