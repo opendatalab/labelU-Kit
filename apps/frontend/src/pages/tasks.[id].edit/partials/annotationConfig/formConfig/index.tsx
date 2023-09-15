@@ -121,9 +121,11 @@ const FormConfig = () => {
 
     const annotationToolNames = _.filter(toolNames, (item) => !globalTools.includes(item));
     setSelectedAnnotationTools(annotationToolNames);
+    setActiveTool(annotationToolNames[0]);
 
     const globalToolNames = _.filter(toolNames, (item) => globalTools.includes(item));
     setSelectedGlobalTools(globalToolNames);
+    setActiveGlobalTool(globalToolNames[0]);
     setHasAttributes(config?.commonAttributeConfigurable ?? false);
   }, [config, tools]);
 
