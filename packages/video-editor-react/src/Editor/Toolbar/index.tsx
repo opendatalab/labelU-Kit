@@ -47,26 +47,30 @@ export default function ToolbarInEditor({ right }: IToolbarInEditorProps) {
   useHotkeys(
     'x',
     () => {
-      onToolChange('segment');
+      if (config?.segment) {
+        onToolChange('segment');
+      }
     },
     {
       preventDefault: true,
       enabled: currentTool !== 'segment',
     },
-    [currentTool, onToolChange],
+    [currentTool, onToolChange, config?.segment],
   );
 
   // 切换时间戳
   useHotkeys(
     'e',
     () => {
-      onToolChange('frame');
+      if (config?.frame) {
+        onToolChange('frame');
+      }
     },
     {
       preventDefault: true,
       enabled: currentTool !== 'frame',
     },
-    [currentTool, onToolChange],
+    [currentTool, onToolChange, config?.frame],
   );
 
   return (

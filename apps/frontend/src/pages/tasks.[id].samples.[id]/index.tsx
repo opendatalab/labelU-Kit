@@ -1,4 +1,4 @@
-import { useState, useEffect, createRef, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash-es';
@@ -9,6 +9,7 @@ import { Editor } from '@label-u/video-editor-react';
 import '@label-u/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import classNames from 'classnames';
+import { Bridge } from 'iframe-message-bridge';
 
 import type { Dispatch, RootState } from '@/store';
 import { MediaType, type SampleResponse } from '@/services/types';
@@ -130,6 +131,22 @@ const AnnotationPage = () => {
     return () => leftSiderContent;
   }, [leftSiderContent]);
 
+  // =================== preview config ===================
+  const [configFromParent, setConfigFromParent] = useState<any>();
+  useLayoutEffect(() => {
+    const bridge = new Bridge(window.parent);
+
+    bridge.on('preview', (data) => {
+      setConfigFromParent(data);
+    });
+
+    bridge.post('ready').catch(() => {});
+
+    return () => {
+      bridge.destroy();
+    };
+  }, []);
+
   if (task.media_type === MediaType.IMAGE) {
     content = (
       <AnnotationOperation
@@ -139,7 +156,7 @@ const AnnotationPage = () => {
         ref={annotationRef}
         isPreview={false}
         sample={editingSample}
-        config={taskConfig}
+        config={configFromParent || taskConfig}
         isShowOrder={false}
       />
     );
@@ -149,7 +166,7 @@ const AnnotationPage = () => {
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
         editingSample={editingSample}
-        config={editorConfig}
+        config={configFromParent || editorConfig}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
       />
@@ -164,7 +181,7 @@ const AnnotationPage = () => {
       spinning={loading || sampleLoading}
     >
       <AnnotationContext.Provider value={annotationContextValue}>
-        {!_.isEmpty(transformed) && !_.isEmpty(taskConfig.tools) && content}
+        {!_.isEmpty(transformed) && !_.isEmpty(taskConfig?.tools) && content}
       </AnnotationContext.Provider>
     </Spin>
   );
