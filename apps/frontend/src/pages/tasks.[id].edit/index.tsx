@@ -502,6 +502,11 @@ const CreateTask = () => {
       return;
     }
 
+    if (bridgeRef.current) {
+      bridgeRef.current.destroy();
+      bridgeRef.current = null;
+    }
+
     bridgeRef.current = new Bridge(previewIframeRef.current.contentWindow!);
     bridgeRef.current.on('ready', () => {
       let _config;
@@ -511,10 +516,11 @@ const CreateTask = () => {
       } else if (taskData.media_type === MediaType.IMAGE) {
         _config = annotationFormInstance.getFieldsValue();
       }
-      bridgeRef.current!.post('preview', _config);
-    });
 
-    return bridgeRef.current.destroy;
+      if (bridgeRef.current) {
+        bridgeRef.current.post('preview', _config);
+      }
+    });
   }, [previewVisible, annotationFormInstance, taskData.media_type]);
 
   return (
