@@ -17,7 +17,7 @@ enum EColor {
 
 const FooterOption = () => {
   const [toolHover, setToolHover] = useState('');
-  const { setImageAttribute, annotationEngine } = useContext(ViewContext);
+  const { setImageAttribute, annotationEngine, isShowOrder } = useContext(ViewContext);
   const { t } = useTranslation();
   // TODO
   const isBegin = false;
@@ -33,7 +33,7 @@ const FooterOption = () => {
       keyup: true,
       keydown: false,
     },
-    [updateRotate],
+    [updateRotate, isShowOrder],
   );
 
   const commonOptionList: any = [

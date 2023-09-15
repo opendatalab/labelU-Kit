@@ -502,11 +502,6 @@ const CreateTask = () => {
       return;
     }
 
-    if (bridgeRef.current) {
-      bridgeRef.current.destroy();
-      bridgeRef.current = null;
-    }
-
     bridgeRef.current = new Bridge(previewIframeRef.current.contentWindow!);
     bridgeRef.current.on('ready', () => {
       let _config;
@@ -518,6 +513,8 @@ const CreateTask = () => {
       }
       bridgeRef.current!.post('preview', _config);
     });
+
+    return bridgeRef.current.destroy;
   }, [previewVisible, annotationFormInstance, taskData.media_type]);
 
   return (
