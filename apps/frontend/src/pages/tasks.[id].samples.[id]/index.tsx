@@ -142,7 +142,7 @@ const AnnotationPage = () => {
 
     bridge.post('ready').catch(() => {});
 
-    return bridge.destroy;
+    return () => bridge.destroy();
   }, []);
 
   if (task.media_type === MediaType.IMAGE) {

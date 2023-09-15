@@ -17,13 +17,14 @@ enum EColor {
 
 const FooterOption = () => {
   const [toolHover, setToolHover] = useState('');
-  const { setImageAttribute, annotationEngine, isShowOrder } = useContext(ViewContext);
+  const { setImageAttribute, annotationEngine, isShowOrder, result } = useContext(ViewContext);
   const { t } = useTranslation();
   // TODO
   const isBegin = false;
 
   const updateRotate = debounce(() => {
     annotationEngine?.toolInstance?.updateRotate();
+    annotationEngine?.toolInstance.emit('updateResult');
   }, 100);
 
   useHotkeys(
@@ -33,7 +34,7 @@ const FooterOption = () => {
       keyup: true,
       keydown: false,
     },
-    [updateRotate, isShowOrder],
+    [updateRotate, isShowOrder, result],
   );
 
   const commonOptionList: any = [
