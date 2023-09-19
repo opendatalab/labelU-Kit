@@ -1,4 +1,4 @@
-import type { InnerAttribute } from '@label-u/interface';
+import type { InnerAttribute, TextAttribute } from '@label-u/interface';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo } from 'react';
@@ -249,14 +249,17 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
 
   const textFormItems = useMemo(() => {
     return (
-      textConfig?.map((item, index) => {
+      (textConfig as TextAttribute[])?.map((item, index) => {
         const attributeConfigItem = attributeMappingByTool[item.type as string][item.value];
 
         return {
           key: item.value,
           label: (
             <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
-              <div>{attributeConfigItem.key}</div>
+              <div>
+                {item.required && <span style={{ color: 'red' }}>*</span>}
+                {attributeConfigItem.key}
+              </div>
             </EllipsisText>
           ),
           forceRender: true,
