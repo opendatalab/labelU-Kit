@@ -1,4 +1,4 @@
-import { Menu, Popover, Row } from 'antd/es';
+import { Menu, Popover, Row } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { createGlobalStyle } from 'styled-components';

@@ -1,4 +1,4 @@
-import { Checkbox } from 'antd/es';
+import { Checkbox } from 'antd';
 import React from 'react';
 
 interface IProps {
@@ -9,7 +9,6 @@ interface IProps {
 }
 
 const CheckboxList = (props: IProps) => {
-  const checkboxRef = React.useRef<any>(null);
   const list = props.list || [];
   return (
     <div className="labelu-checkbox-group">
@@ -20,12 +19,7 @@ const CheckboxList = (props: IProps) => {
         onChange={() => props.attributeChanged()}
       >
         {list.map((i: any, index: number) => (
-          // @ts-ignore
-          <Checkbox value={i.value} ref={checkboxRef} onFocus={() => {
-              checkboxRef?.current?.blur();
-            }}
-            key={index}
-          >
+          <Checkbox value={i.value} key={index}>
             <span className="labelu-checkbox-label" title={i.label}>
               {i.label}
             </span>

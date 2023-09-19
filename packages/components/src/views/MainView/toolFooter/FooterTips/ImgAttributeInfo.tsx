@@ -1,4 +1,4 @@
-import { Col, Row, Slider, Input } from 'antd/es';
+import { Col, Row, Slider, Input } from 'antd';
 import { throttle } from 'lodash-es';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';

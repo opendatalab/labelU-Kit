@@ -1,4 +1,4 @@
-import { Radio } from 'antd/es';
+import { Radio } from 'antd';
 import React from 'react';
 
 import { COLORS_ARRAY, NULL_COLOR } from '@/data/Style';
