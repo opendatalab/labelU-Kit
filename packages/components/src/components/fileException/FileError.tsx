@@ -1,5 +1,5 @@
 import { ReloadOutlined } from '@ant-design/icons';
-import { Button } from 'antd/es';
+import { Button } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,15 +17,7 @@ export interface IFileErrorProps {
 }
 
 const FileError = (props: IFileErrorProps) => {
-  const {
-    width,
-    height,
-    reloadImage,
-    hideSetInvalidTips,
-    ignoreOffsetY,
-    backgroundColor,
-    fileType = 'image',
-  } = props;
+  const { width, height, reloadImage, hideSetInvalidTips, ignoreOffsetY, backgroundColor, fileType = 'image' } = props;
 
   const { t } = useTranslation();
 
@@ -60,11 +52,9 @@ const FileError = (props: IFileErrorProps) => {
     <div style={layerStyle}>
       <div style={buttonStyle}>
         <div style={{ textAlign: 'center', marginBottom: 10 }}>
-          <Button type='primary' shape='circle' icon={<ReloadOutlined />} onClick={reloadImage} />
+          <Button type="primary" shape="circle" icon={<ReloadOutlined />} onClick={reloadImage} />
         </div>
-        <div>
-          {`${t(`${fileType}ErrorAndReload`)}${hideSetInvalidTips ? '' : t('orMaskAsInvalid')}`}
-        </div>
+        <div>{`${t(`${fileType}ErrorAndReload`)}${hideSetInvalidTips ? '' : t('orMaskAsInvalid')}`}</div>
       </div>
     </div>
   );

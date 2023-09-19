@@ -516,7 +516,10 @@ const CreateTask = () => {
       } else if (taskData.media_type === MediaType.IMAGE) {
         _config = annotationFormInstance.getFieldsValue();
       }
-      bridgeRef.current!.post('preview', _config);
+
+      if (bridgeRef.current) {
+        bridgeRef.current.post('preview', _config);
+      }
     });
   }, [previewVisible, annotationFormInstance, taskData.media_type]);
 

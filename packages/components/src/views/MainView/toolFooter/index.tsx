@@ -1,4 +1,4 @@
-import { Input } from 'antd/es';
+import { Input } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 
 import { prefix } from '@/constant';

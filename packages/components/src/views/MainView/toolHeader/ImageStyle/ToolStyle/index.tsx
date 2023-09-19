@@ -1,4 +1,4 @@
-import { Slider } from 'antd/es';
+import { Slider } from 'antd';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { keys } from 'lodash-es';

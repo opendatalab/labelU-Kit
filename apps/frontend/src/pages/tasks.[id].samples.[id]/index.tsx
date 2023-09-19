@@ -142,9 +142,7 @@ const AnnotationPage = () => {
 
     bridge.post('ready').catch(() => {});
 
-    return () => {
-      bridge.destroy();
-    };
+    return () => bridge.destroy();
   }, []);
 
   if (task.media_type === MediaType.IMAGE) {
@@ -181,7 +179,7 @@ const AnnotationPage = () => {
       spinning={loading || sampleLoading}
     >
       <AnnotationContext.Provider value={annotationContextValue}>
-        {!_.isEmpty(transformed) && !_.isEmpty(taskConfig?.tools) && content}
+        {!_.isEmpty(transformed) && (!_.isEmpty(taskConfig?.tools) || !_.isEmpty(configFromParent)) && content}
       </AnnotationContext.Provider>
     </Spin>
   );

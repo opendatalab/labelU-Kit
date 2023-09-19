@@ -7,9 +7,9 @@ const Wrapper = styled.kbd<{ dark?: boolean }>`
     box-shadow: ${dark
       ? `rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 5px 0px,
     rgba(0, 0, 0, 0.2) 0px 2px 10px 0px, rgba(255, 255, 255, 0.15) 0px 0px 1px 0px inset`
-      : `rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.02) 0px 0px 5px 0px, rgba(0, 0, 0, 0.06) 0px 2px 10px 0px, rgba(0, 0, 0, 0.3) 0px 0px 1px 0px`};
+      : `rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.02) 0px 0px 1px 0px, rgba(0, 0, 0, 0.06) 0px 3px 0px 0px, rgba(0, 0, 0, 0.3) 0px 0px 1px 0px`};
   `}
-  border-radius: 6px;
+  border-radius: 4px;
   display: inline-block;
   padding: 2px 6px;
   white-space: nowrap;

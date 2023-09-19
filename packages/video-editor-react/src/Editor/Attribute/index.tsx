@@ -157,10 +157,26 @@ export default function Attribute() {
     const _titles = [];
     // 将文本描述和标签分类合并成全局配置
     if (config?.tag || config?.text) {
+      let isCompleted = false;
+
+      if (config.text) {
+        const textAnnotations = globalAnnotations.filter((item) => item.type === 'text') as TextAnnotationEntity[];
+        const textAnnotationMapping = textAnnotations.reduce((acc, item) => {
+          const key = Object.keys(item.value)[0];
+          acc[key] = item;
+          return acc;
+        }, {} as Record<string, TextAnnotationEntity>);
+
+        // 如果所有的文本描述都是必填的，那么只要有一个不存在，那么就是未完成
+        isCompleted = config.text
+          .filter((item) => item.required)
+          .every((item) => textAnnotationMapping[item.value]?.value?.[item.value]);
+      }
+
       _titles.push({
         title: '全局',
         key: 'global' as const,
-        subtitle: globalAnnotations.length === globals.length ? '已完成' : '未完成',
+        subtitle: isCompleted ? '已完成' : '未完成',
       });
     }
 
@@ -173,15 +189,7 @@ export default function Attribute() {
     }
 
     return _titles;
-  }, [
-    config?.frame,
-    config?.segment,
-    config?.tag,
-    config?.text,
-    globalAnnotations.length,
-    globals.length,
-    videoAnnotations.length,
-  ]);
+  }, [config?.frame, config?.segment, config?.tag, config?.text, globalAnnotations, videoAnnotations.length]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
   useEffect(() => {
