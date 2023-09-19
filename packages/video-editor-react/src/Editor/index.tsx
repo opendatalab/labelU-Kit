@@ -400,8 +400,13 @@ function ForwardEditor(
 
   const handleAttributeChange = useCallback(
     (_attribute: any) => {
-      const newAnnotation = {
-        ...selectedAnnotation,
+      let newAnnotation = JSON.parse(JSON.stringify(selectedAnnotation));
+
+      // 改变标签时，删除旧的attributes属性
+      delete newAnnotation.attributes;
+
+      newAnnotation = {
+        ...newAnnotation,
         ..._attribute,
       };
       setSelectedAnnotation(() => newAnnotation);
