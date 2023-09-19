@@ -1,6 +1,6 @@
 {
   "name": "@label-u/video-editor-react",
-  "version": "1.0.0-alpha.18",
+  "version": "1.0.0-alpha.19",
   "description": "video annotation editor for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
