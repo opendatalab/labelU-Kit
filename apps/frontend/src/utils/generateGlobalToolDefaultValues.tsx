@@ -1,37 +1,49 @@
-import type { EnumerableAttribute, TextAttribute } from '@label-u/interface';
+import type { EnumerableAttribute, TagAnnotationEntity, TextAnnotationEntity, TextAttribute } from '@label-u/interface';
 import { uid } from '@label-u/video-react';
-import _ from 'lodash';
 
-export function generateDefaultValues(attributes?: (TextAttribute | EnumerableAttribute)[]) {
-  return _.map(attributes, (item) => {
-    const defaultValues = [];
+export function generateDefaultValues(
+  attributes?: (TextAttribute | EnumerableAttribute)[],
+): (TagAnnotationEntity | TextAnnotationEntity)[] {
+  const result: (TagAnnotationEntity | TextAnnotationEntity)[] = [];
 
-    if ((item as TextAttribute).type === 'string') {
-      const stringItem = item as TextAttribute;
+  if (!attributes) {
+    return result;
+  }
 
-      return {
+  for (let i = 0; i < attributes.length; i++) {
+    const stringItem = attributes[i] as TextAttribute;
+
+    if (stringItem.type === 'string' && stringItem.defaultValue) {
+      result.push({
         id: uid(),
         type: 'text',
         value: {
           [stringItem.value]: stringItem.defaultValue,
         },
-      };
+      });
     }
 
-    const tagItem = item as EnumerableAttribute;
+    const tagItem = attributes[i] as EnumerableAttribute;
 
-    for (let i = 0; i < tagItem.options.length; i++) {
-      if (tagItem.options[i].isDefault) {
-        defaultValues.push(tagItem.options[i].value);
+    if (tagItem.type === 'tag') {
+      const defaultValues = [];
+      for (let j = 0; j < tagItem.options.length; j++) {
+        if (tagItem.options[j].isDefault) {
+          defaultValues.push(tagItem.options[j].value);
+        }
+      }
+
+      if (defaultValues.length > 0) {
+        result.push({
+          id: uid(),
+          type: 'tag',
+          value: {
+            [tagItem.value]: defaultValues,
+          },
+        });
       }
     }
+  }
 
-    return {
-      id: uid(),
-      type: 'tag',
-      value: {
-        [tagItem.value]: defaultValues,
-      },
-    };
-  });
+  return result;
 }

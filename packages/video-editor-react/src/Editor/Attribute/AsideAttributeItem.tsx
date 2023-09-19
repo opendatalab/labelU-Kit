@@ -225,7 +225,6 @@ export default function AsideAttributeItem({ annotation, active, order, labelTex
         <InnerHeader>
           <div>{order}.</div>
           <FrameIcon color={color} />
-          <div>{labelText}</div>
           <EllipsisText maxWidth={112} title={labelText}>
             <div>{labelText}</div>
           </EllipsisText>

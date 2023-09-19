@@ -86,7 +86,7 @@ export default function ToolbarInEditor({ right }: IToolbarInEditorProps) {
           <Tooltip
             overlay={
               <span>
-                恢复 <Kbd dark>C</Kbd>
+                选择 <Kbd dark>C</Kbd>
               </span>
             }
             placement="topLeft"
