@@ -50,7 +50,7 @@ const TagSidebar = () => {
   const { t } = useTranslation();
 
   const syncToStore = useCallback(
-    (newTagResult) => {
+    (newTagResult: any) => {
       // 保存至store
       const tagsInString = cloneDeep(newTagResult);
       objectEach(tagsInString, (value, keyPath) => {
@@ -204,7 +204,7 @@ const TagSidebar = () => {
   );
 
   const makeTreeData = useCallback(
-    (inputs, optionType: 'enum' | 'array' | undefined, path: string[] = []) => {
+    (inputs: any, optionType: 'enum' | 'array' | undefined, path: string[] = []) => {
       return inputs.map((input: any) => {
         const { options, value, key, type } = input;
         if (Array.isArray(options) && options.length > 0) {

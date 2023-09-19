@@ -102,7 +102,7 @@ const App = forwardRef<
   const pastRef = useRef<any[]>([]);
   const futureRef = useRef<any[]>([]);
 
-  const updateResult = useCallback((newResult) => {
+  const updateResult = useCallback((newResult: any) => {
     setResult((pre) => {
       if (!isEqual(pre, newResult)) {
         pastRef.current = [...pastRef.current, pre];
