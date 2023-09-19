@@ -1,4 +1,4 @@
-import type { InnerAttribute, TextAttribute } from '@label-u/interface';
+import type { GlobalAnnotationType, InnerAttribute, TextAttribute } from '@label-u/interface';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo } from 'react';
@@ -146,7 +146,7 @@ export interface AttributeDataItem {
 export interface AttributeTreeProps {
   data?: AttributeDataItem[];
   config?: InnerAttribute[];
-  onChange?: FormProps['onValuesChange'];
+  onChange?: (changedValues: any, values: any, type: GlobalAnnotationType) => void;
   className?: string;
 }
 
@@ -289,9 +289,9 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
     textForm.setFieldsValue(textData);
   }, [tagData, tagForm, textData, textForm]);
 
-  const handleOnChange = (_name: string) =>
+  const handleOnChange = (_name: GlobalAnnotationType) =>
     ((_changedValues, values) => {
-      onChange?.(_changedValues[_name], values[_name]);
+      onChange?.(_changedValues[_name], values[_name], _name);
     }) as FormProps['onValuesChange'];
 
   return (

@@ -54,7 +54,7 @@ const Select = styled.select`
   }
 `;
 
-const TextArea = styled.textarea`
+const TextAreaWrapper = styled.textarea`
   padding: 0.25rem 0.75rem;
   border: solid 1px #d9d9d9;
   border-radius: 6px;
@@ -226,6 +226,36 @@ function CheckboxGroup({ onChange, value: propsValue, options }: RadioGroupProps
   );
 }
 
+interface TextAreaProps {
+  value?: string;
+  onChange?: (value: string) => void;
+}
+
+function TextArea({
+  value: propsValue,
+  onChange,
+  ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & TextAreaProps) {
+  const [value, setValue] = useState<string | undefined>(propsValue);
+  const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+    onChange?.(e.target.value);
+  };
+
+  useEffect(() => {
+    setValue(propsValue);
+  }, [propsValue]);
+
+  return (
+    <TextAreaWrapper
+      onChange={handleOnChange}
+      value={value ?? ''}
+      onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+      {...props}
+    />
+  );
+}
+
 interface AttributeResultProps {
   type: InnerAttributeType[keyof InnerAttributeType];
   options?: AttributeOption[];
@@ -320,6 +350,7 @@ export function AttributeFormItem({
   return (
     <FormItem label={label} required={required} errors={errors} className={className}>
       <Field key={value} name={fullName} rules={rules}>
+        {/* @ts-ignore */}
         {child}
       </Field>
     </FormItem>
