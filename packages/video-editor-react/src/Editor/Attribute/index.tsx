@@ -3,14 +3,17 @@ import styled, { css } from 'styled-components';
 import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText } from '@label-u/components-react';
 import type {
   EnumerableAttribute,
+  GlobalAnnotationType,
   TagAnnotationEntity,
   TextAnnotationEntity,
   TextAttribute,
   VideoAnnotationData,
 } from '@label-u/interface';
+import { uid } from '@label-u/video-react';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 
+import type { VideoAnnotationInEditor } from '../context';
 import EditorContext from '../context';
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
@@ -210,22 +213,32 @@ export default function Attribute() {
     };
   }, []);
 
-  const handleOnChange = (_changedValues: any, values: any[]) => {
-    // 只要其中之一不存在，那么所有该类型的标注即不存在
-    if (!(values[0].id in annotationsMapping)) {
-      onAnnotationsChange([...(currentSample?.annotations ?? []), ...values]);
-    } else {
-      onAnnotationsChange(
-        currentSample!.annotations.map((item) => {
-          const existIndex = values.findIndex((innerItem) => innerItem.id === item.id);
-          if (existIndex >= 0) {
-            return values[existIndex];
-          }
+  const handleOnChange = (_changedValues: any, values: any[], type: GlobalAnnotationType) => {
+    const newAnnotations = [];
+    const existAnnotations: VideoAnnotationInEditor[] = [];
 
-          return item;
-        }),
-      );
+    for (const item of values) {
+      if (item.id && item.id in annotationsMapping) {
+        existAnnotations.push(item);
+      } else {
+        newAnnotations.push({
+          id: item.id || uid(),
+          type,
+          value: item.value,
+        });
+      }
     }
+
+    const annotations =
+      currentSample?.annotations.map((item) => {
+        const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
+        if (existIndex >= 0) {
+          return existAnnotations[existIndex];
+        }
+
+        return item;
+      }) ?? [];
+    onAnnotationsChange([...annotations, ...newAnnotations]);
   };
 
   const handleClear = () => {
