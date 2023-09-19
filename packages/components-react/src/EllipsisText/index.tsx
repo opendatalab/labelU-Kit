@@ -10,7 +10,7 @@ export function EllipsisText({
   ...restProps
 }: React.PropsWithChildren<
   {
-    title: React.ReactNode;
+    title: React.ReactNode | (() => React.ReactNode);
     maxWidth: number;
   } & Omit<TooltipProps, 'overlay'>
 >) {
@@ -45,6 +45,7 @@ export function EllipsisText({
   }
 
   return (
+    // @ts-ignore
     <Tooltip overlay={title} placement="top" overlayStyle={overlayStyle} {...restProps}>
       {newChildren as NonNullable<any>}
     </Tooltip>
