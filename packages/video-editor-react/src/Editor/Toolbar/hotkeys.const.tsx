@@ -10,19 +10,55 @@ export default [
     hotkeys: [
       {
         name: '保存',
-        content: os === 'MacOS' ? <Kbd>⌘ S</Kbd> : <Kbd>Ctrl S</Kbd>,
+        content:
+          os === 'MacOS' ? (
+            <>
+              <Kbd>⌘</Kbd> + <Kbd>S</Kbd>
+            </>
+          ) : (
+            <>
+              <Kbd>Ctrl</Kbd> + <Kbd>S</Kbd>
+            </>
+          ),
       },
       {
         name: '跳过',
-        content: os === 'MacOS' ? <Kbd>⌘ Space</Kbd> : <Kbd>Ctrl Space</Kbd>,
+        content:
+          os === 'MacOS' ? (
+            <>
+              <Kbd>⌘</Kbd> + <Kbd>Space</Kbd>
+            </>
+          ) : (
+            <>
+              <Kbd>Ctrl</Kbd> + <Kbd>Space</Kbd>
+            </>
+          ),
       },
       {
         name: '撤销',
-        content: os === 'MacOS' ? <Kbd>⌘ Z</Kbd> : <Kbd>Ctrl Z</Kbd>,
+        content:
+          os === 'MacOS' ? (
+            <>
+              <Kbd>⌘</Kbd> + <Kbd>Z</Kbd>
+            </>
+          ) : (
+            <>
+              <Kbd>Ctrl</Kbd> + <Kbd>Space</Kbd>
+            </>
+          ),
       },
       {
         name: '重做',
-        content: os === 'MacOS' ? <Kbd>⌘ ⇧ Z</Kbd> : <Kbd>Ctrl Shift Z</Kbd>,
+        content:
+          os === 'MacOS' ? (
+            <>
+              <Kbd>⌘</Kbd> + <Kbd>⇧</Kbd> + <Kbd>Z</Kbd>
+            </>
+          ) : (
+            <>
+              <Kbd>Ctrl</Kbd> + <Kbd>Shift</Kbd> + <Kbd>Z</Kbd>
+            </>
+          ),
       },
       {
         name: '上一张',
@@ -52,11 +88,29 @@ export default [
       },
       {
         name: '增倍率',
-        content: os === 'MacOS' ? <Kbd>⌘ →</Kbd> : <Kbd>Ctrl →</Kbd>,
+        content:
+          os === 'MacOS' ? (
+            <>
+              <Kbd>⌘</Kbd> + <Kbd>→</Kbd>
+            </>
+          ) : (
+            <>
+              <Kbd>Ctrl</Kbd> + <Kbd>→</Kbd>
+            </>
+          ),
       },
       {
         name: '减倍率',
-        content: os === 'MacOS' ? <Kbd>⌘ ←</Kbd> : <Kbd>Ctrl ←</Kbd>,
+        content:
+          os === 'MacOS' ? (
+            <>
+              <Kbd>⌘</Kbd> + <Kbd>←</Kbd>
+            </>
+          ) : (
+            <>
+              <Kbd>Ctrl</Kbd> + <Kbd>←</Kbd>
+            </>
+          ),
       },
       {
         name: '前进',
