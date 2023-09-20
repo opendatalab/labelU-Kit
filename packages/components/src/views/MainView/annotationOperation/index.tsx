@@ -1,5 +1,5 @@
 import { ImgUtils } from '@label-u/annotation';
-import { message } from 'antd/es';
+import { message } from 'antd';
 import React, { useEffect, useRef, useState, useContext, useLayoutEffect } from 'react';
 
 import FileError from '@/components/fileException/FileError';

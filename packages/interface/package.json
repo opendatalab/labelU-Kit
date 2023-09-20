@@ -1,0 +1,25 @@
+{
+  "name": "@label-u/interface",
+  "version": "1.0.0-alpha.1",
+  "description": "typescript interfaces for label-u annotations",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -d --emitDeclarationOnly"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opendatalab/labelU-Kit.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.shlab.tech"
+  },
+  "author": {
+    "name": "gary",
+    "email": "shenguanlin@pjlab.org.cn"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}

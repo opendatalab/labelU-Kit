@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { Button, Form } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import AnnotationOperation from '@label-u/components';
 import styled from 'styled-components';
+import { Bridge } from 'iframe-message-bridge';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/services/types';
@@ -14,6 +14,7 @@ import { MediaType, TaskStatus } from '@/services/types';
 import type { Dispatch, RootState } from '@/store';
 import { createSamples } from '@/services/samples';
 import { deleteFile } from '@/services/task';
+import { convertVideoConfig } from '@/utils/convertVideoConfig';
 
 import type { QueuedFile } from './partials/inputData';
 import InputData, { UploadStatus } from './partials/inputData';
@@ -66,6 +67,8 @@ const CreateTask = () => {
   const [annotationFormInstance] = Form.useForm();
   const [basicFormInstance] = Form.useForm();
   const modalRef = useRef<any>(null);
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const bridgeRef = useRef<Bridge | null>(null);
 
   const taskId = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
   const [currentStep, setCurrentStep] = useState<StepEnum>(
@@ -148,7 +151,6 @@ const CreateTask = () => {
 
   useEffect(() => {
     basicFormInstance.setFieldsValue(taskData);
-    annotationFormInstance.setFieldValue('media_type', taskData.media_type || MediaType.IMAGE);
   }, [annotationFormInstance, basicFormInstance, taskData]);
 
   useEffect(() => {
@@ -195,12 +197,11 @@ const CreateTask = () => {
           body: {
             ...taskData,
             ...basicFormInstance.getFieldsValue(),
-            media_type: annotationConfig.media_type,
-            config: omit(['media_type'])(annotationConfig),
+            config: annotationConfig,
           },
         })
         .then(() => {
-          navigate('/tasks');
+          navigate(`/tasks/${taskData.id}`);
         });
     },
     [annotationFormInstance, basicFormInstance, currentStep, dispatch.task, navigate, taskData, taskId],
@@ -218,15 +219,6 @@ const CreateTask = () => {
         commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
       });
   }, [annotationFormInstance, dispatch.sample, taskId]);
-
-  const transformedSample = useMemo(() => {
-    const sample = samples?.data?.[0];
-    if (!sample) {
-      return [];
-    }
-
-    return commonController.transformFileList(sample.data, +sample.id!);
-  }, [samples]);
 
   const correctSampleIdsMappings = useMemo(
     () =>
@@ -283,7 +275,6 @@ const CreateTask = () => {
             body: {
               ...taskData,
               ...basicFormValues,
-              media_type: annotationConfig.media_type,
               status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
               config: omit(['media_type'])(annotationConfig),
             },
@@ -404,7 +395,6 @@ const CreateTask = () => {
         try {
           await basicFormInstance.validateFields();
         } catch (err) {
-          message.error('请填入任务名称');
           return;
         }
       }
@@ -507,6 +497,32 @@ const CreateTask = () => {
     [uploadFileList, annotationFormInstance, basicFormInstance, taskData, onAnnotationFormChange],
   );
 
+  useLayoutEffect(() => {
+    if (!previewIframeRef.current) {
+      return;
+    }
+
+    if (bridgeRef.current) {
+      bridgeRef.current.destroy();
+      bridgeRef.current = null;
+    }
+
+    bridgeRef.current = new Bridge(previewIframeRef.current.contentWindow!);
+    bridgeRef.current.on('ready', () => {
+      let _config;
+
+      if (taskData.media_type === MediaType.VIDEO) {
+        _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
+      } else if (taskData.media_type === MediaType.IMAGE) {
+        _config = annotationFormInstance.getFieldsValue();
+      }
+
+      if (bridgeRef.current) {
+        bridgeRef.current.post('preview', _config);
+      }
+    });
+  }, [previewVisible, annotationFormInstance, taskData.media_type]);
+
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
@@ -520,16 +536,14 @@ const CreateTask = () => {
           <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
             {partials}
           </div>
+
           {previewVisible && (
-            <div className="preview-content">
-              <AnnotationOperation
-                topActionContent={null}
-                isPreview
-                sample={transformedSample[0]}
-                config={annotationFormInstance.getFieldsValue()}
-                isShowOrder={false}
-              />
-            </div>
+            <iframe
+              referrerPolicy="no-referrer"
+              ref={previewIframeRef}
+              className={currentStyles.previewIframe}
+              src={`/tasks/${taskData.id}/samples/${samples?.data?.[0].id}?noSave=true`}
+            />
           )}
         </TaskCreationContext.Provider>
       </div>

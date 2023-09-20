@@ -15,7 +15,7 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },
@@ -29,7 +29,11 @@ export default defineConfig({
     react(),
     svgr(),
     ViteEjsPlugin(),
-    !process.env.DIST && process.env.NODE_ENV !== 'production' && tsMonoAlias({}),
+    !process.env.DIST &&
+      process.env.NODE_ENV !== 'production' &&
+      tsMonoAlias({
+        exact: true,
+      }),
   ].filter(Boolean),
   resolve: {
     alias: {

@@ -1,4 +1,6 @@
 import { message } from '@/StaticAnt';
+import type { MediaType } from '@/services/types';
+import { FileExtension, MediaFileSize } from '@/constants/mediaType';
 
 import { ErrorMessages } from '../../services/errorMessage';
 
@@ -112,17 +114,18 @@ const commonController = {
   reducer() {
     // uploadFile().
   },
-  isOverSize(size: number) {
-    return size > 100 * 1024 * 1024;
+  isOverSize(size: number, type: MediaType) {
+    const maxSize = MediaFileSize[type];
+
+    return size > maxSize * 1024 * 1024;
   },
-  isCorrectFileType(fileName: string) {
+  isCorrectFileType(fileName: string, type: MediaType) {
     let result = false;
-    // let correctType = ['jpg', 'png', 'bmp', 'gif', 'mp4', 'wav', 'mp3', 'cav', 'txt', 'json', 'pcd', 'bin'];
-    const correctType = ['jpg', 'png', 'bmp', 'gif'];
+    const correctType = FileExtension[type];
     const dotIndex = fileName.lastIndexOf('.');
     if (dotIndex > -1) {
-      const type = fileName.slice(dotIndex + 1);
-      if (correctType.indexOf(type) > -1) {
+      const _type = fileName.slice(dotIndex + 1);
+      if (correctType.indexOf(_type) > -1) {
         result = true;
       }
     }

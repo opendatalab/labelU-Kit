@@ -92,6 +92,7 @@ const App = forwardRef<
   const [engineResultUpdateTimeStamp, updateTimeStamp] = useState<number>(Date.now());
   const resultRef = useRef<BasicResult | null>();
   const engineRef = useRef<AnnotationEngine | null>(null);
+  const rotateRef = useRef<number | undefined>();
 
   const syncResultToEngine = useCallback(() => {
     updateTimeStamp(Date.now());
@@ -101,7 +102,7 @@ const App = forwardRef<
   const pastRef = useRef<any[]>([]);
   const futureRef = useRef<any[]>([]);
 
-  const updateResult = useCallback((newResult) => {
+  const updateResult = useCallback((newResult: any) => {
     setResult((pre) => {
       if (!isEqual(pre, newResult)) {
         pastRef.current = [...pastRef.current, pre];
@@ -200,6 +201,7 @@ const App = forwardRef<
 
       if (engineRef.current) {
         engineRef.current.toolInstance.destroy();
+        rotateRef.current = engineRef.current.toolInstance.basicImgInfo.rotate;
       }
 
       const newEngine = new AnnotationEngine({
@@ -380,8 +382,8 @@ const App = forwardRef<
       setTimeout(() => {
         const [newResultAdded, basicImgInfo] = engine?.toolInstance.exportData();
         const newResult = {
-          ...basicImgInfo,
           ...cloneDeep(result),
+          ...basicImgInfo,
         };
 
         set(newResult, [toolName, 'result'], cloneDeep(newResultAdded));

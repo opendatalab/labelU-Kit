@@ -29,12 +29,12 @@ const SlideLoader = () => {
    * 3. 将当前文件标记为「取消跳过」，更新文件状态为「新」
    */
   // context中的samples会随着「跳过」、「取消跳过」、「完成」的操作而更新，但上面的useScrollFetch只有滚动的时候才会触发更新
-  const { samples: samplesFromContext } = useContext(AnnotationContext);
+  const { samples: samplesFromContext, task } = useContext(AnnotationContext);
 
   return (
     <div className={currentStyles.leftBar} ref={slideRef}>
       {samplesFromContext?.map((item: SampleResponse) => {
-        return <SliderCard cardInfo={item} key={item.id} onClick={handleSampleClick} />;
+        return <SliderCard cardInfo={item} type={task.media_type} key={item.id} onClick={handleSampleClick} />;
       })}
     </div>
   );

@@ -15,6 +15,8 @@ import commonController from '@/utils/common/common';
 import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
+import type { MediaType } from '@/services/types';
+import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
 
 import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
@@ -44,7 +46,7 @@ export interface QueuedFile {
   file: File;
 }
 
-const isCorrectFiles = (files: File[]) => {
+const isCorrectFiles = (files: File[], type: MediaType) => {
   let result = true;
   if (files.length > 100) {
     commonController.notificationErrorMessage({ message: '单次上传文件数量超过上限100个，请分批上传' }, 3);
@@ -52,15 +54,18 @@ const isCorrectFiles = (files: File[]) => {
   }
   for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
     const fileUnit = files[fileIndex];
-    const isOverSize = commonController.isOverSize(fileUnit.size);
+    const isOverSize = commonController.isOverSize(fileUnit.size, type);
     if (isOverSize) {
-      commonController.notificationErrorMessage({ message: '单个文件大小超过100MB限制' }, 3);
+      commonController.notificationErrorMessage({ message: `单个文件大小超过${MediaFileSize[type]}MB限制` }, 3);
       result = false;
       break;
     }
-    const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name);
+    const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name, type);
     if (!isCorrectFileType) {
-      commonController.notificationErrorMessage({ message: '请上传支持的文件类型，类型包括：jpg、png、bmp、gif' }, 3);
+      commonController.notificationErrorMessage(
+        { message: `请上传支持的文件类型，类型包括：${FileExtensionText[type]}` },
+        3,
+      );
       result = false;
       break;
     }
@@ -175,7 +180,7 @@ const InputData = () => {
   );
 
   const handleFilesChange = (files: RcFile[]) => {
-    const isCorrectCondition = isCorrectFiles(files);
+    const isCorrectCondition = isCorrectFiles(files, task.media_type);
     if (!isCorrectCondition) {
       return;
     } else {
@@ -301,24 +306,23 @@ const InputData = () => {
                   onChange={handleFilesChange}
                   directory={false}
                   multiple={true}
-                  accept={'image/png,image/jpeg,image/bmp,image/gif'}
+                  accept={FileMimeType[task.media_type!]}
                 >
                   上传文件
                 </NativeUpload>
               </Button>
               <Button type="primary" ghost icon={<FolderOpenOutlined />}>
-                <NativeUpload
-                  onChange={handleFilesChange}
-                  directory={true}
-                  accept={'image/jpg,image/jpeg,image/bmp,image/gif'}
-                >
+                <NativeUpload onChange={handleFilesChange} directory={true} accept={FileMimeType[task.media_type!]}>
                   上传文件夹
                 </NativeUpload>
               </Button>
             </div>
             <div className={styles.illustration}>
-              <div className={styles.supportType}>支持文件类型包括：jpg、png、bmp、gif</div>
-              <div className={styles.advises}> 单次上传文件最大数量为100个，建议单个文件大小不超过100MB </div>
+              <div className={styles.supportType}>支持文件类型包括：{FileExtensionText[task.media_type!]}</div>
+              <div className={styles.advises}>
+                {' '}
+                单次上传文件最大数量为100个，建议单个文件大小不超过{MediaFileSize[task.media_type!]}MB{' '}
+              </div>
             </div>
             <div />
           </div>
