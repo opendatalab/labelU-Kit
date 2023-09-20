@@ -68,16 +68,13 @@ jobs:
         run: |
           echo $RELEASE_VERSION
 
-      - name: Install dependencies
+      - name: Build and Release
         run: |
+          cd apps/frontend
           npm cache clean --force
-          pnpm install
-
-      - name: Build frontend
-        run: pnpm run build:frontend
-
-      - name: Release frontend
-        run: pnpm run release:frontend
+          npm install
+          npm run build
+          npm run release
 
       - name: Commit package.json files to current branch
         uses: stefanzweifel/git-auto-commit-action@v4
