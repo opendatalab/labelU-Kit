@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: release
+name: release-live
 
 env:
   LAB_NPM_TOKEN: ${{ secrets.LAB_NPM_TOKEN }}
