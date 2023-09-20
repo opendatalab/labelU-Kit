@@ -23,7 +23,7 @@ import ImgUtils from './utils/ImgUtils';
 import MathUtils from './utils/MathUtils';
 import DblClickEventListener from './utils/tool/DblClickEventListener'; // 暂时这样支持外部工具的使用
 import AnnotationEngine from './core/index';
-export { EToolName, TOOL_NAME } from './constant/tool';
+export { EToolName, TOOL_NAME, EVideoToolName } from './constant/tool';
 export { COLORS_ARRAY } from './constant/style';
 import EKeyCode from './constant/keyCode';
 import AttributeUtils from './utils/tool/AttributeUtils';

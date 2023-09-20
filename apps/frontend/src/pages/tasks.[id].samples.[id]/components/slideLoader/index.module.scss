@@ -1,8 +1,10 @@
 .leftBar {
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   z-index: 10;
-  height: 100%;
+  height: var(--height);
+  box-sizing: border-box;
+  padding: 1rem;
 }
 
 .tips {

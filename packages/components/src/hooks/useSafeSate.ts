@@ -11,7 +11,7 @@ function useSafeState(initialState?: any) {
   const unmountedRef = useUnmountedRef();
   const [state, setState] = React.useState(initialState);
   const setCurrentState = React.useCallback(
-    (currentState) => {
+    (currentState: any) => {
       /** 如果组件已经卸载则不再更新 state */
       if (unmountedRef.current) return;
       setState(currentState);

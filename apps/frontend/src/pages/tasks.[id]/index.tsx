@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Pagination, Button } from 'antd';
+import { VideoCard } from '@label-u/video-editor-react';
 import _ from 'lodash-es';
 import formatter from '@label-u/formatter';
 
 import type { Dispatch, RootState } from '@/store';
-import { SampleState, TaskStatus } from '@/services/types';
+import { MediaType, SampleState, TaskStatus } from '@/services/types';
 import ExportPortal from '@/components/ExportPortal';
 
 import currentStyles from './index.module.scss';
@@ -78,7 +79,12 @@ const Samples = () => {
         for (const sampleId in data.urls) {
           url = data.urls[sampleId];
         }
-        return <img src={url} style={{ width: '116px', height: '70px' }} />;
+
+        if (taskData.media_type === MediaType.IMAGE) {
+          return <img src={url} style={{ width: '116px', height: '70px' }} />;
+        } else {
+          return <VideoCard size={{ width: 116, height: 70 }} src={url} showPlayIcon showDuration />;
+        }
       },
     },
     {
@@ -273,7 +279,7 @@ const Samples = () => {
         />
         <div className={currentStyles.pagination}>
           <div className={currentStyles.dataProcess}>
-            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds}>
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={taskData.media_type!}>
               <Button type="link" disabled={selectedSampleIds.length === 0}>
                 批量数据导出
               </Button>

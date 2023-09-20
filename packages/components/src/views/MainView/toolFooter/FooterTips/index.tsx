@@ -1,4 +1,4 @@
-import { Popover } from 'antd/es';
+import { Popover } from 'antd';
 import type { FC } from 'react';
 import { useState } from 'react';
 

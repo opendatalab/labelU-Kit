@@ -2,7 +2,7 @@ import type { RadioChangeEvent } from 'antd';
 import { Modal, Radio } from 'antd';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { ExportType } from '@/services/types';
+import { ExportType, MediaType } from '@/services/types';
 import { outputSample, outputSamples } from '@/services/samples';
 
 import styles from './index.module.scss';
@@ -10,6 +10,7 @@ import styles from './index.module.scss';
 export interface ExportPortalProps {
   children: React.ReactChild;
   taskId: number;
+  mediaType: MediaType;
   sampleIds?: number[];
 }
 
@@ -19,22 +20,36 @@ export const exportDescriptionMapping = {
   [ExportType.MASK]: '面向图像分割（多边形）任务',
 };
 
-const exportTypeOptions = [
-  {
-    label: ExportType.JSON,
-    value: ExportType.JSON,
-  },
-  {
-    label: ExportType.COCO,
-    value: ExportType.COCO,
-  },
-  {
-    label: ExportType.MASK,
-    value: ExportType.MASK,
-  },
-];
+const availableOptions = {
+  [MediaType.IMAGE]: [
+    {
+      label: ExportType.JSON,
+      value: ExportType.JSON,
+    },
+    {
+      label: ExportType.COCO,
+      value: ExportType.COCO,
+    },
+    {
+      label: ExportType.MASK,
+      value: ExportType.MASK,
+    },
+  ],
+  [MediaType.VIDEO]: [
+    {
+      label: ExportType.JSON,
+      value: ExportType.JSON,
+    },
+  ],
+  [MediaType.AUDIO]: [
+    {
+      label: ExportType.JSON,
+      value: ExportType.JSON,
+    },
+  ],
+};
 
-export default function ExportPortal({ taskId, sampleIds, children }: ExportPortalProps) {
+export default function ExportPortal({ taskId, sampleIds, mediaType, children }: ExportPortalProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const [exportType, setExportType] = useState<ExportType>(ExportType.JSON);
 
@@ -92,7 +107,7 @@ export default function ExportPortal({ taskId, sampleIds, children }: ExportPort
           <div className={styles.title}>导出格式</div>
           <div className={styles.options}>
             <Radio.Group
-              options={exportTypeOptions}
+              options={availableOptions[mediaType]}
               onChange={handleOptionChange}
               value={exportType}
               optionType="button"

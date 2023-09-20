@@ -1,9 +1,0 @@
-{
-  "packages": ["packages/*", "apps/frontend"],
-  "npmClient": "pnpm",
-  "useWorkspaces": true,
-  "version": "independent",
-  "publishConfig": {
-    "access": "public"
-  }
-}

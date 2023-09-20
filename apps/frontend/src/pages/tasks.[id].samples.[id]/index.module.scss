@@ -46,4 +46,14 @@
 .annotationPage {
   overflow-y: auto;
   height: 100%;
+
+  :global(.labelu-video-editor) {
+    height: 100vh;
+  }
+
+  &.hasHeader {
+    :global(.labelu-video-editor) {
+      height: calc(100vh - 56px);
+    }
+  }
 }

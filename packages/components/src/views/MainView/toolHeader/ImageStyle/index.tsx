@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useMemo } from 'react';
-import { Popover } from 'antd/es';
+import { Popover } from 'antd';
 
 import { prefix } from '@/constant';
 

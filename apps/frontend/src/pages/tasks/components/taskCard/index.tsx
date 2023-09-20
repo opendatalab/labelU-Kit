@@ -15,6 +15,8 @@ import FlexItem from '@/components/FlexItem';
 import Status from '@/components/Status';
 import IconText from '@/components/IconText';
 import ExportPortal from '@/components/ExportPortal';
+import { MediaTypeText } from '@/constants/mediaType';
+import type { MediaType } from '@/services/types';
 
 import currentStyles from './index.module.scss';
 
@@ -90,7 +92,7 @@ const TaskCard = (props: any) => {
             <div className={currentStyles.itemTaskName}>{cardInfo.name}</div>
             {cardInfo.status !== 'DRAFT' && cardInfo.status !== 'IMPORTED' && (
               <div className={currentStyles.mediaType}>
-                <div style={{ color: 'var(--color-primary)' }}>图片</div>
+                <div style={{ color: 'var(--color-primary)' }}>{MediaTypeText[cardInfo.media_type as MediaType]}</div>
               </div>
             )}
             {(cardInfo.status === 'DRAFT' || cardInfo.status === 'IMPORTED') && (
@@ -100,7 +102,7 @@ const TaskCard = (props: any) => {
             )}
           </div>
           <div className={currentStyles.actions}>
-            <ExportPortal taskId={cardInfo.id}>
+            <ExportPortal taskId={cardInfo.id} mediaType={cardInfo.media_type}>
               <div className={currentStyles.upload}>
                 <Tooltip placement={'top'} title={'数据导出'}>
                   <Icon className={currentStyles.actionIcon} component={OutputIcon} />

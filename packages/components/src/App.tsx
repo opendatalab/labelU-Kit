@@ -92,23 +92,20 @@ const App = forwardRef<
   const [engineResultUpdateTimeStamp, updateTimeStamp] = useState<number>(Date.now());
   const resultRef = useRef<BasicResult | null>();
   const engineRef = useRef<AnnotationEngine | null>(null);
+  const rotateRef = useRef<number | undefined>();
 
   const syncResultToEngine = useCallback(() => {
     updateTimeStamp(Date.now());
   }, []);
 
   // redo undo
-  // const [past, setPast] = useState([]);
   const pastRef = useRef<any[]>([]);
-  // const [present, setPresent] = useState(null);
-  // const [future, setFuture] = useState([]);
   const futureRef = useRef<any[]>([]);
 
-  const updateResult = useCallback((newResult) => {
+  const updateResult = useCallback((newResult: any) => {
     setResult((pre) => {
       if (!isEqual(pre, newResult)) {
         pastRef.current = [...pastRef.current, pre];
-        console.log('pastRef.current', pastRef.current);
       }
 
       return newResult;
@@ -125,8 +122,6 @@ const App = forwardRef<
     const newPresent = pastRef.current[pastRef.current.length - 1];
     const newPast = pastRef.current.slice(0, pastRef.current.length - 1);
 
-    console.log('current', newPresent);
-
     pastRef.current = newPast;
     setResult(newPresent);
     syncResultToEngine();
@@ -141,8 +136,6 @@ const App = forwardRef<
     const newPresent = futureRef.current[0];
     const newFuture = futureRef.current.slice(1);
     pastRef.current = [...pastRef.current!, resultRef.current!];
-
-    console.log('current', newPresent);
 
     setResult(newPresent);
     futureRef.current = newFuture;
@@ -208,6 +201,7 @@ const App = forwardRef<
 
       if (engineRef.current) {
         engineRef.current.toolInstance.destroy();
+        rotateRef.current = engineRef.current.toolInstance.basicImgInfo.rotate;
       }
 
       const newEngine = new AnnotationEngine({
@@ -388,8 +382,8 @@ const App = forwardRef<
       setTimeout(() => {
         const [newResultAdded, basicImgInfo] = engine?.toolInstance.exportData();
         const newResult = {
-          ...basicImgInfo,
           ...cloneDeep(result),
+          ...basicImgInfo,
         };
 
         set(newResult, [toolName, 'result'], cloneDeep(newResultAdded));

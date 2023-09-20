@@ -24,7 +24,8 @@ export interface TextAttribute {
   key: string;
   value: string;
   type: InnerAttributeType[keyof InnerAttributeType];
-  maxLength: number;
+  maxLength?: number;
+  regexp?: string;
   stringType: StringType[keyof StringType];
   required?: boolean;
   defaultValue?: string;

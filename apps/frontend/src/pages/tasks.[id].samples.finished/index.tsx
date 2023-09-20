@@ -38,7 +38,7 @@ const SamplesFinished = () => {
           <div className={styles.statItem}>跳过：{taskData?.stats?.skipped}</div>
         </div>
         <div className={styles.buttons}>
-          <ExportPortal taskId={taskId}>
+          <ExportPortal taskId={taskId} mediaType={taskData.media_type!}>
             <Button type="primary" size="large">
               导出数据
             </Button>

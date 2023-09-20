@@ -138,7 +138,7 @@ const AttributeOperation = () => {
   );
 
   const handleAttributeClick = useCallback(
-    ({ domEvent, key }) => {
+    ({ domEvent, key }: any) => {
       domEvent.stopPropagation();
       toolInstance.setDefaultAttribute(key);
       setActiveAttribute(key);

@@ -108,29 +108,23 @@ body {
   }
 
   &__left_sider {
-    // max-width: 232px;
     background: #eee;
     overflow-y: auto;
     height: 100%;
     overflow-x: hidden;
     position: relative;
     z-index: 10;
-    // height: calc(100vh - 99px);
-    padding: 16px 0;
 
     .item {
       display: flex;
       // align-items: center;
       justify-content: center;
-      width: 232px;
-      height: 165px;
       position: relative;
 
       .imgItem {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 200px;
         height: 120px;
         background-color: #fff;
 
