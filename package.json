@@ -1,10 +1,6 @@
 {
   "name": "label-u",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/frontend"
-  ],
   "version": "1.7.0",
   "scripts": {
     "prepare": "husky install",
