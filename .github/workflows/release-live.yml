@@ -69,7 +69,9 @@ jobs:
           echo $RELEASE_VERSION
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          npm cache clean --force
+          pnpm install
 
       - name: Build frontend
         run: pnpm run build:frontend
