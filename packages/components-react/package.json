@@ -1,6 +1,6 @@
 {
   "name": "@label-u/components-react",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0",
   "description": "basic react components for labelU",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -39,8 +39,8 @@
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@label-u/annotation": "2.2.0-alpha.1",
-    "@label-u/interface": "1.0.0-alpha.1",
+    "@label-u/annotation": "2.2.0",
+    "@label-u/interface": "1.0.0",
     "@types/react": "^18.2.20",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^3.1.0",
