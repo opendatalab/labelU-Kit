@@ -364,7 +364,7 @@ function ForwardEditor(
   const onLabelChange = useCallback(
     (attribute: Attribute) => {
       setSelectedAttribute(attribute);
-      let newAnnotation = JSON.parse(JSON.stringify(selectedAnnotation));
+      let newAnnotation = JSON.parse(JSON.stringify(selectedAnnotation ?? {}));
 
       // 改变标签时，删除旧的attributes属性
       delete newAnnotation.attributes;
@@ -405,7 +405,7 @@ function ForwardEditor(
 
   const handleAttributeChange = useCallback(
     (_attribute: any) => {
-      let newAnnotation = JSON.parse(JSON.stringify(selectedAnnotation));
+      let newAnnotation = JSON.parse(JSON.stringify(selectedAnnotation ?? {}));
 
       // 改变标签时，删除旧的attributes属性
       delete newAnnotation.attributes;
