@@ -35,7 +35,6 @@
       "always",
       [
         "workspace",
-        "docs",
         "frontend"
       ]
     ],
