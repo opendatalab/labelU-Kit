@@ -9,6 +9,7 @@
   "scripts": {
     "prepare": "husky install",
     "build": "pnpm --filter @label-u/utils --filter @label-u/formatter --filter @label-u/annotation --filter @label-u/components --filter @label-u/interface --filter @label-u/components-react --filter @label-u/video-react --filter @label-u/video-editor-react build",
+    "clean": "pnpm --filter @label-u/utils --filter @label-u/formatter --filter @label-u/annotation --filter @label-u/components --filter @label-u/interface --filter @label-u/components-react --filter @label-u/video-react --filter @label-u/video-editor-react clean",
     "build:frontend": "pnpm --filter @label-u/frontend build",
     "release:frontend": "cd apps/frontend && npm run release",
     "lint:frontend": "eslint ./apps/frontend --ext .js,.jsx,.ts,.tsx --fix",
