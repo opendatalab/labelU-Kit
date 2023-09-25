@@ -19,7 +19,7 @@ export default defineConfig({
     react(),
     svgr(),
     ViteEjsPlugin(),
-    !process.env.DIST && process.env.NODE_ENV !== 'production' && tsMonoAlias({}),
+    !process.env.DIST && process.env.NODE_ENV !== 'production' && tsMonoAlias(),
   ].filter(Boolean),
   resolve: {
     alias: {
