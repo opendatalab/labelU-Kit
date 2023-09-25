@@ -30,6 +30,7 @@
   "scripts": {
     "build": "vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
+    "clean": "rimraf ./node_modules",
     "test": "jest -c=../../jest.config.js --no-cache"
   },
   "dependencies": {
