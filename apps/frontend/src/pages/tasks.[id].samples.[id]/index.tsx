@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash-es';
 import { Spin } from 'antd';
 import AnnotationOperation from '@label-u/components';
-import type { EditorProps } from '@label-u/video-editor-react';
-import { Editor } from '@label-u/video-editor-react';
+import type { AnnotatorProps } from '@label-u/video-annotator-react';
+import { Annotator } from '@label-u/video-annotator-react';
 import '@label-u/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import classNames from 'classnames';
@@ -112,7 +112,7 @@ const AnnotationPage = () => {
       return convertVideoConfig(taskConfig);
     }
 
-    return {} as EditorProps['config'];
+    return {} as AnnotatorProps['config'];
   }, [task.media_type, taskConfig]);
 
   const editingSample = useMemo(() => {
@@ -160,7 +160,7 @@ const AnnotationPage = () => {
     );
   } else if (task.media_type === MediaType.VIDEO) {
     content = (
-      <Editor
+      <Annotator
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
         editingSample={editingSample}

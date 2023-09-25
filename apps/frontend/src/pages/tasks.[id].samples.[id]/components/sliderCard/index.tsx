@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router';
 import _ from 'lodash-es';
-import { VideoCard } from '@label-u/video-editor-react';
+import { VideoCard } from '@label-u/video-annotator-react';
 import classNames from 'classnames';
 
 import type { SampleResponse } from '@/services/types';

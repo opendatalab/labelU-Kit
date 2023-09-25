@@ -41,10 +41,12 @@
         "formatter",
         "utils",
         "annotation",
-        "video-react",
-        "interface",
         "components-react",
-        "video-editor-react"
+        "video-react",
+        "audio-react",
+        "interface",
+        "video-annotator-react",
+        "audio-annotator-react"
       ]
     ],
     "scope-empty": [
