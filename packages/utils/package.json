@@ -34,6 +34,7 @@
     "dev": "rollup -c rollup.config.js -w ",
     "build": "rollup -c rollup.config.js && npm run build:type",
     "build:type": "tsc --emitDeclarationOnly --resolveJsonModule",
+    "clean": "rimraf ./node_modules",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
