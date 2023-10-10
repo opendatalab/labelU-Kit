@@ -348,6 +348,7 @@ function ForwardAnnotator(
 
       if (annotatorRef) {
         annotatorRef.current?.scrollToAnnotation(annotation);
+        annotatorRef.current?.updateTime(annotation.type === 'segment' ? annotation.start : annotation.time);
       }
     },
     [attributeMappingByTool, videoAnnotations],

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { AudioCard } from '@label-u/components-react';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
 
@@ -22,7 +23,6 @@ const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
   position: relative;
   grid-area: sidebar;
   background-color: #ebecf0;
-  /* flex-direction: column; */
 
   ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 232px;')}
 
@@ -56,7 +56,7 @@ export interface SidebarProps {
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
-  const { containerRef } = useAnnotator();
+  const { samples, containerRef, currentSample } = useAnnotator();
   const [height, setHeight] = useState<number>(0);
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
@@ -77,7 +77,24 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
   return (
     // @ts-ignore
     <Wrapper collapsed={collapsed} style={{ '--height': `${height}px` }}>
-      {renderSidebar ? renderSidebar() : <Cards>123</Cards>}
+      {renderSidebar ? (
+        renderSidebar()
+      ) : (
+        <Cards>
+          {samples.map((sample, index) => {
+            return (
+              <AudioCard
+                key={sample.id}
+                no={index + 1}
+                showNo
+                active={currentSample?.id === sample.id}
+                src={sample.url}
+                title={sample.name}
+              />
+            );
+          })}
+        </Cards>
+      )}
       <CollapseTrigger collapsed={collapsed} onClick={handleExpandTriggerClick}>
         <ExpandIcon />
       </CollapseTrigger>
