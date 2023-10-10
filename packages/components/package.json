@@ -1,6 +1,6 @@
 {
   "name": "@label-u/components",
-  "version": "2.2.0-alpha.6",
+  "version": "2.2.1-alpha.1",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -38,7 +38,7 @@
     "email": "751569801@qq.com"
   },
   "dependencies": {
-    "@label-u/annotation": "2.2.0-alpha.2",
+    "@label-u/annotation": "2.2.1-alpha.1",
     "@label-u/utils": "1.0.2",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
