@@ -22,6 +22,13 @@ export enum EVideoToolName {
   VideoFrameTool = 'videoFrameTool',
 }
 
+export enum EAudioToolName {
+  /** 视频截取工具 */
+  AudioSegmentTool = 'audioSegmentTool',
+  /** 视频帧工具 */
+  AudioFrameTool = 'audioFrameTool',
+}
+
 /** 新：工具type */
 export enum EToolType {
   Rect = 0,
@@ -93,6 +100,8 @@ export const TOOL_NAME: Record<string, string> = {
   [EToolName.OCRRelation]: 'OCR关联关系工具',
   [EVideoToolName.VideoSegmentTool]: '片断分割',
   [EVideoToolName.VideoFrameTool]: '时间戳',
+  [EAudioToolName.AudioSegmentTool]: '片断分割',
+  [EAudioToolName.AudioFrameTool]: '时间戳',
   [EPointCloudName.PointCloud]: '点云',
 };
 
