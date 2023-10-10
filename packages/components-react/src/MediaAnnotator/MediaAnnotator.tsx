@@ -60,6 +60,10 @@ type MediaSegment = VideoSegmentAnnotation | AudioSegmentAnnotation;
 type MediaFrame = VideoFrameAnnotation | AudioFrameAnnotation;
 
 export interface AttributeItemProps {
+  /**
+   * 是否是正在新建的标注
+   */
+  isNew?: boolean;
   annotation: MediaAnnotationData;
   attributeConfig: Attribute;
   active?: boolean;
@@ -268,7 +272,7 @@ const AnnotationAttribute = styled.div`
 `;
 
 export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProps>(
-  ({ attributeConfig, active, onContextMenu, barWrapperRef, annotation, visible }, ref) => {
+  ({ attributeConfig, active, onContextMenu, barWrapperRef, annotation, visible, isNew }, ref) => {
     const { type, attributes = {}, order } = annotation;
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const { duration, getCurrentTime, setCurrentTime, onAnnotationChange, showOrder, attributeConfigMapping } =
@@ -360,7 +364,10 @@ export const AttributeItem = forwardRef<HTMLDivElement | null, AttributeItemProp
     }
 
     const { start, end } = annotation as MediaSegment;
-    const diff = parseTime(currentAnnotation.end - currentAnnotation.start);
+    // 仅编辑中或者新建的标注才实时更新diff时间差
+    const diff = isNew
+      ? parseTime(annotation.end - annotation.start)
+      : parseTime(currentAnnotation.end - currentAnnotation.start);
     const startPositionPercentage = start! / duration;
     const endPositionPercentage = end! / duration;
 
@@ -962,6 +969,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
         <ActivityBar editingType={disabled ? undefined : type} onMouseDown={handleMouseDown} ref={activityBarRef}>
           {annotatingSegment && (
             <AttributeItem
+              isNew
               ref={editingElementRef}
               barWrapperRef={activityBarRef}
               key={annotatingSegment.id}
