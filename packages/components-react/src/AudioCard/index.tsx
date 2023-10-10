@@ -75,7 +75,7 @@ export function AudioCard({ active, no, title, src, showNo }: AudioCardProps) {
   }, []);
 
   return (
-    <Wrapper active={active}>
+    <Wrapper active={!!active}>
       {showNo && <CardIndex>{no}</CardIndex>}
       <InnerWrapper>
         <Left>
