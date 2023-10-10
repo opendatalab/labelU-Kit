@@ -39,8 +39,8 @@
     "vite-tsconfig-paths": "^3.5.0"
   },
   "dependencies": {
-    "@label-u/components-react": "workspace:1.0.0-alpha.9",
-    "@label-u/video-react": "workspace:1.0.0-alpha.13",
+    "@label-u/components-react": "workspace:*",
+    "@label-u/video-react": "workspace:*",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6",
