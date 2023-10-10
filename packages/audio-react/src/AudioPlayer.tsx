@@ -72,6 +72,8 @@ export const AudioPlayer = forwardRef<WaveSurfer | null, AudioPlayerProps>(funct
       waveColor: waveGradient,
       progressColor: progressGradient,
       height,
+      barWidth: 3,
+      barGap: 2,
       barHeight: 1.5,
       cursorColor: 'rgba(27, 103, 255, 1)',
     };
