@@ -1,6 +1,6 @@
 {
   "name": "@label-u/audio-annotator-react",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "audio annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -29,15 +29,15 @@
     "react"
   ],
   "dependencies": {
-    "@label-u/components-react": "1.0.0-alpha.10",
-    "@label-u/interface": "1.0.0-alpha.1",
-    "@label-u/audio-react": "workspace:1.0.0",
+    "@label-u/components-react": "1.0.0-alpha.11",
+    "@label-u/interface": "1.0.0-alpha.2",
+    "@label-u/audio-react": "1.0.0-alpha.1",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@label-u/annotation": "2.2.0-alpha.1",
+    "@label-u/annotation": "2.2.0-alpha.2",
     "@types/react": "^18.2.20",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^3.1.0",
