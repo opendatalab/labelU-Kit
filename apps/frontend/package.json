@@ -6,7 +6,7 @@
     "@ant-design/icons": "^4.6.2",
     "@label-u/annotation": "2.2.0-alpha.1",
     "@label-u/components": "2.2.0-alpha.5",
-    "@label-u/components-react": "1.0.0-alpha.9",
+    "@label-u/components-react": "1.0.0-alpha.10",
     "@label-u/formatter": "1.0.1",
     "@label-u/interface": "1.0.0-alpha.1",
     "@label-u/video-annotator-react": "workspace:*",
