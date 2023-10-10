@@ -1,6 +1,6 @@
 {
   "name": "@label-u/video-annotator-react",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "video annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -29,10 +29,10 @@
     "react"
   ],
   "dependencies": {
-    "@label-u/components-react": "1.1.0-alpha.1",
+    "@label-u/components-react": "1.1.0-alpha.2",
     "@label-u/interface": "1.1.0-alpha.1",
-    "@label-u/audio-annotator-react": "1.0.0-alpha.3",
-    "@label-u/video-react": "1.1.0-alpha.1",
+    "@label-u/audio-annotator-react": "1.0.0-alpha.4",
+    "@label-u/video-react": "1.1.0-alpha.2",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6"
