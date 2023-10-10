@@ -642,7 +642,7 @@ export interface MediaAnnotatorRef {
 }
 
 export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps>(function ForwardRefAnnotator(
-  { disabled, type, duration, onEnd, label = '', updateCurrentTime, onAnnotationSelect, getCurrentTime, ...rest },
+  { disabled, type, duration, onEnd, label = '', updateCurrentTime, onAnnotationSelect, ...rest },
   ref,
 ) {
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -742,20 +742,6 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
       return;
     }
 
-    if (
-      editingSegmentAnnotationRef.current &&
-      (offsetX * duration) / rect.width - editingSegmentAnnotationRef.current.start! > 0.2
-    ) {
-      onEnd?.(
-        {
-          ...editingSegmentAnnotationRef.current,
-          end: offsetX > rect.width ? duration : getCurrentTime(),
-        },
-        e,
-      );
-      resetAnnotatingSegment();
-    }
-
     if (type === 'frame') {
       onEnd?.({
         id: uid(),
@@ -790,6 +776,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
           editingSegmentAnnotationRef.current &&
           (offsetX * duration) / rect.width > editingSegmentAnnotationRef.current.start!
         ) {
+          console.log('b end');
           onEnd?.(
             {
               ...editingSegmentAnnotationRef.current,
@@ -797,6 +784,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
             },
             e.nativeEvent,
           );
+          resetAnnotatingSegment();
         } else {
           const newAnnotation = {
             id: uid(),
