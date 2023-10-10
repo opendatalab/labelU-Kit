@@ -1,6 +1,6 @@
 {
   "name": "@label-u/audio-react",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.4",
   "description": "label-u audio annotation component for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -39,8 +39,8 @@
     "vite-tsconfig-paths": "^3.5.0"
   },
   "dependencies": {
-    "@label-u/components-react": "1.1.0-alpha.1",
-    "@label-u/video-react": "1.1.0-alpha.1",
+    "@label-u/components-react": "1.1.0-alpha.2",
+    "@label-u/video-react": "1.1.0-alpha.2",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6",

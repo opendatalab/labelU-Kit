@@ -1,6 +1,6 @@
 {
   "name": "@label-u/video-react",
-  "version": "1.1.0-alpha.1",
+  "version": "1.1.0-alpha.2",
   "description": "label-u video annotation component for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -40,7 +40,7 @@
     "vite-tsconfig-paths": "^3.5.0"
   },
   "dependencies": {
-    "@label-u/components-react": "1.1.0-alpha.1",
+    "@label-u/components-react": "1.1.0-alpha.2",
     "polished": "^4.2.2",
     "rc-tooltip": "^6.0.1",
     "react-hotkeys-hook": "^4.4.1",

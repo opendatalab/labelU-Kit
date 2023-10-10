@@ -742,6 +742,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
       return;
     }
 
+    // 一次拖动结束，如果是标记片断，且拖动距离大于0.2s，则认为是结束标注
     if (
       editingSegmentAnnotationRef.current &&
       (offsetX * duration) / rect.width - editingSegmentAnnotationRef.current.start! > 0.2
@@ -790,6 +791,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
           editingSegmentAnnotationRef.current &&
           (offsetX * duration) / rect.width > editingSegmentAnnotationRef.current.start!
         ) {
+          // 两次点击时，第二次点击的时间点大于第一次点击的时间点，此时认为是结束标注
           onEnd?.(
             {
               ...editingSegmentAnnotationRef.current,
@@ -797,6 +799,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
             },
             e.nativeEvent,
           );
+          resetAnnotatingSegment();
         } else {
           const newAnnotation = {
             id: uid(),
