@@ -1,6 +1,6 @@
 {
   "name": "@label-u/interface",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "typescript interfaces for label-u annotations",
   "types": "./dist/index.d.ts",
   "scripts": {
