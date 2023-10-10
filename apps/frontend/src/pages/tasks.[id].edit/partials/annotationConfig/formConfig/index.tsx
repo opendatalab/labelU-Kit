@@ -1,4 +1,4 @@
-import { EToolName, TOOL_NAME, EVideoToolName } from '@label-u/annotation';
+import { EToolName, TOOL_NAME, EVideoToolName, EAudioToolName } from '@label-u/annotation';
 import type { FormProps, SelectProps, TabsProps } from 'antd';
 import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
@@ -31,6 +31,7 @@ add('category-attribute', FancyCategoryAttribute);
 const globalTools = [EToolName.Tag, EToolName.Text];
 const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line];
 const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool];
+const audioAnnotationTools = [EAudioToolName.AudioSegmentTool, EAudioToolName.AudioFrameTool];
 
 const toolMapping = {
   [MediaType.IMAGE]: graphicTools.map((item) => {
@@ -45,6 +46,12 @@ const toolMapping = {
       value: item,
     };
   }),
+  [MediaType.AUDIO]: audioAnnotationTools.map((item) => {
+    return {
+      label: TOOL_NAME[item],
+      value: item,
+    };
+  }),
 };
 
 const getDefaultActiveTool = (mediaType?: MediaType) => {
@@ -53,6 +60,8 @@ const getDefaultActiveTool = (mediaType?: MediaType) => {
       return EToolName.Rect;
     case MediaType.VIDEO:
       return EVideoToolName.VideoSegmentTool;
+    case MediaType.AUDIO:
+      return EAudioToolName.AudioSegmentTool;
     default:
       return undefined;
   }
@@ -67,6 +76,8 @@ const templateMapping: Record<string, any> = {
   [EToolName.Text]: textTemplate,
   [EVideoToolName.VideoSegmentTool]: videoSegmentTemplate,
   [EVideoToolName.VideoFrameTool]: videoFrameTemplate,
+  [EAudioToolName.AudioSegmentTool]: videoSegmentTemplate,
+  [EAudioToolName.AudioFrameTool]: videoFrameTemplate,
 };
 
 const FormConfig = () => {

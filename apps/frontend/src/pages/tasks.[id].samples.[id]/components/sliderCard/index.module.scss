@@ -15,6 +15,18 @@
   cursor: pointer;
 }
 
+.audioCard {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
 .id {
   border-radius: 2px;
   padding: 0 0.25rem;

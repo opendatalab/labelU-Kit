@@ -21,11 +21,11 @@ export const FileExtension = {
 export const MediaFileSize = {
   [MediaType.IMAGE]: 100,
   [MediaType.VIDEO]: 200,
-  [MediaType.AUDIO]: 50,
+  [MediaType.AUDIO]: 200,
 };
 
 export const FileMimeType = {
   [MediaType.IMAGE]: 'image/png,image/jpeg,image/bmp,image/gif',
   [MediaType.VIDEO]: 'video/mp4',
-  [MediaType.AUDIO]: 'audio/mpeg,audio/x-wav',
+  [MediaType.AUDIO]: 'audio/mpeg,audio/x-wav,audio/vnd.wav,audio/ogg',
 };

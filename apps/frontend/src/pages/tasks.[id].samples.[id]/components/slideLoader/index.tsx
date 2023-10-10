@@ -33,8 +33,10 @@ const SlideLoader = () => {
 
   return (
     <div className={currentStyles.leftBar} ref={slideRef}>
-      {samplesFromContext?.map((item: SampleResponse) => {
-        return <SliderCard cardInfo={item} type={task.media_type} key={item.id} onClick={handleSampleClick} />;
+      {samplesFromContext?.map((item: SampleResponse, index) => {
+        return (
+          <SliderCard cardInfo={item} type={task.media_type} key={item.id} onClick={handleSampleClick} index={index} />
+        );
       })}
     </div>
   );

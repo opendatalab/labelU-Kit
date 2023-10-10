@@ -8,7 +8,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
 
 import commonController from '@/utils/common/common';
-import { annotationRef, videoAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
+import { annotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/services/types';
 import { MediaType, SampleState } from '@/services/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
@@ -217,6 +217,57 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
       });
 
       innerSample = await videoAnnotationRef?.current?.getSample();
+    } else if (task.media_type === MediaType.AUDIO) {
+      const audioAnnotations = await audioAnnotationRef.current?.getAnnotations();
+
+      audioAnnotations.forEach((annotation: any) => {
+        const innerAnnotation = omit(['type', 'visible'])(annotation);
+        if (annotation.type === 'tag') {
+          if (!result.tagTool) {
+            result.tagTool = {
+              toolName: 'tagTool',
+              result: [],
+            };
+          }
+
+          result.tagTool.result.push(innerAnnotation);
+        }
+
+        if (annotation.type === 'text') {
+          if (!result.textTool) {
+            result.textTool = {
+              toolName: 'textTool',
+              result: [],
+            };
+          }
+
+          result.textTool.result.push(innerAnnotation);
+        }
+
+        if (annotation.type === 'frame') {
+          if (!result.audioFrameTool) {
+            result.audioFrameTool = {
+              toolName: 'audioFrameTool',
+              result: [],
+            };
+          }
+
+          result.audioFrameTool.result.push(innerAnnotation);
+        }
+
+        if (annotation.type === 'segment') {
+          if (!result.audioSegmentTool) {
+            result.audioSegmentTool = {
+              toolName: 'audioSegmentTool',
+              result: [],
+            };
+          }
+
+          result.audioSegmentTool.result.push(innerAnnotation);
+        }
+      });
+
+      innerSample = await audioAnnotationRef?.current?.getSample();
     }
 
     // 防止sampleid保存错乱，使用标注时传入的sampleid

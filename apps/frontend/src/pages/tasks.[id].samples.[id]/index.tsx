@@ -6,6 +6,7 @@ import { Spin } from 'antd';
 import AnnotationOperation from '@label-u/components';
 import type { AnnotatorProps } from '@label-u/video-annotator-react';
 import { Annotator } from '@label-u/video-annotator-react';
+import { Annotator as AudioAnnotator } from '@label-u/audio-annotator-react';
 import '@label-u/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import classNames from 'classnames';
@@ -26,6 +27,7 @@ import AnnotationContext from './annotation.context';
 
 export const annotationRef = createRef();
 export const videoAnnotationRef = createRef();
+export const audioAnnotationRef = createRef();
 
 const AnnotationPage = () => {
   const routeParams = useParams();
@@ -108,7 +110,7 @@ const AnnotationPage = () => {
   let content = null;
 
   const editorConfig = useMemo(() => {
-    if (task.media_type === MediaType.VIDEO) {
+    if (task.media_type === MediaType.VIDEO || task.media_type === MediaType.AUDIO) {
       return convertVideoConfig(taskConfig);
     }
 
@@ -118,12 +120,12 @@ const AnnotationPage = () => {
   const editingSample = useMemo(() => {
     if (task.media_type === MediaType.IMAGE) {
       return transformed[0];
-    } else if (task.media_type === MediaType.VIDEO) {
+    } else if (task.media_type === MediaType.VIDEO || task.media_type === MediaType.AUDIO) {
       if (!transformed?.[0]) {
         return null;
       }
 
-      return convertVideoSample(sample.data, routeParams.sampleId, editorConfig);
+      return convertVideoSample(sample.data, routeParams.sampleId, editorConfig, task.media_type);
     }
   }, [editorConfig, routeParams.sampleId, sample.data, task.media_type, transformed]);
 
@@ -163,6 +165,17 @@ const AnnotationPage = () => {
       <Annotator
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
+        editingSample={editingSample}
+        config={configFromParent || editorConfig}
+        toolbarRight={topActionContent}
+        renderSidebar={renderSidebar}
+      />
+    );
+  } else if (task.media_type === MediaType.AUDIO) {
+    content = (
+      <AudioAnnotator
+        primaryColor="#0d53de"
+        ref={audioAnnotationRef}
         editingSample={editingSample}
         config={configFromParent || editorConfig}
         toolbarRight={topActionContent}

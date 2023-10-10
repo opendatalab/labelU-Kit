@@ -82,6 +82,8 @@ const Samples = () => {
 
         if (taskData.media_type === MediaType.IMAGE) {
           return <img src={url} style={{ width: '116px', height: '70px' }} />;
+        } else if (taskData.media_type === MediaType.AUDIO) {
+          return <audio src={url} controls />;
         } else {
           return <VideoCard size={{ width: 116, height: 70 }} src={url} showPlayIcon showDuration />;
         }
