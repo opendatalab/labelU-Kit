@@ -8,6 +8,7 @@
   "scripts": {
     "build": "vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
+    "clean": "rimraf ./node_modules",
     "dev": "vite --port 3001 -c vite.config.app.ts"
   },
   "repository": {
@@ -35,6 +36,7 @@
     "typescript": "^5.1.6",
     "vite": "^4.1.1",
     "vite-plugin-svgr": "^2.4.0",
+    "vite-plugin-ts-mono-alias": "^1.1.7",
     "vite-tsconfig-paths": "^3.5.0"
   },
   "dependencies": {

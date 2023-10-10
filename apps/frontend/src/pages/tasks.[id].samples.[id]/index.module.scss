@@ -45,10 +45,20 @@
 
 .annotationPage {
   overflow-y: auto;
-  height: 100%;
+  height: calc(100vh - var(--header-height)) !important;
+  display: flex;
+  flex-direction: column;
 
   :global(.labelu-video-editor) {
     height: 100vh;
+  }
+
+  :global(.ant-spin-container) {
+    display: flex;
+
+    & > div {
+      width: 100vw;
+    }
   }
 
   &.hasHeader {

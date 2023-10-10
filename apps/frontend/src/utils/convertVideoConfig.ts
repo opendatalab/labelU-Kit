@@ -1,4 +1,4 @@
-import type { EditorProps } from '@label-u/video-editor-react';
+import type { EditorProps } from '@label-u/video-annotator-react';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 

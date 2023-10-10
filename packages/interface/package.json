@@ -4,7 +4,9 @@
   "description": "typescript interfaces for label-u annotations",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -d --emitDeclarationOnly"
+    "dev": "tsc -d --emitDeclarationOnly -w",
+    "build": "tsc -d --emitDeclarationOnly",
+    "clean": "rimraf ./node_modules"
   },
   "repository": {
     "type": "git",

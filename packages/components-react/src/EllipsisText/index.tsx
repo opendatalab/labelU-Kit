@@ -8,12 +8,11 @@ export function EllipsisText({
   title = '',
   maxWidth,
   ...restProps
-}: React.PropsWithChildren<
-  {
-    title: React.ReactNode | (() => React.ReactNode);
-    maxWidth: number;
-  } & Omit<TooltipProps, 'overlay'>
->) {
+}: {
+  children: React.ReactNode;
+  title: React.ReactNode | (() => React.ReactNode);
+  maxWidth: number;
+} & Omit<TooltipProps, 'overlay'>) {
   const [overflow, setOverflow] = useState(false);
   const [isEnter, setIsEnter] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -24,19 +23,22 @@ export function EllipsisText({
     }
   }, [isEnter, maxWidth]);
 
-  const newChildren = cloneElement(children as NonNullable<any>, {
-    ref,
-    style: {
-      maxWidth: `${maxWidth}px`,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
+  const newChildren = cloneElement(
+    typeof children === 'string' ? <span>{children}</span> : (children as NonNullable<any>),
+    {
+      ref,
+      style: {
+        maxWidth: typeof maxWidth === 'string' ? maxWidth : `${maxWidth}px`,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      },
+      // 当元素初始隐藏时，无法获得其宽度，因此需要在鼠标进入时重新计算
+      onMouseEnter: () => {
+        setIsEnter(true);
+      },
     },
-    // 当元素初始隐藏时，无法获得其宽度，因此需要在鼠标进入时重新计算
-    onMouseEnter: () => {
-      setIsEnter(true);
-    },
-  });
+  );
 
   const overlayStyle: React.CSSProperties = {};
 
