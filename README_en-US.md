@@ -26,12 +26,12 @@
 | [@labelu/annotation](./packages/annotation) | [![npm](https://img.shields.io/npm/v/%40labelu/annotation.svg)](https://www.npmjs.com/package/@labelu/annotation) | 2d annotation engine（fork from [labelbee](https://github.com/open-mmlab/labelbee)） |
 | [@labelu/components](./packages/components) | [![npm](https://img.shields.io/npm/v/%40labelu/components.svg)](https://www.npmjs.com/package/@labelu/components) | React components for 2d annotator（fork from [labelbee](https://github.com/open-mmlab/labelbee)） |
 | [@labelu/interface](./packages/interface) | [![npm](https://img.shields.io/npm/v/%40labelu/interface.svg)](https://www.npmjs.com/package/@labelu/interface) | Basic TypeScript interfaces for annotators |
-| [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | Basic React components for another packages |
+| [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | Basic React components for other packages |
 | [@labelu/audio-react](./packages/audio-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-react.svg)](https://www.npmjs.com/package/@labelu/audio-react) | Basic React components for Audio annotator |
 | [@labelu/audio-annotator-react](./packages/audio-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react) | Audio annotator for React |
 | [@labelu/video-react](./packages/video-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-react.svg)](https://www.npmjs.com/package/@labelu/video-react) | Basic React components for Video annotator |
 | [@labelu/video-annotator-react](./packages/video-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-annotator-react.svg)](https://www.npmjs.com/package/@labelu/video-annotator-react) | Video annotator for React |
-| [@labelu/utils](./packages/utils) | [![npm](https://img.shields.io/npm/v/%40labelu/utils.svg)](https://www.npmjs.com/package/@labelu/utils) | utils for another packages |
+| [@labelu/utils](./packages/utils) | [![npm](https://img.shields.io/npm/v/%40labelu/utils.svg)](https://www.npmjs.com/package/@labelu/utils) | utils for other packages |
 
 ## License
 
