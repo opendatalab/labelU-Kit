@@ -1,5 +1,5 @@
 {
-  "name": "label-u",
+  "name": "labelu",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -8,9 +8,9 @@
   "version": "1.7.0",
   "scripts": {
     "prepare": "husky install",
-    "build": "pnpm --filter @label-u/utils --filter @label-u/formatter --filter @label-u/annotation --filter @label-u/components --filter @label-u/interface --filter @label-u/components-react --filter @label-u/audio-react --filter @label-u/video-react --filter @label-u/audio-annotator-react --filter @label-u/video-annotator-react build",
-    "clean": "pnpm --filter @label-u/utils --filter @label-u/formatter --filter @label-u/annotation --filter @label-u/components --filter @label-u/interface --filter @label-u/components-react --filter @label-u/audio-react --filter @label-u/video-react --filter @label-u/audio-annotator-react --filter @label-u/video-annotator-react clean",
-    "build:frontend": "pnpm --filter @label-u/frontend build",
+    "build": "pnpm --filter @labelu/utils --filter @labelu/formatter --filter @labelu/annotation --filter @labelu/components --filter @labelu/interface --filter @labelu/components-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
+    "clean": "pnpm --filter @labelu/utils --filter @labelu/formatter --filter @labelu/annotation --filter @labelu/components --filter @labelu/interface --filter @labelu/components-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react clean",
+    "build:frontend": "pnpm --filter @labelu/frontend build",
     "release:frontend": "cd apps/frontend && npm run release",
     "lint:frontend": "eslint ./apps/frontend --ext .js,.jsx,.ts,.tsx --fix",
     "lint:packages": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
@@ -52,6 +52,7 @@
     "@shlab/fabric": "^1.2.1",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
+    "execa": "^8.0.1",
     "husky": "^8.0.0",
     "lint-staged": "^10.5.4",
     "minimist": "^1.2.7",
