@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import type { VideoAnnotation, VideoAnnotationType } from '@label-u/video-react';
+import type { VideoAnnotation, VideoAnnotationType } from '@labelu/video-react';
 
 import { Editor } from '../Editor';
 import type { VideoSample } from '../Editor/context';

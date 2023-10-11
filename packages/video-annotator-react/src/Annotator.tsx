@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import VideoAnnotator from '@label-u/video-react';
-import type { VideoProps } from '@label-u/video-react';
+import VideoAnnotator from '@labelu/video-react';
+import type { VideoProps } from '@labelu/video-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type {
@@ -15,15 +15,15 @@ import type {
   TextAttribute,
   EnumerableAttribute,
   AttributeValue,
-} from '@label-u/interface';
-import { LabelSection, AnnotatorContext, AnnotatorToolbar, AttributePanel } from '@label-u/audio-annotator-react';
+} from '@labelu/interface';
+import { LabelSection, AnnotatorContext, AnnotatorToolbar, AttributePanel } from '@labelu/audio-annotator-react';
 import type {
   VideoAnnotationInEditor,
   VideoEditorConfig,
   VideoSample,
   VideoWithGlobalAnnotation,
-} from '@label-u/audio-annotator-react';
-import type { MediaAnnotatorRef } from '@label-u/components-react';
+} from '@labelu/audio-annotator-react';
+import type { MediaAnnotatorRef } from '@labelu/components-react';
 
 import Sidebar from './Sidebar';
 

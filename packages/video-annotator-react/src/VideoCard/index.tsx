@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { secondsToMinute } from '@label-u/video-react';
+import { secondsToMinute } from '@labelu/video-react';
 import styled, { css } from 'styled-components';
 
 import MediaError from '@/MediaError';
