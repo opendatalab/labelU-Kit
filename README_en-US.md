@@ -23,8 +23,8 @@
 
 | Name | Version | Description |
 | --- | --- | --- |
-| [@labelu/annotation](./packages/annotation) | [![npm](https://img.shields.io/npm/v/%40labelu/annotation.svg)](https://www.npmjs.com/package/@labelu/annotation) | 2d annotation engine（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |
-| [@labelu/components](./packages/components) | [![npm](https://img.shields.io/npm/v/%40labelu/components.svg)](https://www.npmjs.com/package/@labelu/components) | React components for 2d annotator（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |
+| [@labelu/annotation](./packages/annotation) | [![npm](https://img.shields.io/npm/v/%40labelu/annotation.svg)](https://www.npmjs.com/package/@labelu/annotation) | 2d annotation engine（fork from [labelbee](https://github.com/open-mmlab/labelbee)） |
+| [@labelu/components](./packages/components) | [![npm](https://img.shields.io/npm/v/%40labelu/components.svg)](https://www.npmjs.com/package/@labelu/components) | React components for 2d annotator（fork from [labelbee](https://github.com/open-mmlab/labelbee)） |
 | [@labelu/interface](./packages/interface) | [![npm](https://img.shields.io/npm/v/%40labelu/interface.svg)](https://www.npmjs.com/package/@labelu/interface) | Basic TypeScript interfaces for annotators |
 | [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | Basic React components for another packages |
 | [@labelu/audio-react](./packages/audio-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-react.svg)](https://www.npmjs.com/package/@labelu/audio-react) | Basic React components for Audio annotator |
