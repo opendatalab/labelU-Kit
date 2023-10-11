@@ -22,7 +22,7 @@
     "name": "gary",
     "email": "shenguanlin@pjlab.org.cn"
   },
-  "license": "ISC",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@labelu/annotation": "1.0.0-alpha.1",
     "@labelu/interface": "1.0.0-alpha.1",
