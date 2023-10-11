@@ -20,6 +20,7 @@ interface SliderCardProps {
 const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
   const { id, state, data } = cardInfo;
   const headId = _.chain(data).get('fileNames').keys().head().value();
+  const filename = _.get(data, `fileNames.${headId}`);
   const url = _.get(data, `urls.${headId}`);
   const routeParams = useParams();
   const sampleId = +routeParams.sampleId!;
@@ -37,7 +38,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
       <>
         <div className={styles.audioCard} onClick={() => handleOnClick(cardInfo)}>
           {type === MediaType.AUDIO && (
-            <AudioCard src={url!} active={id === sampleId} title={headId} no={index! + 1} showNo />
+            <AudioCard src={url!} active={id === sampleId} title={filename} no={index! + 1} showNo />
           )}
           {state === 'DONE' && (
             <React.Fragment>
