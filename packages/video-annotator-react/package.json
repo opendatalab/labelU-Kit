@@ -1,6 +1,6 @@
 {
   "name": "@labelu/video-annotator-react",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.1",
   "description": "video annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -28,16 +28,16 @@
     "react"
   ],
   "dependencies": {
-    "@labelu/components-react": "1.1.0-alpha.1",
-    "@labelu/interface": "1.1.0-alpha.1",
-    "@labelu/audio-annotator-react": "1.0.0-alpha.3",
-    "@labelu/video-react": "1.1.0-alpha.1",
+    "@labelu/components-react": "1.0.0-alpha.1",
+    "@labelu/interface": "1.0.0-alpha.1",
+    "@labelu/audio-annotator-react": "1.0.0-alpha.1",
+    "@labelu/video-react": "1.0.0-alpha.1",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@labelu/annotation": "2.2.1-alpha.1",
+    "@labelu/annotation": "1.0.0-alpha.1",
     "@types/react": "^18.2.20",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^3.1.0",
