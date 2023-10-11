@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type WaveSurfer from 'wavesurfer.js';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 import type { AudioAnnotationInUI, MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
 import type {
   Attribute,
@@ -31,10 +32,12 @@ export interface AudioAnnotatorProps {
   showOrder?: boolean;
   editingLabel?: string;
   annotations: AudioAnnotationInUI[];
+  disabled?: boolean;
   toolConfig?: {
     segment?: AudioSegmentToolConfig;
     frame?: AudioFrameToolConfig;
   };
+  onLoad?: () => void;
   onAnnotationSelect?: (annotation: AudioAnnotationInUI) => void;
   onChange?: (annotations: AudioAnnotationInUI) => void;
   onAdd?: (annotations: AudioAnnotationInUI) => void;
@@ -50,10 +53,12 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     onChange,
     playerRef: propsPlayerRef,
     annotatorRef: propsAnnotatorRef,
+    onLoad,
     showOrder,
     editingLabel,
     onAdd,
     onAnnotateEnd,
+    disabled,
     onAnnotationSelect,
     toolConfig,
     annotations,
@@ -253,6 +258,37 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     playerRef.current.on('timeupdate', onTimeUpdate);
   }, [duration, setCurrentAnnotationIds]);
 
+  // ================== 快捷键 ==================
+  // 快进10s
+  useHotkeys(
+    'ArrowRight',
+    () => {
+      if (playerRef.current) {
+        playerRef.current.setTime(playerRef.current?.getCurrentTime() + 10);
+      }
+    },
+    {
+      enabled: !disabled,
+      preventDefault: true,
+    },
+    [finishAnnotation, editingLabel, editingType],
+  );
+
+  // 后退10s
+  useHotkeys(
+    'ArrowLeft',
+    () => {
+      if (playerRef.current) {
+        playerRef.current.setTime(playerRef.current?.getCurrentTime() - 10);
+      }
+    },
+    {
+      enabled: !disabled,
+      preventDefault: true,
+    },
+    [finishAnnotation, editingLabel, editingType],
+  );
+
   const contextValue = useMemo(() => {
     return {
       duration,
@@ -281,10 +317,15 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     showOrder,
   ]);
 
+  const onMediaLoad = useCallback(() => {
+    handleOnLoad();
+    onLoad?.();
+  }, [onLoad, handleOnLoad]);
+
   return (
     <MediaAnnotationContext.Provider value={contextValue}>
       <AudioAnnotatorWrapper ref={ref} className={className}>
-        <AudioPlayer ref={playerRef} src={src} height={playerHeight} onload={handleOnLoad} />
+        <AudioPlayer ref={playerRef} src={src} height={playerHeight} onload={onMediaLoad} />
         <AttributeOverlay />
         <MediaAnnotator
           duration={duration}
