@@ -1,5 +1,5 @@
 // @ts-ignore
-import { i18n } from '@label-u/utils';
+import { i18n } from '@labelu/utils';
 
 import MathUtils from '@/utils/MathUtils';
 import RectUtils from '@/utils/tool/RectUtils';
