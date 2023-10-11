@@ -1,4 +1,4 @@
-import { Kbd, getOS } from '@label-u/components-react';
+import { Kbd, getOS } from '@labelu/components-react';
 
 import { ReactComponent as MouseRightClick } from './mouse-right.svg';
 const os = getOS();

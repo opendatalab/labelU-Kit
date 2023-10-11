@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText, uid } from '@label-u/components-react';
+import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText, uid } from '@labelu/components-react';
 import type {
   EnumerableAttribute,
   GlobalAnnotationType,
@@ -8,7 +8,7 @@ import type {
   TextAnnotationEntity,
   TextAttribute,
   VideoAnnotationData,
-} from '@label-u/interface';
+} from '@labelu/interface';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 

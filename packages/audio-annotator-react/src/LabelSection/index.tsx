@@ -1,8 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import type { DraggableModalRef, ValidationContextType } from '@label-u/components-react';
-import { DraggableModel, AttributeForm, EllipsisText } from '@label-u/components-react';
-import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation, Attribute } from '@label-u/interface';
+import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
+import { DraggableModel, AttributeForm, EllipsisText } from '@labelu/components-react';
+import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation, Attribute } from '@labelu/interface';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
