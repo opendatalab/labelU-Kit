@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type WaveSurfer from 'wavesurfer.js';
 import styled from 'styled-components';
-import type { AudioAnnotationInUI, MediaAnnotatorRef, PlayerControllerRef } from '@label-u/components-react';
+import type { AudioAnnotationInUI, MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
 import type {
   Attribute,
   AudioAnnotationType,
@@ -10,8 +10,8 @@ import type {
   AudioSegmentName,
   AudioSegmentToolConfig,
   EnumerableAttribute,
-} from '@label-u/interface';
-import { AttributeOverlay, MediaAnnotationContext, MediaAnnotator, PlayerController } from '@label-u/components-react';
+} from '@labelu/interface';
+import { AttributeOverlay, MediaAnnotationContext, MediaAnnotator, PlayerController } from '@labelu/components-react';
 
 import { AudioPlayer } from './AudioPlayer';
 
