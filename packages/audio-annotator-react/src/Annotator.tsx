@@ -625,6 +625,11 @@ function ForwardAnnotator(
     [config?.frame, config?.segment],
   );
 
+  const onMediaLoad = useCallback(() => {
+    annotatorRef.current?.updateTime(0);
+    playerRef.current?.setTime(0);
+  }, []);
+
   return (
     <AnnotatorContext.Provider value={contextValue}>
       {/* @ts-ignore */}
@@ -648,6 +653,7 @@ function ForwardAnnotator(
               onChange={handleAnnotationChange}
               onAdd={handleVideoAnnotationAdd}
               showOrder={orderVisible}
+              onLoad={onMediaLoad}
               onAnnotationSelect={handleSelectAnnotation}
               onAnnotateEnd={handleAnnotateEnd}
             />
