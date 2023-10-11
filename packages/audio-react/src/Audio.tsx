@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type WaveSurfer from 'wavesurfer.js';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 import type { AudioAnnotationInUI, MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
 import type {
   Attribute,
@@ -31,6 +32,7 @@ export interface AudioAnnotatorProps {
   showOrder?: boolean;
   editingLabel?: string;
   annotations: AudioAnnotationInUI[];
+  disabled?: boolean;
   toolConfig?: {
     segment?: AudioSegmentToolConfig;
     frame?: AudioFrameToolConfig;
@@ -56,6 +58,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     editingLabel,
     onAdd,
     onAnnotateEnd,
+    disabled,
     onAnnotationSelect,
     toolConfig,
     annotations,
@@ -254,6 +257,37 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     playerRef.current.un('timeupdate', onTimeUpdate);
     playerRef.current.on('timeupdate', onTimeUpdate);
   }, [duration, setCurrentAnnotationIds]);
+
+  // ================== 快捷键 ==================
+  // 快进10s
+  useHotkeys(
+    'ArrowRight',
+    () => {
+      if (playerRef.current) {
+        playerRef.current.setTime(playerRef.current?.getCurrentTime() + 10);
+      }
+    },
+    {
+      enabled: !disabled,
+      preventDefault: true,
+    },
+    [finishAnnotation, editingLabel, editingType],
+  );
+
+  // 后退10s
+  useHotkeys(
+    'ArrowLeft',
+    () => {
+      if (playerRef.current) {
+        playerRef.current.setTime(playerRef.current?.getCurrentTime() - 10);
+      }
+    },
+    {
+      enabled: !disabled,
+      preventDefault: true,
+    },
+    [finishAnnotation, editingLabel, editingType],
+  );
 
   const contextValue = useMemo(() => {
     return {
