@@ -35,6 +35,7 @@ export interface AudioAnnotatorProps {
     segment?: AudioSegmentToolConfig;
     frame?: AudioFrameToolConfig;
   };
+  onLoad?: () => void;
   onAnnotationSelect?: (annotation: AudioAnnotationInUI) => void;
   onChange?: (annotations: AudioAnnotationInUI) => void;
   onAdd?: (annotations: AudioAnnotationInUI) => void;
@@ -50,6 +51,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     onChange,
     playerRef: propsPlayerRef,
     annotatorRef: propsAnnotatorRef,
+    onLoad,
     showOrder,
     editingLabel,
     onAdd,
@@ -281,10 +283,15 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     showOrder,
   ]);
 
+  const onMediaLoad = useCallback(() => {
+    handleOnLoad();
+    onLoad?.();
+  }, [onLoad, handleOnLoad]);
+
   return (
     <MediaAnnotationContext.Provider value={contextValue}>
       <AudioAnnotatorWrapper ref={ref} className={className}>
-        <AudioPlayer ref={playerRef} src={src} height={playerHeight} onload={handleOnLoad} />
+        <AudioPlayer ref={playerRef} src={src} height={playerHeight} onload={onMediaLoad} />
         <AttributeOverlay />
         <MediaAnnotator
           duration={duration}
