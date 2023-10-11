@@ -1,5 +1,5 @@
 {
-  "name": "@label-u/formatter",
+  "name": "@labelu/formatter",
   "version": "1.0.1",
   "private": false,
   "description": "A collection of universal data formatting functions.",
