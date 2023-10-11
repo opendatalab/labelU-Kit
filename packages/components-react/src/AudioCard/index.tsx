@@ -16,6 +16,7 @@ const InnerWrapper = styled.div`
   cursor: pointer;
   user-select: none;
   border-radius: 3px;
+  border: #fff 2px solid;
 `;
 
 const CardIndex = styled.div`
@@ -36,7 +37,7 @@ const Wrapper = styled.div<{
     active &&
     css`
       ${InnerWrapper} {
-        border: var(--color-primary) 2px solid;
+        border-color: var(--color-primary);
       }
 
       ${CardIndex} {
@@ -80,7 +81,7 @@ export function AudioCard({ active, no, title, src, showNo }: AudioCardProps) {
       <InnerWrapper>
         <Left>
           <PlayIcon />
-          <EllipsisText title={title} maxWidth={80}>
+          <EllipsisText title={title} maxWidth={72}>
             {/* @ts-ignore */}
             {title}
           </EllipsisText>

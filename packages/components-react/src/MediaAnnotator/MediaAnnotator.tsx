@@ -849,7 +849,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps
     },
     {
       preventDefault: true,
-      enabled: type === 'segment',
+      enabled: type === 'segment' && duration > 0,
     },
     [setAnnotatingSegment, onEnd, label, maxOrder, type, resetAnnotatingSegment],
   );
