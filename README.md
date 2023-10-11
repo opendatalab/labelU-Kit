@@ -14,9 +14,15 @@
 - 支持音频标注
 - 原子化模块，可自由组合
 
+## 开始使用
+
+- 体验在线版：[https://labelu.shlab.tech/](https://labelu.shlab.tech/)
+- 安装离线版：[https://github.com/opendatalab/labelU/](https://github.com/opendatalab/labelU#install-locally-with-miniconda)
+- 使用文档：[https://opendatalab.github.io/labelU-Kit](https://opendatalab.github.io/labelU-Kit)
+
 ## Packages
 
-| Package | Version | Description |
+| 名称 | 版本 | 描述 |
 | --- | --- | --- |
 | [@labelu/annotation](./packages/annotation) | [![npm](https://img.shields.io/npm/v/%40labelu/annotation.svg)](https://www.npmjs.com/package/@labelu/annotation) | 标注引擎（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |
 | [@labelu/components](./packages/components) | [![npm](https://img.shields.io/npm/v/%40labelu/components.svg)](https://www.npmjs.com/package/@labelu/components) | 标注组件库（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |

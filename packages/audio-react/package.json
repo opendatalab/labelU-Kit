@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@labelu/components-react": "1.0.0-alpha.1",
-    "@labelu/video-react": "1.0.0-alpha.1",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6",
