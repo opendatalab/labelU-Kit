@@ -1,4 +1,4 @@
-import type { Attribute, AttributeOption, InnerAttributeType, StringType } from '@label-u/interface';
+import type { Attribute, AttributeOption, InnerAttributeType, StringType } from '@labelu/interface';
 import type { Rule, ValidateErrorEntity, NamePath } from 'rc-field-form/es/interface';
 import type { FormProps, FormInstance } from 'rc-field-form';
 import Form, { useForm, Field } from 'rc-field-form';
