@@ -1,4 +1,4 @@
-import type { EToolName, AnnotationResult } from '@label-u/annotation';
+import type { EToolName, AnnotationResult } from '@labelu/annotation';
 
 export interface ToolResult {
   toolName: EToolName;

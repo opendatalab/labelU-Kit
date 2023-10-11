@@ -1,4 +1,4 @@
-import { uuid } from '@label-u/annotation';
+import { uuid } from '@labelu/annotation';
 import _ from 'lodash-es';
 
 import { EToolName } from '@/data/enums/ToolType';

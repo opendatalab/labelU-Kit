@@ -1,4 +1,4 @@
-import { i18n } from '@label-u/utils';
+import { i18n } from '@labelu/utils';
 
 import { ReactComponent as ScaleShortCutSvg } from '@/assets/annotation/toolHotKeyIcon/icon_mouse_middle_kj.svg';
 import { ReactComponent as MouseRightClick } from '@/assets/annotation/toolHotKeyIcon/icon_mouse_right_kj.svg';

@@ -2,7 +2,7 @@ import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import _, { size } from 'lodash-es';
-import type { EToolName } from '@label-u/annotation';
+import type { EToolName } from '@labelu/annotation';
 
 import ViewContext from '@/view.context';
 

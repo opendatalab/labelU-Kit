@@ -1,4 +1,4 @@
-import { ImgUtils } from '@label-u/annotation';
+import { ImgUtils } from '@labelu/annotation';
 import { message } from 'antd';
 import React, { useEffect, useRef, useState, useContext, useLayoutEffect } from 'react';
 

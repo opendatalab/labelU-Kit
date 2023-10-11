@@ -1,5 +1,5 @@
-import type { EToolName } from '@label-u/annotation';
-import { BasicToolOperation } from '@label-u/annotation';
+import type { EToolName } from '@labelu/annotation';
+import { BasicToolOperation } from '@labelu/annotation';
 import { useContext, useMemo, useCallback, useEffect, useState } from 'react';
 import type { ButtonProps, MenuProps } from 'antd';
 import { Button, Dropdown, Space } from 'antd';
