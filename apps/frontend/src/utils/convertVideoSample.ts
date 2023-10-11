@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import type { VideoSample } from '@label-u/video-annotator-react/dist/Editor/context';
-import type { EditorProps } from '@label-u/video-annotator-react';
+import type { VideoSample } from '@labelu/video-annotator-react/dist/Editor/context';
+import type { EditorProps } from '@labelu/video-annotator-react';
 
 import type { SampleData } from '@/services/types';
 import { MediaType } from '@/services/types';

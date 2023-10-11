@@ -1,5 +1,5 @@
-import type { EnumerableAttribute, TagAnnotationEntity, TextAnnotationEntity, TextAttribute } from '@label-u/interface';
-import { uid } from '@label-u/video-react';
+import type { EnumerableAttribute, TagAnnotationEntity, TextAnnotationEntity, TextAttribute } from '@labelu/interface';
+import { uid } from '@labelu/video-react';
 
 export function generateDefaultValues(
   attributes?: (TextAttribute | EnumerableAttribute)[],

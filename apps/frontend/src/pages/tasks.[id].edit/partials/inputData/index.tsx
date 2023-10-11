@@ -3,7 +3,7 @@ import { v4 as uuid4 } from 'uuid';
 import type { TableColumnType } from 'antd';
 import { Popconfirm, Button, Table } from 'antd';
 import _ from 'lodash-es';
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import type { RcFile } from 'antd/lib/upload/interface';
 

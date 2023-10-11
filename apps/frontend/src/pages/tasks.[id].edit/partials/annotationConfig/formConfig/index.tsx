@@ -1,4 +1,4 @@
-import { EToolName, TOOL_NAME, EVideoToolName, EAudioToolName } from '@label-u/annotation';
+import { EToolName, TOOL_NAME, EVideoToolName, EAudioToolName } from '@labelu/annotation';
 import type { FormProps, SelectProps, TabsProps } from 'antd';
 import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router';
 import _ from 'lodash-es';
-import { VideoCard } from '@label-u/video-annotator-react';
+import { VideoCard } from '@labelu/video-annotator-react';
 import classNames from 'classnames';
-import { AudioCard } from '@label-u/components-react';
+import { AudioCard } from '@labelu/components-react';
 
 import type { SampleResponse } from '@/services/types';
 import { MediaType } from '@/services/types';
