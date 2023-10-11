@@ -4,6 +4,7 @@ name: release
 
 env:
   LAB_NPM_TOKEN: ${{ secrets.LAB_NPM_TOKEN }}
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
@@ -44,6 +45,7 @@ jobs:
         with:
           version: 7
           run_install: false
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -60,28 +62,41 @@ jobs:
 
       - name: Set env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
       - name: Show env
         run: |
           echo $RELEASE_VERSION
+
       - name: Install dependencies
         run: pnpm install
+
       - name: Build packages
         run: pnpm run build
-      - run: npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
+
+      - name: Set npm registry
+        run: |
+          npm config set registry https://registry.npmjs.com/
+          npm config set //registry.npmjs.com/:_authToken ${NPM_TOKEN}
+
       - name: Publish packages
         run: pnpm run release
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+
       - name: Execute before release script
         run: node ./scripts/before-release-frontend.js
+
       - name: Update frontend dependencies
         run: |
           npm cache clean -f
           pnpm install --no-frozen-lockfile
+
       - name: Build frontend
         run: pnpm run build:frontend
+
       - name: Release frontend
         run: pnpm run release:frontend
+
       - name: Commit package.json files to current branch
         uses: stefanzweifel/git-auto-commit-action@v4
         with:

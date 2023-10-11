@@ -9,8 +9,8 @@ import React, {
   useState,
 } from 'react';
 import styled from 'styled-components';
-import type { PlayerControllerRef } from '@label-u/components-react';
-import { PlayerController, VIDEO_PLAYBACK_RATE_SPEED } from '@label-u/components-react';
+import type { PlayerControllerRef } from '@labelu/components-react';
+import { PlayerController, VIDEO_PLAYBACK_RATE_SPEED } from '@labelu/components-react';
 
 import './video-js.css';
 import invalidVideoIcon from './icons/video-error.svg';

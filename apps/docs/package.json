@@ -5,7 +5,7 @@
   "description": "",
   "license": "MIT",
   "dependencies": {
-    "@label-u/components": "2.0.1",
+    "@labelu/components": "2.0.1",
     "@rocketseat/gatsby-theme-docs": "^3.1.0",
     "gatsby": "^4.2.0",
     "gatsby-plugin-canonical-urls": "^4.2.0",

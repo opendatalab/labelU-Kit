@@ -4,8 +4,8 @@
  */
 
 import React, { useEffect, useRef, useImperativeHandle, useState } from 'react';
-import type { ToolConfig } from '@label-u/annotation';
-import { ViewOperation, ImgUtils } from '@label-u/annotation';
+import type { ToolConfig } from '@labelu/annotation';
+import { ViewOperation, ImgUtils } from '@labelu/annotation';
 import { Spin } from 'antd';
 
 interface IProps {

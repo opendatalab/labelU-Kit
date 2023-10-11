@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cTool } from '@label-u/annotation';
+import { cTool } from '@labelu/annotation';
 import { Popover } from 'antd';
 import { useHotkeys } from 'react-hotkeys-hook';
 

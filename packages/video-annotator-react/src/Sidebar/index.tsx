@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { useAnnotator } from '@label-u/audio-annotator-react';
+import { useAnnotator } from '@labelu/audio-annotator-react';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
 import { VideoCard, StyledVideo } from '@/VideoCard';

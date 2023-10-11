@@ -2,7 +2,7 @@
 
 # `lb-Components`
 
-基于 @label-u/annotation 开发，是一款即插即用的标注组件库。
+基于 @labelu/annotation 开发，是一款即插即用的标注组件库。
 
 1.支持拉框、标签、多边形、线条、点、文本标注标注。
 
@@ -14,10 +14,10 @@
 
 ```bash
 # NPM
-$ npm install @label-u/components
+$ npm install @labelu/components
 
 # YARN
-$ yarn add @label-u/components
+$ yarn add @labelu/components
 ```
 
 ## 🪵 Requirements
@@ -26,4 +26,3 @@ $ yarn add @label-u/components
 | ---------------- | -------- |
 | react            | >=16.9.0 |
 | antd             | >=4.15.0 |
-

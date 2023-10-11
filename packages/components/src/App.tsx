@@ -1,7 +1,7 @@
-import { i18n } from '@label-u/utils';
+import { i18n } from '@labelu/utils';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@label-u/annotation';
-import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@label-u/annotation';
+import type { InnerAttribute, LabelUAnnotationConfig, TextAttribute } from '@labelu/annotation';
+import { AnnotationEngine, BasicToolOperation, EToolName, ImgUtils } from '@labelu/annotation';
 import _, { cloneDeep, isEmpty, set, isEqual } from 'lodash-es';
 import { I18nextProvider } from 'react-i18next';
 import { App as AntApp, ConfigProvider } from 'antd';

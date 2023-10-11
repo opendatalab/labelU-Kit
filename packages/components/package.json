@@ -1,6 +1,6 @@
 {
-  "name": "@label-u/components",
-  "version": "2.2.1-alpha.1",
+  "name": "@labelu/components",
+  "version": "1.0.0-alpha.1",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -17,6 +17,9 @@
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
     "lint:fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
     "commitmsg": "commitlint -e $GIT_PARAMS"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "author": "wuhui,luoluo",
   "contributors": [
@@ -38,8 +41,8 @@
     "email": "751569801@qq.com"
   },
   "dependencies": {
-    "@label-u/annotation": "2.2.1-alpha.1",
-    "@label-u/utils": "1.0.2",
+    "@labelu/annotation": "1.0.0-alpha.1",
+    "@labelu/utils": "1.0.0-alpha.1",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "copyfiles": "^2.4.1",

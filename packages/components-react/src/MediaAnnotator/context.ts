@@ -4,7 +4,7 @@ import type {
   AudioAnnotationData,
   VideoFrameName,
   VideoSegmentName,
-} from '@label-u/interface';
+} from '@labelu/interface';
 import { createContext, useContext } from 'react';
 
 export type VideoAnnotationInUI = VideoAnnotationData & {

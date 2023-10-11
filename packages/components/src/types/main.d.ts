@@ -1,6 +1,6 @@
 import type React from 'react';
 /**
- * 后续下方的定义由 @label-u/annotation 提供
+ * 后续下方的定义由 @labelu/annotation 提供
  */
 export interface ISize {
   width: number;

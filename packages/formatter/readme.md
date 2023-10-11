@@ -1,19 +1,19 @@
-# `@label-u/formatter`
+# `@labelu/formatter`
 
 A formatter set for sinan.
 
 ## Usage
 
 ```bash
-npm install @label-u/formatter
+npm install @labelu/formatter
 # or
-yarn add @label-u/formatter
+yarn add @labelu/formatter
 ```
 
 ## basename
 
 ```typescript
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 
 formatter.format('basename', 'foo/bar/baz/asdf/quux.html');
 // => 'quux.html'
@@ -24,7 +24,7 @@ formatter.format('basename', 'foo/bar/baz/asdf/quux.html');
 > See more options in [filesize.js](https://github.com/avoidwork/filesize.js).
 
 ```typescript
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 
 formatter.format('fileSize', 265318);
 // => '259.1 KB'
@@ -35,7 +35,7 @@ formatter.format('fileSize', 265318);
 > See more options in [dayjs](https://github.com/iamkun/dayjs).
 
 ```typescript
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 
 formatter.format('date', 1670916924956, {
   style: 'YYYY-MM-DD HH:mm',
@@ -46,7 +46,7 @@ formatter.format('date', 1670916924956, {
 ## extension
 
 ```typescript
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 
 formatter.format('extension', 'foo/bar/baz/asdf/quux.html');
 // => 'html'
@@ -55,7 +55,7 @@ formatter.format('extension', 'foo/bar/baz/asdf/quux.html');
 ### Add Your Own Formatter
 
 ```typescript
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 
 formatter.add('foo', (value: string) => {
   return value + 'foo';

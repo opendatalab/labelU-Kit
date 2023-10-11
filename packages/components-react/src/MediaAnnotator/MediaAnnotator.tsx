@@ -10,7 +10,7 @@ import type {
   AudioAnnotationType,
   AudioSegmentAnnotation,
   AudioFrameAnnotation,
-} from '@label-u/interface';
+} from '@labelu/interface';
 import { forwardRef, useCallback, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 

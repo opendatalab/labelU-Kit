@@ -1,21 +1,19 @@
-# `@label-u/utils`
+# `@labelu/utils`
 
 > TODO: description
 
 ## Usage
 
 ```
-const lbUtils = require('@label-u/utils');
+const lbUtils = require('@labelu/utils');
 
 // TODO: DEMONSTRATE API
 ```
 
-
-
 ### ToolStyleConverter
- 
+
 ```ts
-import { toolStyleConverter } from '@label-u/utils';
+import { toolStyleConverter } from '@labelu/utils';
 
 interface IToolStyle {
   stroke: string;
@@ -25,7 +23,7 @@ interface IToolStyle {
 const styleConfig = {
   borderOpacity: 1, // range: [0,1]
   fillOpacity: 0.2, // range: [0,1]
-  colorIndex: 0, // range: 0 1 2 3 4 
+  colorIndex: 0, // range: 0 1 2 3 4
 };
 
 // Basic Pattern

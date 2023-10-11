@@ -1,6 +1,6 @@
 {
-  "name": "@label-u/formatter",
-  "version": "1.0.1",
+  "name": "@labelu/formatter",
+  "version": "1.0.0-alpha.1",
   "private": false,
   "description": "A collection of universal data formatting functions.",
   "keywords": [
@@ -13,8 +13,7 @@
     "url": "https://github.com/opendatalab/labelU-Kit.git"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.shlab.tech"
+    "access": "public"
   },
   "license": "ISC",
   "main": "./dist/index.mjs",

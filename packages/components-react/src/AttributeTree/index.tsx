@@ -1,4 +1,4 @@
-import type { GlobalAnnotationType, InnerAttribute, TextAttribute } from '@label-u/interface';
+import type { GlobalAnnotationType, InnerAttribute, TextAttribute } from '@labelu/interface';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo } from 'react';

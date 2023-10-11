@@ -1,4 +1,4 @@
-import { EToolName } from '@label-u/annotation';
+import { EToolName } from '@labelu/annotation';
 
 export enum EStepType {
   Check = 0, // 查看模式

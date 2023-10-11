@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Pagination, Button } from 'antd';
-import { VideoCard } from '@label-u/video-annotator-react';
+import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 
 import type { Dispatch, RootState } from '@/store';
 import { MediaType, SampleState, TaskStatus } from '@/services/types';

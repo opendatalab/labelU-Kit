@@ -1,7 +1,7 @@
 {
-  "name": "@label-u/audio-react",
-  "version": "1.0.0-alpha.4",
-  "description": "label-u audio annotation component for react",
+  "name": "@labelu/audio-react",
+  "version": "1.0.0-alpha.1",
+  "description": "labelu audio annotation component for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -15,8 +15,7 @@
     "url": "https://github.com/opendatalab/labelU-Kit.git"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.shlab.tech"
+    "access": "public"
   },
   "author": {
     "name": "gary",
@@ -24,7 +23,7 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "@label-u/interface": "1.1.0-alpha.1",
+    "@labelu/interface": "1.0.0-alpha.1",
     "@types/react": "^18.2.20",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^3.1.0",
@@ -39,8 +38,8 @@
     "vite-tsconfig-paths": "^3.5.0"
   },
   "dependencies": {
-    "@label-u/components-react": "1.1.0-alpha.2",
-    "@label-u/video-react": "1.1.0-alpha.2",
+    "@labelu/components-react": "1.0.0-alpha.1",
+    "@labelu/video-react": "1.0.0-alpha.1",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6",

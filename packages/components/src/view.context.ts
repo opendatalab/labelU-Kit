@@ -8,7 +8,7 @@ import type {
   InnerAttribute,
   LabelUAnnotationConfig,
   TextConfig,
-} from '@label-u/annotation';
+} from '@labelu/annotation';
 
 import type { IFileItem } from './types/data';
 import type { BasicResult, ImageAttribute, SelectedResult, ToolResult, ToolStyle } from './interface/base';

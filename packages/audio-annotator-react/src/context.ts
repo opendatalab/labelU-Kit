@@ -1,4 +1,4 @@
-import type { EnumerableAttribute, TextAttribute } from '@label-u/annotation';
+import type { EnumerableAttribute, TextAttribute } from '@labelu/annotation';
 import type {
   Attribute,
   TagAnnotationEntity,
@@ -7,7 +7,7 @@ import type {
   VideoSegmentToolConfig,
   VideoFrameToolConfig,
   VideoAnnotationType,
-} from '@label-u/interface';
+} from '@labelu/interface';
 import { createContext, useContext } from 'react';
 
 export interface VideoEditorConfig {

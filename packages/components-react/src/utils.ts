@@ -1,4 +1,4 @@
-import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation } from '@label-u/interface';
+import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation } from '@labelu/interface';
 
 /**
  * Get the current operating system

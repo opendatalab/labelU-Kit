@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { AudioCard } from '@label-u/components-react';
+import { AudioCard } from '@labelu/components-react';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
 

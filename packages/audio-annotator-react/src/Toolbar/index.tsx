@@ -1,6 +1,6 @@
-import { Toolbar, Tooltip, Kbd, HotkeyPanel } from '@label-u/components-react';
+import { Toolbar, Tooltip, Kbd, HotkeyPanel } from '@labelu/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import type { VideoAnnotationType } from '@label-u/interface';
+import type { VideoAnnotationType } from '@labelu/interface';
 
 import { ReactComponent as SegmentIcon } from '@/assets/icons/segment.svg';
 import { ReactComponent as FrameIcon } from '@/assets/icons/frame.svg';

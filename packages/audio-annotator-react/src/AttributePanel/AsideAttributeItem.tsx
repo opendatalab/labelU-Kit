@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import { useMemo } from 'react';
-import { EllipsisText, secondsToMinute } from '@label-u/components-react';
+import { EllipsisText, secondsToMinute } from '@labelu/components-react';
 
 import { ReactComponent as SegmentIcon } from '@/assets/icons/segment.svg';
 import { ReactComponent as FrameIcon } from '@/assets/icons/frame.svg';

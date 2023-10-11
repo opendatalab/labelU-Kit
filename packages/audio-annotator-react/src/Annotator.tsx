@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import AudioAnnotator from '@label-u/audio-react';
-import type { AudioAnnotatorProps } from '@label-u/audio-react';
+import AudioAnnotator from '@labelu/audio-react';
+import type { AudioAnnotatorProps } from '@labelu/audio-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type {
@@ -15,8 +15,8 @@ import type {
   TextAttribute,
   EnumerableAttribute,
   AttributeValue,
-} from '@label-u/interface';
-import type { MediaAnnotatorRef } from '@label-u/components-react';
+} from '@labelu/interface';
+import type { MediaAnnotatorRef } from '@labelu/components-react';
 
 import type {
   AnnotatorContextType,

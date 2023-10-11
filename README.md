@@ -12,10 +12,10 @@
 - 采用 rollup esbuild 插件及 vite 编译，开发效率更高
 - 采用 pnpm 进行多工程管理。
 - 合理的代码分层：
-  - @label-u/utils 提供国际化能力。
-  - @label-u/annotation 作为工具层，主要实现标注能力的封装，此外提供 AnnotationEngine 用于调用标注能力。
-  - @label-u/components 实现标注能力集成，作为直接暴露在外的标注组件，使用者通过对 AnnotationOperation 的配置即可实现标注界面,支持多工具标注，支持标注结果可视化（目前主要是针对图片标注，视频，音频，文本和点云也在开发当中）
-  - @label-u/frontend 提供一个开箱即用的标注服务，基于@label-u/components 暴露组件实现，并提供模板供用户参考和标注界面预览。
+  - @labelu/utils 提供国际化能力。
+  - @labelu/annotation 作为工具层，主要实现标注能力的封装，此外提供 AnnotationEngine 用于调用标注能力。
+  - @labelu/components 实现标注能力集成，作为直接暴露在外的标注组件，使用者通过对 AnnotationOperation 的配置即可实现标注界面,支持多工具标注，支持标注结果可视化（目前主要是针对图片标注，视频，音频，文本和点云也在开发当中）
+  - @labelu/frontend 提供一个开箱即用的标注服务，基于@labelu/components 暴露组件实现，并提供模板供用户参考和标注界面预览。
 
 ## 安装
 
