@@ -13,8 +13,7 @@
     "url": "https://github.com/opendatalab/labelU-Kit.git"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.shlab.tech"
+    "access": "public"
   },
   "author": {
     "name": "gary",
