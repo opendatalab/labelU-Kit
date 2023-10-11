@@ -12,7 +12,15 @@ async function main() {
 
   for (const pkg of packages) {
     const pkgDir = path.join(pkg.dir);
-    childProcess.execSync(`git add ${pkgDir}`, { stdio: 'inherit' });
+    const status = childProcess.execSync(`git status ${pkgDir}`, { encoding: 'utf-8' });
+
+    if (status && status.split('\n').includes('nothing to commit, working tree clean')) {
+      console.log(status);
+      continue;
+    }
+
+    childProcess.execSync(`git add ${pkgDir}`);
+
     console.log(`git add ${pkgDir}`);
     const commitMsg = `git commit -m '${type}(${path.basename(pkg.dir)}): ${msg}'`;
     console.log(commitMsg);

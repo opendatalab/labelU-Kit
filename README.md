@@ -9,37 +9,24 @@
 
 ## 特性
 
-- 采用 rollup esbuild 插件及 vite 编译，开发效率更高
-- 采用 pnpm 进行多工程管理。
-- 合理的代码分层：
-  - @labelu/utils 提供国际化能力。
-  - @labelu/annotation 作为工具层，主要实现标注能力的封装，此外提供 AnnotationEngine 用于调用标注能力。
-  - @labelu/components 实现标注能力集成，作为直接暴露在外的标注组件，使用者通过对 AnnotationOperation 的配置即可实现标注界面,支持多工具标注，支持标注结果可视化（目前主要是针对图片标注，视频，音频，文本和点云也在开发当中）
-  - @labelu/frontend 提供一个开箱即用的标注服务，基于@labelu/components 暴露组件实现，并提供模板供用户参考和标注界面预览。
+- 支持图片 2D 框、点、线、多边形标注
+- 支持视频标注
+- 支持音频标注
+- 原子化模块，可自由组合
 
-## 安装
+## Packages
 
-(node 版本 >= 14.8.0)
-
-```bash
-# pnpm
-pnpm install
-```
-
-### 启动开发环境
-
-```bash
-cd apps/frontend
-npm start
-```
-
-## 使用
-
-[详细开发文档](https://opendatalab.github.io/labelU-Kit)。
-
-## 致谢
-
-本项目参考并依赖了[labelbee](https://github.com/open-mmlab/labelbee)项目，在此对 labelbee 的作者表示感谢。
+| Package | Version | Description |
+| --- | --- | --- |
+| [@labelu/annotation](./packages/annotation) | [![npm](https://img.shields.io/npm/v/%40labelu/annotation.svg)](https://www.npmjs.com/package/@labelu/annotation) | 标注引擎（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |
+| [@labelu/components](./packages/components) | [![npm](https://img.shields.io/npm/v/%40labelu/components.svg)](https://www.npmjs.com/package/@labelu/components) | 标注组件库（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |
+| [@labelu/interface](./packages/interface) | [![npm](https://img.shields.io/npm/v/%40labelu/interface.svg)](https://www.npmjs.com/package/@labelu/interface) | 基础类型定义 |
+| [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | 基础 React 组件 |
+| [@labelu/audio-react](./packages/audio-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-react.svg)](https://www.npmjs.com/package/@labelu/audio-react) | 基础音频标注 React 组件 |
+| [@labelu/audio-annotator-react](./packages/audio-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react) | 音频 React 标注套件 |
+| [@labelu/video-react](./packages/video-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-react.svg)](https://www.npmjs.com/package/@labelu/video-react) | 基础视频标注 React 组件 |
+| [@labelu/video-annotator-react](./packages/video-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-annotator-react.svg)](https://www.npmjs.com/package/@labelu/video-annotator-react) | 视频 React 标注套件 |
+| [@labelu/utils](./packages/utils) | [![npm](https://img.shields.io/npm/v/%40labelu/utils.svg)](https://www.npmjs.com/package/@labelu/utils) | 工具库 |
 
 ## 许可证
 
