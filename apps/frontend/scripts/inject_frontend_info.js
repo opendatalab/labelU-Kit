@@ -66,7 +66,7 @@ async function main() {
       owner: 'opendatalab',
       repo: 'labelU-Kit',
       message: `chore: update package.json version to ${nextVersion} [skip ci]`,
-      content: Buffer.from(JSON.stringify(appPkgJson, null, 2), 'utf-8').toString('base64'),
+      content: JSON.stringify(appPkgJson, null, 2),
       branch,
       filepath: path.relative(workspace, pksPath),
     });
