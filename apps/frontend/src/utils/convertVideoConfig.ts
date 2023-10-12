@@ -6,7 +6,7 @@ export function convertVideoConfig(taskConfig: ToolsConfigState) {
   const editorConfig: NonNullable<EditorProps['config']> = {} as NonNullable<EditorProps['config']>;
 
   taskConfig?.tools?.forEach((item) => {
-    if (item.tool === 'videoSegmentTool') {
+    if (['videoSegmentTool', 'audioSegmentTool'].includes(item.tool)) {
       editorConfig.segment = {
         ...editorConfig.segment,
         ...item.config,
@@ -22,7 +22,7 @@ export function convertVideoConfig(taskConfig: ToolsConfigState) {
       }
     }
 
-    if (item.tool === 'videoFrameTool') {
+    if (['videoFrameTool', 'audioFrameTool'].includes(item.tool)) {
       editorConfig.frame = {
         ...editorConfig.frame,
         ...item.config,
