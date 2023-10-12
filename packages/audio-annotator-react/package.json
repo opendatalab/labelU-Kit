@@ -28,7 +28,7 @@
     "react"
   ],
   "dependencies": {
-    "@labelu/components-react": "1.0.0-alpha.2",
+    "@labelu/components-react": "1.1.0-alpha.1",
     "@labelu/interface": "1.0.0-alpha.1",
     "@labelu/audio-react": "1.0.0-alpha.3",
     "polished": "^4.2.2",

@@ -6,7 +6,7 @@
     "@ant-design/icons": "^4.6.2",
     "@labelu/annotation": "1.0.0-alpha.1",
     "@labelu/components": "1.0.0-alpha.1",
-    "@labelu/components-react": "1.0.0-alpha.1",
+    "@labelu/components-react": "1.1.0-alpha.1",
     "@labelu/formatter": "1.0.0-alpha.1",
     "@labelu/interface": "1.0.0-alpha.1",
     "@labelu/video-annotator-react": "1.0.0-alpha.2",
