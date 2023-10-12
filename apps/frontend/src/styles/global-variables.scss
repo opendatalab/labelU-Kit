@@ -21,6 +21,7 @@
   --color-warning: #f80;
   --color-error: #f5483b;
   --color-info: #0d53de;
+  --color-link: #1677ff;
   --color-text-base: #121316;
   --color-bg-base: #fff;
   --font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial, 'Noto Sans', sans-serif,
@@ -48,6 +49,7 @@
   --z-index-popup-base: 1000;
   --opacity-image: 1;
   --wireframe: false;
+  --motion: true;
   --blue-1: #e6f4ff;
   --blue1: #e6f4ff;
   --blue-2: #bae0ff;
@@ -367,6 +369,8 @@
   --color-info-text-hover: #4096ff;
   --color-info-text: #1677ff;
   --color-info-text-active: #0958d9;
+  --color-link-hover: #69b1ff;
+  --color-link-active: #0958d9;
   --color-bg-mask: rgb(0 0 0 / 45%);
   --color-white: #fff;
   --font-size-sm: 12px;
@@ -405,6 +409,8 @@
   --border-radius-sm: 4px;
   --border-radius-lg: 4px;
   --border-radius-outer: 4px;
-  --box-shadow: 0 8px 26px 0 rgb(18 19 22 / 12%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
-  --box-shadow-secondary: 0 4px 12px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+  --box-shadow: 0 8px 26px 0 rgb(18 19 22 / 12%), 0 3px 6px -4px rgb(0 0 0 / 12%),
+    0 9px 28px 8px rgb(0 0 0 / 5%);
+  --box-shadow-secondary: 0 4px 12px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%),
+    0 9px 28px 8px rgb(0 0 0 / 5%);
 }
