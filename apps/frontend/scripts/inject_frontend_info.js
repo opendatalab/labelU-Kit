@@ -52,6 +52,7 @@ async function main() {
   const [branch, nextVersion] = args._;
   const appPkgJson = require('../package.json');
   const workspace = path.join(__dirname, '../../../');
+  const pksPath = path.join(__dirname, '../package.json');
   const versions = {
     version: nextVersion || appPkgJson.version,
     deps: {},
