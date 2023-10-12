@@ -85,7 +85,7 @@ async function main() {
   await new Promise((resolve) => {
     setTimeout(async () => {
       createPullRequest({
-        branch,
+        branchName: branch,
         body: releaseNotes,
         base: 'main',
         title: 'Update package version',
