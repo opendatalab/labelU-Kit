@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const { Octokit } = require('@octokit/rest');
-const childProcess = require('child_process');
 
 const octokit = new Octokit({
   auth: process.env.GH_TOKEN,
@@ -17,19 +16,27 @@ async function createCommit({ owner, repo, message, content, branch, filepath })
     repo,
     ref: `heads/${branch}`,
   });
-
-  const currentCommit = await octokit.git.getCommit({
+  const { data: blobData } = await octokit.git.createBlob({ owner, repo, content });
+  const { data: treeData } = await octokit.git.createTree({
     owner,
     repo,
-    commit_sha: currentBranchRef.data.object.sha,
+    base_tree: currentBranchRef.data.object.sha,
+    tree: [
+      {
+        path: filepath,
+        mode: '100644',
+        type: 'blob',
+        sha: blobData.sha,
+      },
+    ],
   });
 
   const { data: commitData } = await octokit.git.createCommit({
     owner,
     repo,
     message,
-    tree: currentCommit.data.tree.sha,
-    parents: [currentCommit.data.sha],
+    tree: treeData.sha,
+    parents: [currentBranchRef.data.object.sha],
   });
 
   await octokit.git.updateRef({
@@ -55,13 +62,13 @@ async function main() {
     fs.writeFileSync(path.join(__dirname, '../package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
     console.log('update package.json version success!');
 
-    createCommit({
+    await createCommit({
       owner: 'opendatalab',
       repo: 'labelU-Kit',
       message: `chore: update package.json version to ${nextVersion} [skip ci]`,
       content: Buffer.from(JSON.stringify(appPkgJson, null, 2), 'utf-8').toString('base64'),
       branch,
-      filepath: path.join(__dirname, '../package.json'),
+      filepath: path.relative(workspace, pksPath),
     });
   }
 
