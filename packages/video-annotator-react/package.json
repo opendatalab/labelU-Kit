@@ -30,7 +30,7 @@
   ],
   "dependencies": {
     "@labelu/components-react": "1.1.0-alpha.1",
-    "@labelu/interface": "1.0.0-alpha.1",
+    "@labelu/interface": "1.1.0-alpha.1",
     "@labelu/audio-annotator-react": "1.0.0-alpha.2",
     "@labelu/video-react": "1.1.0-alpha.1",
     "polished": "^4.2.2",
