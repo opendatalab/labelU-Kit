@@ -21,8 +21,10 @@ import polygonTemplate from './templates/polygon.template';
 import pointTemplate from './templates/point.template';
 import tagTemplate from './templates/tag.template';
 import textTemplate from './templates/text.template';
-import videoSegmentTemplate from './templates/segment.template';
-import videoFrameTemplate from './templates/frame.template';
+import videoSegmentTemplate from './templates/videoSegment.template';
+import videoFrameTemplate from './templates/videoFrame.template';
+import audioSegmentTemplate from './templates/audioSegment.template';
+import audioFrameTemplate from './templates/audioFrame.template';
 
 // 注册fancyInput自定义输入组件
 add('list-attribute', FancyAttributeList);
@@ -76,8 +78,8 @@ const templateMapping: Record<string, any> = {
   [EToolName.Text]: textTemplate,
   [EVideoToolName.VideoSegmentTool]: videoSegmentTemplate,
   [EVideoToolName.VideoFrameTool]: videoFrameTemplate,
-  [EAudioToolName.AudioSegmentTool]: videoSegmentTemplate,
-  [EAudioToolName.AudioFrameTool]: videoFrameTemplate,
+  [EAudioToolName.AudioSegmentTool]: audioSegmentTemplate,
+  [EAudioToolName.AudioFrameTool]: audioFrameTemplate,
 };
 
 const FormConfig = () => {
