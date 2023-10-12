@@ -118,4 +118,8 @@
     "vite-plugin-svgr": "^2.4.0",
     "vite-plugin-ts-mono-alias": "^1.1.0"
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 63aa9413c129a6e77072673cd3022d4d9bfed364
