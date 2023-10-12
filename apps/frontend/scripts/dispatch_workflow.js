@@ -17,6 +17,27 @@ function findLatestVersion(versions) {
   return versions[versionNumbers.indexOf(Math.max(...versionNumbers))];
 }
 
+function createPullRequest({ branchName, body, title = branchName, base = 'main' }) {
+  if (!branchName) {
+    return Promise.reject('branch name is not set');
+  }
+
+  console.log('Create a pull request');
+
+  return octokit.rest.pulls
+    .create({
+      owner: 'opendatalab',
+      repo: 'labelU-Kit',
+      head: branchName,
+      title,
+      base,
+      body,
+    })
+    .then(() => {
+      console.log('Create a pull request success');
+    });
+}
+
 async function main() {
   const args = minimist(process.argv.slice(2));
   const [branch, nextVersion, releaseTime, releaseNotes] = args._;
@@ -60,6 +81,21 @@ async function main() {
     .catch((err) => {
       console.log('trigger labelu workflow failed', err);
     });
+
+  await new Promise((resolve) => {
+    setTimeout(async () => {
+      createPullRequest({
+        branch,
+        body: releaseNotes,
+        base: 'main',
+        title: 'Update package version',
+      }).catch((err) => {
+        console.log(err);
+      });
+      resolve();
+      // 避免 You have exceeded a secondary rate limit 问题
+    }, 1000);
+  });
 }
 
 main();
