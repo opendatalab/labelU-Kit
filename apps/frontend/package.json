@@ -1,6 +1,6 @@
 {
   "name": "@labelu/frontend",
-  "version": "0.1.0",
+  "version": "3.0.0-alpha.4",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
@@ -8,10 +8,10 @@
     "@labelu/components": "1.0.0-alpha.1",
     "@labelu/components-react": "1.1.0-alpha.1",
     "@labelu/formatter": "1.0.0-alpha.1",
-    "@labelu/interface": "1.1.0-alpha.1",
-    "@labelu/video-annotator-react": "1.0.0-alpha.4",
-    "@labelu/audio-annotator-react": "1.0.0-alpha.2",
-    "@labelu/video-react": "1.1.0-alpha.1",
+    "@labelu/interface": "1.1.0-alpha.2",
+    "@labelu/video-annotator-react": "1.1.0-alpha.2",
+    "@labelu/audio-annotator-react": "1.1.0-alpha.2",
+    "@labelu/video-react": "1.1.0-alpha.2",
     "@rematch/core": "^2.2.0",
     "@rematch/immer": "^2.1.3",
     "@rematch/loading": "^2.1.2",
