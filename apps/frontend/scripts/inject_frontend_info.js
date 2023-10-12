@@ -3,7 +3,7 @@ const fs = require('fs');
 const { Octokit } = require('@octokit/rest');
 
 const octokit = new Octokit({
-  auth: process.env.GH_TOKEN,
+  auth: process.env.PERSONAL_TOKEN,
 });
 
 const prettier = require('prettier');
