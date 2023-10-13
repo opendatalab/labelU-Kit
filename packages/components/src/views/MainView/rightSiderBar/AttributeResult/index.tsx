@@ -15,7 +15,7 @@ import { isEmpty, find, sortBy, cloneDeep, map, update, every, compact, size, fi
 import Icon, { EditFilled, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import styled, { css } from 'styled-components';
 import type { FormInstance, Rule } from 'antd/es/form';
-import type { AnnotationResult, Attribute, AttributeOption, InnerAttributeType, StringType } from '@label-u/annotation';
+import type { AnnotationResult, Attribute, AttributeOption, InnerAttributeType, StringType } from '@labelu/annotation';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import emptyAttributeImg from '@/assets/common/emptyAttribute.png';

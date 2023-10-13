@@ -1,16 +1,18 @@
 import _ from 'lodash';
-import type { VideoSample } from '@label-u/video-editor-react/dist/Editor/context';
-import type { EditorProps } from '@label-u/video-editor-react';
+import type { VideoSample } from '@labelu/video-annotator-react/dist/Editor/context';
+import type { EditorProps } from '@labelu/video-annotator-react';
 
 import type { SampleData } from '@/services/types';
+import { MediaType } from '@/services/types';
 
-import { jsonParse } from '.';
+import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
 export function convertVideoSample(
   sample: SampleData | undefined,
   sampleId: string | number | undefined,
   config: EditorProps['config'],
+  mediaType?: MediaType,
 ): VideoSample | undefined {
   if (!sample || !sampleId) {
     return;
@@ -30,15 +32,15 @@ export function convertVideoSample(
 
   // annotation
   const pool = [
-    ['segment', 'videoSegmentTool'],
-    ['frame', 'videoFrameTool'],
+    ['segment', MediaType.VIDEO === mediaType ? 'videoSegmentTool' : 'audioSegmentTool'],
+    ['frame', MediaType.VIDEO === mediaType ? 'videoFrameTool' : 'audioFrameTool'],
     ['text', 'textTool'],
     ['tag', 'tagTool'],
   ];
 
   return {
     id,
-    url: url.replace('attachment', 'partial'),
+    url: mediaType === MediaType.VIDEO ? url.replace('attachment', 'partial') : url,
     annotations: _.chain(pool)
       .map(([type, key]) => {
         const items = _.get(resultParsed, [key, 'result'], []);

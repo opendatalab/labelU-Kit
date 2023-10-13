@@ -8,7 +8,13 @@ export interface AttributeOption extends AttributeItem {
 }
 
 export interface Attribute extends AttributeItem {
+  /**
+   * Color of the attribute.
+   */
   color: string;
+  /**
+   * Attribute list
+   */
   attributes?: InnerAttribute[];
 }
 

@@ -7,7 +7,7 @@ name: Deploy Gatsby site to Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["release"]
+    branches: ['beta'] # TODO: Change to release
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,7 +21,7 @@ permissions:
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: false
 
 # Default to bash
@@ -55,7 +55,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: '14'
           cache: ${{ steps.detect-package-manager.outputs.manager }}
           cache-dependency-path: ./apps/docs/package-lock.json
       - name: Setup Pages
@@ -86,7 +86,7 @@ jobs:
       - name: Build with Gatsby
         working-directory: ./apps/docs
         env:
-          PREFIX_PATHS: "true"
+          PREFIX_PATHS: 'true'
         run: ${{ steps.detect-package-manager.outputs.manager }} run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2

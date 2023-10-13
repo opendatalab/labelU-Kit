@@ -1,6 +1,5 @@
 ## RenderEnhance
 
-
 ### 功能
 
 在原有渲染的基础上进行渲染增强，适配更多的业务场景的扩展
@@ -26,16 +25,15 @@ declare interface IRenderEnhance {
   selectedRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
   creatingRender?: (canvas: HTMLCanvasElement, data: any, style: IAnnotationStyle) => void;
 }
-
 ```
 
 ### 示例
 
 ```ts
-import AnnotationOperation from '@label-u/components';
+import AnnotationOperation from '@labelu/components';
 import 'antd/dist/antd.css';
-import '@label-u/components/dist/index.css';
-import { DrawUtils } from '@label-u/annotation';
+import '@labelu/components/dist/index.css';
+import { DrawUtils } from '@labelu/annotation';
 
 const imgUrl = ''; // 你需要更改当前图片路径 imgUrl
 

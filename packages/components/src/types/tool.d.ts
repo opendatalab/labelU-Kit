@@ -1,4 +1,4 @@
-import type { ToolConfig } from '@label-u/annotation';
+import type { ToolConfig } from '@labelu/annotation';
 export interface IShortcut {
   name: string;
   icon: any;

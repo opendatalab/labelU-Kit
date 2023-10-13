@@ -1,4 +1,4 @@
-import type { GlobalAnnotationType, InnerAttribute, TextAttribute } from '@label-u/interface';
+import type { GlobalAnnotationType, InnerAttribute, TextAttribute } from '@labelu/interface';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo } from 'react';
@@ -223,7 +223,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
           key: item.value,
           label: (
             <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
-              <div>{attributeConfigItem.key}</div>
+              <span>{attributeConfigItem.key}</span>
             </EllipsisText>
           ),
           forceRender: true,
@@ -256,10 +256,10 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
           key: item.value,
           label: (
             <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
-              <div>
+              <span>
                 {item.required && <span style={{ color: 'red' }}>*</span>}
                 {attributeConfigItem.key}
-              </div>
+              </span>
             </EllipsisText>
           ),
           forceRender: true,

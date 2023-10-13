@@ -8,5 +8,8 @@ export * from './EllipsisText';
 export * from './AttributeTree';
 export * from './HotkeyPanel';
 export * from './HotkeyTable';
+export * from './AudioCard';
 export * from './Kbd';
+export * from './MediaAnnotator';
+export * from './PlayerController';
 export * from './utils';

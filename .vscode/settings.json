@@ -17,5 +17,6 @@
   "search.exclude": {
     "**/node_modules*": true
   },
+  "files.associations": { "*.json": "jsonc" },
   "cSpell.words": ["attachement", "enter", "exit", "Props", "sider", "wrapper"]
 }

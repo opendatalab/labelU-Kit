@@ -1,9 +1,8 @@
 import { useState } from 'react';
 
 import Video from '../Video';
-import type { VideoAnnotation } from '../AnnotationBar';
 
-const mockData: VideoAnnotation[] = [
+const mockData: any[] = [
   {
     id: '1',
     start: 6.087957,
@@ -90,11 +89,11 @@ const attributeData = [
 ];
 
 export default function Doc() {
-  const [editingType, setEditingType] = useState<VideoAnnotationType>('segment');
+  const [editingType, setEditingType] = useState('segment');
   const [editingLabel, setEditingLabel] = useState<string>('label-2');
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
-  const [annotations, setAnnotations] = useState<VideoAnnotation[]>(mockData);
-  const handleOnChange = (_annotations: VideoAnnotation[]) => {
+  const [annotations, setAnnotations] = useState(mockData);
+  const handleOnChange = (_annotations) => {
     setAnnotations(_annotations);
   };
   const labelOptions = attributeData.map((item) => {
@@ -122,7 +121,7 @@ export default function Doc() {
         <select
           value={editingType}
           onChange={(e) => {
-            setEditingType(e.target.value as VideoAnnotationType);
+            setEditingType(e.target.value);
           }}
         >
           <option value="">none</option>

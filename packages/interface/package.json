@@ -1,24 +1,27 @@
 {
-  "name": "@label-u/interface",
-  "version": "1.0.0",
-  "description": "typescript interfaces for label-u annotations",
+  "name": "@labelu/interface",
+  "version": "1.1.0-alpha.9",
+  "description": "typescript interfaces for labelu annotations",
   "types": "./dist/index.d.ts",
+  "typings": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -d --emitDeclarationOnly"
+    "dev": "tsc -d --emitDeclarationOnly -w",
+    "build": "tsc -d --emitDeclarationOnly",
+    "docs": "typedoc --out docs",
+    "clean": "rimraf ./node_modules"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/opendatalab/labelU-Kit.git"
   },
+  "license": "Apache-2.0",
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.shlab.tech"
+    "access": "public"
   },
   "author": {
     "name": "gary",
     "email": "shenguanlin@pjlab.org.cn"
   },
-  "license": "ISC",
   "devDependencies": {
     "typescript": "^5.1.6"
   }

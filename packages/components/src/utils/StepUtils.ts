@@ -1,4 +1,4 @@
-import { cTool } from '@label-u/annotation';
+import { cTool } from '@labelu/annotation';
 
 import { EStepType } from '@/constant';
 import type { IStepInfo } from '@/types/step';

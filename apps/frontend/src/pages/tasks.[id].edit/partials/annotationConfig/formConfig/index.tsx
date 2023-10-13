@@ -1,4 +1,4 @@
-import { EToolName, TOOL_NAME, EVideoToolName } from '@label-u/annotation';
+import { EToolName, TOOL_NAME, EVideoToolName, EAudioToolName } from '@labelu/annotation';
 import type { FormProps, SelectProps, TabsProps } from 'antd';
 import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
@@ -21,8 +21,10 @@ import polygonTemplate from './templates/polygon.template';
 import pointTemplate from './templates/point.template';
 import tagTemplate from './templates/tag.template';
 import textTemplate from './templates/text.template';
-import videoSegmentTemplate from './templates/segment.template';
-import videoFrameTemplate from './templates/frame.template';
+import videoSegmentTemplate from './templates/videoSegment.template';
+import videoFrameTemplate from './templates/videoFrame.template';
+import audioSegmentTemplate from './templates/audioSegment.template';
+import audioFrameTemplate from './templates/audioFrame.template';
 
 // 注册fancyInput自定义输入组件
 add('list-attribute', FancyAttributeList);
@@ -31,6 +33,7 @@ add('category-attribute', FancyCategoryAttribute);
 const globalTools = [EToolName.Tag, EToolName.Text];
 const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line];
 const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool];
+const audioAnnotationTools = [EAudioToolName.AudioSegmentTool, EAudioToolName.AudioFrameTool];
 
 const toolMapping = {
   [MediaType.IMAGE]: graphicTools.map((item) => {
@@ -45,6 +48,12 @@ const toolMapping = {
       value: item,
     };
   }),
+  [MediaType.AUDIO]: audioAnnotationTools.map((item) => {
+    return {
+      label: TOOL_NAME[item],
+      value: item,
+    };
+  }),
 };
 
 const getDefaultActiveTool = (mediaType?: MediaType) => {
@@ -53,6 +62,8 @@ const getDefaultActiveTool = (mediaType?: MediaType) => {
       return EToolName.Rect;
     case MediaType.VIDEO:
       return EVideoToolName.VideoSegmentTool;
+    case MediaType.AUDIO:
+      return EAudioToolName.AudioSegmentTool;
     default:
       return undefined;
   }
@@ -67,6 +78,8 @@ const templateMapping: Record<string, any> = {
   [EToolName.Text]: textTemplate,
   [EVideoToolName.VideoSegmentTool]: videoSegmentTemplate,
   [EVideoToolName.VideoFrameTool]: videoFrameTemplate,
+  [EAudioToolName.AudioSegmentTool]: audioSegmentTemplate,
+  [EAudioToolName.AudioFrameTool]: audioFrameTemplate,
 };
 
 const FormConfig = () => {

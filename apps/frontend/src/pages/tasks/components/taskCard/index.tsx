@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import Icon, { ExclamationOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 
 import { modal } from '@/StaticAnt';
 import type { Dispatch, RootState } from '@/store';

@@ -1,4 +1,4 @@
-import { i18n } from '@label-u/utils';
+import { i18n } from '@labelu/utils';
 
 import AnnotationView from '@/components/AnnotationView';
 

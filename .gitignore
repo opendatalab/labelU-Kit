@@ -2,6 +2,8 @@
 
 .vscode/launch.json
 
+temp
+
 # dependencies
 node_modules
 .DS_Store
@@ -34,6 +36,7 @@ es
 .env.development.local
 .env.test.local
 .env.production.local
+.script.test.js
 
 npm-debug.log*
 yarn-debug.log*

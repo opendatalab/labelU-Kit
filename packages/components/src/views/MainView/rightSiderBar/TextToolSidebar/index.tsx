@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useMemo } from 'react';
 import { Input, Form } from 'antd';
-import { cKeyCode, uuid } from '@label-u/annotation';
+import { cKeyCode, uuid } from '@labelu/annotation';
 import { cloneDeep, map, set } from 'lodash-es';
 import styled from 'styled-components';
 import type { FormInstance, Rule } from 'antd/es/form';

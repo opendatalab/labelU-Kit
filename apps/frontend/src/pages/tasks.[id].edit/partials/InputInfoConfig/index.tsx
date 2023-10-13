@@ -32,6 +32,10 @@ const InputInfoConfig = () => {
                     label: '视频',
                     value: MediaType.VIDEO,
                   },
+                  {
+                    label: '音频',
+                    value: MediaType.AUDIO,
+                  },
                 ]}
               />
             </Form.Item>

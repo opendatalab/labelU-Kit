@@ -1,3 +1,3 @@
 export default function Logo() {
-  return "@label-u/components";
+  return '@labelu/components';
 }

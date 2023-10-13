@@ -1,6 +1,6 @@
 {
-  "name": "@label-u/components-react",
-  "version": "1.0.0",
+  "name": "@labelu/components-react",
+  "version": "1.1.0-alpha.9",
   "description": "basic react components for labelU",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -8,15 +8,15 @@
   "scripts": {
     "build": "vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
-    "dev": "vite -c vite.config.app.ts"
+    "clean": "rimraf ./node_modules",
+    "start": "vite -c vite.config.app.ts"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/opendatalab/labelU-Kit.git"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.shlab.tech"
+    "access": "public"
   },
   "author": {
     "name": "gary",
@@ -36,14 +36,16 @@
     "rc-tooltip": "^6.0.1",
     "rc-tree": "^5.7.10",
     "react-draggable": "^4.4.5",
+    "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@label-u/annotation": "2.2.0",
-    "@label-u/interface": "1.0.0",
+    "@labelu/annotation": "1.0.0-alpha.1",
+    "@labelu/interface": "1.1.0-alpha.9",
     "@types/react": "^18.2.20",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^3.1.0",
+    "npm-run-all": "^4.1.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
@@ -56,5 +58,5 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "license": "ISC"
+  "license": "Apache-2.0"
 }

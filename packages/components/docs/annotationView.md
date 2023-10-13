@@ -7,34 +7,29 @@
 ## Examples
 
 ```ts
-import { AnnotationView } from '@label-u/components';
+import { AnnotationView } from '@labelu/components';
 
 const src = ''; // 可访问的图片路径
 
 const DefaultComponent = () => {
-  return (
-    <AnnotationView
-     src={src}
-   />
-  )
-}
+  return <AnnotationView src={src} />;
+};
 
 export default DefaultComponent;
 ```
 
-
 ## API
 
-| 参数            | 说明                                    | 是否必填 | 类型                                                  |            默认             |
-| --------------- | --------------------------------------- | -------- | ----------------------------------------------------- | :-------------------------: |
-| src             | 图片路径                                | 是       | string                                                |              -              |
-| size            | 当前标注展示框的大小                    | 否       | ISize                                                 | {width: 1280, height: 720,} |
-| annotations     | 标注内容的集合                          | 否       | IAnnotationData[]                                     |             []              |
-| style           | 基础标注默认样式                        | 否       | IBasicStyle                                           |             {}              |
-| zoomChange      | 监听内部缩放比例的改变                  | 否       | (zoom: number) => void                                |              -              |
-| backgroundStyle | 容器 style 控制，现用于背景颜色的控制的 | 否       | CSSProperties                                         |             {}              |
-| onChange        | 监听内部的对标注数据的操作              | 否       | (type: 'hover' \| 'selected', ids: string[]) => void; |              -              |
-| showLoading     | 是否进行加载中                          | 否       | boolean                                               |            false            |
+| 参数 | 说明 | 是否必填 | 类型 | 默认 |
+| --- | --- | --- | --- | :-: |
+| src | 图片路径 | 是 | string | - |
+| size | 当前标注展示框的大小 | 否 | ISize | {width: 1280, height: 720,} |
+| annotations | 标注内容的集合 | 否 | IAnnotationData[] | [] |
+| style | 基础标注默认样式 | 否 | IBasicStyle | {} |
+| zoomChange | 监听内部缩放比例的改变 | 否 | (zoom: number) => void | - |
+| backgroundStyle | 容器 style 控制，现用于背景颜色的控制的 | 否 | CSSProperties | {} |
+| onChange | 监听内部的对标注数据的操作 | 否 | (type: 'hover' \| 'selected', ids: string[]) => void; | - |
+| showLoading | 是否进行加载中 | 否 | boolean | false |
 
 ### Special API
 
@@ -55,7 +50,7 @@ interface IBasicStyle {
 }
 
 interface IGraphicsBasicConfig extends IBasicStyle {
-  hiddenText?: boolean; 
+  hiddenText?: boolean;
   isReference?: boolean;
 }
 
@@ -102,5 +97,4 @@ interface IBasicText {
   lineHeight?: number;
   font?: string; // canvas-font https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font
 }
-
 ```

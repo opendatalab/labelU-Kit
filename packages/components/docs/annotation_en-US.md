@@ -25,9 +25,9 @@ interface IFileItem {
 ## Quick Start
 
 ```ts
-import AnnotationOperation from '@label-u/components';
+import AnnotationOperation from '@labelu/components';
 import 'antd/dist/antd.css';
-import '@label-u/components/dist/index.css';
+import '@labelu/components/dist/index.css';
 
 const imgUrl = ''; // You need to change imgUrl
 
@@ -79,9 +79,9 @@ export default App;
 ## Full configuration
 
 ```ts
-import AnnotationOperation from '@label-u/components';
+import AnnotationOperation from '@labelu/components';
 import 'antd/dist/antd.css';
-import '@label-u/components/dist/index.css';
+import '@labelu/components/dist/index.css';
 
 const imgUrl = ''; // You need to change imgUrl
 
@@ -284,13 +284,13 @@ const App = () => {
       stepList={stepList}
       goBack={goBack}
       getFileData={getFileData}
-      headerName='任务标题' // 不写则隐藏标题
+      headerName="任务标题" // 不写则隐藏标题
       initialIndex={0} // 仅在初始化时使用，表示当前图片 index，默认为：0.
       // 支持覆盖 侧边栏 传入组件的形式
       sider={sider} // 传入 null 则隐藏
       footer={footer} // 传入 null 则隐藏
       header={header} // 传入 null 则隐藏
-      className='layout' // 组件默认宽高为 100vw 100vh，若需修改这通过 className 更改样式 or style 的 layout 进行更改
+      className="layout" // 组件默认宽高为 100vw 100vh，若需修改这通过 className 更改样式 or style 的 layout 进行更改
       style={style}
     />
   );
@@ -301,7 +301,7 @@ export default App;
 
 | Params       | Description                       | Required | Type         |
 | ------------ | --------------------------------- | -------- | ------------ |
-| imgList      | list of annotation                | 是       | IFileItem[]    |
+| imgList      | list of annotation                | 是       | IFileItem[]  |
 | step         | current step                      | 是       | Number       |
 | stepList     | the config of each step           | 是       | stepList     |
 | ref          | ForwardRef                        | 否       |              |

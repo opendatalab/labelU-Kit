@@ -1,4 +1,4 @@
-import formatter from '@label-u/formatter';
+import formatter from '@labelu/formatter';
 import { Popover, Tooltip } from 'antd';
 import type { TooltipPropsWithTitle } from 'antd/lib/tooltip';
 import React from 'react';

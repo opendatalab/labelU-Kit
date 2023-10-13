@@ -27,9 +27,9 @@ interface IFileItem {
 ## 快速上手
 
 ```ts
-import AnnotationOperation from '@label-u/components';
+import AnnotationOperation from '@labelu/components';
 import 'antd/dist/antd.css';
-import '@label-u/components/dist/index.css';
+import '@labelu/components/dist/index.css';
 
 const imgUrl = ''; // 你需要更改当前图片路径 imgUrl
 
@@ -81,9 +81,9 @@ export default App;
 ## 全配置介绍
 
 ```ts
-import AnnotationOperation from '@label-u/components';
+import AnnotationOperation from '@labelu/components';
 import 'antd/dist/antd.css';
-import '@label-u/components/dist/index.css';
+import '@labelu/components/dist/index.css';
 
 const imgUrl = ''; // 你需要更改当前图片路径 imgUrl
 
@@ -284,10 +284,7 @@ const App = () => {
    * @param page 第一页为0
    * @param size 默认为10
    */
-  const loadFileList = (
-    page: number,
-    pageSize: number,
-  ): Promise<{ fileList: IFileItem[]; total: number }> => {
+  const loadFileList = (page: number, pageSize: number): Promise<{ fileList: IFileItem[]; total: number }> => {
     return new Promise((resolve) => {
       resolve({ fileList: [], total: 100 });
     });
@@ -319,13 +316,13 @@ const App = () => {
       loadFileList={loadFileList}
       onPageChange={onPageChange}
       onStepChange={onStepChange}
-      headerName='任务标题' // 不写则隐藏标题
+      headerName="任务标题" // 不写则隐藏标题
       initialIndex={0} // 仅在初始化时使用，表示当前图片 index，默认为：0.
       // 支持覆盖 侧边栏 传入组件的形式
       sider={sider} // 传入 null 则隐藏
       footer={footer} // 传入 null 则隐藏
       header={header} // 传入 null 则隐藏
-      className='layout' // 组件默认宽高为 100vw 100vh，若需修改这通过 className 更改样式 or style 的 layout 进行更改
+      className="layout" // 组件默认宽高为 100vw 100vh，若需修改这通过 className 更改样式 or style 的 layout 进行更改
       style={style}
     />
   );
@@ -344,8 +341,8 @@ export default App;
 | onSave       | 保存的时候触发 data 表示当前标注的信息      | 否       | onSave       |
 | goBack       | 页面内自带跳转的回调函数                    | 否       | goBack       |
 | getFileData  | 支持外部传入获取文件接口                    | 否       | getFileData  |
-| loadFileList  | 异步加载文件列表                            | 否       | loadFileList  |
-| pageSize     | loadFileList 每次加载的文件数量              | 否       | number       |
+| loadFileList | 异步加载文件列表                            | 否       | loadFileList |
+| pageSize     | loadFileList 每次加载的文件数量             | 否       | number       |
 | onPageChange | 翻页的回调                                  | 否       | onPageChange |
 | onStepChange | 切换步骤的回调                              | 否       | onStepChange |
 | headerName   | 标题                                        | 否       | string       |
