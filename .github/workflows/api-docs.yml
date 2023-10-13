@@ -73,6 +73,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build packages
+        run: pnpm run build
+
       - name: Build typedoc docs
         run: pnpm run docs
 
