@@ -31,7 +31,6 @@
 | [@labelu/audio-annotator-react](./packages/audio-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react) | Audio annotator for React |
 | [@labelu/video-react](./packages/video-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-react.svg)](https://www.npmjs.com/package/@labelu/video-react) | Basic React components for Video annotator |
 | [@labelu/video-annotator-react](./packages/video-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-annotator-react.svg)](https://www.npmjs.com/package/@labelu/video-annotator-react) | Video annotator for React |
-| [@labelu/utils](./packages/utils) | [![npm](https://img.shields.io/npm/v/%40labelu/utils.svg)](https://www.npmjs.com/package/@labelu/utils) | utils for other packages |
 
 ## License
 

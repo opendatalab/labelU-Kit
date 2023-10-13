@@ -2,6 +2,8 @@
 
 .vscode/launch.json
 
+temp
+
 # dependencies
 node_modules
 .DS_Store

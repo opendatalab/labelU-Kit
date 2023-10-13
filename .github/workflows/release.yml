@@ -27,7 +27,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  publish-packages:
+  release-packages-and-frontend:
     runs-on: ubuntu-latest
 
     steps:
@@ -96,3 +96,25 @@ jobs:
 
       - name: Release frontend
         run: pnpm run release:frontend
+
+      - name: Build docs
+        if: ${{ github.ref == 'refs/heads/release' }}
+        run: pnpm run docs
+
+      - name: Upload artifact
+        if: ${{ github.ref == 'refs/heads/release' }}
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./docs
+
+  # Deployment job
+  deploy-to-github-pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: release-packages-and-frontend
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
