@@ -1,6 +1,6 @@
 {
   "name": "@labelu/interface",
-  "version": "1.1.0-alpha.9",
+  "version": "1.0.0",
   "description": "typescript interfaces for labelu annotations",
   "types": "./dist/index.d.ts",
   "typings": "./dist/index.d.ts",
