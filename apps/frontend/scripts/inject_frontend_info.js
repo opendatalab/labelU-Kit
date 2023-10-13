@@ -52,6 +52,8 @@ async function main() {
   const [branch, nextVersion] = args._;
   const appPkgJson = require('../package.json');
   const workspace = path.join(__dirname, '../../../');
+  const workspacePkgPath = path.join(workspace, 'package.json');
+  const workspacePkgJson = require(workspacePkgPath);
   const pksPath = path.join(__dirname, '../package.json');
   const versions = {
     version: nextVersion || appPkgJson.version,
@@ -60,17 +62,29 @@ async function main() {
 
   if (nextVersion) {
     appPkgJson.version = nextVersion;
+    workspacePkgJson.version = nextVersion;
     fs.writeFileSync(path.join(__dirname, '../package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
-    console.log('update package.json version success!');
+    fs.writeFileSync(workspacePkgPath, JSON.stringify(workspacePkgJson, null, 2), 'utf-8');
 
     await createCommit({
       owner: 'opendatalab',
       repo: 'labelU-Kit',
-      message: `chore: update package.json version to ${nextVersion} [skip ci]`,
+      message: `chore: update frontend package.json version to ${nextVersion} [skip ci]`,
       content: JSON.stringify(appPkgJson, null, 2),
       branch,
       filepath: path.relative(workspace, pksPath),
     });
+
+    await createCommit({
+      owner: 'opendatalab',
+      repo: 'labelU-Kit',
+      message: `chore: update workspace package.json version to ${nextVersion} [skip ci]`,
+      content: JSON.stringify(workspacePkgJson, null, 2),
+      branch,
+      filepath: path.relative(workspace, workspacePkgPath),
+    });
+
+    console.log('update package.json version success!');
   }
 
   console.log('next version is', nextVersion);

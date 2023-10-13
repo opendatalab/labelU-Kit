@@ -5,7 +5,7 @@
     "packages/*",
     "apps/frontend"
   ],
-  "version": "1.7.0",
+  "version": "3.0.0-alpha.13",
   "scripts": {
     "prepare": "husky install",
     "build": "pnpm --filter @labelu/utils --filter @labelu/formatter --filter @labelu/annotation --filter @labelu/components --filter @labelu/interface --filter @labelu/components-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
@@ -16,6 +16,8 @@
     "lint:packages": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
     "lint:style": "stylelint --fix '**/*.less'",
     "commit": "cz",
+    "docs": "typedoc",
+    "docs-all": "npm run docs --workspaces --if-present",
     "release-dry": "multi-semantic-release --dry-run --ignore-private-packages --no-ci",
     "release": "multi-semantic-release --ignore-private-packages"
   },
@@ -63,7 +65,8 @@
     "semantic-release-github-pullrequest": "^1.3.0",
     "stylelint": "^14.16.1",
     "stylelint-prettier": "^2.0.0",
-    "tsc-files": "^1.1.3"
+    "tsc-files": "^1.1.3",
+    "typedoc": "^0.25.2"
   },
   "husky": {
     "hooks": {

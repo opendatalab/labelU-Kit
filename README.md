@@ -32,7 +32,6 @@
 | [@labelu/audio-annotator-react](./packages/audio-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react) | 音频 React 标注套件 |
 | [@labelu/video-react](./packages/video-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-react.svg)](https://www.npmjs.com/package/@labelu/video-react) | 基础视频标注 React 组件 |
 | [@labelu/video-annotator-react](./packages/video-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-annotator-react.svg)](https://www.npmjs.com/package/@labelu/video-annotator-react) | 视频 React 标注套件 |
-| [@labelu/utils](./packages/utils) | [![npm](https://img.shields.io/npm/v/%40labelu/utils.svg)](https://www.npmjs.com/package/@labelu/utils) | 工具库 |
 
 ## 许可证
 
