@@ -1,0 +1,10 @@
+{
+  "entryPoints": ["packages/interface", "packages/audio-react"],
+  "name": "LabelU Kit",
+  "basePath": "apis",
+  "entryPointStrategy": "packages",
+  "includeVersion": true
+
+  // Potentially useful for debugging
+  // "logLevel": "Verbose"
+}
