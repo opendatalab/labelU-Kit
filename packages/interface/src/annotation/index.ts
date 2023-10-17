@@ -5,6 +5,7 @@ import type {
   AudioFrameAnnotation,
   AudioSegmentAnnotation,
 } from './audio';
+import type { TagAnnotationEntity, TextAnnotationEntity } from './others';
 import type {
   VideoAnnotationData,
   VideoAnnotationInUI,
@@ -32,3 +33,6 @@ export type MediaSegment = VideoSegmentAnnotation | AudioSegmentAnnotation;
 
 /** 多媒体标注时间戳 */
 export type MediaFrame = VideoFrameAnnotation | AudioFrameAnnotation;
+
+/** 包含文本描述和标签分类的多媒体标注数据 */
+export type MediaAnnotationWithTextAndTag = MediaAnnotationInUI | TextAnnotationEntity | TagAnnotationEntity;
