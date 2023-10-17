@@ -2,7 +2,7 @@
 #
 # To get started with Gatsby see: https://www.gatsbyjs.com/docs/quick-start/
 #
-name: Deploy Gatsby site to Pages
+name: Api Documentation
 
 on:
   # Runs on pushes targeting the default branch
