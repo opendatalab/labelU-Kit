@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import type WaveSurfer from 'wavesurfer.js';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
-import type { AudioAnnotationInUI, MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
+import type { MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
 import type {
   Attribute,
   AudioAnnotationType,
@@ -11,6 +11,7 @@ import type {
   AudioSegmentName,
   AudioSegmentToolConfig,
   EnumerableAttribute,
+  AudioAnnotationInUI,
 } from '@labelu/interface';
 import { AttributeOverlay, MediaAnnotationContext, MediaAnnotator, PlayerController } from '@labelu/components-react';
 

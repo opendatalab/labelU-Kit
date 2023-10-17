@@ -8,8 +8,9 @@ import type {
   VideoSegmentToolConfig,
   VideoFrameToolConfig,
   EnumerableAttribute,
+  VideoAnnotationInUI,
 } from '@labelu/interface';
-import type { MediaAnnotatorRef, VideoAnnotationInUI } from '@labelu/components-react';
+import type { MediaAnnotatorRef } from '@labelu/components-react';
 import { MediaAnnotator, MediaAnnotationContext, AttributeOverlay } from '@labelu/components-react';
 
 import { VideoPlayer } from './VideoPlayer';
