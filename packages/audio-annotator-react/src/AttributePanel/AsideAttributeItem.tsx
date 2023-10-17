@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components';
 import { useMemo } from 'react';
 import { EllipsisText, secondsToMinute } from '@labelu/components-react';
+import type { MediaAnnotationInUI, MediaAnnotationWithTextAndTag } from '@labelu/interface';
 
 import { ReactComponent as SegmentIcon } from '@/assets/icons/segment.svg';
 import { ReactComponent as FrameIcon } from '@/assets/icons/frame.svg';
@@ -9,10 +10,10 @@ import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 import { ReactComponent as VisibilityIcon } from '@/assets/icons/visibility.svg';
 import { ReactComponent as VisibilityOffIcon } from '@/assets/icons/visibility-off.svg';
 
-import { useAnnotator, type VideoAnnotationInEditor, type VideoWithGlobalAnnotation } from '../context';
+import { useAnnotator } from '../context';
 
 interface AttributeItemProps {
-  annotation: VideoAnnotationInEditor;
+  annotation: MediaAnnotationInUI;
   order: number;
   labelText: string;
   color: string;
@@ -102,8 +103,8 @@ const Body = styled.div`
 `;
 
 export interface AttributeActionProps {
-  annotation?: VideoAnnotationInEditor;
-  annotations?: VideoAnnotationInEditor[];
+  annotation?: MediaAnnotationInUI;
+  annotations?: MediaAnnotationInUI[];
   showEdit?: boolean;
 }
 
@@ -119,7 +120,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
     return annotations.reduce((acc, item) => {
       acc[item.id] = item;
       return acc;
-    }, {} as Record<string, VideoWithGlobalAnnotation>);
+    }, {} as Record<string, MediaAnnotationWithTextAndTag>);
   }, [annotations]);
 
   const visible = useMemo(() => {
