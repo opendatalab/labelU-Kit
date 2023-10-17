@@ -7,16 +7,10 @@
  */
 export type AttributeValue = Record<string, string | string[]>;
 
-/**
- * 标签值，包含标签属性值
- */
+/** 标签值，包含标签属性值 */
 export interface LabelValue {
-  /**
-   * 标签id，通常为英文字符
-   */
+  /** 标签id，通常为英文字符 */
   label: string;
-  /**
-   * 标签属性
-   */
+  /** 标签属性值 */
   attributes?: AttributeValue;
 }
