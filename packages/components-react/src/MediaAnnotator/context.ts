@@ -1,21 +1,5 @@
-import type {
-  Attribute,
-  VideoAnnotationData,
-  AudioAnnotationData,
-  VideoFrameName,
-  VideoSegmentName,
-} from '@labelu/interface';
+import type { Attribute, VideoFrameName, VideoSegmentName, MediaAnnotationInUI } from '@labelu/interface';
 import { createContext, useContext } from 'react';
-
-export type VideoAnnotationInUI = VideoAnnotationData & {
-  visible?: boolean;
-};
-
-export type AudioAnnotationInUI = AudioAnnotationData & {
-  visible?: boolean;
-};
-
-export type MediaAnnotationInUI = VideoAnnotationInUI | AudioAnnotationInUI;
 
 export interface MediaAnnotationContextType {
   selectedAnnotation: MediaAnnotationInUI | undefined;

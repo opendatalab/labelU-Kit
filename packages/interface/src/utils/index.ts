@@ -12,16 +12,10 @@
  * @see {@link TextAnnotationEntity}
  */
 export interface AnnotationWrapper<Type, ValueType> {
-  /**
-   * 标注id
-   */
+  /** 标注id */
   id: string;
-  /**
-   * 标注类型
-   */
+  /** 标注类型 */
   type: Type;
-  /**
-   * 标注值
-   */
+  /** 标注值 */
   value: ValueType;
 }

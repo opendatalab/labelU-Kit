@@ -1,9 +1,10 @@
+import React from 'react';
 import { useState } from 'react';
 
-import Video, { AudioAnnotator } from '../Audio';
-import type { AudioAnnotation } from '../AnnotationBar';
+import { AudioAnnotator, type AudioAnnotatorProps } from '@labelu/audio-react';
+import type { AudioAnnotationType, MediaAnnotationInUI } from '@labelu/interface';
 
-const mockData: AudioAnnotation[] = [
+const mockData: any[] = [
   {
     id: '1',
     start: 6.087957,
@@ -12,24 +13,6 @@ const mockData: AudioAnnotation[] = [
     attributes: { eeeee: 'ddddasdqwe爱大赛请问', gffffffasd: ['ddd'] },
     type: 'segment',
   },
-  {
-    id: '2',
-    time: 14,
-    label: 'label-2',
-    attributes: { eeeee: 'vvzxc', gffffffasd: ['ddd'] },
-    type: 'frame',
-  },
-  { id: 'ciwn339hr7', type: 'segment', start: 14.239382, end: 23.094575, label: 'label-2' },
-  { id: 'wmy061xgch9', type: 'segment', start: 22.613409, end: 32, label: 'label-2' },
-  { id: 'afc4u4tb3n9', type: 'segment', start: 32.4, end: 37.4, label: 'label-2' },
-  { id: 'bm6bg3by2zv', type: 'segment', start: 38.4, end: 42.1, label: 'label-2' },
-  { id: 'h7r76w6ldv6', type: 'segment', start: 1.7, end: 8.3, label: 'label-2' },
-  { id: '9f2jb81mv5c', type: 'segment', start: 9.9, end: 12.9, label: 'label-2' },
-  { id: 'xgn2mhett', type: 'segment', start: 17.9, end: 29.690047, label: 'label-2' },
-  { id: '8jc7k83i8mp', type: 'segment', start: 23.7, end: 33.823799, label: 'label-2' },
-  { id: 'fu7qfbp1oyc', type: 'segment', start: 42.8, end: 45.6, label: 'label-2' },
-  { id: 'apyldbrgnrg', type: 'frame', time: 15.2, label: 'xfasd' },
-  { id: 'xnkieti5vns', type: 'segment', start: 27.7, end: 34.6, label: 'label-2' },
 ];
 
 const attributeData = [
@@ -89,13 +72,16 @@ const attributeData = [
   },
 ];
 
-export default function Doc() {
-  const [editingType, setEditingType] = useState<VideoAnnotationType>('segment');
+export default function App() {
+  const [editingType, setEditingType] = useState<AudioAnnotationType>('segment');
   const [editingLabel, setEditingLabel] = useState<string>('label-2');
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
-  const [annotations, setAnnotations] = useState<VideoAnnotation[]>(mockData);
-  const handleOnChange = (_annotations: VideoAnnotation[]) => {
+  const [annotations, setAnnotations] = useState<MediaAnnotationInUI[]>(mockData);
+  const handleOnChange = (_annotations: MediaAnnotationInUI[]) => {
     setAnnotations(_annotations);
+  };
+  const handleOnEnd: AudioAnnotatorProps['onAnnotateEnd'] = (annotation) => {
+    setAnnotations([...annotations, annotation]);
   };
   const labelOptions = attributeData.map((item) => {
     return {
@@ -110,10 +96,19 @@ export default function Doc() {
         src="/sample-15s.mp3"
         editingType={editingType}
         editingLabel={editingLabel}
-        // @ts-ignore
-        attributes={attributeData}
+        toolConfig={{
+          segment: {
+            type: 'segment',
+            attributes: attributeData,
+          },
+          frame: {
+            type: 'frame',
+            attributes: attributeData,
+          },
+        }}
         disabled={isDisabled}
         annotations={annotations}
+        onAnnotateEnd={handleOnEnd}
         onChange={handleOnChange}
       />
       <hr />
@@ -122,7 +117,7 @@ export default function Doc() {
         <select
           value={editingType}
           onChange={(e) => {
-            setEditingType(e.target.value as VideoAnnotationType);
+            setEditingType(e.target.value as AudioAnnotationType);
           }}
         >
           <option value="">none</option>

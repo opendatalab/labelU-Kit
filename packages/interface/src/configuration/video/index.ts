@@ -1,17 +1,28 @@
-import type { VideoAnnotationType, VideoFrameName, VideoSegmentName } from '../../annotation';
-import type { Attribute } from '../attribute';
+import type { AudioAnnotationToolConfig, AudioFrameToolConfig, AudioSegmentToolConfig } from '../audio';
 
-export interface VideoAnnotationToolConfig {
-  attributes?: Attribute[];
-  type: VideoAnnotationType;
-}
+/**
+ * 视频标注工具配置
+ *
+ * @description 与音频标注工具配置一致
+ *
+ * @see {@link AudioAnnotationToolConfig}
+ */
+export type VideoAnnotationToolConfig = AudioAnnotationToolConfig;
 
-export interface VideoSegmentToolConfig {
-  attributes?: Attribute[];
-  type: VideoSegmentName;
-}
+/**
+ * 视频片断分割工具配置
+ *
+ * @description 与音频片断分割工具配置一致
+ *
+ * @see {@link AudioSegmentToolConfig}
+ */
+export type VideoSegmentToolConfig = AudioSegmentToolConfig;
 
-export interface VideoFrameToolConfig {
-  attributes?: Attribute[];
-  type: VideoFrameName;
-}
+/**
+ * 视频时间戳标注工具配置
+ *
+ * @description 与音频时间戳标注工具配置一致
+ *
+ * @see {@link AudioFrameToolConfig}
+ */
+export type VideoFrameToolConfig = AudioFrameToolConfig;

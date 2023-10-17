@@ -7,7 +7,7 @@ name: Deploy Gatsby site to Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ['beta'] # TODO: Change to release
+    branches: ['beta'] # TODO change to release
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

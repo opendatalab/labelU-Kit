@@ -53,3 +53,10 @@ export interface VideoFrameAnnotation extends Omit<VideoSegmentAnnotation, 'star
  * 视频标注数据
  */
 export type VideoAnnotationData = VideoSegmentAnnotation | VideoFrameAnnotation;
+
+/**
+ * 视频标注数据在UI层的表示
+ */
+export type VideoAnnotationInUI = VideoAnnotationData & {
+  visible?: boolean;
+};
