@@ -347,15 +347,6 @@ function ForwardAnnotator(
       setSelectedAttribute(attributeMappingByTool[annotation.type][annotation.label!]);
       setCurrentTool(annotation.type);
       selectedIndexRef.current = videoAnnotations.findIndex((item) => item.id === annotation.id);
-
-      if (playerRef.current) {
-        playerRef.current.currentTime(annotation.type === 'segment' ? annotation.start : annotation.time);
-      }
-
-      if (annotatorRef.current) {
-        annotatorRef.current?.scrollToAnnotation(annotation);
-        annotatorRef.current?.updateTime(annotation.type === 'segment' ? annotation.start : annotation.time);
-      }
     },
     [attributeMappingByTool, videoAnnotations],
   );
@@ -371,6 +362,12 @@ function ForwardAnnotator(
         ..._annotation,
         attributes: defaultAttributes,
       });
+
+      /**
+       * 触发标记结束的自定义事件，用于显示属性编辑框
+       *
+       * @see https://github.com/opendatalab/labelU-Kit/blob/0ef291e50effecef3628edb173b2edff1c3399db/packages/audio-annotator-react/src/LabelSection/index.tsx#L191
+       */
       document.dispatchEvent(
         new CustomEvent('annotate-end', {
           detail: {
