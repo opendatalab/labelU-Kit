@@ -67,8 +67,3 @@ jobs:
 
       - name: Build frontend
         run: pnpm run build:frontend
-
-  merge:
-    needs:
-      - build
-    runs-on: ubuntu-latest
