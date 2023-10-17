@@ -6,13 +6,13 @@ import type {
   GlobalAnnotationType,
   TagAnnotationEntity,
   TextAnnotationEntity,
+  MediaAnnotationInUI,
   TextAttribute,
   VideoAnnotationData,
 } from '@labelu/interface';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 
-import type { VideoAnnotationInEditor } from '../context';
 import { useAnnotator } from '../context';
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
@@ -105,7 +105,7 @@ export function AttributePanel() {
     onAnnotationsChange,
     annotationsMapping,
     onAnnotationsRemove,
-    videoAnnotations,
+    annotations,
     selectedAnnotation,
     attributeMapping,
   } = useAnnotator();
@@ -122,7 +122,7 @@ export function AttributePanel() {
 
     const videoAnnotationsGroupByLabel = new Map<string, VideoAnnotationData[]>();
 
-    for (const item of videoAnnotations) {
+    for (const item of annotations) {
       if (!videoAnnotationsGroupByLabel.has(item.label)) {
         videoAnnotationsGroupByLabel.set(item.label, []);
       }
@@ -135,7 +135,7 @@ export function AttributePanel() {
       videoAnnotationsGroup: videoAnnotationsGroupByLabel,
       defaultActiveKeys: Array.from(videoAnnotationsGroupByLabel.keys()),
     };
-  }, [currentSample?.annotations, videoAnnotations]);
+  }, [currentSample?.annotations, annotations]);
 
   const globals = useMemo(() => {
     const _globals: (TextAttribute | EnumerableAttribute)[] = [];
@@ -186,12 +186,12 @@ export function AttributePanel() {
       _titles.push({
         title: '标记',
         key: 'label' as const,
-        subtitle: `${videoAnnotations.length}条`,
+        subtitle: `${annotations.length}条`,
       });
     }
 
     return _titles;
-  }, [config?.frame, config?.segment, config?.tag, config?.text, globalAnnotations, videoAnnotations.length]);
+  }, [config?.frame, config?.segment, config?.tag, config?.text, globalAnnotations, annotations.length]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
   useEffect(() => {
@@ -214,7 +214,7 @@ export function AttributePanel() {
 
   const handleOnChange = (_changedValues: any, values: any[], type: GlobalAnnotationType) => {
     const newAnnotations = [];
-    const existAnnotations: VideoAnnotationInEditor[] = [];
+    const existAnnotations: MediaAnnotationInUI[] = [];
 
     for (const item of values) {
       if (item.id && item.id in annotationsMapping) {
@@ -228,7 +228,7 @@ export function AttributePanel() {
       }
     }
 
-    const annotations =
+    const _annotations =
       currentSample?.annotations.map((item) => {
         const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
         if (existIndex >= 0) {
@@ -237,7 +237,7 @@ export function AttributePanel() {
 
         return item;
       }) ?? [];
-    onAnnotationsChange([...annotations, ...newAnnotations]);
+    onAnnotationsChange([..._annotations, ...newAnnotations]);
   };
 
   const handleClear = () => {
@@ -248,14 +248,14 @@ export function AttributePanel() {
     if (activeKey === 'global') {
       onAnnotationsRemove(globalAnnotations);
     } else {
-      onAnnotationsRemove(videoAnnotations);
+      onAnnotationsRemove(annotations);
     }
   };
 
   const collapseItems = useMemo(
     () =>
-      Array.from(videoAnnotationsGroup).map(([label, annotations]) => {
-        const found = attributeMapping[annotations[0].type]?.[label];
+      Array.from(videoAnnotationsGroup).map(([label, _annotations]) => {
+        const found = attributeMapping[_annotations[0].type]?.[label];
         const labelText = found ? found?.key ?? '无标签' : '无标签';
 
         return {
@@ -265,13 +265,13 @@ export function AttributePanel() {
                 <div>{labelText}</div>
               </EllipsisText>
 
-              <AttributeAction annotations={annotations} showEdit={false} />
+              <AttributeAction annotations={_annotations} showEdit={false} />
             </Header>
           ),
           key: label,
           children: (
             <AsideWrapper>
-              {annotations.map((item) => (
+              {_annotations.map((item) => (
                 <AsideAttributeItem
                   key={item.id}
                   active={item.id === selectedAnnotation?.id}

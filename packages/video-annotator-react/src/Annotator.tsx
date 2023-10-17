@@ -4,8 +4,6 @@ import type { VideoProps } from '@labelu/video-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type {
-  TagAnnotationEntity,
-  TextAnnotationEntity,
   VideoAnnotationType,
   Attribute,
   VideoSegmentName,
@@ -15,14 +13,11 @@ import type {
   TextAttribute,
   EnumerableAttribute,
   AttributeValue,
+  MediaAnnotationWithTextAndTag,
+  MediaAnnotationInUI,
 } from '@labelu/interface';
 import { LabelSection, AnnotatorContext, AnnotatorToolbar, AttributePanel } from '@labelu/audio-annotator-react';
-import type {
-  VideoAnnotationInEditor,
-  VideoEditorConfig,
-  VideoSample,
-  VideoWithGlobalAnnotation,
-} from '@labelu/audio-annotator-react';
+import type { AudioAnnotatorConfig, MediaSample } from '@labelu/audio-annotator-react';
 import type { MediaAnnotatorRef } from '@labelu/components-react';
 
 import Sidebar from './Sidebar';
@@ -78,17 +73,17 @@ const Content = styled.div`
 `;
 
 export interface AnnotatorRef {
-  getAnnotations: () => VideoWithGlobalAnnotation[];
-  getSample: () => VideoSample | undefined;
+  getAnnotations: () => MediaAnnotationWithTextAndTag[];
+  getSample: () => MediaSample | undefined;
 }
 
 export interface AnnotatorProps {
-  samples: VideoSample[];
+  samples: MediaSample[];
   autoPlay?: boolean;
-  config?: VideoEditorConfig;
+  config?: AudioAnnotatorConfig;
   renderSidebar?: () => React.ReactNode;
   renderAttributes?: () => React.ReactNode;
-  editingSample?: VideoSample;
+  editingSample?: MediaSample;
   maxHistoryCount?: number;
   primaryColor?: string;
   toolbarExtra?: React.ReactNode;
@@ -122,7 +117,7 @@ function ForwardAnnotator(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const playerRef = useRef<any | null>(null);
-  const [selectedAnnotation, setSelectedAnnotation] = useState<VideoAnnotationInEditor | undefined>();
+  const [selectedAnnotation, setSelectedAnnotation] = useState<MediaAnnotationInUI | undefined>();
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | undefined>(attributes[0]);
 
   const attributeMappingByTool = useMemo(() => {
@@ -162,10 +157,10 @@ function ForwardAnnotator(
   );
 
   // ================== sample state ==================
-  const [currentSample, setCurrentSample] = useState<VideoSample | undefined>(editingSample);
+  const [currentSample, setCurrentSample] = useState<MediaSample | undefined>(editingSample);
   // ================== redo undo ==================
-  const pastRef = useRef<VideoSample[]>([]);
-  const futureRef = useRef<VideoSample[]>([]);
+  const pastRef = useRef<MediaSample[]>([]);
+  const futureRef = useRef<MediaSample[]>([]);
 
   // 重置历史记录
   useEffect(() => {
@@ -174,7 +169,7 @@ function ForwardAnnotator(
   }, [editingSample]);
 
   const updateCurrentSample = useCallback(
-    (_newSample: React.SetStateAction<VideoSample | undefined>) => {
+    (_newSample: React.SetStateAction<MediaSample | undefined>) => {
       setCurrentSample((pre) => {
         const newSample = typeof _newSample === 'function' ? _newSample(pre) : _newSample;
 
@@ -232,7 +227,7 @@ function ForwardAnnotator(
 
   // ================== sample ==================
 
-  const handleSelectSample = useCallback((sample: VideoSample) => {
+  const handleSelectSample = useCallback((sample: MediaSample) => {
     setCurrentSample(sample);
     setSelectedAnnotation(undefined);
     pastRef.current = [];
@@ -245,7 +240,7 @@ function ForwardAnnotator(
 
   // ================== annotation ==================
   const annotationsMapping = useMemo(() => {
-    const mapping: Record<string, VideoAnnotationInEditor | TextAnnotationEntity | TagAnnotationEntity> = {};
+    const mapping: Record<string, MediaAnnotationWithTextAndTag> = {};
 
     if (currentSample?.annotations) {
       currentSample?.annotations.reduce((acc, cur) => {
@@ -257,9 +252,9 @@ function ForwardAnnotator(
     return mapping;
   }, [currentSample?.annotations]);
 
-  const videoAnnotations = useMemo(() => {
+  const annotations = useMemo(() => {
     const _videoAnnotations = (currentSample?.annotations?.filter((item) => ['segment', 'frame'].includes(item.type)) ??
-      []) as VideoAnnotationInEditor[];
+      []) as MediaAnnotationInUI[];
 
     _videoAnnotations.sort((a, b) => a.order - b.order);
 
@@ -267,7 +262,7 @@ function ForwardAnnotator(
   }, [currentSample?.annotations]);
 
   const handleAnnotationsChange = useCallback(
-    (_annotations: VideoWithGlobalAnnotation[]) => {
+    (_annotations: MediaAnnotationWithTextAndTag[]) => {
       console.info(JSON.stringify(_annotations, null, 2));
       updateCurrentSample((pre) => {
         return {
@@ -280,7 +275,7 @@ function ForwardAnnotator(
   );
 
   const handleAnnotationChange = useCallback(
-    (_annotation: VideoAnnotationInEditor) => {
+    (_annotation: MediaAnnotationInUI) => {
       updateCurrentSample((pre) => {
         const newAnnotations = pre!.annotations!.map((item) => {
           if (item.id === _annotation?.id) {
@@ -299,7 +294,7 @@ function ForwardAnnotator(
   );
 
   const handleVideoAnnotationAdd = useCallback(
-    (_annotation: VideoAnnotationInEditor) => {
+    (_annotation: MediaAnnotationInUI) => {
       updateCurrentSample((pre) => {
         return {
           ...pre!,
@@ -312,7 +307,7 @@ function ForwardAnnotator(
   );
 
   const handleRemoveAnnotation = useCallback(
-    (_annotation: VideoAnnotationInEditor) => {
+    (_annotation: MediaAnnotationInUI) => {
       updateCurrentSample((pre) => {
         return {
           ...pre!,
@@ -325,12 +320,12 @@ function ForwardAnnotator(
   );
 
   const handleRemoveAnnotations = useCallback(
-    (_annotations: VideoWithGlobalAnnotation[]) => {
+    (_annotations: MediaAnnotationWithTextAndTag[]) => {
       updateCurrentSample((pre) => {
-        const removedMapping: Record<string, VideoWithGlobalAnnotation> = _annotations.reduce((acc, cur) => {
+        const removedMapping: Record<string, MediaAnnotationWithTextAndTag> = _annotations.reduce((acc, cur) => {
           acc[cur.id] = cur;
           return acc;
-        }, {} as Record<string, VideoWithGlobalAnnotation>);
+        }, {} as Record<string, MediaAnnotationWithTextAndTag>);
         return {
           ...pre!,
           annotations: pre!.annotations!.filter((i) => !removedMapping[i.id]),
@@ -342,17 +337,17 @@ function ForwardAnnotator(
   );
 
   const handleSelectAnnotation = useCallback(
-    (annotation: VideoAnnotationInEditor) => {
+    (annotation: MediaAnnotationInUI) => {
       setSelectedAnnotation(annotation);
       setSelectedAttribute(attributeMappingByTool[annotation.type][annotation.label!]);
       setCurrentTool(annotation.type);
-      selectedIndexRef.current = videoAnnotations.findIndex((item) => item.id === annotation.id);
+      selectedIndexRef.current = annotations.findIndex((item) => item.id === annotation.id);
     },
-    [attributeMappingByTool, videoAnnotations],
+    [attributeMappingByTool, annotations],
   );
 
   const handleAnnotateEnd: VideoProps['onAnnotateEnd'] = useCallback(
-    (_annotation: VideoAnnotationInEditor, e?: MouseEvent) => {
+    (_annotation: MediaAnnotationInUI, e?: MouseEvent) => {
       // 生成attributes默认值
       const _attributes = attributeMappingByTool[_annotation.type][_annotation.label!]?.attributes ?? [];
 
@@ -397,7 +392,7 @@ function ForwardAnnotator(
       updateCurrentSample((pre) => {
         const newAnnotations = pre!.annotations!.map((item) => {
           if (item.id === selectedAnnotation?.id) {
-            return newAnnotation as VideoAnnotationInEditor;
+            return newAnnotation as MediaAnnotationInUI;
           }
           return item;
         });
@@ -445,7 +440,7 @@ function ForwardAnnotator(
 
         const newAnnotations = pre!.annotations!.map((item) => {
           if (item.id === selectedAnnotation?.id) {
-            return newAnnotation as VideoAnnotationInEditor;
+            return newAnnotation as MediaAnnotationInUI;
           }
           return item;
         });
@@ -496,27 +491,27 @@ function ForwardAnnotator(
     'ArrowUp',
     () => {
       selectedIndexRef.current = Math.max(selectedIndexRef.current - 1, 0);
-      setSelectedAnnotation((videoAnnotations as VideoAnnotationInEditor[])[selectedIndexRef.current]);
+      setSelectedAnnotation((annotations as MediaAnnotationInUI[])[selectedIndexRef.current]);
     },
     {
       keyup: true,
       keydown: false,
     },
-    [videoAnnotations],
+    [annotations],
   );
 
   // 下一个标记
   useHotkeys(
     'ArrowDown',
     () => {
-      selectedIndexRef.current = Math.min(selectedIndexRef.current + 1, videoAnnotations.length - 1);
-      setSelectedAnnotation((videoAnnotations as VideoAnnotationInEditor[])[selectedIndexRef.current]);
+      selectedIndexRef.current = Math.min(selectedIndexRef.current + 1, annotations.length - 1);
+      setSelectedAnnotation((annotations as MediaAnnotationInUI[])[selectedIndexRef.current]);
     },
     {
       keyup: true,
       keydown: false,
     },
-    [videoAnnotations],
+    [annotations],
   );
 
   // 1 ~ 9 设置标签
@@ -560,7 +555,7 @@ function ForwardAnnotator(
       samples,
       config,
       currentSample,
-      videoAnnotations,
+      annotations,
       orderVisible,
       containerRef,
       handleSelectSample,
@@ -598,7 +593,7 @@ function ForwardAnnotator(
     samples,
     config,
     currentSample,
-    videoAnnotations,
+    annotations,
     orderVisible,
     handleSelectSample,
     selectedAttribute,
@@ -649,7 +644,7 @@ function ForwardAnnotator(
               src={currentSample.url}
               editingType={currentTool}
               selectedAnnotation={selectedAnnotation}
-              annotations={videoAnnotations as unknown as VideoAnnotationInEditor[]}
+              annotations={annotations as unknown as MediaAnnotationInUI[]}
               toolConfig={videoToolConfig}
               onChange={handleAnnotationChange}
               onAdd={handleVideoAnnotationAdd}
