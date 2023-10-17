@@ -139,6 +139,15 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
       setSelectedAnnotation(_annotation);
       setCurrentAnnotationIds(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
       onAnnotationSelect?.(_annotation);
+
+      if (playerRef.current) {
+        playerRef.current.currentTime(_annotation.type === 'segment' ? _annotation.start : _annotation.time);
+      }
+
+      if (annotatorRef.current) {
+        annotatorRef.current?.scrollToAnnotation(_annotation);
+        annotatorRef.current?.updateTime(_annotation.type === 'segment' ? _annotation.start : _annotation.time);
+      }
     },
     [onAnnotationSelect, setCurrentAnnotationIds],
   );
@@ -299,7 +308,6 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
           annotations={annotations}
           duration={duration}
           type={editingType}
-          onAnnotationSelect={onAnnotationSelect}
           label={editingLabel}
           getCurrentTime={() => playerRef.current.currentTime()}
           updateCurrentTime={updateCurrentTime}
