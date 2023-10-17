@@ -8,7 +8,7 @@ import { AnnotationTrack } from './AnnotationTrack';
 import { AnnotationItem } from './AnnotationBar';
 import { ActivityBar, BarWrapper, ExpandIconElem, ExpandTrigger, PlayerFrame, TrackWrapper } from './style';
 
-export interface TrackAnnotationProps {
+export interface MediaAnnotatorProps {
   annotations: MediaAnnotationInUI[];
   disabled?: boolean;
   type?: MediaAnnotationType;
@@ -26,7 +26,7 @@ export interface MediaAnnotatorRef {
   scrollToAnnotation: (annotation: MediaAnnotationData) => void;
 }
 
-export const MediaAnnotator = forwardRef<MediaAnnotatorRef, TrackAnnotationProps>(function ForwardRefAnnotator(
+export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>(function ForwardRefAnnotator(
   { disabled, type, duration, onEnd, label = '', updateCurrentTime, getCurrentTime, ...rest },
   ref,
 ) {
