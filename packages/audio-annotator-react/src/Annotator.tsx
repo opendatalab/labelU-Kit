@@ -341,15 +341,6 @@ function ForwardAnnotator(
       setSelectedAttribute(attributeMappingByTool[annotation.type][annotation.label!]);
       setCurrentTool(annotation.type);
       selectedIndexRef.current = videoAnnotations.findIndex((item) => item.id === annotation.id);
-
-      if (playerRef.current) {
-        playerRef.current.setTime(annotation.type === 'frame' ? annotation.time : annotation.start);
-      }
-
-      if (annotatorRef) {
-        annotatorRef.current?.scrollToAnnotation(annotation);
-        annotatorRef.current?.updateTime(annotation.type === 'segment' ? annotation.start : annotation.time);
-      }
     },
     [attributeMappingByTool, videoAnnotations],
   );
