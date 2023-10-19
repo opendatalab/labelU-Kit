@@ -1,9 +1,8 @@
 import { Input, Form } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import intl from 'react-intl-universal';
 
-import type { Dispatch } from '@/store';
+import { login } from '@/api/services/user';
 
 import LogoTitle from '../../components/logoTitle';
 import styles from './index.module.scss';
@@ -12,12 +11,10 @@ import zhCN1 from '../../locales/zh-CN';
 
 const LoginPage = () => {
   const [form] = Form.useForm();
-
-  const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
 
   const handleLogin = async (values: any) => {
-    dispatch.user.login(values).then(() => {
+    login(values).then(() => {
       navigate('/');
     });
   };

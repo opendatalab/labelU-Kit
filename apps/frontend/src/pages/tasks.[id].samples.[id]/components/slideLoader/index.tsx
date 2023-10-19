@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import type { SampleResponse } from '@/services/types';
+import type { SampleResponse } from '@/api/types';
 
 import SliderCard from '../sliderCard';
 import currentStyles from './index.module.scss';

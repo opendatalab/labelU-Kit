@@ -2,7 +2,7 @@ const COMMON_INIT_CODE = 30000;
 const USER_INIT_CODE = 40000;
 const TASK_INIT_CODE = 50000;
 
-export const ErrorMessages: any = {
+export const ErrorMessages = {
   400: '参数有问题',
   [COMMON_INIT_CODE]: 'sql错误',
   [COMMON_INIT_CODE + 1]: '静止,没有权限',
@@ -20,4 +20,4 @@ export const ErrorMessages: any = {
   [TASK_INIT_CODE + 1001]: '附近没找到',
   [TASK_INIT_CODE + 5000]: '参数错误：after,before,pageNo,只能选一个，pageNo 可以说是0',
   [TASK_INIT_CODE + 5001]: '没有此sample',
-};
+} as const;

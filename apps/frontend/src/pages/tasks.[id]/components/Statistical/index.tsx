@@ -1,28 +1,31 @@
 import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
-import { useSelector } from 'react-redux';
 import _ from 'lodash-es';
 
-import type { RootState } from '@/store';
+import type { TaskLoaderResult } from '@/loaders/task.loader';
+import { MediaType } from '@/api/types';
 
 import currentStyles from './index.module.scss';
 import commonController from '../../../../utils/common/common';
 import ExportPortal from '../../../../components/ExportPortal';
 
 const Statistical = () => {
-  const taskData = useSelector((state: RootState) => state.task.item);
+  const routerLoaderData = useRouteLoaderData('task') as TaskLoaderResult;
+  const taskData = _.get(routerLoaderData, 'task');
   const { stats = {} } = taskData || {};
   const taskId = _.get(taskData, 'id');
+  const mediaType = _.get(taskData, 'media_type', MediaType.IMAGE);
 
-  const samples = useSelector((state: RootState) => state.sample.list);
+  const samples = _.get(routerLoaderData, 'samples');
 
   const navigate = useNavigate();
 
   const handleGoAnnotation = () => {
-    if (samples.data.length === 0) {
+    if (!samples || samples.data.length === 0) {
       return;
     }
+
     navigate(`/tasks/${taskId}/samples/${samples.data[0].id}`);
   };
   const handleGoConfig = () => {
@@ -76,7 +79,7 @@ const Statistical = () => {
         <Button type="text" icon={<SettingOutlined />} onClick={handleGoConfig}>
           任务配置
         </Button>
-        <ExportPortal taskId={+taskId!} mediaType={taskData.media_type!}>
+        <ExportPortal taskId={+taskId!} mediaType={mediaType}>
           <Button type="text" icon={<UploadOutlined />}>
             数据导出
           </Button>

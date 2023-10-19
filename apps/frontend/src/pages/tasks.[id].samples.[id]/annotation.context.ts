@@ -1,11 +1,12 @@
 import type { Dispatch, SetStateAction } from 'react';
 import React from 'react';
 
-import type { SampleResponse, TaskResponse } from '@/services/types';
+import type { SampleResponse } from '@/api/types';
+import type { TaskLoaderResult } from '@/loaders/task.loader';
 
 export interface AnnotationContextValue {
   samples: SampleResponse[];
-  task: TaskResponse;
+  task: TaskLoaderResult['task'];
   setSamples: Dispatch<SetStateAction<SampleResponse[]>>;
   isEnd: boolean;
 }

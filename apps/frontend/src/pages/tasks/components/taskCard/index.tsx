@@ -1,32 +1,27 @@
 import React, { useState } from 'react';
 import { Modal, Progress, Tooltip } from 'antd';
-import { useNavigate } from 'react-router';
+import { useNavigate, useRevalidator } from 'react-router';
 import Icon, { ExclamationOutlined } from '@ant-design/icons';
-import { useDispatch, useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
 import formatter from '@labelu/formatter';
 
 import { modal } from '@/StaticAnt';
-import type { Dispatch, RootState } from '@/store';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import { ReactComponent as OutputIcon } from '@/assets/svg/outputData.svg';
-import { deleteTask } from '@/services/task';
+import { deleteTask } from '@/api/services/task';
 import FlexItem from '@/components/FlexItem';
 import Status from '@/components/Status';
 import IconText from '@/components/IconText';
 import ExportPortal from '@/components/ExportPortal';
 import { MediaTypeText } from '@/constants/mediaType';
-import type { MediaType } from '@/services/types';
+import type { MediaType } from '@/api/types';
+import * as storage from '@/utils/storage';
 
 import currentStyles from './index.module.scss';
 
 const TaskCard = (props: any) => {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
   const { cardInfo } = props;
-  const dispatch = useDispatch<Dispatch>();
-  const [searchParams] = useSearchParams({
-    page: '1',
-  });
+  const revalidator = useRevalidator();
   const { stats, id, status } = cardInfo;
   const unDoneSample = stats.new;
   const doneSample = stats.done + stats.skipped;
@@ -43,7 +38,7 @@ const TaskCard = (props: any) => {
 
     navigate('/tasks/' + id);
   };
-  const userInfo = useSelector((state: RootState) => state.user);
+  const username = storage.get('username');
 
   const handleDeleteTask = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,10 +49,8 @@ const TaskCard = (props: any) => {
       okText: '确定',
       cancelText: '取消',
       onOk: async () => {
-        await dispatch.task.deleteTask(id);
-        await dispatch.task.fetchTasks({
-          page: Number(searchParams.get('page')) - 1,
-        });
+        await deleteTask(id);
+        revalidator.revalidate();
       },
     });
   };
@@ -109,7 +102,7 @@ const TaskCard = (props: any) => {
                 </Tooltip>
               </div>
             </ExportPortal>
-            {userInfo.username === cardInfo.created_by.username && (
+            {username === cardInfo.created_by.username && (
               <div onClick={handleDeleteTask} className={currentStyles.delete}>
                 <Tooltip title={'删除文件'} placement={'top'}>
                   <Icon className={currentStyles.actionIcon} component={DeleteIcon} />

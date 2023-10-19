@@ -4,12 +4,10 @@ import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
 import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
-import { useSelector } from 'react-redux';
 
-import { MediaType, TaskStatus } from '@/services/types';
+import { MediaType, TaskStatus } from '@/api/types';
 import FancyForm from '@/components/FancyForm';
 import FancyInput, { add } from '@/components/FancyInput';
-import type { RootState } from '@/store';
 
 import { TaskCreationContext } from '../../../taskCreation.context';
 import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
@@ -84,7 +82,8 @@ const templateMapping: Record<string, any> = {
 
 const FormConfig = () => {
   const { annotationFormInstance, onAnnotationFormChange, task } = useContext(TaskCreationContext);
-  const [activeTool, setActiveTool] = useState<string | undefined>(getDefaultActiveTool(task.media_type));
+  // const routerLoaderData = useRouteLoaderData('task') as TaskLoaderResult;
+  const [activeTool, setActiveTool] = useState<string | undefined>(getDefaultActiveTool(task?.media_type));
   const [activeGlobalTool, setActiveGlobalTool] = useState<string | undefined>(globalTools[0]);
   // 选中的所有工具
   const [selectedTools, setSelectedTools] = useState<any[]>([]);
@@ -94,9 +93,9 @@ const FormConfig = () => {
   const [selectedGlobalTools, setSelectedGlobalTools] = useState<string[]>([]);
   const [hasAttributes, setHasAttributes] = useState(false);
 
-  const config = useSelector((state: RootState) => state.task.config);
-  const taskStatus = useSelector((state: RootState) => state.task.item.status);
-  const taskDoneAmount = useSelector((state: RootState) => state.task.item.stats?.done);
+  const config = _.get(task, 'config');
+  const taskStatus = _.get(task, 'status');
+  const taskDoneAmount = _.get(task, 'stats.done');
   const { tools } = config || {};
 
   // 进行中和已完成的任务不允许删除工具
@@ -192,6 +191,10 @@ const FormConfig = () => {
   );
 
   const toolsMenu = useMemo(() => {
+    if (!task?.media_type) {
+      return [];
+    }
+
     const toolOptions = toolMapping[task.media_type!];
 
     return [
@@ -212,7 +215,7 @@ const FormConfig = () => {
         })),
       },
     ];
-  }, [selectedTools, task.media_type]);
+  }, [selectedTools, task?.media_type]);
 
   const tabItems: TabsProps['items'] = useMemo(() => {
     return _.chain(selectedTools)
@@ -357,7 +360,7 @@ const FormConfig = () => {
         </div>
       </Form.Item>
 
-      {task.media_type === MediaType.IMAGE && (
+      {task?.media_type === MediaType.IMAGE && (
         <Form.Item
           label="画布外标注"
           name="drawOutsideTarget"

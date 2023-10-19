@@ -2,7 +2,7 @@ import type { EditorProps } from '@labelu/video-annotator-react';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 
-export function convertVideoConfig(taskConfig: ToolsConfigState) {
+export function convertVideoConfig(taskConfig?: ToolsConfigState) {
   const editorConfig: NonNullable<EditorProps['config']> = {} as NonNullable<EditorProps['config']>;
 
   taskConfig?.tools?.forEach((item) => {

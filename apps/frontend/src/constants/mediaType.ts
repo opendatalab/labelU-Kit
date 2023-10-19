@@ -1,4 +1,4 @@
-import { MediaType } from '@/services/types';
+import { MediaType } from '@/api/types';
 
 export const MediaTypeText = {
   [MediaType.IMAGE]: '图片',

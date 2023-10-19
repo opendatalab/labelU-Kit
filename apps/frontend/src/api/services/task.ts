@@ -1,4 +1,4 @@
-import request from './request';
+import request from '../request';
 import type {
   BasicConfigCommand,
   OkRespCommonDataResp,
@@ -11,7 +11,7 @@ import type {
   CreateApiV1TasksTaskIdAttachmentsPostParams,
   DeleteApiV1TasksTaskIdAttachmentsDeleteParams,
   AttachmentDeleteCommand,
-} from './types';
+} from '../types';
 
 export async function getTask(taskId: number): Promise<OkRespTaskResponseWithStatics> {
   return await request.get(`/v1/tasks/${taskId}`, {
@@ -57,10 +57,14 @@ export async function updateTaskConfig(taskId: number, taskConfig: UpdateCommand
   return await request.patch(`/v1/tasks/${taskId}`, taskConfig);
 }
 
-export async function getTaskList(params: ListByApiV1TasksGetParams): Promise<TaskListResponseWithStatics> {
+export async function getTaskList({
+  page,
+  ...params
+}: ListByApiV1TasksGetParams): Promise<TaskListResponseWithStatics> {
   return await request.get('/v1/tasks', {
     params: {
       size: 16,
+      page: page ? page - 1 : 0,
       ...params,
     },
   });

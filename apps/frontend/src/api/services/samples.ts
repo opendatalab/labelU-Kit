@@ -1,5 +1,6 @@
-import request from './request';
-import commonController from '../utils/common/common';
+import commonController from '@/utils/common/common';
+
+import request from '../request';
 import { getTask } from './task';
 import type {
   DeleteApiV1TasksTaskIdDeleteParams,
@@ -15,7 +16,7 @@ import type {
   SampleListResponse,
   SampleResponse,
   UpdateApiV1TasksTaskIdSamplesSampleIdPatchParams,
-} from './types';
+} from '../types';
 
 export async function createSamples(
   taskId: number,

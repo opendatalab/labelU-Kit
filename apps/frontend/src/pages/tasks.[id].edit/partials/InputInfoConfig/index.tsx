@@ -1,7 +1,7 @@
 import React, { memo, useContext } from 'react';
 import { Form, Input, Select } from 'antd';
 
-import { MediaType } from '@/services/types';
+import { MediaType } from '@/api/types';
 
 import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';

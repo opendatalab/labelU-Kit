@@ -3,16 +3,15 @@ import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set, omit } from 'lodash/fp';
-import { useSelector } from 'react-redux';
+import { useIsFetching } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
 
 import commonController from '@/utils/common/common';
 import { annotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
-import type { SampleListResponse, SampleResponse } from '@/services/types';
-import { MediaType, SampleState } from '@/services/types';
-import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
-import type { RootState } from '@/store';
+import type { SampleListResponse, SampleResponse } from '@/api/types';
+import { MediaType, SampleState } from '@/api/types';
+import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
 
 import currentStyles from './index.module.scss';
@@ -58,7 +57,8 @@ export interface AnnotationLoaderData {
 }
 
 const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: AnnotationRightCornerProps) => {
-  const isGlobalLoading = useSelector((state: RootState) => state.loading.global);
+  const isFetching = useIsFetching();
+  const isGlobalLoading = isFetching > 0;
   const navigate = useNavigate();
   const routeParams = useParams();
   const taskId = routeParams.taskId;

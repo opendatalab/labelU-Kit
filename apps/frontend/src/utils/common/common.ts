@@ -1,8 +1,7 @@
 import { message } from '@/StaticAnt';
-import type { MediaType } from '@/services/types';
+import type { MediaType } from '@/api/types';
 import { FileExtension, MediaFileSize } from '@/constants/mediaType';
-
-import { ErrorMessages } from '../../services/errorMessage';
+import { ErrorMessages } from '@/api/constant';
 
 const commonController = {
   isNullObject(obj: any) {

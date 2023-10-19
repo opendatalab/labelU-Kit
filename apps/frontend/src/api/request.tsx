@@ -3,7 +3,7 @@ import { get } from 'lodash-es';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 
-import commonController from '../utils/common/common';
+import commonController from '@/utils/common/common';
 
 /**
  * 后端返回的结构由 { data, meta_data } 包裹

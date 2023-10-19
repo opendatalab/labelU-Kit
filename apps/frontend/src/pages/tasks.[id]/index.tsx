@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useNavigate, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import type { ColumnsType } from 'antd/es/table';
 import { Table, Pagination, Button } from 'antd';
 import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 
-import type { Dispatch, RootState } from '@/store';
-import { MediaType, SampleState, TaskStatus } from '@/services/types';
+import type { SampleResponse } from '@/api/types';
+import { MediaType, SampleState, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
+import type { TaskLoaderResult } from '@/loaders/task.loader';
 
 import currentStyles from './index.module.scss';
 import Statistical from './components/Statistical';
@@ -16,12 +17,13 @@ import GoToEditTask from './components/GoToEditTask';
 import statisticalStyles from './components/Statistical/index.module.scss';
 
 const Samples = () => {
+  const routerData = useRouteLoaderData('task') as TaskLoaderResult;
+  const samples = _.get(routerData, 'samples.data');
+  const task = _.get(routerData, 'task');
+  const metaData = routerData?.samples?.meta_data;
   const navigate = useNavigate();
-  const dispatch = useDispatch<Dispatch>();
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
-  const taskData = useSelector((state: RootState) => state.task.item);
-  const taskConfig = useSelector((state: RootState) => state.task.config);
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
@@ -32,29 +34,11 @@ const Samples = () => {
     }),
   );
 
-  const taskStatus = _.get(taskData, 'status');
+  const taskStatus = _.get(task, 'status');
   const isTaskReadyToAnnotate =
-    ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!) && taskConfig && Object.keys(taskConfig).length > 0;
-  const {
-    meta_data = {
-      total: 0,
-    },
-    data: samples,
-  } = useSelector((state: RootState) => state.sample.list);
-
-  // 初始化获取文件列表
-  useEffect(() => {
-    dispatch.sample.fetchSamples({
-      task_id: +taskId!,
-      ...Object.fromEntries(searchParams.entries()),
-    });
-  }, [dispatch.sample, searchParams, taskId]);
-
-  // 获取任务信息
-  useEffect(() => {
-    dispatch.task.fetchTask(taskId);
-  }, [dispatch.task, taskId]);
-
+    ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!) &&
+    task?.config &&
+    Object.keys(task?.config).length > 0;
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
 
@@ -62,7 +46,7 @@ const Samples = () => {
     navigate(`/tasks/${taskId}/samples/${sampleId}`);
   };
 
-  const columns: any = [
+  const columns: ColumnsType<SampleResponse> = [
     {
       title: '数据ID',
       dataIndex: 'id',
@@ -74,15 +58,15 @@ const Samples = () => {
       dataIndex: 'data',
       key: 'packageID',
       align: 'left',
-      render: (data: any) => {
+      render: (data) => {
         let url = '';
         for (const sampleId in data.urls) {
           url = data.urls[sampleId];
         }
 
-        if (taskData.media_type === MediaType.IMAGE) {
+        if (task!.media_type === MediaType.IMAGE) {
           return <img src={url} style={{ width: '116px', height: '70px' }} />;
-        } else if (taskData.media_type === MediaType.AUDIO) {
+        } else if (task!.media_type === MediaType.AUDIO) {
           return <audio src={url} controls />;
         } else {
           return <VideoCard size={{ width: 116, height: 70 }} src={url} showPlayIcon showDuration />;
@@ -95,7 +79,7 @@ const Samples = () => {
       key: 'packageID',
       align: 'left',
 
-      render: (text: string) => {
+      render: (text) => {
         if (!isTaskReadyToAnnotate) {
           return '';
         }
@@ -263,7 +247,6 @@ const Samples = () => {
     };
   };
 
-  // @ts-ignore
   return (
     <div className={currentStyles.outerFrame}>
       <div className={currentStyles.stepsRow}>
@@ -281,7 +264,7 @@ const Samples = () => {
         />
         <div className={currentStyles.pagination}>
           <div className={currentStyles.dataProcess}>
-            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={taskData.media_type!}>
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={task!.media_type!}>
               <Button type="link" disabled={selectedSampleIds.length === 0}>
                 批量数据导出
               </Button>
@@ -290,7 +273,7 @@ const Samples = () => {
           <Pagination
             current={parseInt(searchParams.get('pageNo') || '1')}
             pageSize={parseInt(searchParams.get('pageSize') || '10')}
-            total={meta_data?.total}
+            total={metaData?.total}
             showSizeChanger
             showQuickJumper
             onChange={handlePaginationChange}

@@ -1,18 +1,20 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, Pagination } from 'antd';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import _ from 'lodash';
 
-import type { Dispatch, RootState } from '@/store';
 import { useResponse } from '@/components/FlexItem';
+import type { TaskListResponseWithStatics } from '@/api/types';
 
 import currentStyles from './index.module.scss';
 import TaskCard from './components/taskCard';
 import NullTask from './components/nullTask';
 
 const TaskList = () => {
-  const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
+  const routerLoaderData = useRouteLoaderData('tasks') as TaskListResponseWithStatics;
+  const tasks = _.get(routerLoaderData, 'data');
+  const meta_data = _.get(routerLoaderData, 'meta_data');
 
   const { isLargeScreen, isRegularScreen, isSmallScreen, isXLargeScreen, isXSmallScreen, isXXSmallScreen } =
     useResponse();
@@ -32,23 +34,9 @@ const TaskList = () => {
   }
 
   const [searchParams, setSearchParams] = useSearchParams({
-    page: '1',
     size: String(pageSize),
   });
-
-  // 初始化获取任务列表
-  useEffect(() => {
-    dispatch.task.fetchTasks({
-      page: Number(searchParams.get('page')) - 1,
-      size: searchParams.get('size') ? +searchParams.get('size')! : pageSize,
-    });
-  }, [dispatch.task, pageSize, searchParams]);
-
-  const { meta_data, data: tasks = [] } = useSelector((state: RootState) => state.task.list);
-  const loading = useSelector((state: RootState) => state.loading.effects.task.fetchTasks);
-
   const createTask = () => {
-    dispatch.task.clearTaskItemAndConfig();
     navigate('/tasks/0/edit?isNew=true');
   };
 
@@ -64,12 +52,12 @@ const TaskList = () => {
           {tasks.map((cardInfo: any, cardInfoIndex: number) => {
             return <TaskCard key={cardInfoIndex} cardInfo={cardInfo} />;
           })}
-          {tasks.length === 0 && !loading && <NullTask />}
+          {meta_data?.total === 0 && <NullTask />}
         </div>
         {meta_data && searchParams && meta_data?.total > pageSize && (
           <div className={currentStyles.pagination}>
             <Pagination
-              defaultCurrent={1}
+              defaultCurrent={searchParams.get('page') ? +searchParams.get('page')! : 1}
               total={meta_data?.total ?? 0}
               pageSize={+searchParams.get('size')!}
               onChange={(value: number, _pageSize: number) => {

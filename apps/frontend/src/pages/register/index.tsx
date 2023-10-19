@@ -3,10 +3,11 @@ import { Form, Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import intl from 'react-intl-universal';
 
+import { signUp } from '@/api/services/user';
+
 import styles from './index.module.scss';
 import LogoTitle from '../../components/logoTitle';
 import CommonController from '../../utils/common/common';
-import { signUp } from '../../services/user';
 import enUS1 from '../../locales/en-US';
 import zhCN1 from '../../locales/zh-CN';
 

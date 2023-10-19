@@ -3,7 +3,7 @@ import { Button, Card, Col, Empty, Menu, Modal, Row } from 'antd';
 import _ from 'lodash-es';
 import styled from 'styled-components';
 
-import { MediaType, TaskStatus } from '@/services/types';
+import { MediaType, TaskStatus } from '@/api/types';
 
 import { TaskCreationContext } from '../../../taskCreation.context';
 import * as presetConfigs from './presetConfigs';

@@ -2,15 +2,15 @@ import type { RadioChangeEvent } from 'antd';
 import { Modal, Radio } from 'antd';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { ExportType, MediaType } from '@/services/types';
-import { outputSample, outputSamples } from '@/services/samples';
+import { ExportType, MediaType } from '@/api/types';
+import { outputSample, outputSamples } from '@/api/services/samples';
 
 import styles from './index.module.scss';
 
 export interface ExportPortalProps {
   children: React.ReactChild;
   taskId: number;
-  mediaType: MediaType;
+  mediaType: MediaType | undefined;
   sampleIds?: number[];
 }
 
@@ -107,7 +107,7 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, children }:
           <div className={styles.title}>导出格式</div>
           <div className={styles.options}>
             <Radio.Group
-              options={availableOptions[mediaType]}
+              options={mediaType ? availableOptions[mediaType] : []}
               onChange={handleOptionChange}
               value={exportType}
               optionType="button"

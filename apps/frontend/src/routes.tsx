@@ -1,6 +1,5 @@
 import type { RouteObject } from 'react-router';
 import { Outlet } from 'react-router';
-import { redirect } from 'react-router-dom';
 
 import Login from '@/pages/login/index';
 import Register from '@/pages/register';
@@ -10,10 +9,12 @@ import TaskAnnotation from '@/pages/tasks.[id].samples.[id]';
 import Samples from '@/pages/tasks.[id]';
 import TaskSamplesFinished from '@/pages/tasks.[id].samples.finished';
 import Page404 from '@/pages/404';
-import type { TaskResponse } from '@/services/types';
 import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
-import { taskLoader } from './loaders/task.loader';
+import type { TaskLoaderResult } from './loaders/task.loader';
+import { taskLoader, tasksLoader } from './loaders/task.loader';
+import { rootLoader } from './loaders/root.loader';
+import { sampleLoader } from './loaders/sample.loader';
 
 const routes: RouteObject[] = [
   {
@@ -23,21 +24,16 @@ const routes: RouteObject[] = [
         return '首页';
       },
     },
+    id: 'root',
     element: <Outlet />,
-    loader: async () => {
-      const token = localStorage.getItem('token');
-      const username = localStorage.getItem('username');
-      if (!token || !username) {
-        return redirect('/login');
-      }
-
-      return redirect('/tasks');
-    },
+    loader: rootLoader,
   },
   {
     path: '/tasks',
     element: <MainLayout />,
     errorElement: <Page404 />,
+    id: 'tasks',
+    loader: tasksLoader,
     handle: {
       crumb: () => {
         return '任务列表';
@@ -54,8 +50,8 @@ const routes: RouteObject[] = [
         element: <Outlet />,
         loader: taskLoader,
         handle: {
-          crumb: (data: TaskResponse) => {
-            return data?.name;
+          crumb: (data: TaskLoaderResult) => {
+            return data?.task?.name;
           },
         },
         children: [
@@ -77,11 +73,13 @@ const routes: RouteObject[] = [
           },
           {
             path: 'samples',
+            id: 'samples',
             element: <Outlet />,
             children: [
               {
                 path: ':sampleId',
                 element: <TaskAnnotation />,
+                loader: sampleLoader,
                 id: 'annotation',
                 handle: {
                   crumb: () => {

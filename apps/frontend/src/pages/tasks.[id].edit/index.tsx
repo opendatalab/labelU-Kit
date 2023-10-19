@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { Button, Form } from 'antd';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useLocation, useNavigate, useParams, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
@@ -9,12 +8,13 @@ import styled from 'styled-components';
 import { Bridge } from 'iframe-message-bridge';
 
 import { message, modal } from '@/StaticAnt';
-import type { TaskResponse } from '@/services/types';
-import { MediaType, TaskStatus } from '@/services/types';
-import type { Dispatch, RootState } from '@/store';
-import { createSamples } from '@/services/samples';
-import { deleteFile } from '@/services/task';
+import type { TaskResponse } from '@/api/types';
+import { MediaType, TaskStatus } from '@/api/types';
+import { createSamples, deleteSamples } from '@/api/services/samples';
+import { deleteFile, deleteTask } from '@/api/services/task';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
+import type { TaskLoaderResult } from '@/loaders/task.loader';
+import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 
 import type { QueuedFile } from './partials/inputData';
 import InputData, { UploadStatus } from './partials/inputData';
@@ -60,7 +60,12 @@ export interface PartialConfigProps {
 }
 
 const CreateTask = () => {
-  const dispatch = useDispatch<Dispatch>();
+  // const dispatch = useDispatch<Dispatch>();
+  const revalidator = useRevalidator();
+  const routerLoaderData = useRouteLoaderData('task') as TaskLoaderResult;
+  const taskData = _.get(routerLoaderData, 'task');
+  const samples = _.get(routerLoaderData, 'samples');
+  const toolsConfig = taskData?.config;
   const navigate = useNavigate();
   const routeParams = useParams();
   const location = useLocation();
@@ -78,6 +83,9 @@ const CreateTask = () => {
   const isCreateNewTask = searchParams.get('isNew') === 'true';
   const [isAnnotationFormValid, toggleAnnotationFormValidation] = useState<boolean>(true);
   const attachmentsConnected = useRef<boolean>(false);
+
+  const addTask = useAddTaskMutation();
+  const updateTaskConfig = useUpdateTaskConfigMutation(taskId);
 
   // 缓存上传的文件清单
   const [uploadFileList, setUploadFileList] = useState<QueuedFile[]>([]);
@@ -107,12 +115,10 @@ const CreateTask = () => {
       .value();
   }, [currentStep]);
 
-  const toolsConfig = useSelector((state: RootState) => state.task.config);
-  const samples = useSelector((state: RootState) => state.sample.list);
-  const taskData = useSelector((state: RootState) => state.task.item);
-  const loading = useSelector(
-    (state: RootState) => state.loading.effects.task.updateTaskConfig || state.loading.effects.task.createTask,
-  );
+  // const toolsConfig = useSelector((state: RootState) => state.task.config);
+  // const samples = useSelector((state: RootState) => state.sample.list);
+  // const taskData = useSelector((state: RootState) => state.task.item);
+  const loading = updateTaskConfig.isPending || addTask.isPending;
   const isExistTask = taskId > 0;
   const taskStatus = _.get(taskData, 'status') as TaskStatus;
   const stepDataSource: TaskStep[] = useMemo(
@@ -154,12 +160,6 @@ const CreateTask = () => {
   }, [annotationFormInstance, basicFormInstance, taskData]);
 
   useEffect(() => {
-    if (isExistTask && _.isEmpty(taskData)) {
-      dispatch.task.fetchTask(taskId);
-    }
-  }, [dispatch.task, isExistTask, taskData, taskId]);
-
-  useEffect(() => {
     if (isEmpty(toolsConfig?.tools)) {
       toggleAnnotationFormValidation(false);
     }
@@ -170,6 +170,8 @@ const CreateTask = () => {
       toggleAnnotationFormValidation(size(values.tools) > 0);
     });
   }, [annotationFormInstance]);
+
+  const [template, setTemplate] = useState<unknown>(null);
 
   const handleSave = useCallback(
     async function (isFromCancel?: boolean) {
@@ -191,25 +193,23 @@ const CreateTask = () => {
         return;
       }
 
-      return dispatch.task
-        .updateTaskConfig({
-          taskId: taskId,
-          body: {
-            ...taskData,
-            ...basicFormInstance.getFieldsValue(),
-            config: annotationConfig,
-          },
+      return updateTaskConfig
+        .mutateAsync({
+          ...taskData,
+          ...basicFormInstance.getFieldsValue(),
+          config: annotationConfig,
         })
         .then(() => {
-          navigate(`/tasks/${taskData.id}`);
+          navigate(`/tasks/${taskData!.id}`);
         });
     },
-    [annotationFormInstance, basicFormInstance, currentStep, dispatch.task, navigate, taskData, taskId],
+    [annotationFormInstance, basicFormInstance, currentStep, navigate, taskData, updateTaskConfig],
   );
 
   const [previewVisible, setPreviewVisible] = useState(false);
   const handleOpenPreview = useCallback(() => {
-    dispatch.sample.fetchSamples({ task_id: taskId });
+    revalidator.revalidate();
+    // dispatch.sample.fetchSamples({ task_id: taskId });
     annotationFormInstance
       .validateFields()
       .then(() => {
@@ -218,7 +218,7 @@ const CreateTask = () => {
       .catch(() => {
         commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
       });
-  }, [annotationFormInstance, dispatch.sample, taskId]);
+  }, [annotationFormInstance, revalidator]);
 
   const correctSampleIdsMappings = useMemo(
     () =>
@@ -267,17 +267,15 @@ const CreateTask = () => {
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
 
-        dispatch.sample.fetchSamples({ task_id: taskId });
+        // dispatch.sample.fetchSamples({ task_id: taskId });
+        revalidator.revalidate();
 
-        return dispatch.task
-          .updateTaskConfig({
-            taskId: taskId,
-            body: {
-              ...taskData,
-              ...basicFormValues,
-              status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
-              config: omit(['media_type'])(annotationConfig),
-            },
+        return updateTaskConfig
+          .mutateAsync({
+            ...taskData,
+            ...basicFormValues,
+            status: taskData?.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData?.status,
+            config: omit(['media_type'])(annotationConfig),
           })
           .then(() => {
             if (isFromCancel) {
@@ -285,12 +283,13 @@ const CreateTask = () => {
             }
           });
       } else {
-        const newTask = await dispatch.task.createTask(basicFormValues);
+        await addTask.mutateAsync(basicFormValues);
+        const newTask = addTask.data?.data;
 
         // 取消并保存时，跳转到任务列表页
         if (isFromCancel) {
           navigate('/tasks');
-        } else {
+        } else if (newTask) {
           navigate(`/tasks/${newTask.id}/edit${location.search}#${StepEnum.Upload}`);
         }
 
@@ -298,16 +297,17 @@ const CreateTask = () => {
       }
     },
     [
+      addTask,
       annotationFormInstance,
       basicFormInstance,
       currentStep,
-      dispatch.sample,
-      dispatch.task,
       isExistTask,
       location.search,
       navigate,
+      revalidator,
       taskData,
       taskId,
+      updateTaskConfig,
       uploadFileList,
     ],
   );
@@ -328,29 +328,22 @@ const CreateTask = () => {
         .map((item) => correctSampleIdsMappings[item.id!].id!);
 
       if (uploadedSampleIds.length > 0) {
-        await dispatch.sample.deleteSamples({
-          task_id: taskId,
-          body: { sample_ids: uploadedSampleIds },
-        });
+        await deleteSamples(
+          {
+            task_id: taskId,
+          },
+          { sample_ids: uploadedSampleIds },
+        );
       }
     }
 
     if (isCreateNewTask && isExistTask) {
-      await dispatch.task.deleteTask(taskId);
+      await deleteTask(taskId);
     }
 
     modalRef.current.destroy();
     navigate('/tasks');
-  }, [
-    correctSampleIdsMappings,
-    dispatch.sample,
-    dispatch.task,
-    isCreateNewTask,
-    isExistTask,
-    navigate,
-    taskId,
-    uploadFileList,
-  ]);
+  }, [correctSampleIdsMappings, isCreateNewTask, isExistTask, navigate, taskId, uploadFileList]);
 
   const handleCancelConfirm = useCallback(() => {
     modalRef.current = modal.confirm({
@@ -402,7 +395,7 @@ const CreateTask = () => {
       // 如果是从「数据导入」到下一步，没有文件时不可进入下一步
       if (
         currentStep === StepEnum.Upload &&
-        isEmpty(samples.data) &&
+        isEmpty(samples?.data) &&
         filter(uploadFileList, (item) => item.status === UploadStatus.Success).length === 0
       ) {
         message.error('请至少上传一个文件');
@@ -415,7 +408,7 @@ const CreateTask = () => {
         })
         .catch(() => {});
     },
-    [basicFormInstance, currentStep, samples.data, stepDataSource, submitForm, updateCurrentStep, uploadFileList],
+    [basicFormInstance, currentStep, samples?.data, stepDataSource, submitForm, updateCurrentStep, uploadFileList],
   );
 
   const handlePrevStep = async (step: TaskStep, lastStep: TaskStep) => {
@@ -449,10 +442,10 @@ const CreateTask = () => {
           </Button>
         );
       }
-      const previewDisabled = !isAnnotationFormValid || isEmpty(samples.data);
+      const previewDisabled = !isAnnotationFormValid || isEmpty(samples?.data);
       return (
         <>
-          <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples.data)}>
+          <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples?.data)}>
             进入预览
             <ArrowRightOutlined />
           </Button>
@@ -480,7 +473,7 @@ const CreateTask = () => {
     handleNextStep,
     previewVisible,
     isAnnotationFormValid,
-    samples.data,
+    samples?.data,
     handleOpenPreview,
     handleSave,
   ]);
@@ -490,11 +483,13 @@ const CreateTask = () => {
       uploadFileList,
       setUploadFileList,
       annotationFormInstance,
+      selectedTemplate: template,
+      onTemplateSelect: setTemplate,
       basicFormInstance,
-      task: taskData,
+      task: taskData as NonNullable<TaskLoaderResult['task']>,
       onAnnotationFormChange,
     }),
-    [uploadFileList, annotationFormInstance, basicFormInstance, taskData, onAnnotationFormChange],
+    [uploadFileList, annotationFormInstance, template, basicFormInstance, taskData, onAnnotationFormChange],
   );
 
   useLayoutEffect(() => {
@@ -511,9 +506,9 @@ const CreateTask = () => {
     bridgeRef.current.on('ready', () => {
       let _config;
 
-      if (taskData.media_type === MediaType.VIDEO) {
+      if (taskData?.media_type === MediaType.VIDEO) {
         _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
-      } else if (taskData.media_type === MediaType.IMAGE) {
+      } else if (taskData?.media_type === MediaType.IMAGE) {
         _config = annotationFormInstance.getFieldsValue();
       }
 
@@ -521,7 +516,7 @@ const CreateTask = () => {
         bridgeRef.current.post('preview', _config);
       }
     });
-  }, [previewVisible, annotationFormInstance, taskData.media_type]);
+  }, [previewVisible, annotationFormInstance, taskData?.media_type]);
 
   return (
     <div className={currentStyles.outerFrame}>
@@ -542,7 +537,7 @@ const CreateTask = () => {
               referrerPolicy="no-referrer"
               ref={previewIframeRef}
               className={currentStyles.previewIframe}
-              src={`/tasks/${taskData.id}/samples/${samples?.data?.[0].id}?noSave=true`}
+              src={`/tasks/${taskData!.id}/samples/${samples?.data?.[0].id}?noSave=true`}
             />
           )}
         </TaskCreationContext.Provider>

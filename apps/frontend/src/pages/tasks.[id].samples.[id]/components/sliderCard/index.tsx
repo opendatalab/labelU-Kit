@@ -5,8 +5,8 @@ import { VideoCard } from '@labelu/video-annotator-react';
 import classNames from 'classnames';
 import { AudioCard } from '@labelu/components-react';
 
-import type { SampleResponse } from '@/services/types';
-import { MediaType } from '@/services/types';
+import type { SampleResponse } from '@/api/types';
+import { MediaType } from '@/api/types';
 
 import styles from './index.module.scss';
 
