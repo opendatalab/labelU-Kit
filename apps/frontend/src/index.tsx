@@ -6,7 +6,7 @@ import '@labelu/components-react/dist/style.css';
 import './polyfills';
 import App from './App';
 import './initialize';
-import './styles/index.scss';
+import './styles/index.css';
 
 window.React = React;
 

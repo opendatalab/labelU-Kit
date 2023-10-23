@@ -15,6 +15,7 @@ import { deleteFile, deleteTask } from '@/api/services/task';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
+import FlexLayout from '@/layouts/FlexLayout';
 
 import type { QueuedFile } from './partials/inputData';
 import InputData, { UploadStatus } from './partials/inputData';
@@ -23,8 +24,9 @@ import InputInfoConfig from './partials/InputInfoConfig';
 import currentStyles from './index.module.scss';
 import type { StepData } from './components/Step';
 import Step from './components/Step';
-import commonController from '../../utils/common/common';
+import commonController from '../../utils/common';
 import { TaskCreationContext } from './taskCreation.context';
+import { StepRow } from './style';
 
 enum StepEnum {
   Basic = 'basic',
@@ -283,17 +285,17 @@ const CreateTask = () => {
             }
           });
       } else {
-        await addTask.mutateAsync(basicFormValues);
-        const newTask = addTask.data?.data;
+        return addTask.mutateAsync(basicFormValues).then((res) => {
+          const newTask = res.data;
 
-        // 取消并保存时，跳转到任务列表页
-        if (isFromCancel) {
-          navigate('/tasks');
-        } else if (newTask) {
-          navigate(`/tasks/${newTask.id}/edit${location.search}#${StepEnum.Upload}`);
-        }
-
-        return Promise.reject();
+          // 取消并保存时，跳转到任务列表页
+          if (isFromCancel) {
+            navigate('/tasks');
+          } else if (newTask) {
+            navigate(`/tasks/${newTask.id}/edit${location.search}#${StepEnum.Upload}`);
+          }
+          return Promise.reject();
+        });
       }
     },
     [
@@ -444,7 +446,7 @@ const CreateTask = () => {
       }
       const previewDisabled = !isAnnotationFormValid || isEmpty(samples?.data);
       return (
-        <>
+        <FlexLayout gap=".5rem">
           <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples?.data)}>
             进入预览
             <ArrowRightOutlined />
@@ -453,18 +455,17 @@ const CreateTask = () => {
           <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
             保存
           </Button>
-        </>
+        </FlexLayout>
       );
     }
 
     return (
-      <>
+      <FlexLayout gap=".5rem">
         <Button onClick={handleCancelConfirm}>取消</Button>
-
         <Button loading={loading} type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
           下一步
         </Button>
-      </>
+      </FlexLayout>
     );
   }, [
     currentStep,
@@ -519,14 +520,14 @@ const CreateTask = () => {
   }, [previewVisible, annotationFormInstance, taskData?.media_type]);
 
   return (
-    <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.stepsRow}>
-        <div className={currentStyles.left}>
+    <FlexLayout direction="column" items="stretch" className={currentStyles.outerFrame}>
+      <StepRow flex items="center" justify="space-between">
+        <FlexLayout.Header>
           <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
-        </div>
-        <div className={currentStyles.right}>{actionNodes}</div>
-      </div>
-      <div className={currentStyles.content}>
+        </FlexLayout.Header>
+        <FlexLayout.Footer>{actionNodes}</FlexLayout.Footer>
+      </StepRow>
+      <FlexLayout.Content scroll className={currentStyles.content}>
         <TaskCreationContext.Provider value={taskCreationContextValue}>
           <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
             {partials}
@@ -541,8 +542,8 @@ const CreateTask = () => {
             />
           )}
         </TaskCreationContext.Provider>
-      </div>
-    </div>
+      </FlexLayout.Content>
+    </FlexLayout>
   );
 };
 

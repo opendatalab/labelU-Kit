@@ -1,148 +1,102 @@
-import React, { useState } from 'react';
 import { Form, Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import intl from 'react-intl-universal';
+import _ from 'lodash';
 
 import { signUp } from '@/api/services/user';
+import FlexLayout from '@/layouts/FlexLayout';
+import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
+import { ReactComponent as PasswordIcon } from '@/assets/svg/password.svg';
+import { message } from '@/StaticAnt';
 
-import styles from './index.module.scss';
 import LogoTitle from '../../components/logoTitle';
-import CommonController from '../../utils/common/common';
-import enUS1 from '../../locales/en-US';
-import zhCN1 from '../../locales/zh-CN';
+import { ButtonWrapper, FormWrapper, LoginWrapper } from '../login/style';
+
+interface FormValues {
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const SignUpPage = () => {
-  const [form] = Form.useForm();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
+  const [form] = Form.useForm<FormValues>();
   const navigate = useNavigate();
 
-  if (navigator.language.indexOf('zh-CN') > -1) {
-    intl.init({
-      currentLocale: 'zh-CN',
-      locales: {
-        'en-US': enUS1,
-        'zh-CN': zhCN1,
-      },
-    });
-  } else {
-    intl.init({
-      currentLocale: 'en-US',
-      locales: {
-        'en-US': enUS1,
-        'zh-CN': zhCN1,
-      },
-    });
-  }
-  const changeEmail = (event: any) => {
-    const targetValue = event.target.value;
-    const isNull = CommonController.isInputValueNull(event);
-    if (!isNull) {
-      setUsername(targetValue);
-    }
-  };
-  const changePassword = (event: any) => {
-    const targetValue = event.target.value;
-    const isNull = CommonController.isInputValueNull(event);
-    if (!isNull) {
-      setPassword(targetValue);
-    }
-  };
-  const checkRepeatPassword = () => {
-    let result = true;
-    if (password !== repeatPassword) {
-      result = false;
-      CommonController.notificationErrorMessage({ msg: '两次输入的密码不一致' }, 1);
-    }
-    return result;
-  };
+  const handleRegister = async function () {
+    form.validateFields().then(async (values) => {
+      try {
+        await signUp(_.pick(values, ['username', 'password']));
 
-  const register = async function () {
-    try {
-      const hasUndefined = CommonController.checkObjectHasUndefined({
-        username,
-        password,
-        repeatPassword,
-      });
-      if (hasUndefined.tag) {
-        CommonController.notificationErrorMessage({ msg: hasUndefined.key }, 2);
-        return;
+        navigate('/login');
+      } catch (err) {
+        message.error('注册失败');
       }
-      const checkUsername = CommonController.checkEmail(undefined, username);
-      if (!checkUsername) {
-        return;
-      }
-      const checkPassword = CommonController.checkPassword(undefined, password);
-      if (!checkPassword) {
-        return;
-      }
-      const _checkRepeatPassword = password === repeatPassword;
-      if (!_checkRepeatPassword) {
-        CommonController.notificationErrorMessage({ msg: '两次输入的密码不一致' }, 1);
-        return;
-      }
-      await signUp({
-        username,
-        password,
-      });
-      CommonController.notificationSuccessMessage({ message: '注册成功' }, 1);
-      navigate('/login');
-    } catch (error) {
-      CommonController.notificationErrorMessage(error, 1);
-    }
-  };
-  const changeRepeatPassword = (event: any, _repeatPassword?: any) => {
-    const targetValue = event ? event.target.value : _repeatPassword;
-    const isNull = CommonController.isInputValueNull(event);
-    if (!isNull) {
-      setRepeatPassword(targetValue);
-    }
+    });
   };
 
   return (
-    <div className={styles.signUpWrapper}>
+    <LoginWrapper direction="column" justify="center" items="center">
       <LogoTitle />
-      <Form className={styles.outerFrame} form={form}>
-        <div className={styles.title}>{intl.get('signUp')}</div>
-        <div className={styles.email_m}>
-          <Input
-            placeholder={intl.get('requestEmail')}
-            prefix={<img src="/src/icons/email.svg" alt="" />}
-            onBlur={CommonController.debounce(CommonController.checkEmail, 500)}
-            onChange={changeEmail}
-            className={'email'}
-          />
-        </div>
+      <FormWrapper gap=".5rem" flex="column">
+        <Form form={form} onFinish={handleRegister}>
+          <FlexLayout direction="column">
+            <h1>注册</h1>
+            <Form.Item
+              name="username"
+              rules={[
+                { required: true, message: '请填写邮箱' },
+                { type: 'email', message: '请填写正确的邮箱格式' },
+              ]}
+            >
+              <Input placeholder="邮箱" prefix={<EmailIcon />} />
+            </Form.Item>
 
-        <div className={styles.email_m}>
-          <Input.Password
-            placeholder={intl.get('requestPassword')}
-            onChange={changePassword}
-            onBlur={CommonController.debounce(CommonController.checkPassword, 500)}
-            prefix={<img src="/src/icons/password.svg" alt="" />}
-            visibilityToggle={false}
-          />
-        </div>
+            <Form.Item
+              name="password"
+              rules={[
+                { required: true, message: '请填写密码' },
+                {
+                  pattern: /^\S+$/,
+                  message: '密码不能包含空格',
+                },
+              ]}
+            >
+              <Input.Password placeholder="密码" prefix={<PasswordIcon />} visibilityToggle={false} />
+            </Form.Item>
 
-        <div className={styles.email_m}>
-          <Input.Password
-            placeholder={intl.get('requestRepeatPassword')}
-            onChange={changeRepeatPassword}
-            onBlur={CommonController.debounce(checkRepeatPassword, 500)}
-            visibilityToggle={false}
-            prefix={<img src="/src/icons/password.svg" alt="" />}
-          />
-        </div>
+            <Form.Item
+              name="confirmPassword"
+              dependencies={['password']}
+              rules={[
+                {
+                  required: true,
+                  message: '请确认密码',
+                },
+                ({ getFieldValue }) => ({
+                  validator(_unused, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve();
+                    }
 
-        <div className={styles.loginButton} onClick={register}>
-          {intl.get('signUpButton')}
-        </div>
-        <div className={styles.signUpButton}>
-          {intl.get('hasAccount')}？<Link to={'/'}>{intl.get('login123')}</Link>
-        </div>
-      </Form>
-    </div>
+                    return Promise.reject(new Error('两次输入密码不一致！'));
+                  },
+                }),
+              ]}
+            >
+              <Input.Password placeholder="确认密码" visibilityToggle={false} prefix={<PasswordIcon />} />
+            </Form.Item>
+
+            <Form.Item>
+              <ButtonWrapper block type="primary" onClick={form.submit}>
+                注册
+              </ButtonWrapper>
+            </Form.Item>
+          </FlexLayout>
+        </Form>
+        <FlexLayout justify="flex-end">
+          已有账号？<Link to={'/login'}>登录</Link>
+        </FlexLayout>
+      </FormWrapper>
+    </LoginWrapper>
   );
 };
 export default SignUpPage;

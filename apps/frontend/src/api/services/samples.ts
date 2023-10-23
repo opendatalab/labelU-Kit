@@ -1,4 +1,4 @@
-import commonController from '@/utils/common/common';
+import commonController from '@/utils/common';
 
 import request from '../request';
 import { getTask } from './task';

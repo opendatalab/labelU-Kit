@@ -14,15 +14,10 @@ import StaticAnt from './StaticAnt';
 import routes from './routes';
 import * as storage from './utils/storage';
 import { QueryProvider } from './api/queryClient';
+import GlobalStyle from './styles/GlobalStyle';
 
 const App: React.FC = () => {
-  // @ts-ignore
   const locale = storage.get('locale') || 'zh_CN';
-  /**
-   * handler function that passes locale
-   * information to ConfigProvider for
-   * setting language across text components
-   */
   const getAntdLocale = () => {
     if (locale === 'en_US') {
       return enUS;
@@ -55,6 +50,7 @@ const App: React.FC = () => {
     <ConfigProvider locale={getAntdLocale()} componentSize="middle" theme={{ token: themeToken.token }}>
       <AntApp>
         <StaticAnt />
+        <GlobalStyle />
         {/* @ts-ignore */}
         <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
           <QueryProvider>

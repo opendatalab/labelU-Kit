@@ -1,13 +1,43 @@
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+html,
+body,
+#root,
+#root > * {
+  margin: 0;
+}
+
+:root {
+  --header-height: 3.5rem;
+}
+
+body {
+  font-size: 14px;
+  color: #333 !important;
+}
+
+#root, .ant-app {
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sensebee-input-wrap .deleteIcon {
+  color: #ccc;
+}
+
+/* ant-design */
+
 .ant-list-item {
   padding: 12px !important;
 }
 
 .ant-table-cell .ant-btn.ant-btn-link {
   padding: 0 4px !important;
-}
-
-.ant-btn + .ant-btn {
-  margin-left: 10px;
 }
 
 .ant-tabs-tab + .ant-tabs-tab {
@@ -60,3 +90,6 @@
 .ant-form-item .ant-form-item-label > label .ant-form-item-tooltip {
   font-size: 1rem;
 }
+`;
+
+export default GlobalStyle;

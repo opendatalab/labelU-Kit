@@ -7,7 +7,7 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { MediaType } from '@/api/types';
 
 import currentStyles from './index.module.scss';
-import commonController from '../../../../utils/common/common';
+import commonController from '../../../../utils/common';
 import ExportPortal from '../../../../components/ExportPortal';
 
 const Statistical = () => {

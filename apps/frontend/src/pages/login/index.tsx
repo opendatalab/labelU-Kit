@@ -1,92 +1,75 @@
+import type { FormProps } from 'antd';
 import { Input, Form } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import intl from 'react-intl-universal';
 
 import { login } from '@/api/services/user';
+import FlexLayout from '@/layouts/FlexLayout';
+import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
+import { ReactComponent as PasswordIcon } from '@/assets/svg/password.svg';
 
 import LogoTitle from '../../components/logoTitle';
-import styles from './index.module.scss';
-import enUS1 from '../../locales/en-US';
-import zhCN1 from '../../locales/zh-CN';
+import { ButtonWrapper, FormWrapper, LoginWrapper } from './style';
+
+interface FormValues {
+  username: string;
+  password: string;
+}
 
 const LoginPage = () => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<FormValues>();
   const navigate = useNavigate();
 
-  const handleLogin = async (values: any) => {
+  const handleLogin: FormProps<FormValues>['onFinish'] = async (values) => {
     login(values).then(() => {
       navigate('/');
     });
   };
 
-  if (navigator.language.indexOf('zh-CN') > -1) {
-    intl.init({
-      currentLocale: 'zh-CN',
-      locales: {
-        'en-US': enUS1,
-        'zh-CN': zhCN1,
-      },
-    });
-  } else {
-    intl.init({
-      currentLocale: 'en-US',
-      locales: {
-        'en-US': enUS1,
-        'zh-CN': zhCN1,
-      },
-    });
-  }
-
   return (
-    <div className={styles.loginWrapper}>
+    <LoginWrapper direction="column" justify="center" items="center">
       <LogoTitle />
-      <Form className={styles.loginForm} form={form} onFinish={handleLogin}>
-        <div className={styles.title}>{intl.get('login123')}</div>
-        <div className={styles.email_m}>
-          <Form.Item
-            name="username"
-            rules={[
-              { required: true, message: '请填写邮箱' },
-              { type: 'email', message: '请填写正确的邮箱格式' },
-            ]}
-          >
-            <Input
-              placeholder={intl.get('email')}
-              prefix={<img src="/src/icons/email.svg" alt="" />}
-              className={'email'}
-              onPressEnter={form.submit}
-            />
-          </Form.Item>
-        </div>
-
-        <div className={styles.email_m}>
-          <Form.Item
-            name="password"
-            rules={[
-              { required: true, message: '请填写密码' },
-              {
-                pattern: /^\S+$/,
-                message: '密码不能包含空格',
-              },
-            ]}
-          >
-            <Input.Password
-              placeholder={intl.get('password')}
-              prefix={<img src="/src/icons/password.svg" alt="" />}
-              visibilityToggle={false}
-              onPressEnter={form.submit}
-            />
-          </Form.Item>
-        </div>
-
-        <div className={styles.loginButton} onClick={form.submit}>
-          {intl.get('login123')}
-        </div>
-        <div className={styles.signUpButton}>
-          <Link to="/register">{intl.get('signUp')}</Link>
-        </div>
-      </Form>
-    </div>
+      <FormWrapper gap=".5rem" flex="column">
+        <Form<FormValues> form={form} onFinish={handleLogin}>
+          <FlexLayout direction="column">
+            <h1>登录</h1>
+            <Form.Item
+              name="username"
+              rules={[
+                { required: true, message: '请填写邮箱' },
+                { type: 'email', message: '请填写正确的邮箱格式' },
+              ]}
+            >
+              <Input placeholder="邮箱" prefix={<EmailIcon />} onPressEnter={form.submit} />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                { required: true, message: '请填写密码' },
+                {
+                  pattern: /^\S+$/,
+                  message: '密码不能包含空格',
+                },
+              ]}
+            >
+              <Input.Password
+                placeholder="密码"
+                prefix={<PasswordIcon />}
+                visibilityToggle={false}
+                onPressEnter={form.submit}
+              />
+            </Form.Item>
+            <Form.Item>
+              <ButtonWrapper block type="primary" onClick={form.submit}>
+                登录
+              </ButtonWrapper>
+            </Form.Item>
+          </FlexLayout>
+        </Form>
+        <FlexLayout justify="flex-end">
+          <Link to="/register">注册</Link>
+        </FlexLayout>
+      </FormWrapper>
+    </LoginWrapper>
   );
 };
 export default LoginPage;

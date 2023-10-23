@@ -7,7 +7,7 @@ import { useIsFetching } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
 
-import commonController from '@/utils/common/common';
+import commonController from '@/utils/common';
 import { annotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';

@@ -1,9 +1,14 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 import Navigate from '@/components/Navigate';
 
-import currentStyles from './index.module.scss';
+import FlexLayout from '../FlexLayout';
+
+const MainContent = styled(FlexLayout.Content)`
+  background-color: #f4f5f7;
+`;
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -21,12 +26,16 @@ const MainLayout = () => {
   }, [navigate]);
 
   return (
-    <div className={currentStyles.main}>
-      {!isPreview && <Navigate />}
-      <div className={currentStyles.content}>
+    <FlexLayout direction="column">
+      {!isPreview && (
+        <FlexLayout.Header>
+          <Navigate />
+        </FlexLayout.Header>
+      )}
+      <MainContent>
         <Outlet />
-      </div>
-    </div>
+      </MainContent>
+    </FlexLayout>
   );
 };
 export default MainLayout;

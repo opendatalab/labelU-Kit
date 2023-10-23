@@ -20,7 +20,7 @@ import { convertVideoSample } from '@/utils/convertVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 
 import currentStyles from './index.module.scss';
-import commonController from '../../utils/common/common';
+import commonController from '../../utils/common';
 import SlideLoader, { slideRef } from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';

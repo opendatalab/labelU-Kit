@@ -11,7 +11,7 @@ import IconText from '@/components/IconText';
 import type { StatusType } from '@/components/Status';
 import Status from '@/components/Status';
 import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
-import commonController from '@/utils/common/common';
+import commonController from '@/utils/common';
 import NativeUpload from '@/components/nativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/api/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
