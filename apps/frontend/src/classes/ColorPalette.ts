@@ -1,17 +1,17 @@
 const defaultColors = [
   '#fc5b50',
-  '#FC7A42',
+  '#50AAF2',
   '#FFB300',
   '#3BC141',
-  '#50AAF2',
+  '#FC7A42',
   '#506AFF',
-  '#8D64FF',
   '#D55EEA',
   '#F974A4',
   '#DE8B3E',
   '#FF5C97',
   '#FFCC4A',
   '#F1F462',
+  '#8D64FF',
   '#ABFF7E',
   '#52CEDD',
   '#5AB4DB',
@@ -40,9 +40,10 @@ export default class ColorPalette {
   /**
    * 拾取颜色，指针往下移动
    */
-  public pick() {
+  public pick(cursor?: number) {
     const { _cursor, colors } = this;
-    const nextCursor = _cursor > colors.length - 2 ? 0 : _cursor + 1;
+    const finalCursor = cursor || _cursor;
+    const nextCursor = finalCursor > colors.length - 2 ? 0 : finalCursor + 1;
     this._cursor = nextCursor;
 
     return colors[_cursor];

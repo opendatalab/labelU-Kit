@@ -199,7 +199,7 @@ const CreateTask = () => {
         .mutateAsync({
           ...taskData,
           ...basicFormInstance.getFieldsValue(),
-          config: annotationConfig,
+          config: JSON.stringify(annotationConfig),
         })
         .then(() => {
           navigate(`/tasks/${taskData!.id}`);
@@ -277,7 +277,7 @@ const CreateTask = () => {
             ...taskData,
             ...basicFormValues,
             status: taskData?.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData?.status,
-            config: omit(['media_type'])(annotationConfig),
+            config: JSON.stringify(omit(['media_type'])(annotationConfig)),
           })
           .then(() => {
             if (isFromCancel) {
