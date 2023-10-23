@@ -62,7 +62,6 @@ export interface PartialConfigProps {
 }
 
 const CreateTask = () => {
-  // const dispatch = useDispatch<Dispatch>();
   const revalidator = useRevalidator();
   const routerLoaderData = useRouteLoaderData('task') as TaskLoaderResult;
   const taskData = _.get(routerLoaderData, 'task');
@@ -116,10 +115,6 @@ const CreateTask = () => {
       })
       .value();
   }, [currentStep]);
-
-  // const toolsConfig = useSelector((state: RootState) => state.task.config);
-  // const samples = useSelector((state: RootState) => state.sample.list);
-  // const taskData = useSelector((state: RootState) => state.task.item);
   const loading = updateTaskConfig.isPending || addTask.isPending;
   const isExistTask = taskId > 0;
   const taskStatus = _.get(taskData, 'status') as TaskStatus;
@@ -269,7 +264,6 @@ const CreateTask = () => {
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
 
-        // dispatch.sample.fetchSamples({ task_id: taskId });
         revalidator.revalidate();
 
         return updateTaskConfig

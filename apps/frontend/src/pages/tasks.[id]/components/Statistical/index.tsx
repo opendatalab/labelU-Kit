@@ -2,13 +2,53 @@ import { UploadOutlined, SettingOutlined } from '@ant-design/icons';
 import { useNavigate, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
 import _ from 'lodash-es';
+import styled from 'styled-components';
 
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { MediaType } from '@/api/types';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import currentStyles from './index.module.scss';
 import commonController from '../../../../utils/common';
 import ExportPortal from '../../../../components/ExportPortal';
+
+const Circle = styled.div<{
+  color: string;
+}>`
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: ${({ color }) => color};
+`;
+
+export interface TaskStatusProps {
+  status?: 'done' | 'new' | 'skipped';
+  count?: number;
+}
+
+export function TaskStatus({ children, status, count }: React.PropsWithChildren<TaskStatusProps>) {
+  const colorMapping = {
+    done: 'var(--color-primary)',
+    new: 'var(--color-text-tertiary)',
+    skipped: 'var(--orange)',
+  };
+
+  const textMapping = {
+    done: '已标注',
+    new: '未标注',
+    skipped: '跳过',
+  };
+
+  const color = status ? colorMapping[status] : colorMapping.new;
+  const title = status ? textMapping[status] : children;
+
+  return (
+    <FlexLayout items="center" gap=".5rem">
+      {status && <Circle color={color} />}
+      <b>{title}</b>
+      {count && <b>{count}</b>}
+    </FlexLayout>
+  );
+}
 
 const Statistical = () => {
   const routerLoaderData = useRouteLoaderData('task') as TaskLoaderResult;
@@ -35,47 +75,15 @@ const Statistical = () => {
     navigate(`/tasks/${taskId}/edit#upload`);
   };
   return (
-    <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.left}>
-        <div className={currentStyles.leftTitle}>
-          <b>数据总览</b>
-        </div>
-        <div className={currentStyles.leftTitleContent}>
-          <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionBlueIcon} />
-            <div className={currentStyles.leftTitleContentOptionContent}>
-              <b>已标注</b>
-            </div>
-            <div className={currentStyles.leftTitleContentOptionContent}>{stats.done}</div>
-          </div>
-          <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionGrayIcon} />
-            <div className={currentStyles.leftTitleContentOptionContent}>
-              <b>未标注</b>
-            </div>
-            <div className={currentStyles.leftTitleContentOptionContent}>{stats.new}</div>
-          </div>
-          <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionOrangeIcon} />
-            <div className={currentStyles.leftTitleContentOptionContent}>
-              <b>跳过</b>
-            </div>
-            <div className={currentStyles.leftTitleContentOptionContent}>{stats.skipped}</div>
-          </div>
-          <div className={currentStyles.leftTitleContentOption}>
-            <div className={currentStyles.leftTitleContentOptionWhiteIcon} />
-            <div className={currentStyles.leftTitleContentOptionContent}>
-              <b>总计</b>
-            </div>
-            {stats && (
-              <div className={currentStyles.leftTitleContentOptionContent}>
-                {stats.done! + stats.new! + stats.skipped!}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className={currentStyles.right}>
+    <FlexLayout justify="space-between" items="center">
+      <FlexLayout items="center" gap="3rem">
+        <b>数据总览</b>
+        <TaskStatus status="done" count={stats.done} />
+        <TaskStatus status="new" count={stats.new} />
+        <TaskStatus status="skipped" count={stats.skipped} />
+        <TaskStatus count={stats.done! + stats.new! + stats.skipped!}>总计</TaskStatus>
+      </FlexLayout>
+      <FlexLayout gap=".5rem">
         <Button type="text" icon={<SettingOutlined />} onClick={handleGoConfig}>
           任务配置
         </Button>
@@ -90,8 +98,8 @@ const Statistical = () => {
         <Button type="primary" onClick={commonController.debounce(handleGoAnnotation, 100)}>
           开始标注
         </Button>
-      </div>
-    </div>
+      </FlexLayout>
+    </FlexLayout>
   );
 };
 export default Statistical;

@@ -6,6 +6,10 @@ import Navigate from '@/components/Navigate';
 
 import FlexLayout from '../FlexLayout';
 
+const LayoutWrapper = styled(FlexLayout)`
+  min-height: 100vh;
+`;
+
 const MainContent = styled(FlexLayout.Content)`
   background-color: #f4f5f7;
 `;
@@ -26,7 +30,7 @@ const MainLayout = () => {
   }, [navigate]);
 
   return (
-    <FlexLayout direction="column">
+    <LayoutWrapper direction="column">
       {!isPreview && (
         <FlexLayout.Header>
           <Navigate />
@@ -35,7 +39,7 @@ const MainLayout = () => {
       <MainContent>
         <Outlet />
       </MainContent>
-    </FlexLayout>
+    </LayoutWrapper>
   );
 };
 export default MainLayout;

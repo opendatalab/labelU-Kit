@@ -1,27 +1,33 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
 import { Table, Pagination, Button } from 'antd';
 import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
+import styled from 'styled-components';
 
 import type { SampleResponse } from '@/api/types';
-import { MediaType, SampleState, TaskStatus } from '@/api/types';
+import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
+import FlexLayout from '@/layouts/FlexLayout';
+import BlockContainer from '@/layouts/BlockContainer';
 
-import currentStyles from './index.module.scss';
-import Statistical from './components/Statistical';
+import type { TaskStatusProps } from './components/Statistical';
+import Statistical, { TaskStatus as TaskStatusComponent } from './components/Statistical';
 import GoToEditTask from './components/GoToEditTask';
-import statisticalStyles from './components/Statistical/index.module.scss';
+
+const HeaderWrapper = styled(FlexLayout.Header)`
+  background-color: #fff;
+  height: 3.5rem;
+`;
 
 const Samples = () => {
   const routerData = useRouteLoaderData('task') as TaskLoaderResult;
   const samples = _.get(routerData, 'samples.data');
   const task = _.get(routerData, 'task');
   const metaData = routerData?.samples?.meta_data;
-  const navigate = useNavigate();
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
 
@@ -41,10 +47,6 @@ const Samples = () => {
     Object.keys(task?.config).length > 0;
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
-
-  const handleGoAnnotation = (sampleId: number) => {
-    navigate(`/tasks/${taskId}/samples/${sampleId}`);
-  };
 
   const columns: ColumnsType<SampleResponse> = [
     {
@@ -84,24 +86,7 @@ const Samples = () => {
           return '';
         }
 
-        const icons: Record<SampleState, React.ReactNode> = {
-          [SampleState.DONE]: <div className={statisticalStyles.leftTitleContentOptionBlueIcon} />,
-          [SampleState.NEW]: <div className={statisticalStyles.leftTitleContentOptionGrayIcon} />,
-          [SampleState.SKIPPED]: <div className={statisticalStyles.leftTitleContentOptionOrangeIcon} />,
-        };
-
-        const texts: Record<SampleState, string> = {
-          [SampleState.DONE]: '已标注',
-          [SampleState.NEW]: '未标注',
-          [SampleState.SKIPPED]: '跳过',
-        };
-
-        return (
-          <div className={currentStyles.leftTitleContentOption}>
-            {icons[text as SampleState]}
-            <div className={statisticalStyles.leftTitleContentOptionContent}>{texts[text as SampleState]}</div>
-          </div>
-        );
+        return <TaskStatusComponent status={_.lowerCase(text) as TaskStatusProps['status']} />;
       },
       sorter: true,
     },
@@ -167,21 +152,17 @@ const Samples = () => {
       dataIndex: 'option',
       key: 'option',
       width: 180,
-      align: 'left',
+      align: 'center',
 
       render: (x: any, record: any) => {
         return (
-          <React.Fragment>
-            {record.id === enterRowId && (
-              <div className={currentStyles.optionItem}>
-                {isTaskReadyToAnnotate && (
-                  <div className={currentStyles.optionItemEnter} onClick={() => handleGoAnnotation(record.id)}>
-                    进入标注
-                  </div>
-                )}
-              </div>
+          <>
+            {record.id === enterRowId && isTaskReadyToAnnotate && (
+              <Link to={`/tasks/${taskId}/samples/${record.id}`}>
+                <Button type="link">进入标注</Button>
+              </Link>
             )}
-          </React.Fragment>
+          </>
         );
       },
     },
@@ -248,39 +229,46 @@ const Samples = () => {
   };
 
   return (
-    <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.stepsRow}>
-        {isTaskReadyToAnnotate ? <Statistical /> : <GoToEditTask taskStatus={taskStatus} />}
-      </div>
-      <div className={currentStyles.content}>
-        <Table
-          columns={columns}
-          dataSource={samples || []}
-          pagination={false}
-          rowKey={(record) => record.id!}
-          rowSelection={rowSelection}
-          onRow={onRow}
-          onChange={handleTableChange}
-        />
-        <div className={currentStyles.pagination}>
-          <div className={currentStyles.dataProcess}>
-            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={task!.media_type!}>
-              <Button type="link" disabled={selectedSampleIds.length === 0}>
-                批量数据导出
-              </Button>
-            </ExportPortal>
-          </div>
-          <Pagination
-            current={parseInt(searchParams.get('pageNo') || '1')}
-            pageSize={parseInt(searchParams.get('pageSize') || '10')}
-            total={metaData?.total}
-            showSizeChanger
-            showQuickJumper
-            onChange={handlePaginationChange}
-          />
-        </div>
-      </div>
-    </div>
+    <FlexLayout direction="column" full gap="2rem">
+      <HeaderWrapper flex items="center">
+        <FlexLayout.Content full>
+          <BlockContainer>
+            {isTaskReadyToAnnotate ? <Statistical /> : <GoToEditTask taskStatus={taskStatus} />}
+          </BlockContainer>
+        </FlexLayout.Content>
+      </HeaderWrapper>
+
+      <FlexLayout.Content scroll>
+        <BlockContainer>
+          <FlexLayout justify="space-between" direction="column" gap="1rem">
+            <Table
+              columns={columns}
+              dataSource={samples || []}
+              pagination={false}
+              rowKey={(record) => record.id!}
+              rowSelection={rowSelection}
+              onRow={onRow}
+              onChange={handleTableChange}
+            />
+            <FlexLayout justify="space-between">
+              <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={task!.media_type!}>
+                <Button type="link" disabled={selectedSampleIds.length === 0}>
+                  批量数据导出
+                </Button>
+              </ExportPortal>
+              <Pagination
+                current={parseInt(searchParams.get('pageNo') || '1')}
+                pageSize={parseInt(searchParams.get('pageSize') || '10')}
+                total={metaData?.total}
+                showSizeChanger
+                showQuickJumper
+                onChange={handlePaginationChange}
+              />
+            </FlexLayout>
+          </FlexLayout>
+        </BlockContainer>
+      </FlexLayout.Content>
+    </FlexLayout>
   );
 };
 

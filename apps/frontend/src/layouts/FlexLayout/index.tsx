@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components';
 
 interface BasicFlexBox extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   flex?: 'column' | 'row' | boolean;
+  full?: boolean;
   scroll?: boolean;
   items?: React.CSSProperties['alignItems'];
   justify?: React.CSSProperties['justifyContent'];
@@ -28,6 +29,24 @@ const common = css<BasicFlexBox>`
         return css`
           display: flex;
           flex-direction: row;
+        `;
+    }
+  }}
+
+  ${({ full, flex }) => {
+    if (!full) {
+      return '';
+    }
+
+    switch (flex) {
+      case 'column':
+        return css`
+          height: 100%;
+        `;
+      case 'row':
+      default:
+        return css`
+          width: 100%;
         `;
     }
   }}
