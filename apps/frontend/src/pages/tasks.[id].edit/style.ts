@@ -7,3 +7,13 @@ export const StepRow = styled(FlexLayout.Header)`
   height: 56px;
   padding: 0 1.5rem;
 `;
+
+export const ContentWrapper = styled(FlexLayout.Content)`
+  background-color: white;
+  border-top: 1px solid var(--color-border-secondary);
+`;
+
+export const PreviewFrame = styled.iframe`
+  flex: 1 auto;
+  border: 0;
+`;

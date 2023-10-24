@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType, TableProps } from 'antd/es/table';
 import { Table, Pagination, Button } from 'antd';
 import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
@@ -96,9 +96,9 @@ const Samples = () => {
       key: 'annotated_count',
       align: 'left',
 
-      render: (temp: any, record: any) => {
+      render: (_unused, record) => {
         let result = 0;
-        const resultJson = JSON.parse(record.data.result);
+        const resultJson = record?.data?.result ? JSON.parse(record?.data?.result) : {};
         for (const key in resultJson) {
           if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
             const tool = resultJson[key];
@@ -125,7 +125,7 @@ const Samples = () => {
       key: 'created_by',
       align: 'left',
 
-      render: (created_by: any) => {
+      render: (created_by) => {
         if (!isTaskReadyToAnnotate) {
           return '';
         }
@@ -137,9 +137,7 @@ const Samples = () => {
       dataIndex: 'updated_at',
       key: 'updated_at',
       align: 'left',
-
-      // width : 310,
-      render: (updated_at: any) => {
+      render: (updated_at) => {
         if (!isTaskReadyToAnnotate) {
           return '';
         }
@@ -154,7 +152,7 @@ const Samples = () => {
       width: 180,
       align: 'center',
 
-      render: (x: any, record: any) => {
+      render: (x, record) => {
         return (
           <>
             {record.id === enterRowId && isTaskReadyToAnnotate && (
@@ -168,23 +166,14 @@ const Samples = () => {
     },
   ];
 
-  const rowSelection = {
+  const rowSelection: TableProps<SampleResponse>['rowSelection'] = {
     columnWidth: 58,
-    onChange: (selectedKeys: number[]) => {
+    onChange: (selectedKeys) => {
       setSelectedSampleIds(selectedKeys);
     },
-    getCheckboxProps: (record: any) => {
-      return {
-        disabled: false, // Column configuration not to be checked
-        name: record.packageID,
-        key: record.packageID,
-      };
-    },
-    selectedKeys: () => {},
   };
 
-  // @ts-ignore
-  const handleTableChange = (pagination, filters, sorter) => {
+  const handleTableChange: TableProps<SampleResponse>['onChange'] = (pagination, filters, sorter) => {
     if (!_.isEmpty(pagination)) {
       searchParams.set('pageNo', `${pagination.current}`);
       searchParams.set('pageSize', `${pagination.pageSize}`);
@@ -192,6 +181,7 @@ const Samples = () => {
 
     if (sorter) {
       let sortValue = '';
+      // @ts-ignore
       switch (sorter.order) {
         case 'ascend':
           sortValue = 'asc';

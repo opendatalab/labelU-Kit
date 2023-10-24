@@ -8,11 +8,11 @@ import { PlusOutlined } from '@ant-design/icons';
 import { MediaType, TaskStatus } from '@/api/types';
 import FancyForm from '@/components/FancyForm';
 import FancyInput, { add } from '@/components/FancyInput';
+import FlexLayout from '@/layouts/FlexLayout';
 
 import { TaskCreationContext } from '../../../taskCreation.context';
 import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
 import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
-import styles from './index.module.scss';
 import lineTemplate from './templates/line.template';
 import rectTemplate from './templates/rect.template';
 import polygonTemplate from './templates/polygon.template';
@@ -23,6 +23,7 @@ import videoSegmentTemplate from './templates/videoSegment.template';
 import videoFrameTemplate from './templates/videoFrame.template';
 import audioSegmentTemplate from './templates/audioSegment.template';
 import audioFrameTemplate from './templates/audioFrame.template';
+import { AttributeBox, AttributeFormItem, ConfigForm, TabForm } from './style';
 
 // 注册fancyInput自定义输入组件
 add('list-attribute', FancyAttributeList);
@@ -230,16 +231,18 @@ const FormConfig = () => {
           label: TOOL_NAME[tool],
           forceRender: true,
           children: (
-            <div className={styles.innerForm}>
-              <div style={{ display: isToolDeletable ? 'flex' : 'none', justifyContent: 'flex-end' }}>
-                <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
-                  <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
-                    删除工具
-                  </Button>
-                </Popconfirm>
-              </div>
+            <TabForm flex="column" gap=".5rem">
+              {isToolDeletable && (
+                <FlexLayout.Header flex justify="flex-end">
+                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
+                    <Button type="link" danger>
+                      删除工具
+                    </Button>
+                  </Popconfirm>
+                </FlexLayout.Header>
+              )}
               <FancyForm template={fancyFormTemplate} name={['tools', index]} />
-            </div>
+            </TabForm>
           ),
         };
       })
@@ -259,16 +262,18 @@ const FormConfig = () => {
           label: TOOL_NAME[tool],
           forceRender: true,
           children: (
-            <div className={styles.innerForm}>
-              <div style={{ display: isGlobalToolDeletable ? 'flex' : 'none', justifyContent: 'flex-end' }}>
-                <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
-                  <Button type="link" danger style={{ marginBottom: '0.5rem' }}>
-                    删除工具
-                  </Button>
-                </Popconfirm>
-              </div>
+            <TabForm flex="column" gap=".5rem">
+              {isGlobalToolDeletable && (
+                <FlexLayout.Header flex justify="flex-end">
+                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
+                    <Button type="link" danger>
+                      删除工具
+                    </Button>
+                  </Popconfirm>
+                </FlexLayout.Header>
+              )}
               <FancyForm template={fancyFormTemplate} name={['tools', index]} />
-            </div>
+            </TabForm>
           ),
         };
       })
@@ -291,12 +296,11 @@ const FormConfig = () => {
   // ========================= end ==============================
 
   return (
-    <Form
+    <ConfigForm
       form={annotationFormInstance}
       labelCol={{ span: 4 }}
       wrapperCol={{ span: 20 }}
       colon={false}
-      className={styles.formConfig}
       initialValues={config}
       onValuesChange={handleFormValuesChange}
       validateTrigger="onBlur"
@@ -348,16 +352,12 @@ const FormConfig = () => {
           <FancyInput type="boolean" />
         </Form.Item>
       )}
-      <Form.Item
-        wrapperCol={{ offset: 4 }}
-        className={styles.attributes}
-        hidden={!hasAttributes || globalTools.includes(activeTool as EToolName)}
-      >
-        <div className={styles.attributesBox}>
-          <Form.Item name="attributes">
+      <Form.Item wrapperCol={{ offset: 4 }} hidden={!hasAttributes || globalTools.includes(activeTool as EToolName)}>
+        <AttributeBox>
+          <AttributeFormItem>
             <FancyInput type="list-attribute" fullField={['attributes']} />
-          </Form.Item>
-        </div>
+          </AttributeFormItem>
+        </AttributeBox>
       </Form.Item>
 
       {task?.media_type === MediaType.IMAGE && (
@@ -370,7 +370,7 @@ const FormConfig = () => {
           <FancyInput type="boolean" />
         </Form.Item>
       )}
-    </Form>
+    </ConfigForm>
   );
 };
 

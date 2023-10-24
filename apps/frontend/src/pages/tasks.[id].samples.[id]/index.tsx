@@ -1,14 +1,13 @@
 import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
-import { Spin } from 'antd';
+import { Empty, Spin } from 'antd';
 import AnnotationOperation from '@labelu/components';
 import type { AnnotatorProps } from '@labelu/video-annotator-react';
 import { Annotator } from '@labelu/video-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
 import '@labelu/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
-import classNames from 'classnames';
 import { Bridge } from 'iframe-message-bridge';
 
 import { MediaType, type SampleResponse } from '@/api/types';
@@ -18,8 +17,8 @@ import { getSamples } from '@/api/services/samples';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import { convertVideoSample } from '@/utils/convertVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import currentStyles from './index.module.scss';
 import commonController from '../../utils/common';
 import SlideLoader, { slideRef } from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
@@ -168,17 +167,30 @@ const AnnotationPage = () => {
     );
   }
 
-  return (
-    <Spin
-      wrapperClassName={classNames(currentStyles.annotationPage, {
-        [currentStyles.hasHeader]: !searchParams.get('noSave'),
-      })}
-      spinning={loading}
-    >
-      <AnnotationContext.Provider value={annotationContextValue}>
-        {!_.isEmpty(transformed) && (!_.isEmpty(taskConfig?.tools) || !_.isEmpty(configFromParent)) && content}
-      </AnnotationContext.Provider>
-    </Spin>
-  );
+  if (loading) {
+    return (
+      <FlexLayout.Content items="center" justify="center" flex>
+        <Spin spinning={loading} />
+      </FlexLayout.Content>
+    );
+  }
+
+  if (_.isEmpty(transformed)) {
+    return (
+      <FlexLayout.Content items="center" justify="center" flex>
+        <Empty description="无样本数据" />
+      </FlexLayout.Content>
+    );
+  }
+
+  if (_.isEmpty(taskConfig?.tools) && _.isEmpty(configFromParent)) {
+    return (
+      <FlexLayout.Content items="center" justify="center" flex>
+        <Empty description="无标注工具" />
+      </FlexLayout.Content>
+    );
+  }
+
+  return <AnnotationContext.Provider value={annotationContextValue}>{content}</AnnotationContext.Provider>;
 };
 export default AnnotationPage;

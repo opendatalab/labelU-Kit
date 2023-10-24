@@ -24,6 +24,12 @@ export const MediaFileSize = {
   [MediaType.AUDIO]: 200,
 };
 
+export const MediaRouterPrefix = {
+  [MediaType.IMAGE]: 'image',
+  [MediaType.VIDEO]: 'video',
+  [MediaType.AUDIO]: 'audio',
+};
+
 export const FileMimeType = {
   [MediaType.IMAGE]: 'image/png,image/jpeg,image/bmp,image/gif',
   [MediaType.VIDEO]: 'video/mp4',

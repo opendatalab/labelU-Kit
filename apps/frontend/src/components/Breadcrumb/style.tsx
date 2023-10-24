@@ -13,7 +13,7 @@ const StyledBreadcrumb = styled(BlockContainer).attrs((props: BreadcrumbProps) =
 }))`
   display: flex;
   justify-content: flex-start;
-  font-size: 1rem;
+  font-size: 14px;
   .breadcrumb-item-wrap {
     display: flex;
     align-items: center;

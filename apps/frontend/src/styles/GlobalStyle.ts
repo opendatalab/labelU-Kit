@@ -21,11 +21,6 @@ body {
   min-height: 100vh;
 }
 
-a {
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 .sensebee-input-wrap .deleteIcon {
   color: #ccc;
 }

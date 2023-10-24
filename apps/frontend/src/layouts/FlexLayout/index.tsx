@@ -1,10 +1,11 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-interface BasicFlexBox extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+export interface BasicFlexBox extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   flex?: 'column' | 'row' | boolean;
   full?: boolean;
   scroll?: boolean;
+  padding?: React.CSSProperties['padding'];
   items?: React.CSSProperties['alignItems'];
   justify?: React.CSSProperties['justifyContent'];
 
@@ -42,10 +43,12 @@ const common = css<BasicFlexBox>`
       case 'column':
         return css`
           height: 100%;
+          flex-grow: 1;
         `;
       case 'row':
       default:
         return css`
+          flex-grow: 1;
           width: 100%;
         `;
     }
@@ -55,6 +58,12 @@ const common = css<BasicFlexBox>`
     gap &&
     css`
       gap: ${gap};
+    `}
+
+    ${({ padding }) =>
+    padding &&
+    css`
+      padding: ${padding};
     `}
 
   ${({ items }) =>
@@ -125,7 +134,7 @@ function FlexItem({ children, ...props }: FlexItemProps) {
 
 // ========================================= flex layout =========================================
 
-const FlexLayoutWrapper = styled.div<BasicFlexBox>`
+const FlexLayoutWrapper = styled.div<FlexItemProps>`
   display: flex;
   ${common}
 `;

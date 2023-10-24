@@ -12,14 +12,15 @@ import type { StatusType } from '@/components/Status';
 import Status from '@/components/Status';
 import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
 import commonController from '@/utils/common';
-import NativeUpload from '@/components/nativeUpload';
+import NativeUpload from '@/components/NativeUpload1';
 import { deleteFile, uploadFile as uploadFileService } from '@/api/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 import type { MediaType } from '@/api/types';
 import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
+import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
 
 export enum UploadStatus {
   Uploading = 'Uploading',
@@ -88,7 +89,7 @@ const normalizeFiles = (files: File[]) => {
 
 const InputData = () => {
   // 上传队列，包括成功和失败的任务
-  const { uploadFileList: fileQueue, setUploadFileList: setFileQueue, task = {} } = useContext(TaskCreationContext);
+  const { uploadFileList: fileQueue, setUploadFileList: setFileQueue, task } = useContext(TaskCreationContext);
   const taskId = task.id;
 
   const amountMapping = useMemo(() => {
@@ -180,7 +181,7 @@ const InputData = () => {
   );
 
   const handleFilesChange = (files: RcFile[]) => {
-    const isCorrectCondition = isCorrectFiles(files, task.media_type);
+    const isCorrectCondition = isCorrectFiles(files, task.media_type!);
     if (!isCorrectCondition) {
       return;
     } else {
@@ -214,11 +215,9 @@ const InputData = () => {
         key: 'name',
         render: (text: string) => {
           return (
-            <div className={styles.fileItem}>
-              <IconText icon={<FileIcon />}>
-                {formatter.format('ellipsis', text, { maxWidth: 540, type: 'tooltip' })}
-              </IconText>
-            </div>
+            <IconText icon={<FileIcon />}>
+              {formatter.format('ellipsis', text, { maxWidth: 540, type: 'tooltip' })}
+            </IconText>
           );
         },
       },
@@ -241,10 +240,7 @@ const InputData = () => {
         key: 'status',
         render: (text: UploadStatus, record: QueuedFile) => {
           return (
-            <Status
-              type={_.lowerCase(record.status) as StatusType}
-              icon={<span className={styles.spot} style={{ backgroundColor: 'var(--status-color)' }} />}
-            >
+            <Status type={_.lowerCase(record.status) as StatusType} icon={<Spot />}>
               {statusTextMapping[text]}
             </Status>
           );
@@ -289,18 +285,18 @@ const InputData = () => {
   }, [fileQueue, handleFileDelete, processUpload]);
 
   return (
-    <div className={styles.outerFrame}>
-      <div className={styles.title}>
-        <div className={styles.icon} />
-        <div className={styles.titleText}>数据导入</div>
-      </div>
-      <div className={styles.content}>
-        <div className={styles.left}>
-          <div className={styles.leftTitle}>本地上传</div>
-          <div className={styles.dragAndDrop}>
-            <UploadBg className={styles.survey} />
+    <Wrapper flex="column" full>
+      <Header flex items="center">
+        <Bar />
+        <h3>数据导入</h3>
+      </Header>
+      <FlexLayout.Content flex items="stretch" gap="1.5rem">
+        <Left flex="column">
+          <h4>本地上传</h4>
+          <UploadArea flex="column" gap="1rem" items="center">
+            <UploadBg />
 
-            <div className={styles.buttons}>
+            <FlexLayout gap="1rem">
               <Button type="primary" icon={<FileOutlined />}>
                 <NativeUpload
                   onChange={handleFilesChange}
@@ -316,52 +312,47 @@ const InputData = () => {
                   上传文件夹
                 </NativeUpload>
               </Button>
-            </div>
-            <div className={styles.illustration}>
-              <div className={styles.supportType}>支持文件类型包括：{FileExtensionText[task.media_type!]}</div>
-              <div className={styles.advises}>
-                {' '}
-                单次上传文件最大数量为100个，建议单个文件大小不超过{MediaFileSize[task.media_type!]}MB{' '}
-              </div>
-            </div>
-            <div />
-          </div>
-        </div>
-        <div className={styles.right}>
+            </FlexLayout>
+            <ButtonWrapper flex="column" items="center" gap="0.25rem">
+              <div>支持文件类型包括：{FileExtensionText[task.media_type!]}</div>
+              <div> 单次上传文件最大数量为100个，建议单个文件大小不超过{MediaFileSize[task.media_type!]}MB </div>
+            </ButtonWrapper>
+          </UploadArea>
+        </Left>
+        <Right flex="column" gap="1rem">
           {fileQueue.length > 0 && (
-            <>
-              <div className={styles.rightTitle}>
-                <div className={styles.rightTitleLeft}>上传列表</div>
-                <div>正在上传</div>
-                <div>
-                  <div style={{ display: 'inline-block', color: 'var(--color-primary)' }}>
-                    {amountMapping.uploading}
-                  </div>
-                  个；
-                </div>
-                <div>
-                  上传成功
-                  <Status type="success" icon={null} style={{ display: 'inline-block' }}>
-                    {amountMapping.succeeded}
-                  </Status>
-                  个，
-                </div>
-                <div>
-                  上传失败
-                  <Status type="failed" icon={null} style={{ display: 'inline-block' }}>
-                    {amountMapping.failed}
-                  </Status>
-                  个。
-                </div>
-              </div>
-            </>
+            <FlexLayout.Header items="center" gap="0.25rem" flex>
+              <b>上传列表</b>
+              <div>正在上传</div>
+              <FlexLayout gap=".25rem">
+                <span style={{ display: 'inline-block', color: 'var(--color-primary)' }}>
+                  {amountMapping.uploading}
+                </span>
+                <b>个；</b>
+              </FlexLayout>
+              <FlexLayout gap=".25rem">
+                <span>上传成功</span>
+                <Status type="success" icon={null} style={{ display: 'inline-block' }}>
+                  {amountMapping.succeeded}
+                </Status>
+                <span>个，</span>
+              </FlexLayout>
+              <FlexLayout gap=".25rem">
+                <span>上传失败</span>
+                <Status type="failed" icon={null} style={{ display: 'inline-block' }}>
+                  {amountMapping.failed}
+                </Status>
+                <span>个。</span>
+              </FlexLayout>
+            </FlexLayout.Header>
           )}
-          <div className={styles.rightContent}>
+          <FlexLayout.Content scroll>
             <Table columns={tableColumns} dataSource={fileQueue} rowKey={(record) => record.uid} />
-          </div>
-        </div>
-      </div>
-    </div>
+          </FlexLayout.Content>
+        </Right>
+      </FlexLayout.Content>
+    </Wrapper>
   );
 };
+
 export default InputData;

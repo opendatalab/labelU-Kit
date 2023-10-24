@@ -1,7 +1,7 @@
 import type { Params } from 'react-router-dom';
 import { useMatches } from 'react-router-dom';
 
-import StyledBreadcrumb, { BreadcrumbItem } from './styled';
+import StyledBreadcrumb, { BreadcrumbItem } from './style';
 
 export interface Match {
   id: string;

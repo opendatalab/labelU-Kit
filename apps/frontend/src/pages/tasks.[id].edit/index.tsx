@@ -17,16 +17,15 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 import FlexLayout from '@/layouts/FlexLayout';
 
-import type { QueuedFile } from './partials/inputData';
-import InputData, { UploadStatus } from './partials/inputData';
-import AnnotationConfig from './partials/annotationConfig';
+import type { QueuedFile } from './partials/InputData1';
+import InputData, { UploadStatus } from './partials/InputData1';
+import AnnotationConfig from './partials/AnnotationConfig1';
 import InputInfoConfig from './partials/InputInfoConfig';
-import currentStyles from './index.module.scss';
 import type { StepData } from './components/Step';
 import Step from './components/Step';
 import commonController from '../../utils/common';
 import { TaskCreationContext } from './taskCreation.context';
-import { StepRow } from './style';
+import { ContentWrapper, PreviewFrame, StepRow } from './style';
 
 enum StepEnum {
   Basic = 'basic',
@@ -108,9 +107,9 @@ const CreateTask = () => {
       .toPairs()
       .map(([key, Partial], index) => {
         return (
-          <div key={index} style={{ display: currentStep === key ? 'block' : 'none' }}>
+          <FlexLayout.Content key={index} style={{ display: currentStep === key ? 'flex' : 'none' }} flex="column">
             <Partial />
-          </div>
+          </FlexLayout.Content>
         );
       })
       .value();
@@ -514,30 +513,29 @@ const CreateTask = () => {
   }, [previewVisible, annotationFormInstance, taskData?.media_type]);
 
   return (
-    <FlexLayout flex="column" items="stretch" className={currentStyles.outerFrame}>
+    <FlexLayout.Content flex="column">
       <StepRow flex items="center" justify="space-between">
         <FlexLayout.Header>
           <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
         </FlexLayout.Header>
         <FlexLayout.Footer>{actionNodes}</FlexLayout.Footer>
       </StepRow>
-      <FlexLayout.Content scroll className={currentStyles.content}>
+      <ContentWrapper scroll flex="column">
         <TaskCreationContext.Provider value={taskCreationContextValue}>
-          <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
+          <FlexLayout.Content style={{ display: previewVisible ? 'none' : 'flex' }} flex="column">
             {partials}
-          </div>
+          </FlexLayout.Content>
 
           {previewVisible && (
-            <iframe
+            <PreviewFrame
               referrerPolicy="no-referrer"
               ref={previewIframeRef}
-              className={currentStyles.previewIframe}
               src={`/tasks/${taskData!.id}/samples/${samples?.data?.[0].id}?noSave=true`}
             />
           )}
         </TaskCreationContext.Provider>
-      </FlexLayout.Content>
-    </FlexLayout>
+      </ContentWrapper>
+    </FlexLayout.Content>
   );
 };
 

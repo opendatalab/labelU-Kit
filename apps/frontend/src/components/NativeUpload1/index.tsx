@@ -1,8 +1,24 @@
 import type { HTMLAttributes, PropsWithChildren } from 'react';
 import React, { createRef, useEffect } from 'react';
 import type { RcFile } from 'antd/lib/upload/interface';
+import styled from 'styled-components';
 
-import styles from './index.module.scss';
+const Wrapper = styled.div`
+  position: relative;
+  overflow: hidden;
+  display: inline;
+  cursor: pointer;
+  > input {
+    opacity: 0;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+  }
+`;
 
 type IProps = HTMLAttributes<HTMLDivElement> & {
   accept?: string;
@@ -14,12 +30,14 @@ type IProps = HTMLAttributes<HTMLDivElement> & {
 const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
   const inputRef = createRef<any>();
   const { children, directory, multiple, ...req } = props;
+
   useEffect(() => {
     inputRef.current.webkitdirectory = directory;
     inputRef.current.multiple = multiple;
   }, [directory, inputRef, multiple]);
+
   return (
-    <div className={styles.upload}>
+    <Wrapper>
       <input
         ref={inputRef}
         type="file"
@@ -31,7 +49,7 @@ const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
         }}
       />
       {children}
-    </div>
+    </Wrapper>
   );
 };
 

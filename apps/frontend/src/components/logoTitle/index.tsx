@@ -1,37 +1,23 @@
-import React from 'react';
 import intl from 'react-intl-universal';
+import styled from 'styled-components';
 
-import currentStyles from './index.module.scss';
-import enUS1 from '../../locales/en-US';
-import zhCN1 from '../../locales/zh-CN';
+import FlexLayout from '@/layouts/FlexLayout';
+import { ReactComponent as Logo } from '@/assets/svg/LOGO.svg';
+
+const Description = styled.span`
+  text-align: center;
+  color: var(--color-text-secondary);
+`;
+
 const LogoTitle = () => {
-  if (navigator.language.indexOf('zh-CN') > -1) {
-    intl.init({
-      currentLocale: 'zh-CN',
-      locales: {
-        'en-US': enUS1,
-        'zh-CN': zhCN1,
-      },
-    });
-  } else {
-    intl.init({
-      currentLocale: 'en-US',
-      locales: {
-        'en-US': enUS1,
-        'zh-CN': zhCN1,
-      },
-    });
-  }
   return (
-    <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.logo} />
-      <div className={currentStyles.logoText}>
-        {/*<div>Uniform, Unlimited, Universal and Unbelievable</div>*/}
+    <FlexLayout flex="column" items="center" gap="1rem">
+      <Logo />
+      <Description>
         <div>{intl.get('loginTitle1')}</div>
         <div>{intl.get('loginTitle2')}</div>
-        {/*<div>Annotation Toolbox</div>*/}
-      </div>
-    </div>
+      </Description>
+    </FlexLayout>
   );
 };
 export default LogoTitle;

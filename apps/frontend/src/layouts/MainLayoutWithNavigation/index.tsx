@@ -36,7 +36,7 @@ const MainLayout = () => {
           <Navigate />
         </FlexLayout.Header>
       )}
-      <MainContent>
+      <MainContent flex="column">
         <Outlet />
       </MainContent>
     </LayoutWrapper>
