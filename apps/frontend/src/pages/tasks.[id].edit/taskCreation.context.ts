@@ -3,7 +3,7 @@ import type { FormInstance } from 'antd';
 
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 
-import type { QueuedFile } from './partials/InputData1';
+import type { QueuedFile } from './partials/InputData';
 
 export interface TaskCreationContextValue {
   task: NonNullable<TaskLoaderResult['task']>;

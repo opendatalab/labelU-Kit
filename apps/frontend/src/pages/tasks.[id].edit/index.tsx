@@ -17,9 +17,9 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 import FlexLayout from '@/layouts/FlexLayout';
 
-import type { QueuedFile } from './partials/InputData1';
-import InputData, { UploadStatus } from './partials/InputData1';
-import AnnotationConfig from './partials/AnnotationConfig1';
+import type { QueuedFile } from './partials/InputData';
+import InputData, { UploadStatus } from './partials/InputData';
+import AnnotationConfig from './partials/AnnotationConfig';
 import InputInfoConfig from './partials/InputInfoConfig';
 import type { StepData } from './components/Step';
 import Step from './components/Step';

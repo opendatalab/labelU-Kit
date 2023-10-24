@@ -12,7 +12,7 @@ import type { StatusType } from '@/components/Status';
 import Status from '@/components/Status';
 import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
 import commonController from '@/utils/common';
-import NativeUpload from '@/components/NativeUpload1';
+import NativeUpload from '@/components/NativeUpload';
 import { deleteFile, uploadFile as uploadFileService } from '@/api/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 import type { MediaType } from '@/api/types';
