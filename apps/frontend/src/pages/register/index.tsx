@@ -9,7 +9,7 @@ import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
 import { ReactComponent as PasswordIcon } from '@/assets/svg/password.svg';
 import { message } from '@/StaticAnt';
 
-import LogoTitle from '../../components/logoTitle1';
+import LogoTitle from '../../components/LogoTitle';
 import { ButtonWrapper, FormWrapper, LoginWrapper } from '../login/style';
 
 interface FormValues {
