@@ -1,6 +1,7 @@
 import { Form, Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import _ from 'lodash';
+import { useMutation } from '@tanstack/react-query';
 
 import { signUp } from '@/api/services/user';
 import FlexLayout from '@/layouts/FlexLayout';
@@ -20,25 +21,34 @@ interface FormValues {
 const SignUpPage = () => {
   const [form] = Form.useForm<FormValues>();
   const navigate = useNavigate();
+  const signUpMutation = useMutation({
+    mutationFn: signUp,
+    onSuccess: () => {
+      message.success('注册成功');
+      navigate('/login');
+    },
+    onError: () => {
+      message.error('注册失败');
+    },
+  });
 
-  const handleRegister = async function () {
+  const register = async function () {
     form.validateFields().then(async (values) => {
-      try {
-        await signUp(_.pick(values, ['username', 'password']));
-
-        navigate('/login');
-      } catch (err) {
-        message.error('注册失败');
-      }
+      signUpMutation.mutate(_.pick(values, ['username', 'password']));
     });
   };
 
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    form.submit();
+  };
+
   return (
-    <LoginWrapper direction="column" justify="center" items="center">
+    <LoginWrapper flex="column" justify="center" items="center">
       <LogoTitle />
       <FormWrapper gap=".5rem" flex="column">
-        <Form form={form} onFinish={handleRegister}>
-          <FlexLayout direction="column">
+        <Form form={form} onFinish={register}>
+          <FlexLayout flex="column">
             <h1>注册</h1>
             <Form.Item
               name="username"
@@ -86,7 +96,7 @@ const SignUpPage = () => {
             </Form.Item>
 
             <Form.Item>
-              <ButtonWrapper block type="primary" onClick={form.submit}>
+              <ButtonWrapper block type="primary" onClick={handleSubmit} loading={signUpMutation.isPending}>
                 注册
               </ButtonWrapper>
             </Form.Item>

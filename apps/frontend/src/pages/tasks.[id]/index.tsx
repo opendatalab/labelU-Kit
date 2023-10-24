@@ -229,7 +229,7 @@ const Samples = () => {
   };
 
   return (
-    <FlexLayout direction="column" full gap="2rem">
+    <FlexLayout flex="column" full gap="2rem">
       <HeaderWrapper flex items="center">
         <FlexLayout.Content full>
           <BlockContainer>
@@ -240,7 +240,7 @@ const Samples = () => {
 
       <FlexLayout.Content scroll>
         <BlockContainer>
-          <FlexLayout justify="space-between" direction="column" gap="1rem">
+          <FlexLayout justify="space-between" flex="column" gap="1rem">
             <Table
               columns={columns}
               dataSource={samples || []}

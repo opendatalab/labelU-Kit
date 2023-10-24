@@ -1,6 +1,7 @@
 import type { FormProps } from 'antd';
 import { Input, Form } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 
 import { login } from '@/api/services/user';
 import FlexLayout from '@/layouts/FlexLayout';
@@ -18,19 +19,28 @@ interface FormValues {
 const LoginPage = () => {
   const [form] = Form.useForm<FormValues>();
   const navigate = useNavigate();
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: () => {
+      navigate('/');
+    },
+  });
 
   const handleLogin: FormProps<FormValues>['onFinish'] = async (values) => {
-    login(values).then(() => {
-      navigate('/');
-    });
+    loginMutation.mutate(values);
+  };
+
+  const handleSubmit = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    form.submit();
   };
 
   return (
-    <LoginWrapper direction="column" justify="center" items="center">
+    <LoginWrapper flex="column" justify="center" items="center">
       <LogoTitle />
       <FormWrapper gap=".5rem" flex="column">
         <Form<FormValues> form={form} onFinish={handleLogin}>
-          <FlexLayout direction="column">
+          <FlexLayout flex="column">
             <h1>登录</h1>
             <Form.Item
               name="username"
@@ -39,7 +49,7 @@ const LoginPage = () => {
                 { type: 'email', message: '请填写正确的邮箱格式' },
               ]}
             >
-              <Input placeholder="邮箱" prefix={<EmailIcon />} onPressEnter={form.submit} />
+              <Input placeholder="邮箱" prefix={<EmailIcon />} onPressEnter={handleSubmit} />
             </Form.Item>
             <Form.Item
               name="password"
@@ -55,11 +65,11 @@ const LoginPage = () => {
                 placeholder="密码"
                 prefix={<PasswordIcon />}
                 visibilityToggle={false}
-                onPressEnter={form.submit}
+                onPressEnter={handleSubmit}
               />
             </Form.Item>
             <Form.Item>
-              <ButtonWrapper block type="primary" onClick={form.submit}>
+              <ButtonWrapper loading={loginMutation.isPending} block type="primary" onClick={handleSubmit}>
                 登录
               </ButtonWrapper>
             </Form.Item>

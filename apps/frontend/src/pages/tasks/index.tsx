@@ -47,7 +47,7 @@ const TaskList = () => {
   };
 
   return (
-    <Wrapper direction="column">
+    <Wrapper flex="column">
       <FlexLayout.Content scroll flex="column">
         {tasks.length > 0 && (
           <Header>
@@ -57,12 +57,15 @@ const TaskList = () => {
           </Header>
         )}
         <FlexLayout.Content scroll>
-          <CardsWrapper>
-            {tasks.map((cardInfo: any, cardInfoIndex: number) => {
-              return <TaskCardItem key={cardInfoIndex} cardInfo={cardInfo} />;
-            })}
-            {meta_data?.total === 0 && <NullTask />}
-          </CardsWrapper>
+          {meta_data && meta_data?.total > 0 ? (
+            <CardsWrapper>
+              {tasks.map((cardInfo: any, cardInfoIndex: number) => {
+                return <TaskCardItem key={cardInfoIndex} cardInfo={cardInfo} />;
+              })}
+            </CardsWrapper>
+          ) : (
+            <NullTask />
+          )}
         </FlexLayout.Content>
       </FlexLayout.Content>
       <Footer flex="column" items="flex-end">

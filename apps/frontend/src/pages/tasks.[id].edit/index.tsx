@@ -514,7 +514,7 @@ const CreateTask = () => {
   }, [previewVisible, annotationFormInstance, taskData?.media_type]);
 
   return (
-    <FlexLayout direction="column" items="stretch" className={currentStyles.outerFrame}>
+    <FlexLayout flex="column" items="stretch" className={currentStyles.outerFrame}>
       <StepRow flex items="center" justify="space-between">
         <FlexLayout.Header>
           <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />

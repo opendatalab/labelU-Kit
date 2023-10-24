@@ -35,6 +35,7 @@ const Homepage = () => {
         <HelpTips />
         <Dropdown
           overlayClassName={styles.dropDownOverlay}
+          trigger={['click']}
           menu={{
             items: [
               {

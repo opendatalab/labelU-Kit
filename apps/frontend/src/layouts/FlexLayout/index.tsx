@@ -125,25 +125,12 @@ function FlexItem({ children, ...props }: FlexItemProps) {
 
 // ========================================= flex layout =========================================
 
-const FlexLayoutWrapper = styled.div<FlexLayoutProps>`
+const FlexLayoutWrapper = styled.div<BasicFlexBox>`
   display: flex;
-  flex-direction: ${({ direction }) => direction || 'row'};
-  ${({ scroll }) =>
-    scroll &&
-    css`
-      min-height: 0;
-      overflow: auto;
-    `}
-
   ${common}
 `;
-export interface FlexLayoutProps extends Omit<BasicFlexBox, 'flex'> {
-  direction?: 'row' | 'column';
-  scroll?: boolean;
-  full?: boolean;
-}
 
-export default function FlexLayout({ children, ...props }: FlexLayoutProps) {
+export default function FlexLayout({ children, ...props }: BasicFlexBox) {
   return <FlexLayoutWrapper {...props}>{children}</FlexLayoutWrapper>;
 }
 

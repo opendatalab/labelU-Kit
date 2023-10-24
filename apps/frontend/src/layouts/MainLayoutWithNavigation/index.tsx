@@ -30,7 +30,7 @@ const MainLayout = () => {
   }, [navigate]);
 
   return (
-    <LayoutWrapper direction="column">
+    <LayoutWrapper flex="column">
       {!isPreview && (
         <FlexLayout.Header>
           <Navigate />
