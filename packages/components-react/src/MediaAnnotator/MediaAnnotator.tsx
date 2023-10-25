@@ -218,7 +218,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
           });
           resetAnnotatingSegment();
         }
-      } else {
+      } else if (currentTime < duration) {
         const newAnnotation = {
           id: uid(),
           type: 'segment',
@@ -235,7 +235,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
       preventDefault: true,
       enabled: type === 'segment' && duration > 0,
     },
-    [setAnnotatingSegment, onEnd, label, maxOrder, type, resetAnnotatingSegment],
+    [setAnnotatingSegment, onEnd, label, maxOrder, type, resetAnnotatingSegment, duration],
   );
 
   // 标记时间戳
@@ -326,7 +326,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
             );
 
             // 播放结束时但没有标注结束时间点
-            if (time === duration && !annotations.find((item) => item.id === annotatingSegment.id)) {
+            if (time >= duration && !annotations.find((item) => item.id === annotatingSegment.id)) {
               isSettingCurrentTimeRef.current = false;
               onEnd?.({
                 ...annotatingSegment,
