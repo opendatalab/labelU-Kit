@@ -1,44 +1,67 @@
 import { CheckOutlined } from '@ant-design/icons';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import styled from 'styled-components';
 
 import ExportPortal from '@/components/ExportPortal';
-import type { Dispatch, RootState } from '@/store';
+import type { TaskLoaderResult } from '@/loaders/task.loader';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import styles from './index.module.scss';
+const Wrapper = styled(FlexLayout)`
+  background: #fff;
+  height: calc(100vh - var(--header-height));
+`;
+
+const Inner = styled(FlexLayout.Item)`
+  width: 312px;
+  height: 290px;
+`;
+
+const CircleCheck = styled(FlexLayout.Item)`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--color-success-bg);
+`;
+
+const Statistic = styled(FlexLayout)`
+  font-size: 1rem;
+`;
+
+const ButtonWrapper = styled(FlexLayout)`
+  button {
+    padding: 0.375rem 2.5rem !important;
+    height: 3rem !important;
+  }
+`;
 
 const SamplesFinished = () => {
-  const dispatch = useDispatch<Dispatch>();
-  const taskData = useSelector((state: RootState) => state.task.item);
+  const { task: taskData } = useRouteLoaderData('task') as TaskLoaderResult;
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
   const handleGoHome = () => {
     navigate(`/tasks/${taskId}?t=${Date.now()}`);
+    setTimeout(revalidator.revalidate);
   };
 
-  useEffect(() => {
-    dispatch.task.fetchTask(taskId);
-  }, [dispatch.task, taskId]);
-
   return (
-    <div className={styles.finishedWrapper}>
-      <div className={styles.innerWrapper}>
-        <div className={styles.check}>
+    <Wrapper flex="column" items="center" justify="center">
+      <Inner flex="column" justify="space-between" items="center">
+        <CircleCheck items="center" justify="center" flex>
           <CheckOutlined style={{ color: 'var(--color-success)', fontSize: '40px' }} />
-        </div>
-        <div className={styles.txt}>标注完成</div>
-        <div className={styles.stat}>
-          <div className={styles.statItem}>已标注： {taskData?.stats?.done}，</div>
-          <div className={styles.statItem}>
-            未标注： <div style={{ color: 'red' }}>{taskData?.stats?.new}</div>，
+        </CircleCheck>
+        <h1>标注完成</h1>
+        <Statistic>
+          <div>已标注： {taskData?.stats?.done}，</div>
+          <div>
+            未标注： <span style={{ color: 'red' }}>{taskData?.stats?.new}</span>，
           </div>
-          <div className={styles.statItem}>跳过：{taskData?.stats?.skipped}</div>
-        </div>
-        <div className={styles.buttons}>
-          <ExportPortal taskId={taskId} mediaType={taskData.media_type!}>
+          <div>跳过：{taskData?.stats?.skipped}</div>
+        </Statistic>
+        <ButtonWrapper gap="1.5rem">
+          <ExportPortal taskId={taskId} mediaType={taskData?.media_type}>
             <Button type="primary" size="large">
               导出数据
             </Button>
@@ -46,9 +69,9 @@ const SamplesFinished = () => {
           <Button type="default" size="large" onClick={handleGoHome}>
             返回主页
           </Button>
-        </div>
-      </div>
-    </div>
+        </ButtonWrapper>
+      </Inner>
+    </Wrapper>
   );
 };
 

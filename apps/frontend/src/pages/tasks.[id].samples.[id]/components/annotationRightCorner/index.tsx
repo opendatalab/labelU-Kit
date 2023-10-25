@@ -1,21 +1,20 @@
 import { useEffect, useCallback, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set, omit } from 'lodash/fp';
-import { useSelector } from 'react-redux';
+import { useIsFetching } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
 
-import commonController from '@/utils/common/common';
+import commonController from '@/utils/common';
 import { annotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
-import type { SampleListResponse, SampleResponse } from '@/services/types';
-import { MediaType, SampleState } from '@/services/types';
-import { updateSampleState, updateSampleAnnotationResult } from '@/services/samples';
-import type { RootState } from '@/store';
+import type { SampleListResponse, SampleResponse } from '@/api/types';
+import { MediaType, SampleState } from '@/api/types';
+import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import currentStyles from './index.module.scss';
 import AnnotationContext from '../../annotation.context';
 
 interface AnnotationRightCornerProps {
@@ -58,9 +57,11 @@ export interface AnnotationLoaderData {
 }
 
 const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: AnnotationRightCornerProps) => {
-  const isGlobalLoading = useSelector((state: RootState) => state.loading.global);
+  const isFetching = useIsFetching();
+  const isGlobalLoading = isFetching > 0;
   const navigate = useNavigate();
   const routeParams = useParams();
+  const revalidator = useRevalidator();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
   const { samples, setSamples, task } = useContext(AnnotationContext);
@@ -155,7 +156,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
   );
 
   const saveCurrentSample = useCallback(async () => {
-    if (currentSample?.state === SampleState.SKIPPED || noSave) {
+    if (currentSample?.state === SampleState.SKIPPED || noSave || !task?.media_type) {
       return;
     }
 
@@ -278,12 +279,13 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, noSave, task.media_type, taskId]);
+  }, [currentSample, noSave, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
     navigateWithSearch(`/tasks/${taskId}/samples/finished`);
-  }, [saveCurrentSample, navigateWithSearch, taskId]);
+    setTimeout(revalidator.revalidate);
+  }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
   const handleNextSample = useCallback(() => {
     if (noSave) {
@@ -399,44 +401,36 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
     };
   }, [navigateWithSearch, noSave, saveCurrentSample, taskId]);
 
+  if (noSave) {
+    return null;
+  }
+
   return (
-    <div className={currentStyles.outerFrame} id="rightCorner">
-      {!noSave && (
-        <div className={currentStyles.right}>
-          {isSampleSkipped ? (
-            <Button
-              type="text"
-              onClick={commonController.debounce(handleCancelSkipSample, 100)}
-              disabled={isGlobalLoading}
-            >
-              取消跳过
-            </Button>
-          ) : (
-            <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
-              跳过
-            </Button>
-          )}
-          {!isFirstSample && (
-            <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
-              上一页
-            </Button>
-          )}
-          {isLastSample ? (
-            <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
-              完成
-            </Button>
-          ) : (
-            <Button
-              type="primary"
-              onClick={commonController.debounce(handleNextSample, 100)}
-              disabled={isGlobalLoading}
-            >
-              下一页
-            </Button>
-          )}
-        </div>
+    <FlexLayout items="center" gap=".5rem">
+      {isSampleSkipped ? (
+        <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
+          取消跳过
+        </Button>
+      ) : (
+        <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
+          跳过
+        </Button>
       )}
-    </div>
+      {!isFirstSample && (
+        <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
+          上一页
+        </Button>
+      )}
+      {isLastSample ? (
+        <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
+          完成
+        </Button>
+      ) : (
+        <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
+          下一页
+        </Button>
+      )}
+    </FlexLayout>
   );
 };
 export default AnnotationRightCorner;

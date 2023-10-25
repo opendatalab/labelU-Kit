@@ -3,7 +3,7 @@ const path = require('path');
 
 const _ = require('lodash');
 let codeTemplate;
-const targetPath = path.join(__dirname, '../src/styles/global-variables.scss');
+const targetPath = path.join(__dirname, '../src/styles/global-variables.css');
 const tokenPath = path.join(__dirname, '../src/styles/theme.json');
 const { theme } = require('antd');
 const prettier = require('prettier');
@@ -61,7 +61,7 @@ try {
     fs.writeFile(
       targetPath,
       prettier.format(codeTemplate, {
-        parser: 'scss',
+        parser: 'css',
       }),
       'utf-8',
       () => {

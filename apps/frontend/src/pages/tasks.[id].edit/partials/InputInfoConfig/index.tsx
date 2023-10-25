@@ -1,22 +1,26 @@
 import React, { memo, useContext } from 'react';
 import { Form, Input, Select } from 'antd';
+import styled from 'styled-components';
 
-import { MediaType } from '@/services/types';
+import { MediaType } from '@/api/types';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import styles from './index.module.scss';
 import { TaskCreationContext } from '../../taskCreation.context';
+
+const Inner = styled(FlexLayout)`
+  width: 740px;
+  margin: auto;
+`;
 
 const InputInfoConfig = () => {
   const { basicFormInstance } = useContext(TaskCreationContext);
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.innerWrapper}>
-        <div className={styles.header}>
-          <span className={styles.title}>基础配置</span>
-        </div>
-        <div className={styles.content}>
-          <Form form={basicFormInstance} className={styles.basicForm} labelCol={{ span: 3 }} wrapperCol={{ span: 21 }}>
+    <FlexLayout padding="1rem" flex="column">
+      <Inner flex="column">
+        <h2>基础配置</h2>
+        <FlexLayout.Content>
+          <Form form={basicFormInstance} labelCol={{ span: 3 }} wrapperCol={{ span: 21 }}>
             <Form.Item label="任务名称" name="name" required rules={[{ required: true, message: '任务名称不可为空' }]}>
               <Input placeholder="请输入50字以内的任务名称" maxLength={50} />
             </Form.Item>
@@ -50,9 +54,9 @@ const InputInfoConfig = () => {
               />
             </Form.Item>
           </Form>
-        </div>
-      </div>
-    </div>
+        </FlexLayout.Content>
+      </Inner>
+    </FlexLayout>
   );
 };
 export default memo(InputInfoConfig);

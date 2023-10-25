@@ -8,7 +8,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@labelu/interface": "^1.0.0",
+    "@labelu/interface": "latest",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.4",
@@ -19,7 +19,7 @@
     "vite-plugin-ts-mono-alias": "^1.1.0"
   },
   "dependencies": {
-    "@labelu/audio-react": "^1.0.0",
+    "@labelu/audio-react": "latest",
     "react-router": "^6.16.0",
     "react-router-dom": "^6.16.0"
   }

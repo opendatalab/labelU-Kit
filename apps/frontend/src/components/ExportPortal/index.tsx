@@ -2,15 +2,14 @@ import type { RadioChangeEvent } from 'antd';
 import { Modal, Radio } from 'antd';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { ExportType, MediaType } from '@/services/types';
-import { outputSample, outputSamples } from '@/services/samples';
-
-import styles from './index.module.scss';
+import { ExportType, MediaType } from '@/api/types';
+import { outputSample, outputSamples } from '@/api/services/samples';
+import FlexLayout from '@/layouts/FlexLayout';
 
 export interface ExportPortalProps {
   children: React.ReactChild;
   taskId: number;
-  mediaType: MediaType;
+  mediaType: MediaType | undefined;
   sampleIds?: number[];
 }
 
@@ -103,19 +102,19 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, children }:
     <>
       {plainChild}
       <Modal title="选择导出格式" okText={'导出'} onOk={handleExport} onCancel={handleCloseModal} open={modalVisible}>
-        <div className={styles.wrapper}>
-          <div className={styles.title}>导出格式</div>
-          <div className={styles.options}>
+        <FlexLayout flex="column" gap="1rem">
+          <FlexLayout.Header items="center" gap="1rem" flex>
+            <span>导出格式</span>
             <Radio.Group
-              options={availableOptions[mediaType]}
+              options={mediaType ? availableOptions[mediaType] : []}
               onChange={handleOptionChange}
               value={exportType}
               optionType="button"
               buttonStyle="solid"
             />
-          </div>
-        </div>
-        <div className={styles.description}>{exportDescriptionMapping[exportType]}</div>
+          </FlexLayout.Header>
+          <div>{exportDescriptionMapping[exportType]}</div>
+        </FlexLayout>
       </Modal>
     </>
   );

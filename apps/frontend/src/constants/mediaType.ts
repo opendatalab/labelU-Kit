@@ -1,4 +1,4 @@
-import { MediaType } from '@/services/types';
+import { MediaType } from '@/api/types';
 
 export const MediaTypeText = {
   [MediaType.IMAGE]: '图片',
@@ -22,6 +22,12 @@ export const MediaFileSize = {
   [MediaType.IMAGE]: 100,
   [MediaType.VIDEO]: 200,
   [MediaType.AUDIO]: 200,
+};
+
+export const MediaRouterPrefix = {
+  [MediaType.IMAGE]: 'image',
+  [MediaType.VIDEO]: 'video',
+  [MediaType.AUDIO]: 'audio',
 };
 
 export const FileMimeType = {

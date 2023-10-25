@@ -13,7 +13,13 @@ import type {
   EnumerableAttribute,
   AudioAnnotationInUI,
 } from '@labelu/interface';
-import { AttributeOverlay, MediaAnnotationContext, MediaAnnotator, PlayerController } from '@labelu/components-react';
+import {
+  AttributeOverlay,
+  MediaAnnotationContext,
+  MediaAnnotator,
+  PlayerController,
+  parseTime,
+} from '@labelu/components-react';
 
 import { AudioPlayer } from './AudioPlayer';
 
@@ -169,7 +175,8 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
       const playingIds = annotations
         .filter((item) => {
           if (item.type === 'frame') {
-            return item.time === time;
+            // 播放时播放器的时间不一定跟标注的时间一致，取一位小数再比较
+            return parseTime(item.time) === parseTime(time);
           }
 
           return item.start <= time && item.end >= time;

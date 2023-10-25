@@ -3,14 +3,11 @@ import styled from 'styled-components';
 const StyledContainer = styled.div`
   padding: 0 2rem;
 `;
-
-export interface BlockContainerProps {
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}
-
-export default function BlockContainer({ children, className, style }: BlockContainerProps) {
+export default function BlockContainer({
+  children,
+  className,
+  style,
+}: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
   return (
     <StyledContainer style={style} className={className}>
       {children}

@@ -1,27 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { Link, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import type { ColumnsType, TableProps } from 'antd/es/table';
 import { Table, Pagination, Button } from 'antd';
 import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
+import styled from 'styled-components';
 
-import type { Dispatch, RootState } from '@/store';
-import { MediaType, SampleState, TaskStatus } from '@/services/types';
+import type { SampleResponse } from '@/api/types';
+import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
+import type { TaskLoaderResult } from '@/loaders/task.loader';
+import FlexLayout from '@/layouts/FlexLayout';
+import BlockContainer from '@/layouts/BlockContainer';
 
-import currentStyles from './index.module.scss';
-import Statistical from './components/Statistical';
+import type { TaskStatusProps } from './components/Statistical';
+import Statistical, { TaskStatus as TaskStatusComponent } from './components/Statistical';
 import GoToEditTask from './components/GoToEditTask';
-import statisticalStyles from './components/Statistical/index.module.scss';
+
+const HeaderWrapper = styled(FlexLayout.Header)`
+  background-color: #fff;
+  height: 3.5rem;
+`;
 
 const Samples = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch<Dispatch>();
+  const routerData = useRouteLoaderData('task') as TaskLoaderResult;
+  const samples = _.get(routerData, 'samples.data');
+  const task = _.get(routerData, 'task');
+  const metaData = routerData?.samples?.meta_data;
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
-  const taskData = useSelector((state: RootState) => state.task.item);
-  const taskConfig = useSelector((state: RootState) => state.task.config);
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
@@ -32,37 +40,15 @@ const Samples = () => {
     }),
   );
 
-  const taskStatus = _.get(taskData, 'status');
+  const taskStatus = _.get(task, 'status');
   const isTaskReadyToAnnotate =
-    ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!) && taskConfig && Object.keys(taskConfig).length > 0;
-  const {
-    meta_data = {
-      total: 0,
-    },
-    data: samples,
-  } = useSelector((state: RootState) => state.sample.list);
-
-  // 初始化获取文件列表
-  useEffect(() => {
-    dispatch.sample.fetchSamples({
-      task_id: +taskId!,
-      ...Object.fromEntries(searchParams.entries()),
-    });
-  }, [dispatch.sample, searchParams, taskId]);
-
-  // 获取任务信息
-  useEffect(() => {
-    dispatch.task.fetchTask(taskId);
-  }, [dispatch.task, taskId]);
-
+    ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!) &&
+    task?.config &&
+    Object.keys(task?.config).length > 0;
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
 
-  const handleGoAnnotation = (sampleId: number) => {
-    navigate(`/tasks/${taskId}/samples/${sampleId}`);
-  };
-
-  const columns: any = [
+  const columns: ColumnsType<SampleResponse> = [
     {
       title: '数据ID',
       dataIndex: 'id',
@@ -74,15 +60,15 @@ const Samples = () => {
       dataIndex: 'data',
       key: 'packageID',
       align: 'left',
-      render: (data: any) => {
+      render: (data) => {
         let url = '';
         for (const sampleId in data.urls) {
           url = data.urls[sampleId];
         }
 
-        if (taskData.media_type === MediaType.IMAGE) {
+        if (task!.media_type === MediaType.IMAGE) {
           return <img src={url} style={{ width: '116px', height: '70px' }} />;
-        } else if (taskData.media_type === MediaType.AUDIO) {
+        } else if (task!.media_type === MediaType.AUDIO) {
           return <audio src={url} controls />;
         } else {
           return <VideoCard size={{ width: 116, height: 70 }} src={url} showPlayIcon showDuration />;
@@ -95,29 +81,12 @@ const Samples = () => {
       key: 'packageID',
       align: 'left',
 
-      render: (text: string) => {
+      render: (text) => {
         if (!isTaskReadyToAnnotate) {
           return '';
         }
 
-        const icons: Record<SampleState, React.ReactNode> = {
-          [SampleState.DONE]: <div className={statisticalStyles.leftTitleContentOptionBlueIcon} />,
-          [SampleState.NEW]: <div className={statisticalStyles.leftTitleContentOptionGrayIcon} />,
-          [SampleState.SKIPPED]: <div className={statisticalStyles.leftTitleContentOptionOrangeIcon} />,
-        };
-
-        const texts: Record<SampleState, string> = {
-          [SampleState.DONE]: '已标注',
-          [SampleState.NEW]: '未标注',
-          [SampleState.SKIPPED]: '跳过',
-        };
-
-        return (
-          <div className={currentStyles.leftTitleContentOption}>
-            {icons[text as SampleState]}
-            <div className={statisticalStyles.leftTitleContentOptionContent}>{texts[text as SampleState]}</div>
-          </div>
-        );
+        return <TaskStatusComponent status={_.lowerCase(text) as TaskStatusProps['status']} />;
       },
       sorter: true,
     },
@@ -127,9 +96,9 @@ const Samples = () => {
       key: 'annotated_count',
       align: 'left',
 
-      render: (temp: any, record: any) => {
+      render: (_unused, record) => {
         let result = 0;
-        const resultJson = JSON.parse(record.data.result);
+        const resultJson = record?.data?.result ? JSON.parse(record?.data?.result) : {};
         for (const key in resultJson) {
           if (key.indexOf('Tool') > -1 && key !== 'textTool' && key !== 'tagTool') {
             const tool = resultJson[key];
@@ -156,7 +125,7 @@ const Samples = () => {
       key: 'created_by',
       align: 'left',
 
-      render: (created_by: any) => {
+      render: (created_by) => {
         if (!isTaskReadyToAnnotate) {
           return '';
         }
@@ -168,9 +137,7 @@ const Samples = () => {
       dataIndex: 'updated_at',
       key: 'updated_at',
       align: 'left',
-
-      // width : 310,
-      render: (updated_at: any) => {
+      render: (updated_at) => {
         if (!isTaskReadyToAnnotate) {
           return '';
         }
@@ -183,43 +150,30 @@ const Samples = () => {
       dataIndex: 'option',
       key: 'option',
       width: 180,
-      align: 'left',
+      align: 'center',
 
-      render: (x: any, record: any) => {
+      render: (x, record) => {
         return (
-          <React.Fragment>
-            {record.id === enterRowId && (
-              <div className={currentStyles.optionItem}>
-                {isTaskReadyToAnnotate && (
-                  <div className={currentStyles.optionItemEnter} onClick={() => handleGoAnnotation(record.id)}>
-                    进入标注
-                  </div>
-                )}
-              </div>
+          <>
+            {record.id === enterRowId && isTaskReadyToAnnotate && (
+              <Link to={`/tasks/${taskId}/samples/${record.id}`}>
+                <Button type="link">进入标注</Button>
+              </Link>
             )}
-          </React.Fragment>
+          </>
         );
       },
     },
   ];
 
-  const rowSelection = {
+  const rowSelection: TableProps<SampleResponse>['rowSelection'] = {
     columnWidth: 58,
-    onChange: (selectedKeys: number[]) => {
+    onChange: (selectedKeys) => {
       setSelectedSampleIds(selectedKeys);
     },
-    getCheckboxProps: (record: any) => {
-      return {
-        disabled: false, // Column configuration not to be checked
-        name: record.packageID,
-        key: record.packageID,
-      };
-    },
-    selectedKeys: () => {},
   };
 
-  // @ts-ignore
-  const handleTableChange = (pagination, filters, sorter) => {
+  const handleTableChange: TableProps<SampleResponse>['onChange'] = (pagination, filters, sorter) => {
     if (!_.isEmpty(pagination)) {
       searchParams.set('pageNo', `${pagination.current}`);
       searchParams.set('pageSize', `${pagination.pageSize}`);
@@ -227,6 +181,7 @@ const Samples = () => {
 
     if (sorter) {
       let sortValue = '';
+      // @ts-ignore
       switch (sorter.order) {
         case 'ascend':
           sortValue = 'asc';
@@ -263,41 +218,45 @@ const Samples = () => {
     };
   };
 
-  // @ts-ignore
   return (
-    <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.stepsRow}>
-        {isTaskReadyToAnnotate ? <Statistical /> : <GoToEditTask taskStatus={taskStatus} />}
-      </div>
-      <div className={currentStyles.content}>
-        <Table
-          columns={columns}
-          dataSource={samples || []}
-          pagination={false}
-          rowKey={(record) => record.id!}
-          rowSelection={rowSelection}
-          onRow={onRow}
-          onChange={handleTableChange}
-        />
-        <div className={currentStyles.pagination}>
-          <div className={currentStyles.dataProcess}>
-            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={taskData.media_type!}>
+    <FlexLayout flex="column" full gap="2rem">
+      <HeaderWrapper flex items="center">
+        <FlexLayout.Content full>
+          <BlockContainer>
+            {isTaskReadyToAnnotate ? <Statistical /> : <GoToEditTask taskStatus={taskStatus} />}
+          </BlockContainer>
+        </FlexLayout.Content>
+      </HeaderWrapper>
+
+      <FlexLayout.Content scroll>
+        <FlexLayout justify="space-between" flex="column" gap="1rem" padding="0 1.5rem 1.5rem">
+          <Table
+            columns={columns}
+            dataSource={samples || []}
+            pagination={false}
+            rowKey={(record) => record.id!}
+            rowSelection={rowSelection}
+            onRow={onRow}
+            onChange={handleTableChange}
+          />
+          <FlexLayout justify="space-between">
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={task!.media_type!}>
               <Button type="link" disabled={selectedSampleIds.length === 0}>
                 批量数据导出
               </Button>
             </ExportPortal>
-          </div>
-          <Pagination
-            current={parseInt(searchParams.get('pageNo') || '1')}
-            pageSize={parseInt(searchParams.get('pageSize') || '10')}
-            total={meta_data?.total}
-            showSizeChanger
-            showQuickJumper
-            onChange={handlePaginationChange}
-          />
-        </div>
-      </div>
-    </div>
+            <Pagination
+              current={parseInt(searchParams.get('pageNo') || '1')}
+              pageSize={parseInt(searchParams.get('pageSize') || '10')}
+              total={metaData?.total}
+              showSizeChanger
+              showQuickJumper
+              onChange={handlePaginationChange}
+            />
+          </FlexLayout>
+        </FlexLayout>
+      </FlexLayout.Content>
+    </FlexLayout>
   );
 };
 

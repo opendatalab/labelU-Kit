@@ -1,11 +1,20 @@
 import React, { useContext } from 'react';
+import styled from 'styled-components';
 
-import type { SampleResponse } from '@/services/types';
+import type { SampleResponse } from '@/api/types';
+import type { TaskInLoader } from '@/loaders/task.loader';
 
 import SliderCard from '../sliderCard';
-import currentStyles from './index.module.scss';
 import { SAMPLE_CHANGED } from '../annotationRightCorner';
 import AnnotationContext from '../../annotation.context';
+
+const LeftWrapper = styled.div`
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: var(--height);
+  box-sizing: border-box;
+  padding: 1rem;
+`;
 
 export const slideRef = React.createRef<HTMLDivElement>();
 
@@ -29,16 +38,16 @@ const SlideLoader = () => {
    * 3. 将当前文件标记为「取消跳过」，更新文件状态为「新」
    */
   // context中的samples会随着「跳过」、「取消跳过」、「完成」的操作而更新，但上面的useScrollFetch只有滚动的时候才会触发更新
-  const { samples: samplesFromContext, task } = useContext(AnnotationContext);
+  const { samples: samplesFromContext, task = {} as NonNullable<TaskInLoader> } = useContext(AnnotationContext);
 
   return (
-    <div className={currentStyles.leftBar} ref={slideRef}>
+    <LeftWrapper ref={slideRef}>
       {samplesFromContext?.map((item: SampleResponse, index) => {
         return (
           <SliderCard cardInfo={item} type={task.media_type} key={item.id} onClick={handleSampleClick} index={index} />
         );
       })}
-    </div>
+    </LeftWrapper>
   );
 };
 
