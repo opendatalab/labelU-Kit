@@ -498,9 +498,14 @@ const CreateTask = () => {
 
     bridgeRef.current = new Bridge(previewIframeRef.current.contentWindow!);
     bridgeRef.current.on('ready', () => {
+      if (!taskData?.media_type) {
+        console.warn('media_type is empty');
+        return;
+      }
+
       let _config;
 
-      if (taskData?.media_type === MediaType.VIDEO) {
+      if ([MediaType.VIDEO, MediaType.AUDIO].includes(taskData?.media_type)) {
         _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
       } else if (taskData?.media_type === MediaType.IMAGE) {
         _config = annotationFormInstance.getFieldsValue();
