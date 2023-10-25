@@ -3,7 +3,7 @@ import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set, omit } from 'lodash/fp';
-import { useIsFetching } from '@tanstack/react-query';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
 
@@ -58,7 +58,8 @@ export interface AnnotationLoaderData {
 
 const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: AnnotationRightCornerProps) => {
   const isFetching = useIsFetching();
-  const isGlobalLoading = isFetching > 0;
+  const isMutating = useIsMutating();
+  const isGlobalLoading = isFetching > 0 || isMutating > 0;
   const navigate = useNavigate();
   const routeParams = useParams();
   const revalidator = useRevalidator();
