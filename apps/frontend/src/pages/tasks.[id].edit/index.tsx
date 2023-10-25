@@ -197,9 +197,10 @@ const CreateTask = () => {
         })
         .then(() => {
           navigate(`/tasks/${taskData!.id}`);
+          revalidator.revalidate();
         });
     },
-    [annotationFormInstance, basicFormInstance, currentStep, navigate, taskData, updateTaskConfig],
+    [annotationFormInstance, basicFormInstance, currentStep, navigate, revalidator, taskData, updateTaskConfig],
   );
 
   const [previewVisible, setPreviewVisible] = useState(false);
