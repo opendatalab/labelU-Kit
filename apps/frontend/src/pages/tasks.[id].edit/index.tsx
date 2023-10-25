@@ -204,8 +204,6 @@ const CreateTask = () => {
 
   const [previewVisible, setPreviewVisible] = useState(false);
   const handleOpenPreview = useCallback(() => {
-    revalidator.revalidate();
-    // dispatch.sample.fetchSamples({ task_id: taskId });
     annotationFormInstance
       .validateFields()
       .then(() => {
@@ -214,7 +212,7 @@ const CreateTask = () => {
       .catch(() => {
         commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
       });
-  }, [annotationFormInstance, revalidator]);
+  }, [annotationFormInstance]);
 
   const correctSampleIdsMappings = useMemo(
     () =>
@@ -400,10 +398,20 @@ const CreateTask = () => {
       submitForm()
         .then(() => {
           updateCurrentStep((nextStep as TaskStep).value);
+          revalidator.revalidate();
         })
         .catch(() => {});
     },
-    [basicFormInstance, currentStep, samples?.data, stepDataSource, submitForm, updateCurrentStep, uploadFileList],
+    [
+      basicFormInstance,
+      currentStep,
+      revalidator,
+      samples?.data,
+      stepDataSource,
+      submitForm,
+      updateCurrentStep,
+      uploadFileList,
+    ],
   );
 
   const handlePrevStep = async (step: TaskStep, lastStep: TaskStep) => {
@@ -438,9 +446,10 @@ const CreateTask = () => {
         );
       }
       const previewDisabled = !isAnnotationFormValid || isEmpty(samples?.data);
+
       return (
         <FlexLayout gap=".5rem">
-          <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples?.data)}>
+          <Button onClick={handleOpenPreview} disabled={previewDisabled}>
             进入预览
             <ArrowRightOutlined />
           </Button>
@@ -471,6 +480,8 @@ const CreateTask = () => {
     handleOpenPreview,
     handleSave,
   ]);
+
+  console.log('22', routerLoaderData, samples);
 
   const taskCreationContextValue = useMemo(
     () => ({
