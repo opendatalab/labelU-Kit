@@ -64,7 +64,5 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
     };
   }
 
-  console.log('result', result);
-
   return result;
 }
