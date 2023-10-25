@@ -187,8 +187,6 @@ const AnnotationPage = () => {
     );
   }
 
-  console.log(configFromParent);
-
   if (_.isEmpty(taskConfig?.tools) && _.isEmpty(configFromParent)) {
     return (
       <FlexLayout.Content items="center" justify="center" flex>
