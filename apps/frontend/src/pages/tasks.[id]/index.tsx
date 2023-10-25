@@ -229,34 +229,32 @@ const Samples = () => {
       </HeaderWrapper>
 
       <FlexLayout.Content scroll>
-        <BlockContainer>
-          <FlexLayout justify="space-between" flex="column" gap="1rem">
-            <Table
-              columns={columns}
-              dataSource={samples || []}
-              pagination={false}
-              rowKey={(record) => record.id!}
-              rowSelection={rowSelection}
-              onRow={onRow}
-              onChange={handleTableChange}
+        <FlexLayout justify="space-between" flex="column" gap="1rem" padding="0 1.5rem 1.5rem">
+          <Table
+            columns={columns}
+            dataSource={samples || []}
+            pagination={false}
+            rowKey={(record) => record.id!}
+            rowSelection={rowSelection}
+            onRow={onRow}
+            onChange={handleTableChange}
+          />
+          <FlexLayout justify="space-between">
+            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={task!.media_type!}>
+              <Button type="link" disabled={selectedSampleIds.length === 0}>
+                批量数据导出
+              </Button>
+            </ExportPortal>
+            <Pagination
+              current={parseInt(searchParams.get('pageNo') || '1')}
+              pageSize={parseInt(searchParams.get('pageSize') || '10')}
+              total={metaData?.total}
+              showSizeChanger
+              showQuickJumper
+              onChange={handlePaginationChange}
             />
-            <FlexLayout justify="space-between">
-              <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={task!.media_type!}>
-                <Button type="link" disabled={selectedSampleIds.length === 0}>
-                  批量数据导出
-                </Button>
-              </ExportPortal>
-              <Pagination
-                current={parseInt(searchParams.get('pageNo') || '1')}
-                pageSize={parseInt(searchParams.get('pageSize') || '10')}
-                total={metaData?.total}
-                showSizeChanger
-                showQuickJumper
-                onChange={handlePaginationChange}
-              />
-            </FlexLayout>
           </FlexLayout>
-        </BlockContainer>
+        </FlexLayout>
       </FlexLayout.Content>
     </FlexLayout>
   );

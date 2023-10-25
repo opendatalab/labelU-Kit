@@ -1,10 +1,10 @@
 import React from 'react';
 import { CheckOutlined } from '@ant-design/icons';
-import classNames from 'classnames';
 
-import Separator from '@/components/separator';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import styles from './index.module.scss';
+import Separator from '../Separator';
+import { IconWrapper, StepItemInner, StepItemWrapper } from './style';
 
 export interface StepData {
   title: string;
@@ -23,19 +23,15 @@ interface StepItemProps {
 
 const StepItem = ({ step, index, isEnd, onClick, active }: StepItemProps) => {
   return (
-    <div className={styles.stepItem}>
-      <div
-        className={classNames(styles.stepItemInner, {
-          [styles.active]: active,
-          [styles.finished]: step.isFinished,
-        })}
-        onClick={onClick}
-      >
-        <div className={styles.icon}>{step.isFinished ? <CheckOutlined /> : index + 1}</div>
-        <div className={styles.title}> {step.title} </div>
-      </div>
+    <StepItemWrapper justify="space-around" items="center">
+      <StepItemInner gap=".5rem" items="center" flex onClick={onClick}>
+        <IconWrapper flex items="center" justify="center" active={active} finished={step.isFinished}>
+          {step.isFinished ? <CheckOutlined /> : index + 1}
+        </IconWrapper>
+        <span> {step.title} </span>
+      </StepItemInner>
       {!isEnd && <Separator />}
-    </div>
+    </StepItemWrapper>
   );
 };
 
@@ -61,7 +57,7 @@ export default function Step({ steps, currentStep, onNext, onPrev }: StepProps) 
   };
 
   return (
-    <div className={styles.stepWrapper}>
+    <FlexLayout items="center" justify="flex-start">
       {steps.map((step, index) => {
         return (
           <StepItem
@@ -75,6 +71,6 @@ export default function Step({ steps, currentStep, onNext, onPrev }: StepProps) 
           />
         );
       })}
-    </div>
+    </FlexLayout>
   );
 }

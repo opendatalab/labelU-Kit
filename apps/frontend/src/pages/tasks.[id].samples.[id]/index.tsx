@@ -9,6 +9,7 @@ import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
 import '@labelu/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
+import { useIsFetching } from '@tanstack/react-query';
 
 import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
@@ -34,6 +35,7 @@ const AnnotationPage = () => {
   const sample = useRouteLoaderData('annotation') as Awaited<ReturnType<typeof getSample>>;
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
+  const isFetching = useIsFetching();
 
   const sampleId = routeParams.sampleId;
 
@@ -130,6 +132,8 @@ const AnnotationPage = () => {
     return () => bridge.destroy();
   }, []);
 
+  const isLoading = useMemo(() => loading || isFetching, [loading, isFetching]);
+
   if (task?.media_type === MediaType.IMAGE) {
     content = (
       <AnnotationOperation
@@ -167,10 +171,10 @@ const AnnotationPage = () => {
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <FlexLayout.Content items="center" justify="center" flex>
-        <Spin spinning={loading} />
+        <Spin spinning={isLoading} />
       </FlexLayout.Content>
     );
   }

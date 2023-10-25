@@ -1,5 +1,5 @@
 import type { Params } from 'react-router-dom';
-import { useMatches } from 'react-router-dom';
+import { useMatches, useNavigate, useRevalidator } from 'react-router-dom';
 
 import StyledBreadcrumb, { BreadcrumbItem } from './style';
 
@@ -26,6 +26,8 @@ export interface BreadcrumbProps {
  */
 function Breadcrumb({ className, hideHome = false, style }: BreadcrumbProps) {
   const matches = useMatches() as Match[];
+  const navigate = useNavigate();
+  const revalidator = useRevalidator();
 
   const crumbs = matches
     .filter((match) => (match.pathname === '/' ? !hideHome : Boolean(match.handle?.crumb!(match.data))))
@@ -34,6 +36,12 @@ function Breadcrumb({ className, hideHome = false, style }: BreadcrumbProps) {
       crumb: match.handle.crumb!(match.data),
       pathname: match.pathname,
     }));
+
+  const handleLinkClick = (pathname: string) => () => {
+    navigate(pathname);
+    // 通过面包屑跳转后，重新调用路由的loader来获得数据
+    setTimeout(revalidator.revalidate);
+  };
 
   return (
     // @ts-ignore
@@ -44,7 +52,7 @@ function Breadcrumb({ className, hideHome = false, style }: BreadcrumbProps) {
         if (!isCurrent) {
           return (
             <div key={index} className="breadcrumb-item-wrap">
-              <BreadcrumbItem to={item.pathname} isCurrent={false}>
+              <BreadcrumbItem to={item.pathname} isCurrent={false} onClick={handleLinkClick(item.pathname)}>
                 {item.crumb}
               </BreadcrumbItem>
               <span className="breadcrumb-item-separator">/</span>

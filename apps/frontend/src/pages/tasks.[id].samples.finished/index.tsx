@@ -1,5 +1,5 @@
 import { CheckOutlined } from '@ant-design/icons';
-import { useNavigate, useParams, useRouteLoaderData } from 'react-router';
+import { useNavigate, useParams, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
 import styled from 'styled-components';
 
@@ -40,8 +40,10 @@ const SamplesFinished = () => {
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
   const handleGoHome = () => {
     navigate(`/tasks/${taskId}?t=${Date.now()}`);
+    setTimeout(revalidator.revalidate);
   };
 
   return (

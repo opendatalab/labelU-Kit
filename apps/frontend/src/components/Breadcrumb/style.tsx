@@ -1,6 +1,4 @@
-import type { FC } from 'react';
 import type { LinkProps } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
 import BlockContainer from '@/layouts/BlockContainer';
@@ -29,16 +27,12 @@ export interface BreadcrumbItemProps extends LinkProps {
   isCurrent?: boolean;
 }
 
-const CustomLink: FC<BreadcrumbItemProps> = ({ isCurrent: _, ...props }) => {
-  return <Link {...props} />;
-};
-
-export const BreadcrumbItem = styled(CustomLink).attrs((props: BreadcrumbItemProps) => ({
+export const BreadcrumbItem = styled.span.attrs((props: BreadcrumbItemProps) => ({
   ...props,
   className: 'breadcrumb-item',
 }))`
   color: ${({ isCurrent }: BreadcrumbItemProps) => (isCurrent ? '#333' : '#999')};
-  text-decoration: none;
+  cursor: pointer;
 
   ${({ isCurrent }: BreadcrumbItemProps) =>
     !isCurrent &&

@@ -1,12 +1,12 @@
 import React from 'react';
 import type { FormInstance } from 'antd';
 
-import type { TaskLoaderResult } from '@/loaders/task.loader';
+import type { TaskInLoader } from '@/loaders/task.loader';
 
 import type { QueuedFile } from './partials/InputData';
 
 export interface TaskCreationContextValue {
-  task: NonNullable<TaskLoaderResult['task']>;
+  task: NonNullable<TaskInLoader>;
   uploadFileList: QueuedFile[];
   setUploadFileList: React.Dispatch<React.SetStateAction<QueuedFile[]>>;
   annotationFormInstance: FormInstance;

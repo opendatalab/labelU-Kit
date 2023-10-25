@@ -18,6 +18,7 @@ import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 import type { MediaType } from '@/api/types';
 import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
 import FlexLayout from '@/layouts/FlexLayout';
+import type { TaskInLoader } from '@/loaders/task.loader';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
@@ -89,7 +90,11 @@ const normalizeFiles = (files: File[]) => {
 
 const InputData = () => {
   // 上传队列，包括成功和失败的任务
-  const { uploadFileList: fileQueue, setUploadFileList: setFileQueue, task } = useContext(TaskCreationContext);
+  const {
+    uploadFileList: fileQueue,
+    setUploadFileList: setFileQueue,
+    task = {} as NonNullable<TaskInLoader>,
+  } = useContext(TaskCreationContext);
   const taskId = task.id;
 
   const amountMapping = useMemo(() => {

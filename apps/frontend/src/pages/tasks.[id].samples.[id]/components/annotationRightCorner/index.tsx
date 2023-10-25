@@ -13,8 +13,8 @@ import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
+import FlexLayout from '@/layouts/FlexLayout';
 
-import currentStyles from './index.module.scss';
 import AnnotationContext from '../../annotation.context';
 
 interface AnnotationRightCornerProps {
@@ -399,44 +399,36 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
     };
   }, [navigateWithSearch, noSave, saveCurrentSample, taskId]);
 
+  if (noSave) {
+    return null;
+  }
+
   return (
-    <div className={currentStyles.outerFrame} id="rightCorner">
-      {!noSave && (
-        <div className={currentStyles.right}>
-          {isSampleSkipped ? (
-            <Button
-              type="text"
-              onClick={commonController.debounce(handleCancelSkipSample, 100)}
-              disabled={isGlobalLoading}
-            >
-              取消跳过
-            </Button>
-          ) : (
-            <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
-              跳过
-            </Button>
-          )}
-          {!isFirstSample && (
-            <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
-              上一页
-            </Button>
-          )}
-          {isLastSample ? (
-            <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
-              完成
-            </Button>
-          ) : (
-            <Button
-              type="primary"
-              onClick={commonController.debounce(handleNextSample, 100)}
-              disabled={isGlobalLoading}
-            >
-              下一页
-            </Button>
-          )}
-        </div>
+    <FlexLayout items="center" gap=".5rem">
+      {isSampleSkipped ? (
+        <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
+          取消跳过
+        </Button>
+      ) : (
+        <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
+          跳过
+        </Button>
       )}
-    </div>
+      {!isFirstSample && (
+        <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
+          上一页
+        </Button>
+      )}
+      {isLastSample ? (
+        <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
+          完成
+        </Button>
+      ) : (
+        <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
+          下一页
+        </Button>
+      )}
+    </FlexLayout>
   );
 };
 export default AnnotationRightCorner;

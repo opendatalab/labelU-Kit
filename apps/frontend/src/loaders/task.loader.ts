@@ -18,11 +18,13 @@ export async function tasksLoader({ request }: LoaderFunctionArgs) {
   });
 }
 
+export type TaskInLoader = Omit<TaskResponseWithStatics, 'config'> & {
+  config: ToolsConfigState;
+};
+
 export interface TaskLoaderResult {
   samples?: SampleListResponse;
-  task?: Omit<TaskResponseWithStatics, 'config'> & {
-    config: ToolsConfigState;
-  };
+  task?: TaskInLoader;
 }
 
 export async function taskLoader({ params, request }: LoaderFunctionArgs) {
