@@ -481,8 +481,6 @@ const CreateTask = () => {
     handleSave,
   ]);
 
-  console.log('22', routerLoaderData, samples);
-
   const taskCreationContextValue = useMemo(
     () => ({
       uploadFileList,
