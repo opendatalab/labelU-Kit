@@ -9,7 +9,7 @@ import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
 import '@labelu/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
-import { useIsFetching } from '@tanstack/react-query';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 
 import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
@@ -24,6 +24,7 @@ import commonController from '../../utils/common';
 import SlideLoader, { slideRef } from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
+import { LoadingWrapper, Wrapper } from './style';
 
 export const annotationRef = createRef();
 export const videoAnnotationRef = createRef();
@@ -36,6 +37,7 @@ const AnnotationPage = () => {
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
   const isFetching = useIsFetching();
+  const isMutating = useIsMutating();
 
   const sampleId = routeParams.sampleId;
 
@@ -132,7 +134,7 @@ const AnnotationPage = () => {
     return () => bridge.destroy();
   }, []);
 
-  const isLoading = useMemo(() => loading || isFetching, [loading, isFetching]);
+  const isLoading = useMemo(() => loading || isFetching > 0 || isMutating > 0, [loading, isFetching, isMutating]);
 
   if (task?.media_type === MediaType.IMAGE) {
     content = (
@@ -171,14 +173,6 @@ const AnnotationPage = () => {
     );
   }
 
-  if (isLoading) {
-    return (
-      <FlexLayout.Content items="center" justify="center" flex>
-        <Spin spinning={isLoading} />
-      </FlexLayout.Content>
-    );
-  }
-
   if (_.isEmpty(transformed)) {
     return (
       <FlexLayout.Content items="center" justify="center" flex>
@@ -195,6 +189,17 @@ const AnnotationPage = () => {
     );
   }
 
-  return <AnnotationContext.Provider value={annotationContextValue}>{content}</AnnotationContext.Provider>;
+  return (
+    <AnnotationContext.Provider value={annotationContextValue}>
+      {isLoading && (
+        <LoadingWrapper items="center" justify="center" flex>
+          <Spin spinning />
+        </LoadingWrapper>
+      )}
+      <Wrapper flex="column" full loading={isLoading}>
+        {content}
+      </Wrapper>
+    </AnnotationContext.Provider>
+  );
 };
 export default AnnotationPage;
