@@ -1,6 +1,6 @@
 {
   "name": "@labelu/video-react",
-  "version": "1.1.0-alpha.10",
+  "version": "1.1.0-alpha.11",
   "description": "labelu video annotation component for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -39,7 +39,7 @@
     "vite-tsconfig-paths": "^3.5.0"
   },
   "dependencies": {
-    "@labelu/components-react": "1.1.0-alpha.10",
+    "@labelu/components-react": "1.1.0-alpha.11",
     "polished": "^4.2.2",
     "rc-tooltip": "^6.0.1",
     "react-hotkeys-hook": "^4.4.1",
