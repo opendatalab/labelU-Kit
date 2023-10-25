@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set, omit } from 'lodash/fp';
@@ -61,6 +61,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
   const isGlobalLoading = isFetching > 0;
   const navigate = useNavigate();
   const routeParams = useParams();
+  const revalidator = useRevalidator();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
   const { samples, setSamples, task } = useContext(AnnotationContext);
@@ -155,7 +156,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
   );
 
   const saveCurrentSample = useCallback(async () => {
-    if (currentSample?.state === SampleState.SKIPPED || noSave) {
+    if (currentSample?.state === SampleState.SKIPPED || noSave || !task?.media_type) {
       return;
     }
 
@@ -278,12 +279,13 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, noSave, task.media_type, taskId]);
+  }, [currentSample, noSave, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
     navigateWithSearch(`/tasks/${taskId}/samples/finished`);
-  }, [saveCurrentSample, navigateWithSearch, taskId]);
+    setTimeout(revalidator.revalidate);
+  }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
   const handleNextSample = useCallback(() => {
     if (noSave) {
