@@ -255,7 +255,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
           }
         >
           <InnerSegmentBar>
-            <ResizeBar position="left" ref={resizeHandlerLeftRef} onMouseDown={handleMouseDown('left')} />
+            {!isNew && <ResizeBar position="left" ref={resizeHandlerLeftRef} onMouseDown={handleMouseDown('left')} />}
             <AnnotationContent>
               {showOrder && <OrderWrapper>{order}.</OrderWrapper>}
               <AnnotationAttribute>
@@ -266,7 +266,13 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
                 </AttributeWrap>
               </AnnotationAttribute>
             </AnnotationContent>
-            <ResizeBar position="right" ref={resizeHandlerRightRef} onMouseDown={handleMouseDown('right')} />
+            {!isNew && (
+              <ResizeBar
+                position="right"
+                ref={resizeHandlerRightRef}
+                onMouseDown={isNew ? undefined : handleMouseDown('right')}
+              />
+            )}
           </InnerSegmentBar>
         </Tooltip>
       </AttributeItemWrapper>
