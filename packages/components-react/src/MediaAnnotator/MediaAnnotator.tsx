@@ -326,7 +326,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
             );
 
             // 播放结束时但没有标注结束时间点
-            if (time >= duration && !annotations.find((item) => item.id === annotatingSegment.id)) {
+            if (time === duration && !annotations.find((item) => item.id === annotatingSegment.id)) {
               isSettingCurrentTimeRef.current = false;
               onEnd?.({
                 ...annotatingSegment,

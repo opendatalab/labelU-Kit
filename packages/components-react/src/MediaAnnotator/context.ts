@@ -1,4 +1,10 @@
-import type { Attribute, VideoFrameName, VideoSegmentName, MediaAnnotationInUI } from '@labelu/interface';
+import type {
+  Attribute,
+  VideoFrameName,
+  VideoSegmentName,
+  MediaAnnotationInUI,
+  AttributeOption,
+} from '@labelu/interface';
 import { createContext, useContext } from 'react';
 
 export interface MediaAnnotationContextType {
@@ -9,7 +15,20 @@ export interface MediaAnnotationContextType {
   showOrder: boolean;
   onChange?: (annotation: MediaAnnotationInUI) => void;
   onAnnotationChange: (annotation: MediaAnnotationInUI) => void;
-  attributeConfigMapping: Record<VideoSegmentName | VideoFrameName, Record<string, Attribute>>;
+  attributeConfigMapping: Record<
+    VideoSegmentName | VideoFrameName,
+    Record<
+      string,
+      Attribute & {
+        attributesMapping?: Record<
+          string,
+          Attribute & {
+            optionMapping?: Record<string, AttributeOption>;
+          }
+        >;
+      }
+    >
+  >;
   playingAnnotationIds: string[];
   setCurrentTime: (time: number) => void;
   getCurrentTime: () => number;
