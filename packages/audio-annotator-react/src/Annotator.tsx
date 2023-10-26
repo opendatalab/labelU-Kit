@@ -109,7 +109,7 @@ function ForwardAnnotator(
   }: AnnotatorProps,
   ref: React.Ref<AudioAnnotatorRef>,
 ) {
-  const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>('segment');
+  const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>();
   const containerRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
