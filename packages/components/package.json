@@ -11,7 +11,7 @@
     "dev:style": "dart-sass --watch src/index.scss dist/index.css ",
     "build:style": "dart-sass src/index.scss dist/index.css && shx cp -R ./src/assets/cssIcon/.  ./dist/assets/cssIcon",
     "build": "rimraf dist && rimraf es && cross-env NODE_ENV=production rollup -c rollup.config.js && npm run build:style && npm run build:types",
-    "build:types": "tsc -d --emitDeclarationOnly",
+    "build:types": "tsc -v && tsc -d --emitDeclarationOnly",
     "clean": "rimraf ./node_modules",
     "commit": "git-cz",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' && npm run build:type",
