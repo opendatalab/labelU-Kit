@@ -104,7 +104,7 @@ function ForwardAnnotator(
   }: AnnotatorProps,
   ref: React.Ref<AnnotatorRef>,
 ) {
-  const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>('segment');
+  const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>();
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
   const selectedIndexRef = useRef<number>(-1);
   const attributes = useMemo(() => {
