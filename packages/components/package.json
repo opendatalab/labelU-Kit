@@ -1,6 +1,6 @@
 {
   "name": "@labelu/components",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.1",
   "description": "Provide a complete library of annotation components",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -41,8 +41,8 @@
     "email": "751569801@qq.com"
   },
   "dependencies": {
-    "@labelu/annotation": "1.0.0",
-    "@labelu/utils": "1.0.0",
+    "@labelu/annotation": "1.0.1-alpha.1",
+    "@labelu/utils": "1.0.1-alpha.1",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "copyfiles": "^2.4.1",
