@@ -62,6 +62,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: show package version
+        run: |
+          pnpm list react react-dom @types/react @types/react-dom
+
       - name: Build packages
         run: pnpm run build
 

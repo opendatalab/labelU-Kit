@@ -213,7 +213,12 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
     Object.keys(toolConfig).forEach((key) => {
       const _key = key as VideoSegmentName | VideoFrameName;
       const _attributes: Attribute[] = toolConfig?.[_key]?.attributes ?? [];
-      const _mapping: Record<string, Attribute> = {};
+      const _mapping: Record<
+        string,
+        Attribute & {
+          attributesMapping?: Record<string, Attribute>;
+        }
+      > = {};
 
       _attributes.forEach((_item) => {
         _mapping[_item.value] = { ..._item };

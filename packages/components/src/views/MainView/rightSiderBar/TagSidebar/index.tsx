@@ -250,7 +250,7 @@ const TagSidebar = () => {
     [handleOnChange, tagResult.values],
   );
 
-  const treeData = useMemo(() => {
+  const treeData = useMemo<any>(() => {
     return makeTreeData(tagConfigList, undefined, undefined);
   }, [makeTreeData, tagConfigList]);
 

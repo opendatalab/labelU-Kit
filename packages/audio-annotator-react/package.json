@@ -36,13 +36,13 @@
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
+    "typescript": "4.8.4",
     "@types/react": "^18.2.20",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "typescript": "^5.1.6",
     "vite": "^4.1.1",
     "vite-plugin-svgr": "^2.4.0",
     "vite-plugin-ts-mono-alias": "^1.1.0",
