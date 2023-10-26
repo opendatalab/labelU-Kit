@@ -7,7 +7,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "vite build && npm run build:types",
-    "build:types": "tsc -d --emitDeclarationOnly",
+    "build:types": "tsc -d --emitDeclarationOnly -v",
     "clean": "rimraf ./node_modules",
     "start": "vite -c vite.config.app.ts"
   },
