@@ -40,6 +40,7 @@
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
+    "typescript": "4.8.4",
     "@labelu/annotation": "1.0.0",
     "@labelu/interface": "1.1.0-alpha.10",
     "@types/react": "^18.2.2",
@@ -49,7 +50,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "typescript": "4.8.4",
     "vite": "^4.1.1",
     "vite-plugin-svgr": "^2.4.0",
     "vite-tsconfig-paths": "^3.5.0"
