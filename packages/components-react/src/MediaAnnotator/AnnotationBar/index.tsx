@@ -68,7 +68,6 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
 
     const color = attributeConfig.color;
     const currentAttributeMapping = useMemo(() => {
-      // @ts-ignore
       return attributeConfigMapping?.[type]?.[annotation.label]?.attributesMapping ?? {};
     }, [annotation.label, attributeConfigMapping, type]);
 
