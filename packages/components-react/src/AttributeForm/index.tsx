@@ -1,5 +1,5 @@
 import type { Attribute, AttributeOption, InnerAttributeType, StringType } from '@labelu/interface';
-import type { Rule, ValidateErrorEntity, NamePath } from 'rc-field-form/es/interface';
+import type { Rule, ValidateErrorEntity } from 'rc-field-form/es/interface';
 import type { FormProps, FormInstance } from 'rc-field-form';
 import Form, { useForm, Field } from 'rc-field-form';
 import {
@@ -267,7 +267,7 @@ interface AttributeResultProps {
   defaultValue?: string | boolean;
   stringType?: StringType[keyof StringType];
   className?: string;
-  name?: NamePath;
+  name?: string | number | (string | number)[];
 }
 
 export function AttributeFormItem({
