@@ -91,7 +91,7 @@ const AttributeOperation = () => {
   const [attributeBoxLength, setAttributeBoxLength] = useState<number>(0);
   const [showAttributeCount, setShowAttributeCount] = useState<number>(0);
   const [chooseAttribute, setChoseAttribute] = useState<string>();
-  const attributeMap = useMemo(
+  const attributeMap = useMemo<any>(
     () => toolInstance?.config?.attributeMap ?? new Map(),
     [toolInstance?.config?.attributeMap],
   );

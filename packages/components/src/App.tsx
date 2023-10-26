@@ -73,7 +73,7 @@ const App = forwardRef<
     defaultLang = 'cn',
   } = props;
   const [imgNode, setImgNode] = useState<HTMLImageElement | null>(null);
-  const parsedResult = useMemo(() => {
+  const parsedResult = useMemo<any>(() => {
     return jsonParser(sample?.result);
   }, [sample?.result]);
   const [engine, setEngine] = useState<AnnotationEngine | null>(null);
