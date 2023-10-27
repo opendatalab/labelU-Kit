@@ -30,6 +30,7 @@ export const SkipWrapper = styled.div`
 export const ContentWrapper = styled<any>(FlexLayout.Content)`
   position: relative;
   margin-bottom: 10px;
+  max-height: 118px;
   background: #fff;
   overflow: hidden;
 
