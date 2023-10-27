@@ -30,13 +30,13 @@ export default [
         initialValue: [
           {
             key: '标签-1',
-            value: 'label-1',
+            value: 'tag-label-1',
             required: true,
             type: 'enum',
             options: [
               {
                 key: '标签-1-1',
-                value: 'label-1-1',
+                value: 'tag-label-1-1',
               },
             ],
           },
