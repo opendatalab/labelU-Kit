@@ -13,6 +13,7 @@ import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
 import type { FancyInputProps } from '@/components/FancyInput/types';
 
 import { duplicatedValueValidator, listOmitWithId, listWrapWithId, wrapWithId } from '../utils';
+import TagSwitcher from './TagSwitcher';
 
 export enum CategoryType {
   Enum = 'enum',
@@ -468,6 +469,19 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   >
                     <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
+                  <FlexLayout>
+                    <Tooltip title="是否必填">
+                      <Form.Item name={[...path, index, 'required']} label="">
+                        <TagSwitcher
+                          titleMapping={{
+                            true: '必填',
+                            false: '选填',
+                          }}
+                          onChange={handleOnChange(`[${index}].required`)}
+                        />
+                      </Form.Item>
+                    </Tooltip>
+                  </FlexLayout>
                   <div className="should-align-center">
                     <Tooltip title={tooltipTitleMapping[itemType]}>
                       <Tag className="multiple-switcher" onClick={handleToggleMultiple(index)}>
@@ -510,6 +524,19 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   >
                     <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
+                  <FlexLayout>
+                    <Tooltip title="是否必填">
+                      <Form.Item name={[...path, index, 'required']} label="">
+                        <TagSwitcher
+                          titleMapping={{
+                            true: '必填',
+                            false: '选填',
+                          }}
+                          onChange={handleOnChange(`[${index}].required`)}
+                        />
+                      </Form.Item>
+                    </Tooltip>
+                  </FlexLayout>
                   <div className="should-align-center">
                     <Tag>{tagTitleMapping[itemType]}</Tag>
                     <Tooltip title="删除">

@@ -261,6 +261,7 @@ const CreateTask = () => {
         }
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
+        const config = omit(['media_type'])(annotationConfig);
 
         revalidator.revalidate();
 
@@ -269,7 +270,7 @@ const CreateTask = () => {
             ...taskData,
             ...basicFormValues,
             status: taskData?.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData?.status,
-            config: JSON.stringify(omit(['media_type'])(annotationConfig)),
+            config: _.isEmpty(config) ? null : JSON.stringify(config),
           })
           .then(() => {
             if (isFromCancel) {

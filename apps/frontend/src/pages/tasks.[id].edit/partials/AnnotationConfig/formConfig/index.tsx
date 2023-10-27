@@ -352,13 +352,16 @@ const FormConfig = () => {
           <FancyInput type="boolean" />
         </Form.Item>
       )}
-      <Form.Item wrapperCol={{ offset: 4 }} hidden={!hasAttributes || globalTools.includes(activeTool as EToolName)}>
-        <AttributeBox>
-          <AttributeFormItem name="attributes">
-            <FancyInput type="list-attribute" fullField={['attributes']} />
-          </AttributeFormItem>
-        </AttributeBox>
-      </Form.Item>
+
+      {hasAttributes && !globalTools.includes(activeTool as EToolName) && (
+        <Form.Item wrapperCol={{ offset: 4 }}>
+          <AttributeBox>
+            <AttributeFormItem name="attributes">
+              <FancyInput type="list-attribute" fullField={['attributes']} />
+            </AttributeFormItem>
+          </AttributeBox>
+        </Form.Item>
+      )}
 
       {task?.media_type === MediaType.IMAGE && (
         <Form.Item
