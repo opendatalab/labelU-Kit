@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from 'antd';
+import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as CreateTaskIcon } from '@/assets/svg/create-task.svg';
-import FlexLayout from '@/layouts/FlexLayout';
 
 const Wrapper = styled(FlexLayout.Item)`
   display: flex;

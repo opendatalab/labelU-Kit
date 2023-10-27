@@ -1,6 +1,6 @@
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
-import FlexLayout from '@/layouts/FlexLayout';
 import { ReactComponent as Logo } from '@/assets/svg/LOGO.svg';
 
 export const NavigationWrapper = styled(FlexLayout)`

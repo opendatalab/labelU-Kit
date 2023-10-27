@@ -6,6 +6,7 @@ import { filter, isEqual, map, omit, set, size, update } from 'lodash/fp';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Icon, { CloseCircleFilled, PlusOutlined, StarFilled, SwapOutlined } from '@ant-design/icons';
+import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as TreeSwitcherIcon } from '@/assets/svg/tree-switcher.svg';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
@@ -613,7 +614,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
 
     const treeData = useMemo(() => makeTreeData(stateValue, fullField), [fullField, makeTreeData, stateValue]);
     const buttons = (
-      <div className="buttons">
+      <FlexLayout gap=".5rem" className="buttons">
         {showAddTag && (
           <Button
             className="add"
@@ -636,7 +637,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
             {addStringText}
           </Button>
         )}
-      </div>
+      </FlexLayout>
     );
 
     return (

@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components';
-
-import FlexLayout from '@/layouts/FlexLayout';
+import { FlexLayout } from '@labelu/components-react';
 
 export const Wrapper = styled<any>(FlexLayout.Content)`
   position: relative;

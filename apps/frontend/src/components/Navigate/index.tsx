@@ -1,9 +1,9 @@
 import { Button, Dropdown } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import Icon, { BellOutlined, PoweroffOutlined } from '@ant-design/icons';
+import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import Breadcrumb from '../Breadcrumb';
 import { LabeluLogo, NavigationWrapper } from './style';

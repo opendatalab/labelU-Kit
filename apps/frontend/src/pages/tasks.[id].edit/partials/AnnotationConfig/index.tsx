@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import { MediaType } from '@/api/types';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import FormConfig from './formConfig';
 import { TaskCreationContext } from '../../taskCreation.context';

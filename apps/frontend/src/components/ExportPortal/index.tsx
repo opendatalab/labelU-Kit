@@ -1,10 +1,10 @@
 import type { RadioChangeEvent } from 'antd';
 import { Modal, Radio } from 'antd';
 import React, { useCallback, useMemo, useState } from 'react';
+import { FlexLayout } from '@labelu/components-react';
 
 import { ExportType, MediaType } from '@/api/types';
 import { outputSample, outputSamples } from '@/api/services/samples';
-import FlexLayout from '@/layouts/FlexLayout';
 
 export interface ExportPortalProps {
   children: React.ReactChild;

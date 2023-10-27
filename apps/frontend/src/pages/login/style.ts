@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { Button } from 'antd';
-
-import FlexLayout from '@/layouts/FlexLayout';
+import { FlexLayout } from '@labelu/components-react';
 
 export const LoginWrapper = styled(FlexLayout)`
   height: 100vh;

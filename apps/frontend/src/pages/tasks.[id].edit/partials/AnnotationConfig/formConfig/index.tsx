@@ -4,11 +4,11 @@ import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
 import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
+import { FlexLayout } from '@labelu/components-react';
 
 import { MediaType, TaskStatus } from '@/api/types';
 import FancyForm from '@/components/FancyForm';
 import FancyInput, { add } from '@/components/FancyInput';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import { TaskCreationContext } from '../../../taskCreation.context';
 import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
@@ -354,7 +354,7 @@ const FormConfig = () => {
       )}
       <Form.Item wrapperCol={{ offset: 4 }} hidden={!hasAttributes || globalTools.includes(activeTool as EToolName)}>
         <AttributeBox>
-          <AttributeFormItem>
+          <AttributeFormItem name="attributes">
             <FancyInput type="list-attribute" fullField={['attributes']} />
           </AttributeFormItem>
         </AttributeBox>

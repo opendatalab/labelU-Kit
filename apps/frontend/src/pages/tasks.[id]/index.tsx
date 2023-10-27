@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { Link, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { Table, Pagination, Button } from 'antd';
@@ -6,12 +6,12 @@ import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
-import FlexLayout from '@/layouts/FlexLayout';
 import BlockContainer from '@/layouts/BlockContainer';
 
 import type { TaskStatusProps } from './components/Statistical';
@@ -217,6 +217,28 @@ const Samples = () => {
       },
     };
   };
+
+  useLayoutEffect(() => {
+    if (task?.media_type !== MediaType.AUDIO) {
+      return;
+    }
+
+    const handleOnPlay = (e: Event) => {
+      const audios = document.getElementsByTagName('audio');
+      // 使当前只有一条音频在播放
+      for (let i = 0, len = audios.length; i < len; i++) {
+        if (audios[i] !== e.target) {
+          (audios[i] as HTMLAudioElement).pause();
+        }
+      }
+    };
+
+    document.addEventListener('play', handleOnPlay, true);
+
+    return () => {
+      document.removeEventListener('play', handleOnPlay, true);
+    };
+  }, [task?.media_type]);
 
   return (
     <FlexLayout flex="column" full gap="2rem">

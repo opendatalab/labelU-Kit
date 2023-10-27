@@ -6,6 +6,7 @@ import { set, omit } from 'lodash/fp';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
+import { FlexLayout } from '@labelu/components-react';
 
 import commonController from '@/utils/common';
 import { annotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
@@ -13,7 +14,6 @@ import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import AnnotationContext from '../../annotation.context';
 

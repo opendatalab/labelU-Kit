@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components';
-
-import FlexLayout from '@/layouts/FlexLayout';
+import { FlexLayout } from '@labelu/components-react';
 
 export const StepItemWrapper = styled(FlexLayout)`
   font-size: 1rem;

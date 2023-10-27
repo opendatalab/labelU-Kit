@@ -139,7 +139,7 @@ const FlexLayoutWrapper = styled.div<FlexItemProps>`
   ${common}
 `;
 
-export default function FlexLayout({ children, ...props }: BasicFlexBox) {
+export function FlexLayout({ children, ...props }: BasicFlexBox) {
   return <FlexLayoutWrapper {...props}>{children}</FlexLayoutWrapper>;
 }
 
