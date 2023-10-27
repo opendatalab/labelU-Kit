@@ -1,5 +1,5 @@
 import type { AffixProps, ButtonProps } from 'antd';
-import { Switch, Affix, Select, InputNumber, Button, Form, Input, Tag, Tooltip, Tree } from 'antd';
+import { Affix, Select, InputNumber, Button, Form, Input, Tag, Tooltip, Tree } from 'antd';
 import type { NamePath } from 'antd/es/form/interface';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { filter, isEqual, map, omit, set, size, update } from 'lodash/fp';
@@ -567,9 +567,6 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                           options={finalStringTypeOptions}
                           onChange={handleOnChange(`[${index}].stringType`)}
                         />
-                      </Form.Item>
-                      <Form.Item valuePropName="checked" name={[...path, index, 'required']} label="是否必填">
-                        <Switch onChange={handleOnChange(`[${index}].required`)} />
                       </Form.Item>
                       {(item.stringType as StringType) === StringType.Regexp && (
                         <Form.Item name={[...path, index, 'regexp']} label="自定义格式（正则表达式）">

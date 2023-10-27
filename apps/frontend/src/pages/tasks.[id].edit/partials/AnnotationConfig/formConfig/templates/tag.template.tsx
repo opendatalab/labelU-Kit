@@ -31,6 +31,7 @@ export default [
           {
             key: '标签-1',
             value: 'label-1',
+            required: true,
             type: 'enum',
             options: [
               {
