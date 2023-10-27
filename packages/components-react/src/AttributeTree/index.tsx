@@ -223,7 +223,10 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
           key: item.value,
           label: (
             <EllipsisText maxWidth={220} title={attributeConfigItem.key}>
-              <span>{attributeConfigItem.key}</span>
+              <span>
+                {item.required && <span style={{ color: 'red' }}>*</span>}
+                <span>{attributeConfigItem.key}</span>
+              </span>
             </EllipsisText>
           ),
           forceRender: true,
