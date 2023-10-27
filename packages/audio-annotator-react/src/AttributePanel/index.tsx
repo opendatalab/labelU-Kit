@@ -161,19 +161,16 @@ export function AttributePanel() {
     if (config?.tag || config?.text) {
       let isCompleted = false;
 
-      if (config.text) {
-        const textAnnotations = globalAnnotations.filter((item) => item.type === 'text') as TextAnnotationEntity[];
-        const textAnnotationMapping = textAnnotations.reduce((acc, item) => {
-          const key = Object.keys(item.value)[0];
-          acc[key] = item;
-          return acc;
-        }, {} as Record<string, TextAnnotationEntity>);
+      const globalAnnotationMapping = globalAnnotations.reduce((acc, item) => {
+        const key = Object.keys(item.value)[0];
+        acc[key] = item;
+        return acc;
+      }, {} as Record<string, TextAnnotationEntity | TagAnnotationEntity>);
 
-        // 如果所有的文本描述都是必填的，那么只要有一个不存在，那么就是未完成
-        isCompleted = config.text
-          .filter((item) => item.required)
-          .every((item) => textAnnotationMapping[item.value]?.value?.[item.value]);
-      }
+      /** 如果所有的文本描述都是必填的，那么只要有一个不存在，那么就是未完成  */
+      isCompleted = [...(config.text ?? []), ...(config.tag ?? [])]
+        .filter((item) => item.required)
+        .every((item) => globalAnnotationMapping[item.value]?.value?.[item.value]);
 
       _titles.push({
         title: '全局',
