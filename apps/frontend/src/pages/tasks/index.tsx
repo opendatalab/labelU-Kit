@@ -2,9 +2,9 @@ import { Button, Pagination } from 'antd';
 import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import type { TaskListResponseWithStatics } from '@/api/types';
-import FlexLayout from '@/layouts/FlexLayout';
 import { usePageSize } from '@/hooks/usePageSize';
 import { ResponsiveGrid } from '@/components/ResponsiveGrid';
 

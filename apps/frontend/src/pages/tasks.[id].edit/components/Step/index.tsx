@@ -1,7 +1,6 @@
 import React from 'react';
 import { CheckOutlined } from '@ant-design/icons';
-
-import FlexLayout from '@/layouts/FlexLayout';
+import { FlexLayout } from '@labelu/components-react';
 
 import Separator from '../Separator';
 import { IconWrapper, StepItemInner, StepItemWrapper } from './style';

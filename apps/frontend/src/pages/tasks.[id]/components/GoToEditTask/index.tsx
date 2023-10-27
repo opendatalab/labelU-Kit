@@ -1,9 +1,9 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
+import { FlexLayout } from '@labelu/components-react';
 
 import { TaskStatus } from '@/api/types';
-import FlexLayout from '@/layouts/FlexLayout';
 
 const GoToEditTask = (props: any) => {
   const { taskStatus } = props;

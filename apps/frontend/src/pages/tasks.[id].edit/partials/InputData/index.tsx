@@ -6,6 +6,7 @@ import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import type { RcFile } from 'antd/lib/upload/interface';
+import { FlexLayout } from '@labelu/components-react';
 
 import IconText from '@/components/IconText';
 import type { StatusType } from '@/components/Status';
@@ -17,7 +18,6 @@ import { deleteFile, uploadFile as uploadFileService } from '@/api/services/task
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 import type { MediaType } from '@/api/types';
 import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
-import FlexLayout from '@/layouts/FlexLayout';
 import type { TaskInLoader } from '@/loaders/task.loader';
 
 import { TaskCreationContext } from '../../taskCreation.context';

@@ -1,9 +1,9 @@
 import React, { memo, useContext } from 'react';
 import { Form, Input, Select } from 'antd';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import { MediaType } from '@/api/types';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 

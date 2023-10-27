@@ -2,9 +2,9 @@ import { Form, Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import _ from 'lodash';
 import { useMutation } from '@tanstack/react-query';
+import { FlexLayout } from '@labelu/components-react';
 
 import { signUp } from '@/api/services/user';
-import FlexLayout from '@/layouts/FlexLayout';
 import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
 import { ReactComponent as PasswordIcon } from '@/assets/svg/password.svg';
 import { message } from '@/StaticAnt';

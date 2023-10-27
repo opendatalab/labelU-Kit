@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import Navigate from '@/components/Navigate';
-
-import FlexLayout from '../FlexLayout';
 
 const LayoutWrapper = styled(FlexLayout)`
   min-height: 100vh;
