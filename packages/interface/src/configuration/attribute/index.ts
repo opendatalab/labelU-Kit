@@ -2,6 +2,10 @@
  * 标签的基础信息
  */
 export interface AttributeItem {
+  /** 控制标签属性显隐性的条件 */
+  conditions?: ConditionItem[];
+  /** 是否必填 */
+  required?: boolean;
   /** 标签名称 */
   key: string;
   /** 标签值，通常为英文字符 */
@@ -42,8 +46,6 @@ export interface TextAttribute extends AttributeItem {
   regexp?: string;
   /** 字符串类型 */
   stringType: 'text' | 'number' | 'order' | 'regexp' | 'english';
-  /** 是否必填 */
-  required?: boolean;
   /**
    * 默认值
    *
@@ -91,4 +93,34 @@ export enum InnerAttributeType {
   Array = 'array',
   /** 文本类型 */
   String = 'string',
+}
+
+/**
+ * 条件值内容
+ */
+export interface ConditionContent {
+  /** 依赖的属性的值  */
+  field: string;
+  /** 依赖的属性选项的值 */
+  value: string;
+  option_id: string;
+  question_id: string;
+  /**
+   * 运算符
+   *
+   * @description eq 等于；neq 不等于；in 包含；nin 不包含
+   */
+  operator: 'eq' | 'neq' | 'in' | 'nin';
+}
+
+/**
+ * 标签属性表单中的表单项支持根据条件显示或隐藏
+ */
+export interface ConditionItem {
+  /** 条件连接符 */
+  connector: 'and' | 'or';
+  /** 条件内容 */
+  items: ConditionContent[];
+  /** 子条件 */
+  children: ConditionItem[];
 }
