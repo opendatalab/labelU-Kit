@@ -3,7 +3,7 @@ import { Button, Progress, Tooltip } from 'antd';
 import { useNavigate, useRevalidator } from 'react-router';
 import Icon from '@ant-design/icons';
 import formatter from '@labelu/formatter';
-import { EllipsisText } from '@labelu/components-react';
+import { EllipsisText, FlexLayout } from '@labelu/components-react';
 
 import { modal } from '@/StaticAnt';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
@@ -15,7 +15,6 @@ import { MediaTypeText } from '@/constants/mediaType';
 import type { MediaType } from '@/api/types';
 import { TaskStatus } from '@/api/types';
 import * as storage from '@/utils/storage';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import { ActionRow, CardWrapper, MediaBadge, Row, TaskName } from './style';
 

@@ -1,7 +1,7 @@
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
-import FlexLayout from '@/layouts/FlexLayout';
 import { ReactComponent as Logo } from '@/assets/svg/LOGO.svg';
 
 const Description = styled.span`

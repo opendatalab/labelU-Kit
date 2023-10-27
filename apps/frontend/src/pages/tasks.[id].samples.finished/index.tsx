@@ -2,10 +2,10 @@ import { CheckOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
-import FlexLayout from '@/layouts/FlexLayout';
 
 const Wrapper = styled(FlexLayout)`
   background: #fff;

@@ -10,6 +10,7 @@ import '@labelu/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
+import { FlexLayout } from '@labelu/components-react';
 
 import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
@@ -18,7 +19,6 @@ import { getSamples } from '@/api/services/samples';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import { convertVideoSample } from '@/utils/convertVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import commonController from '../../utils/common';
 import SlideLoader, { slideRef } from './components/slideLoader';

@@ -6,12 +6,12 @@ import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
-import FlexLayout from '@/layouts/FlexLayout';
 import BlockContainer from '@/layouts/BlockContainer';
 
 import type { TaskStatusProps } from './components/Statistical';

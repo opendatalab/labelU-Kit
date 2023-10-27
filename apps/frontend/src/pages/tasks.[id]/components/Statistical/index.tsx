@@ -3,10 +3,10 @@ import { useNavigate, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
 import _ from 'lodash-es';
 import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { MediaType } from '@/api/types';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import commonController from '../../../../utils/common';
 import ExportPortal from '../../../../components/ExportPortal';

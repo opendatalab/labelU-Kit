@@ -6,6 +6,7 @@ import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { Bridge } from 'iframe-message-bridge';
+import { FlexLayout } from '@labelu/components-react';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/api/types';
@@ -15,7 +16,6 @@ import { deleteFile, deleteTask } from '@/api/services/task';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
-import FlexLayout from '@/layouts/FlexLayout';
 
 import type { QueuedFile } from './partials/InputData';
 import InputData, { UploadStatus } from './partials/InputData';

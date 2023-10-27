@@ -4,6 +4,7 @@ import { compose, get, isEqual, size } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Icon, { ExclamationCircleFilled } from '@ant-design/icons';
+import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as AddCategoryIcon } from '@/assets/svg/add-category.svg';
 import { ReactComponent as AddTextIcon } from '@/assets/svg/add-text.svg';
@@ -174,12 +175,12 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   );
   const footer = useMemo(
     () => (
-      <div className="footer">
+      <FlexLayout gap=".5rem" className="footer">
         <Button type="primary" onClick={handleSave}>
           保存
         </Button>
         <Button onClick={handleClose}>取消</Button>
-      </div>
+      </FlexLayout>
     ),
     [handleSave, handleClose],
   );
