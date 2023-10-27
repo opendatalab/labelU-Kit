@@ -264,12 +264,14 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                 key: '',
                 value: '',
                 type: cateType,
+                required: true,
                 options: [],
               })
             : wrapWithId({
                 key: '',
                 value: '',
                 type: cateType,
+                required: true,
                 maxLength: 1000,
                 stringType: StringType.Text,
                 defaultValue: '',
