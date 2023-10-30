@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import VideoAnnotator from '@labelu/video-react';
 import type { VideoProps } from '@labelu/video-react';
+import '@labelu/video-react/dist/style.css';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type {
