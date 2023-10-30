@@ -18,14 +18,15 @@ npm install @labelu/audio-annotator-react
 
 ```tsx
 import React from 'react';
-import Annotator from '@labelu/audio-annotator-react';
+import { useState } from 'react';
 
-const [editType, setEditType] = useState('segment');
+import { Annotator } from '@labelu/audio-annotator-react';
+import '@labelu/components-react/dist/style.css';
 
 const samples = [
   {
     id: 'sample-12s',
-    url: 'https://samplelib.com/lib/preview/mp3/sample-12s.mp3',
+    url: '/sample-15s.mp3',
     name: 'sample-12s.mp3',
     annotations: [
       {
@@ -119,12 +120,14 @@ const annotatorConfig = {
   },
 };
 
+export default function App() {
+  const [editType, setEditType] = useState('segment');
 
-<Annotator
-  samples={samples}
-  type={editType}
-  config={annotatorConfig}
-/>
+  return (
+    <Annotator samples={samples} type={editType} config={annotatorConfig} />
+  );
+}
+
 
 ```
 
