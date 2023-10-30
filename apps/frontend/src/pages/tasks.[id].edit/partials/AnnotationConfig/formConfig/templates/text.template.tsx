@@ -31,11 +31,11 @@ export default [
         initialValue: [
           {
             key: '标签-1',
-            value: 'label-1',
+            value: 'text-label-1',
+            required: true,
             type: 'string',
             maxLength: 1000,
             stringType: 'text',
-            required: false,
             defaultValue: '',
           },
         ],
