@@ -31,17 +31,19 @@ const menus = [
         path: '/guide/image',
         hash: '#polygon',
       },
-      {
-        title: '立体框',
-        path: '/guide/image',
-        hash: '#cuboid',
-      },
+      // TODO
+      // {
+      //   title: '立体框',
+      //   path: '/guide/image',
+      //   hash: '#cuboid',
+      // },
     ],
   },
-  {
-    title: '文本',
-    path: '/guide/text',
-  },
+  // TODO
+  // {
+  //   title: '文本',
+  //   path: '/guide/text',
+  // },
   {
     title: '音频',
     path: '/guide/audio',
@@ -50,10 +52,11 @@ const menus = [
     title: '视频',
     path: '/guide/video',
   },
-  {
-    title: '点云',
-    path: '/guide/point-cloud',
-  },
+  // TODO
+  // {
+  //   title: '点云',
+  //   path: '/guide/point-cloud',
+  // },
 ];
 
 export default function Guide() {

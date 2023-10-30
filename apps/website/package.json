@@ -2,7 +2,8 @@
   "name": "labelu-website",
   "private": true,
   "dependencies": {
-    "@labelu/components-react": "1.1.0-alpha.13",
+    "@labelu/audio-annotator-react": "workspace:1.1.0-alpha.15",
+    "@labelu/components-react": "workspace:1.1.0-alpha.14",
     "@mdx-js/react": "^3.0.0",
     "@react-icons/all-files": "^4.1.0",
     "@tailwindcss/typography": "^0.5.10",
@@ -10,7 +11,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.17.0",
-    "react-router-dom": "^6.17.0"
+    "react-router-dom": "^6.17.0",
+    "react-syntax-highlighter": "^15.5.0"
   },
   "scripts": {
     "start": "vite --port 3005"

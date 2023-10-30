@@ -6,6 +6,11 @@ body {
   margin: 0;
 }
 
+pre > div {
+  background: none !important;
+  color: inherit !important;
+}
+
 #root {
   min-height: 100vh;
   display: flex;

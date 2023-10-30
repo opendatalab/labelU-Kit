@@ -1,5 +1,11 @@
+import MarkdownWithHighlight from '@/components/markdown-with-highlight';
+
 import Markdown from './text.mdx';
 
 export default function TextGuide() {
-  return <Markdown />;
+  return (
+    <MarkdownWithHighlight>
+      <Markdown />
+    </MarkdownWithHighlight>
+  );
 }
