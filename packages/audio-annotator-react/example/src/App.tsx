@@ -1,14 +1,13 @@
 import React from 'react';
 import { useState } from 'react';
 
-import Annotator from '@labelu/audio-annotator-react';
-
-const [editType, setEditType] = useState('segment');
+import { Annotator } from '@labelu/audio-annotator-react';
+import '@labelu/audio-annotator-react/dist/style.css';
 
 const samples = [
   {
     id: 'sample-12s',
-    url: 'https://samplelib.com/lib/preview/mp3/sample-12s.mp3',
+    url: '/sample-15s.mp3',
     name: 'sample-12s.mp3',
     annotations: [
       {
@@ -103,5 +102,7 @@ const annotatorConfig = {
 };
 
 export default function App() {
+  const [editType, setEditType] = useState('segment');
+
   return <Annotator samples={samples} type={editType} config={annotatorConfig} />;
 }
