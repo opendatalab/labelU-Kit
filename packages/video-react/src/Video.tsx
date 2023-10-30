@@ -11,7 +11,7 @@ import type {
   VideoAnnotationInUI,
 } from '@labelu/interface';
 import type { MediaAnnotatorRef } from '@labelu/components-react';
-import { MediaAnnotator, MediaAnnotationContext, AttributeOverlay } from '@labelu/components-react';
+import { MediaAnnotator, MediaAnnotationContext, AttributeOverlay, parseTime } from '@labelu/components-react';
 
 import { VideoPlayer } from './VideoPlayer';
 
@@ -109,7 +109,8 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
       const playingIds = annotations
         .filter((item) => {
           if (item.type === 'frame') {
-            return item.time === time;
+            // 播放时播放器的时间不一定跟标注的时间一致，取一位小数再比较
+            return parseTime(item.time) === parseTime(time);
           }
 
           return item.start <= time && item.end >= time;
