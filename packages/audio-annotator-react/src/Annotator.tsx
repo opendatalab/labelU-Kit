@@ -19,6 +19,7 @@ import type {
   MediaAnnotationWithTextAndTag,
 } from '@labelu/interface';
 import type { MediaAnnotatorRef } from '@labelu/components-react';
+import '@labelu/components-react/dist/style.css';
 
 import type { AnnotatorContextType, AudioAnnotatorConfig, MediaSample } from './context';
 import { AnnotatorContext } from './context';
