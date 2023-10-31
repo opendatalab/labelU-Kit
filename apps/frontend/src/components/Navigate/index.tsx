@@ -22,10 +22,12 @@ const Homepage = () => {
   };
 
   return (
-    <NavigationWrapper items="center" justify="space-between" padding="0 2rem">
+    <NavigationWrapper items="center" justify="space-between" padding="0 1.5rem">
       <FlexLayout.Item flex items="center" gap="2.5rem">
         <Link to="/">
-          <LabeluLogo />
+          <FlexLayout.Item flex items="center">
+            <LabeluLogo />
+          </FlexLayout.Item>
         </Link>
         <Breadcrumb />
       </FlexLayout.Item>
