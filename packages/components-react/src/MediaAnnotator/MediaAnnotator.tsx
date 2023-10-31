@@ -24,6 +24,8 @@ export interface MediaAnnotatorRef {
   updateTime: (time: number) => void;
   playing: (time: number) => void;
   scrollToAnnotation: (annotation: MediaAnnotationData) => void;
+  getAnnotatingSegment: () => MediaSegment | null;
+  updateAnnotatingSegment: (segment: MediaSegment) => void;
 }
 
 export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>(function ForwardRefAnnotator(
@@ -335,6 +337,23 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
             }
           }
         }
+      },
+      // 上层组件可以通过该方法判断是否正在标注
+      getAnnotatingSegment: () => editingSegmentAnnotationRef.current,
+      // 上层组件可以通过该方法更新正在标注的片断，比如：上层修改了标签，需要更新正在标注的片断
+      updateAnnotatingSegment: (segment: MediaSegment) => {
+        if (!segment) {
+          return;
+        }
+
+        setAnnotatingSegment(() => {
+          editingSegmentAnnotationRef.current = {
+            ...editingSegmentAnnotationRef.current,
+            ...segment,
+          };
+
+          return editingSegmentAnnotationRef.current;
+        });
       },
     }),
     [resetAnnotatingSegment, annotations, annotatingSegment, duration, type, onEnd],

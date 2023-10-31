@@ -197,7 +197,6 @@ function ForwardAnnotator(
     pastRef.current = newPast;
     setCurrentSample(newPresent);
     setSelectedAnnotation(undefined);
-    setSelectedAttribute(undefined);
     if (currentSample) {
       futureRef.current = [currentSample, ...futureRef.current];
     }
