@@ -1,6 +1,6 @@
 {
   "name": "@labelu/formatter",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.1",
   "private": false,
   "description": "A collection of universal data formatting functions.",
   "keywords": [
@@ -37,11 +37,11 @@
     "filesize": "10.0.6"
   },
   "devDependencies": {
+    "typescript": "4.8.4",
     "@types/rollup-plugin-peer-deps-external": "^2.2.1",
     "react": "^18.0.0",
     "react-dom": "^18.1.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "typescript": "4.6.3",
     "vite": "^4.1.1",
     "vite-tsconfig-paths": "^3.5.0"
   },

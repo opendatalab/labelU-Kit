@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import type WaveSurfer from 'wavesurfer.js';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
-import type { AudioAnnotationInUI, MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
+import type { MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
 import type {
   Attribute,
   AudioAnnotationType,
@@ -11,8 +11,15 @@ import type {
   AudioSegmentName,
   AudioSegmentToolConfig,
   EnumerableAttribute,
+  AudioAnnotationInUI,
 } from '@labelu/interface';
-import { AttributeOverlay, MediaAnnotationContext, MediaAnnotator, PlayerController } from '@labelu/components-react';
+import {
+  AttributeOverlay,
+  MediaAnnotationContext,
+  MediaAnnotator,
+  PlayerController,
+  parseTime,
+} from '@labelu/components-react';
 
 import { AudioPlayer } from './AudioPlayer';
 
@@ -23,27 +30,65 @@ const AudioAnnotatorWrapper = styled.div`
 
 export interface AudioAnnotatorProps {
   className?: string;
+  /** 音频文件url */
   src: string;
+  /** 播放器高度 */
   playerHeight?: number;
+  /** 选中的标注 */
   selectedAnnotation?: AudioAnnotationInUI;
+  /** 播放器ref */
   playerRef: React.RefObject<WaveSurfer>;
+  /** 标注器ref */
   annotatorRef?: React.RefObject<MediaAnnotatorRef>;
+  /** 标注类型 */
   editingType?: AudioAnnotationType;
+  /** 是否显示标注顺序 */
   showOrder?: boolean;
+  /** 当前选中的标签属性 */
   editingLabel?: string;
+  /** 标注列表 */
   annotations: AudioAnnotationInUI[];
+  /** 是否禁用 */
   disabled?: boolean;
+  /** 标注工具配置 */
   toolConfig?: {
     segment?: AudioSegmentToolConfig;
     frame?: AudioFrameToolConfig;
   };
+  /** 文件加载完的回调 */
   onLoad?: () => void;
+  /**
+   * 标注选中的回调
+   *
+   * @param annotation 选中的标注
+   */
   onAnnotationSelect?: (annotation: AudioAnnotationInUI) => void;
+  /**
+   * 当标注改变时调用的回调
+   *
+   * @param annotations 标注列表，包含标注的可见性
+   */
   onChange?: (annotations: AudioAnnotationInUI) => void;
+  /**
+   * 当新增标注时的回调
+   *
+   * @param annotations 标注列表，包含标注的可见性
+   */
   onAdd?: (annotations: AudioAnnotationInUI) => void;
+  /**
+   * 标注结束时的回调
+   *
+   * @param annotation 标注
+   * @param e 事件，需要根据鼠标事件中的位置来控制标签属性表单弹框的显示位置；当通过快捷键结束标注时，e为undefined，此时弹框显示在默认位置。
+   */
   onAnnotateEnd?: (annotation: AudioAnnotationInUI, e?: MouseEvent) => void;
 }
 
+/**
+ * 音频标注器
+ *
+ * @see [使用示例](https://github.com/opendatalab/labelU-Kit/tree/main/packages/audio-react/example)
+ */
 export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(function ForwardAudioAnnotator(
   {
     src,
@@ -130,7 +175,8 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
       const playingIds = annotations
         .filter((item) => {
           if (item.type === 'frame') {
-            return item.time === time;
+            // 播放时播放器的时间不一定跟标注的时间一致，取一位小数再比较
+            return parseTime(item.time) === parseTime(time);
           }
 
           return item.start <= time && item.end >= time;
@@ -209,6 +255,15 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
       setSelectedAnnotation(_annotation);
       setCurrentAnnotationIds(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
       onAnnotationSelect?.(_annotation);
+
+      if (playerRef.current) {
+        playerRef.current.setTime(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
+      }
+
+      if (annotatorRef) {
+        annotatorRef.current?.scrollToAnnotation(_annotation);
+        annotatorRef.current?.updateTime(_annotation.type === 'segment' ? _annotation.start : _annotation.time);
+      }
     },
     [onAnnotationSelect, setCurrentAnnotationIds],
   );
@@ -334,7 +389,6 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
           annotations={annotations}
           ref={annotatorRef}
           onEnd={finishAnnotation}
-          onAnnotationSelect={onAnnotationSelect}
           label={editingLabel}
           type={editingType}
         />
@@ -351,3 +405,5 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     </MediaAnnotationContext.Provider>
   );
 });
+
+AudioAnnotator.displayName = 'AudioAnnotator';

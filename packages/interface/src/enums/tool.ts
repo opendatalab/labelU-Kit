@@ -1,3 +1,4 @@
+/** 标签工具名称枚举类型 */
 export enum ToolName {
   /** 拉框工具 */
   Rect = 'rect',

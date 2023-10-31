@@ -8,9 +8,10 @@ import type {
   VideoSegmentToolConfig,
   VideoFrameToolConfig,
   EnumerableAttribute,
+  VideoAnnotationInUI,
 } from '@labelu/interface';
-import type { MediaAnnotatorRef, VideoAnnotationInUI } from '@labelu/components-react';
-import { MediaAnnotator, MediaAnnotationContext, AttributeOverlay } from '@labelu/components-react';
+import type { MediaAnnotatorRef } from '@labelu/components-react';
+import { MediaAnnotator, MediaAnnotationContext, AttributeOverlay, parseTime } from '@labelu/components-react';
 
 import { VideoPlayer } from './VideoPlayer';
 
@@ -108,7 +109,8 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
       const playingIds = annotations
         .filter((item) => {
           if (item.type === 'frame') {
-            return item.time === time;
+            // 播放时播放器的时间不一定跟标注的时间一致，取一位小数再比较
+            return parseTime(item.time) === parseTime(time);
           }
 
           return item.start <= time && item.end >= time;
@@ -139,6 +141,15 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
       setSelectedAnnotation(_annotation);
       setCurrentAnnotationIds(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
       onAnnotationSelect?.(_annotation);
+
+      if (playerRef.current) {
+        playerRef.current.currentTime(_annotation.type === 'segment' ? _annotation.start : _annotation.time);
+      }
+
+      if (annotatorRef.current) {
+        annotatorRef.current?.scrollToAnnotation(_annotation);
+        annotatorRef.current?.updateTime(_annotation.type === 'segment' ? _annotation.start : _annotation.time);
+      }
     },
     [onAnnotationSelect, setCurrentAnnotationIds],
   );
@@ -203,7 +214,12 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
     Object.keys(toolConfig).forEach((key) => {
       const _key = key as VideoSegmentName | VideoFrameName;
       const _attributes: Attribute[] = toolConfig?.[_key]?.attributes ?? [];
-      const _mapping: Record<string, Attribute> = {};
+      const _mapping: Record<
+        string,
+        Attribute & {
+          attributesMapping?: Record<string, Attribute>;
+        }
+      > = {};
 
       _attributes.forEach((_item) => {
         _mapping[_item.value] = { ..._item };
@@ -299,7 +315,6 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
           annotations={annotations}
           duration={duration}
           type={editingType}
-          onAnnotationSelect={onAnnotationSelect}
           label={editingLabel}
           getCurrentTime={() => playerRef.current.currentTime()}
           updateCurrentTime={updateCurrentTime}

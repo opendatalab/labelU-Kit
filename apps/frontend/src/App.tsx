@@ -3,7 +3,6 @@ import { IntlProvider } from 'react-intl';
 import { App as AntApp, ConfigProvider } from 'antd';
 import enUS from 'antd/es/locale/en_US';
 import zhCN from 'antd/es/locale/zh_CN';
-import { useSelector } from 'react-redux';
 import intl from 'react-intl-universal';
 
 import enUS1 from './locales/en-US';
@@ -13,15 +12,12 @@ import RouterContainer from './components/RouterContainer';
 import themeToken from './styles/theme.json';
 import StaticAnt from './StaticAnt';
 import routes from './routes';
+import * as storage from './utils/storage';
+import { QueryProvider } from './api/queryClient';
+import GlobalStyle from './styles/GlobalStyle';
 
 const App: React.FC = () => {
-  // @ts-ignore
-  const { locale } = useSelector((state) => state.user);
-  /**
-   * handler function that passes locale
-   * information to ConfigProvider for
-   * setting language across text components
-   */
+  const locale = storage.get('locale') || 'zh_CN';
   const getAntdLocale = () => {
     if (locale === 'en_US') {
       return enUS;
@@ -54,9 +50,12 @@ const App: React.FC = () => {
     <ConfigProvider locale={getAntdLocale()} componentSize="middle" theme={{ token: themeToken.token }}>
       <AntApp>
         <StaticAnt />
+        <GlobalStyle />
         {/* @ts-ignore */}
         <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
-          <RouterContainer routes={routes} />
+          <QueryProvider>
+            <RouterContainer routes={routes} />
+          </QueryProvider>
         </IntlProvider>
       </AntApp>
     </ConfigProvider>

@@ -1,30 +1,31 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { Button, Form } from 'antd';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useLocation, useNavigate, useParams, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 import _, { filter, isEmpty, size } from 'lodash-es';
 import { omit } from 'lodash/fp';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { Bridge } from 'iframe-message-bridge';
+import { FlexLayout } from '@labelu/components-react';
 
 import { message, modal } from '@/StaticAnt';
-import type { TaskResponse } from '@/services/types';
-import { MediaType, TaskStatus } from '@/services/types';
-import type { Dispatch, RootState } from '@/store';
-import { createSamples } from '@/services/samples';
-import { deleteFile } from '@/services/task';
+import type { TaskResponse } from '@/api/types';
+import { MediaType, TaskStatus } from '@/api/types';
+import { createSamples, deleteSamples } from '@/api/services/samples';
+import { deleteFile, deleteTask } from '@/api/services/task';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
+import type { TaskLoaderResult } from '@/loaders/task.loader';
+import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 
-import type { QueuedFile } from './partials/inputData';
-import InputData, { UploadStatus } from './partials/inputData';
-import AnnotationConfig from './partials/annotationConfig';
+import type { QueuedFile } from './partials/InputData';
+import InputData, { UploadStatus } from './partials/InputData';
+import AnnotationConfig from './partials/AnnotationConfig';
 import InputInfoConfig from './partials/InputInfoConfig';
-import currentStyles from './index.module.scss';
 import type { StepData } from './components/Step';
 import Step from './components/Step';
-import commonController from '../../utils/common/common';
+import commonController from '../../utils/common';
 import { TaskCreationContext } from './taskCreation.context';
+import { ContentWrapper, PreviewFrame, StepRow } from './style';
 
 enum StepEnum {
   Basic = 'basic',
@@ -60,7 +61,11 @@ export interface PartialConfigProps {
 }
 
 const CreateTask = () => {
-  const dispatch = useDispatch<Dispatch>();
+  const revalidator = useRevalidator();
+  const routerLoaderData = useRouteLoaderData('task') as TaskLoaderResult;
+  const taskData = _.get(routerLoaderData, 'task');
+  const samples = _.get(routerLoaderData, 'samples');
+  const toolsConfig = taskData?.config;
   const navigate = useNavigate();
   const routeParams = useParams();
   const location = useLocation();
@@ -78,6 +83,9 @@ const CreateTask = () => {
   const isCreateNewTask = searchParams.get('isNew') === 'true';
   const [isAnnotationFormValid, toggleAnnotationFormValidation] = useState<boolean>(true);
   const attachmentsConnected = useRef<boolean>(false);
+
+  const addTask = useAddTaskMutation();
+  const updateTaskConfig = useUpdateTaskConfigMutation(taskId);
 
   // 缓存上传的文件清单
   const [uploadFileList, setUploadFileList] = useState<QueuedFile[]>([]);
@@ -99,20 +107,14 @@ const CreateTask = () => {
       .toPairs()
       .map(([key, Partial], index) => {
         return (
-          <div key={index} style={{ display: currentStep === key ? 'block' : 'none' }}>
+          <FlexLayout.Content key={index} style={{ display: currentStep === key ? 'flex' : 'none' }} flex="column">
             <Partial />
-          </div>
+          </FlexLayout.Content>
         );
       })
       .value();
   }, [currentStep]);
-
-  const toolsConfig = useSelector((state: RootState) => state.task.config);
-  const samples = useSelector((state: RootState) => state.sample.list);
-  const taskData = useSelector((state: RootState) => state.task.item);
-  const loading = useSelector(
-    (state: RootState) => state.loading.effects.task.updateTaskConfig || state.loading.effects.task.createTask,
-  );
+  const loading = updateTaskConfig.isPending || addTask.isPending;
   const isExistTask = taskId > 0;
   const taskStatus = _.get(taskData, 'status') as TaskStatus;
   const stepDataSource: TaskStep[] = useMemo(
@@ -154,12 +156,6 @@ const CreateTask = () => {
   }, [annotationFormInstance, basicFormInstance, taskData]);
 
   useEffect(() => {
-    if (isExistTask && _.isEmpty(taskData)) {
-      dispatch.task.fetchTask(taskId);
-    }
-  }, [dispatch.task, isExistTask, taskData, taskId]);
-
-  useEffect(() => {
     if (isEmpty(toolsConfig?.tools)) {
       toggleAnnotationFormValidation(false);
     }
@@ -170,6 +166,8 @@ const CreateTask = () => {
       toggleAnnotationFormValidation(size(values.tools) > 0);
     });
   }, [annotationFormInstance]);
+
+  const [template, setTemplate] = useState<unknown>(null);
 
   const handleSave = useCallback(
     async function (isFromCancel?: boolean) {
@@ -191,25 +189,22 @@ const CreateTask = () => {
         return;
       }
 
-      return dispatch.task
-        .updateTaskConfig({
-          taskId: taskId,
-          body: {
-            ...taskData,
-            ...basicFormInstance.getFieldsValue(),
-            config: annotationConfig,
-          },
+      return updateTaskConfig
+        .mutateAsync({
+          ...taskData,
+          ...basicFormInstance.getFieldsValue(),
+          config: JSON.stringify(annotationConfig),
         })
         .then(() => {
-          navigate(`/tasks/${taskData.id}`);
+          navigate(`/tasks/${taskData!.id}`);
+          revalidator.revalidate();
         });
     },
-    [annotationFormInstance, basicFormInstance, currentStep, dispatch.task, navigate, taskData, taskId],
+    [annotationFormInstance, basicFormInstance, currentStep, navigate, revalidator, taskData, updateTaskConfig],
   );
 
   const [previewVisible, setPreviewVisible] = useState(false);
   const handleOpenPreview = useCallback(() => {
-    dispatch.sample.fetchSamples({ task_id: taskId });
     annotationFormInstance
       .validateFields()
       .then(() => {
@@ -218,7 +213,7 @@ const CreateTask = () => {
       .catch(() => {
         commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
       });
-  }, [annotationFormInstance, dispatch.sample, taskId]);
+  }, [annotationFormInstance]);
 
   const correctSampleIdsMappings = useMemo(
     () =>
@@ -266,18 +261,16 @@ const CreateTask = () => {
         }
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
+        const config = omit(['media_type'])(annotationConfig);
 
-        dispatch.sample.fetchSamples({ task_id: taskId });
+        revalidator.revalidate();
 
-        return dispatch.task
-          .updateTaskConfig({
-            taskId: taskId,
-            body: {
-              ...taskData,
-              ...basicFormValues,
-              status: taskData.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData.status,
-              config: omit(['media_type'])(annotationConfig),
-            },
+        return updateTaskConfig
+          .mutateAsync({
+            ...taskData,
+            ...basicFormValues,
+            status: taskData?.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData?.status,
+            config: _.isEmpty(config) ? null : JSON.stringify(config),
           })
           .then(() => {
             if (isFromCancel) {
@@ -285,29 +278,31 @@ const CreateTask = () => {
             }
           });
       } else {
-        const newTask = await dispatch.task.createTask(basicFormValues);
+        return addTask.mutateAsync(basicFormValues).then((res) => {
+          const newTask = res.data;
 
-        // 取消并保存时，跳转到任务列表页
-        if (isFromCancel) {
-          navigate('/tasks');
-        } else {
-          navigate(`/tasks/${newTask.id}/edit${location.search}#${StepEnum.Upload}`);
-        }
-
-        return Promise.reject();
+          // 取消并保存时，跳转到任务列表页
+          if (isFromCancel) {
+            navigate('/tasks');
+          } else if (newTask) {
+            navigate(`/tasks/${newTask.id}/edit${location.search}#${StepEnum.Upload}`);
+          }
+          return Promise.reject();
+        });
       }
     },
     [
+      addTask,
       annotationFormInstance,
       basicFormInstance,
       currentStep,
-      dispatch.sample,
-      dispatch.task,
       isExistTask,
       location.search,
       navigate,
+      revalidator,
       taskData,
       taskId,
+      updateTaskConfig,
       uploadFileList,
     ],
   );
@@ -328,29 +323,22 @@ const CreateTask = () => {
         .map((item) => correctSampleIdsMappings[item.id!].id!);
 
       if (uploadedSampleIds.length > 0) {
-        await dispatch.sample.deleteSamples({
-          task_id: taskId,
-          body: { sample_ids: uploadedSampleIds },
-        });
+        await deleteSamples(
+          {
+            task_id: taskId,
+          },
+          { sample_ids: uploadedSampleIds },
+        );
       }
     }
 
     if (isCreateNewTask && isExistTask) {
-      await dispatch.task.deleteTask(taskId);
+      await deleteTask(taskId);
     }
 
     modalRef.current.destroy();
     navigate('/tasks');
-  }, [
-    correctSampleIdsMappings,
-    dispatch.sample,
-    dispatch.task,
-    isCreateNewTask,
-    isExistTask,
-    navigate,
-    taskId,
-    uploadFileList,
-  ]);
+  }, [correctSampleIdsMappings, isCreateNewTask, isExistTask, navigate, taskId, uploadFileList]);
 
   const handleCancelConfirm = useCallback(() => {
     modalRef.current = modal.confirm({
@@ -402,7 +390,7 @@ const CreateTask = () => {
       // 如果是从「数据导入」到下一步，没有文件时不可进入下一步
       if (
         currentStep === StepEnum.Upload &&
-        isEmpty(samples.data) &&
+        isEmpty(samples?.data) &&
         filter(uploadFileList, (item) => item.status === UploadStatus.Success).length === 0
       ) {
         message.error('请至少上传一个文件');
@@ -412,10 +400,20 @@ const CreateTask = () => {
       submitForm()
         .then(() => {
           updateCurrentStep((nextStep as TaskStep).value);
+          revalidator.revalidate();
         })
         .catch(() => {});
     },
-    [basicFormInstance, currentStep, samples.data, stepDataSource, submitForm, updateCurrentStep, uploadFileList],
+    [
+      basicFormInstance,
+      currentStep,
+      revalidator,
+      samples?.data,
+      stepDataSource,
+      submitForm,
+      updateCurrentStep,
+      uploadFileList,
+    ],
   );
 
   const handlePrevStep = async (step: TaskStep, lastStep: TaskStep) => {
@@ -449,10 +447,11 @@ const CreateTask = () => {
           </Button>
         );
       }
-      const previewDisabled = !isAnnotationFormValid || isEmpty(samples.data);
+      const previewDisabled = !isAnnotationFormValid || isEmpty(samples?.data);
+
       return (
-        <>
-          <Button onClick={handleOpenPreview} disabled={previewDisabled || isEmpty(samples.data)}>
+        <FlexLayout gap=".5rem">
+          <Button onClick={handleOpenPreview} disabled={previewDisabled}>
             进入预览
             <ArrowRightOutlined />
           </Button>
@@ -460,18 +459,17 @@ const CreateTask = () => {
           <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
             保存
           </Button>
-        </>
+        </FlexLayout>
       );
     }
 
     return (
-      <>
+      <FlexLayout gap=".5rem">
         <Button onClick={handleCancelConfirm}>取消</Button>
-
         <Button loading={loading} type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
           下一步
         </Button>
-      </>
+      </FlexLayout>
     );
   }, [
     currentStep,
@@ -480,7 +478,7 @@ const CreateTask = () => {
     handleNextStep,
     previewVisible,
     isAnnotationFormValid,
-    samples.data,
+    samples?.data,
     handleOpenPreview,
     handleSave,
   ]);
@@ -490,11 +488,13 @@ const CreateTask = () => {
       uploadFileList,
       setUploadFileList,
       annotationFormInstance,
+      selectedTemplate: template,
+      onTemplateSelect: setTemplate,
       basicFormInstance,
-      task: taskData,
+      task: taskData as NonNullable<TaskLoaderResult['task']>,
       onAnnotationFormChange,
     }),
-    [uploadFileList, annotationFormInstance, basicFormInstance, taskData, onAnnotationFormChange],
+    [uploadFileList, annotationFormInstance, template, basicFormInstance, taskData, onAnnotationFormChange],
   );
 
   useLayoutEffect(() => {
@@ -509,11 +509,16 @@ const CreateTask = () => {
 
     bridgeRef.current = new Bridge(previewIframeRef.current.contentWindow!);
     bridgeRef.current.on('ready', () => {
+      if (!taskData?.media_type) {
+        console.warn('media_type is empty');
+        return;
+      }
+
       let _config;
 
-      if (taskData.media_type === MediaType.VIDEO) {
+      if ([MediaType.VIDEO, MediaType.AUDIO].includes(taskData?.media_type)) {
         _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
-      } else if (taskData.media_type === MediaType.IMAGE) {
+      } else if (taskData?.media_type === MediaType.IMAGE) {
         _config = annotationFormInstance.getFieldsValue();
       }
 
@@ -521,33 +526,32 @@ const CreateTask = () => {
         bridgeRef.current.post('preview', _config);
       }
     });
-  }, [previewVisible, annotationFormInstance, taskData.media_type]);
+  }, [previewVisible, annotationFormInstance, taskData?.media_type]);
 
   return (
-    <div className={currentStyles.outerFrame}>
-      <div className={currentStyles.stepsRow}>
-        <div className={currentStyles.left}>
+    <FlexLayout.Content flex="column">
+      <StepRow flex items="center" justify="space-between">
+        <FlexLayout.Header>
           <Step steps={stepDataSource} currentStep={currentStep} onNext={handleNextStep} onPrev={handlePrevStep} />
-        </div>
-        <div className={currentStyles.right}>{actionNodes}</div>
-      </div>
-      <div className={currentStyles.content}>
+        </FlexLayout.Header>
+        <FlexLayout.Footer>{actionNodes}</FlexLayout.Footer>
+      </StepRow>
+      <ContentWrapper scroll flex="column">
         <TaskCreationContext.Provider value={taskCreationContextValue}>
-          <div className="form-content" style={{ display: previewVisible ? 'none' : 'block' }}>
+          <FlexLayout.Content style={{ display: previewVisible ? 'none' : 'flex' }} flex="column">
             {partials}
-          </div>
+          </FlexLayout.Content>
 
           {previewVisible && (
-            <iframe
+            <PreviewFrame
               referrerPolicy="no-referrer"
               ref={previewIframeRef}
-              className={currentStyles.previewIframe}
-              src={`/tasks/${taskData.id}/samples/${samples?.data?.[0].id}?noSave=true`}
+              src={`/tasks/${taskData!.id}/samples/${samples?.data?.[0].id}?noSave=true`}
             />
           )}
         </TaskCreationContext.Provider>
-      </div>
-    </div>
+      </ContentWrapper>
+    </FlexLayout.Content>
   );
 };
 

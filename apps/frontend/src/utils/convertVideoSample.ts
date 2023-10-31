@@ -2,8 +2,8 @@ import _ from 'lodash';
 import type { VideoSample } from '@labelu/video-annotator-react/dist/Editor/context';
 import type { EditorProps } from '@labelu/video-annotator-react';
 
-import type { SampleData } from '@/services/types';
-import { MediaType } from '@/services/types';
+import type { SampleData } from '@/api/types';
+import { MediaType } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';

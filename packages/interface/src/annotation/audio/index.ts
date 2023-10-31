@@ -56,3 +56,10 @@ export interface AudioFrameAnnotation extends Omit<AudioSegmentAnnotation, 'star
 }
 
 export type AudioAnnotationData = AudioSegmentAnnotation | AudioFrameAnnotation;
+
+/**
+ * 音频标注数据在UI层的表示
+ */
+export type AudioAnnotationInUI = AudioAnnotationData & {
+  visible?: boolean;
+};

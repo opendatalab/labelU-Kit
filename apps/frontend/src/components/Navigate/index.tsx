@@ -1,12 +1,12 @@
 import { Button, Dropdown } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import Icon, { PoweroffOutlined } from '@ant-design/icons';
+import Icon, { BellOutlined, PoweroffOutlined } from '@ant-design/icons';
+import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 
 import Breadcrumb from '../Breadcrumb';
-import styles from './index.module.scss';
-import HelpTips from '../helpTips';
+import { LabeluLogo, NavigationWrapper } from './style';
 
 const Homepage = () => {
   const username = localStorage.getItem('username');
@@ -22,27 +22,36 @@ const Homepage = () => {
   };
 
   return (
-    <div className={styles.navigator}>
-      <div className={styles.left}>
+    <NavigationWrapper items="center" justify="space-between" padding="0 1.5rem">
+      <FlexLayout.Item flex items="center" gap="2.5rem">
         <Link to="/">
-          <div className={styles.logo} />
+          <FlexLayout.Item flex items="center">
+            <LabeluLogo />
+          </FlexLayout.Item>
         </Link>
-        <div className={styles.breadcrumb}>
-          <Breadcrumb style={{ fontSize: 14 }} />
-        </div>
-      </div>
-      <div className={styles.right}>
-        <HelpTips />
+        <Breadcrumb />
+      </FlexLayout.Item>
+      <FlexLayout.Item flex gap="1rem">
+        <Button
+          type="link"
+          icon={<BellOutlined />}
+          href="https://github.com/opendatalab/labelU/blob/main/docs/GUIDE.md"
+          style={{ color: 'rgba(0, 0, 0, 0.85)' }}
+          target="_blank"
+          rel="noreferrer"
+        >
+          帮助文档
+        </Button>
         <Dropdown
-          overlayClassName={styles.dropDownOverlay}
+          trigger={['click']}
           menu={{
             items: [
               {
                 label: (
-                  <div className={styles.quit} onClick={logout}>
-                    退出登录
+                  <FlexLayout.Item onClick={logout} flex gap=".5rem" padding=".25rem 0">
                     <PoweroffOutlined />
-                  </div>
+                    <span>退出登录</span>
+                  </FlexLayout.Item>
                 ),
                 key: 'logout',
                 title: '退出登录',
@@ -54,8 +63,8 @@ const Homepage = () => {
             {username}
           </Button>
         </Dropdown>
-      </div>
-    </div>
+      </FlexLayout.Item>
+    </NavigationWrapper>
   );
 };
 export default Homepage;

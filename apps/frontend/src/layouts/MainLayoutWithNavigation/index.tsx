@@ -1,9 +1,17 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { FlexLayout } from '@labelu/components-react';
 
 import Navigate from '@/components/Navigate';
 
-import currentStyles from './index.module.scss';
+const LayoutWrapper = styled(FlexLayout)`
+  min-height: 100vh;
+`;
+
+const MainContent = styled(FlexLayout.Content)`
+  background-color: #f4f5f7;
+`;
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -21,12 +29,16 @@ const MainLayout = () => {
   }, [navigate]);
 
   return (
-    <div className={currentStyles.main}>
-      {!isPreview && <Navigate />}
-      <div className={currentStyles.content}>
+    <LayoutWrapper flex="column">
+      {!isPreview && (
+        <FlexLayout.Header>
+          <Navigate />
+        </FlexLayout.Header>
+      )}
+      <MainContent flex="column">
         <Outlet />
-      </div>
-    </div>
+      </MainContent>
+    </LayoutWrapper>
   );
 };
 export default MainLayout;
