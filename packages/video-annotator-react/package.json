@@ -1,6 +1,6 @@
 {
   "name": "@labelu/video-annotator-react",
-  "version": "1.2.0",
+  "version": "1.2.1-alpha.1",
   "description": "video annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -31,7 +31,7 @@
   "dependencies": {
     "@labelu/components-react": "1.2.0",
     "@labelu/interface": "1.2.0",
-    "@labelu/audio-annotator-react": "1.2.0",
+    "@labelu/audio-annotator-react": "1.2.1-alpha.1",
     "@labelu/video-react": "1.2.0",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
