@@ -27,6 +27,10 @@ npm install @labelu/audio-annotator-react
 
 ## 使用
 
+### 在线示例 👇🏻
+
+[![在线示例](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/opendatalab/labelU-Kit/tree/website/packages/audio-annotator-react/example)
+
 ### 首先
 
 你需要引入样式文件（这个样式文件主要包含 在 `@labelu/components-react` 中使用到的 [`rc-components`](http://react-component.github.io/badgeboard/) 的样式）：
@@ -157,10 +161,6 @@ export default function App() {
   return <Annotator samples={samples} type={editType} config={annotatorConfig} />;
 }
 ```
-
-#### 在线示例 👇🏻
-
-[![在线示例](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/opendatalab/labelU-Kit/tree/website/packages/audio-annotator-react/example)
 
 ## 配置
 
