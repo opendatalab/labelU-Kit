@@ -41,7 +41,6 @@
   },
   "devDependencies": {
     "typescript": "4.8.4",
-    "@labelu/annotation": "1.0.2",
     "@labelu/interface": "1.1.0",
     "@types/react": "^18.2.2",
     "@types/styled-components": "^5.1.26",
