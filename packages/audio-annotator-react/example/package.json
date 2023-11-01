@@ -19,7 +19,7 @@
     "vite-plugin-ts-mono-alias": "^1.1.0"
   },
   "dependencies": {
-    "@labelu/audio-annotator-react": "latest",
+    "@labelu/audio-annotator-react": "1.1.0-alpha.17",
     "react-router": "^6.16.0",
     "react-router-dom": "^6.16.0"
   }

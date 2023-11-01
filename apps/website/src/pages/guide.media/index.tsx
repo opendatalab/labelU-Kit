@@ -1,6 +1,6 @@
 import MarkdownWithHighlight from '@/components/markdown-with-highlight';
 
-import Markdown from './audio.mdx';
+import Markdown from './media.mdx';
 
 export default function AudioGuide() {
   return (

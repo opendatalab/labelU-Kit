@@ -6,9 +6,19 @@ body {
   margin: 0;
 }
 
-pre > div {
+.prose pre {
+  max-height: 40rem;
+  overflow: auto;
+}
+
+.prose pre > div {
   background: none !important;
   color: inherit !important;
+}
+
+.prose img, .prose video {
+  box-shadow: 0px 3px 20px #00000038;
+  border-radius: 0.375rem;
 }
 
 #root {

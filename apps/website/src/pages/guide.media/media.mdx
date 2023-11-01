@@ -1,9 +1,13 @@
-# @labelu/audio-annotator-react
+import { Annotator } from '@labelu/audio-annotator-react';
+import { Kbd } from '@labelu/components-react';
 
-![音频标注套件](./source/SCR-20231030-qcvf.png)
+# 音频与视频
+
+![](/SCR-20231030-qcvf.png)
 
 音频标注和视频标注工具共用了大部分组件，所以它们的特性基本一致，差异主要在播放器上。
 
+> - 视频标注内置了 [video.js](https://github.com/videojs/video.js)
 > - 音频标注内置了 [wavesurfer.js](https://github.com/katspaugh/wavesurfer.js)
 
 **音视频标注工具支持以下特性：**
@@ -18,8 +22,6 @@
 如果你希望查看更详细的代码 API，请访问：[Audio Annotator API](https://github.com/opendatalab/labelU-Kit/blob/41539439ca1c6bf551386053c174df6b30512f8c/packages/audio-annotator-react/readme.md#L3)
 
 ## 安装
-
-[![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react)
 
 ```bash
 # 音频
@@ -50,6 +52,7 @@ import { Annotator } from '@labelu/audio-annotator-react';
 ### 最后
 
 在应用中使用：
+
 
 ```tsx
 import React from 'react';
@@ -158,13 +161,17 @@ const annotatorConfig = {
 export default function App() {
   const [editType, setEditType] = useState('segment');
 
-  return <Annotator samples={samples} type={editType} config={annotatorConfig} />;
+  return (
+    <Annotator samples={samples} type={editType} config={annotatorConfig} />
+  );
 }
+
 ```
 
 #### 在线示例 👇🏻
-
 [![在线示例](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/opendatalab/labelU-Kit/tree/website/packages/audio-annotator-react/example)
+
+
 
 ## 配置
 
@@ -173,7 +180,6 @@ export default function App() {
 配置是针对四种标注类型而设定的，分别是：片断分割、时间戳、全局工具（文本分类、文本描述）。
 
 ### 片断分割和时间戳
-
 ```tsx
 import React from 'react';
 import { useState } from 'react';
@@ -270,37 +276,30 @@ export default function App() {
   type="segment"
   config={{
     // 标签分类
-    tag: [
-      {
-        type: 'enum',
-        key: 'Category',
-        value: 'category',
-        required: true,
-        options: [
-          {
-            key: 'Humanbeing',
-            value: 'humanbeing',
-          },
-          {
-            key: 'Vehicle',
-            value: 'vehicle',
-          },
-        ],
-      },
-    ],
+    tag: [{
+      type: 'enum',
+      key: 'Category',
+      value: 'category',
+      required: true,
+      options: [{
+        key: 'Humanbeing',
+        value: 'humanbeing',
+      }, {
+        key: 'Vehicle',
+        value: 'vehicle',
+      }]
+    }],
     // 文本描述
-    text: [
-      {
-        key: 'Description',
-        value: 'description',
-        type: 'string',
-        maxLength: 1000,
-        required: true,
-        stringType: 'text' as const,
-        defaultValue: 'Some default text',
-        regexp: '',
-      },
-    ],
+    text: [{
+      key: 'Description',
+      value: 'description',
+      type: 'string',
+      maxLength: 1000,
+      required: true,
+      stringType: 'text' as const,
+      defaultValue: 'Some default text',
+      regexp: '',
+    }]
   }}
 />
 ```

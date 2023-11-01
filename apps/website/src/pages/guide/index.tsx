@@ -45,12 +45,30 @@ const menus = [
   //   path: '/guide/text',
   // },
   {
-    title: '音频',
-    path: '/guide/audio',
-  },
-  {
-    title: '视频',
-    path: '/guide/video',
+    title: '音频与视频',
+    path: '/guide/media',
+    children: [
+      {
+        title: '简介',
+        path: '/guide/media',
+        hash: '',
+      },
+      {
+        title: '代码示例',
+        path: '/guide/media',
+        hash: '#使用',
+      },
+      {
+        title: '配置',
+        path: '/guide/media',
+        hash: '#配置',
+      },
+      {
+        title: '全局工具',
+        path: '/guide/media',
+        hash: '#全局工具',
+      },
+    ],
   },
   // TODO
   // {
@@ -77,7 +95,7 @@ export default function Guide() {
                         <li key={hash}>
                           <Link
                             className={clsx('rounded-full pl-6', {
-                              'bg-base-200': location.hash === hash,
+                              'bg-base-200': location.pathname === subPath && location.hash === hash,
                             })}
                             to={`${subPath}${hash}`}
                           >

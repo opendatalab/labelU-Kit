@@ -8,8 +8,7 @@ import NoMatch from './pages/no-match';
 import ImageGuide from './pages/guide.image';
 import TextGuide from './pages/guide.text';
 import GettingStarted from './pages/getting-started';
-import VideoGuide from './pages/guide.video';
-import AudioGuide from './pages/guide.audio';
+import MediaGuide from './pages/guide.media';
 import PointCloudGuide from './pages/guide.point-cloud';
 
 export default function App() {
@@ -21,8 +20,7 @@ export default function App() {
           <Route path="image" element={<ImageGuide />} />
           <Route path="point-cloud" element={<PointCloudGuide />} />
           <Route path="text" element={<TextGuide />} />
-          <Route path="audio" element={<AudioGuide />} />
-          <Route path="video" element={<VideoGuide />} />
+          <Route path="media" element={<MediaGuide />} />
         </Route>
         <Route path="api" element={<Api />} />
         <Route path="*" element={<NoMatch />} />
