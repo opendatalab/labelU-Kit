@@ -7,9 +7,7 @@ import type {
   Attribute,
   AudioAnnotationType,
   AudioFrameName,
-  AudioFrameToolConfig,
   AudioSegmentName,
-  AudioSegmentToolConfig,
   EnumerableAttribute,
   AudioAnnotationInUI,
 } from '@labelu/interface';
@@ -52,8 +50,8 @@ export interface AudioAnnotatorProps {
   disabled?: boolean;
   /** 标注工具配置 */
   toolConfig?: {
-    segment?: AudioSegmentToolConfig;
-    frame?: AudioFrameToolConfig;
+    segment?: Attribute[];
+    frame?: Attribute[];
   };
   /** 文件加载完的回调 */
   onLoad?: () => void;
@@ -130,7 +128,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
 
     Object.keys(toolConfig).forEach((key) => {
       const _key = key as AudioSegmentName | AudioFrameName;
-      const _attributes: Attribute[] = toolConfig?.[_key]?.attributes ?? [];
+      const _attributes: Attribute[] = toolConfig?.[_key] ?? [];
       const _mapping: Record<string, Attribute> = {};
 
       _attributes.forEach((_item) => {
