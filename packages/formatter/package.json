@@ -1,6 +1,6 @@
 {
   "name": "@labelu/formatter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": false,
   "description": "A collection of universal data formatting functions.",
   "keywords": [
