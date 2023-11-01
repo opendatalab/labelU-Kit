@@ -41,7 +41,7 @@
     "vite-tsconfig-paths": "^3.5.0"
   },
   "dependencies": {
-    "@labelu/components-react": "1.1.4-alpha.4",
+    "@labelu/components-react": "1.2.0",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6",
