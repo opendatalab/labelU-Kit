@@ -1,7 +1,5 @@
 import type {
   Attribute,
-  VideoSegmentToolConfig,
-  VideoFrameToolConfig,
   VideoAnnotationType,
   EnumerableAttribute,
   TextAttribute,
@@ -16,9 +14,9 @@ export interface AudioAnnotatorConfig {
   // 文本描述
   text?: TextAttribute[];
   // 分割工具
-  segment: VideoSegmentToolConfig;
+  segment: Attribute[];
   // 帧工具
-  frame: VideoFrameToolConfig;
+  frame: Attribute[];
 }
 
 export interface MediaSample {

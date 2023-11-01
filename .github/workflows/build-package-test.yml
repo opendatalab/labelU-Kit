@@ -71,3 +71,6 @@ jobs:
 
       - name: Build frontend
         run: pnpm run build:frontend
+
+      - name: Release in dry mode
+        run: pnpm run release-dry
