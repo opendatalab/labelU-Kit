@@ -1,6 +1,6 @@
 {
   "name": "@labelu/audio-annotator-react",
-  "version": "1.1.0-alpha.49",
+  "version": "1.1.0-alpha.50",
   "description": "audio annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -29,8 +29,8 @@
   ],
   "dependencies": {
     "@labelu/components-react": "1.1.4-alpha.1",
-    "@labelu/interface": "1.1.1-alpha.1",
-    "@labelu/audio-react": "1.0.4",
+    "@labelu/interface": "1.1.1-alpha.2",
+    "@labelu/audio-react": "1.0.5-alpha.1",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "styled-components": "^5.3.6"
