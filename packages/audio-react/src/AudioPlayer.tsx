@@ -47,10 +47,12 @@ export const AudioPlayer = forwardRef<WaveSurfer | null, AudioPlayerProps>(funct
   const audioRef = useRef<HTMLDivElement>(null);
   const options = useMemo<Omit<WaveSurferOptions, 'container' | 'url'>>(() => {
     const ctx = document.createElement('canvas').getContext('2d');
-    const waveGradient = ctx!.createLinearGradient(0, 0, 0, 322);
+    const ratio = window.devicePixelRatio || 1;
 
-    const waveTopColor = '#20afb1';
-    const waveBottomColor = '#44179e';
+    const waveGradient = ctx!.createLinearGradient(0, 0, 0, ratio * height);
+
+    const waveTopColor = '#167d7f';
+    const waveBottomColor = '#35127b';
 
     const progressTopColor = '#5ffcff';
     const progressBottomColor = '#6107f3';
@@ -61,7 +63,7 @@ export const AudioPlayer = forwardRef<WaveSurfer | null, AudioPlayerProps>(funct
     waveGradient.addColorStop(0.7, waveTopColor);
     waveGradient.addColorStop(1, waveTopColor);
 
-    const progressGradient = ctx!.createLinearGradient(0, 0, 0, 322);
+    const progressGradient = ctx!.createLinearGradient(0, 0, 0, ratio * height);
 
     progressGradient.addColorStop(0, progressTopColor);
     progressGradient.addColorStop(0.3, progressTopColor);
@@ -73,10 +75,11 @@ export const AudioPlayer = forwardRef<WaveSurfer | null, AudioPlayerProps>(funct
       waveColor: waveGradient,
       progressColor: progressGradient,
       height,
-      barWidth: 3,
-      barHeight: 0.6,
-      barGap: 3,
-      cursorColor: '#fff',
+      barWidth: 3.5,
+      barHeight: 0.5,
+      barRadius: 3,
+      barGap: 6,
+      cursorColor: '#0d53de',
     };
   }, [height]);
   const waveSurfer = useWaveSurfer(audioRef, options);
