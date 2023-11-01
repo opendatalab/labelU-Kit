@@ -134,6 +134,8 @@ export interface ToolbarProps {
   onUndo?: () => void;
   onOrderSwitch?: (value: boolean) => void;
   showOrder?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 Toolbar.Item = Item;
@@ -148,6 +150,8 @@ export function Toolbar({
   showOrder,
   onUndo,
   onRedo,
+  className,
+  style,
 }: ToolbarProps) {
   const [orderVisible, setOrderVisible] = useState<boolean | undefined>(showOrder);
 
@@ -163,7 +167,7 @@ export function Toolbar({
   };
 
   return (
-    <Wrapper>
+    <Wrapper className={className} style={style}>
       <Left>
         {tools && tools}
         {tools && <Divider direction="vertical" style={{ height: '1.5em' }} />}

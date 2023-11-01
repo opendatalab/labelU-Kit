@@ -1,6 +1,7 @@
 import { Toolbar, Tooltip, Kbd, HotkeyPanel } from '@labelu/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import type { VideoAnnotationType } from '@labelu/interface';
+import styled from 'styled-components';
 
 import { ReactComponent as SegmentIcon } from '@/assets/icons/segment.svg';
 import { ReactComponent as FrameIcon } from '@/assets/icons/frame.svg';
@@ -8,6 +9,10 @@ import { ReactComponent as CursorIcon } from '@/assets/icons/cursor.svg';
 
 import { useAnnotator } from '../context';
 import hotkeysConst from './hotkeys.const';
+
+const ToolbarWrapper = styled(Toolbar)`
+  color: rgba(0, 0, 0, 0.6);
+`;
 
 export interface IToolbarInEditorProps {
   extra?: React.ReactNode;
@@ -73,7 +78,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
   );
 
   return (
-    <Toolbar
+    <ToolbarWrapper
       disableRedo={!futureRef.current?.length}
       disableUndo={!!pastRef.current && pastRef.current.length <= 1}
       onOrderSwitch={onOrderVisibleChange}
