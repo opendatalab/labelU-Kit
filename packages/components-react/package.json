@@ -1,6 +1,6 @@
 {
   "name": "@labelu/components-react",
-  "version": "1.1.4-alpha.1",
+  "version": "1.1.4-alpha.3",
   "description": "basic react components for labelU",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
