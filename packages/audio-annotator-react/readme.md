@@ -15,18 +15,14 @@
 - 支持侧边栏自定义
 - 支持撤回和重做
 
-如果你希望查看更详细的代码 API，请访问：[Audio Annotator API](https://github.com/opendatalab/labelU-Kit/blob/41539439ca1c6bf551386053c174df6b30512f8c/packages/audio-annotator-react/readme.md#L3)
+如果你希望查看更详细的代码 API，请访问：[Audio Annotator API](https://opendatalab.github.io/labelU-Kit/interfaces/_labelu_audio_anntator_react.AnnotatorProps.html)
 
 ## 安装
 
 [![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react)
 
 ```bash
-# 音频
 npm install @labelu/audio-annotator-react
-
-# 视频
-npm install @labelu/video-annotator-react
 ```
 
 ## 使用
