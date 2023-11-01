@@ -10,8 +10,6 @@ import type {
   Attribute,
   VideoSegmentName,
   VideoFrameName,
-  VideoSegmentToolConfig,
-  VideoFrameToolConfig,
   TextAttribute,
   EnumerableAttribute,
   AttributeValue,
@@ -120,7 +118,7 @@ function ForwardAnnotator(
       return [];
     }
 
-    return config?.[currentTool]?.attributes ?? [];
+    return config?.[currentTool] ?? [];
   }, [config, currentTool]);
   const playerRef = useRef<any | null>(null);
   const [selectedAnnotation, setSelectedAnnotation] = useState<MediaAnnotationInUI | undefined>();
@@ -130,7 +128,8 @@ function ForwardAnnotator(
     const mapping: Record<string, Record<string, Attribute>> = {};
 
     Object.keys(config ?? {}).forEach((key) => {
-      const _attributes: Attribute[] = config?.[key as VideoSegmentName | VideoFrameName]?.attributes ?? [];
+      const _attributes: Attribute[] = config?.[key as VideoSegmentName | VideoFrameName] ?? [];
+
       mapping[key] = {};
       _attributes.reduce((acc, cur) => {
         acc[cur.value] = cur;
@@ -155,7 +154,7 @@ function ForwardAnnotator(
 
       // 默认选中第一个标签
       if (tool) {
-        const _attributes = config?.[tool]?.attributes ?? [];
+        const _attributes = config?.[tool] ?? [];
         setSelectedAttribute(_attributes[0]);
       }
     },
@@ -619,8 +618,8 @@ function ForwardAnnotator(
 
   const toolConfig = useMemo(
     () => ({
-      segment: config?.segment ?? ({} as VideoSegmentToolConfig),
-      frame: config?.frame ?? ({} as VideoFrameToolConfig),
+      segment: config?.segment ?? ([] as Attribute[]),
+      frame: config?.frame ?? ([] as Attribute[]),
     }),
     [config?.frame, config?.segment],
   );
