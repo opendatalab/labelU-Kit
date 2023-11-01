@@ -9,7 +9,7 @@
     "@labelu/components": "1.0.1",
     "@labelu/components-react": "1.1.4-alpha.1",
     "@labelu/formatter": "1.0.2",
-    "@labelu/interface": "1.1.1-alpha.2",
+    "@labelu/interface": "1.1.1-alpha.3",
     "@labelu/video-annotator-react": "1.0.2",
     "@labelu/video-react": "1.0.3",
     "@tanstack/react-query": "^5.0.0",
