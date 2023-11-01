@@ -5,8 +5,6 @@ import type {
   Attribute,
   VideoSegmentName,
   VideoFrameName,
-  VideoSegmentToolConfig,
-  VideoFrameToolConfig,
   EnumerableAttribute,
   VideoAnnotationInUI,
 } from '@labelu/interface';
@@ -20,8 +18,8 @@ export interface VideoProps {
   annotations: VideoAnnotationInUI[];
   selectedAnnotation?: VideoAnnotationInUI;
   toolConfig?: {
-    segment?: VideoSegmentToolConfig;
-    frame?: VideoFrameToolConfig;
+    segment?: Attribute[];
+    frame?: Attribute[];
   };
   editingType?: VideoAnnotationType;
   editingLabel?: string;
@@ -213,7 +211,7 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
 
     Object.keys(toolConfig).forEach((key) => {
       const _key = key as VideoSegmentName | VideoFrameName;
-      const _attributes: Attribute[] = toolConfig?.[_key]?.attributes ?? [];
+      const _attributes: Attribute[] = toolConfig?.[_key] ?? [];
       const _mapping: Record<
         string,
         Attribute & {

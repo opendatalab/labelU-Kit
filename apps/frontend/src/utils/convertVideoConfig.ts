@@ -1,40 +1,24 @@
-import type { EditorProps } from '@labelu/video-annotator-react';
+import type { AudioAnnotatorConfig } from '@labelu/audio-annotator-react';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 
 export function convertVideoConfig(taskConfig?: ToolsConfigState) {
-  const editorConfig: NonNullable<EditorProps['config']> = {} as NonNullable<EditorProps['config']>;
+  const editorConfig: AudioAnnotatorConfig = {} as AudioAnnotatorConfig;
 
   taskConfig?.tools?.forEach((item) => {
     if (['videoSegmentTool', 'audioSegmentTool'].includes(item.tool)) {
-      editorConfig.segment = {
-        ...editorConfig.segment,
-        ...item.config,
-        type: 'segment',
-      };
+      editorConfig.segment = [...(editorConfig.segment ?? []), ...(item.config.attributes ?? [])];
 
       if (taskConfig.attributes) {
-        if (!editorConfig.segment.attributes) {
-          editorConfig.segment.attributes = [];
-        }
-
-        editorConfig.segment.attributes = taskConfig.attributes.concat(editorConfig.segment.attributes);
+        editorConfig.segment = [...editorConfig.segment, ...taskConfig.attributes];
       }
     }
 
     if (['videoFrameTool', 'audioFrameTool'].includes(item.tool)) {
-      editorConfig.frame = {
-        ...editorConfig.frame,
-        ...item.config,
-        type: 'frame',
-      };
+      editorConfig.frame = [...(editorConfig.frame ?? []), ...(item.config.attributes ?? [])];
 
       if (taskConfig.attributes) {
-        if (!editorConfig.frame.attributes) {
-          editorConfig.frame.attributes = [];
-        }
-
-        editorConfig.frame.attributes = taskConfig.attributes.concat(editorConfig.frame.attributes);
+        editorConfig.frame = [...editorConfig.frame, ...taskConfig.attributes];
       }
     }
 
