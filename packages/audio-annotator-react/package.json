@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "@labelu/components-react": "1.1.0",
-    "@labelu/interface": "1.1.0",
+    "@labelu/interface": "1.1.0-alpha.12",
     "@labelu/audio-react": "1.0.1",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
