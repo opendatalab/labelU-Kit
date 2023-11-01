@@ -31,7 +31,7 @@
   "dependencies": {
     "@labelu/components-react": "1.1.3",
     "@labelu/interface": "1.1.0",
-    "@labelu/audio-annotator-react": "1.0.4",
+    "@labelu/audio-annotator-react": "1.1.0-alpha.49",
     "@labelu/video-react": "1.0.3",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
