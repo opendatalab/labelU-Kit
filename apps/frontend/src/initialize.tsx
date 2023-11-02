@@ -12,6 +12,7 @@ declare global {
   interface Window {
     // 是否开发环境
     DEV: boolean;
+    IS_ONLINE: boolean;
   }
 }
 

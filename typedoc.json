@@ -1,7 +1,10 @@
 {
-  "entryPoints": ["packages/interface", "packages/audio-react"],
+  "entryPoints": ["packages/*"],
   "name": "LabelU Kit",
-  "basePath": "apis",
+  "navigationLinks": {
+    "LabelU": "https://opendatalab.github.io/labelU/",
+    "OpenDataLab": "https://opendatalab.com/"
+  },
   "entryPointStrategy": "packages",
   "includeVersion": true
 

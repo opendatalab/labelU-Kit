@@ -20,6 +20,10 @@ const MainLayout = () => {
   const isPreview = searchParams.get('noSave');
 
   useEffect(() => {
+    if (window.IS_ONLINE) {
+      return;
+    }
+
     const token = localStorage.getItem('token');
     const _username = localStorage.getItem('username');
 
