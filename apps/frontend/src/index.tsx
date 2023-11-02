@@ -9,5 +9,8 @@ import './initialize';
 import './styles/index.css';
 
 window.React = React;
+// 是否是线上演示环境
+console.log('import.meta.env.VITE_IS_ONLINE', import.meta.env.VITE_IS_ONLINE);
+window.IS_ONLINE = !!import.meta.env.VITE_IS_ONLINE;
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);

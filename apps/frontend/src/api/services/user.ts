@@ -4,16 +4,32 @@ import type {
   OkRespLoginResponse,
   OkRespLogoutResponse,
   OkRespSignupResponse,
+  OkRespUserInfo,
   SignupCommand,
 } from '../types';
 
-export async function login(params: LoginCommand): Promise<OkRespLoginResponse> {
-  const result = await request.post('/v1/users/login', params);
+interface SSOLoginParams {
+  code: string;
+}
+
+export async function login(params: LoginCommand | SSOLoginParams): Promise<OkRespLoginResponse> {
+  const url = window.IS_ONLINE ? `/v1/users/token?code=${(params as SSOLoginParams).code}` : '/v1/users/login';
+
+  const result = await request.post(url, params);
 
   localStorage.setItem('token', result.data.token);
-  localStorage.setItem('username', params.username);
+
+  if (window.IS_ONLINE) {
+    // TODO
+  } else {
+    localStorage.setItem('username', (params as LoginCommand).username!);
+  }
 
   return result;
+}
+
+export async function getUserInfo(): Promise<OkRespUserInfo> {
+  return await request.post('/v1/users/me');
 }
 
 export async function logout(): Promise<OkRespLogoutResponse> {

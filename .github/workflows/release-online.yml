@@ -1,0 +1,83 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release-online
+
+env:
+  LAB_NPM_TOKEN: ${{ secrets.LAB_NPM_TOKEN }}
+  # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  VITE_SSO_CLIENT_ID: ${{ secrets.VITE_SSO_CLIENT_ID }}
+  VITE_SSO_ORIGIN: ${{ secrets.VITE_SSO_ORIGIN }}
+  GL_TRIGGER_TOKEN: ${{ secrets.GL_TRIGGER_TOKEN }}
+  GI_LABELU_PROJECT_ID: ${{ secrets.GI_LABELU_PROJECT_ID }}
+  VITE_IS_ONLINE: true
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: ['online']
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Frontend branch'
+        required: false
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - alpha
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  release-packages-and-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Show env
+        run: |
+          echo $RELEASE_VERSION
+
+      - name: Install dependencies
+        run: |
+          npm cache clean -f
+          pnpm install --no-frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm run build:frontend
+
+      - name: Release frontend
+        run: pnpm run release:frontend
