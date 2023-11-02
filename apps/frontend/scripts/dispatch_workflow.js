@@ -47,6 +47,7 @@ function gitlabCiTrigger(nextVersion) {
   );
 
   const formData = new URLSearchParams();
+
   formData.append('variables[frontend_url]', url);
 
   const options = {
