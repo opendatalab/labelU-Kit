@@ -60,7 +60,7 @@ async function main() {
     deps: {},
   };
 
-  if (nextVersion) {
+  if (nextVersion && branch !== 'online') {
     appPkgJson.version = nextVersion;
     workspacePkgJson.version = nextVersion;
     fs.writeFileSync(path.join(__dirname, '../package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
