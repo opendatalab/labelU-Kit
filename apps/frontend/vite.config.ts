@@ -7,6 +7,9 @@ import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
+const isOnline = process.env.VITE_IS_ONLINE === true;
+console.log('isOnline', isOnline);
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/',
@@ -16,7 +19,7 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'https://labelu.shlab.tech',
+        target: isOnline ? 'https://labelu.shlab.tech' : 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },

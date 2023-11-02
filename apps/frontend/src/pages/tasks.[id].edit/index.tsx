@@ -270,7 +270,7 @@ const CreateTask = () => {
             ...taskData,
             ...basicFormValues,
             status: taskData?.status === TaskStatus.DRAFT ? TaskStatus.IMPORTED : taskData?.status,
-            config: _.isEmpty(config) ? null : JSON.stringify(config),
+            config: isCreateNewTask ? null : JSON.stringify(config),
           })
           .then(() => {
             if (isFromCancel) {
@@ -296,6 +296,7 @@ const CreateTask = () => {
       annotationFormInstance,
       basicFormInstance,
       currentStep,
+      isCreateNewTask,
       isExistTask,
       location.search,
       navigate,
