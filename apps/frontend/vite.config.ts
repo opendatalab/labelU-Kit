@@ -7,8 +7,6 @@ import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
-process.env.VITE_IS_ONLINE = true;
-
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/',
