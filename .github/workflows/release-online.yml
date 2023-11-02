@@ -75,6 +75,9 @@ jobs:
           npm cache clean -f
           pnpm install --no-frozen-lockfile
 
+      - name: Build packages
+        run: pnpm run build
+
       - name: Build frontend
         run: pnpm run build:frontend
         env:
