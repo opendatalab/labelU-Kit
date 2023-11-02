@@ -1,10 +1,5 @@
 {
-  "branches": [
-    "release",
-    { "name": "beta", "prerelease": true },
-    { "name": "alpha", "prerelease": true },
-    { "name": "online", "prerelease": true }
-  ],
+  "branches": ["release", { "name": "beta", "prerelease": true }, { "name": "alpha", "prerelease": true }],
   "plugins": [
     [
       {
