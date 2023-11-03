@@ -6,7 +6,6 @@ import { FlexLayout } from '@labelu/components-react';
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 import { ReactComponent as LocalDeploy } from '@/assets/svg/local-deploy.svg';
 import { goLogin } from '@/utils/sso';
-import { logout as logoutService } from '@/api/services/user';
 
 import Breadcrumb from '../Breadcrumb';
 import { LabeluLogo, NavigationWrapper } from './style';
@@ -24,7 +23,6 @@ const Homepage = () => {
     localStorage.setItem('token', '');
 
     if (window.IS_ONLINE) {
-      await logoutService();
       await goLogin();
     } else {
       navigate('/login');
