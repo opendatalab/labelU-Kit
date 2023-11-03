@@ -90,7 +90,7 @@ const TaskCard = (props: any) => {
             </Tooltip>
           </ExportPortal>
           {username === cardInfo.created_by.username && (
-            <Tooltip title={'删除文件'} placement={'top'}>
+            <Tooltip title="删除任务" placement={'top'}>
               <Button onClick={handleDeleteTask} size="small" type="text" icon={<Icon component={DeleteIcon} />} />
             </Tooltip>
           )}

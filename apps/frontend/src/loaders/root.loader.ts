@@ -2,7 +2,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 import { redirect } from 'react-router';
 
 import * as storage from '@/utils/storage';
-import { getUserInfo, login } from '@/api/services/user';
+import { getUserInfo, ssoLogin } from '@/api/services/user';
 
 export async function rootLoader({ request }: LoaderFunctionArgs) {
   if (window.IS_ONLINE) {
@@ -17,7 +17,7 @@ export async function rootLoader({ request }: LoaderFunctionArgs) {
     try {
       if (code) {
         // 处理登陆过来url是否携带code
-        await login({ code });
+        await ssoLogin(code);
 
         // 替换basename
         const path = `${location.pathname}?${search.toString()}`;
