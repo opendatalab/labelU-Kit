@@ -40,83 +40,80 @@ function Root() {
 const routes: RouteObject[] = [
   {
     path: '/',
-    handle: {
-      crumb: () => {
-        return '首页';
-      },
-    },
     id: 'root',
     element: <Root />,
     loader: rootLoader,
-  },
-  {
-    path: '/tasks',
-    element: <MainLayout />,
-    errorElement: <Page404 />,
-    id: 'tasks',
-    loader: tasksLoader,
-    handle: {
-      crumb: () => {
-        return '任务列表';
-      },
-    },
     children: [
       {
-        index: true,
-        element: <Tasks />,
-      },
-      {
-        path: ':taskId',
-        id: 'task',
-        element: <Outlet />,
-        loader: taskLoader,
+        path: 'tasks',
+        element: <MainLayout />,
+        errorElement: <Page404 />,
+        id: 'tasks',
+        loader: tasksLoader,
         handle: {
-          crumb: (data: TaskLoaderResult) => {
-            return data?.task?.name;
+          crumb: () => {
+            return '任务列表';
           },
         },
         children: [
           {
             index: true,
-            element: <Samples />,
+            element: <Tasks />,
           },
           {
-            path: 'edit',
-            element: <TaskEdit />,
-            loader: async ({ params }) => {
-              return params.taskId !== '0' ? '任务编辑' : '新建任务';
-            },
+            path: ':taskId',
+            id: 'task',
+            element: <Outlet />,
+            loader: taskLoader,
             handle: {
-              crumb: (data: string) => {
-                return data;
+              crumb: (data: TaskLoaderResult) => {
+                return data?.task?.name;
               },
             },
-          },
-          {
-            path: 'samples',
-            id: 'samples',
-            element: <Outlet />,
             children: [
               {
-                path: ':sampleId',
-                element: <TaskAnnotation />,
-                loader: sampleLoader,
-                id: 'annotation',
+                index: true,
+                element: <Samples />,
+              },
+              {
+                path: 'edit',
+                element: <TaskEdit />,
+                loader: async ({ params }) => {
+                  return params.taskId !== '0' ? '任务编辑' : '新建任务';
+                },
                 handle: {
-                  crumb: () => {
-                    return '开始标注';
+                  crumb: (data: string) => {
+                    return data;
                   },
                 },
               },
               {
-                path: 'finished',
-                element: <TaskSamplesFinished />,
-                loader: taskLoader,
-                handle: {
-                  crumb: () => {
-                    return '标注结束';
+                path: 'samples',
+                id: 'samples',
+                element: <Outlet />,
+                children: [
+                  {
+                    path: ':sampleId',
+                    element: <TaskAnnotation />,
+                    loader: sampleLoader,
+                    id: 'annotation',
+                    handle: {
+                      crumb: () => {
+                        return '开始标注';
+                      },
+                    },
                   },
-                },
+                  {
+                    path: 'finished',
+                    element: <TaskSamplesFinished />,
+                    loader: taskLoader,
+                    handle: {
+                      crumb: () => {
+                        return '标注结束';
+                      },
+                    },
+                  },
+                ],
               },
             ],
           },
