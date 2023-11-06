@@ -1,5 +1,6 @@
 import type { RouteObject } from 'react-router';
-import { Outlet } from 'react-router';
+import { Outlet, useLocation, useNavigate } from 'react-router';
+import { useEffect } from 'react';
 
 import Register from '@/pages/register';
 import Tasks from '@/pages/tasks';
@@ -17,8 +18,19 @@ import { sampleLoader } from './loaders/sample.loader';
 import RequireAuth from './components/RequireSSO';
 import { registerLoader } from './loaders/register.loader';
 import { loginLoader } from './loaders/login.loader';
+import LoginPage from './pages/login';
 
 function Root() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // 如果是根路径，跳转到任务管理（以任务管理为首页）
+    if (location.pathname === '/' || location.pathname === '') {
+      navigate('/tasks');
+    }
+  }, [location.pathname, navigate]);
+
   if (!window.IS_ONLINE) {
     return <Outlet />;
   }
@@ -117,6 +129,7 @@ const routes: RouteObject[] = [
   {
     path: 'login',
     loader: loginLoader,
+    element: <LoginPage />,
   },
   {
     path: 'register',
