@@ -16,6 +16,7 @@ on:
       - 'release'
       - 'alpha'
       - 'beta'
+      - 'online'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -29,7 +30,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm

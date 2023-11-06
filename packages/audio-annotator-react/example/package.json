@@ -1,0 +1,26 @@
+{
+  "name": "audio-annotator-react-example",
+  "version": "1.0.1",
+  "description": "",
+  "scripts": {
+    "start": "vite --port 3100"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "4.8.4",
+    "@labelu/interface": "latest",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite": "^4.4.9",
+    "vite-plugin-ts-mono-alias": "^1.1.0"
+  },
+  "dependencies": {
+    "@labelu/audio-annotator-react": "1.1.0-alpha.17",
+    "react-router": "^6.16.0",
+    "react-router-dom": "^6.16.0"
+  }
+}

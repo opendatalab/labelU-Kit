@@ -173,6 +173,10 @@ export interface OkRespLoginResponse {
   data: LoginResponse;
 }
 
+export interface OkRespUserInfo {
+  data: SignupResponse;
+}
+
 export interface OkRespLogoutResponse {
   data: LogoutResponse;
 }

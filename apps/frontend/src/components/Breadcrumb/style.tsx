@@ -1,17 +1,23 @@
 import type { LinkProps } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
-import BlockContainer from '@/layouts/BlockContainer';
-
 import type { BreadcrumbProps } from './index';
 
-const StyledBreadcrumb = styled(BlockContainer).attrs((props: BreadcrumbProps) => ({
+const StyledBreadcrumb = styled.div.attrs((props: BreadcrumbProps) => ({
   ...props,
   className: 'breadcrumbs',
 }))`
   display: flex;
   justify-content: flex-start;
-  font-size: 14px;
+
+  ${() =>
+    window.IS_ONLINE
+      ? css`
+          font-size: 1rem;
+        `
+      : css`
+          font-size: 14px;
+        `}
   .breadcrumb-item-wrap {
     display: flex;
     align-items: center;

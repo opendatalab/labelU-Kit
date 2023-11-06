@@ -10,7 +10,7 @@ npm install @labelu/audio-react
 
 ## 使用
 
-> 访问 [example](./src/example)
+> [example](./src/example)
 
 ```tsx
 import React from 'react';

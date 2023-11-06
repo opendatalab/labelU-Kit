@@ -1,4 +1,4 @@
-import { Button, Pagination } from 'antd';
+import { Alert, Button, Pagination } from 'antd';
 import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -49,6 +49,23 @@ const TaskList = () => {
   return (
     <Wrapper flex="column">
       <FlexLayout.Content scroll flex="column">
+        {window.IS_ONLINE && (
+          <Alert
+            type="info"
+            style={{
+              marginTop: '1rem',
+            }}
+            showIcon
+            message={
+              <div>
+                当前为体验版，每日凌晨数据将自动清空，请及时备份重要数据。如需完整使用，建议
+                <a href="https://github.com/opendatalab/labelU#getting-started" target="_blank" rel="noreferrer">
+                  本地部署
+                </a>
+              </div>
+            }
+          />
+        )}
         {tasks.length > 0 && (
           <Header>
             <Button type="primary" onClick={createTask}>
