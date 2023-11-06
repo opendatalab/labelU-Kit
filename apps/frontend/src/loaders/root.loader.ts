@@ -44,5 +44,9 @@ export async function rootLoader({ request }: LoaderFunctionArgs) {
     return redirect('/login');
   }
 
-  return redirect('/tasks');
+  if (location.pathname === '/') {
+    return redirect('/tasks');
+  }
+
+  return null;
 }
