@@ -12,6 +12,10 @@ export async function tasksLoader({ request }: LoaderFunctionArgs) {
   const searchParams = new URLSearchParams(url.search);
   const queryParams = Object.fromEntries(searchParams.entries());
 
+  if (searchParams.has('clientId')) {
+    return null;
+  }
+
   return await queryClient.fetchQuery({
     queryKey: taskKey.list(queryParams),
     queryFn: () => getTaskList(queryParams),

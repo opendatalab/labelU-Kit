@@ -1,8 +1,6 @@
 import type { RouteObject } from 'react-router';
-import { Outlet, useLocation, useNavigate } from 'react-router';
-import { useEffect } from 'react';
+import { Outlet } from 'react-router';
 
-import Login from '@/pages/login/index';
 import Register from '@/pages/register';
 import Tasks from '@/pages/tasks';
 import TaskEdit from '@/pages/tasks.[id].edit';
@@ -16,19 +14,14 @@ import type { TaskLoaderResult } from './loaders/task.loader';
 import { taskLoader, tasksLoader } from './loaders/task.loader';
 import { rootLoader } from './loaders/root.loader';
 import { sampleLoader } from './loaders/sample.loader';
-import { goLogin, goRegister } from './utils/sso';
 import RequireAuth from './components/RequireSSO';
+import { registerLoader } from './loaders/register.loader';
+import { loginLoader } from './loaders/login.loader';
 
 function Root() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // 如果是根路径，跳转到任务管理（以任务管理为首页）
-    if (location.pathname === '/' || location.pathname === '') {
-      navigate('/tasks');
-    }
-  }, [location.pathname, navigate]);
+  if (!window.IS_ONLINE) {
+    return <Outlet />;
+  }
 
   return (
     <RequireAuth>
@@ -123,28 +116,11 @@ const routes: RouteObject[] = [
   },
   {
     path: 'login',
-    loader: async () => {
-      if (window.IS_ONLINE) {
-        goLogin();
-
-        return Promise.resolve();
-      }
-
-      return null;
-    },
-    element: <Login />,
+    loader: loginLoader,
   },
   {
     path: 'register',
-    loader: async () => {
-      if (window.IS_ONLINE) {
-        goRegister();
-
-        return Promise.resolve();
-      }
-
-      return null;
-    },
+    loader: registerLoader,
     element: <Register />,
     handle: {
       crumb: () => {

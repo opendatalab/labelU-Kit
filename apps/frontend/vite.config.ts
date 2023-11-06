@@ -7,7 +7,7 @@ import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
-const isOnline = process.env.VITE_IS_ONLINE === true;
+const isOnline = !!process.env.VITE_IS_ONLINE;
 console.log('isOnline', isOnline);
 
 // https://vitejs.dev/config/
@@ -49,7 +49,7 @@ export default defineConfig({
     terserOptions: {
       compress: {
         drop_console: false,
-        drop_debugger: false,
+        drop_debugger: true,
       },
     },
   },

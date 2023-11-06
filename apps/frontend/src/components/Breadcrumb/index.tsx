@@ -30,7 +30,13 @@ function Breadcrumb({ className, hideHome = false, style }: BreadcrumbProps) {
   const revalidator = useRevalidator();
 
   const crumbs = matches
-    .filter((match) => (match.pathname === '/' ? !hideHome : Boolean(match.handle?.crumb!(match.data))))
+    .filter((match) => {
+      if (match.pathname === '/' && hideHome) {
+        return false;
+      }
+
+      return match.handle && match.handle.crumb && match.handle.crumb(match.data);
+    })
     .map((match) => ({
       ...match,
       crumb: match.handle.crumb!(match.data),
