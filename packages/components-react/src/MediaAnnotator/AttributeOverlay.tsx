@@ -11,6 +11,8 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   font-size: 14px;
+  max-height: 80vh;
+  overflow: auto;
 `;
 
 const OverlayItem = styled.div`
@@ -22,6 +24,7 @@ const OverlayItem = styled.div`
   max-width: 20em;
   max-height: 12em;
   overflow: auto;
+  flex-shrink: 0;
 `;
 
 const List = styled.div`
