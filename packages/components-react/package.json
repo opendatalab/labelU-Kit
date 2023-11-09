@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
     "clean": "rimraf ./node_modules",
     "start": "vite -c vite.config.app.ts"
