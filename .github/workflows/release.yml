@@ -123,13 +123,16 @@ jobs:
         run: |
           echo $RELEASE_VERSION
 
+      - name: Install dependencies
+        run: |
+          npm cache clean -f
+          pnpm install --no-frozen-lockfile
+
       - name: Execute before release script
         run: node ./scripts/before-release-frontend.js
 
       - name: Update frontend dependencies
-        run: |
-          npm cache clean -f
-          pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Build packages
         run: pnpm run build
