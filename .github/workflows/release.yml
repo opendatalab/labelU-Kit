@@ -128,11 +128,13 @@ jobs:
           npm cache clean -f
           pnpm install --no-frozen-lockfile
 
-      - name: Execute before release script
+      - name: Update package.json deps
         run: node ./scripts/before-release-frontend.js
 
       - name: Update frontend dependencies
-        run: pnpm install
+        run: |
+          npm cache clean -f
+          pnpm install --no-frozen-lockfile
 
       - name: Build packages
         run: pnpm run build

@@ -60,33 +60,6 @@ async function main() {
     deps: {},
   };
 
-  if (nextVersion && branch !== 'online') {
-    appPkgJson.version = nextVersion;
-    workspacePkgJson.version = nextVersion;
-    fs.writeFileSync(path.join(__dirname, '../package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
-    fs.writeFileSync(workspacePkgPath, JSON.stringify(workspacePkgJson, null, 2), 'utf-8');
-
-    await createCommit({
-      owner: 'opendatalab',
-      repo: 'labelU-Kit',
-      message: `chore: update frontend package.json version to ${nextVersion} [skip ci]`,
-      content: JSON.stringify(appPkgJson, null, 2),
-      branch,
-      filepath: path.relative(workspace, pksPath),
-    });
-
-    await createCommit({
-      owner: 'opendatalab',
-      repo: 'labelU-Kit',
-      message: `chore: update workspace package.json version to ${nextVersion} [skip ci]`,
-      content: JSON.stringify(workspacePkgJson, null, 2),
-      branch,
-      filepath: path.relative(workspace, workspacePkgPath),
-    });
-
-    console.log('update package.json version success!');
-  }
-
   console.log('next version is', nextVersion);
 
   const getCode = (info) => {
@@ -120,6 +93,37 @@ async function main() {
   );
 
   console.log('Inject frontend info success!');
+
+  try {
+    if (nextVersion && branch !== 'online') {
+      appPkgJson.version = nextVersion;
+      workspacePkgJson.version = nextVersion;
+      fs.writeFileSync(path.join(__dirname, '../package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
+      fs.writeFileSync(workspacePkgPath, JSON.stringify(workspacePkgJson, null, 2), 'utf-8');
+
+      await createCommit({
+        owner: 'opendatalab',
+        repo: 'labelU-Kit',
+        message: `chore: update frontend package.json version to ${nextVersion} [skip ci]`,
+        content: JSON.stringify(appPkgJson, null, 2),
+        branch,
+        filepath: path.relative(workspace, pksPath),
+      });
+
+      await createCommit({
+        owner: 'opendatalab',
+        repo: 'labelU-Kit',
+        message: `chore: update workspace package.json version to ${nextVersion} [skip ci]`,
+        content: JSON.stringify(workspacePkgJson, null, 2),
+        branch,
+        filepath: path.relative(workspace, workspacePkgPath),
+      });
+
+      console.log('update package.json version success!');
+    }
+  } catch (e) {
+    console.log('update package.json version failed!', e);
+  }
 }
 
 main();
