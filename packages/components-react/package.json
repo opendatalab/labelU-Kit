@@ -1,10 +1,16 @@
 {
   "name": "@labelu/components-react",
-  "version": "1.2.1",
+  "version": "1.2.2-alpha.1",
   "description": "basic react components for labelU",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build && npm run build:types",
     "build:types": "tsc -d --emitDeclarationOnly",
@@ -40,7 +46,6 @@
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "typescript": "4.8.4",
     "@labelu/interface": "1.2.1",
     "@types/react": "^18.2.2",
     "@types/styled-components": "^5.1.26",
@@ -49,7 +54,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
+    "typescript": "4.8.4",
     "vite": "^4.1.1",
+    "vite-plugin-dts": "^3.6.3",
     "vite-plugin-svgr": "^2.4.0",
     "vite-tsconfig-paths": "^3.5.0"
   },
