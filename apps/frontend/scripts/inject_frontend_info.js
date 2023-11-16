@@ -17,20 +17,24 @@ async function createCommit({ owner, repo, message, branch, files }) {
     ref: `heads/${branch}`,
   });
 
+  const tree = [];
+
+  for (const file of files) {
+    const { data: blobData } = await octokit.git.createBlob({ owner, repo, content: file.content });
+
+    tree.push({
+      path: file.path,
+      mode: '100644',
+      type: 'blob',
+      sha: blobData.sha,
+    });
+  }
+
   const { data: treeData } = await octokit.git.createTree({
     owner,
     repo,
     base_tree: currentBranchRef.data.object.sha,
-    tree: files.map(async (item) => {
-      const { data: blobData } = await octokit.git.createBlob({ owner, repo, content: item.content });
-
-      return {
-        path: item.path,
-        mode: '100644',
-        type: 'blob',
-        sha: blobData.sha,
-      };
-    }),
+    tree,
   });
 
   const { data: commitData } = await octokit.git.createCommit({
