@@ -65,6 +65,25 @@ export default function App() {
         },
       ],
     },
+    point: {
+      style: {
+        strokeWidth: 1,
+      },
+      labels: [
+        {
+          id: '1',
+          value: 'noneAttribute',
+          key: '无标签',
+          color: '#ff0000',
+        },
+        {
+          id: 'car',
+          value: 'car',
+          key: '车子',
+          color: '#f69',
+        },
+      ],
+    },
   });
 
   useLayoutEffect(() => {
@@ -123,6 +142,16 @@ export default function App() {
           id: 'rW5Jbd8G2',
           attributes: {},
           order: 1,
+          label: 'car',
+        },
+      ]);
+      engine.loadData('point', [
+        {
+          x: 134.5060975609757,
+          y: 376.7248475609756,
+          valid: true,
+          id: 'pWiUgJIH',
+          order: 3,
           label: 'car',
         },
       ]);

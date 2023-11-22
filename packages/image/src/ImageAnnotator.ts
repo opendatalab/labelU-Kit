@@ -1,7 +1,8 @@
 import EventEmitter from 'eventemitter3';
 
 import { Renderer } from './core/Renderer';
-import type { AnnotationToolData, ToolName } from './tools';
+import { PointTool } from './tools';
+import type { AnnotationTool, AnnotationToolData, PointToolOptions, ToolName } from './tools';
 import type { LineToolOptions } from './tools/LineTool';
 import { LineTool } from './tools/LineTool';
 import type { CursorParams } from './graphics/Cursor';
@@ -22,6 +23,7 @@ export interface AnnotatorOptions {
    */
   cursor?: CursorParams | false;
   line?: LineToolOptions;
+  point?: PointToolOptions;
   image: ImageOption;
 }
 
@@ -34,7 +36,7 @@ export class Annotator extends EventEmitter {
 
   private _config: AnnotatorOptions;
 
-  private _tools: LineTool[] = [];
+  private _tools: AnnotationTool[] = [];
 
   private _axis: Axis | null = null;
 
@@ -108,7 +110,7 @@ export class Annotator extends EventEmitter {
   }
 
   /**
-   * TODO：加载标注数据
+   * 加载标注数据
    */
   public loadData<T extends ToolName>(toolName: T, data: AnnotationToolData<T>) {
     if (!data) {
@@ -117,27 +119,32 @@ export class Annotator extends EventEmitter {
 
     const { _axis } = this;
 
-    switch (toolName) {
-      case 'line':
-        this._use(
-          new LineTool(
-            {
-              ...this._config.line,
-              data,
-            },
-            _axis!,
-          ),
-        );
-        break;
-
-      default:
-        break;
+    if (toolName == 'line') {
+      this._use(
+        new LineTool(
+          {
+            ...this._config.line,
+            data: data as AnnotationToolData<'line'>,
+          },
+          _axis!,
+        ),
+      );
+    } else if (toolName == 'point') {
+      this._use(
+        new PointTool(
+          {
+            ...this._config.point,
+            data: data as AnnotationToolData<'point'>,
+          },
+          _axis!,
+        ),
+      );
     }
 
     this.render();
   }
 
-  private _use(instance: LineTool) {
+  private _use(instance: AnnotationTool) {
     this._tools.push(instance);
     return this;
   }

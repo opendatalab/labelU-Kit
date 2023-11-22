@@ -5,6 +5,7 @@
     "sourceMap": false,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "outDir": "dist",
     "declarationDir": "dist/types",

@@ -1,23 +1,20 @@
 import type { LineStyle } from '../graphics/Line';
 import { Line } from '../graphics/Line';
 import { ETool } from '../enums';
-import type { PointItem } from './Point';
+import type { AxisPoint } from '../graphics/Point';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import type { Axis } from '../core/Axis';
+import type { BasicImageAnnotation } from './interface';
 
-export interface LineData {
+export interface PointItem extends AxisPoint {
   id: string;
-  pointList: PointItem[];
-  order: number;
-  valid?: boolean;
-  /** 标签分类 */
-  label?: string;
-  /** 标签分类属性 */
-  attributes?: Record<string, string | string[]>;
 }
 
-export interface LineToolOptions extends BasicToolParams<LineData> {
+export interface LineData extends BasicImageAnnotation {
+  pointList: PointItem[];
+}
+
+export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   /**
    * 线条类型
    * @description
@@ -47,49 +44,47 @@ export interface LineToolOptions extends BasicToolParams<LineData> {
   closingPointAmount?: number;
 }
 
-export class LineTool extends Tool<LineData, LineToolOptions> {
+export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   static toolName = ETool.Line;
 
-  public style: LineStyle = {
-    stroke: '#000',
-    strokeWidth: 2,
-    opacity: 1,
-  };
+  public style: LineStyle = Line.DEFAULT_STYLE;
 
-  constructor({ data, ...config }: LineToolOptions, axis: Axis) {
-    super(data, config, axis);
-  }
+  private _elements: Line[] = [];
 
+  // TODO: 绘制过程
   public draw() {
     console.log('drawing');
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    const { data = [], labelMapping, style, axis } = this;
-    const lines = [];
+    const { data = [], style, axis } = this;
+
+    this._elements = [];
 
     for (const item of data) {
       for (let i = 1; i < item.pointList.length; i++) {
         const startPoint = item.pointList[i - 1];
         const endPoint = item.pointList[i];
-        const lineToolLabel = labelMapping.get(item.label || '');
+        const label = this.getLabelByValue(item.label);
 
-        const startCoord = axis!.getScaledCoord(startPoint);
-        const endCoord = axis!.getScaledCoord(endPoint);
+        const startCoord = axis.getScaledCoord(startPoint);
+        const endCoord = axis.getScaledCoord(endPoint);
 
-        const line = new Line({
-          x1: startCoord.x,
-          y1: startCoord.y,
-          x2: endCoord.x,
-          y2: endCoord.y,
-          style: {
-            ...style,
-            stroke: lineToolLabel?.color || style.stroke,
+        const line = new Line(
+          {
+            x1: startCoord.x,
+            y1: startCoord.y,
+            x2: endCoord.x,
+            y2: endCoord.y,
           },
-        });
+          {
+            ...style,
+            stroke: label?.color || style.stroke,
+          },
+        );
 
         line.render(ctx!);
-        lines.push(line);
+        this._elements.push(line);
       }
     }
   }

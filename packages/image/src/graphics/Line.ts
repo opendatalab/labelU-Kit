@@ -18,27 +18,19 @@ interface LineCoordinate {
   y2: number;
 }
 
-export interface LineParams extends LineCoordinate {
-  /** 线条样式 */
-  style?: LineStyle;
-}
-
 export class Line {
-  public coordinate: LineCoordinate;
-
-  public style: Required<LineStyle> = {
+  static DEFAULT_STYLE: Required<LineStyle> = {
     stroke: '#000',
     strokeWidth: 2,
     opacity: 1,
   };
 
-  constructor({ x1, y1, x2, y2, style }: LineParams) {
-    this.coordinate = {
-      x1,
-      y1,
-      x2,
-      y2,
-    };
+  public coordinate: LineCoordinate;
+
+  public style: Required<LineStyle> = Line.DEFAULT_STYLE;
+
+  constructor(coordinate: LineCoordinate, style: LineStyle) {
+    this.coordinate = coordinate;
 
     if (style) {
       this.style = style as Required<LineStyle>;
@@ -51,10 +43,11 @@ export class Line {
     }
 
     const { style, coordinate } = this;
-    const { stroke, strokeWidth } = style;
+    const { stroke, strokeWidth, opacity } = style;
     const { x1, y1, x2, y2 } = coordinate;
 
     ctx.save();
+    ctx.globalAlpha = opacity;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.strokeStyle = stroke;
@@ -65,6 +58,7 @@ export class Line {
     ctx.lineTo(x2, y2);
 
     ctx.stroke();
+    ctx.globalAlpha = 1;
     ctx.restore();
   }
 }

@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
-import type { AxisPoint } from '../tools/Point';
+import type { AxisPoint } from '../graphics/Point';
 import type { CursorParams } from '../graphics/Cursor';
 import { Cursor } from '../graphics/Cursor';
 import { Ticker } from './Ticker';
@@ -13,7 +13,7 @@ interface AxisParams {
   cursor?: CursorParams | false;
 }
 
-function ValidateAnnotator(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function validateAnnotator(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
 
   descriptor.value = function (...args: any[]) {
@@ -28,9 +28,13 @@ function ValidateAnnotator(target: any, propertyKey: string, descriptor: Propert
 }
 
 /**
- * 坐标 Axis，用于管理画布的移动、缩放等操作
+ * 画布坐标系 Axis，用于管理画布的移动、缩放等操作
  */
 export class Axis extends EventEmitter {
+  static MIN_SCALE = 0.1;
+
+  static MAX_SCALE = 10;
+
   private _isMoving: boolean = false;
 
   private _annotator: Annotator | null = null;
@@ -45,8 +49,12 @@ export class Axis extends EventEmitter {
 
   private _rect: DOMRect | null = null;
 
+  /** 缩放比例 */
   private _scale: number = 1;
 
+  /**
+   * 移动时的起始点
+   */
   private _startPoint: AxisPoint | null = null;
 
   private _distanceX: number = 0;
@@ -57,6 +65,9 @@ export class Axis extends EventEmitter {
 
   private _ticker: Ticker | null = null;
 
+  /**
+   * 以鼠标为中心缩放时的坐标
+   */
   private _scalePoint: AxisPoint = {
     x: 0,
     y: 0,
@@ -87,7 +98,7 @@ export class Axis extends EventEmitter {
     container.removeEventListener('wheel', this._handleScroll.bind(this));
   }
 
-  @ValidateAnnotator
+  @validateAnnotator
   private _handleMoveStart(e: MouseEvent) {
     e.preventDefault();
     const { container } = this._params!;
@@ -104,7 +115,7 @@ export class Axis extends EventEmitter {
     this.emit('move-start', this);
   }
 
-  @ValidateAnnotator
+  @validateAnnotator
   private _pan(e: MouseEvent) {
     const { _startPoint, _annotator } = this;
     const point = this._getCursorCoordInCanvas(e);
@@ -132,7 +143,7 @@ export class Axis extends EventEmitter {
     this._ticker?.requestUpdate();
   }
 
-  @ValidateAnnotator
+  @validateAnnotator
   private _handleMoveEnd(e: MouseEvent) {
     e.preventDefault();
     const { _annotator } = this;
@@ -151,30 +162,27 @@ export class Axis extends EventEmitter {
 
     const point = this.getCoordRelativeToCanvas(e as MouseEvent);
 
-    // Calculate the new scale factor
     const scaleFactor = e.deltaY < 0 ? SCALE_FACTOR : 1 / SCALE_FACTOR;
 
-    // Calculate the new x and y to make the zoom centered around the mouse position
+    if (this._scale * scaleFactor < Axis.MIN_SCALE || this._scale * scaleFactor > Axis.MAX_SCALE) {
+      return;
+    }
+
     const newX = point.x - (point.x - this._x) * scaleFactor;
     const newY = point.y - (point.y - this._y) * scaleFactor;
 
     this._scalePoint = point;
 
-    console.log(point);
-
-    // Update x, y and scale
     this._x = newX;
     this._y = newY;
     this._scale *= scaleFactor;
 
-    // Schedule a rerender
     this._ticker?.requestUpdate();
 
-    // Emit 'zoom' event
     this.emit('zoom', this);
   }
 
-  @ValidateAnnotator
+  @validateAnnotator
   private getCoordRelativeToCanvas(e: MouseEvent) {
     const { _rect } = this;
 
@@ -206,7 +214,7 @@ export class Axis extends EventEmitter {
     };
   }
 
-  @ValidateAnnotator
+  @validateAnnotator
   private _rerender() {
     const { _cursor, _annotator } = this;
     const { renderer, backgroundRenderer } = _annotator!;
@@ -277,10 +285,6 @@ export class Axis extends EventEmitter {
 
     this._createTicker();
     this._bindEvents();
-  }
-
-  public zoom() {
-    this._ticker?.requestUpdate();
   }
 
   public destroy() {
