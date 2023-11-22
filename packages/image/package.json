@@ -1,0 +1,56 @@
+{
+  "name": "@labelu/image",
+  "version": "1.0.1",
+  "description": "Image annotation tool for labelU",
+  "author": {
+    "name": "GaryShen",
+    "email": "grinson50@gmail.com"
+  },
+  "license": "Apache-2.0",
+  "types": "dist/types/index.d.ts",
+  "typings": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./es/index.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "homepage": "",
+  "main": "dist/index.js",
+  "module": "es/index.js",
+  "files": [
+    "lib",
+    "es"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:opendatalab/labelU-Kit.git"
+  },
+  "scripts": {
+    "dev": "rollup -c rollup.config.js -w ",
+    "build": "rollup -c rollup.config.js && npm run build:type",
+    "build:type": "tsc --emitDeclarationOnly --resolveJsonModule",
+    "clean": "rimraf ./node_modules",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@labelu/interface": "workspace:1.2.1",
+    "eventemitter3": "^5.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.11.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.43.1",
+    "rollup-plugin-esbuild": "^3.0.2",
+    "typescript": "4.8.4"
+  }
+}
