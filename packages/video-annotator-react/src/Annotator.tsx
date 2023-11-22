@@ -379,6 +379,18 @@ function ForwardAnnotator(
       setSelectedAttribute(attribute);
       let newAnnotation = JSON.parse(JSON.stringify(selectedAnnotation ?? {}));
 
+      // 正在标注时，应该更新正在标注的片断，而不是当前选中的片断
+      const annotatingSegment = annotatorRef.current?.getAnnotatingSegment();
+
+      if (annotatingSegment) {
+        annotatorRef.current!.updateAnnotatingSegment({
+          ...annotatingSegment,
+          label: attribute.value,
+        });
+
+        return;
+      }
+
       // 改变标签时，删除旧的attributes属性
       delete newAnnotation.attributes;
 
@@ -417,7 +429,7 @@ function ForwardAnnotator(
   // ================== attribute ==================
 
   const handleAttributeChange = useCallback(
-    (_attribute: any) => {
+    (_attribute: Attribute) => {
       let newAnnotation = JSON.parse(JSON.stringify(selectedAnnotation ?? {}));
 
       // 改变标签时，删除旧的attributes属性
@@ -526,7 +538,8 @@ function ForwardAnnotator(
           label: attributes[index].value,
         };
 
-        if (playerRef.current && newAnnotation) {
+        // 正在标注时变更标签，应该更新正在标注的片断
+        if (playerRef.current && newAnnotation && !annotatorRef.current?.getAnnotatingSegment()) {
           document.dispatchEvent(
             new CustomEvent('annotate-end', {
               detail: {

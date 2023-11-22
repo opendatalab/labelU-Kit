@@ -51,11 +51,11 @@ export const AudioPlayer = forwardRef<WaveSurfer | null, AudioPlayerProps>(funct
 
     const waveGradient = ctx!.createLinearGradient(0, 0, 0, ratio * height);
 
-    const waveTopColor = '#167d7f';
-    const waveBottomColor = '#35127b';
+    const waveTopColor = '#26b5b2';
+    const waveBottomColor = '#02929f';
 
-    const progressTopColor = '#5ffcff';
-    const progressBottomColor = '#6107f3';
+    const progressTopColor = '#32FFFC';
+    const progressBottomColor = '#00E9FF';
 
     waveGradient.addColorStop(0, waveTopColor);
     waveGradient.addColorStop(0.3, waveTopColor);
