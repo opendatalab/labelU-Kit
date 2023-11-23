@@ -2,13 +2,14 @@ import EventEmitter from 'eventemitter3';
 
 import { Renderer } from './core/Renderer';
 import { PointTool } from './tools';
-import type { AnnotationTool, AnnotationToolData, PointToolOptions, ToolName } from './tools';
+import type { PointToolOptions } from './tools';
 import type { LineToolOptions } from './tools/LineTool';
 import { LineTool } from './tools/LineTool';
 import type { CursorParams } from './graphics/Cursor';
 import type { ImageOption } from './core/BackgroundRenderer';
 import { BackgroundRenderer } from './core/BackgroundRenderer';
 import { Axis } from './core/Axis';
+import type { AnnotationTool, AnnotationToolData, ToolName } from './tools/interface';
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -28,8 +29,6 @@ export interface AnnotatorOptions {
 }
 
 export class Annotator extends EventEmitter {
-  readonly scalePerTick = 0.05;
-
   public renderer: Renderer | null = null;
 
   public backgroundRenderer: BackgroundRenderer | null = null;
@@ -39,6 +38,13 @@ export class Annotator extends EventEmitter {
   private _tools: AnnotationTool[] = [];
 
   private _axis: Axis | null = null;
+
+  /**
+   * 用于内部模块通信
+   *
+   * @description 内部事件名称都以 `__[module]:[event]__` 的形式命名
+   */
+  private _event: EventEmitter = new EventEmitter();
 
   constructor(params: AnnotatorOptions) {
     super();
@@ -90,19 +96,32 @@ export class Annotator extends EventEmitter {
   }
 
   private _initialAxis() {
-    const { container, cursor } = this._config;
-
     if (!this.renderer) {
       return;
     }
 
-    this._axis = new Axis({
-      container,
-      cursor,
-    });
-
-    this._axis.setup(this);
+    this._axis = new Axis(this);
     this.backgroundRenderer!.setAxis(this._axis!);
+  }
+
+  private _use(instance: AnnotationTool) {
+    this._tools.push(instance);
+    return this;
+  }
+
+  public get tools() {
+    return this._tools;
+  }
+
+  public render() {
+    const { renderer } = this;
+    if (!renderer) {
+      return this;
+    }
+
+    this._tools.forEach((tool) => {
+      tool.render(renderer.ctx!);
+    });
   }
 
   public loadImage(url: string, options: ImageOption) {
@@ -144,25 +163,15 @@ export class Annotator extends EventEmitter {
     this.render();
   }
 
-  private _use(instance: AnnotationTool) {
-    this._tools.push(instance);
-    return this;
-  }
-
-  public render() {
-    const { renderer } = this;
-    if (!renderer) {
-      return this;
-    }
-
+  public destroy() {
+    this.removeAllListeners();
+    this._event!.removeAllListeners();
     this._tools.forEach((tool) => {
-      tool.render(renderer.ctx!);
+      tool.destroy();
     });
-  }
-
-  public destroyAll() {
-    this.renderer!.removeAllListeners();
     this._tools = [];
+    this._axis?.destroy();
+    this._axis = null;
     this.renderer = null;
   }
 }

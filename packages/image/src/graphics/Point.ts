@@ -1,3 +1,5 @@
+import { CanvasObject } from './CanvasObject';
+
 export interface AxisPoint {
   x: number;
   y: number;
@@ -57,7 +59,7 @@ export interface PointStyle {
 /**
  * 基础图形点
  */
-export class Point {
+export class Point extends CanvasObject<PointStyle, AxisPoint> {
   static DEFAULT_STYLE: Required<PointStyle> = {
     stroke: '#000',
     strokeWidth: 0,
@@ -68,15 +70,13 @@ export class Point {
     endAngle: Math.PI * 2,
   };
 
-  public coordinate: AxisPoint;
-
   public style: Required<PointStyle> = Point.DEFAULT_STYLE;
 
-  constructor(coordinate: AxisPoint, style: PointStyle) {
-    this.coordinate = coordinate;
+  constructor(id: string, coordinate: AxisPoint, style: PointStyle) {
+    super(id, coordinate);
 
     if (style) {
-      this.style = style as Required<PointStyle>;
+      this.style = { ...this.style, ...style };
     }
   }
 

@@ -1,3 +1,5 @@
+import type { Axis } from '../core/Axis';
+import { ETool } from '../enums';
 import type { AxisPoint, PointStyle } from '../graphics/Point';
 import { Point } from '../graphics/Point';
 import type { BasicToolParams } from './Tool';
@@ -42,7 +44,41 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
   private _elements: Point[] = [];
 
-  public style: PointStyle = Point.DEFAULT_STYLE;
+  public style: Required<PointStyle> = Point.DEFAULT_STYLE;
+
+  constructor(params: PointToolOptions, axis: Axis) {
+    super(params, axis);
+
+    this._insertRBushTree();
+  }
+
+  private _insertRBushTree() {
+    const { data, axis } = this;
+
+    if (!Array.isArray(data)) {
+      throw Error('Data must be an array!');
+    }
+
+    for (const item of data) {
+      const rbushItem = { id: item.id, type: ETool.Point, ...this._calcPointRNodeMatrix(item) };
+
+      this.rbushElementMapping.set(rbushItem.id, rbushItem);
+      axis.rbush.insert(rbushItem);
+    }
+  }
+
+  private _calcPointRNodeMatrix(point: AxisPoint) {
+    const { style } = this;
+    const { x, y } = point;
+    const { radius } = style;
+
+    return {
+      minX: x - radius,
+      minY: y - radius,
+      maxX: x + radius,
+      maxY: y + radius,
+    };
+  }
 
   render(ctx: CanvasRenderingContext2D) {
     const { data = [], style, axis } = this;
@@ -53,7 +89,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       const label = this.getLabelByValue(item.label);
       const coord = axis.getScaledCoord(item);
 
-      const point = new Point(coord, {
+      const point = new Point(item.id, coord, {
         ...style,
         stroke: label?.color || style.stroke,
       });

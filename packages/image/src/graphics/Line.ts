@@ -1,3 +1,5 @@
+import { CanvasObject } from './CanvasObject';
+
 export interface LineStyle {
   stroke?: string;
   strokeWidth?: number;
@@ -18,22 +20,20 @@ interface LineCoordinate {
   y2: number;
 }
 
-export class Line {
+export class Line extends CanvasObject<LineStyle, LineCoordinate> {
   static DEFAULT_STYLE: Required<LineStyle> = {
     stroke: '#000',
     strokeWidth: 2,
     opacity: 1,
   };
 
-  public coordinate: LineCoordinate;
-
   public style: Required<LineStyle> = Line.DEFAULT_STYLE;
 
-  constructor(coordinate: LineCoordinate, style: LineStyle) {
-    this.coordinate = coordinate;
+  constructor(id: string, coordinate: LineCoordinate, style: LineStyle) {
+    super(id, coordinate);
 
     if (style) {
-      this.style = style as Required<LineStyle>;
+      this.style = { ...this.style, ...style };
     }
   }
 

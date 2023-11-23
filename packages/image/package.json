@@ -44,9 +44,12 @@
   },
   "dependencies": {
     "@labelu/interface": "workspace:1.2.1",
-    "eventemitter3": "^5.0.0"
+    "eventemitter3": "^5.0.0",
+    "geolib": "^3.3.4",
+    "rbush": "^3.0.1"
   },
   "devDependencies": {
+    "@types/rbush": "^3.0.3",
     "esbuild": "^0.11.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.43.1",
