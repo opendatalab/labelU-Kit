@@ -40,7 +40,7 @@ export interface PointToolOptions extends BasicToolParams<PointData, PointStyle>
 }
 
 export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
-  static toolName = 'point';
+  public toolName = ETool.Point;
 
   private _elements: Point[] = [];
 

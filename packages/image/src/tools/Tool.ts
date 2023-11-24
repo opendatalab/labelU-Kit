@@ -56,6 +56,14 @@ export class Tool<Data, Style, Config extends BasicToolParams<Data, Style>> {
     }
   }
 
+  /**
+   * 工具进入绘制模式
+   *
+   * @param label 标签
+   */
+  public pen(label: string | Attribute): void;
+  public pen() {}
+
   public getLabelByValue(value: string | undefined) {
     if (typeof value !== 'string') {
       console.warn('value is not a string', value);

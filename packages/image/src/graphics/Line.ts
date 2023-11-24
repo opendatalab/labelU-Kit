@@ -37,6 +37,21 @@ export class Line extends CanvasObject<LineStyle, LineCoordinate> {
     }
   }
 
+  /**
+   * 获取线段的包围盒
+   * NOTE: 是否需要加上线宽？
+   */
+  public getBBox() {
+    const { x1, y1, x2, y2 } = this.coordinate;
+
+    return {
+      minX: Math.min(x1, x2),
+      minY: Math.min(y1, y2),
+      maxX: Math.max(x1, x2),
+      maxY: Math.max(y1, y2),
+    };
+  }
+
   public render(ctx: CanvasRenderingContext2D | null) {
     if (!ctx) {
       throw Error('No context specific!');

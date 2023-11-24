@@ -45,7 +45,6 @@
   "dependencies": {
     "@labelu/interface": "workspace:1.2.1",
     "eventemitter3": "^5.0.0",
-    "geolib": "^3.3.4",
     "rbush": "^3.0.1"
   },
   "devDependencies": {

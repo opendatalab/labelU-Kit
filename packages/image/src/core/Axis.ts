@@ -1,4 +1,5 @@
 import EventEmitter from 'eventemitter3';
+import type { BBox } from 'rbush';
 import RBush from 'rbush';
 
 import type { AxisPoint } from '../graphics/Point';
@@ -6,16 +7,13 @@ import { Cursor } from '../graphics/Cursor';
 import { Ticker } from './Ticker';
 import type { Annotator } from '../ImageAnnotator';
 import type { ToolName } from '../tools/interface';
+import { EInternalEvent } from '../enums';
 
 const SCALE_FACTOR = 1.1;
 
-export interface RBushItem {
+export interface RBushItem extends BBox {
   type: ToolName;
   id: string;
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
 }
 
 function validateAnnotator(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -71,7 +69,7 @@ export class Axis {
    *
    * @description
    *
-   * 内部事件名称都以 `__[module]:[event]__` 的形式命名。axis贯穿于各个模块中，适合在axis中挂载事件。
+   * axis贯穿于各个模块中，适合在axis中挂载事件。
    *
    * NOTE: 如果挂载在annotator上，增加Tool下子类对Annotator的引用就会变复杂，所以尽量保持Tool子类纯粹。
    */
@@ -102,24 +100,42 @@ export class Axis {
     this._createTicker();
     this._bindEvents();
     this._cursor = new Cursor({ x: 0, y: 0, ...cursor });
+    // NOTE: debug
+    this._renderRBushTree();
   }
 
   private _bindEvents() {
-    const { container } = this._annotator!.config!;
+    const { canvas } = this._annotator!.renderer!;
 
-    container.addEventListener('contextmenu', this._handleMoveStart.bind(this), false);
-    container.addEventListener('mousemove', this._handleMoving.bind(this), false);
-    container.addEventListener('mouseup', this._handleMoveEnd.bind(this), false);
-    container.addEventListener('wheel', this._handleScroll.bind(this), false);
+    /**
+     * NOTE: 画布元素的事件监听都应该在这里绑定，而不是在分散具体的工具中绑定
+     */
+    canvas.addEventListener('contextmenu', this._handleMoveStart.bind(this), false);
+    canvas.addEventListener('mousemove', this._handleMoving.bind(this), false);
+    canvas.addEventListener('mouseup', this._handleMoveEnd.bind(this), false);
+    canvas.addEventListener('wheel', this._handleScroll.bind(this), false);
+    canvas.addEventListener('click', this._handleClick.bind(this), false);
   }
 
   private _offEvents() {
-    const { container } = this._annotator!.config!;
+    const { canvas } = this._annotator!.renderer!;
 
-    container.removeEventListener('contextmenu', this._handleMoveStart.bind(this));
-    container.removeEventListener('mousemove', this._handleMoving.bind(this));
-    container.removeEventListener('mouseup', this._handleMoveEnd.bind(this));
-    container.removeEventListener('wheel', this._handleScroll.bind(this));
+    canvas.removeEventListener('contextmenu', this._handleMoveStart.bind(this));
+    canvas.removeEventListener('mousemove', this._handleMoving.bind(this));
+    canvas.removeEventListener('mouseup', this._handleMoveEnd.bind(this));
+    canvas.removeEventListener('wheel', this._handleScroll.bind(this));
+    canvas.removeEventListener('click', this._handleClick.bind(this));
+  }
+
+  @validateAnnotator
+  private _handleClick(e: MouseEvent) {
+    const mouseCoord = {
+      x: e.offsetX,
+      y: e.offsetY,
+    };
+    const rbushItems = this._scanCanvasObject(mouseCoord);
+
+    this.emit(EInternalEvent.Click, e, rbushItems, mouseCoord);
   }
 
   @validateAnnotator
@@ -134,22 +150,28 @@ export class Axis {
     this._isMoving = false;
 
     // 起始点：鼠标点击位置：在画布内的真实坐标
-    this._startPoint = this._getCursorCoordInCanvas(e);
+    this._startPoint = this._getCoordInCanvas({
+      x: e.offsetX,
+      y: e.offsetY,
+    });
 
-    this.emit('__axis__:move-start', this);
+    this.emit(EInternalEvent.PanStart, e);
   }
 
   @validateAnnotator
   private _pan(e: MouseEvent) {
     const { _startPoint, _annotator } = this;
-    const point = this._getCursorCoordInCanvas(e);
+    const point = this._getCoordInCanvas({
+      x: e.offsetX,
+      y: e.offsetY,
+    });
 
     this._x = this._x + point.x - _startPoint!.x;
     this._y = this._y + point.y - _startPoint!.y;
 
     _annotator!.renderer!.canvas.style.cursor = 'grabbing';
 
-    this.emit('__axis__:pan', this);
+    this.emit(EInternalEvent.Pan, e);
   }
 
   private _handleMoving(e: MouseEvent) {
@@ -160,9 +182,16 @@ export class Axis {
       // 移动画布时隐藏鼠标指针，移动时始终在画布外面
       this._cursor!.updateCoordinate(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
     } else {
-      this._cursor!.updateCoordinate(e.offsetX, e.offsetY);
+      const mouseCoord = {
+        x: e.offsetX,
+        y: e.offsetY,
+      };
+      this._cursor!.updateCoordinate(mouseCoord.x, mouseCoord.y);
       // 鼠标移动时，需要实时检查在是否有图形元素在鼠标位置
-      this._scanCanvasObject(e);
+      const rbushItems = this._scanCanvasObject(mouseCoord);
+
+      // 向订阅了move事件的图形工具发送事件，由每个工具自行实现鼠标经过的逻辑。
+      this.emit(EInternalEvent.Move, e, rbushItems, mouseCoord);
     }
 
     // 只要鼠标在画布内移动，触发画布更新
@@ -179,7 +208,7 @@ export class Axis {
     this._x = this._x + this._distanceX;
     this._y = this._y + this._distanceY;
     this._startPoint = null;
-    this.emit('__axis__:move-end', this);
+    this.emit(EInternalEvent.MoveEnd, e);
   }
 
   private _handleScroll(e: WheelEvent) {
@@ -206,7 +235,7 @@ export class Axis {
 
     this._ticker?.requestUpdate();
 
-    this.emit('__axis__:zoom', this);
+    this.emit(EInternalEvent.Zoom, e);
   }
 
   /**
@@ -219,20 +248,13 @@ export class Axis {
    * 3. 根据图形类别，判断鼠标是否真实落在图形上
    * @param e
    */
-  private _scanCanvasObject(e: MouseEvent) {
-    const mouseCoord = this.getCoordRelativeToCanvas(e);
-    const items = this._rbush.search({
+  private _scanCanvasObject(mouseCoord: AxisPoint) {
+    return this._rbush.search({
       minX: mouseCoord.x,
       minY: mouseCoord.y,
       maxX: mouseCoord.x,
       maxY: mouseCoord.y,
     });
-    /**
-     * 向订阅了move事件的图形工具发送事件，由每个工具自行实现鼠标经过的逻辑。
-     *
-     * NOTE: mouseCoord: 因为rbush里存储的是原始的坐标，在各个Tool下对比时，需要使用真实坐标，所以mouse也要转换成以左上角为原点的坐标。
-     */
-    this.emit('__axis__:move', items, mouseCoord, e);
   }
 
   /**
@@ -245,15 +267,6 @@ export class Axis {
     return {
       x: e.clientX - _rect!.left,
       y: e.clientY - _rect!.top,
-    };
-  }
-
-  private _getCursorCoordInCanvas(e: MouseEvent) {
-    const { _rect, _x, _y } = this;
-
-    return {
-      x: e.clientX - _rect!.left - _x,
-      y: e.clientY - _rect!.top - _y,
     };
   }
 
@@ -273,14 +286,35 @@ export class Axis {
   @validateAnnotator
   private _rerender() {
     const { _cursor, _annotator } = this;
-    const { renderer, backgroundRenderer } = _annotator!;
+    const { renderer } = _annotator!;
 
-    renderer?.clear();
-    backgroundRenderer?.clear();
-
-    _annotator!.render();
-    backgroundRenderer?.render();
+    this.emit(EInternalEvent.Render, renderer!.ctx);
     _cursor!.render(renderer!.ctx);
+    // debug
+    this._renderRBushTree();
+  }
+
+  /**
+   * Debug使用，渲染R-Tree
+   */
+  private _renderRBushTree() {
+    const { ctx } = this._annotator!.renderer!;
+
+    ctx!.save();
+    ctx!.strokeStyle = '#000';
+    ctx!.globalAlpha = 1;
+    ctx!.lineDashOffset = 2;
+    ctx!.setLineDash([2, 2]);
+    ctx!.lineWidth = 1;
+
+    this._rbush.all().forEach((item) => {
+      const { minX, minY, maxX, maxY } = item;
+
+      ctx!.strokeRect(minX, minY, maxX - minX, maxY - minY);
+    });
+
+    ctx!.globalAlpha = 1;
+    ctx!.restore();
   }
 
   /**
@@ -334,12 +368,23 @@ export class Axis {
    */
   public getScaledCoord(originCoord: AxisPoint): AxisPoint {
     const { x, y } = originCoord;
-    const { _x, _y, _scaleCenter, _scale } = this;
 
     return {
-      x: _x + (_scaleCenter.x + (x - _scaleCenter.x)) * _scale,
-      y: _y + (_scaleCenter.y + (y - _scaleCenter.y)) * _scale,
+      x: this.getScaledX(x),
+      y: this.getScaledY(y),
     };
+  }
+
+  public getScaledX(x: number) {
+    const { _x, _scaleCenter, _scale } = this;
+
+    return _x + (_scaleCenter.x + (x - _scaleCenter.x)) * _scale;
+  }
+
+  public getScaledY(y: number) {
+    const { _y, _scaleCenter, _scale } = this;
+
+    return _y + (_scaleCenter.y + (y - _scaleCenter.y)) * _scale;
   }
 
   public destroy() {
@@ -351,18 +396,18 @@ export class Axis {
 
   // ================= 增加event代理 =================
   public on(eventName: string, listener: (...args: any[]) => void) {
-    this._event.on(eventName, listener);
+    return this._event.on(eventName, listener);
   }
 
   public once(eventName: string, listener: (...args: any[]) => void) {
-    this._event.once(eventName, listener);
+    return this._event.once(eventName, listener);
   }
 
   public off(eventName: string, listener: (...args: any[]) => void) {
-    this._event.off(eventName, listener);
+    return this._event.off(eventName, listener);
   }
 
   public emit(eventName: string, ...args: any[]) {
-    this._event.emit(eventName, ...args);
+    return this._event.emit(eventName, ...args);
   }
 }

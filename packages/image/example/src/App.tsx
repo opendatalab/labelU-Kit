@@ -155,6 +155,12 @@ export default function App() {
           label: 'car',
         },
       ]);
+
+      engine.pick('line', 'car');
+    });
+
+    engine.on('hover', (data) => {
+      console.log('hover', data);
     });
 
     engine.on('complete', () => {
