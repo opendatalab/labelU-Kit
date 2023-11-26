@@ -141,7 +141,7 @@ export default function App() {
           ],
           id: 'rW5Jbd8G2',
           attributes: {},
-          order: 1,
+          order: 2,
           label: 'car',
         },
       ]);

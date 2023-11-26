@@ -45,10 +45,16 @@
   "dependencies": {
     "@labelu/interface": "workspace:1.2.1",
     "eventemitter3": "^5.0.0",
-    "rbush": "^3.0.1"
+    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1",
+    "rbush": "^3.0.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/lodash.throttle": "^4.1.9",
     "@types/rbush": "^3.0.3",
+    "@types/uuid": "^9.0.0",
     "esbuild": "^0.11.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.43.1",

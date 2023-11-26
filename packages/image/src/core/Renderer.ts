@@ -7,7 +7,7 @@ export interface RendererOptions {
 }
 
 export class Renderer extends EventEmitter {
-  private _ratio: number = 1;
+  protected ratio: number = 1;
   public options: RendererOptions;
 
   public canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -20,14 +20,19 @@ export class Renderer extends EventEmitter {
     const { container } = options;
 
     this.options = options;
-    this._ratio = window.devicePixelRatio || 1;
+    this.ratio = window.devicePixelRatio || 1;
     this.ctx = this.canvas.getContext('2d');
+    this.ctx!.imageSmoothingEnabled = false;
 
     if (container) {
       container.appendChild(this.canvas);
 
-      this.canvas.width = options.width || container.clientWidth;
-      this.canvas.height = options.height || container.clientHeight;
+      this.canvas.width = (options.width || container.clientWidth) * this.ratio;
+      this.canvas.height = (options.height || container.clientHeight) * this.ratio;
+
+      // 解决canvas绘制模糊问题
+      this.ctx?.translate(-0.5, -0.5);
+      this.ctx?.scale(this.ratio, this.ratio);
     }
   }
 

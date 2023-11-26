@@ -1,10 +1,10 @@
 export class Ticker {
-  private fps: number;
-  private interval: number;
-  private lastTick: number;
-  private rafId: number | null = null;
-  private shouldUpdate: boolean;
-  private tickHandler: () => void;
+  private _fps: number;
+  private _interval: number;
+  private _lastTick: number;
+  private _rafId: number | null = null;
+  private _shouldUpdate: boolean;
+  private _tickHandler: () => void;
 
   /**
    * constructor
@@ -12,38 +12,38 @@ export class Ticker {
    * @param fps 默认60
    */
   constructor(tickHandler: () => void, fps: number = 60) {
-    this.tickHandler = tickHandler;
-    this.fps = fps;
-    this.interval = 1000 / fps;
-    this.lastTick = Date.now();
-    this.shouldUpdate = false;
+    this._tickHandler = tickHandler;
+    this._fps = fps;
+    this._interval = 1000 / fps;
+    this._lastTick = Date.now();
+    this._shouldUpdate = false;
   }
 
   public start() {
-    if (!this.rafId) {
+    if (!this._rafId) {
       this.tick();
     }
   }
 
   public stop() {
-    cancelAnimationFrame(this.rafId!);
-    this.rafId = null;
+    cancelAnimationFrame(this._rafId!);
+    this._rafId = null;
   }
 
   public requestUpdate() {
-    this.shouldUpdate = true;
+    this._shouldUpdate = true;
   }
 
   private tick() {
     const now = Date.now();
-    const elapsed = now - this.lastTick;
+    const elapsed = now - this._lastTick;
 
-    if (elapsed > this.interval && this.shouldUpdate) {
-      this.lastTick = now - (elapsed % this.interval);
-      this.tickHandler();
-      this.shouldUpdate = false;
+    if (elapsed > this._interval && this._shouldUpdate) {
+      this._lastTick = now - (elapsed % this._interval);
+      this._tickHandler();
+      this._shouldUpdate = false;
     }
 
-    this.rafId = requestAnimationFrame(() => this.tick());
+    this._rafId = requestAnimationFrame(() => this.tick());
   }
 }

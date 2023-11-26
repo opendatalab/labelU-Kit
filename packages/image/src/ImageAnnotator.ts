@@ -1,17 +1,19 @@
-import EventEmitter from 'eventemitter3';
 import type { ILabel } from '@labelu/interface';
 
 import { Renderer } from './core/Renderer';
 import { PointTool } from './tools';
 import type { PointToolOptions } from './tools';
-import type { LineToolOptions } from './tools/LineTool';
-import { LineTool } from './tools/LineTool';
-import type { CursorParams } from './graphics/Cursor';
+import type { LineToolOptions } from './drawing/Line.drawing';
+import { LineTool } from './tools/Line.tool';
+import type { CursorParams } from './shape/Cursor.shape';
 import type { ImageOption } from './core/BackgroundRenderer';
 import { BackgroundRenderer } from './core/BackgroundRenderer';
-import { Axis } from './core/Axis';
-import type { AnnotationTool, AnnotationToolData, ToolName } from './tools/interface';
+import type { Axis } from './core/Axis';
+import type { AnnotationTool, AnnotationToolData, ToolName } from './interface';
 import { EInternalEvent } from './enums';
+import { Monitor } from './core/Monitor';
+import { createAxis } from './singletons/axis';
+import { eventEmitter } from './singletons';
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -30,10 +32,12 @@ export interface AnnotatorOptions {
   image: ImageOption;
 }
 
-export class Annotator extends EventEmitter {
+export class Annotator {
   public renderer: Renderer | null = null;
 
   public backgroundRenderer: BackgroundRenderer | null = null;
+
+  private _monitor: Monitor | null = null;
 
   private _config: AnnotatorOptions;
 
@@ -46,11 +50,9 @@ export class Annotator extends EventEmitter {
    *
    * @description 注意：不要与内部事件混淆
    */
-  private _event: EventEmitter = new EventEmitter();
+  private _event: typeof eventEmitter = eventEmitter;
 
   constructor(params: AnnotatorOptions) {
-    super();
-
     const { container } = params;
 
     if (!container) {
@@ -60,6 +62,7 @@ export class Annotator extends EventEmitter {
     this._config = params;
 
     this.init();
+    this.render();
   }
 
   public get config() {
@@ -70,6 +73,7 @@ export class Annotator extends EventEmitter {
     // 添加鼠标光标
     this._initialContainer();
     this._initialAxis();
+    this._monitor = new Monitor(this);
   }
 
   private _initialContainer() {
@@ -81,9 +85,9 @@ export class Annotator extends EventEmitter {
     container.style.cursor = 'none';
 
     this.renderer = new Renderer({ container, width, height });
-    // 解决canvas绘制模糊问题
-    this.renderer.ctx?.translate(-0.5, -0.5);
     this.renderer.canvas.style.position = 'absolute';
+    this.renderer.canvas.style.width = `${width}px`;
+    this.renderer.canvas.style.height = `${height}px`;
     this.renderer.canvas.style.left = '0';
     this.renderer.canvas.style.cursor = 'none';
     this.renderer.canvas.style.top = '0';
@@ -91,6 +95,8 @@ export class Annotator extends EventEmitter {
 
     this.backgroundRenderer = new BackgroundRenderer({ container, width, height });
     this.backgroundRenderer.canvas.style.position = 'absolute';
+    this.backgroundRenderer.canvas.style.width = `${width}px`;
+    this.backgroundRenderer.canvas.style.height = `${height}px`;
     this.backgroundRenderer.canvas.style.cursor = 'none';
     this.backgroundRenderer.canvas.style.left = '0';
     this.backgroundRenderer.canvas.style.top = '0';
@@ -102,9 +108,12 @@ export class Annotator extends EventEmitter {
       return;
     }
 
-    this._axis = new Axis(this);
-    this.backgroundRenderer!.setAxis(this._axis!);
-    this._axis.on(EInternalEvent.Render, this.render.bind(this));
+    this._axis = createAxis(this);
+    eventEmitter.on(EInternalEvent.Render, this.render.bind(this));
+  }
+
+  public get monitor() {
+    return this._monitor;
   }
 
   public use(instance: AnnotationTool) {
@@ -142,11 +151,11 @@ export class Annotator extends EventEmitter {
       throw new Error(`Tool ${toolName} is not used!`);
     }
 
-    tool.pen(label);
+    tool.switchToPen(label);
   }
 
   public render() {
-    const { renderer, backgroundRenderer } = this;
+    const { renderer, backgroundRenderer, _tools } = this;
 
     if (!renderer) {
       return this;
@@ -160,9 +169,9 @@ export class Annotator extends EventEmitter {
     // 渲染背景
     backgroundRenderer!.render();
 
-    // 渲染标注
-    this._tools.forEach((tool) => {
-      tool.render(renderer.ctx!);
+    // 渲染工具
+    _tools.forEach((tool) => {
+      tool.render(renderer!.ctx!);
     });
   }
 
@@ -178,35 +187,30 @@ export class Annotator extends EventEmitter {
       return;
     }
 
-    const { _axis } = this;
-
     if (toolName == 'line') {
       this.use(
-        new LineTool(
-          {
-            ...this._config.line,
-            data: data as AnnotationToolData<'line'>,
-          },
-          _axis!,
-        ),
+        new LineTool({
+          ...this._config.line,
+          data: data as AnnotationToolData<'line'>,
+        }),
       );
     } else if (toolName == 'point') {
-      this.use(
-        new PointTool(
-          {
-            ...this._config.point,
-            data: data as AnnotationToolData<'point'>,
-          },
-          _axis!,
-        ),
-      );
+      console.log(PointTool);
+      // this.use(
+      //   new PointTool(
+      //     {
+      //       ...this._config.point,
+      //       data: data as AnnotationToolData<'point'>,
+      //     },
+      //     _axis!,
+      //   ),
+      // );
     }
 
     this.render();
   }
 
   public destroy() {
-    this.removeAllListeners();
     this._event!.removeAllListeners();
     this._tools.forEach((tool) => {
       tool.destroy();
@@ -216,4 +220,10 @@ export class Annotator extends EventEmitter {
     this._axis = null;
     this.renderer = null;
   }
+
+  public on = eventEmitter.on.bind(eventEmitter);
+  public off = eventEmitter.off.bind(eventEmitter);
+  public emit = eventEmitter.emit.bind(eventEmitter);
+  public once = eventEmitter.once.bind(eventEmitter);
+  public removeAllListeners = eventEmitter.removeAllListeners.bind(eventEmitter);
 }

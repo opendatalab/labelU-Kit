@@ -1,20 +1,12 @@
-import EventEmitter from 'eventemitter3';
-import type { BBox } from 'rbush';
-import RBush from 'rbush';
-
-import type { AxisPoint } from '../graphics/Point';
-import { Cursor } from '../graphics/Cursor';
+import type { AxisPoint } from '../shape/Point.shape';
+import { Cursor } from '../shape/Cursor.shape';
 import { Ticker } from './Ticker';
 import type { Annotator } from '../ImageAnnotator';
-import type { ToolName } from '../tools/interface';
 import { EInternalEvent } from '../enums';
+import * as eventEmitter from '../singletons/eventEmitter';
+import { rbush } from '../singletons';
 
 const SCALE_FACTOR = 1.1;
-
-export interface RBushItem extends BBox {
-  type: ToolName;
-  id: string;
-}
 
 function validateAnnotator(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
@@ -65,31 +57,12 @@ export class Axis {
   private _ticker: Ticker | null = null;
 
   /**
-   * 用于内部模块通信
-   *
-   * @description
-   *
-   * axis贯穿于各个模块中，适合在axis中挂载事件。
-   *
-   * NOTE: 如果挂载在annotator上，增加Tool下子类对Annotator的引用就会变复杂，所以尽量保持Tool子类纯粹。
-   */
-  private _event: EventEmitter = new EventEmitter();
-
-  /**
    * 以鼠标为中心缩放时的坐标
    */
   private _scaleCenter: AxisPoint = {
     x: 0,
     y: 0,
   };
-
-  /**
-   * 以 R-Tree 为基础的空间索引
-   * 使用 rbush，用于吸附和高亮等交互
-   *
-   * @see https://github.com/mourner/rbush#readme
-   */
-  private _rbush: RBush<RBushItem> = new RBush();
 
   constructor(annotator: Annotator) {
     const { cursor } = annotator!.config;
@@ -101,7 +74,7 @@ export class Axis {
     this._bindEvents();
     this._cursor = new Cursor({ x: 0, y: 0, ...cursor });
     // NOTE: debug
-    this._renderRBushTree();
+    // this._renderRBushTree();
   }
 
   private _bindEvents() {
@@ -111,6 +84,7 @@ export class Axis {
      * NOTE: 画布元素的事件监听都应该在这里绑定，而不是在分散具体的工具中绑定
      */
     canvas.addEventListener('contextmenu', this._handleMoveStart.bind(this), false);
+    canvas.addEventListener('contextmenu', this._handleRightClick.bind(this), false);
     canvas.addEventListener('mousemove', this._handleMoving.bind(this), false);
     canvas.addEventListener('mouseup', this._handleMoveEnd.bind(this), false);
     canvas.addEventListener('wheel', this._handleScroll.bind(this), false);
@@ -135,7 +109,17 @@ export class Axis {
     };
     const rbushItems = this._scanCanvasObject(mouseCoord);
 
-    this.emit(EInternalEvent.Click, e, rbushItems, mouseCoord);
+    eventEmitter.emit(EInternalEvent.Click, e, rbushItems, mouseCoord);
+  }
+
+  private _handleRightClick(e: MouseEvent) {
+    const mouseCoord = {
+      x: e.offsetX,
+      y: e.offsetY,
+    };
+    const rbushItems = this._scanCanvasObject(mouseCoord);
+
+    eventEmitter.emit(EInternalEvent.RightClick, e, rbushItems, mouseCoord);
   }
 
   @validateAnnotator
@@ -147,15 +131,13 @@ export class Axis {
       return;
     }
 
-    this._isMoving = false;
-
     // 起始点：鼠标点击位置：在画布内的真实坐标
     this._startPoint = this._getCoordInCanvas({
       x: e.offsetX,
       y: e.offsetY,
     });
 
-    this.emit(EInternalEvent.PanStart, e);
+    eventEmitter.emit(EInternalEvent.PanStart, e);
   }
 
   @validateAnnotator
@@ -171,7 +153,8 @@ export class Axis {
 
     _annotator!.renderer!.canvas.style.cursor = 'grabbing';
 
-    this.emit(EInternalEvent.Pan, e);
+    eventEmitter.emit(EInternalEvent.Pan, e);
+    eventEmitter.emit(EInternalEvent.AxisChange, e);
   }
 
   private _handleMoving(e: MouseEvent) {
@@ -191,7 +174,7 @@ export class Axis {
       const rbushItems = this._scanCanvasObject(mouseCoord);
 
       // 向订阅了move事件的图形工具发送事件，由每个工具自行实现鼠标经过的逻辑。
-      this.emit(EInternalEvent.Move, e, rbushItems, mouseCoord);
+      eventEmitter.emit(EInternalEvent.Move, e, rbushItems, mouseCoord);
     }
 
     // 只要鼠标在画布内移动，触发画布更新
@@ -208,7 +191,7 @@ export class Axis {
     this._x = this._x + this._distanceX;
     this._y = this._y + this._distanceY;
     this._startPoint = null;
-    this.emit(EInternalEvent.MoveEnd, e);
+    eventEmitter.emit(EInternalEvent.MoveEnd, e);
   }
 
   private _handleScroll(e: WheelEvent) {
@@ -235,7 +218,8 @@ export class Axis {
 
     this._ticker?.requestUpdate();
 
-    this.emit(EInternalEvent.Zoom, e);
+    eventEmitter.emit(EInternalEvent.Zoom, e);
+    eventEmitter.emit(EInternalEvent.AxisChange, e);
   }
 
   /**
@@ -249,7 +233,7 @@ export class Axis {
    * @param e
    */
   private _scanCanvasObject(mouseCoord: AxisPoint) {
-    return this._rbush.search({
+    return rbush.search({
       minX: mouseCoord.x,
       minY: mouseCoord.y,
       maxX: mouseCoord.x,
@@ -284,14 +268,14 @@ export class Axis {
   }
 
   @validateAnnotator
-  private _rerender() {
+  public rerender() {
     const { _cursor, _annotator } = this;
     const { renderer } = _annotator!;
 
-    this.emit(EInternalEvent.Render, renderer!.ctx);
+    eventEmitter.emit(EInternalEvent.Render, renderer!.ctx);
     _cursor!.render(renderer!.ctx);
     // debug
-    this._renderRBushTree();
+    // this._renderRBushTree();
   }
 
   /**
@@ -301,13 +285,13 @@ export class Axis {
     const { ctx } = this._annotator!.renderer!;
 
     ctx!.save();
-    ctx!.strokeStyle = '#000';
+    ctx!.strokeStyle = '#666';
     ctx!.globalAlpha = 1;
     ctx!.lineDashOffset = 2;
     ctx!.setLineDash([2, 2]);
     ctx!.lineWidth = 1;
 
-    this._rbush.all().forEach((item) => {
+    rbush.all().forEach((item) => {
       const { minX, minY, maxX, maxY } = item;
 
       ctx!.strokeRect(minX, minY, maxX - minX, maxY - minY);
@@ -323,7 +307,7 @@ export class Axis {
    */
   private _createTicker() {
     this._ticker = new Ticker(() => {
-      this._rerender();
+      this.rerender();
     });
 
     this._ticker.start();
@@ -331,10 +315,6 @@ export class Axis {
 
   public get scale() {
     return this._scale;
-  }
-
-  public get rbush() {
-    return this._rbush;
   }
 
   public get annotator() {
@@ -375,6 +355,27 @@ export class Axis {
     };
   }
 
+  public getOriginalCoord(scaledCoord: AxisPoint): AxisPoint {
+    const { x, y } = scaledCoord;
+
+    return {
+      x: this.getOriginalX(x),
+      y: this.getOriginalY(y),
+    };
+  }
+
+  public getOriginalX(x: number) {
+    const { _x, _scaleCenter, _scale } = this;
+
+    return (x - _x) / _scale - _scaleCenter.x + _scaleCenter.x;
+  }
+
+  public getOriginalY(y: number) {
+    const { _y, _scaleCenter, _scale } = this;
+
+    return (y - _y) / _scale - _scaleCenter.y + _scaleCenter.y;
+  }
+
   public getScaledX(x: number) {
     const { _x, _scaleCenter, _scale } = this;
 
@@ -389,25 +390,7 @@ export class Axis {
 
   public destroy() {
     this._offEvents();
-    this._event.removeAllListeners();
     this._ticker?.stop();
     this._ticker = null;
-  }
-
-  // ================= 增加event代理 =================
-  public on(eventName: string, listener: (...args: any[]) => void) {
-    return this._event.on(eventName, listener);
-  }
-
-  public once(eventName: string, listener: (...args: any[]) => void) {
-    return this._event.once(eventName, listener);
-  }
-
-  public off(eventName: string, listener: (...args: any[]) => void) {
-    return this._event.off(eventName, listener);
-  }
-
-  public emit(eventName: string, ...args: any[]) {
-    return this._event.emit(eventName, ...args);
   }
 }

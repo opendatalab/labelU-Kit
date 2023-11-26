@@ -1,10 +1,10 @@
 import type { Axis } from '../core/Axis';
 import { ETool } from '../enums';
-import type { AxisPoint, PointStyle } from '../graphics/Point';
-import { Point } from '../graphics/Point';
+import type { AxisPoint, PointStyle } from '../shape/Point.shape';
+import { Point } from '../shape/Point.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import type { BasicImageAnnotation } from './interface';
+import type { BasicImageAnnotation } from '../interface';
 
 export type PointData = BasicImageAnnotation & AxisPoint;
 
@@ -52,20 +52,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this._insertRBushTree();
   }
 
-  private _insertRBushTree() {
-    const { data, axis } = this;
-
-    if (!Array.isArray(data)) {
-      throw Error('Data must be an array!');
-    }
-
-    for (const item of data) {
-      const rbushItem = { id: item.id, type: ETool.Point, ...this._calcPointRNodeMatrix(item) };
-
-      this.rbushElementMapping.set(rbushItem.id, rbushItem);
-      axis.rbush.insert(rbushItem);
-    }
-  }
+  private _insertRBushTree() {}
 
   private _calcPointRNodeMatrix(point: AxisPoint) {
     const { style } = this;

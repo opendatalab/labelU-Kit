@@ -1,7 +1,6 @@
-import type { ThrottleOptions } from '../utils';
-import { debounce as db } from '../utils';
+import db from 'lodash.debounce';
 
-export function debounce(wait = 0, opts: ThrottleOptions = {}): MethodDecorator {
+export function debounce(wait = 0, opts: any = {}): MethodDecorator {
   return (proto: unknown, name: string | symbol, descriptor: PropertyDescriptor) => {
     if (!descriptor || typeof descriptor.value !== 'function') {
       throw new Error('debounce can only decorate functions');

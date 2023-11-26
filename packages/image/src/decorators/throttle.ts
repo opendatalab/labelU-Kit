@@ -1,7 +1,6 @@
-import type { ThrottleOptions } from '../utils';
-import { throttle as th } from '../utils';
+import th from 'lodash.throttle';
 
-export function throttle(wait = 0, opts: ThrottleOptions = {}): MethodDecorator {
+export function throttle(wait = 0, opts: any = {}): MethodDecorator {
   return (proto: unknown, name: string | symbol, descriptor: PropertyDescriptor) => {
     if (!descriptor || typeof descriptor.value !== 'function') {
       throw new Error('debounce can only decorate functions');

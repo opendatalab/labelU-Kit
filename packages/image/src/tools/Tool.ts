@@ -1,6 +1,7 @@
 import type { Attribute } from '@labelu/interface';
 
-import type { Axis, RBushItem } from '../core/Axis';
+import type { Drawing } from '../drawing/Drawing.abstract';
+import type { Pen } from '../pen/Pen';
 
 export const TOOL_HOVER = 'tool:hover';
 
@@ -10,41 +11,70 @@ export interface BasicToolParams<Data, Style> {
   data?: Data[];
 
   style?: Style;
+
+  hoveredStyle?: Style;
 }
 
-export class Tool<Data, Style, Config extends BasicToolParams<Data, Style>> {
+type ConfigOmit<T> = Omit<T, 'data' | 'style' | 'hoveredStyle'>;
+
+abstract class AbsTool<Data, Style, Config extends BasicToolParams<Data, Style>, Annotation> {
+  abstract labelMapping: Map<string, Attribute>;
+  abstract data?: Data[];
+  abstract config: ConfigOmit<Config>;
+  abstract style: Style;
+  abstract hoverStyle?: Style;
+  abstract pen: Pen<AbsTool<Data, Style, Config, Annotation>, Data> | null;
+  abstract drawing: Drawing<Data, AbsTool<Data, Style, Config, Annotation>, Annotation> | null;
+
+  // 抽象方法，子类中必须实现
+  abstract _createLabelMapping(config: ConfigOmit<Config>): void;
+}
+
+/**
+ * 工具基类
+ */
+export class Tool<Data, Style, Config extends BasicToolParams<Data, Style>, Annotation>
+  implements AbsTool<Data, Style, Config, Annotation>
+{
   public defaultColor: string = '#000';
 
   public labelMapping: Map<string, Attribute> = new Map();
 
   public data?: Data[] = [];
 
-  public config: Omit<Config, 'data' | 'style'>;
+  public style: Style = {} as Style;
 
-  public style?: Style;
+  public config: ConfigOmit<Config>;
 
-  public axis: Required<Axis>;
+  public hoverStyle?: Style;
 
-  public rbushElementMapping: Map<string, RBushItem> = new Map();
+  /** 当前工具的画笔 */
+  public pen: Pen<Tool<Data, Style, Config, Annotation>, Data> | null = null;
 
   /**
-   * 非编辑模式下的图形对象
+   * 当前工具非编辑状态的成品（称为制品）
+   *
+   * TODO: 获取有更好的名字？
    */
-  public staticObjects: any[] = [];
 
-  constructor({ data, style, ...config }: Config, axis: Axis) {
+  public drawing: Drawing<Data, Tool<Data, Style, Config, Annotation>, Annotation> | null = null;
+
+  constructor({ data, style, hoveredStyle, ...config }: Config) {
     // 创建标签映射
-    this._createLabelMapping(config as Omit<Config, 'data' | 'style'>);
-    this.config = config as Omit<Config, 'data' | 'style'>;
+    this._createLabelMapping(config as ConfigOmit<Config>);
+    this.config = config as ConfigOmit<Config>;
     this.data = data;
-    this.axis = axis;
 
     if (style) {
       this.style = style;
     }
+
+    if (hoveredStyle) {
+      this.hoverStyle = hoveredStyle;
+    }
   }
 
-  private _createLabelMapping(config: Omit<Config, 'data' | 'style'>) {
+  _createLabelMapping(config: ConfigOmit<Config>) {
     const { labels } = config as Config;
 
     if (!labels) {
@@ -58,11 +88,13 @@ export class Tool<Data, Style, Config extends BasicToolParams<Data, Style>> {
 
   /**
    * 工具进入绘制模式
-   *
+   * NOTE: 需要在各自的工具类中实现
    * @param label 标签
    */
-  public pen(label: string | Attribute): void;
-  public pen() {}
+  public switchToPen(label: string | Attribute): void;
+  public switchToPen() {
+    console.log('Please implement switchToPen method in your tool');
+  }
 
   public getLabelByValue(value: string | undefined) {
     if (typeof value !== 'string') {
@@ -79,9 +111,6 @@ export class Tool<Data, Style, Config extends BasicToolParams<Data, Style>> {
 
   public destroy(): void;
   public destroy(): void {
-    this.rbushElementMapping.forEach((item) => {
-      this.axis.rbush.remove(item);
-    });
-    this.rbushElementMapping.clear();
+    console.log('Please implement destroy method in your tool');
   }
 }

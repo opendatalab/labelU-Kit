@@ -50,6 +50,11 @@ export class Pen<T extends ITool, ToolData> {
 
     this.label = correctLabel;
   }
+
+  render(ctx: CanvasRenderingContext2D) {
+    console.log('render', ctx);
+  }
+
   destroy(): void;
   destroy() {}
 }

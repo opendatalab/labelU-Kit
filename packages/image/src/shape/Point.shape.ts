@@ -1,4 +1,4 @@
-import { CanvasObject } from './CanvasObject';
+import { Shape } from './Shape';
 
 export interface AxisPoint {
   x: number;
@@ -59,7 +59,7 @@ export interface PointStyle {
 /**
  * 基础图形点
  */
-export class Point extends CanvasObject<PointStyle, AxisPoint> {
+export class Point extends Shape<PointStyle> {
   static DEFAULT_STYLE: Required<PointStyle> = {
     stroke: '#000',
     strokeWidth: 0,
@@ -73,7 +73,18 @@ export class Point extends CanvasObject<PointStyle, AxisPoint> {
   public style: Required<PointStyle> = Point.DEFAULT_STYLE;
 
   constructor(id: string, coordinate: AxisPoint, style: PointStyle) {
-    super(id, coordinate);
+    super(id, coordinate, {
+      updateBBox: (dynamicCoordinate) => {
+        const [{ x, y }] = dynamicCoordinate;
+
+        return {
+          minX: x,
+          minY: y,
+          maxX: x,
+          maxY: y,
+        };
+      },
+    });
 
     if (style) {
       this.style = { ...this.style, ...style };
@@ -85,9 +96,9 @@ export class Point extends CanvasObject<PointStyle, AxisPoint> {
       throw Error('No context specific!');
     }
 
-    const { style, coordinate } = this;
+    const { style, dynamicCoordinate } = this;
     const { stroke, strokeWidth, radius, fill, opacity, startAngle, endAngle } = style;
-    const { x, y } = coordinate;
+    const [{ x, y }] = dynamicCoordinate;
 
     ctx.save();
     ctx.lineJoin = 'round';

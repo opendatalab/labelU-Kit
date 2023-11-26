@@ -1,6 +1,6 @@
-import type { Axis } from './Axis';
 import type { RendererOptions } from './Renderer';
 import { Renderer } from './Renderer';
+import { axis } from '../singletons';
 
 export interface ImageOption extends RendererOptions {
   url?: string;
@@ -35,8 +35,6 @@ export interface ImageOption extends RendererOptions {
 
 export class BackgroundRenderer extends Renderer {
   private _image: HTMLImageElement | null = null;
-
-  private axis: Axis | null = null;
 
   public options: ImageOption = {
     rotate: 0,
@@ -99,12 +97,8 @@ export class BackgroundRenderer extends Renderer {
     });
   }
 
-  public setAxis(axis: Axis) {
-    this.axis = axis;
-  }
-
   render() {
-    const { ctx, axis } = this;
+    const { ctx } = this;
 
     if (!ctx) {
       return;
