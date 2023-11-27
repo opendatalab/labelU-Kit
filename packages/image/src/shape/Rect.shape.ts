@@ -50,18 +50,7 @@ export class Rect extends Shape<RectStyle> {
   public height: number = 0;
 
   constructor(id: string, coordinate: AxisPoint, width: number, height: number, style: RectStyle) {
-    super(id, coordinate, {
-      updateBBox: (dynamicCoordinate) => {
-        const [{ x, y }] = dynamicCoordinate;
-
-        return {
-          minX: x,
-          minY: y,
-          maxX: x + width * axis!.scale,
-          maxY: y + height * axis!.scale,
-        };
-      },
-    });
+    super(id, coordinate);
 
     this.width = width;
     this.height = height;
@@ -70,7 +59,16 @@ export class Rect extends Shape<RectStyle> {
       this.style = { ...this.style, ...style };
     }
 
-    console.log(this.dynamicCoordinate);
+    this.setBBoxUpdater(() => {
+      const [{ x, y }] = this.dynamicCoordinate;
+
+      return {
+        minX: x,
+        minY: y,
+        maxX: x + width * axis!.scale,
+        maxY: y + height * axis!.scale,
+      };
+    });
   }
 
   public render(ctx: CanvasRenderingContext2D | null) {

@@ -1,6 +1,5 @@
-import type { LineData } from './drawing/Line.drawing';
-import type { LineTool } from './tools';
-import type { PointData } from './tools/Point.tool';
+import type { LineData, PointData } from './annotation';
+import type { LineTool, PointTool } from './tools';
 
 /**
  * 图片标注结果的基础字段
@@ -27,7 +26,7 @@ export interface BasicImageAnnotation {
 
 export type AnnotationData = LineData | PointData;
 
-export type AnnotationTool = LineTool;
+export type AnnotationTool = LineTool | PointTool;
 
 export type ToolName = 'line' | 'point' | 'polygon' | 'rect';
 

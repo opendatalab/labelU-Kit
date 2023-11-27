@@ -10,6 +10,7 @@ export class Pen<T extends ITool, ToolData> {
 
   /** 当前激活的标签类别 */
   public label: ILabel | undefined = undefined;
+
   /**
    * 绘制过程中的临时数据，并未真正添加到数据中
    */

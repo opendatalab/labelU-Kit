@@ -20,6 +20,9 @@ export interface AxisChangeCallbacks {
   updateBBox?: (dynamicCoordinate: AxisPoint[]) => BBox;
 }
 
+type CoordinateUpdater = () => AxisPoint[];
+type BBoxUpdater = () => BBox;
+
 /**
  * 画布上的图形对象（基类）
  */
@@ -28,9 +31,9 @@ export class Shape<Style> {
 
   private _cachedRBush: RBushItem | null = null;
 
-  private _coordinateUpdater?: () => AxisPoint[];
+  private _coordinateUpdater?: CoordinateUpdater;
 
-  private _bboxUpdater?: (dynamicCoordinate: AxisPoint[]) => BBox;
+  private _bboxUpdater?: BBoxUpdater;
 
   /**
    * 动态坐标
@@ -68,15 +71,13 @@ export class Shape<Style> {
    * @param id 图形对象的唯一标识
    * @param coordinate 图形对象的原始坐标，不随缩放拖拽等操作而改变
    */
-  constructor(id: string, coordinate: Coord, callbacks?: AxisChangeCallbacks) {
+  constructor(id: string, coordinate: Coord) {
     this.id = id;
 
     if (!coordinate) {
       throw Error('coordinate is not a valid AxisPoint!');
     }
 
-    this._coordinateUpdater = callbacks?.updateCoordinate;
-    this._bboxUpdater = callbacks?.updateBBox;
     this.coordinate = !Array.isArray(coordinate) ? [coordinate] : coordinate;
     this.dynamicCoordinate = this.coordinate;
 
@@ -85,14 +86,14 @@ export class Shape<Style> {
   }
 
   private _bindEvents() {
-    eventEmitter.on(EInternalEvent.AxisChange, this._update.bind(this));
+    eventEmitter.on(EInternalEvent.AxisChange, this._update);
   }
 
-  private _update() {
+  private _update = () => {
     this._updateDynamicCoordinate();
     this._updateBBox();
     this._updateRBush();
-  }
+  };
 
   private _updateBBox() {
     const { dynamicCoordinate, _bboxUpdater } = this;
@@ -101,7 +102,7 @@ export class Shape<Style> {
       throw Error('dynamicCoordinate is not defined!');
     }
 
-    let bbox = _bboxUpdater?.(dynamicCoordinate);
+    let bbox = _bboxUpdater?.();
 
     if (!bbox) {
       // 使用默认的bbox更新器
@@ -156,6 +157,16 @@ export class Shape<Style> {
     this.dynamicCoordinate = newCoordinate;
   }
 
+  setCoordinateUpdater(updater: CoordinateUpdater) {
+    this._coordinateUpdater = updater;
+    this._update();
+  }
+
+  setBBoxUpdater(updater: BBoxUpdater) {
+    this._bboxUpdater = updater;
+    this._update();
+  }
+
   /**
    * 渲染图形
    * @param ctx canvas context
@@ -168,7 +179,7 @@ export class Shape<Style> {
   public destroy() {
     rbush.remove(this._cachedRBush!);
     this._event.removeAllListeners();
-    eventEmitter.off(EInternalEvent.AxisChange, this._updateRBush.bind(this));
+    eventEmitter.off(EInternalEvent.AxisChange, this._update);
   }
 
   public updateStyle(style: Partial<Style>) {

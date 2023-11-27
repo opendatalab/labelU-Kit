@@ -1,16 +1,19 @@
-import type { LineTool } from '../tools/Line.tool';
+import type { PointTool } from '../tools/Point.tool';
 import type { BasicImageAnnotation } from '../interface';
-import type { PointItem } from '../drawing/Line.drawing';
-import { Annotation } from './Annotation.abstract';
+import { Annotation } from './Annotation';
 import type { Line } from '../shape/Line.shape';
-import type { AxisPoint } from '../shape/Point.shape';
+import { Point } from '../shape/Point.shape';
+import type { AxisPoint, PointStyle } from '../shape/Point.shape';
 import { Group } from '../shape/Group';
+import type { RBushItem } from '../singletons';
+import { eventEmitter } from '../singletons';
+import { Hover } from '../decorators/Hover.decorator';
+import { getDistance } from '../shape/math.util';
 
-export interface LineData extends BasicImageAnnotation {
-  pointList: PointItem[];
-}
+export type PointData = BasicImageAnnotation & AxisPoint;
 
-export class AnnotationPoint extends Annotation<LineData, LineTool> {
+@Hover
+export class AnnotationPoint extends Annotation<PointData, PointTool> {
   /**
    * Rbush 碰撞检测阈值
    *
@@ -18,27 +21,56 @@ export class AnnotationPoint extends Annotation<LineData, LineTool> {
    */
   static DISTANCE_THRESHOLD = 2 as const;
 
-  public data: LineData;
+  public group: Group<Point, PointStyle>;
 
-  public tool: LineTool;
-
-  public id: string;
-
-  public group = new Group('22');
+  public effectedStyles: string[] = ['fill'];
 
   private _isHovered: boolean = false;
 
-  private _isSelected: boolean = false;
-
   private _elementMapping: Map<string, Line> = new Map();
 
-  constructor(id: string, data: LineData, tool: LineTool) {
-    super();
+  constructor(id: string, data: PointData, tool: PointTool) {
+    super(id, data, tool);
 
-    this.id = id;
-    this.data = data;
-    this.tool = tool;
+    this.group = new Group(id);
+
+    this._setupShapes();
   }
+
+  private _setupShapes() {
+    const { data, group } = this;
+
+    const point = new Point(data.id, data, this.getStyle());
+
+    group.add(point);
+
+    this._elementMapping.set(point.id, point);
+  }
+
+  public onMouseOver = (e: MouseEvent, rbushItems: RBushItem[], mouseCoord: AxisPoint) => {
+    const { group } = this;
+
+    const shapes = rbushItems.filter((item) => group.get(item.id)).map((item) => group.get(item.id));
+
+    if (this.isUnderCursor(mouseCoord, shapes as Point[])) {
+      this._isHovered = true;
+      eventEmitter.emit('hover', e, this.data);
+    } else {
+      this._isHovered = false;
+      this.hovered = false;
+    }
+
+    // 更新组内所有元素的样式
+    group.updateStyle(this.getStyle());
+  };
+
+  public onHover = (annotation: AnnotationPoint) => {
+    if (annotation.id === this.id) {
+      this.hovered = true;
+    } else {
+      this.hovered = false;
+    }
+  };
 
   /**
    * 获取在鼠标指针下的标注id
@@ -47,10 +79,37 @@ export class AnnotationPoint extends Annotation<LineData, LineTool> {
    * @param rbushItems rbushItems
    * @returns 标注id
    */
-  public isUnderCursor(mouseCoord: AxisPoint, lines: Line[]) {
-    if (lines.length === 0) {
+  public isUnderCursor(mouseCoord: AxisPoint, points: Point[]) {
+    const { group } = this;
+    const { style } = this.tool;
+
+    if (points.length === 0) {
       return;
     }
+
+    for (let i = 0; i < points.length; i += 1) {
+      const item = points[i];
+
+      if (!item) {
+        throw Error(`Line at [${i}] in lines is undefined!`);
+      }
+
+      const distance = getDistance(mouseCoord, item.coordinate[0]);
+
+      if (distance < AnnotationPoint.DISTANCE_THRESHOLD + (style.radius + style.strokeWidth) / 2) {
+        const annotationId = group.get(item.id);
+
+        if (!annotationId) {
+          throw Error(`Annotation not found! point id is ${item.id} `);
+        }
+
+        return annotationId;
+      }
+    }
+  }
+
+  public get bbox() {
+    return this.group.bbox;
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -58,24 +117,11 @@ export class AnnotationPoint extends Annotation<LineData, LineTool> {
   }
 
   public destroy() {
-    const { group } = this;
-
-    group.destroy();
+    super.destroy();
+    this.group.destroy();
   }
 
   public get isHovered() {
     return this._isHovered;
-  }
-
-  public get isSelected() {
-    return this._isSelected;
-  }
-
-  public get shapes() {
-    return Array.from(this._elementMapping.values());
-  }
-
-  public get elementMapping() {
-    return this._elementMapping;
   }
 }

@@ -1,20 +1,11 @@
 import { EInternalEvent } from '../enums';
 import type { BasicToolParams } from '../tools/Tool';
 import type { LineStyle } from '../shape/Line.shape';
-import type { BasicImageAnnotation } from '../interface';
-import type { Drawing } from './Drawing.abstract';
-import type { AxisPoint } from '../shape/Point.shape';
 import type { LineTool } from '../tools/Line.tool';
+import type { LineData } from '../annotation';
 import { AnnotationLine } from '../annotation';
 import { eventEmitter } from '../singletons';
-
-export interface LineData extends BasicImageAnnotation {
-  pointList: PointItem[];
-}
-
-export interface PointItem extends AxisPoint {
-  id: string;
-}
+import { Drawing, type IDrawing } from './Drawing';
 
 export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   /**
@@ -46,20 +37,15 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   closingPointAmount?: number;
 }
 
-export class LineDrawing implements Drawing<LineData, LineTool, AnnotationLine> {
+export class LineDrawing extends Drawing<LineData, LineTool> implements IDrawing<LineData, LineTool> {
   /** 元素集合 */
   private _annotationMapping: Map<string, AnnotationLine> = new Map();
 
   /** 端点对标注id的映射 */
   private _pointAnnotationMapping: Map<string, string> = new Map();
 
-  public data: LineData[] = [];
-
-  public tool: LineTool;
-
   constructor(data: LineData[], tool: LineTool) {
-    this.data = data;
-    this.tool = tool;
+    super(data, tool);
 
     this._init();
   }
@@ -82,7 +68,9 @@ export class LineDrawing implements Drawing<LineData, LineTool, AnnotationLine> 
     }
   }
 
-  public destroy() {
+  public override destroy() {
+    super.destroy();
+
     eventEmitter.off(EInternalEvent.Render, this.render.bind(this));
 
     this._annotationMapping.forEach((element) => {
@@ -92,7 +80,7 @@ export class LineDrawing implements Drawing<LineData, LineTool, AnnotationLine> 
     this._annotationMapping.clear();
   }
 
-  public render(ctx: CanvasRenderingContext2D) {
+  public override render(ctx: CanvasRenderingContext2D) {
     const { _annotationMapping } = this;
 
     _annotationMapping.forEach((element) => {

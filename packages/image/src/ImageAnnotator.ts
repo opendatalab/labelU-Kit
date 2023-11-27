@@ -2,7 +2,6 @@ import type { ILabel } from '@labelu/interface';
 
 import { Renderer } from './core/Renderer';
 import { PointTool } from './tools';
-import type { PointToolOptions } from './tools';
 import type { LineToolOptions } from './drawing/Line.drawing';
 import { LineTool } from './tools/Line.tool';
 import type { CursorParams } from './shape/Cursor.shape';
@@ -14,6 +13,7 @@ import { EInternalEvent } from './enums';
 import { Monitor } from './core/Monitor';
 import { createAxis } from './singletons/axis';
 import { eventEmitter } from './singletons';
+import type { PointToolOptions } from './drawing';
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -196,15 +196,12 @@ export class Annotator {
       );
     } else if (toolName == 'point') {
       console.log(PointTool);
-      // this.use(
-      //   new PointTool(
-      //     {
-      //       ...this._config.point,
-      //       data: data as AnnotationToolData<'point'>,
-      //     },
-      //     _axis!,
-      //   ),
-      // );
+      this.use(
+        new PointTool({
+          ...this._config.point,
+          data: data as AnnotationToolData<'point'>,
+        }),
+      );
     }
 
     this.render();

@@ -1,88 +1,89 @@
-import type { Axis } from '../core/Axis';
+import type { ILabel } from '@labelu/interface';
+// import { v4 as uuid } from 'uuid';
+
 import { ETool } from '../enums';
-import type { AxisPoint, PointStyle } from '../shape/Point.shape';
+import type { PointStyle } from '../shape/Point.shape';
 import { Point } from '../shape/Point.shape';
-import type { BasicToolParams } from './Tool';
+import type { IAnnotationTool } from './Tool';
 import { Tool } from './Tool';
-import type { BasicImageAnnotation } from '../interface';
+import type { AnnotationPoint, PointData } from '../annotation/Point.annotation';
+import { PointPen } from '../pen';
+import type { PointToolOptions } from '../drawing/Point.drawing';
+import { PointDrawing } from '../drawing/Point.drawing';
+import { Selection } from '../decorators/Selection.decorator';
+import { Group } from '../shape/Group';
+import { axis } from '../singletons';
 
-export type PointData = BasicImageAnnotation & AxisPoint;
-
-/**
- * 点标注工具配置
- */
-export interface PointToolOptions extends BasicToolParams<PointData, PointStyle> {
-  /**
-   * 上限点数
-   *
-   * @default undefined 默认无限制
-   */
-  maxPointAmount?: number;
-
-  /**
-   * 下限点数
-   *
-   * @default 0
-   */
-  minPointAmount?: number;
-
-  /**
-   * 画布外标注
-   * @default true;
-   */
-  outOfCanvas?: boolean;
-
-  /**
-   * 边缘吸附
-   * @default true;
-   */
-  edgeAdsorptive?: boolean;
-}
-
-export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
+@Selection
+export class PointTool
+  extends Tool<PointData, PointStyle, PointToolOptions, AnnotationPoint>
+  implements IAnnotationTool<PointData, PointStyle, PointToolOptions, AnnotationPoint>
+{
   public toolName = ETool.Point;
 
-  private _elements: Point[] = [];
+  public group: Group<Point, PointStyle> | null = null;
 
-  public style: Required<PointStyle> = Point.DEFAULT_STYLE;
+  private _selectionShape: Point | null = null;
 
-  constructor(params: PointToolOptions, axis: Axis) {
-    super(params, axis);
+  constructor(params: PointToolOptions) {
+    super({
+      ...params,
+      style: {
+        ...Point.DEFAULT_STYLE,
+        ...params.style,
+      },
+    });
 
-    this._insertRBushTree();
+    this.createDrawing();
   }
 
-  private _insertRBushTree() {}
+  /**
+   * 点击画布事件处理
+   *
+   * @description
+   * 点击标注时：
+   * 1. 销毁被点击的标注的drawing（成品）
+   * 2. 进入pen的编辑模式
+   *  2.1. 创建新的drawing（成品），需要包含点、线
+   *  2.2. 创建选中包围盒
+   */
+  public onSelect = (annotation: AnnotationPoint) => {
+    this.activatedAnnotation = annotation;
+    this.group = new Group(annotation.id);
+    annotation.group.updateStyle({
+      fill: '#fff',
+    });
+    axis!.rerender();
+  };
 
-  private _calcPointRNodeMatrix(point: AxisPoint) {
-    const { style } = this;
-    const { x, y } = point;
-    const { radius } = style;
+  public onUnSelect = () => {
+    this.activatedAnnotation = null;
+    axis!.rerender();
+  };
 
-    return {
-      minX: x - radius,
-      minY: y - radius,
-      maxX: x + radius,
-      maxY: y + radius,
-    };
+  public createDrawing(data?: PointData[]) {
+    if (data) {
+      this.data = data;
+    }
+
+    const { data: _data } = this;
+
+    if (!Array.isArray(_data)) {
+      throw Error('Data must be an array!');
+    }
+
+    this.drawing = new PointDrawing(_data, this);
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    const { data = [], style, axis } = this;
+  public switchToPen(label: string | ILabel) {
+    this.pen = new PointPen(this, label);
+  }
 
-    this._elements = [];
+  public render(ctx: CanvasRenderingContext2D): void {
+    super.render(ctx);
 
-    for (const item of data) {
-      const label = this.getLabelByValue(item.label);
-      const coord = axis.getScaledCoord(item);
-
-      const point = new Point(item.id, coord, {
-        ...style,
-        stroke: label?.color || style.stroke,
-      });
-
-      point.render(ctx!);
-      this._elements.push(point);
+    if (this._selectionShape) {
+      this._selectionShape.render(ctx);
     }
   }
 }

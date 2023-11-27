@@ -48,7 +48,11 @@ export default function App() {
     },
     line: {
       style: {
-        strokeWidth: 1,
+        strokeWidth: 5,
+      },
+      hoveredStyle: {
+        stroke: '#f60',
+        strokeWidth: 10,
       },
       labels: [
         {
@@ -68,6 +72,7 @@ export default function App() {
     point: {
       style: {
         strokeWidth: 1,
+        radius: 5,
       },
       labels: [
         {
@@ -153,6 +158,14 @@ export default function App() {
           id: 'pWiUgJIH',
           order: 3,
           label: 'car',
+        },
+        {
+          x: 114.5060975609757,
+          y: 76.7248475609756,
+          valid: true,
+          id: 'pWiUgJIH-2',
+          order: 4,
+          label: 'noneAttribute',
         },
       ]);
 

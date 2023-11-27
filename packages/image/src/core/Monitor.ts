@@ -1,7 +1,7 @@
 import type { BBox } from 'rbush';
 import { v4 as uuid } from 'uuid';
 
-import type { AnnotationLine } from '../annotation';
+import type { AnnotationLine, AnnotationPoint } from '../annotation';
 import type { Annotator } from '../ImageAnnotator';
 import { EInternalEvent } from '../enums';
 import { Rect } from '../shape';
@@ -27,10 +27,6 @@ function validateAxis(target: any, propertyKey: string, descriptor: PropertyDesc
  * @description 用于监控画布的变化，包括画布的大小、缩放比例、偏移量等
  */
 export class Monitor {
-  private _selectedAnnotation: AnnotationLine | null = null;
-
-  private _hoveredAnnotation: AnnotationLine | null = null;
-
   private _annotator: Annotator;
 
   private _bbox: BBox | null = null;
@@ -47,12 +43,11 @@ export class Monitor {
   private _bindEvents() {
     eventEmitter.on(EInternalEvent.Move, this._handleMouseOver.bind(this));
     eventEmitter.on(EInternalEvent.RightClick, this._handleRightClick.bind(this));
-    eventEmitter.on(EInternalEvent.Render, this.render.bind(this));
   }
 
   private _handleMouseOver(e: MouseEvent) {
     const { tools } = this._annotator;
-    const hoveredAnnotations: AnnotationLine[] = [];
+    const hoveredAnnotations: (AnnotationLine | AnnotationPoint)[] = [];
 
     for (const tool of tools) {
       // eslint-disable-next-line @typescript-eslint/no-loop-func
@@ -64,15 +59,15 @@ export class Monitor {
     }
 
     if (hoveredAnnotations.length > 0) {
-      this._hoveredAnnotation = hoveredAnnotations[hoveredAnnotations.length - 1];
-      eventEmitter.emit(EInternalEvent.Hover, this._hoveredAnnotation);
-      eventEmitter.emit('hover', e, this._hoveredAnnotation.data);
+      const lastAnnotation = hoveredAnnotations[hoveredAnnotations.length - 1];
+      eventEmitter.emit(EInternalEvent.Hover, lastAnnotation);
+      eventEmitter.emit('hover', e, lastAnnotation.data);
     }
   }
 
   private _handleRightClick(e: MouseEvent) {
     const { tools } = this._annotator;
-    const hoveredAnnotations: AnnotationLine[] = [];
+    const hoveredAnnotations: (AnnotationLine | AnnotationPoint)[] = [];
 
     for (const tool of tools) {
       // eslint-disable-next-line @typescript-eslint/no-loop-func
@@ -84,10 +79,9 @@ export class Monitor {
     }
 
     if (hoveredAnnotations.length > 0) {
-      this._selectedAnnotation = hoveredAnnotations[hoveredAnnotations.length - 1];
-      eventEmitter.emit(EInternalEvent.Select, this._selectedAnnotation);
-      this._onSelected();
-      eventEmitter.emit('select', e, this._selectedAnnotation.data);
+      const lastAnnotation = hoveredAnnotations[hoveredAnnotations.length - 1];
+      eventEmitter.emit(EInternalEvent.Select, lastAnnotation);
+      eventEmitter.emit('select', e, lastAnnotation.data);
     } else {
       eventEmitter.emit(EInternalEvent.UnSelect);
       eventEmitter.emit('unselect', e);
@@ -123,16 +117,6 @@ export class Monitor {
       },
     );
     this._bbox = bbox;
-    axis!.rerender();
-  }
-
-  @validateAxis
-  public render() {
-    const { _selectionBBox } = this;
-
-    if (_selectionBBox) {
-      _selectionBBox.render(this.annotator!.renderer!.ctx);
-    }
   }
 
   public destroy() {

@@ -8,20 +8,6 @@ import { rbush } from '../singletons';
 
 const SCALE_FACTOR = 1.1;
 
-function validateAnnotator(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-  const originalMethod = descriptor.value;
-
-  descriptor.value = function (...args: any[]) {
-    const _this = this as Axis;
-
-    if (!_this.annotator) {
-      throw new Error('Error: annotator is not defined.');
-    }
-
-    return originalMethod.apply(this, args);
-  };
-}
-
 /**
  * 画布坐标系 Axis，用于管理画布的移动、缩放等操作
  */
@@ -74,7 +60,7 @@ export class Axis {
     this._bindEvents();
     this._cursor = new Cursor({ x: 0, y: 0, ...cursor });
     // NOTE: debug
-    // this._renderRBushTree();
+    this._renderRBushTree();
   }
 
   private _bindEvents() {
@@ -83,26 +69,25 @@ export class Axis {
     /**
      * NOTE: 画布元素的事件监听都应该在这里绑定，而不是在分散具体的工具中绑定
      */
-    canvas.addEventListener('contextmenu', this._handleMoveStart.bind(this), false);
-    canvas.addEventListener('contextmenu', this._handleRightClick.bind(this), false);
-    canvas.addEventListener('mousemove', this._handleMoving.bind(this), false);
-    canvas.addEventListener('mouseup', this._handleMoveEnd.bind(this), false);
-    canvas.addEventListener('wheel', this._handleScroll.bind(this), false);
-    canvas.addEventListener('click', this._handleClick.bind(this), false);
+    canvas.addEventListener('contextmenu', this._handleMoveStart, false);
+    canvas.addEventListener('contextmenu', this._handleRightClick, false);
+    canvas.addEventListener('mousemove', this._handleMoving, false);
+    canvas.addEventListener('mouseup', this._handleMoveEnd, false);
+    canvas.addEventListener('wheel', this._handleScroll, false);
+    canvas.addEventListener('click', this._handleClick, false);
   }
 
   private _offEvents() {
     const { canvas } = this._annotator!.renderer!;
 
-    canvas.removeEventListener('contextmenu', this._handleMoveStart.bind(this));
-    canvas.removeEventListener('mousemove', this._handleMoving.bind(this));
-    canvas.removeEventListener('mouseup', this._handleMoveEnd.bind(this));
-    canvas.removeEventListener('wheel', this._handleScroll.bind(this));
-    canvas.removeEventListener('click', this._handleClick.bind(this));
+    canvas.removeEventListener('contextmenu', this._handleMoveStart);
+    canvas.removeEventListener('mousemove', this._handleMoving);
+    canvas.removeEventListener('mouseup', this._handleMoveEnd);
+    canvas.removeEventListener('wheel', this._handleScroll);
+    canvas.removeEventListener('click', this._handleClick);
   }
 
-  @validateAnnotator
-  private _handleClick(e: MouseEvent) {
+  private _handleClick = (e: MouseEvent) => {
     const mouseCoord = {
       x: e.offsetX,
       y: e.offsetY,
@@ -110,9 +95,9 @@ export class Axis {
     const rbushItems = this._scanCanvasObject(mouseCoord);
 
     eventEmitter.emit(EInternalEvent.Click, e, rbushItems, mouseCoord);
-  }
+  };
 
-  private _handleRightClick(e: MouseEvent) {
+  private _handleRightClick = (e: MouseEvent) => {
     const mouseCoord = {
       x: e.offsetX,
       y: e.offsetY,
@@ -120,10 +105,9 @@ export class Axis {
     const rbushItems = this._scanCanvasObject(mouseCoord);
 
     eventEmitter.emit(EInternalEvent.RightClick, e, rbushItems, mouseCoord);
-  }
+  };
 
-  @validateAnnotator
-  private _handleMoveStart(e: MouseEvent) {
+  private _handleMoveStart = (e: MouseEvent) => {
     e.preventDefault();
     const { container } = this._annotator!.config!;
 
@@ -138,10 +122,9 @@ export class Axis {
     });
 
     eventEmitter.emit(EInternalEvent.PanStart, e);
-  }
+  };
 
-  @validateAnnotator
-  private _pan(e: MouseEvent) {
+  private _pan = (e: MouseEvent) => {
     const { _startPoint, _annotator } = this;
     const point = this._getCoordInCanvas({
       x: e.offsetX,
@@ -155,9 +138,9 @@ export class Axis {
 
     eventEmitter.emit(EInternalEvent.Pan, e);
     eventEmitter.emit(EInternalEvent.AxisChange, e);
-  }
+  };
 
-  private _handleMoving(e: MouseEvent) {
+  private _handleMoving = (e: MouseEvent) => {
     e.preventDefault();
 
     if (this._startPoint) {
@@ -179,10 +162,9 @@ export class Axis {
 
     // 只要鼠标在画布内移动，触发画布更新
     this._ticker?.requestUpdate();
-  }
+  };
 
-  @validateAnnotator
-  private _handleMoveEnd(e: MouseEvent) {
+  private _handleMoveEnd = (e: MouseEvent) => {
     e.preventDefault();
     const { _annotator } = this;
 
@@ -192,9 +174,9 @@ export class Axis {
     this._y = this._y + this._distanceY;
     this._startPoint = null;
     eventEmitter.emit(EInternalEvent.MoveEnd, e);
-  }
+  };
 
-  private _handleScroll(e: WheelEvent) {
+  private _handleScroll = (e: WheelEvent) => {
     e.preventDefault();
 
     // 当前鼠标所在画布屏幕上的坐标（不是在画布坐标系里面）
@@ -220,7 +202,7 @@ export class Axis {
 
     eventEmitter.emit(EInternalEvent.Zoom, e);
     eventEmitter.emit(EInternalEvent.AxisChange, e);
-  }
+  };
 
   /**
    * 扫描鼠标经过画布内的图形元素，触发move事件
@@ -244,7 +226,6 @@ export class Axis {
   /**
    * 获取鼠标相对于画布的坐标
    */
-  @validateAnnotator
   private getCoordRelativeToCanvas(e: MouseEvent) {
     const { _rect } = this;
 
@@ -267,7 +248,6 @@ export class Axis {
     };
   }
 
-  @validateAnnotator
   public rerender() {
     const { _cursor, _annotator } = this;
     const { renderer } = _annotator!;
@@ -275,7 +255,7 @@ export class Axis {
     eventEmitter.emit(EInternalEvent.Render, renderer!.ctx);
     _cursor!.render(renderer!.ctx);
     // debug
-    // this._renderRBushTree();
+    this._renderRBushTree();
   }
 
   /**

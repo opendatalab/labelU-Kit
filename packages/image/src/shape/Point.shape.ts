@@ -73,22 +73,23 @@ export class Point extends Shape<PointStyle> {
   public style: Required<PointStyle> = Point.DEFAULT_STYLE;
 
   constructor(id: string, coordinate: AxisPoint, style: PointStyle) {
-    super(id, coordinate, {
-      updateBBox: (dynamicCoordinate) => {
-        const [{ x, y }] = dynamicCoordinate;
-
-        return {
-          minX: x,
-          minY: y,
-          maxX: x,
-          maxY: y,
-        };
-      },
-    });
+    super(id, coordinate);
 
     if (style) {
       this.style = { ...this.style, ...style };
     }
+
+    this.setBBoxUpdater(() => {
+      const [{ x, y }] = this.dynamicCoordinate;
+      console.log('point style in updater', this.style);
+
+      return {
+        minX: x - this.style.radius,
+        minY: y - this.style.radius,
+        maxX: x + this.style.radius,
+        maxY: y + this.style.radius,
+      };
+    });
   }
 
   public render(ctx: CanvasRenderingContext2D | null) {
