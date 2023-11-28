@@ -271,6 +271,7 @@ export class Axis {
     ctx!.setLineDash([2, 2]);
     ctx!.lineWidth = 1;
 
+    console.info(rbush.all().length);
     rbush.all().forEach((item) => {
       const { minX, minY, maxX, maxY } = item;
 

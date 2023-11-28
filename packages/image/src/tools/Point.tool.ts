@@ -1,32 +1,29 @@
-import type { ILabel } from '@labelu/interface';
-// import { v4 as uuid } from 'uuid';
-
 import { ETool } from '../enums';
 import type { PointStyle } from '../shape/Point.shape';
 import { Point } from '../shape/Point.shape';
-import type { IAnnotationTool } from './Tool';
 import { Tool } from './Tool';
 import type { AnnotationPoint, PointData } from '../annotation/Point.annotation';
 import { PointPen } from '../pen';
 import type { PointToolOptions } from '../drawing/Point.drawing';
 import { PointDrawing } from '../drawing/Point.drawing';
 import { Selection } from '../decorators/Selection.decorator';
-import { Group } from '../shape/Group';
 import { axis } from '../singletons';
 
 @Selection
-export class PointTool
-  extends Tool<PointData, PointStyle, PointToolOptions, AnnotationPoint>
-  implements IAnnotationTool<PointData, PointStyle, PointToolOptions, AnnotationPoint>
-{
+export class PointTool extends Tool<PointData, PointStyle, PointToolOptions, AnnotationPoint> {
   public toolName = ETool.Point;
-
-  public group: Group<Point, PointStyle> | null = null;
-
-  private _selectionShape: Point | null = null;
 
   constructor(params: PointToolOptions) {
     super({
+      labels: [],
+      hoveredStyle: {},
+      selectedStyle: {},
+      maxPointAmount: Infinity,
+      minPointAmount: 0,
+      outOfCanvas: true,
+      edgeAdsorptive: true,
+      data: [],
+      // ----------------
       ...params,
       style: {
         ...Point.DEFAULT_STYLE,
@@ -41,49 +38,62 @@ export class PointTool
    * 点击画布事件处理
    *
    * @description
-   * 点击标注时：
-   * 1. 销毁被点击的标注的drawing（成品）
-   * 2. 进入pen的编辑模式
-   *  2.1. 创建新的drawing（成品），需要包含点、线
-   *  2.2. 创建选中包围盒
    */
   public onSelect = (annotation: AnnotationPoint) => {
+    const { style, hoveredStyle, selectedStyle, config } = this;
+
     this.activatedAnnotation = annotation;
-    this.group = new Group(annotation.id);
-    annotation.group.updateStyle({
-      fill: '#fff',
-    });
+
+    // 如果没有画笔，需要创建
+    if (!this.pen) {
+      this.pen = new PointPen(config.labels, style, hoveredStyle, selectedStyle);
+    }
+
+    // 画笔需要选中标注
+    this.pen.select(annotation);
+    // 成品上需要删除选中的标注，进入绘制模式
+    this.drawing!.remove(annotation);
+    // 重新渲染
     axis!.rerender();
   };
 
   public onUnSelect = () => {
+    const { activatedAnnotation, pen } = this;
+
+    if (pen && activatedAnnotation && pen.draft) {
+      this.drawing?.addAnnotation(pen.draft.data);
+      pen.unselect();
+    }
+
     this.activatedAnnotation = null;
     axis!.rerender();
   };
 
   public createDrawing(data?: PointData[]) {
+    const { style, hoveredStyle, data: _data, config } = this;
+
     if (data) {
       this.data = data;
     }
-
-    const { data: _data } = this;
 
     if (!Array.isArray(_data)) {
       throw Error('Data must be an array!');
     }
 
-    this.drawing = new PointDrawing(_data, this);
+    this.drawing = new PointDrawing(config.labels || [], _data, style, hoveredStyle);
   }
 
-  public switchToPen(label: string | ILabel) {
-    this.pen = new PointPen(this, label);
+  public switchToPen(label: string) {
+    const { style, hoveredStyle, selectedStyle, config } = this;
+
+    this.pen = new PointPen(config.labels, style, hoveredStyle, selectedStyle);
+
+    this.pen.label = label;
+
+    return this.pen;
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
-
-    if (this._selectionShape) {
-      this._selectionShape.render(ctx);
-    }
   }
 }

@@ -1,4 +1,3 @@
-import type { LineTool } from '../tools/Line.tool';
 import type { BasicImageAnnotation } from '../interface';
 import { Annotation } from './Annotation';
 import type { LineStyle } from '../shape/Line.shape';
@@ -19,7 +18,7 @@ export interface LineData extends BasicImageAnnotation {
 }
 
 @Hover
-export class AnnotationLine extends Annotation<LineData, LineTool> {
+export class AnnotationLine extends Annotation<LineData, LineStyle> {
   /**
    * Rbush 碰撞检测阈值
    *
@@ -34,8 +33,6 @@ export class AnnotationLine extends Annotation<LineData, LineTool> {
    */
   public hovered: boolean = false;
 
-  public selected: boolean = false;
-
   /**
    * 鼠标悬浮标识
    *
@@ -45,29 +42,31 @@ export class AnnotationLine extends Annotation<LineData, LineTool> {
    */
   private _isHovered: boolean = false;
 
-  constructor(id: string, data: LineData, tool: LineTool) {
-    super(id, data, tool);
+  constructor(id: string, data: LineData, style: LineStyle, hoveredStyle?: LineStyle) {
+    super(id, data, style, hoveredStyle);
 
     this.group = new Group(id);
 
     this._setupShapes();
+
+    console.log('line style', style);
   }
 
   private _setupShapes() {
-    const { data, group } = this;
+    const { data, group, style } = this;
 
     for (let i = 1; i < data.pointList.length; i++) {
       const startPoint = data.pointList[i - 1];
       const endPoint = data.pointList[i];
 
-      const line = new Line(startPoint.id, [startPoint, endPoint], this.getStyle());
+      const line = new Line(startPoint.id, [startPoint, endPoint], style);
 
       group.add(line);
     }
   }
 
   public onMouseOver = (e: MouseEvent, rbushItems: RBushItem[], mouseCoord: AxisPoint) => {
-    const { group } = this;
+    const { group, style } = this;
 
     const shapes = rbushItems.filter((item) => group.get(item.id)).map((item) => group.get(item.id));
 
@@ -77,17 +76,22 @@ export class AnnotationLine extends Annotation<LineData, LineTool> {
     } else {
       this._isHovered = false;
       this.hovered = false;
+      group.updateStyle(style);
     }
-
-    // 更新组内所有元素的样式
-    group.updateStyle(this.getStyle());
   };
 
   public onHover = (annotation: AnnotationLine) => {
+    const { group, style, hoveredStyle } = this;
+
     if (annotation.id === this.id) {
       this.hovered = true;
+      group.updateStyle({
+        ...style,
+        ...(hoveredStyle ?? {}),
+      });
     } else {
       this.hovered = false;
+      group.updateStyle(style);
     }
   };
 
@@ -99,8 +103,7 @@ export class AnnotationLine extends Annotation<LineData, LineTool> {
    * @returns 标注id
    */
   public isUnderCursor(mouseCoord: AxisPoint, lines: Line[]) {
-    const { group } = this;
-    const { style } = this.tool;
+    const { group, style } = this;
 
     if (lines.length === 0) {
       return;
@@ -115,7 +118,7 @@ export class AnnotationLine extends Annotation<LineData, LineTool> {
 
       const distance = getDistanceToLine(mouseCoord, item);
 
-      if (distance < AnnotationLine.DISTANCE_THRESHOLD + style.strokeWidth / 2) {
+      if (distance < AnnotationLine.DISTANCE_THRESHOLD + (style.strokeWidth ?? 0) / 2) {
         const annotationId = group.get(item.id);
 
         if (!annotationId) {

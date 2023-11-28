@@ -1,30 +1,31 @@
-import type { Annotation } from '../annotation/Annotation';
+import type { ILabel } from '@labelu/interface';
 
-export interface IDrawing<Data, Tool> {
+import type { BasicImageAnnotation } from '../interface';
+import type { Annotation } from '../annotation/Annotation';
+import { BaseLabel } from './BaseLabel';
+
+export class Drawing<Data extends BasicImageAnnotation, Style> extends BaseLabel<Style> {
+  private _annotationMapping: Map<string, Annotation<Data, Style>> = new Map();
+
   data: Data[];
 
-  tool: Tool;
+  constructor(data: Data[], labels: ILabel[], style: Style, hoveredStyle: Style, selectedStyle: Style) {
+    super(labels, style, hoveredStyle, selectedStyle);
 
-  readonly annotationMapping: Map<string, Annotation<Data, Tool>>;
-
-  render: (ctx: CanvasRenderingContext2D) => void;
-
-  destroy: () => void;
-}
-
-export class Drawing<Data, Tool> implements IDrawing<Data, Tool> {
-  public data: Data[] = [];
-
-  public tool: Tool;
-
-  public get annotationMapping() {
-    console.log('Implement me!');
-    return new Map();
+    this.data = data;
   }
 
-  constructor(data: Data[], tool: Tool) {
-    this.data = data;
-    this.tool = tool;
+  public remove(annotation: Annotation<Data, Style>) {
+    this._annotationMapping.delete(annotation.id);
+    annotation.destroy();
+  }
+
+  public get annotationMapping() {
+    return this._annotationMapping;
+  }
+
+  addAnnotation(_data: Data) {
+    console.error('Implement me!');
   }
 
   public render(_ctx: CanvasRenderingContext2D) {
@@ -33,6 +34,11 @@ export class Drawing<Data, Tool> implements IDrawing<Data, Tool> {
 
   public destroy() {
     this.data = [];
-    this.tool = null as any;
+
+    this.annotationMapping.forEach((element) => {
+      element.destroy();
+    });
+
+    this.annotationMapping.clear();
   }
 }

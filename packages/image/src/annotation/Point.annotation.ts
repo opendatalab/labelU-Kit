@@ -1,4 +1,3 @@
-import type { PointTool } from '../tools/Point.tool';
 import type { BasicImageAnnotation } from '../interface';
 import { Annotation } from './Annotation';
 import type { Line } from '../shape/Line.shape';
@@ -13,7 +12,7 @@ import { getDistance } from '../shape/math.util';
 export type PointData = BasicImageAnnotation & AxisPoint;
 
 @Hover
-export class AnnotationPoint extends Annotation<PointData, PointTool> {
+export class AnnotationPoint extends Annotation<PointData, PointStyle> {
   /**
    * Rbush 碰撞检测阈值
    *
@@ -29,8 +28,8 @@ export class AnnotationPoint extends Annotation<PointData, PointTool> {
 
   private _elementMapping: Map<string, Line> = new Map();
 
-  constructor(id: string, data: PointData, tool: PointTool) {
-    super(id, data, tool);
+  constructor(id: string, data: PointData, style: PointStyle, hoveredStyle?: PointStyle) {
+    super(id, data, style, hoveredStyle);
 
     this.group = new Group(id);
 
@@ -38,9 +37,9 @@ export class AnnotationPoint extends Annotation<PointData, PointTool> {
   }
 
   private _setupShapes() {
-    const { data, group } = this;
+    const { data, style, group } = this;
 
-    const point = new Point(data.id, data, this.getStyle());
+    const point = new Point(data.id, data, style);
 
     group.add(point);
 
@@ -48,7 +47,7 @@ export class AnnotationPoint extends Annotation<PointData, PointTool> {
   }
 
   public onMouseOver = (e: MouseEvent, rbushItems: RBushItem[], mouseCoord: AxisPoint) => {
-    const { group } = this;
+    const { group, style } = this;
 
     const shapes = rbushItems.filter((item) => group.get(item.id)).map((item) => group.get(item.id));
 
@@ -58,15 +57,16 @@ export class AnnotationPoint extends Annotation<PointData, PointTool> {
     } else {
       this._isHovered = false;
       this.hovered = false;
+      group.updateStyle(style);
     }
-
-    // 更新组内所有元素的样式
-    group.updateStyle(this.getStyle());
   };
 
   public onHover = (annotation: AnnotationPoint) => {
+    const { group, style, hoveredStyle } = this;
+
     if (annotation.id === this.id) {
       this.hovered = true;
+      group.updateStyle({ ...style, ...hoveredStyle });
     } else {
       this.hovered = false;
     }
@@ -80,8 +80,7 @@ export class AnnotationPoint extends Annotation<PointData, PointTool> {
    * @returns 标注id
    */
   public isUnderCursor(mouseCoord: AxisPoint, points: Point[]) {
-    const { group } = this;
-    const { style } = this.tool;
+    const { group, style } = this;
 
     if (points.length === 0) {
       return;
@@ -94,9 +93,9 @@ export class AnnotationPoint extends Annotation<PointData, PointTool> {
         throw Error(`Line at [${i}] in lines is undefined!`);
       }
 
-      const distance = getDistance(mouseCoord, item.coordinate[0]);
+      const distance = getDistance(mouseCoord, item.dynamicCoordinate[0]);
 
-      if (distance < AnnotationPoint.DISTANCE_THRESHOLD + (style.radius + style.strokeWidth) / 2) {
+      if (distance < AnnotationPoint.DISTANCE_THRESHOLD + ((style.radius ?? 0) + (style.strokeWidth ?? 0)) / 2) {
         const annotationId = group.get(item.id);
 
         if (!annotationId) {

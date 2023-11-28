@@ -2,22 +2,10 @@ import type { BBox } from 'rbush';
 
 import type { BasicImageAnnotation } from '../interface';
 
-interface ITool {
-  style: Record<string, any>;
-
-  hoveredStyle: Record<string, any>;
-
-  selectedStyle: Record<string, any>;
-
-  getLabelByValue: (value: string) => { label: string; color: string } | undefined;
-}
-
-export interface IAnnotation<Data extends BasicImageAnnotation, Tool> {
+export interface IAnnotation<Data extends BasicImageAnnotation> {
   id: string;
 
   data: Data;
-
-  tool: Tool;
 
   getBBox: () => BBox;
 
@@ -29,37 +17,28 @@ export interface IAnnotation<Data extends BasicImageAnnotation, Tool> {
 
   /** 对比标注顺序之后悬浮的标识 */
   hovered: boolean;
-
-  /** 对比标注顺序之后选中的标识 */
-  selected: boolean;
 }
 
-export class Annotation<Data extends BasicImageAnnotation, Tool extends ITool> implements IAnnotation<Data, Tool> {
+export class Annotation<Data extends BasicImageAnnotation, Style> implements IAnnotation<Data> {
   public id: string;
 
   public data: Data;
 
-  public tool: Tool;
+  public style: Style;
+
+  public hoveredStyle?: Style;
 
   public hovered: boolean = false;
-
-  public selected: boolean = false;
-
-  /**
-   * 标签分类的颜色所影响的canvas样式属性
-   *
-   * @default ['stroke']
-   */
-  public effectedStyles: string[] = ['stroke'];
 
   public get isHovered() {
     return false;
   }
 
-  constructor(id: string, data: Data, tool: Tool) {
+  constructor(id: string, data: Data, style: Style, hoveredStyle?: Style) {
     this.id = id;
     this.data = data;
-    this.tool = tool;
+    this.style = style;
+    this.hoveredStyle = hoveredStyle;
   }
 
   public getBBox() {
@@ -71,47 +50,11 @@ export class Annotation<Data extends BasicImageAnnotation, Tool extends ITool> i
     };
   }
 
-  public getStyle() {
-    const { data, tool, hovered, selected, effectedStyles } = this;
-    const { style } = tool;
-
-    if (!data.label) {
-      return style;
-    }
-
-    const styleWithLabel = {
-      ...style,
-    };
-
-    for (const prop of effectedStyles) {
-      if (styleWithLabel[prop]) {
-        styleWithLabel[prop] = tool.getLabelByValue(data.label)?.color || style[prop];
-      }
-    }
-
-    if (hovered) {
-      return {
-        ...styleWithLabel,
-        ...tool.hoveredStyle,
-      };
-    }
-
-    if (selected) {
-      return {
-        ...styleWithLabel,
-        ...tool.selectedStyle,
-      };
-    }
-
-    return styleWithLabel;
-  }
-
   public render(_ctx: CanvasRenderingContext2D) {
     console.warn('Implement me!');
   }
 
   public destroy() {
     this.data = null as any;
-    this.tool = null as any;
   }
 }

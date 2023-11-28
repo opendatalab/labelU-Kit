@@ -29,27 +29,29 @@ export function Hover<T extends { new (...args: any[]): any }>(constructor: T) {
       super(...args);
 
       // 过滤鼠标经过的线条标注
-      if (typeof this.onMouseOver === 'function') {
-        eventEmitter.on(EInternalEvent.Move, this.onMouseOver);
-      }
+      eventEmitter.on(EInternalEvent.Move, this._onMove);
 
       // 监听鼠标悬浮标注
-      if (typeof this.onHover === 'function') {
-        eventEmitter.on(EInternalEvent.Hover, this.onHover);
-      }
+      eventEmitter.on(EInternalEvent.Hover, this._onHover);
     }
 
+    public _onMove = (...args: any[]) => {
+      if (typeof this.onMouseOver === 'function') {
+        this.onMouseOver(...args);
+      }
+    };
+
+    public _onHover = (...args: any[]) => {
+      if (typeof this.onMouseOver === 'function') {
+        this.onHover(...args);
+      }
+    };
+
     public destroy() {
-      // @ts-ignore
       super.destroy();
 
-      if (typeof this.onMouseOver === 'function') {
-        eventEmitter.off(EInternalEvent.Select, this.onMouseOver);
-      }
-
-      if (typeof this.onHover === 'function') {
-        eventEmitter.off(EInternalEvent.Hover, this.onHover);
-      }
+      eventEmitter.off(EInternalEvent.Move, this._onMove);
+      eventEmitter.off(EInternalEvent.Hover, this._onHover);
     }
   };
 }

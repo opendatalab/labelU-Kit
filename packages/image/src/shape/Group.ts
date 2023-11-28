@@ -29,23 +29,27 @@ export class Group<T extends Shape<Style>, Style> {
   private _event = new EventEmitter();
 
   constructor(id: string) {
-    this.id = id;
+    this.id = this._makeId(id);
 
     this._bindEvents();
   }
 
-  private _bindEvents() {
-    // 组合的变化只需要在移动结束和缩放结束后更新
-    eventEmitter.on(EInternalEvent.MoveEnd, this._OnAxisChange.bind(this));
-    eventEmitter.on(EInternalEvent.Zoom, this._OnAxisChange.bind(this));
+  private _makeId(id: string) {
+    return `${id}-group`;
   }
 
-  private _OnAxisChange() {
+  private _bindEvents() {
+    // 组合的变化只需要在移动结束和缩放结束后更新
+    eventEmitter.on(EInternalEvent.MoveEnd, this._onAxisChange);
+    eventEmitter.on(EInternalEvent.Zoom, this._onAxisChange);
+  }
+
+  private _onAxisChange = () => {
     // 组合在图形之后创建，所以需要延迟一帧更新
     setTimeout(() => {
       this._updateBBox()._updateRBush();
     });
-  }
+  };
 
   private _updateBBox() {
     const minX = Math.min(...this.shapes.map((shape) => shape.bbox.minX));
@@ -126,10 +130,10 @@ export class Group<T extends Shape<Style>, Style> {
     this.shapes.forEach((shape) => {
       shape.destroy();
     });
-
+    rbush.remove(this._cachedRBush!);
     this._shapeMapping.clear();
-    eventEmitter.off(EInternalEvent.MoveEnd, this._OnAxisChange.bind(this));
-    eventEmitter.off(EInternalEvent.Zoom, this._OnAxisChange.bind(this));
+    eventEmitter.off(EInternalEvent.MoveEnd, this._onAxisChange);
+    eventEmitter.off(EInternalEvent.Zoom, this._onAxisChange);
   }
 
   public get shapes() {

@@ -1,61 +1,51 @@
-import type { ILabel } from '@labelu/interface';
+import { BaseLabel } from '../drawing/BaseLabel';
 
-interface ITool {
-  labelMapping: Map<string, ILabel>;
-  // 其他属性和方法...
-}
-
-export class Pen<T extends ITool, ToolData> {
-  public tool: T | null = null;
-
+export class Pen<Annotation, Style> extends BaseLabel<Style> {
   /** 当前激活的标签类别 */
-  public label: ILabel | undefined = undefined;
+  public label: string | undefined;
 
   /**
    * 绘制过程中的临时数据，并未真正添加到数据中
+   * Group<Line, LineStyle>
    */
-  public draft: any;
+  public draft: Annotation | null = null;
 
-  constructor(tool: T, label: ILabel | string) {
-    this.tool = tool;
+  /**
+   * 标签分类的颜色所影响的canvas样式属性
+   *
+   * @default ['stroke']
+   */
+  public effectedStyles: string[] = ['stroke'];
 
-    if (typeof label === 'string') {
-      const correctLabel = this.tool.labelMapping.get(label);
-
-      if (!correctLabel) {
-        throw new Error(`Label ${label} in ${tool} is not found!`);
-      }
-
-      this.label = correctLabel;
-    } else {
-      this.label = label;
-    }
-  }
-
-  public makeData(): ToolData {
-    console.log('makeData');
-    return undefined as any;
+  /**
+   * 选中标注，创建草稿
+   */
+  public select(_annotation: Annotation) {
+    console.error('Implement select method');
   }
 
   /**
-   * 设置激活的标签
-   *
-   * @param label 标签唯一标示
+   * 取消选中标注，销毁草稿
    */
-  public setLabel(label: string) {
-    const correctLabel = this.tool!.labelMapping.get(label);
+  public unselect(): void {
+    // TODO：完善类型
+    // @ts-ignore
+    this.draft?.destroy();
+    this.draft = null;
+  }
 
-    if (!correctLabel) {
-      throw new Error(`Label ${label} in ${this.tool} is not found!`);
-    }
-
-    this.label = correctLabel;
+  public destroy() {
+    // TODO：完善类型
+    // @ts-ignore
+    this.draft?.destroy();
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    console.log('render', ctx);
+    const { draft } = this;
+    if (draft) {
+      // TODO 完善类型
+      // @ts-ignore
+      draft.render(ctx);
+    }
   }
-
-  destroy(): void;
-  destroy() {}
 }

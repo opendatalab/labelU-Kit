@@ -29,19 +29,21 @@ export function Selection<T extends { new (...args: any[]): any }>(constructor: 
       super(...args);
 
       // 过滤鼠标经过的线条标注
-      if (typeof this.onSelect === 'function') {
-        eventEmitter.on(EInternalEvent.Select, this._onSelect);
-      }
+      eventEmitter.on(EInternalEvent.Select, this._onSelect);
 
       // 监听鼠标悬浮标注
-      if (typeof this.onUnSelect === 'function') {
-        eventEmitter.on(EInternalEvent.UnSelect, this.onUnSelect);
-      }
+      eventEmitter.on(EInternalEvent.UnSelect, this._onUnSelect);
     }
 
     public _onSelect = (annotation: any) => {
-      if (this.drawing?.annotationMapping.has(annotation.id)) {
+      if (this.drawing?.annotationMapping.has(annotation.id) && typeof this.onSelect === 'function') {
         this.onSelect(annotation);
+      }
+    };
+
+    public _onUnSelect = (annotation: any) => {
+      if (typeof this.onUnSelect === 'function') {
+        this.onUnSelect(annotation);
       }
     };
 
@@ -49,13 +51,8 @@ export function Selection<T extends { new (...args: any[]): any }>(constructor: 
       // @ts-ignore
       super.destroy();
 
-      if (typeof this.onSelect === 'function') {
-        eventEmitter.off(EInternalEvent.Select, this._onSelect);
-      }
-
-      if (typeof this.onUnSelect === 'function') {
-        eventEmitter.off(EInternalEvent.UnSelect, this.onUnSelect);
-      }
+      eventEmitter.off(EInternalEvent.Select, this._onSelect);
+      eventEmitter.off(EInternalEvent.UnSelect, this._onUnSelect);
     }
   };
 }

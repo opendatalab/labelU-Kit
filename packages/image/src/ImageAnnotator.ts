@@ -1,5 +1,3 @@
-import type { ILabel } from '@labelu/interface';
-
 import { Renderer } from './core/Renderer';
 import { PointTool } from './tools';
 import type { LineToolOptions } from './drawing/Line.drawing';
@@ -109,7 +107,7 @@ export class Annotator {
     }
 
     this._axis = createAxis(this);
-    eventEmitter.on(EInternalEvent.Render, this.render.bind(this));
+    eventEmitter.on(EInternalEvent.Render, this.render);
   }
 
   public get monitor() {
@@ -139,7 +137,7 @@ export class Annotator {
    * @param toolName 工具名称
    * @param label 标注类别，如果是字符串，则表示标注类别value（唯一标示）；如果是对象，则表示标注类别
    */
-  public pick(toolName: ToolName, label: ILabel | string) {
+  public pick(toolName: ToolName, label: string) {
     if (typeof toolName !== 'string') {
       throw new Error('toolName must be string, such as "line" or "point"');
     }
@@ -154,7 +152,7 @@ export class Annotator {
     tool.switchToPen(label);
   }
 
-  public render() {
+  public render = () => {
     const { renderer, backgroundRenderer, _tools } = this;
 
     if (!renderer) {
@@ -173,7 +171,7 @@ export class Annotator {
     _tools.forEach((tool) => {
       tool.render(renderer!.ctx!);
     });
-  }
+  };
 
   public loadImage(url: string, options: ImageOption) {
     return this.backgroundRenderer!.loadImage(url, options);

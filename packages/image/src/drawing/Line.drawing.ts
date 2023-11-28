@@ -1,11 +1,12 @@
+import type { ILabel } from '@labelu/interface';
+
 import { EInternalEvent } from '../enums';
 import type { BasicToolParams } from '../tools/Tool';
 import type { LineStyle } from '../shape/Line.shape';
-import type { LineTool } from '../tools/Line.tool';
 import type { LineData } from '../annotation';
 import { AnnotationLine } from '../annotation';
 import { eventEmitter } from '../singletons';
-import { Drawing, type IDrawing } from './Drawing';
+import { Drawing } from './Drawing';
 
 export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   /**
@@ -37,15 +38,9 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   closingPointAmount?: number;
 }
 
-export class LineDrawing extends Drawing<LineData, LineTool> implements IDrawing<LineData, LineTool> {
-  /** 元素集合 */
-  private _annotationMapping: Map<string, AnnotationLine> = new Map();
-
-  /** 端点对标注id的映射 */
-  private _pointAnnotationMapping: Map<string, string> = new Map();
-
-  constructor(data: LineData[], tool: LineTool) {
-    super(data, tool);
+export class LineDrawing extends Drawing<LineData, LineStyle> {
+  constructor(labels: ILabel[], data: LineData[], style: LineStyle, hoveredStyle: LineStyle) {
+    super(data, labels, style, hoveredStyle, {});
 
     this._init();
   }
@@ -53,46 +48,37 @@ export class LineDrawing extends Drawing<LineData, LineTool> implements IDrawing
   private _init() {
     this._buildMappings();
 
-    eventEmitter.on(EInternalEvent.Render, this.render.bind(this));
+    eventEmitter.on(EInternalEvent.Render, this.render);
   }
 
   private _buildMappings() {
-    const { data = [], tool, _annotationMapping } = this;
+    const { data = [] } = this;
 
     for (const annotation of data) {
-      _annotationMapping.set(annotation.id, new AnnotationLine(annotation.id, annotation, tool));
-
-      for (const point of annotation.pointList) {
-        this._pointAnnotationMapping.set(point.id, annotation.id);
-      }
+      this.addAnnotation(annotation);
     }
+  }
+
+  public addAnnotation(data: LineData) {
+    const { style, hoveredStyle } = this;
+
+    this.annotationMapping.set(
+      data.id,
+      new AnnotationLine(data.id, data, { ...style, stroke: this.getLabelColor(data.label) }, hoveredStyle),
+    );
   }
 
   public override destroy() {
     super.destroy();
 
-    eventEmitter.off(EInternalEvent.Render, this.render.bind(this));
-
-    this._annotationMapping.forEach((element) => {
-      element.destroy();
-    });
-
-    this._annotationMapping.clear();
+    eventEmitter.off(EInternalEvent.Render, this.render);
   }
 
-  public override render(ctx: CanvasRenderingContext2D) {
-    const { _annotationMapping } = this;
+  public override render = (ctx: CanvasRenderingContext2D) => {
+    const { annotationMapping } = this;
 
-    _annotationMapping.forEach((element) => {
+    annotationMapping.forEach((element) => {
       element.render(ctx);
     });
-  }
-
-  public get annotationMapping() {
-    return this._annotationMapping;
-  }
-
-  public get pointAnnotationMapping() {
-    return this._pointAnnotationMapping;
-  }
+  };
 }

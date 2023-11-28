@@ -71,8 +71,16 @@ export default function App() {
     },
     point: {
       style: {
-        strokeWidth: 1,
+        strokeWidth: 3,
         radius: 5,
+      },
+      hoveredStyle: {
+        fill: '#007bff',
+        stroke: '#fff',
+        strokeWidth: 10,
+      },
+      selectedStyle: {
+        fill: '#fff',
       },
       labels: [
         {
