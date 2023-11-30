@@ -35,9 +35,14 @@ export function Selection<T extends { new (...args: any[]): any }>(constructor: 
       eventEmitter.on(EInternalEvent.UnSelect, this._onUnSelect);
     }
 
-    public _onSelect = (annotation: any) => {
-      if (this.drawing?.annotationMapping.has(annotation.id) && typeof this.onSelect === 'function') {
-        this.onSelect(annotation);
+    public _onSelect = (group: any) => {
+      const { drawing } = this;
+
+      if (!drawing) {
+        console.error('drawing is not exist');
+      }
+      if (drawing.annotationMapping.has(group.id) && typeof this.onSelect === 'function') {
+        this.onSelect(drawing.annotationMapping.get(group.id));
       }
     };
 

@@ -18,6 +18,33 @@ export enum EInternalEvent {
   /** 缩放中 */
   Zoom = '__zoom__',
 
+  /** 鼠标左键按下 */
+  LeftMouseDown = '__left_mouse_down__',
+
+  /** 鼠标右键按下 */
+  RightMouseDown = '__right_mouse_down__',
+
+  /** 鼠标左键松开 */
+  LeftMouseUp = '__left_mouse_up__',
+
+  /** 鼠标右键松开 */
+  RightMouseUp = '__right_mouse_up__',
+
+  /** 鼠标经过 */
+  MouseOver = '__mouse_over__',
+
+  /** 经过包围盒 */
+  BBoxOver = '__bbox_over__',
+
+  /** 在包围盒外 */
+  BBoxOut = '__bbox_out__',
+
+  /** 鼠标不在目标内 */
+  MouseOut = '__mouse_out__',
+
+  /** 无图形对象 */
+  NoTarget = '__no_target__',
+
   /**
    * 坐标系发生变化
    * @description 包括坐标系的大小、缩放比例、偏移量等，是Move和Zoom的合并

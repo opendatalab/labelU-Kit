@@ -137,6 +137,7 @@ export class Shape<Style> {
         maxX: bbox.maxX,
         maxY: bbox.maxY,
         id: this.id,
+        _shape: this,
       };
       rbush.insert(this._cachedRBush!);
     }
@@ -157,14 +158,20 @@ export class Shape<Style> {
     this.dynamicCoordinate = newCoordinate;
   }
 
-  setCoordinateUpdater(updater: CoordinateUpdater) {
+  protected setCoordinateUpdater(updater: CoordinateUpdater) {
     this._coordinateUpdater = updater;
     this._update();
   }
 
-  setBBoxUpdater(updater: BBoxUpdater) {
+  protected setBBoxUpdater(updater: BBoxUpdater) {
     this._bboxUpdater = updater;
     this._update();
+  }
+
+  public isUnderCursor(_mouseCoord: AxisPoint) {
+    console.error('isUnderCursor is not implemented!');
+
+    return false;
   }
 
   /**

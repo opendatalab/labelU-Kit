@@ -27,6 +27,7 @@ export class Pen<Annotation, Style> extends BaseLabel<Style> {
   /**
    * 取消选中标注，销毁草稿
    */
+  public unselect(_annotation?: Annotation): void;
   public unselect(): void {
     // TODO：完善类型
     // @ts-ignore

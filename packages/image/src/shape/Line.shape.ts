@@ -1,5 +1,6 @@
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
+import { getDistanceToLine } from './math.util';
 
 export interface LineStyle {
   stroke?: string;
@@ -15,6 +16,13 @@ type LineCoordinate = [
 ];
 
 export class Line extends Shape<LineStyle> {
+  /**
+   * Rbush 碰撞检测阈值
+   *
+   * TODO: 阈值是否可配置
+   */
+  static DISTANCE_THRESHOLD = 2 as const;
+
   static DEFAULT_STYLE: Required<LineStyle> = {
     stroke: '#000',
     strokeWidth: 2,
@@ -29,6 +37,23 @@ export class Line extends Shape<LineStyle> {
     if (style) {
       this.style = { ...this.style, ...style };
     }
+  }
+
+  /**
+   * 是否在鼠标指针下
+   *
+   * @param mouseCoord 鼠标坐标
+   */
+  public isUnderCursor(mouseCoord: AxisPoint) {
+    const { style } = this;
+
+    const distance = getDistanceToLine(mouseCoord, this);
+
+    if (distance < Line.DISTANCE_THRESHOLD + (style.strokeWidth ?? 0) / 2) {
+      return true;
+    }
+
+    return false;
   }
 
   public render(ctx: CanvasRenderingContext2D | null) {

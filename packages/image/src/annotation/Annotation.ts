@@ -1,6 +1,10 @@
 import type { BBox } from 'rbush';
 
 import type { BasicImageAnnotation } from '../interface';
+import { Group } from '../shape/Group';
+import { Point, type Shape } from '../shape';
+import { EInternalEvent } from '../enums';
+import { eventEmitter } from '../singletons';
 
 export interface IAnnotation<Data extends BasicImageAnnotation> {
   id: string;
@@ -12,23 +16,20 @@ export interface IAnnotation<Data extends BasicImageAnnotation> {
   render: (ctx: CanvasRenderingContext2D) => void;
 
   destroy: () => void;
-
-  readonly isHovered: boolean;
-
-  /** 对比标注顺序之后悬浮的标识 */
-  hovered: boolean;
 }
 
-export class Annotation<Data extends BasicImageAnnotation, Style> implements IAnnotation<Data> {
+export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<Style>, Style>
+  implements IAnnotation<Data>
+{
   public id: string;
 
   public data: Data;
 
   public style: Style;
 
-  public hoveredStyle?: Style;
+  public group: Group<IShape, Style>;
 
-  public hovered: boolean = false;
+  public hoveredStyle?: Style;
 
   public get isHovered() {
     return false;
@@ -39,7 +40,31 @@ export class Annotation<Data extends BasicImageAnnotation, Style> implements IAn
     this.data = data;
     this.style = style;
     this.hoveredStyle = hoveredStyle;
+    this.group = new Group(id, data.order);
+
+    this.group.on(EInternalEvent.BBoxOver, this._handleMouseOver);
+    this.group.on(EInternalEvent.BBoxOut, this._handleMouseOut);
+    eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
   }
+
+  private _handleMouseOver = () => {
+    const { group, style, hoveredStyle } = this;
+
+    group.updateStyle({
+      ...style,
+      ...(hoveredStyle ?? {}),
+    });
+  };
+
+  private _handleMouseOut = () => {
+    const { group, style } = this;
+
+    if (group.shapes[0] instanceof Point) {
+      console.log('Point out');
+    }
+
+    group.updateStyle(style);
+  };
 
   public getBBox() {
     return {
@@ -56,5 +81,7 @@ export class Annotation<Data extends BasicImageAnnotation, Style> implements IAn
 
   public destroy() {
     this.data = null as any;
+    this.group.destroy();
+    eventEmitter.off(EInternalEvent.NoTarget, this._handleMouseOut);
   }
 }

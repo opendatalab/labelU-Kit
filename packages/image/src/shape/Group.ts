@@ -5,12 +5,15 @@ import type { Shape } from './Shape';
 import { EInternalEvent } from '../enums';
 import type { RBushItem } from '../singletons';
 import { eventEmitter, rbush } from '../singletons';
+import type { AxisPoint } from './Point.shape';
 
 /**
  * 组合类，用于组合多个图形
  */
 export class Group<T extends Shape<Style>, Style> {
   public id: string;
+
+  public order: number;
 
   /**
    * 图形组的包围盒
@@ -28,14 +31,10 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _event = new EventEmitter();
 
-  constructor(id: string) {
-    this.id = this._makeId(id);
-
+  constructor(id: string, order: number) {
+    this.id = id;
+    this.order = order;
     this._bindEvents();
-  }
-
-  private _makeId(id: string) {
-    return `${id}-group`;
   }
 
   private _bindEvents() {
@@ -84,6 +83,7 @@ export class Group<T extends Shape<Style>, Style> {
         maxX: bbox.maxX,
         maxY: bbox.maxY,
         id: this.id,
+        _group: this,
       };
     }
 
@@ -104,6 +104,21 @@ export class Group<T extends Shape<Style>, Style> {
     });
 
     this._updateBBox()._updateRBush();
+  }
+
+  /**
+   * 获取在鼠标指针下的标注id
+   */
+  public isShapesUnderCursor(mouseCoord: AxisPoint): string | undefined {
+    const shapes = this.shapes;
+
+    for (let i = 0; i < shapes.length; i += 1) {
+      const item = shapes[i];
+
+      if (item.isUnderCursor(mouseCoord)) {
+        return item.id;
+      }
+    }
   }
 
   public remove(...shapes: T[]) {
@@ -132,6 +147,7 @@ export class Group<T extends Shape<Style>, Style> {
     });
     rbush.remove(this._cachedRBush!);
     this._shapeMapping.clear();
+    this._event.removeAllListeners();
     eventEmitter.off(EInternalEvent.MoveEnd, this._onAxisChange);
     eventEmitter.off(EInternalEvent.Zoom, this._onAxisChange);
   }

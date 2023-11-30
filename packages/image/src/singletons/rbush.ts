@@ -1,8 +1,15 @@
 import type { BBox } from 'rbush';
 import RBush from 'rbush';
 
+import type { Shape } from '@/shape';
+import type { Group } from '@/shape/Group';
+
 export interface RBushItem extends BBox {
   id: string;
+  _shape?: Shape<any>;
+  _group?: Group<Shape<any>, any>;
+  /** 标注顺序，目前只在group当中有这个值 */
+  _order?: number;
 }
 
 /**

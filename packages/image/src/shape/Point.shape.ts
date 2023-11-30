@@ -1,4 +1,5 @@
 import { Shape } from './Shape';
+import { getDistance } from './math.util';
 
 export interface AxisPoint {
   x: number;
@@ -60,6 +61,13 @@ export interface PointStyle {
  * 基础图形点
  */
 export class Point extends Shape<PointStyle> {
+  /**
+   * Rbush 碰撞检测阈值
+   *
+   * TODO: 阈值是否可配置
+   */
+  static DISTANCE_THRESHOLD = 2 as const;
+
   static DEFAULT_STYLE: Required<PointStyle> = {
     stroke: '#000',
     strokeWidth: 0,
@@ -81,7 +89,6 @@ export class Point extends Shape<PointStyle> {
 
     this.setBBoxUpdater(() => {
       const [{ x, y }] = this.dynamicCoordinate;
-      console.log('point style in updater', this.style);
 
       return {
         minX: x - this.style.radius,
@@ -90,6 +97,23 @@ export class Point extends Shape<PointStyle> {
         maxY: y + this.style.radius,
       };
     });
+  }
+
+  /**
+   * 是否在鼠标指针下
+   *
+   * @param mouseCoord 鼠标坐标
+   */
+  public isUnderCursor(mouseCoord: AxisPoint) {
+    const { style, dynamicCoordinate } = this;
+
+    const distance = getDistance(mouseCoord, dynamicCoordinate[0]);
+
+    if (distance < Point.DISTANCE_THRESHOLD + ((style.radius ?? 0) + (style.strokeWidth ?? 0))) {
+      return true;
+    }
+
+    return false;
   }
 
   public render(ctx: CanvasRenderingContext2D | null) {

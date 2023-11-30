@@ -72,9 +72,10 @@ export class Axis {
     canvas.addEventListener('contextmenu', this._handleMoveStart, false);
     canvas.addEventListener('contextmenu', this._handleRightClick, false);
     canvas.addEventListener('mousemove', this._handleMoving, false);
-    canvas.addEventListener('mouseup', this._handleMoveEnd, false);
+    canvas.addEventListener('mouseup', this._handleMouseUp, false);
     canvas.addEventListener('wheel', this._handleScroll, false);
     canvas.addEventListener('click', this._handleClick, false);
+    canvas.addEventListener('mousedown', this._handleMouseDown, false);
   }
 
   private _offEvents() {
@@ -82,29 +83,26 @@ export class Axis {
 
     canvas.removeEventListener('contextmenu', this._handleMoveStart);
     canvas.removeEventListener('mousemove', this._handleMoving);
-    canvas.removeEventListener('mouseup', this._handleMoveEnd);
+    canvas.removeEventListener('mouseup', this._handleMouseUp);
     canvas.removeEventListener('wheel', this._handleScroll);
     canvas.removeEventListener('click', this._handleClick);
+    canvas.removeEventListener('mousedown', this._handleMouseDown);
   }
 
   private _handleClick = (e: MouseEvent) => {
-    const mouseCoord = {
-      x: e.offsetX,
-      y: e.offsetY,
-    };
-    const rbushItems = this._scanCanvasObject(mouseCoord);
-
-    eventEmitter.emit(EInternalEvent.Click, e, rbushItems, mouseCoord);
+    eventEmitter.emit(EInternalEvent.Click, e);
   };
 
   private _handleRightClick = (e: MouseEvent) => {
-    const mouseCoord = {
-      x: e.offsetX,
-      y: e.offsetY,
-    };
-    const rbushItems = this._scanCanvasObject(mouseCoord);
+    eventEmitter.emit(EInternalEvent.RightClick, e);
+  };
 
-    eventEmitter.emit(EInternalEvent.RightClick, e, rbushItems, mouseCoord);
+  private _handleMouseDown = (e: MouseEvent) => {
+    if (e.button === 0) {
+      eventEmitter.emit(EInternalEvent.LeftMouseDown, e);
+    } else if (e.button === 2) {
+      eventEmitter.emit(EInternalEvent.RightMouseDown, e);
+    }
   };
 
   private _handleMoveStart = (e: MouseEvent) => {
@@ -126,13 +124,16 @@ export class Axis {
 
   private _pan = (e: MouseEvent) => {
     const { _startPoint, _annotator } = this;
-    const point = this._getCoordInCanvas({
+    const point = {
       x: e.offsetX,
       y: e.offsetY,
-    });
+    };
 
-    this._x = this._x + point.x - _startPoint!.x;
-    this._y = this._y + point.y - _startPoint!.y;
+    this._distanceX = Math.abs(point.x - _startPoint!.x);
+    this._distanceY = Math.abs(point.y - _startPoint!.y);
+
+    this._x = point.x - _startPoint!.x;
+    this._y = point.y - _startPoint!.y;
 
     _annotator!.renderer!.canvas.style.cursor = 'grabbing';
 
@@ -148,32 +149,36 @@ export class Axis {
       // 移动画布时隐藏鼠标指针，移动时始终在画布外面
       this._cursor!.updateCoordinate(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
     } else {
-      const mouseCoord = {
-        x: e.offsetX,
-        y: e.offsetY,
-      };
-      this._cursor!.updateCoordinate(mouseCoord.x, mouseCoord.y);
-      // 鼠标移动时，需要实时检查在是否有图形元素在鼠标位置
-      const rbushItems = this._scanCanvasObject(mouseCoord);
-
-      // 向订阅了move事件的图形工具发送事件，由每个工具自行实现鼠标经过的逻辑。
-      eventEmitter.emit(EInternalEvent.Move, e, rbushItems, mouseCoord);
+      this._cursor!.updateCoordinate(e.offsetX, e.offsetY);
+      eventEmitter.emit(EInternalEvent.Move, e);
     }
 
     // 只要鼠标在画布内移动，触发画布更新
     this._ticker?.requestUpdate();
   };
 
-  private _handleMoveEnd = (e: MouseEvent) => {
+  private _handleMouseUp = (e: MouseEvent) => {
     e.preventDefault();
-    const { _annotator } = this;
+    const { _annotator, _distanceX, _distanceY } = this;
 
     _annotator!.renderer!.canvas.style.cursor = 'none';
 
-    this._x = this._x + this._distanceX;
-    this._y = this._y + this._distanceY;
+    const isMoved = _distanceX > 0 || _distanceY > 0;
+
     this._startPoint = null;
-    eventEmitter.emit(EInternalEvent.MoveEnd, e);
+
+    if (e.button === 0) {
+      eventEmitter.emit(EInternalEvent.LeftMouseUp, e, isMoved);
+    } else if (e.button === 2) {
+      eventEmitter.emit(EInternalEvent.RightMouseUp, e, isMoved);
+    }
+
+    if (isMoved) {
+      this._distanceX = 0;
+      this._distanceY = 0;
+
+      eventEmitter.emit(EInternalEvent.MoveEnd, e);
+    }
   };
 
   private _handleScroll = (e: WheelEvent) => {
@@ -203,25 +208,6 @@ export class Axis {
     eventEmitter.emit(EInternalEvent.Zoom, e);
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
-
-  /**
-   * 扫描鼠标经过画布内的图形元素，触发move事件
-   *
-   * @description
-   *
-   * 1. 首先通过鼠标坐标，从 R-Tree 中搜索出所有可能的图形元素
-   * 2. 从id中取得映射的图形元素
-   * 3. 根据图形类别，判断鼠标是否真实落在图形上
-   * @param e
-   */
-  private _scanCanvasObject(mouseCoord: AxisPoint) {
-    return rbush.search({
-      minX: mouseCoord.x,
-      minY: mouseCoord.y,
-      maxX: mouseCoord.x,
-      maxY: mouseCoord.y,
-    });
-  }
 
   /**
    * 获取鼠标相对于画布的坐标
