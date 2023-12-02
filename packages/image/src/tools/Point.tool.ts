@@ -1,4 +1,6 @@
-import { ETool } from '../enums';
+import { v4 as uuid } from 'uuid';
+
+import { EInternalEvent, ETool } from '../enums';
 import type { PointStyle } from '../shape/Point.shape';
 import { Point } from '../shape/Point.shape';
 import type { BasicToolParams } from './Tool';
@@ -6,7 +8,7 @@ import { Tool } from './Tool';
 import type { PointData } from '../annotation/Point.annotation';
 import { AnnotationPoint } from '../annotation/Point.annotation';
 // import { PointPen } from '../pen';
-import { axis } from '../singletons';
+import { axis, eventEmitter, monitor } from '../singletons';
 
 /**
  * 点标注工具配置
@@ -60,17 +62,30 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       },
     });
 
-    // this.createDrawing();
+    this._createDrawingFromData();
 
-    this._init();
+    eventEmitter.on(EInternalEvent.LeftMouseDownWithoutTarget, this._handleMouseDown);
   }
 
-  private _init() {
-    const { data = [] } = this;
-
-    for (const annotation of data) {
-      this.addAnnotation(annotation);
+  private _createDrawingFromData(data: PointData[] = this.data) {
+    for (const item of data) {
+      this.addAnnotation(item);
     }
+  }
+
+  private _createDraft(data: PointData) {
+    const { style, selectedStyle } = this;
+
+    this.draft = new AnnotationPoint({
+      id: data.id || uuid(),
+      data,
+      style: { ...style, ...selectedStyle },
+      onPick: this.onPick,
+      onUnSelect: this.onUnSelect,
+      onMove: this.onMove,
+      onMoveEnd: this.onMoveEnd,
+    });
+    monitor!.setSelectedAnnotationId(this.draft.id);
   }
 
   public addAnnotation(data: PointData) {
@@ -89,18 +104,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   }
 
   public onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
-    const { selectedStyle, style } = this;
-
-    this.draft = new AnnotationPoint({
-      id: annotation.id,
-      data: annotation.data,
-      style: { ...style, ...selectedStyle },
-      onPick: this.onPick,
-      onUnSelect: this.onUnSelect,
-      onMove: this.onMove,
-      onMoveEnd: this.onMoveEnd,
-    });
-
+    this._archive();
+    this._createDraft(annotation.data);
     this.removeFromDrawing(annotation.id);
     this.previousCoordinates = this.getCoordinates();
     // 重新渲染
@@ -113,9 +118,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     axis!.rerender();
   };
 
-  public onUnSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
-    this.addAnnotation(annotation.data);
-    this.draft?.destroy();
+  public onUnSelect = (_e: MouseEvent) => {
+    this._archive();
     // 重新渲染
     axis!.rerender();
   };
@@ -145,4 +149,37 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
   }
+
+  private _archive() {
+    const { draft } = this;
+
+    if (draft) {
+      this.addAnnotation(draft.data);
+      draft.destroy();
+      this.draft = null;
+    }
+  }
+
+  private _handleMouseDown = (e: MouseEvent) => {
+    const { activeLabel } = this;
+
+    // 没有激活工具则不进行绘制
+    if (!activeLabel) {
+      return;
+    }
+
+    this._archive();
+
+    // 创建草稿
+    this._createDraft({
+      // TODO: 从monitor获取最大order
+      order: monitor!.getMaxOrder() + 1,
+      id: uuid(),
+      label: activeLabel,
+      x: axis!.getOriginalX(e.offsetX - axis!.distance.x),
+      y: axis!.getOriginalY(e.offsetY - axis!.distance.y),
+    });
+
+    axis?.rerender();
+  };
 }

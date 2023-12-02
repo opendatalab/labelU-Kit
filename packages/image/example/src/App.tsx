@@ -177,7 +177,7 @@ export default function App() {
         },
       ]);
 
-      engine.pick('line', 'car');
+      engine.switch('point', 'car');
     });
 
     engine.on('hover', (data) => {

@@ -99,7 +99,18 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   }
 
   public activate(label: string) {
+    if (typeof this.getLabelByValue(label) === 'undefined') {
+      console.warn('label is not defined', label);
+
+      return;
+    }
+
     this.activeLabel = label;
+  }
+
+  public deactivate() {
+    this.activeLabel = null;
+    this.previousCoordinates = [];
   }
 
   public getCoordinates() {

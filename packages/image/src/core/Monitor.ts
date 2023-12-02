@@ -10,11 +10,11 @@ import type { AxisPoint } from '../shape';
 export class Monitor {
   private _canvas: HTMLCanvasElement;
 
-  private _hoveredGroup: any = null;
+  public _hoveredGroup: any = null;
 
-  private _selectedGroup: any = null;
+  public selectedAnnotationId: string | null = null;
 
-  private _isLeftMouseDown = false;
+  private _orderIndexedAnnotationIds: string[] = [];
 
   private _isSelectedGroupHold = false;
 
@@ -61,7 +61,7 @@ export class Monitor {
 
     if (this._isSelectedGroupHold) {
       // 移动选中的标注
-      eventEmitter.emit(EInternalEvent.AnnotationMove, e, this._selectedGroup.id);
+      eventEmitter.emit(EInternalEvent.AnnotationMove, e, this.selectedAnnotationId);
     }
 
     eventEmitter.emit(EInternalEvent.MouseMove, e);
@@ -139,15 +139,15 @@ export class Monitor {
   private _handleLeftMouseDown(e: MouseEvent) {
     e.preventDefault();
 
-    const { _hoveredGroup, _selectedGroup } = this;
+    const { _hoveredGroup, selectedAnnotationId } = this;
 
-    this._isLeftMouseDown = true;
-
-    this._isSelectedGroupHold = _hoveredGroup && _selectedGroup && _hoveredGroup.id === _selectedGroup.id;
+    this._isSelectedGroupHold = _hoveredGroup && selectedAnnotationId && _hoveredGroup.id === selectedAnnotationId;
 
     // 左键点击选中的标注
     if (this._isSelectedGroupHold) {
-      eventEmitter.emit(EInternalEvent.Pick, e, _selectedGroup.id);
+      eventEmitter.emit(EInternalEvent.Pick, e, selectedAnnotationId);
+    } else {
+      eventEmitter.emit(EInternalEvent.LeftMouseDownWithoutTarget, e);
     }
   }
 
@@ -157,18 +157,17 @@ export class Monitor {
    * @description 右键点击选中和取消选中标注
    */
   private _handleRightMouseUp = (e: MouseEvent) => {
-    const { _hoveredGroup, _selectedGroup } = this;
+    const { _hoveredGroup, selectedAnnotationId } = this;
 
     if (_hoveredGroup) {
-      if (_selectedGroup && _hoveredGroup.id !== _selectedGroup.id) {
-        console.log('unselect');
-        eventEmitter.emit(EInternalEvent.UnSelect, e, _selectedGroup.id);
+      if (selectedAnnotationId && _hoveredGroup.id !== selectedAnnotationId) {
+        eventEmitter.emit(EInternalEvent.UnSelect, e, selectedAnnotationId);
       }
 
-      _hoveredGroup.emit(EInternalEvent.Select);
-      this._selectedGroup = _hoveredGroup;
-    } else if (_selectedGroup) {
-      eventEmitter.emit(EInternalEvent.UnSelect, e, _selectedGroup.id);
+      eventEmitter.emit(EInternalEvent.Select, e, _hoveredGroup.id);
+      this.selectedAnnotationId = _hoveredGroup.id;
+    } else if (selectedAnnotationId) {
+      eventEmitter.emit(EInternalEvent.UnSelect, e, selectedAnnotationId);
     }
   };
 
@@ -189,6 +188,30 @@ export class Monitor {
       maxX: mouseCoord.x,
       maxY: mouseCoord.y,
     });
+  }
+
+  public setSelectedAnnotationId(id: string | null) {
+    this.selectedAnnotationId = id;
+  }
+
+  public setOrderIndexedAnnotationIds(order: number, id: string) {
+    if (typeof order !== 'number') {
+      throw Error('order must be a number');
+    }
+
+    if (typeof id !== 'string') {
+      throw Error('id must be a string');
+    }
+
+    this._orderIndexedAnnotationIds[order] = id;
+  }
+
+  public getMaxOrder() {
+    if (this._orderIndexedAnnotationIds.length === 0) {
+      return 0;
+    }
+
+    return this._orderIndexedAnnotationIds.length - 1;
   }
 
   public destroy() {

@@ -2,7 +2,7 @@ import type { BasicImageAnnotation } from '../interface';
 import { Group } from '../shape/Group';
 import { type Shape } from '../shape';
 import { EInternalEvent } from '../enums';
-import { eventEmitter } from '../singletons';
+import { eventEmitter, monitor } from '../singletons';
 
 // TODO: 去除本类的any
 export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
@@ -75,18 +75,26 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
     this.group = new Group(id, data.order);
 
+    // hover事件挂在group上即可满足当前需求
     this.group.on(EInternalEvent.BBoxOver, this._handleMouseOver);
     this.group.on(EInternalEvent.BBoxOut, this._handleMouseOut);
-    this.group.on(EInternalEvent.Select, this._handleSelect);
 
+    eventEmitter.on(EInternalEvent.Select, this._handleSelect);
     eventEmitter.on(EInternalEvent.AnnotationMove, this._handleAnnotationMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMoveEnd);
     eventEmitter.on(EInternalEvent.UnSelect, this._handleUnSelect);
     eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
     eventEmitter.on(EInternalEvent.Pick, this._handlePick);
+
+    // 建立order和id的映射关系
+    monitor?.setOrderIndexedAnnotationIds(data.order, id);
   }
 
-  private _handleSelect = (e: MouseEvent) => {
+  private _handleSelect = (e: MouseEvent, id: string) => {
+    if (id !== this.id) {
+      return;
+    }
+
     const { onSelect } = this.eventHandlers;
     if (onSelect) {
       onSelect(e, this);
@@ -188,6 +196,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   public destroy() {
     this.data = null as any;
     this.group.destroy();
+    eventEmitter.off(EInternalEvent.Select, this._handleSelect);
     eventEmitter.off(EInternalEvent.UnSelect, this._handleUnSelect);
     eventEmitter.off(EInternalEvent.NoTarget, this._handleMouseOut);
     eventEmitter.off(EInternalEvent.AnnotationMove, this._handleAnnotationMove);

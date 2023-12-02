@@ -27,6 +27,9 @@ export enum EInternalEvent {
   /** 鼠标左键按下 */
   LeftMouseDown = '__left_mouse_down__',
 
+  /** 鼠标左键按下但没有选中的图形目标 */
+  LeftMouseDownWithoutTarget = '__left_mouse_down_without_target__',
+
   /** 鼠标右键按下 */
   RightMouseDown = '__right_mouse_down__',
 

@@ -1,6 +1,7 @@
 import { Renderer } from './core/Renderer';
+import type { PointToolOptions } from './tools';
 import { PointTool } from './tools';
-import type { LineToolOptions } from './drawing/Line.drawing';
+import type { LineToolOptions } from './tools/Line.tool';
 import { LineTool } from './tools/Line.tool';
 import type { CursorParams } from './shape/Cursor.shape';
 import type { ImageOption } from './core/BackgroundRenderer';
@@ -8,10 +9,9 @@ import { BackgroundRenderer } from './core/BackgroundRenderer';
 import type { Axis } from './core/Axis';
 import type { AnnotationTool, AnnotationToolData, ToolName } from './interface';
 import { EInternalEvent } from './enums';
-import { Monitor } from './core/Monitor';
+import type { Monitor } from './core/Monitor';
 import { createAxis } from './singletons/axis';
-import { eventEmitter } from './singletons';
-import type { PointToolOptions } from './drawing';
+import { createMonitor, eventEmitter } from './singletons';
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -34,6 +34,8 @@ export class Annotator {
   public renderer: Renderer | null = null;
 
   public backgroundRenderer: BackgroundRenderer | null = null;
+
+  public activeToolName: ToolName | null = null;
 
   private _monitor: Monitor | null = null;
 
@@ -71,7 +73,10 @@ export class Annotator {
     // 添加鼠标光标
     this._initialContainer();
     this._initialAxis();
-    this._monitor = new Monitor(this.renderer!.canvas);
+    this._monitor = createMonitor(this.renderer!.canvas);
+
+    // debug
+    window.monitor = this._monitor;
   }
 
   private _initialContainer() {
@@ -137,11 +142,12 @@ export class Annotator {
    * @param toolName 工具名称
    * @param label 标注类别，如果是字符串，则表示标注类别value（唯一标示）；如果是对象，则表示标注类别
    */
-  public pick(toolName: ToolName, label: string) {
+  public switch(toolName: ToolName, label: string) {
     if (typeof toolName !== 'string') {
       throw new Error('toolName must be string, such as "line" or "point"');
     }
 
+    const { activeToolName } = this;
     const tool = this._tools.get(toolName);
 
     if (!tool) {
@@ -149,6 +155,11 @@ export class Annotator {
       throw new Error(`Tool ${toolName} is not used!`);
     }
 
+    if (activeToolName && activeToolName !== toolName) {
+      this._tools.get(activeToolName)!.deactivate();
+    }
+
+    this.activeToolName = toolName;
     tool.activate(label);
   }
 
