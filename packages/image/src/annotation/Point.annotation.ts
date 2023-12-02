@@ -1,15 +1,15 @@
 import type { BasicImageAnnotation } from '../interface';
+import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import { Point } from '../shape/Point.shape';
 import type { AxisPoint, PointStyle } from '../shape/Point.shape';
-import { Hover } from '../decorators/Hover.decorator';
+import { axis } from '../singletons';
 
 export type PointData = BasicImageAnnotation & AxisPoint;
 
-@Hover
 export class AnnotationPoint extends Annotation<PointData, Point, PointStyle> {
-  constructor(id: string, data: PointData, style: PointStyle, hoveredStyle?: PointStyle) {
-    super(id, data, style, hoveredStyle);
+  constructor(params: AnnotationParams<PointData, PointStyle>) {
+    super(params);
 
     this._setupShapes();
   }
@@ -22,12 +22,13 @@ export class AnnotationPoint extends Annotation<PointData, Point, PointStyle> {
     group.add(point);
   }
 
-  public get bbox() {
-    return this.group.bbox;
-  }
+  public syncCoordToData() {
+    const { group, data } = this;
 
-  public render(ctx: CanvasRenderingContext2D) {
-    this.group.render(ctx);
+    group.each((shape) => {
+      data.x = axis!.getOriginalX(shape.dynamicCoordinate[0].x);
+      data.y = axis!.getOriginalY(shape.dynamicCoordinate[0].y);
+    });
   }
 
   public destroy() {

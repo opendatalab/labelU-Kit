@@ -3,17 +3,44 @@ import { v4 as uuid } from 'uuid';
 import type { LineStyle } from '../shape/Line.shape';
 import { Line } from '../shape/Line.shape';
 import { ETool } from '../enums';
+import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import { LinePen } from '../pen';
-import type { LineToolOptions } from '../drawing/Line.drawing';
-import { LineDrawing } from '../drawing/Line.drawing';
-import type { AnnotationLine, LineData } from '../annotation';
-import { axis } from '../singletons';
+import type { LineData } from '../annotation';
+import { AnnotationLine } from '../annotation';
 import { Rect } from '../shape';
-import { Selection } from '../decorators/Selection.decorator';
+import { axis } from '../singletons';
 
-@Selection
-export class LineTool extends Tool<LineData, LineStyle, LineToolOptions, AnnotationLine> {
+export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
+  /**
+   * 线条类型
+   * @description
+   * - line: 直线
+   * - curve: 曲线
+   * @default 'line'
+   */
+  lineType?: 'line' | 'curve';
+
+  /**
+   * 边缘吸附
+   * @default true;
+   */
+  edgeAdsorptive?: boolean;
+
+  /**
+   * 画布外标注
+   * @default true;
+   */
+  outOfCanvas?: boolean;
+
+  /**
+   * 闭合点个数
+   * @description 至少两个点
+   * @default 2
+   */
+  closingPointAmount?: number;
+}
+
+export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   public toolName = ETool.Line;
 
   private _selectionShape: Rect | null = null;
@@ -36,7 +63,30 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions, Annotat
       },
     });
 
-    this.createDrawing();
+    this._init();
+  }
+
+  private _init() {
+    const { data = [] } = this;
+
+    for (const annotation of data) {
+      this.addAnnotation(annotation);
+    }
+  }
+
+  public addAnnotation(data: LineData) {
+    const { style, hoveredStyle, drawing } = this;
+
+    drawing!.set(
+      data.id,
+      new AnnotationLine({
+        id: data.id,
+        data,
+        style: { ...style, stroke: this.getLabelColor(data.label) },
+        hoveredStyle,
+        onSelect: this.onSelect,
+      }),
+    );
   }
 
   /**
@@ -49,69 +99,43 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions, Annotat
    *  2.1. 创建新的drawing（成品），需要包含点、线
    *  2.2. 创建选中包围盒
    */
-  public onSelect = (annotation: AnnotationLine) => {
-    const { style, hoveredStyle, selectedStyle, config } = this;
+  public onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
+    const { style } = this;
+    const { data } = annotation;
 
-    this.activatedAnnotation = annotation;
+    // 1. 创建草稿
+    this.draft = new AnnotationLine({
+      id: data.id,
+      data,
+      style: { ...style, stroke: this.getLabelColor(data.label) },
+      // 在草稿上添加取消选中的事件监听
+      onUnSelect: this.onUnSelect,
+    });
 
+    // 2. 销毁成品
+    this.removeFromDrawing(data.id);
+
+    // 3. 记录选中前的坐标
+    this.previousCoordinates = this.getCoordinates();
+
+    // 4. 选中标注，创建选框，进入编辑模式
     // 如果存在上一次的选框，需要销毁
     if (this._selectionShape) {
       this._destroySelection();
     }
-
-    // 重新创建选框图形
+    // 创建选框图形
     this._createSelection();
-
-    // 如果没有画笔，需要创建
-    if (!this.pen) {
-      this.pen = new LinePen(config.labels, style, hoveredStyle, selectedStyle);
-    }
-
-    // 画笔需要选中标注
-    this.pen.select(annotation);
-    // 成品上需要删除选中的标注，进入绘制模式
-    this.drawing!.remove(annotation);
     // 重新渲染
     axis!.rerender();
   };
 
-  public onUnSelect = () => {
-    const { activatedAnnotation, pen } = this;
-
-    if (pen && activatedAnnotation && pen.draft) {
-      this.drawing?.addAnnotation(pen.draft.data);
-      pen.unselect();
-    }
-
+  public onUnSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
+    this.addAnnotation(annotation.data);
     this._destroySelection();
-    this.activatedAnnotation = null;
+    this.draft?.destroy();
+    // 重新渲染
     axis!.rerender();
   };
-
-  public createDrawing(data?: LineData[]) {
-    const { style, hoveredStyle, data: _data, config } = this;
-
-    if (data) {
-      this.data = data;
-    }
-
-    if (!Array.isArray(_data)) {
-      throw Error('Data must be an array!');
-    }
-
-    this.drawing = new LineDrawing(config.labels || [], _data, style, hoveredStyle);
-  }
-
-  public switchToPen(label: string) {
-    const { style, hoveredStyle, selectedStyle, config } = this;
-
-    return (this.pen = new LinePen(
-      config.labels,
-      { ...style, stroke: this.getLabelColor(label) },
-      hoveredStyle,
-      selectedStyle,
-    ));
-  }
 
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
@@ -126,8 +150,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions, Annotat
       this._selectionShape.destroy();
     }
 
-    const { activatedAnnotation } = this;
-    const bbox = activatedAnnotation!.bbox;
+    const { draft } = this;
+    const bbox = draft!.bbox;
 
     this._selectionShape = new Rect(
       uuid(),

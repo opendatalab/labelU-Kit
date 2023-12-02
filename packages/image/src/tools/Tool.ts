@@ -1,9 +1,9 @@
-import type { Attribute } from '@labelu/interface';
+import type { Attribute, ILabel } from '@labelu/interface';
+import cloneDeep from 'lodash.clonedeep';
 
-import type { Pen } from '../pen/Pen';
+import type { Annotation } from '../annotation/Annotation';
 import type { BasicImageAnnotation } from '../interface';
-import { BaseLabel } from '../drawing/BaseLabel';
-import type { Drawing } from '../drawing/Drawing';
+import type { AxisPoint, Shape } from '../shape';
 
 export const TOOL_HOVER = 'tool:hover';
 
@@ -22,41 +22,75 @@ export interface BasicToolParams<Data, Style> {
   selectedStyle?: Style;
 }
 
+type IAnnotation<Style> = Annotation<BasicImageAnnotation, Shape<Style>, Style>;
+
 type ConfigOmit<T> = Omit<T, 'data' | 'style' | 'hoveredStyle'>;
 
 /**
  * 工具基类
  */
-export class Tool<
-  Data extends BasicImageAnnotation,
-  Style,
-  Config extends BasicToolParams<Data, Style>,
-  Annotation,
-> extends BaseLabel<Style> {
+export class Tool<Data extends BasicImageAnnotation, Style, Config extends BasicToolParams<Data, Style>> {
+  public defaultColor = '#000';
+
+  public labelMapping = new Map();
+
+  public style = {} as Required<Style>;
+
+  public hoveredStyle = {} as Style;
+
+  public selectedStyle = {} as Style;
   public data: Data[];
   public config;
 
-  public pen: Pen<Annotation, Style> | null = null;
+  public activeLabel: string | null = null;
 
-  public drawing: Drawing<Data, Style> | null = null;
+  public drawing: Map<string, IAnnotation<Style>> | null = new Map();
 
-  public activatedAnnotation: Annotation | null = null;
+  /**
+   * 绘制过程中的临时数据，并未真正添加到数据中
+   * Group<Line, LineStyle>
+   */
+  public draft: IAnnotation<Style> | null = null;
+
+  protected previousCoordinates: AxisPoint[][] = [];
 
   constructor({ data, style, hoveredStyle, selectedStyle, ...config }: Required<Config>) {
-    super(config.labels, style as Style, hoveredStyle as Style, selectedStyle as Style);
+    // 创建标签映射
+    this._createLabelMapping(config.labels);
+
+    if (style) {
+      this.style = {
+        ...this.style,
+        ...style,
+      };
+    }
+
+    if (hoveredStyle) {
+      this.hoveredStyle = hoveredStyle;
+    }
+
+    if (selectedStyle) {
+      this.selectedStyle = selectedStyle;
+    }
     this.config = config as ConfigOmit<Config>;
     this.data = data || [];
   }
 
+  public addAnnotation(_data: Data) {
+    console.error('Implement me!');
+  }
+
   public render(ctx: CanvasRenderingContext2D) {
-    const { drawing, pen } = this;
+    const { drawing, draft } = this;
 
     if (drawing) {
-      drawing.render(ctx);
+      drawing.forEach((annotation) => {
+        annotation.render(ctx);
+      });
     }
 
-    if (pen) {
-      pen.render(ctx);
+    if (draft) {
+      draft.render(ctx);
     }
   }
 
@@ -64,25 +98,61 @@ export class Tool<
     this.style = { ...this.style, ...style };
   }
 
-  /**
-   * 创建成品图形
-   *
-   * @description 非编辑状态下的成品图形
-   *
-   * 调用时机：
-   * 1. 当结束编辑后，调用此方法；
-   * 2. 当切换工具时，调用此方法；
-   * 3. 当初始化画面时，调用此方法；
-   */
-  createDrawing(_data?: Data[]) {
-    throw Error('Implement createDrawing method');
+  public activate(label: string) {
+    this.activeLabel = label;
+  }
+
+  public getCoordinates() {
+    const { draft } = this;
+
+    if (!draft) {
+      return [];
+    }
+
+    return draft.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
+  }
+
+  _createLabelMapping(labels: ILabel[] | undefined) {
+    if (!labels) {
+      return;
+    }
+
+    for (const label of labels) {
+      this.labelMapping.set(label.value, label);
+    }
+  }
+
+  public getLabelByValue(value: string | undefined) {
+    if (typeof value !== 'string') {
+      console.warn('value is not a string', value);
+      return undefined;
+    }
+
+    return this.labelMapping.get(value);
+  }
+
+  public getLabelColor(label: string | undefined) {
+    if (!label) {
+      return this.defaultColor;
+    }
+
+    return this.getLabelByValue(label)?.color ?? this.defaultColor;
+  }
+
+  public removeFromDrawing(id: string) {
+    this.drawing?.get(id)?.destroy();
+    this.drawing?.delete(id);
   }
 
   public destroy(): void;
   public destroy(): void {
-    this.pen?.destroy();
-    this.drawing?.destroy();
-    this.pen = null;
+    this.drawing?.forEach((annotation) => {
+      annotation.destroy();
+    });
     this.drawing = null;
+    this.draft?.destroy();
+    this.draft = null;
+
+    this.data = [];
   }
 }

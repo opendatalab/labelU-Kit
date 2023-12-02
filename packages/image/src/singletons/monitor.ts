@@ -1,10 +1,9 @@
 import { Monitor } from '../core/Monitor';
-import type { Annotator } from '../ImageAnnotator';
 
 let monitor: Monitor | null = null;
 
-export function createAxis(annotator: Annotator) {
-  monitor = new Monitor(annotator);
+export function createAxis(canvas: HTMLCanvasElement) {
+  monitor = new Monitor(canvas);
 
   return monitor;
 }

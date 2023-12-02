@@ -24,15 +24,18 @@ export class Axis {
   /** 画布相对左上角原点偏移的 y 距离 */
   private _y: number = 0;
 
-  private _rect: DOMRect | null = null;
-
   /** 缩放比例 */
   private _scale: number = 1;
 
   /**
-   * 移动时的起始点
+   * 移动画布时的起始点
    */
-  private _startPoint: AxisPoint | null = null;
+  private _startPanPoint: AxisPoint | null = null;
+
+  /**
+   * 左键点击的起始点
+   */
+  private _startMovePoint: AxisPoint | null = null;
 
   private _distanceX: number = 0;
 
@@ -53,8 +56,8 @@ export class Axis {
   constructor(annotator: Annotator) {
     const { cursor } = annotator!.config;
 
+    // TODO：改成renderer参数
     this._annotator = annotator;
-    this._rect = annotator.renderer!.canvas.getBoundingClientRect();
 
     this._createTicker();
     this._bindEvents();
@@ -64,128 +67,129 @@ export class Axis {
   }
 
   private _bindEvents() {
-    const { canvas } = this._annotator!.renderer!;
-
     /**
      * NOTE: 画布元素的事件监听都应该在这里绑定，而不是在分散具体的工具中绑定
      */
-    canvas.addEventListener('contextmenu', this._handleMoveStart, false);
-    canvas.addEventListener('contextmenu', this._handleRightClick, false);
-    canvas.addEventListener('mousemove', this._handleMoving, false);
-    canvas.addEventListener('mouseup', this._handleMouseUp, false);
-    canvas.addEventListener('wheel', this._handleScroll, false);
-    canvas.addEventListener('click', this._handleClick, false);
-    canvas.addEventListener('mousedown', this._handleMouseDown, false);
+    eventEmitter.on(EInternalEvent.RightMouseDown, this._handleMoveStart);
+    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
+    eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
+    eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+    eventEmitter.on(EInternalEvent.Wheel, this._handleScroll);
   }
 
   private _offEvents() {
-    const { canvas } = this._annotator!.renderer!;
-
-    canvas.removeEventListener('contextmenu', this._handleMoveStart);
-    canvas.removeEventListener('mousemove', this._handleMoving);
-    canvas.removeEventListener('mouseup', this._handleMouseUp);
-    canvas.removeEventListener('wheel', this._handleScroll);
-    canvas.removeEventListener('click', this._handleClick);
-    canvas.removeEventListener('mousedown', this._handleMouseDown);
+    eventEmitter.off(EInternalEvent.RightMouseDown, this._handleMoveStart);
+    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
+    eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
+    eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+    eventEmitter.off(EInternalEvent.Wheel, this._handleScroll);
   }
 
-  private _handleClick = (e: MouseEvent) => {
-    eventEmitter.emit(EInternalEvent.Click, e);
-  };
-
-  private _handleRightClick = (e: MouseEvent) => {
-    eventEmitter.emit(EInternalEvent.RightClick, e);
-  };
-
-  private _handleMouseDown = (e: MouseEvent) => {
-    if (e.button === 0) {
-      eventEmitter.emit(EInternalEvent.LeftMouseDown, e);
-    } else if (e.button === 2) {
-      eventEmitter.emit(EInternalEvent.RightMouseDown, e);
-    }
-  };
-
   private _handleMoveStart = (e: MouseEvent) => {
-    e.preventDefault();
-    const { container } = this._annotator!.config!;
-
-    if (!container) {
-      return;
-    }
-
     // 起始点：鼠标点击位置：在画布内的真实坐标
-    this._startPoint = this._getCoordInCanvas({
+    this._startPanPoint = {
+      x: e.offsetX - this._x,
+      y: e.offsetY - this._y,
+    };
+
+    // 鼠标相对左上角位置
+    this._startMovePoint = {
       x: e.offsetX,
       y: e.offsetY,
-    });
+    };
+  };
 
-    eventEmitter.emit(EInternalEvent.PanStart, e);
+  private _handleLeftMouseDown = (e: MouseEvent) => {
+    this._startMovePoint = {
+      x: e.offsetX,
+      y: e.offsetY,
+    };
   };
 
   private _pan = (e: MouseEvent) => {
-    const { _startPoint, _annotator } = this;
+    const { _startPanPoint, _annotator, _startMovePoint } = this;
     const point = {
       x: e.offsetX,
       y: e.offsetY,
     };
 
-    this._distanceX = Math.abs(point.x - _startPoint!.x);
-    this._distanceY = Math.abs(point.y - _startPoint!.y);
+    this._distanceX = point.x - _startMovePoint!.x;
+    this._distanceY = point.y - _startMovePoint!.y;
 
-    this._x = point.x - _startPoint!.x;
-    this._y = point.y - _startPoint!.y;
+    this._x = point.x - _startPanPoint!.x;
+    this._y = point.y - _startPanPoint!.y;
 
     _annotator!.renderer!.canvas.style.cursor = 'grabbing';
 
-    eventEmitter.emit(EInternalEvent.Pan, e);
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
 
-  private _handleMoving = (e: MouseEvent) => {
-    e.preventDefault();
-
-    if (this._startPoint) {
+  private _handleMouseMove = (e: MouseEvent) => {
+    if (this._startPanPoint) {
       this._pan(e);
       // 移动画布时隐藏鼠标指针，移动时始终在画布外面
       this._cursor!.updateCoordinate(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
     } else {
+      this._calcMouseMove(e);
       this._cursor!.updateCoordinate(e.offsetX, e.offsetY);
-      eventEmitter.emit(EInternalEvent.Move, e);
+      eventEmitter.emit(EInternalEvent.MouseMoveWithoutAxisChange, e);
     }
 
     // 只要鼠标在画布内移动，触发画布更新
     this._ticker?.requestUpdate();
   };
 
-  private _handleMouseUp = (e: MouseEvent) => {
-    e.preventDefault();
+  private _calcMouseMove(e: MouseEvent) {
+    const { _startMovePoint } = this;
+
+    if (!_startMovePoint) {
+      return;
+    }
+
+    const point = {
+      x: e.offsetX,
+      y: e.offsetY,
+    };
+
+    this._distanceX = point.x - _startMovePoint!.x;
+    this._distanceY = point.y - _startMovePoint!.y;
+  }
+
+  private _handleLeftMouseUp = () => {
+    this._startMovePoint = null;
+
+    this._distanceX = 0;
+    this._distanceY = 0;
+  };
+
+  private _handleRightMouseUp = (e: MouseEvent) => {
     const { _annotator, _distanceX, _distanceY } = this;
 
     _annotator!.renderer!.canvas.style.cursor = 'none';
 
-    const isMoved = _distanceX > 0 || _distanceY > 0;
+    const isMoved = _distanceX !== 0 || _distanceY !== 0;
 
-    this._startPoint = null;
+    this._startPanPoint = null;
+    this._startMovePoint = null;
 
-    if (e.button === 0) {
-      eventEmitter.emit(EInternalEvent.LeftMouseUp, e, isMoved);
-    } else if (e.button === 2) {
-      eventEmitter.emit(EInternalEvent.RightMouseUp, e, isMoved);
-    }
-
-    if (isMoved) {
+    if (!isMoved) {
+      eventEmitter.emit(EInternalEvent.RightMouseUpWithoutAxisChange, e);
+    } else {
       this._distanceX = 0;
       this._distanceY = 0;
 
-      eventEmitter.emit(EInternalEvent.MoveEnd, e);
+      eventEmitter.emit(EInternalEvent.PanEnd, e);
     }
   };
 
   private _handleScroll = (e: WheelEvent) => {
-    e.preventDefault();
-
     // 当前鼠标所在画布屏幕上的坐标（不是在画布坐标系里面）
-    const point = this.getCoordRelativeToCanvas(e as MouseEvent);
+    const point = {
+      x: e.offsetX,
+      y: e.offsetY,
+    };
 
     const scaleFactor = e.deltaY < 0 ? SCALE_FACTOR : 1 / SCALE_FACTOR;
 
@@ -208,31 +212,6 @@ export class Axis {
     eventEmitter.emit(EInternalEvent.Zoom, e);
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
-
-  /**
-   * 获取鼠标相对于画布的坐标
-   */
-  private getCoordRelativeToCanvas(e: MouseEvent) {
-    const { _rect } = this;
-
-    return {
-      x: e.clientX - _rect!.left,
-      y: e.clientY - _rect!.top,
-    };
-  }
-
-  private _getCoordInCanvas(p: AxisPoint) {
-    if (!p) {
-      throw new Error('Error: p is not defined.');
-    }
-
-    const { _x, _y } = this;
-
-    return {
-      x: p.x - _x,
-      y: p.y - _y,
-    };
-  }
 
   public rerender() {
     const { _cursor, _annotator } = this;
@@ -284,8 +263,18 @@ export class Axis {
     return this._scale;
   }
 
-  public get annotator() {
-    return this._annotator;
+  public get offset() {
+    return {
+      x: this._x,
+      y: this._y,
+    };
+  }
+
+  public get distance() {
+    return {
+      x: this._distanceX,
+      y: this._distanceY,
+    };
   }
 
   /**

@@ -1,26 +1,26 @@
-import type { BBox } from 'rbush';
-
 import type { BasicImageAnnotation } from '../interface';
 import { Group } from '../shape/Group';
-import { Point, type Shape } from '../shape';
+import { type Shape } from '../shape';
 import { EInternalEvent } from '../enums';
 import { eventEmitter } from '../singletons';
 
-export interface IAnnotation<Data extends BasicImageAnnotation> {
+// TODO: 去除本类的any
+export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   id: string;
-
   data: Data;
+  style: Style;
+  hoveredStyle?: Style;
 
-  getBBox: () => BBox;
-
-  render: (ctx: CanvasRenderingContext2D) => void;
-
-  destroy: () => void;
+  onBBoxOver?: (e: MouseEvent, annotation: any) => void;
+  onBBoxOut?: (e: MouseEvent, annotation: any) => void;
+  onSelect?: (e: MouseEvent, annotation: any) => void;
+  onUnSelect?: (e: MouseEvent, annotation: any) => void;
+  onMove?: (e: MouseEvent, annotation: any) => void;
+  onMoveEnd?: (e: MouseEvent, annotation: any) => void;
+  onPick?: (e: MouseEvent, annotation: any) => void;
 }
 
-export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<Style>, Style>
-  implements IAnnotation<Data>
-{
+export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<Style>, Style> {
   public id: string;
 
   public data: Data;
@@ -31,57 +31,167 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
   public hoveredStyle?: Style;
 
+  public eventHandlers: {
+    onBBoxOver?: (e: MouseEvent, annotation: any) => void;
+    onBBoxOut?: (e: MouseEvent, annotation: any) => void;
+    onSelect?: (e: MouseEvent, annotation: any) => void;
+    onUnSelect?: (e: MouseEvent, annotation: any) => void;
+    onMove?: (e: MouseEvent, annotation: any) => void;
+    onMoveEnd?: (e: MouseEvent, annotation: any) => void;
+    onPick?: (e: MouseEvent, annotation: any) => void;
+  };
+
   public get isHovered() {
     return false;
   }
 
-  constructor(id: string, data: Data, style: Style, hoveredStyle?: Style) {
+  constructor({
+    id,
+    data,
+    style,
+    hoveredStyle,
+    onBBoxOver,
+    onBBoxOut,
+    onSelect,
+    onUnSelect,
+    onMove,
+    onMoveEnd,
+    onPick,
+  }: AnnotationParams<Data, Style>) {
     this.id = id;
     this.data = data;
     this.style = style;
     this.hoveredStyle = hoveredStyle;
+
+    this.eventHandlers = {
+      onBBoxOver,
+      onBBoxOut,
+      onSelect,
+      onUnSelect,
+      onMove,
+      onMoveEnd,
+      onPick,
+    };
+
     this.group = new Group(id, data.order);
 
     this.group.on(EInternalEvent.BBoxOver, this._handleMouseOver);
     this.group.on(EInternalEvent.BBoxOut, this._handleMouseOut);
+    this.group.on(EInternalEvent.Select, this._handleSelect);
+
+    eventEmitter.on(EInternalEvent.AnnotationMove, this._handleAnnotationMove);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMoveEnd);
+    eventEmitter.on(EInternalEvent.UnSelect, this._handleUnSelect);
     eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
+    eventEmitter.on(EInternalEvent.Pick, this._handlePick);
   }
 
-  private _handleMouseOver = () => {
-    const { group, style, hoveredStyle } = this;
-
-    group.updateStyle({
-      ...style,
-      ...(hoveredStyle ?? {}),
-    });
+  private _handleSelect = (e: MouseEvent) => {
+    const { onSelect } = this.eventHandlers;
+    if (onSelect) {
+      onSelect(e, this);
+    } else {
+      console.warn('Implement me!');
+    }
   };
 
-  private _handleMouseOut = () => {
-    const { group, style } = this;
-
-    if (group.shapes[0] instanceof Point) {
-      console.log('Point out');
+  private _handleUnSelect = (e: MouseEvent, id: string) => {
+    if (id !== this.id) {
+      return;
     }
 
-    group.updateStyle(style);
+    const { onUnSelect } = this.eventHandlers;
+    if (onUnSelect) {
+      onUnSelect(e, this);
+    } else {
+      console.warn('Implement me!');
+    }
   };
 
-  public getBBox() {
-    return {
-      minX: 0,
-      minY: 0,
-      maxX: 0,
-      maxY: 0,
-    };
+  private _handleMouseOver = (e: MouseEvent) => {
+    const { onBBoxOver } = this.eventHandlers;
+
+    if (onBBoxOver) {
+      onBBoxOver(e, this);
+    } else {
+      const { group, style, hoveredStyle } = this;
+
+      group.updateStyle({
+        ...style,
+        ...(hoveredStyle ?? {}),
+      });
+    }
+  };
+
+  private _handleMouseOut = (e: MouseEvent) => {
+    const { onBBoxOut } = this.eventHandlers;
+
+    if (onBBoxOut) {
+      onBBoxOut(e, this);
+    } else {
+      const { group, style } = this;
+
+      group.updateStyle(style);
+    }
+  };
+
+  private _handleAnnotationMove = (e: MouseEvent, id: string) => {
+    if (id !== this.id) {
+      return;
+    }
+
+    const { onMove } = this.eventHandlers;
+
+    if (onMove) {
+      onMove(e, this);
+    } else {
+      console.warn('Implement me!');
+    }
+  };
+
+  private _handleMoveEnd = (e: MouseEvent) => {
+    const { onMoveEnd } = this.eventHandlers;
+
+    if (onMoveEnd) {
+      onMoveEnd(e, this);
+    } else {
+      console.warn('Implement me!');
+    }
+  };
+
+  private _handlePick = (e: MouseEvent, id: string) => {
+    if (id !== this.id) {
+      return;
+    }
+
+    const { onPick } = this.eventHandlers;
+
+    if (onPick) {
+      onPick(e, this);
+    } else {
+      console.warn('Implement me!');
+    }
+  };
+
+  public get bbox() {
+    return this.group.bbox;
+  }
+
+  public syncCoordToData() {
+    throw Error('Implement me!');
   }
 
   public render(_ctx: CanvasRenderingContext2D) {
-    console.warn('Implement me!');
+    this.group.render(_ctx);
   }
 
   public destroy() {
     this.data = null as any;
     this.group.destroy();
+    eventEmitter.off(EInternalEvent.UnSelect, this._handleUnSelect);
     eventEmitter.off(EInternalEvent.NoTarget, this._handleMouseOut);
+    eventEmitter.off(EInternalEvent.AnnotationMove, this._handleAnnotationMove);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMoveEnd);
+    eventEmitter.off(EInternalEvent.Pick, this._handlePick);
   }
 }

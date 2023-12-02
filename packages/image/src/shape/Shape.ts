@@ -35,6 +35,8 @@ export class Shape<Style> {
 
   private _bboxUpdater?: BBoxUpdater;
 
+  private _prevOpacity: number = 1;
+
   /**
    * 动态坐标
    *
@@ -87,6 +89,7 @@ export class Shape<Style> {
 
   private _bindEvents() {
     eventEmitter.on(EInternalEvent.AxisChange, this._update);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._update);
   }
 
   private _update = () => {
@@ -187,9 +190,10 @@ export class Shape<Style> {
     rbush.remove(this._cachedRBush!);
     this._event.removeAllListeners();
     eventEmitter.off(EInternalEvent.AxisChange, this._update);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this._update);
   }
 
-  public updateStyle(style: Partial<Style>) {
+  public updateStyle(style: Style) {
     this.style = { ...this.style, ...style };
   }
 

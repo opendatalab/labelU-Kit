@@ -6,17 +6,23 @@ export enum EInternalEvent {
   /** 拖拽中 */
   Pan = '__pan__',
 
-  /** 开始移动 */
-  MoveStart = '__move_start__',
+  /** 鼠标滚轮事件 */
+  Wheel = '__wheel__',
 
   /** 移动结束 */
-  MoveEnd = '__move_end__',
+  PanEnd = '__pan_end__',
 
-  /** 移动中 */
-  Move = '__move__',
+  /** 鼠标移动 */
+  MouseMove = '__mouse_move__',
+
+  /** 鼠标按下左键移动 */
+  LeftMouseMove = '__left_mouse_move__',
 
   /** 缩放中 */
   Zoom = '__zoom__',
+
+  /** 图形对象移动 */
+  AnnotationMove = '__annotation_move__',
 
   /** 鼠标左键按下 */
   LeftMouseDown = '__left_mouse_down__',
@@ -29,6 +35,12 @@ export enum EInternalEvent {
 
   /** 鼠标右键松开 */
   RightMouseUp = '__right_mouse_up__',
+
+  /** 右键松开时没有坐标变化 */
+  RightMouseUpWithoutAxisChange = '__right_mouse_up_without_axis_change__',
+
+  /** 左键松开时没有坐标变化 */
+  LeftMouseUpWithoutAxisChange = '__left_mouse_up_without_axis_change__',
 
   /** 鼠标经过 */
   MouseOver = '__mouse_over__',
@@ -51,6 +63,12 @@ export enum EInternalEvent {
    */
   AxisChange = '__axis_change__',
 
+  /** 普通鼠标移动，没有坐标变化 */
+  MouseMoveWithoutAxisChange = '__mouse_move_without_axis_change__',
+
+  /** 坐标上松开鼠标，会携带是否移动过的标识 */
+  AxisMouseUp = '__axis_mouse_up__',
+
   /** 点击 */
   Click = '__click__',
 
@@ -65,6 +83,9 @@ export enum EInternalEvent {
 
   /** 悬浮事件 */
   Hover = '__hover__',
+
+  /** 左键点击已选中的标注 */
+  Pick = '__pick__',
 
   /** 选中事件 */
   Select = '__select__',

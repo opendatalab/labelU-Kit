@@ -71,7 +71,7 @@ export class Annotator {
     // 添加鼠标光标
     this._initialContainer();
     this._initialAxis();
-    this._monitor = new Monitor(this);
+    this._monitor = new Monitor(this.renderer!.canvas);
   }
 
   private _initialContainer() {
@@ -149,7 +149,7 @@ export class Annotator {
       throw new Error(`Tool ${toolName} is not used!`);
     }
 
-    tool.switchToPen(label);
+    tool.activate(label);
   }
 
   public render = () => {

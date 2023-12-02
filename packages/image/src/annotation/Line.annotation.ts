@@ -1,9 +1,9 @@
 import type { BasicImageAnnotation } from '../interface';
+import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import type { LineStyle } from '../shape/Line.shape';
 import { Line } from '../shape/Line.shape';
 import type { AxisPoint } from '../shape/Point.shape';
-import { Hover } from '../decorators/Hover.decorator';
 
 export interface PointItem extends AxisPoint {
   id: string;
@@ -13,10 +13,9 @@ export interface LineData extends BasicImageAnnotation {
   pointList: PointItem[];
 }
 
-@Hover
 export class AnnotationLine extends Annotation<LineData, Line, LineStyle> {
-  constructor(id: string, data: LineData, style: LineStyle, hoveredStyle?: LineStyle) {
-    super(id, data, style, hoveredStyle);
+  constructor(params: AnnotationParams<LineData, LineStyle>) {
+    super(params);
 
     this._setupShapes();
   }
@@ -32,13 +31,5 @@ export class AnnotationLine extends Annotation<LineData, Line, LineStyle> {
 
       group.add(line);
     }
-  }
-
-  public get bbox() {
-    return this.group.bbox;
-  }
-
-  public render(ctx: CanvasRenderingContext2D) {
-    this.group.render(ctx);
   }
 }

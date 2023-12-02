@@ -1,22 +1,6 @@
-import type { AnnotationLine, AnnotationPoint } from '../annotation';
-import type { Annotator } from '../ImageAnnotator';
 import { EInternalEvent } from '../enums';
 import { eventEmitter, rbush } from '../singletons';
 import type { AxisPoint } from '../shape';
-
-function validateAxis(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-  const originalMethod = descriptor.value;
-
-  descriptor.value = function (...args: any[]) {
-    const _this = this as Monitor;
-
-    if (!_this.annotator) {
-      throw new Error('Error: annotator is not defined.');
-    }
-
-    return originalMethod.apply(this, args);
-  };
-}
 
 /**
  * 画布监控器
@@ -24,24 +8,83 @@ function validateAxis(target: any, propertyKey: string, descriptor: PropertyDesc
  * @description 用于监控画布的变化，包括画布的大小、缩放比例、偏移量等
  */
 export class Monitor {
-  private _annotator: Annotator;
+  private _canvas: HTMLCanvasElement;
 
   private _hoveredGroup: any = null;
 
-  private _selectedAnnotation: AnnotationLine | AnnotationPoint | null = null;
+  private _selectedGroup: any = null;
 
-  constructor(annotator: Annotator) {
-    this._annotator = annotator;
+  private _isLeftMouseDown = false;
+
+  private _isSelectedGroupHold = false;
+
+  constructor(canvas: HTMLCanvasElement) {
+    if (!canvas) {
+      throw Error('canvas is required');
+    }
+
+    this._canvas = canvas;
 
     this._bindEvents();
   }
 
-  @validateAxis
   private _bindEvents() {
-    eventEmitter.on(EInternalEvent.Move, this._handleMouseOver);
-    eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
-    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
+    const { _canvas } = this;
+    /**
+     * NOTE: 画布元素的事件监听都应该在这里绑定，而不是在分散具体的工具中绑定
+     */
+    _canvas.addEventListener('mousedown', this._handleMouseDown, false);
+    _canvas.addEventListener('contextmenu', this._handleContextMenu, false);
+    _canvas.addEventListener('mousemove', this._handleMouseMove, false);
+    _canvas.addEventListener('mouseup', this._handleMouseUp, false);
+    _canvas.addEventListener('wheel', this._handleWheel, false);
+
+    eventEmitter.on(EInternalEvent.RightMouseUpWithoutAxisChange, this._handleRightMouseUp);
   }
+
+  private _handleContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+  };
+
+  private _handleMouseDown = (e: MouseEvent) => {
+    if (e.button === 0) {
+      eventEmitter.emit(EInternalEvent.LeftMouseDown, e);
+
+      this._handleLeftMouseDown(e);
+    } else if (e.button === 2) {
+      eventEmitter.emit(EInternalEvent.RightMouseDown, e);
+    }
+  };
+
+  private _handleMouseMove = (e: MouseEvent) => {
+    e.preventDefault();
+
+    if (this._isSelectedGroupHold) {
+      // 移动选中的标注
+      eventEmitter.emit(EInternalEvent.AnnotationMove, e, this._selectedGroup.id);
+    }
+
+    eventEmitter.emit(EInternalEvent.MouseMove, e);
+    this._handleMouseOver(e);
+  };
+
+  private _handleMouseUp = (e: MouseEvent) => {
+    e.preventDefault();
+
+    this._isSelectedGroupHold = false;
+
+    if (e.button === 0) {
+      eventEmitter.emit(EInternalEvent.LeftMouseUp, e);
+    } else if (e.button === 2) {
+      eventEmitter.emit(EInternalEvent.RightMouseUp, e);
+    }
+  };
+
+  private _handleWheel = (e: WheelEvent) => {
+    e.preventDefault();
+
+    eventEmitter.emit(EInternalEvent.Wheel, e);
+  };
 
   /**
    * 全局处理鼠标移动事件
@@ -94,7 +137,18 @@ export class Monitor {
   };
 
   private _handleLeftMouseDown(e: MouseEvent) {
-    console.log('ddddd', e);
+    e.preventDefault();
+
+    const { _hoveredGroup, _selectedGroup } = this;
+
+    this._isLeftMouseDown = true;
+
+    this._isSelectedGroupHold = _hoveredGroup && _selectedGroup && _hoveredGroup.id === _selectedGroup.id;
+
+    // 左键点击选中的标注
+    if (this._isSelectedGroupHold) {
+      eventEmitter.emit(EInternalEvent.Pick, e, _selectedGroup.id);
+    }
   }
 
   /**
@@ -102,25 +156,19 @@ export class Monitor {
    *
    * @description 右键点击选中和取消选中标注
    */
-  private _handleRightMouseUp = (e: MouseEvent, isMoved: boolean) => {
-    // 移动了画布，不触发右键事件处理
-    if (isMoved) {
-      return;
-    }
-    const { _hoveredGroup, _selectedAnnotation } = this;
+  private _handleRightMouseUp = (e: MouseEvent) => {
+    const { _hoveredGroup, _selectedGroup } = this;
 
     if (_hoveredGroup) {
-      if (_selectedAnnotation && _hoveredGroup.id !== _selectedAnnotation?.id) {
-        eventEmitter.emit(EInternalEvent.UnSelect, _selectedAnnotation);
-        eventEmitter.emit('unselect', e, _selectedAnnotation.data);
+      if (_selectedGroup && _hoveredGroup.id !== _selectedGroup.id) {
+        console.log('unselect');
+        eventEmitter.emit(EInternalEvent.UnSelect, e, _selectedGroup.id);
       }
 
-      eventEmitter.emit(EInternalEvent.Select, _hoveredGroup);
-      eventEmitter.emit('select', e, _hoveredGroup.data);
-      this._selectedAnnotation = _hoveredGroup;
-    } else if (_selectedAnnotation) {
-      eventEmitter.emit(EInternalEvent.UnSelect, _selectedAnnotation);
-      eventEmitter.emit('unselect', e, _selectedAnnotation.data);
+      _hoveredGroup.emit(EInternalEvent.Select);
+      this._selectedGroup = _hoveredGroup;
+    } else if (_selectedGroup) {
+      eventEmitter.emit(EInternalEvent.UnSelect, e, _selectedGroup.id);
     }
   };
 
@@ -144,12 +192,14 @@ export class Monitor {
   }
 
   public destroy() {
-    eventEmitter.off(EInternalEvent.Move, this._handleMouseOver);
-    eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
-    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
-  }
+    const { _canvas } = this;
 
-  public get annotator() {
-    return this._annotator;
+    _canvas.removeEventListener('mousedown', this._handleMouseDown);
+    _canvas.removeEventListener('contextmenu', this._handleContextMenu);
+    _canvas.removeEventListener('mousemove', this._handleMouseMove);
+    _canvas.removeEventListener('mouseup', this._handleMouseUp);
+    _canvas.removeEventListener('wheel', this._handleWheel);
+
+    eventEmitter.off(EInternalEvent.RightMouseUpWithoutAxisChange, this._handleRightMouseUp);
   }
 }

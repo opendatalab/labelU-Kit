@@ -39,7 +39,8 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _bindEvents() {
     // 组合的变化只需要在移动结束和缩放结束后更新
-    eventEmitter.on(EInternalEvent.MoveEnd, this._onAxisChange);
+    eventEmitter.on(EInternalEvent.PanEnd, this._onAxisChange);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._onAxisChange);
     eventEmitter.on(EInternalEvent.Zoom, this._onAxisChange);
   }
 
@@ -129,9 +130,9 @@ export class Group<T extends Shape<Style>, Style> {
     this._updateBBox()._updateRBush();
   }
 
-  public each(callback: (shape: T) => void) {
-    this.shapes.forEach((shape) => {
-      callback(shape);
+  public each(callback: (shape: T, idx: number) => void) {
+    this.shapes.forEach((shape, index) => {
+      callback(shape, index);
     });
   }
 
@@ -148,7 +149,8 @@ export class Group<T extends Shape<Style>, Style> {
     rbush.remove(this._cachedRBush!);
     this._shapeMapping.clear();
     this._event.removeAllListeners();
-    eventEmitter.off(EInternalEvent.MoveEnd, this._onAxisChange);
+    eventEmitter.off(EInternalEvent.PanEnd, this._onAxisChange);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this._onAxisChange);
     eventEmitter.off(EInternalEvent.Zoom, this._onAxisChange);
   }
 
