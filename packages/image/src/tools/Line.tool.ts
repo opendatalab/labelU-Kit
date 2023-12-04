@@ -356,9 +356,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     if (draft && _selectedPoint && _previousPointCoordinate) {
       this._destroySelection();
-      _selectedPoint.dynamicCoordinate[0].x = _previousPointCoordinate.x + axis!.distance.x;
-      _selectedPoint.dynamicCoordinate[0].y = _previousPointCoordinate.y + axis!.distance.y;
-
+      _selectedPoint.coordinate = [
+        axis!.getOriginalCoord({
+          x: e.offsetX,
+          y: e.offsetY,
+        }),
+      ];
       // 手动更新组合的包围盒
       draft.group.updateBBox();
       draft.group.updateRBush();
@@ -366,7 +369,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       draft.syncCoordToData();
 
       // 手动更新组合内的图形
-      // NOTE: 必须在把坐标更新到数据data之后再更新坐标
       draft.group.each((shape) => {
         shape.update();
       });
@@ -473,7 +475,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
 
     if (this._creatingShapes) {
-      console.log(this._creatingShapes.shapes);
       this._creatingShapes.render(ctx);
     }
   }

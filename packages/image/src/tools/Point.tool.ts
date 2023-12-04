@@ -165,15 +165,20 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     axis?.rerender();
   };
 
-  private _handleMouseMove = () => {
-    const { previousCoordinates, draft, _isSelectedPointPicked } = this;
+  private _handleMouseMove = (e: MouseEvent) => {
+    const { draft, _isSelectedPointPicked } = this;
     if (!draft || !_isSelectedPointPicked) {
       return;
     }
 
-    draft.group.each((shape, index) => {
-      shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
-      shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
+    draft.group.each((shape) => {
+      shape.coordinate = [
+        axis!.getOriginalCoord({
+          x: e.offsetX,
+          y: e.offsetY,
+        }),
+      ];
+      shape.update();
     });
     draft.group.updateBBox();
     draft.group.updateRBush();
