@@ -35,6 +35,8 @@ export const useEngine = (containerRef: React.RefObject<HTMLDivElement>, options
   return engine;
 };
 
+const tools = [{ name: 'point' }, { name: 'line' }];
+
 export default function App() {
   const ref = useRef<HTMLDivElement>(null);
   const engine = useEngine(ref, {
@@ -98,6 +100,9 @@ export default function App() {
       ],
     },
   });
+
+  const [tool, setTool] = useState('point');
+  const [label, setLabel] = useState('car');
 
   useLayoutEffect(() => {
     if (!engine) {
@@ -193,7 +198,39 @@ export default function App() {
     engine.on('render', () => {
       console.log('Render');
     });
+    engine.on('toolChange', (toolName: string, label: string) => {
+      setTool(toolName);
+      setLabel(label);
+    });
   }, [engine]);
 
-  return <div style={{ margin: '10rem 0 0 10rem' }} ref={ref} />;
+  const switchTool = (tool: string) => () => {
+    engine.switch(tool, 'car');
+    setTool(tool);
+    setLabel('car');
+  };
+
+  return (
+    <div>
+      <div style={{ margin: '10rem 0 0 10rem' }} ref={ref} />
+      <div>
+        {tools.map((item) => (
+          <button
+            style={{
+              backgroundColor: tool === item.name ? '#f60' : '#fff',
+              color: tool === item.name ? '#fff' : '#333',
+              border: '1px solid #e2e2e2',
+              margin: '0 4px',
+              padding: '4px 8px',
+              borderRadius: 3,
+              cursor: 'pointer',
+            }}
+            onClick={switchTool(item.name)}
+          >
+            {item.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
