@@ -142,10 +142,16 @@ export class Group<T extends Shape<Style>, Style> {
     this.updateBBox().updateRBush();
   }
 
-  public each(callback: (shape: T, idx: number) => void) {
-    this.shapes.forEach((shape, index) => {
-      callback(shape, index);
-    });
+  public each(callback: (shape: T, idx: number) => void | boolean) {
+    let shouldContinue = true;
+
+    for (let i = 0; i < this.shapes.length; i += 1) {
+      if (shouldContinue === false) {
+        break;
+      }
+
+      shouldContinue = callback(this.shapes[i], i) as boolean;
+    }
   }
 
   public render(ctx: CanvasRenderingContext2D) {

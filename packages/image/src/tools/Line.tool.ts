@@ -6,7 +6,7 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { LineData } from '../annotation';
 import { AnnotationLine } from '../annotation';
-import type { PointStyle } from '../shape';
+import type { AxisPoint, PointStyle } from '../shape';
 import { Rect, Point } from '../shape';
 import { axis, eventEmitter } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
@@ -103,7 +103,9 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   /**
    * 选中端点
    */
-  private _isPointPicked: boolean = false;
+  private _selectedPoint: Point | null = null;
+
+  private _previousPointCoordinate: AxisPoint | null = null;
 
   constructor(params: LineToolOptions) {
     super({
@@ -268,46 +270,100 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _handleMouseDown = (e: MouseEvent) => {
     const { draft, _selectionShape } = this;
 
-    if (draft && _selectionShape && _selectionShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
-      this._isSelectionPicked = true;
-      this.previousCoordinates = this.getCoordinates();
-      this._destroySelection();
-      axis!.rerender();
+    if (draft) {
+      // ====================== 点击点 ======================
+      draft.group.each((shape) => {
+        if (shape instanceof Point) {
+          if (shape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+            this._selectedPoint = shape;
+            this._previousPointCoordinate = {
+              x: shape.dynamicCoordinate[0].x,
+              y: shape.dynamicCoordinate[0].y,
+            };
+
+            return false;
+          }
+        }
+      });
+
+      // 选中选框
+      if (!this._selectedPoint && _selectionShape && _selectionShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+        this._isSelectionPicked = true;
+        this.previousCoordinates = this.getCoordinates();
+        axis!.rerender();
+      }
       return;
     }
 
     // ====================== 绘制 ======================
+    const { activeLabel } = this;
+
+    console.log('TODO', activeLabel);
+
     this._archive();
   };
 
   private _handleMouseMove = () => {
-    const { draft, previousCoordinates, _isSelectionPicked } = this;
+    const {
+      draft,
+      previousCoordinates,
+      _isSelectionPicked,
+      _selectionShape,
+      _selectedPoint,
+      _previousPointCoordinate,
+    } = this;
 
-    if (!draft || !_isSelectionPicked) {
+    if (!draft) {
       return;
     }
 
-    // 更新草稿坐标
-    draft.group.each((shape, index) => {
-      if (shape instanceof Point) {
-        shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
-        shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
-      } else {
-        shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
-        shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
-        shape.dynamicCoordinate[1].x = previousCoordinates[index][1].x + axis!.distance.x;
-        shape.dynamicCoordinate[1].y = previousCoordinates[index][1].y + axis!.distance.y;
-      }
+    if (!_selectedPoint && !_isSelectionPicked) {
+      return;
+    }
 
-      // 手动更新图形内部的包围盒
-      shape.updateBBox();
-      shape.updateRBush();
-    });
+    if (_selectionShape) {
+      this._destroySelection();
+    }
 
-    draft.group.updateBBox();
-    draft.group.updateRBush();
+    if (_selectedPoint && _previousPointCoordinate) {
+      _selectedPoint.dynamicCoordinate[0].x = _previousPointCoordinate.x + axis!.distance.x;
+      _selectedPoint.dynamicCoordinate[0].y = _previousPointCoordinate.y + axis!.distance.y;
 
-    draft.syncCoordToData();
+      // 手动更新组合的包围盒
+      draft.group.updateBBox();
+      draft.group.updateRBush();
+
+      draft.syncCoordToData();
+
+      // 手动更新组合内的图形
+      // NOTE: 必须在把坐标更新到数据data之后再更新坐标
+      draft.group.each((shape) => {
+        shape.update();
+      });
+    } else {
+      // 更新草稿坐标
+      draft.group.each((shape, index) => {
+        if (shape instanceof Point) {
+          shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
+          shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
+        } else {
+          shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
+          shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
+          shape.dynamicCoordinate[1].x = previousCoordinates[index][1].x + axis!.distance.x;
+          shape.dynamicCoordinate[1].y = previousCoordinates[index][1].y + axis!.distance.y;
+        }
+
+        // 手动更新图形内部的包围盒
+        shape.updateBBox();
+        shape.updateRBush();
+      });
+
+      // 手动更新组合的包围盒
+      draft.group.updateBBox();
+      draft.group.updateRBush();
+
+      draft.syncCoordToData();
+    }
   };
 
   private _handleMouseUp = () => {
@@ -315,9 +371,11 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       this.previousCoordinates = this.getCoordinates();
       this._isSelectionPicked = false;
       this._createSelection();
+    } else if (this._selectedPoint) {
+      this._selectedPoint = null;
+      this._previousPointCoordinate = null;
+      this._createSelection();
     }
-
-    axis!.rerender();
   };
 
   public render(ctx: CanvasRenderingContext2D): void {
