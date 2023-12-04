@@ -158,8 +158,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       order: monitor!.getMaxOrder() + 1,
       id: uuid(),
       label: activeLabel,
-      x: axis!.getOriginalX(e.offsetX - axis!.distance.x),
-      y: axis!.getOriginalY(e.offsetY - axis!.distance.y),
+      x: axis!.getOriginalX(e.offsetX),
+      y: axis!.getOriginalY(e.offsetY),
     });
 
     axis?.rerender();

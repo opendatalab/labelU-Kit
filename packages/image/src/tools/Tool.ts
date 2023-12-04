@@ -85,7 +85,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   public data: Data[];
   public config;
 
-  public activeLabel: string | null = null;
+  public activeLabel: string | undefined = undefined;
 
   public drawing: Map<string, IAnnotation<Data, Style>> | null = new Map();
 
@@ -151,7 +151,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   }
 
   public deactivate() {
-    this.activeLabel = null;
+    this.activeLabel = undefined;
     this.previousCoordinates = [];
   }
 

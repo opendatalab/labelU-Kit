@@ -8,10 +8,11 @@ import type { LineData } from '../annotation';
 import { AnnotationLine } from '../annotation';
 import type { AxisPoint, PointStyle } from '../shape';
 import { Rect, Point } from '../shape';
-import { axis, eventEmitter } from '../singletons';
+import { axis, eventEmitter, monitor } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { EInternalEvent } from '../enums';
+import { Group } from '../shape/Group';
 
 class DraftLine extends Annotation<LineData, Line | Point, LineStyle | PointStyle> {
   constructor(params: AnnotationParams<LineData, LineStyle>) {
@@ -107,6 +108,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   private _previousPointCoordinate: AxisPoint | null = null;
 
+  private _creatingShapes: Group<Line | Point, LineStyle | PointStyle> | null = null;
+
   constructor(params: LineToolOptions) {
     super({
       name: 'line',
@@ -131,6 +134,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
+    eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 
   /**
@@ -144,9 +148,11 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
+    this?._creatingShapes?.destroy();
+    this._creatingShapes = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this._archive();
+    this._archiveDraft();
     this._createDraft(annotation.data);
     // 2. 销毁成品
     this.removeFromDrawing(annotation.id);
@@ -166,8 +172,10 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   protected onUnSelect = (_e: MouseEvent) => {
-    this._archive();
+    this._archiveDraft();
     this._destroySelection();
+    this?._creatingShapes?.destroy();
+    this._creatingShapes = null;
     // 重新渲染
     axis!.rerender();
   };
@@ -232,7 +240,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  private _archive() {
+  private _archiveDraft() {
     const { draft } = this;
 
     if (draft) {
@@ -261,16 +269,16 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       (bbox.maxY - bbox.minY) / axis!.scale,
       // TODO: 选中框样式开放配置
       {
-        stroke: 'red',
-        strokeWidth: 5,
+        stroke: '#fff',
+        strokeWidth: 1,
       },
     );
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
-    const { draft, _selectionShape } = this;
+    const { draft, _selectionShape, _creatingShapes } = this;
 
-    if (draft) {
+    if (draft && !_creatingShapes) {
       // ====================== 点击点 ======================
       draft.group.each((shape) => {
         if (shape instanceof Point) {
@@ -286,46 +294,68 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         }
       });
 
+      // 选中点后不继续执行
+      if (this._selectedPoint) {
+        return;
+      }
+
       // 选中选框
-      if (!this._selectedPoint && _selectionShape && _selectionShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+      if (_selectionShape && _selectionShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
         this._isSelectionPicked = true;
         this.previousCoordinates = this.getCoordinates();
-        axis!.rerender();
+
+        return;
       }
-      return;
     }
 
     // ====================== 绘制 ======================
-    const { activeLabel } = this;
+    const { activeLabel, style } = this;
 
-    console.log('TODO', activeLabel);
+    if (!activeLabel) {
+      return;
+    }
 
-    this._archive();
+    // 先归档上一次的草稿
+    this._archiveDraft();
+
+    if (!_creatingShapes) {
+      this._creatingShapes = new Group(uuid(), monitor!.getMaxOrder() + 1);
+    }
+
+    const startPoint = axis!.getOriginalCoord({
+      x: e.offsetX - axis!.distance.x,
+      y: e.offsetY - axis!.distance.y,
+    });
+
+    // 创建新的线段
+    this._creatingShapes?.add(
+      new Line({
+        id: uuid(),
+        style: { ...style, stroke: this.getLabelColor(activeLabel) },
+        coordinate: [
+          {
+            ...startPoint,
+          },
+          {
+            ...startPoint,
+          },
+        ],
+      }),
+    );
   };
 
-  private _handleMouseMove = () => {
+  private _handleMouseMove = (e: MouseEvent) => {
     const {
       draft,
       previousCoordinates,
       _isSelectionPicked,
-      _selectionShape,
       _selectedPoint,
       _previousPointCoordinate,
+      _creatingShapes,
     } = this;
 
-    if (!draft) {
-      return;
-    }
-
-    if (!_selectedPoint && !_isSelectionPicked) {
-      return;
-    }
-
-    if (_selectionShape) {
+    if (draft && _selectedPoint && _previousPointCoordinate) {
       this._destroySelection();
-    }
-
-    if (_selectedPoint && _previousPointCoordinate) {
       _selectedPoint.dynamicCoordinate[0].x = _previousPointCoordinate.x + axis!.distance.x;
       _selectedPoint.dynamicCoordinate[0].y = _previousPointCoordinate.y + axis!.distance.y;
 
@@ -340,7 +370,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       draft.group.each((shape) => {
         shape.update();
       });
-    } else {
+    } else if (draft && _isSelectionPicked) {
+      this._destroySelection();
       // 更新草稿坐标
       draft.group.each((shape, index) => {
         if (shape instanceof Point) {
@@ -363,6 +394,17 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       draft.group.updateRBush();
 
       draft.syncCoordToData();
+    } else if (_creatingShapes) {
+      // 正在绘制的线段，最后一个端点的坐标跟随鼠标
+      const { shapes } = _creatingShapes;
+      const lastShape = shapes[shapes.length - 1];
+      lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
+      lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
+      shapes.forEach((shape) => {
+        shape.update();
+      });
+      _creatingShapes.updateBBox();
+      _creatingShapes.updateRBush();
     }
   };
 
@@ -378,11 +420,61 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   };
 
+  private _handleRightMouseUp = () => {
+    // 归档创建中的图形
+    if (this._creatingShapes) {
+      const points = [];
+      // 最后一个点不需要加入标注
+      for (let i = 0; i < this._creatingShapes.shapes.length - 1; i++) {
+        const shape = this._creatingShapes.shapes[i];
+        if (i === 0) {
+          points.push(
+            {
+              id: shape.id,
+              x: axis!.getOriginalX(shape.dynamicCoordinate[0].x),
+              y: axis!.getOriginalY(shape.dynamicCoordinate[0].y),
+            },
+            {
+              id: uuid(),
+              x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
+              y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
+            },
+          );
+        } else {
+          points.push({
+            id: uuid(),
+            x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
+            y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
+          });
+        }
+      }
+      const data: LineData = {
+        id: uuid(),
+        pointList: points,
+        label: this.activeLabel,
+        order: monitor!.getMaxOrder() + 1,
+      };
+
+      this._addAnnotation(data);
+      this._creatingShapes.destroy();
+      this._creatingShapes = null;
+      axis!.rerender();
+      // TODO: 选中刚刚创建的标注
+      this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationLine);
+      monitor!.setSelectedAnnotationId(data.id);
+    }
+  };
+
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 
     if (this._selectionShape) {
       this._selectionShape.render(ctx);
+    }
+
+    if (this._creatingShapes) {
+      console.log(this._creatingShapes.shapes);
+      this._creatingShapes.render(ctx);
     }
   }
 
@@ -392,5 +484,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
+    eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 }
