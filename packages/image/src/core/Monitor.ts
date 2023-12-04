@@ -49,8 +49,6 @@ export class Monitor {
   private _handleMouseDown = (e: MouseEvent) => {
     if (e.button === 0) {
       eventEmitter.emit(EInternalEvent.LeftMouseDown, e);
-
-      this._handleLeftMouseDown(e);
     } else if (e.button === 2) {
       eventEmitter.emit(EInternalEvent.RightMouseDown, e);
     }
@@ -58,11 +56,6 @@ export class Monitor {
 
   private _handleMouseMove = (e: MouseEvent) => {
     e.preventDefault();
-
-    if (this._isSelectedGroupHold) {
-      // 移动选中的标注
-      eventEmitter.emit(EInternalEvent.AnnotationMove, e, this.selectedAnnotationId);
-    }
 
     eventEmitter.emit(EInternalEvent.MouseMove, e);
     this._handleMouseOver(e);
@@ -93,7 +86,7 @@ export class Monitor {
    */
   private _handleMouseOver = (e: MouseEvent) => {
     const { _hoveredGroup } = this;
-    const rbushItems = this._scanCanvasObject({ x: e.offsetX, y: e.offsetY });
+    const rbushItems = this.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
     const orderIndexedGroup: any[] = [];
 
     for (const rbushItem of rbushItems) {
@@ -136,21 +129,6 @@ export class Monitor {
     }
   };
 
-  private _handleLeftMouseDown(e: MouseEvent) {
-    e.preventDefault();
-
-    const { _hoveredGroup, selectedAnnotationId } = this;
-
-    this._isSelectedGroupHold = _hoveredGroup && selectedAnnotationId && _hoveredGroup.id === selectedAnnotationId;
-
-    // 左键点击选中的标注
-    if (this._isSelectedGroupHold) {
-      eventEmitter.emit(EInternalEvent.Pick, e, selectedAnnotationId);
-    } else {
-      eventEmitter.emit(EInternalEvent.LeftMouseDownWithoutTarget, e);
-    }
-  }
-
   /**
    * 处理全局的右键事件
    *
@@ -181,7 +159,7 @@ export class Monitor {
    * 3. 根据图形类别，判断鼠标是否真实落在图形上
    * @param e
    */
-  private _scanCanvasObject(mouseCoord: AxisPoint) {
+  public scanCanvasObject(mouseCoord: AxisPoint) {
     return rbush.search({
       minX: mouseCoord.x,
       minY: mouseCoord.y,

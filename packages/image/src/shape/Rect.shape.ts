@@ -59,10 +59,8 @@ export class Rect extends Shape<RectStyle> {
       this.style = { ...this.style, ...style };
     }
 
-    this.setBBoxUpdater((dynamicCoordinate) => {
-      const [{ x, y }] = dynamicCoordinate;
-
-      console.log('dddddd', x, y, width, height);
+    this.setBBoxUpdater(() => {
+      const [{ x, y }] = this.dynamicCoordinate;
 
       return {
         minX: x,
@@ -71,6 +69,26 @@ export class Rect extends Shape<RectStyle> {
         maxY: y + height * axis!.scale,
       };
     });
+  }
+
+  /**
+   * 是否在鼠标指针下
+   *
+   * @param mouseCoord 鼠标坐标
+   */
+  public isUnderCursor(mouseCoord: AxisPoint) {
+    const { bbox } = this;
+
+    if (
+      mouseCoord.x >= bbox.minX &&
+      mouseCoord.x <= bbox.maxX &&
+      mouseCoord.y >= bbox.minY &&
+      mouseCoord.y <= bbox.maxY
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   public render(ctx: CanvasRenderingContext2D | null) {

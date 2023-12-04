@@ -42,6 +42,7 @@ export interface PointToolOptions extends BasicToolParams<PointData, PointStyle>
 }
 
 export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
+  private _isSelectedPointPicked: boolean = false;
   constructor(params: PointToolOptions) {
     super({
       name: 'point',
@@ -63,12 +64,14 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     this._createDrawingFromData();
 
-    eventEmitter.on(EInternalEvent.LeftMouseDownWithoutTarget, this._handleMouseDown);
+    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+    eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
   }
 
   private _createDrawingFromData(data: PointData[] = this.data) {
     for (const item of data) {
-      this.addAnnotation(item);
+      this._addAnnotation(item);
     }
   }
 
@@ -79,15 +82,12 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       id: data.id || uuid(),
       data,
       style: { ...style, ...selectedStyle },
-      onPick: this.onPick,
       onUnSelect: this.onUnSelect,
-      onMove: this.onMove,
-      onMoveEnd: this.onMoveEnd,
     });
     monitor!.setSelectedAnnotationId(this.draft.id);
   }
 
-  public addAnnotation(data: PointData) {
+  private _addAnnotation(data: PointData) {
     const { style, hoveredStyle } = this;
 
     this.drawing!.set(
@@ -125,43 +125,25 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     axis!.rerender();
   };
 
-  /**
-   * 移动选中的点
-   */
-  protected onMove = (_e: MouseEvent) => {
-    const { draft, previousCoordinates } = this;
-
-    if (!draft) {
-      return;
-    }
-
-    draft.group.each((shape, index) => {
-      shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
-      shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
-    });
-
-    draft.syncCoordToData();
-  };
-
-  protected onMoveEnd = () => {
-    this.previousCoordinates = this.getCoordinates();
-  };
-
-  public render(ctx: CanvasRenderingContext2D): void {
-    super.render(ctx);
-  }
-
   private _archive() {
     const { draft } = this;
 
     if (draft) {
-      this.addAnnotation(draft.data);
+      this._addAnnotation(draft.data);
       draft.destroy();
       this.draft = null;
     }
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
+    if (this.draft && this.draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+      this.previousCoordinates = this.getCoordinates();
+      this._isSelectedPointPicked = true;
+      return;
+    }
+
+    // ====================== 绘制 ======================
+
     const { activeLabel } = this;
 
     // 没有激活工具则不进行绘制
@@ -182,4 +164,36 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     axis?.rerender();
   };
+
+  private _handleMouseMove = () => {
+    const { previousCoordinates, draft, _isSelectedPointPicked } = this;
+    if (!draft || !_isSelectedPointPicked) {
+      return;
+    }
+
+    draft.group.each((shape, index) => {
+      shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
+      shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
+    });
+    draft.group.updateBBox();
+    draft.group.updateRBush();
+    draft.syncCoordToData();
+  };
+
+  private _handleMouseUp = () => {
+    this.previousCoordinates = this.getCoordinates();
+    this._isSelectedPointPicked = false;
+  };
+
+  public destroy(): void {
+    super.destroy();
+
+    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+    eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
+  }
+
+  public render(ctx: CanvasRenderingContext2D): void {
+    super.render(ctx);
+  }
 }

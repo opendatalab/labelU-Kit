@@ -121,10 +121,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.data = data || [];
   }
 
-  public addAnnotation(_data: Data) {
-    console.error('Implement me!');
-  }
-
   public render(ctx: CanvasRenderingContext2D) {
     const { drawing, draft } = this;
 

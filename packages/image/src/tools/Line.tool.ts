@@ -94,6 +94,17 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
 // @MouseDecorator
 export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _selectionShape: Rect | null = null;
+
+  /**
+   * 选中选框
+   */
+  private _isSelectionPicked: boolean = false;
+
+  /**
+   * 选中端点
+   */
+  private _isPointPicked: boolean = false;
+
   constructor(params: LineToolOptions) {
     super({
       name: 'line',
@@ -115,30 +126,9 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     this._init();
 
-    eventEmitter.on(EInternalEvent.LeftMouseDownWithoutTarget, this._handleMouseDown);
-  }
-
-  private _init() {
-    const { data = [] } = this;
-
-    for (const annotation of data) {
-      this.addAnnotation(annotation);
-    }
-  }
-
-  public addAnnotation(data: LineData) {
-    const { style, hoveredStyle, drawing } = this;
-
-    drawing!.set(
-      data.id,
-      new AnnotationLine({
-        id: data.id,
-        data,
-        style: { ...style, stroke: this.getLabelColor(data.label) },
-        hoveredStyle,
-        onSelect: this.onSelect,
-      }),
-    );
+    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+    eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
   }
 
   /**
@@ -151,7 +141,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
    *  2.1. 创建新的drawing（成品），需要包含点、线
    *  2.2. 创建选中包围盒
    */
-  public onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
+  protected onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._archive();
@@ -173,19 +163,35 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     axis!.rerender();
   };
 
-  public onUnSelect = (_e: MouseEvent) => {
+  protected onUnSelect = (_e: MouseEvent) => {
     this._archive();
     this._destroySelection();
     // 重新渲染
     axis!.rerender();
   };
 
-  protected onPick = (_e: MouseEvent) => {
-    this.previousCoordinates = this.getCoordinates();
-    this._destroySelection();
-    // 重新渲染
-    axis!.rerender();
-  };
+  private _init() {
+    const { data = [] } = this;
+
+    for (const annotation of data) {
+      this._addAnnotation(annotation);
+    }
+  }
+
+  private _addAnnotation(data: LineData) {
+    const { style, hoveredStyle, drawing } = this;
+
+    drawing!.set(
+      data.id,
+      new AnnotationLine({
+        id: data.id,
+        data,
+        style: { ...style, stroke: this.getLabelColor(data.label) },
+        hoveredStyle,
+        onSelect: this.onSelect,
+      }),
+    );
+  }
 
   protected handlePointStyle = () => {
     const { draft } = this;
@@ -203,10 +209,81 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     });
   };
 
-  protected onMove = (_e: MouseEvent) => {
-    const { draft, previousCoordinates } = this;
+  private _createDraft(data: LineData) {
+    const { style } = this;
 
-    if (!draft) {
+    this.draft = new DraftLine({
+      id: data.id,
+      data,
+      style: { ...style, stroke: this.getLabelColor(data.label) },
+      // 在草稿上添加取消选中的事件监听
+      onUnSelect: this.onUnSelect,
+      onBBoxOut: this.handlePointStyle,
+      onBBoxOver: this.handlePointStyle,
+    });
+  }
+
+  private _destroySelection() {
+    if (this._selectionShape) {
+      this._selectionShape.destroy();
+      this._selectionShape = null;
+    }
+  }
+
+  private _archive() {
+    const { draft } = this;
+
+    if (draft) {
+      this._addAnnotation(draft.data);
+      draft.destroy();
+      this._destroySelection();
+      this.draft = null;
+    }
+  }
+
+  private _createSelection() {
+    if (this._selectionShape) {
+      this._selectionShape.destroy();
+    }
+
+    const { draft } = this;
+    const bbox = draft!.group.bbox;
+
+    this._selectionShape = new Rect(
+      uuid(),
+      axis!.getOriginalCoord({
+        x: bbox.minX,
+        y: bbox.minY,
+      }),
+      (bbox.maxX - bbox.minX) / axis!.scale,
+      (bbox.maxY - bbox.minY) / axis!.scale,
+      // TODO: 选中框样式开放配置
+      {
+        stroke: 'red',
+        strokeWidth: 5,
+      },
+    );
+  }
+
+  private _handleMouseDown = (e: MouseEvent) => {
+    const { draft, _selectionShape } = this;
+
+    if (draft && _selectionShape && _selectionShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+      this._isSelectionPicked = true;
+      this.previousCoordinates = this.getCoordinates();
+      this._destroySelection();
+      axis!.rerender();
+      return;
+    }
+
+    // ====================== 绘制 ======================
+    this._archive();
+  };
+
+  private _handleMouseMove = () => {
+    const { draft, previousCoordinates, _isSelectionPicked } = this;
+
+    if (!draft || !_isSelectionPicked) {
       return;
     }
 
@@ -227,17 +304,20 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       shape.updateRBush();
     });
 
-    draft.syncCoordToData();
+    draft.group.updateBBox();
+    draft.group.updateRBush();
 
-    if (this._selectionShape) {
-      this._selectionShape.dynamicCoordinate[0].x = draft.bbox.minX + axis!.distance.x;
-      this._selectionShape.dynamicCoordinate[0].y = draft.bbox.minY + axis!.distance.y;
-    }
+    draft.syncCoordToData();
   };
 
-  protected onMoveEnd = () => {
-    this.previousCoordinates = this.getCoordinates();
-    this._createSelection();
+  private _handleMouseUp = () => {
+    if (this._isSelectionPicked) {
+      this.previousCoordinates = this.getCoordinates();
+      this._isSelectionPicked = false;
+      this._createSelection();
+    }
+
+    axis!.rerender();
   };
 
   public render(ctx: CanvasRenderingContext2D): void {
@@ -248,66 +328,11 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  private _createDraft(data: LineData) {
-    const { style } = this;
+  public destroy(): void {
+    super.destroy();
 
-    this.draft = new DraftLine({
-      id: data.id,
-      data,
-      style: { ...style, stroke: this.getLabelColor(data.label) },
-      // 在草稿上添加取消选中的事件监听
-      onUnSelect: this.onUnSelect,
-      onBBoxOut: this.handlePointStyle,
-      onBBoxOver: this.handlePointStyle,
-      onPick: this.onPick,
-      onMove: this.onMove,
-      onMoveEnd: this.onMoveEnd,
-    });
-  }
-
-  private _archive() {
-    const { draft } = this;
-
-    if (draft) {
-      this.addAnnotation(draft.data);
-      draft.destroy();
-      this._destroySelection();
-      this.draft = null;
-    }
-  }
-
-  private _createSelection() {
-    if (this._selectionShape) {
-      this._selectionShape.destroy();
-    }
-
-    const { draft } = this;
-    const bbox = draft!.bbox;
-
-    this._selectionShape = new Rect(
-      uuid(),
-      axis!.getOriginalCoord({
-        x: bbox.minX,
-        y: bbox.minY,
-      }),
-      (bbox.maxX - bbox.minX) / axis!.scale,
-      (bbox.maxY - bbox.minY) / axis!.scale,
-      // TODO: 选中框样式开放配置
-      {
-        stroke: 'red',
-        strokeWidth: 5,
-      },
-    );
-  }
-
-  private _handleMouseDown = () => {
-    this._archive();
-  };
-
-  private _destroySelection() {
-    if (this._selectionShape) {
-      this._selectionShape.destroy();
-      this._selectionShape = null;
-    }
+    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+    eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
   }
 }

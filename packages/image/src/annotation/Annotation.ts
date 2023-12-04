@@ -80,11 +80,8 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     this.group.on(EInternalEvent.BBoxOut, this._handleMouseOut);
 
     eventEmitter.on(EInternalEvent.Select, this._handleSelect);
-    eventEmitter.on(EInternalEvent.AnnotationMove, this._handleAnnotationMove);
-    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMoveEnd);
     eventEmitter.on(EInternalEvent.UnSelect, this._handleUnSelect);
     eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
-    eventEmitter.on(EInternalEvent.Pick, this._handlePick);
 
     // 建立order和id的映射关系
     monitor?.setOrderIndexedAnnotationIds(data.order, id);
@@ -143,44 +140,6 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     }
   };
 
-  private _handleAnnotationMove = (e: MouseEvent, id: string) => {
-    if (id !== this.id) {
-      return;
-    }
-
-    const { onMove } = this.eventHandlers;
-
-    if (onMove) {
-      onMove(e, this);
-    } else {
-      console.warn('Implement me!');
-    }
-  };
-
-  private _handleMoveEnd = (e: MouseEvent) => {
-    const { onMoveEnd } = this.eventHandlers;
-
-    if (onMoveEnd) {
-      onMoveEnd(e, this);
-    } else {
-      console.warn('Implement me!');
-    }
-  };
-
-  private _handlePick = (e: MouseEvent, id: string) => {
-    if (id !== this.id) {
-      return;
-    }
-
-    const { onPick } = this.eventHandlers;
-
-    if (onPick) {
-      onPick(e, this);
-    } else {
-      console.warn('Implement me!');
-    }
-  };
-
   public get bbox() {
     return this.group.bbox;
   }
@@ -199,8 +158,5 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     eventEmitter.off(EInternalEvent.Select, this._handleSelect);
     eventEmitter.off(EInternalEvent.UnSelect, this._handleUnSelect);
     eventEmitter.off(EInternalEvent.NoTarget, this._handleMouseOut);
-    eventEmitter.off(EInternalEvent.AnnotationMove, this._handleAnnotationMove);
-    eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMoveEnd);
-    eventEmitter.off(EInternalEvent.Pick, this._handlePick);
   }
 }
