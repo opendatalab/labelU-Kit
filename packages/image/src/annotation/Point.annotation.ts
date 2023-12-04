@@ -17,7 +17,11 @@ export class AnnotationPoint extends Annotation<PointData, Point, PointStyle> {
   private _setupShapes() {
     const { data, style, group } = this;
 
-    const point = new Point(data.id, data, style);
+    const point = new Point({
+      id: data.id,
+      coordinate: data,
+      style,
+    });
 
     group.add(point);
   }

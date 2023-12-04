@@ -1,5 +1,7 @@
 /** 内部事件名列表 */
 export enum EInternalEvent {
+  /** 工具变更 */
+  ToolChange = '__tool_change__',
   /** 拖拽开始 */
   PanStart = '__pan_start__',
 

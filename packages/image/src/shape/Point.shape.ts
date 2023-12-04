@@ -57,6 +57,21 @@ export interface PointStyle {
   endAngle?: number;
 }
 
+export interface PointParams {
+  id: string;
+  coordinate: AxisPoint;
+  style?: PointStyle;
+
+  /**
+   * 计算包围盒时是否忽略半径
+   *
+   * @description 当计算组Group的包围盒时，需要忽略半径
+   *
+   * @default false
+   */
+  groupIgnoreRadius?: boolean;
+}
+
 /**
  * 基础图形点
  */
@@ -80,15 +95,28 @@ export class Point extends Shape<PointStyle> {
 
   public style: Required<PointStyle> = Point.DEFAULT_STYLE;
 
-  constructor(id: string, coordinate: AxisPoint, style: PointStyle) {
+  public groupIgnoreRadius: boolean = false;
+
+  constructor({ id, coordinate, style, groupIgnoreRadius = false }: PointParams) {
     super(id, coordinate);
 
     if (style) {
       this.style = { ...this.style, ...style };
     }
 
+    this.groupIgnoreRadius = groupIgnoreRadius;
+
     this.setBBoxUpdater(() => {
       const [{ x, y }] = this.dynamicCoordinate;
+
+      if (this.groupIgnoreRadius) {
+        return {
+          minX: x,
+          minY: y,
+          maxX: x,
+          maxY: y,
+        };
+      }
 
       return {
         minX: x - this.style.radius,

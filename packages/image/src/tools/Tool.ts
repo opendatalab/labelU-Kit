@@ -1,9 +1,47 @@
-import type { Attribute, ILabel } from '@labelu/interface';
+import { type Attribute, type ILabel } from '@labelu/interface';
 import cloneDeep from 'lodash.clonedeep';
 
+import { EInternalEvent } from '../enums';
 import type { Annotation } from '../annotation/Annotation';
-import type { BasicImageAnnotation } from '../interface';
+import type { ToolName, BasicImageAnnotation } from '../interface';
 import type { AxisPoint, Shape } from '../shape';
+import { eventEmitter } from '../singletons';
+
+export function MouseDecorator<T extends { new (...args: any[]): any }>(constructor: T) {
+  return class extends constructor {
+    constructor(...args: any[]) {
+      super(...args);
+
+      eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+      eventEmitter.on(EInternalEvent.AnnotationMove, this._handleMouseMove);
+      eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
+    }
+    public _handleMouseDown = (e: MouseEvent) => {
+      if (typeof this.onMouseDown === 'function') {
+        this.onMouseDown(e);
+      }
+    };
+
+    public _handleMouseMove = (e: MouseEvent) => {
+      if (typeof this.onMouseMove === 'function') {
+        this.onMouseMove(e);
+      }
+    };
+
+    public _handleMouseUp = (e: MouseEvent) => {
+      if (typeof this.onMouseUp === 'function') {
+        this.onMouseUp(e);
+      }
+    };
+
+    public destroy() {
+      super.destroy();
+      eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+      eventEmitter.off(EInternalEvent.LeftMouseMove, this._handleMouseMove);
+      eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
+    }
+  };
+}
 
 export const TOOL_HOVER = 'tool:hover';
 
@@ -22,14 +60,19 @@ export interface BasicToolParams<Data, Style> {
   selectedStyle?: Style;
 }
 
-type IAnnotation<Style> = Annotation<BasicImageAnnotation, Shape<Style>, Style>;
+type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Shape<Style>, Style>;
 
-type ConfigOmit<T> = Omit<T, 'data' | 'style' | 'hoveredStyle'>;
+type ConfigOmit<T> = Omit<T, 'data' | 'style' | 'hoveredStyle' | 'name'>;
+
+interface ExtraParams {
+  name: ToolName;
+}
 
 /**
  * 工具基类
  */
 export class Tool<Data extends BasicImageAnnotation, Style, Config extends BasicToolParams<Data, Style>> {
+  public name: ToolName;
   public defaultColor = '#000';
 
   public labelMapping = new Map();
@@ -44,19 +87,21 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   public activeLabel: string | null = null;
 
-  public drawing: Map<string, IAnnotation<Style>> | null = new Map();
+  public drawing: Map<string, IAnnotation<Data, Style>> | null = new Map();
 
   /**
    * 绘制过程中的临时数据，并未真正添加到数据中
    * Group<Line, LineStyle>
    */
-  public draft: IAnnotation<Style> | null = null;
+  public draft: IAnnotation<Data, Style> | null = null;
 
   protected previousCoordinates: AxisPoint[][] = [];
 
-  constructor({ data, style, hoveredStyle, selectedStyle, ...config }: Required<Config>) {
+  constructor({ name, data, style, hoveredStyle, selectedStyle, ...config }: Required<Config> & ExtraParams) {
     // 创建标签映射
     this._createLabelMapping(config.labels);
+
+    this.name = name;
 
     if (style) {
       this.style = {
@@ -94,13 +139,14 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     }
   }
 
-  public updateStyle(style: Style) {
-    this.style = { ...this.style, ...style };
-  }
+  public activate(label?: string) {
+    const { activeLabel } = this;
 
-  public activate(label: string) {
-    if (typeof this.getLabelByValue(label) === 'undefined') {
-      console.warn('label is not defined', label);
+    if (!label) {
+      // 没有传入label且当前没有使用过label，则使用第一个label
+      if (!activeLabel) {
+        this.activeLabel = this.labelMapping.keys().next().value;
+      }
 
       return;
     }

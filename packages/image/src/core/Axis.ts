@@ -158,10 +158,13 @@ export class Axis {
   }
 
   private _handleLeftMouseUp = () => {
-    this._startMovePoint = null;
+    // 内部可能有模块还在使用这些变量，所以延迟清空
+    setTimeout(() => {
+      this._startMovePoint = null;
 
-    this._distanceX = 0;
-    this._distanceY = 0;
+      this._distanceX = 0;
+      this._distanceY = 0;
+    });
   };
 
   private _handleRightMouseUp = (e: MouseEvent) => {

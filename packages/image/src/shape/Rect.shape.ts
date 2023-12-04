@@ -59,8 +59,10 @@ export class Rect extends Shape<RectStyle> {
       this.style = { ...this.style, ...style };
     }
 
-    this.setBBoxUpdater(() => {
-      const [{ x, y }] = this.dynamicCoordinate;
+    this.setBBoxUpdater((dynamicCoordinate) => {
+      const [{ x, y }] = dynamicCoordinate;
+
+      console.log('dddddd', x, y, width, height);
 
       return {
         minX: x,

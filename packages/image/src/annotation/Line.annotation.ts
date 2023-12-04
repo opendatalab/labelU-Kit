@@ -27,7 +27,11 @@ export class AnnotationLine extends Annotation<LineData, Line, LineStyle> {
       const startPoint = data.pointList[i - 1];
       const endPoint = data.pointList[i];
 
-      const line = new Line(startPoint.id, [startPoint, endPoint], style);
+      const line = new Line({
+        id: startPoint.id,
+        coordinate: [startPoint, endPoint],
+        style,
+      });
 
       group.add(line);
     }

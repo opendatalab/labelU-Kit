@@ -75,8 +75,10 @@ export class Annotator {
     this._initialAxis();
     this._monitor = createMonitor(this.renderer!.canvas);
 
+    eventEmitter.on(EInternalEvent.ToolChange, this._handleToolChange);
+
     // debug
-    window.monitor = this._monitor;
+    // window.monitor = this._monitor;
   }
 
   private _initialContainer() {
@@ -115,17 +117,22 @@ export class Annotator {
     eventEmitter.on(EInternalEvent.Render, this.render);
   }
 
+  private _handleToolChange = (toolName: ToolName, label: string) => {
+    this.emit('toolChange', toolName, label);
+    this.switch(toolName, label);
+  };
+
   public get monitor() {
     return this._monitor;
   }
 
   public use(instance: AnnotationTool) {
     const { _tools } = this;
-    if (_tools.has(instance.toolName)) {
-      throw new Error(`Tool ${instance.toolName} already exists!`);
+    if (_tools.has(instance.name)) {
+      throw new Error(`Tool ${instance.name} already exists!`);
     }
 
-    _tools.set(instance.toolName, instance);
+    _tools.set(instance.name, instance);
 
     return this;
   }
@@ -204,7 +211,6 @@ export class Annotator {
         }),
       );
     } else if (toolName == 'point') {
-      console.log(PointTool);
       this.use(
         new PointTool({
           ...this._config.point,

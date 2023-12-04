@@ -5,7 +5,7 @@ import type { Shape } from './Shape';
 import { EInternalEvent } from '../enums';
 import type { RBushItem } from '../singletons';
 import { eventEmitter, rbush } from '../singletons';
-import type { AxisPoint } from './Point.shape';
+import { Point, type AxisPoint } from './Point.shape';
 
 /**
  * 组合类，用于组合多个图形
@@ -41,21 +41,29 @@ export class Group<T extends Shape<Style>, Style> {
     // 组合的变化只需要在移动结束和缩放结束后更新
     eventEmitter.on(EInternalEvent.PanEnd, this._onAxisChange);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._onAxisChange);
+    eventEmitter.on(EInternalEvent.AnnotationMove, this._onAxisChange);
     eventEmitter.on(EInternalEvent.Zoom, this._onAxisChange);
   }
 
   private _onAxisChange = () => {
     // 组合在图形之后创建，所以需要延迟一帧更新
     setTimeout(() => {
-      this._updateBBox()._updateRBush();
+      this.updateBBox().updateRBush();
     });
   };
 
-  private _updateBBox() {
-    const minX = Math.min(...this.shapes.map((shape) => shape.bbox.minX));
-    const minY = Math.min(...this.shapes.map((shape) => shape.bbox.minY));
-    const maxX = Math.max(...this.shapes.map((shape) => shape.bbox.maxX));
-    const maxY = Math.max(...this.shapes.map((shape) => shape.bbox.maxY));
+  public updateBBox() {
+    const finalShapes = this.shapes.filter((shape) => {
+      if (shape instanceof Point && shape.groupIgnoreRadius) {
+        return false;
+      }
+      return true;
+    });
+
+    const minX = Math.min(...finalShapes.map((shape) => shape.bbox.minX));
+    const minY = Math.min(...finalShapes.map((shape) => shape.bbox.minY));
+    const maxX = Math.max(...finalShapes.map((shape) => shape.bbox.maxX));
+    const maxY = Math.max(...finalShapes.map((shape) => shape.bbox.maxY));
 
     this.bbox = {
       minX,
@@ -67,7 +75,7 @@ export class Group<T extends Shape<Style>, Style> {
     return this;
   }
 
-  private _updateRBush() {
+  public updateRBush() {
     const { _cachedRBush, bbox } = this;
 
     if (_cachedRBush) {
@@ -101,10 +109,14 @@ export class Group<T extends Shape<Style>, Style> {
 
   public add(...shapes: T[]) {
     shapes.forEach((shape) => {
+      if (this._shapeMapping.has(shape.id)) {
+        throw Error(`Shape with id ${shape.id} already exists!`);
+      }
+
       this._shapeMapping.set(shape.id, shape);
     });
 
-    this._updateBBox()._updateRBush();
+    this.updateBBox().updateRBush();
   }
 
   /**
@@ -127,7 +139,7 @@ export class Group<T extends Shape<Style>, Style> {
       this._shapeMapping.delete(shape.id);
     });
 
-    this._updateBBox()._updateRBush();
+    this.updateBBox().updateRBush();
   }
 
   public each(callback: (shape: T, idx: number) => void) {
@@ -151,6 +163,7 @@ export class Group<T extends Shape<Style>, Style> {
     this._event.removeAllListeners();
     eventEmitter.off(EInternalEvent.PanEnd, this._onAxisChange);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._onAxisChange);
+    eventEmitter.off(EInternalEvent.AnnotationMove, this._onAxisChange);
     eventEmitter.off(EInternalEvent.Zoom, this._onAxisChange);
   }
 

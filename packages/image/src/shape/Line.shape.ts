@@ -15,6 +15,12 @@ type LineCoordinate = [
   AxisPoint,
 ];
 
+export interface LineParams {
+  id: string;
+  coordinate: LineCoordinate;
+  style?: LineStyle;
+}
+
 export class Line extends Shape<LineStyle> {
   /**
    * Rbush 碰撞检测阈值
@@ -31,7 +37,7 @@ export class Line extends Shape<LineStyle> {
 
   public style: Required<LineStyle> = Line.DEFAULT_STYLE;
 
-  constructor(id: string, coordinate: LineCoordinate, style: LineStyle) {
+  constructor({ id, coordinate, style }: LineParams) {
     super(id, coordinate);
 
     if (style) {

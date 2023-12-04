@@ -21,7 +21,7 @@ export interface AxisChangeCallbacks {
 }
 
 type CoordinateUpdater = () => AxisPoint[];
-type BBoxUpdater = () => BBox;
+type BBoxUpdater = (coordinates: AxisPoint[]) => BBox;
 
 /**
  * 画布上的图形对象（基类）
@@ -84,28 +84,28 @@ export class Shape<Style> {
     this.dynamicCoordinate = this.coordinate;
 
     this._bindEvents();
-    this._update();
+    this.update();
   }
 
   private _bindEvents() {
-    eventEmitter.on(EInternalEvent.AxisChange, this._update);
-    eventEmitter.on(EInternalEvent.LeftMouseUp, this._update);
+    eventEmitter.on(EInternalEvent.AxisChange, this.update);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this.update);
   }
 
-  private _update = () => {
-    this._updateDynamicCoordinate();
-    this._updateBBox();
-    this._updateRBush();
+  public update = () => {
+    this.updateDynamicCoordinate();
+    this.updateBBox();
+    this.updateRBush();
   };
 
-  private _updateBBox() {
+  public updateBBox() {
     const { dynamicCoordinate, _bboxUpdater } = this;
 
     if (!dynamicCoordinate) {
       throw Error('dynamicCoordinate is not defined!');
     }
 
-    let bbox = _bboxUpdater?.();
+    let bbox = _bboxUpdater?.(dynamicCoordinate);
 
     if (!bbox) {
       // 使用默认的bbox更新器
@@ -121,7 +121,7 @@ export class Shape<Style> {
     this.bbox = bbox;
   }
 
-  private _updateRBush() {
+  public updateRBush() {
     const { _cachedRBush, bbox } = this;
 
     if (_cachedRBush) {
@@ -146,7 +146,7 @@ export class Shape<Style> {
     }
   }
 
-  private _updateDynamicCoordinate() {
+  public updateDynamicCoordinate() {
     const { coordinate, _coordinateUpdater } = this;
     let newCoordinate = _coordinateUpdater?.();
 
@@ -161,14 +161,14 @@ export class Shape<Style> {
     this.dynamicCoordinate = newCoordinate;
   }
 
-  protected setCoordinateUpdater(updater: CoordinateUpdater) {
+  public setCoordinateUpdater(updater: CoordinateUpdater) {
     this._coordinateUpdater = updater;
-    this._update();
+    this.update();
   }
 
-  protected setBBoxUpdater(updater: BBoxUpdater) {
+  public setBBoxUpdater(updater: BBoxUpdater) {
     this._bboxUpdater = updater;
-    this._update();
+    this.update();
   }
 
   public isUnderCursor(_mouseCoord: AxisPoint) {
@@ -189,8 +189,8 @@ export class Shape<Style> {
   public destroy() {
     rbush.remove(this._cachedRBush!);
     this._event.removeAllListeners();
-    eventEmitter.off(EInternalEvent.AxisChange, this._update);
-    eventEmitter.off(EInternalEvent.LeftMouseUp, this._update);
+    eventEmitter.off(EInternalEvent.AxisChange, this.update);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this.update);
   }
 
   public updateStyle(style: Style) {

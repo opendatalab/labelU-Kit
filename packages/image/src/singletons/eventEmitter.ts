@@ -9,6 +9,7 @@ export type EventName =
   | 'zoom'
   | 'select'
   | 'unselect'
+  | 'toolChange'
   | 'click'
   | 'dblclick'
   | 'contextmenu';

@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { EInternalEvent, ETool } from '../enums';
+import { EInternalEvent } from '../enums';
 import type { PointStyle } from '../shape/Point.shape';
 import { Point } from '../shape/Point.shape';
 import type { BasicToolParams } from './Tool';
@@ -42,10 +42,9 @@ export interface PointToolOptions extends BasicToolParams<PointData, PointStyle>
 }
 
 export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
-  public toolName = ETool.Point;
-
   constructor(params: PointToolOptions) {
     super({
+      name: 'point',
       labels: [],
       hoveredStyle: {},
       selectedStyle: {},
@@ -103,7 +102,9 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     );
   }
 
-  public onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
+  protected onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
+    this.activate(annotation.data.label);
+    eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._archive();
     this._createDraft(annotation.data);
     this.removeFromDrawing(annotation.id);
@@ -118,7 +119,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     axis!.rerender();
   };
 
-  public onUnSelect = (_e: MouseEvent) => {
+  protected onUnSelect = (_e: MouseEvent) => {
     this._archive();
     // 重新渲染
     axis!.rerender();
@@ -127,7 +128,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   /**
    * 移动选中的点
    */
-  public onMove = (_e: MouseEvent) => {
+  protected onMove = (_e: MouseEvent) => {
     const { draft, previousCoordinates } = this;
 
     if (!draft) {
@@ -142,7 +143,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     draft.syncCoordToData();
   };
 
-  public onMoveEnd = () => {
+  protected onMoveEnd = () => {
     this.previousCoordinates = this.getCoordinates();
   };
 
@@ -172,7 +173,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     // 创建草稿
     this._createDraft({
-      // TODO: 从monitor获取最大order
       order: monitor!.getMaxOrder() + 1,
       id: uuid(),
       label: activeLabel,
