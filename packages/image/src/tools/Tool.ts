@@ -4,7 +4,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { EInternalEvent } from '../enums';
 import type { Annotation } from '../annotation/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
-import type { AxisPoint, Shape } from '../shape';
+import type { AxisPoint, Shape } from '../shapes';
 import { eventEmitter } from '../singletons';
 
 export function MouseDecorator<T extends { new (...args: any[]): any }>(constructor: T) {

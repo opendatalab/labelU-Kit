@@ -1,8 +1,8 @@
 import { v4 as uuid } from 'uuid';
 
 import { EInternalEvent } from '../enums';
-import type { PointStyle } from '../shape/Point.shape';
-import { Point } from '../shape/Point.shape';
+import type { PointStyle } from '../shapes/Point.shape';
+import { Point } from '../shapes/Point.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { PointData } from '../annotation/Point.annotation';

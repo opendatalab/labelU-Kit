@@ -1,5 +1,5 @@
-import type { AxisPoint } from '../shape/Point.shape';
-import { Cursor } from '../shape/Cursor.shape';
+import type { AxisPoint } from '../shapes/Point.shape';
+import { Cursor } from '../shapes/Cursor.shape';
 import { Ticker } from './Ticker';
 import type { Annotator } from '../ImageAnnotator';
 import { EInternalEvent } from '../enums';

@@ -1,18 +1,18 @@
 import { v4 as uuid } from 'uuid';
 
-import type { LineStyle } from '../shape/Line.shape';
-import { Line } from '../shape/Line.shape';
+import type { LineStyle } from '../shapes/Line.shape';
+import { Line } from '../shapes/Line.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { LineData } from '../annotation';
 import { AnnotationLine } from '../annotation';
-import type { AxisPoint, PointStyle } from '../shape';
-import { Rect, Point } from '../shape';
+import type { AxisPoint, PointStyle } from '../shapes';
+import { Rect, Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { EInternalEvent } from '../enums';
-import { Group } from '../shape/Group';
+import { Group } from '../shapes/Group';
 
 class DraftLine extends Annotation<LineData, Line | Point, LineStyle | PointStyle> {
   constructor(params: AnnotationParams<LineData, LineStyle>) {

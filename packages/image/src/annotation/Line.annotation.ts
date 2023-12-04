@@ -1,9 +1,9 @@
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
-import type { LineStyle } from '../shape/Line.shape';
-import { Line } from '../shape/Line.shape';
-import type { AxisPoint } from '../shape/Point.shape';
+import type { LineStyle } from '../shapes/Line.shape';
+import { Line } from '../shapes/Line.shape';
+import type { AxisPoint } from '../shapes/Point.shape';
 
 export interface PointItem extends AxisPoint {
   id: string;

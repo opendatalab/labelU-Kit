@@ -1,6 +1,6 @@
 import type { BasicImageAnnotation } from '../interface';
-import { Group } from '../shape/Group';
-import { type Shape } from '../shape';
+import { Group } from '../shapes/Group';
+import { type Shape } from '../shapes';
 import { EInternalEvent } from '../enums';
 import { eventEmitter, monitor } from '../singletons';
 

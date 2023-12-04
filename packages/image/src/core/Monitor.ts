@@ -1,6 +1,6 @@
 import { EInternalEvent } from '../enums';
 import { eventEmitter, rbush } from '../singletons';
-import type { AxisPoint } from '../shape';
+import type { AxisPoint } from '../shapes';
 
 /**
  * 画布监控器

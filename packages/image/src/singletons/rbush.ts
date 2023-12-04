@@ -1,8 +1,8 @@
 import type { BBox } from 'rbush';
 import RBush from 'rbush';
 
-import type { Shape } from '@/shape';
-import type { Group } from '@/shape/Group';
+import type { Shape } from '@/shapes';
+import type { Group } from '@/shapes/Group';
 
 export interface RBushItem extends BBox {
   id: string;

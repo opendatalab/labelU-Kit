@@ -3,7 +3,7 @@ import type { PointToolOptions } from './tools';
 import { PointTool } from './tools';
 import type { LineToolOptions } from './tools/Line.tool';
 import { LineTool } from './tools/Line.tool';
-import type { CursorParams } from './shape/Cursor.shape';
+import type { CursorParams } from './shapes/Cursor.shape';
 import type { ImageOption } from './core/BackgroundRenderer';
 import { BackgroundRenderer } from './core/BackgroundRenderer';
 import type { Axis } from './core/Axis';

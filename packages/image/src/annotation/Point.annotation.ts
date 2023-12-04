@@ -1,8 +1,8 @@
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
-import { Point } from '../shape/Point.shape';
-import type { AxisPoint, PointStyle } from '../shape/Point.shape';
+import { Point } from '../shapes/Point.shape';
+import type { AxisPoint, PointStyle } from '../shapes/Point.shape';
 import { axis } from '../singletons';
 
 export type PointData = BasicImageAnnotation & AxisPoint;
