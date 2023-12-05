@@ -32,13 +32,21 @@ export interface RectStyle {
   opacity?: number;
 }
 
+export interface RectParams {
+  id: string;
+  coordinate: AxisPoint;
+  width: number;
+  height: number;
+  style: RectStyle;
+}
+
 /**
  * 基础图形点
  */
 export class Rect extends Shape<RectStyle> {
   static DEFAULT_STYLE: Required<RectStyle> = {
     stroke: '#000',
-    strokeWidth: 0,
+    strokeWidth: 2,
     fill: 'transparent',
     opacity: 1,
   };
@@ -49,7 +57,7 @@ export class Rect extends Shape<RectStyle> {
 
   public height: number = 0;
 
-  constructor(id: string, coordinate: AxisPoint, width: number, height: number, style: RectStyle) {
+  constructor({ id, coordinate, width, height, style }: RectParams) {
     super(id, coordinate);
 
     this.width = width;
@@ -60,13 +68,14 @@ export class Rect extends Shape<RectStyle> {
     }
 
     this.setBBoxUpdater(() => {
+      const { width: settledWidth, height: settledHeight } = this;
       const [{ x, y }] = this.dynamicCoordinate;
 
       return {
         minX: x,
         minY: y,
-        maxX: x + width * axis!.scale,
-        maxY: y + height * axis!.scale,
+        maxX: x + settledWidth * axis!.scale,
+        maxY: y + settledHeight * axis!.scale,
       };
     });
   }

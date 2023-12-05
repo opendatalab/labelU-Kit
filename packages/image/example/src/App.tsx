@@ -35,7 +35,7 @@ export const useEngine = (containerRef: React.RefObject<HTMLDivElement>, options
   return engine;
 };
 
-const tools = [{ name: 'point' }, { name: 'line' }];
+const tools = [{ name: 'point' }, { name: 'line' }, { name: 'rect' }];
 
 export default function App() {
   const ref = useRef<HTMLDivElement>(null);
@@ -96,6 +96,30 @@ export default function App() {
           value: 'car',
           key: '车子',
           color: '#f69',
+        },
+      ],
+    },
+    rect: {
+      style: {
+        strokeWidth: 3,
+      },
+      hoveredStyle: {
+        fill: '#007bff37',
+        stroke: '#fff',
+        strokeWidth: 5,
+      },
+      labels: [
+        {
+          id: '1',
+          value: 'noneAttribute',
+          key: '无标签',
+          color: '#e1ff00',
+        },
+        {
+          id: 'car',
+          value: 'car',
+          key: '车子',
+          color: '#6b66ff',
         },
       ],
     },
@@ -179,6 +203,29 @@ export default function App() {
           id: 'pWiUgJIH-2',
           order: 4,
           label: 'noneAttribute',
+        },
+      ]);
+
+      engine.loadData('rect', [
+        {
+          x: 148.66463414634154,
+          y: 294.4123475609755,
+          width: 168.1326219512195,
+          height: 134.5060975609756,
+          valid: true,
+          id: '0kjFS5rI',
+          order: 6,
+          label: 'noneAttribute',
+        },
+        {
+          x: 515.016768292683,
+          y: 103.2614329268292,
+          width: 194.67987804878047,
+          height: 69.02286585365853,
+          valid: true,
+          id: 'AcO6GXyc',
+          order: 7,
+          label: 'car',
         },
       ]);
 

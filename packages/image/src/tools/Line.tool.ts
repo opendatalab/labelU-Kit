@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import cloneDeep from 'lodash.clonedeep';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
@@ -30,7 +31,7 @@ class DraftLine extends Annotation<LineData, Line | Point, LineStyle | PointStyl
 
       const line = new Line({
         id: uuid(),
-        coordinate: [startPoint, endPoint],
+        coordinate: cloneDeep([startPoint, endPoint]),
         style,
       });
 
@@ -42,7 +43,8 @@ class DraftLine extends Annotation<LineData, Line | Point, LineStyle | PointStyl
       const pointItem = data.pointList[i];
       const point = new Point({
         id: pointItem.id,
-        coordinate: pointItem,
+        // 深拷贝，避免出现引用问题
+        coordinate: cloneDeep(pointItem),
         style: { ...style, radius: 8, stroke: 'transparent', fill: 'blue' },
         groupIgnoreRadius: true,
       });
@@ -107,6 +109,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _selectedPoint: Point | null = null;
 
   private _previousPointCoordinate: AxisPoint | null = null;
+
+  private _effectedLines: [Line | undefined, Line | undefined] | null = null;
 
   private _creatingShapes: Group<Line | Point, LineStyle | PointStyle> | null = null;
 
@@ -259,20 +263,19 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     const { draft } = this;
     const bbox = draft!.group.bbox;
 
-    this._selectionShape = new Rect(
-      uuid(),
-      axis!.getOriginalCoord({
+    this._selectionShape = new Rect({
+      id: uuid(),
+      coordinate: axis!.getOriginalCoord({
         x: bbox.minX,
         y: bbox.minY,
       }),
-      (bbox.maxX - bbox.minX) / axis!.scale,
-      (bbox.maxY - bbox.minY) / axis!.scale,
-      // TODO: 选中框样式开放配置
-      {
+      width: (bbox.maxX - bbox.minX) / axis!.scale,
+      height: (bbox.maxY - bbox.minY) / axis!.scale,
+      style: {
         stroke: '#fff',
         strokeWidth: 1,
       },
-    );
+    });
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
@@ -296,6 +299,27 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
       // 选中点后不继续执行
       if (this._selectedPoint) {
+        this._effectedLines = [undefined, undefined];
+
+        draft.group.each((shape) => {
+          if (shape instanceof Line) {
+            if (
+              shape.dynamicCoordinate[0].x === this._selectedPoint?.dynamicCoordinate[0].x &&
+              shape.dynamicCoordinate[0].y === this._selectedPoint?.dynamicCoordinate[0].y
+            ) {
+              // 线段的起点
+              this._effectedLines![0] = shape;
+            }
+            if (
+              shape.dynamicCoordinate[1].x === this._selectedPoint?.dynamicCoordinate[0].x &&
+              shape.dynamicCoordinate[1].y === this._selectedPoint?.dynamicCoordinate[0].y
+            ) {
+              // 线段的终点
+              this._effectedLines![1] = shape;
+            }
+          }
+        });
+
         return;
       }
 
@@ -352,9 +376,10 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       _selectedPoint,
       _previousPointCoordinate,
       _creatingShapes,
+      _effectedLines,
     } = this;
 
-    if (draft && _selectedPoint && _previousPointCoordinate) {
+    if (draft && _selectedPoint && _previousPointCoordinate && _effectedLines) {
       this._destroySelection();
       _selectedPoint.coordinate = [
         axis!.getOriginalCoord({
@@ -362,33 +387,49 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
           y: e.offsetY,
         }),
       ];
-      // 手动更新组合的包围盒
-      draft.group.updateBBox();
-      draft.group.updateRBush();
 
-      draft.syncCoordToData();
+      // 更新受影响的线段端点
+      if (_effectedLines[1] === undefined && _effectedLines[0]) {
+        _effectedLines[0].coordinate[0] = { ..._selectedPoint.coordinate[0] };
+      } else if (_effectedLines[0] === undefined && _effectedLines[1]) {
+        _effectedLines[1].coordinate[1] = { ..._selectedPoint.coordinate[0] };
+      } else if (_effectedLines[0] && _effectedLines[1]) {
+        // 更新下一个线段的起点
+        _effectedLines[0].coordinate[0] = { ..._selectedPoint.coordinate[0] };
+        // 更新前一个线段的终点
+        _effectedLines[1].coordinate[1] = { ..._selectedPoint.coordinate[0] };
+      }
 
       // 手动更新组合内的图形
       draft.group.each((shape) => {
         shape.update();
       });
+      // 手动更新组合的包围盒
+      draft.group.updateBBox();
+      draft.group.updateRBush();
+
+      draft.syncCoordToData();
     } else if (draft && _isSelectionPicked) {
       this._destroySelection();
       // 更新草稿坐标
       draft.group.each((shape, index) => {
+        const startPoint = axis!.getOriginalCoord({
+          x: previousCoordinates[index][0].x + axis!.distance.x,
+          y: previousCoordinates[index][0].y + axis!.distance.y,
+        });
+
         if (shape instanceof Point) {
-          shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
-          shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
+          shape.coordinate = [startPoint];
         } else {
-          shape.dynamicCoordinate[0].x = previousCoordinates[index][0].x + axis!.distance.x;
-          shape.dynamicCoordinate[0].y = previousCoordinates[index][0].y + axis!.distance.y;
-          shape.dynamicCoordinate[1].x = previousCoordinates[index][1].x + axis!.distance.x;
-          shape.dynamicCoordinate[1].y = previousCoordinates[index][1].y + axis!.distance.y;
+          const endPoint = axis!.getOriginalCoord({
+            x: previousCoordinates[index][1].x + axis!.distance.x,
+            y: previousCoordinates[index][1].y + axis!.distance.y,
+          });
+          shape.coordinate = [startPoint, endPoint];
         }
 
         // 手动更新图形内部的包围盒
-        shape.updateBBox();
-        shape.updateRBush();
+        shape.update();
       });
 
       // 手动更新组合的包围盒
@@ -461,7 +502,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       this._creatingShapes.destroy();
       this._creatingShapes = null;
       axis!.rerender();
-      // TODO: 选中刚刚创建的标注
       this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationLine);
       monitor!.setSelectedAnnotationId(data.id);
     }

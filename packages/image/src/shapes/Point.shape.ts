@@ -59,6 +59,7 @@ export interface PointStyle {
 
 export interface PointParams {
   id: string;
+  name?: string;
   coordinate: AxisPoint;
   style?: PointStyle;
 
@@ -95,10 +96,14 @@ export class Point extends Shape<PointStyle> {
 
   public style: Required<PointStyle> = Point.DEFAULT_STYLE;
 
+  name: string | undefined;
+
   public groupIgnoreRadius: boolean = false;
 
-  constructor({ id, coordinate, style, groupIgnoreRadius = false }: PointParams) {
+  constructor({ id, name, coordinate, style, groupIgnoreRadius = false }: PointParams) {
     super(id, coordinate);
+
+    this.name = name;
 
     if (style) {
       this.style = { ...this.style, ...style };

@@ -108,13 +108,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this._archive();
     this._createDraft(annotation.data);
     this.removeFromDrawing(annotation.id);
-    this.previousCoordinates = this.getCoordinates();
-    // 重新渲染
-    axis!.rerender();
-  };
-
-  public onPick = (_e: MouseEvent) => {
-    this.previousCoordinates = this.getCoordinates();
     // 重新渲染
     axis!.rerender();
   };
@@ -137,7 +130,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
   private _handleMouseDown = (e: MouseEvent) => {
     if (this.draft && this.draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY })) {
-      this.previousCoordinates = this.getCoordinates();
       this._isSelectedPointPicked = true;
       return;
     }
@@ -186,7 +178,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   };
 
   private _handleMouseUp = () => {
-    this.previousCoordinates = this.getCoordinates();
     this._isSelectedPointPicked = false;
   };
 

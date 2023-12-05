@@ -1,6 +1,6 @@
 import { Renderer } from './core/Renderer';
-import type { PointToolOptions } from './tools';
-import { PointTool } from './tools';
+import type { PointToolOptions, RectToolOptions } from './tools';
+import { PointTool, RectTool } from './tools';
 import type { LineToolOptions } from './tools/Line.tool';
 import { LineTool } from './tools/Line.tool';
 import type { CursorParams } from './shapes/Cursor.shape';
@@ -27,6 +27,7 @@ export interface AnnotatorOptions {
   cursor?: CursorParams | false;
   line?: LineToolOptions;
   point?: PointToolOptions;
+  rect?: RectToolOptions;
   image: ImageOption;
 }
 
@@ -78,7 +79,8 @@ export class Annotator {
     eventEmitter.on(EInternalEvent.ToolChange, this._handleToolChange);
 
     // debug
-    // window.monitor = this._monitor;
+    // @ts-ignore
+    window.monitor = this._monitor;
   }
 
   private _initialContainer() {
@@ -215,6 +217,13 @@ export class Annotator {
         new PointTool({
           ...this._config.point,
           data: data as AnnotationToolData<'point'>,
+        }),
+      );
+    } else if (toolName == 'rect') {
+      this.use(
+        new RectTool({
+          ...this._config.rect,
+          data: data as AnnotationToolData<'rect'>,
         }),
       );
     }
