@@ -53,22 +53,22 @@ export class Rect extends Shape<RectStyle> {
 
   public style: Required<RectStyle> = Rect.DEFAULT_STYLE;
 
-  public width: number = 0;
+  public _width: number = 0;
 
-  public height: number = 0;
+  public _height: number = 0;
 
   constructor({ id, coordinate, width, height, style }: RectParams) {
     super(id, coordinate);
 
-    this.width = width;
-    this.height = height;
+    this._width = width;
+    this._height = height;
 
     if (style) {
       this.style = { ...this.style, ...style };
     }
 
     this.setBBoxUpdater(() => {
-      const { width: settledWidth, height: settledHeight } = this;
+      const { _width: settledWidth, _height: settledHeight } = this;
       const [{ x, y }] = this.dynamicCoordinate;
 
       return {
@@ -78,6 +78,24 @@ export class Rect extends Shape<RectStyle> {
         maxY: y + settledHeight * axis!.scale,
       };
     });
+  }
+
+  public set width(width: number) {
+    this._width = width;
+    this.update();
+  }
+
+  public get width() {
+    return this._width;
+  }
+
+  public set height(height: number) {
+    this._height = height;
+    this.update();
+  }
+
+  public get height() {
+    return this._height;
   }
 
   /**

@@ -7,19 +7,6 @@ import { EInternalEvent } from '../enums';
 import type { AxisPoint } from './Point.shape';
 
 type Coord = AxisPoint | AxisPoint[];
-
-export interface AxisChangeCallbacks {
-  /**
-   * 更新坐标
-   */
-  updateCoordinate?: () => AxisPoint[];
-
-  /**
-   * 更新包围盒
-   */
-  updateBBox?: (dynamicCoordinate: AxisPoint[]) => BBox;
-}
-
 type CoordinateUpdater = () => AxisPoint[];
 type BBoxUpdater = (coordinates: AxisPoint[]) => BBox;
 
@@ -35,14 +22,12 @@ export class Shape<Style> {
 
   private _bboxUpdater?: BBoxUpdater;
 
-  private _prevOpacity: number = 1;
-
   /**
    * 动态坐标
    *
    * @description 经过缩放拖拽等操作后，图形对象的坐标会发生变化，但是这个变化不会影响到图形对象的原始坐标
    */
-  public dynamicCoordinate: AxisPoint[];
+  private _dynamicCoordinate: AxisPoint[] = [];
 
   /**
    * 图形对象的唯一标识
@@ -62,7 +47,18 @@ export class Shape<Style> {
   /**
    * 图形对象原始的坐标
    */
-  public coordinate: AxisPoint[];
+  private _coordinate: AxisPoint[];
+
+  /**
+   * 更新坐标后自动更新偏移后的坐标及bbox
+   */
+  private _coordinateHandler: ProxyHandler<AxisPoint[]> = {
+    set: (target, key, value) => {
+      target[Number(key)] = value;
+      this.update();
+      return true;
+    },
+  };
 
   /**
    * 样式
@@ -79,9 +75,7 @@ export class Shape<Style> {
     if (!coordinate) {
       throw Error('coordinate is not a valid AxisPoint!');
     }
-
-    this.coordinate = !Array.isArray(coordinate) ? [coordinate] : coordinate;
-    this.dynamicCoordinate = this.coordinate;
+    this._coordinate = new Proxy(!Array.isArray(coordinate) ? [coordinate] : coordinate, this._coordinateHandler);
 
     this._bindEvents();
     this.update();
@@ -92,36 +86,45 @@ export class Shape<Style> {
     eventEmitter.on(EInternalEvent.LeftMouseUp, this.update);
   }
 
-  public update = () => {
-    this.updateDynamicCoordinate();
-    this.updateBBox();
-    this.updateRBush();
-  };
+  private _syncCoordinateToDynamic() {
+    const { _coordinate, _coordinateUpdater } = this;
+    let newCoordinate = _coordinateUpdater?.();
 
-  public updateBBox() {
-    const { dynamicCoordinate, _bboxUpdater } = this;
+    if (!newCoordinate) {
+      // 使用默认的坐标更新器
 
-    if (!dynamicCoordinate) {
+      newCoordinate = _coordinate.map((point) => {
+        return axis!.getScaledCoord(point);
+      });
+    }
+
+    this._dynamicCoordinate = newCoordinate;
+  }
+
+  private _updateBBox() {
+    const { _dynamicCoordinate, _bboxUpdater } = this;
+
+    if (!_dynamicCoordinate) {
       throw Error('dynamicCoordinate is not defined!');
     }
 
-    let bbox = _bboxUpdater?.(dynamicCoordinate);
+    let bbox = _bboxUpdater?.(_dynamicCoordinate);
 
     if (!bbox) {
       // 使用默认的bbox更新器
 
       bbox = {
-        minX: Math.min(...dynamicCoordinate.map((point) => point.x)),
-        minY: Math.min(...dynamicCoordinate.map((point) => point.y)),
-        maxX: Math.max(...dynamicCoordinate.map((point) => point.x)),
-        maxY: Math.max(...dynamicCoordinate.map((point) => point.y)),
+        minX: Math.min(..._dynamicCoordinate.map((point) => point.x)),
+        minY: Math.min(..._dynamicCoordinate.map((point) => point.y)),
+        maxX: Math.max(..._dynamicCoordinate.map((point) => point.x)),
+        maxY: Math.max(..._dynamicCoordinate.map((point) => point.y)),
       };
     }
 
     this.bbox = bbox;
   }
 
-  public updateRBush() {
+  private _updateRBush() {
     const { _cachedRBush, bbox } = this;
 
     if (_cachedRBush) {
@@ -146,20 +149,29 @@ export class Shape<Style> {
     }
   }
 
-  public updateDynamicCoordinate() {
-    const { coordinate, _coordinateUpdater } = this;
-    let newCoordinate = _coordinateUpdater?.();
+  public set coordinate(coordinate: AxisPoint[]) {
+    if (Array.isArray(coordinate)) {
+      this._coordinate = new Proxy(coordinate, this._coordinateHandler);
 
-    if (!newCoordinate) {
-      // 使用默认的坐标更新器
-
-      newCoordinate = coordinate.map((point) => {
-        return axis!.getScaledCoord(point);
-      });
+      this.update();
+    } else {
+      throw new Error('coordinate must be an array of AxisPoint!');
     }
-
-    this.dynamicCoordinate = newCoordinate;
   }
+
+  public get coordinate() {
+    return this._coordinate;
+  }
+
+  public get dynamicCoordinate() {
+    return this._coordinate;
+  }
+
+  public update = () => {
+    this._syncCoordinateToDynamic();
+    this._updateBBox();
+    this._updateRBush();
+  };
 
   public setCoordinateUpdater(updater: CoordinateUpdater) {
     this._coordinateUpdater = updater;

@@ -390,20 +390,16 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
       // 更新受影响的线段端点
       if (_effectedLines[1] === undefined && _effectedLines[0]) {
-        _effectedLines[0].coordinate[0] = { ..._selectedPoint.coordinate[0] };
+        _effectedLines[0].coordinate = [{ ..._selectedPoint.coordinate[0] }, { ..._effectedLines[0].coordinate[1] }];
       } else if (_effectedLines[0] === undefined && _effectedLines[1]) {
-        _effectedLines[1].coordinate[1] = { ..._selectedPoint.coordinate[0] };
+        _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { ..._selectedPoint.coordinate[0] }];
       } else if (_effectedLines[0] && _effectedLines[1]) {
         // 更新下一个线段的起点
-        _effectedLines[0].coordinate[0] = { ..._selectedPoint.coordinate[0] };
+        _effectedLines[0].coordinate = [{ ..._selectedPoint.coordinate[0] }, { ..._effectedLines[0].coordinate[1] }];
         // 更新前一个线段的终点
-        _effectedLines[1].coordinate[1] = { ..._selectedPoint.coordinate[0] };
+        _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { ..._selectedPoint.coordinate[0] }];
       }
 
-      // 手动更新组合内的图形
-      draft.group.each((shape) => {
-        shape.update();
-      });
       // 手动更新组合的包围盒
       draft.group.updateBBox();
       draft.group.updateRBush();
@@ -427,9 +423,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
           });
           shape.coordinate = [startPoint, endPoint];
         }
-
-        // 手动更新图形内部的包围盒
-        shape.update();
       });
 
       // 手动更新组合的包围盒
@@ -443,9 +436,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       const lastShape = shapes[shapes.length - 1];
       lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
       lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
-      shapes.forEach((shape) => {
-        shape.update();
-      });
       _creatingShapes.updateBBox();
       _creatingShapes.updateRBush();
     }

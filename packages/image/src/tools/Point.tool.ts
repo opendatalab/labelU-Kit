@@ -170,7 +170,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
           y: e.offsetY,
         }),
       ];
-      shape.update();
     });
     draft.group.updateBBox();
     draft.group.updateRBush();

@@ -6,7 +6,7 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { RectData } from '../annotation';
 import { AnnotationRect } from '../annotation';
-import type { AxisPoint, PointStyle, RectStyle } from '../shapes';
+import type { PointStyle, RectStyle } from '../shapes';
 import { Rect, Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
@@ -128,8 +128,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   private _selectedPoint: Point | null = null;
 
   private _isRectPicked: boolean = false;
-
-  private _previousPointCoordinate: AxisPoint | null = null;
 
   private _preBBox: BBox | null = null;
 
@@ -281,7 +279,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       // 选中点后不继续执行
       if (this._selectedPoint) {
         this._preBBox = cloneDeep(draft.group.bbox);
-        console.log('this._preBBox', this._preBBox);
         return;
       }
 
@@ -403,24 +400,23 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             }
           } else if (selectedPointName === 'se') {
             if (x > _preBBox.minX) {
-              console.log('x', _preBBox);
-              shape.coordinate[0].x = axis!.getOriginalX(_preBBox.minX);
               shape.width = (x - _preBBox.minX) / axis!.scale;
+              shape.coordinate[0].x = axis!.getOriginalX(_preBBox.minX);
             }
 
             if (x <= _preBBox.minX) {
-              shape.coordinate[0].x = axis!.getOriginalX(x);
               shape.width = (_preBBox.minX - x) / axis!.scale;
+              shape.coordinate[0].x = axis!.getOriginalX(x);
             }
 
             if (y > _preBBox.minY) {
-              shape.coordinate[0].y = axis!.getOriginalY(_preBBox.minY);
               shape.height = (y - _preBBox.minY) / axis!.scale;
+              shape.coordinate[0].y = axis!.getOriginalY(_preBBox.minY);
             }
 
             if (y <= _preBBox.minY) {
-              shape.coordinate[0].y = axis!.getOriginalY(y);
               shape.height = (_preBBox.minY - y) / axis!.scale;
+              shape.coordinate[0].y = axis!.getOriginalY(y);
             }
           } else if (selectedPointName === 'sw') {
             if (x < _preBBox.maxX) {
@@ -444,7 +440,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             }
           }
         }
-        shape.update();
       });
 
       // 手动更新组合的包围盒
@@ -462,7 +457,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
           }),
         ];
         // 手动更新图形内部的包围盒
-        shape.update();
       });
 
       // 手动更新组合的包围盒
@@ -476,9 +470,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       const lastShape = shapes[shapes.length - 1];
       lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
       lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
-      shapes.forEach((shape) => {
-        shape.update();
-      });
+
       _creatingShapes.updateBBox();
       _creatingShapes.updateRBush();
     }
@@ -491,7 +483,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     } else if (this._selectedPoint) {
       this._selectedPoint = null;
       this._preBBox = cloneDeep(this.draft!.group.bbox);
-      this._previousPointCoordinate = null;
     }
   };
 
