@@ -7,6 +7,7 @@ import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { Bridge } from 'iframe-message-bridge';
 import { FlexLayout } from '@labelu/components-react';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 
 import { message, modal } from '@/StaticAnt';
 import type { TaskResponse } from '@/api/types';
@@ -87,6 +88,9 @@ const CreateTask = () => {
   const addTask = useAddTaskMutation();
   const updateTaskConfig = useUpdateTaskConfigMutation(taskId);
 
+  const isFetching = useIsFetching();
+  const isMutating = useIsMutating();
+
   // 缓存上传的文件清单
   const [uploadFileList, setUploadFileList] = useState<QueuedFile[]>([]);
 
@@ -114,7 +118,7 @@ const CreateTask = () => {
       })
       .value();
   }, [currentStep]);
-  const loading = updateTaskConfig.isPending || addTask.isPending;
+  const loading = isMutating > 0 || isFetching > 0;
   const isExistTask = taskId > 0;
   const taskStatus = _.get(taskData, 'status') as TaskStatus;
   const stepDataSource: TaskStep[] = useMemo(
