@@ -14,11 +14,12 @@ import Status from '@/components/Status';
 import { ReactComponent as FileIcon } from '@/assets/svg/file.svg';
 import commonController from '@/utils/common';
 import NativeUpload from '@/components/NativeUpload';
-import { deleteFile, uploadFile as uploadFileService } from '@/api/services/task';
+import { deleteFile } from '@/api/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 import type { MediaType } from '@/api/types';
 import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
 import type { TaskInLoader } from '@/loaders/task.loader';
+import { useUploadFileMutation } from '@/api/mutations/attachment';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
@@ -95,6 +96,8 @@ const InputData = () => {
     setUploadFileList: setFileQueue,
     task = {} as NonNullable<TaskInLoader>,
   } = useContext(TaskCreationContext);
+  const uploadMutation = useUploadFileMutation();
+
   const taskId = task.id;
 
   const amountMapping = useMemo(() => {
@@ -139,7 +142,7 @@ const InputData = () => {
         }
 
         try {
-          const { data } = await uploadFileService({
+          const { data } = await uploadMutation.mutateAsync({
             task_id: taskId!,
             file: fileBlob,
           });
@@ -182,7 +185,7 @@ const InputData = () => {
         commonController.notificationWarnMessage({ message: `${failed} 个文件上传失败` }, 3);
       }
     },
-    [setFileQueue, taskId],
+    [setFileQueue, taskId, uploadMutation],
   );
 
   const handleFilesChange = (files: RcFile[]) => {
