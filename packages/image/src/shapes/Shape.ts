@@ -171,7 +171,6 @@ export class Shape<Style> {
 
   public set coordinate(coordinate: AxisPoint[]) {
     if (Array.isArray(coordinate)) {
-      console.log('set coordinate', coordinate);
       this._coordinate = new Proxy(coordinate, this._coordinateHandler);
 
       this.update();

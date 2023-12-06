@@ -81,6 +81,7 @@ export class Annotator {
     // debug
     // @ts-ignore
     window.monitor = this._monitor;
+    window.annotator = this;
   }
 
   private _initialContainer() {

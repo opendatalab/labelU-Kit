@@ -133,6 +133,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   private _creatingShapes: Group<Rect | Point, RectStyle | PointStyle> | null = null;
 
+  private _positionSwitchingMap: Record<PointPosition, PointPosition> = {} as Record<PointPosition, PointPosition>;
+
   public draft: DraftRect | null = null;
 
   constructor(params: RectToolOptions) {
@@ -351,6 +353,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       const sePoint = draft.pointPositionMapping.get('se')!;
       const swPoint = draft.pointPositionMapping.get('sw')!;
 
+      console.log(selectedPointName);
+
       // 更新端点坐标
       if (selectedPointName === 'nw') {
         swPoint.coordinate[0].x = axis!.getOriginalX(e.offsetX);
@@ -366,6 +370,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
         sePoint.coordinate[0].y = axis!.getOriginalY(e.offsetY);
       }
 
+      const switchingMap: Record<PointPosition, PointPosition> = {} as Record<PointPosition, PointPosition>;
+
       // 更新矩形的坐标
       draft.group.each((shape) => {
         if (shape instanceof Rect) {
@@ -378,6 +384,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (x >= _preBBox.maxX) {
               shape.coordinate[0].x = axis!.getOriginalX(_preBBox.maxX);
               shape.width = (x - _preBBox.maxX) / axis!.scale;
+              switchingMap.nw = 'ne';
+              switchingMap.sw = 'se';
+              switchingMap.ne = 'nw';
+              switchingMap.se = 'sw';
             }
 
             if (y < _preBBox.maxY) {
@@ -388,6 +398,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (y >= _preBBox.maxY) {
               shape.coordinate[0].y = axis!.getOriginalY(_preBBox.maxY);
               shape.height = (y - _preBBox.maxY) / axis!.scale;
+              switchingMap.nw = 'sw';
+              switchingMap.ne = 'se';
+              switchingMap.sw = 'nw';
+              switchingMap.se = 'ne';
+            }
+
+            if (x >= _preBBox.maxX && y >= _preBBox.maxY) {
+              switchingMap.nw = 'se';
+              switchingMap.ne = 'sw';
+              switchingMap.sw = 'ne';
+              switchingMap.se = 'nw';
             }
           } else if (selectedPointName === 'ne') {
             if (x > _preBBox.minX) {
@@ -398,6 +419,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (x <= _preBBox.minX) {
               shape.coordinate[0].x = axis!.getOriginalX(x);
               shape.width = (_preBBox.minX - x) / axis!.scale;
+              switchingMap.ne = 'nw';
+              switchingMap.se = 'sw';
+              switchingMap.nw = 'ne';
+              switchingMap.sw = 'se';
             }
 
             if (y < _preBBox.maxY) {
@@ -408,6 +433,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (y >= _preBBox.maxY) {
               shape.coordinate[0].y = axis!.getOriginalY(_preBBox.maxY);
               shape.height = (y - _preBBox.maxY) / axis!.scale;
+              switchingMap.ne = 'se';
+              switchingMap.nw = 'sw';
+              switchingMap.se = 'ne';
+              switchingMap.sw = 'nw';
+            }
+
+            if (x <= _preBBox.minX && y >= _preBBox.maxY) {
+              switchingMap.ne = 'sw';
+              switchingMap.nw = 'se';
+              switchingMap.se = 'nw';
+              switchingMap.sw = 'ne';
             }
           } else if (selectedPointName === 'se') {
             if (x > _preBBox.minX) {
@@ -418,6 +454,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (x <= _preBBox.minX) {
               shape.width = (_preBBox.minX - x) / axis!.scale;
               shape.coordinate[0].x = axis!.getOriginalX(x);
+              switchingMap.se = 'sw';
+              switchingMap.ne = 'nw';
+              switchingMap.sw = 'se';
+              switchingMap.nw = 'ne';
             }
 
             if (y > _preBBox.minY) {
@@ -428,6 +468,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (y <= _preBBox.minY) {
               shape.height = (_preBBox.minY - y) / axis!.scale;
               shape.coordinate[0].y = axis!.getOriginalY(y);
+              switchingMap.se = 'ne';
+              switchingMap.sw = 'nw';
+              switchingMap.ne = 'se';
+              switchingMap.nw = 'sw';
+            }
+
+            if (x <= _preBBox.minX && y <= _preBBox.minY) {
+              switchingMap.se = 'nw';
+              switchingMap.sw = 'ne';
+              switchingMap.ne = 'sw';
+              switchingMap.nw = 'se';
             }
           } else if (selectedPointName === 'sw') {
             if (x < _preBBox.maxX) {
@@ -438,6 +489,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (x >= _preBBox.maxX) {
               shape.coordinate[0].x = axis!.getOriginalX(_preBBox.maxX);
               shape.width = (x - _preBBox.maxX) / axis!.scale;
+              switchingMap.sw = 'se';
+              switchingMap.nw = 'ne';
+              switchingMap.se = 'sw';
+              switchingMap.ne = 'nw';
             }
 
             if (y > _preBBox.minY) {
@@ -448,10 +503,23 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             if (y <= _preBBox.minY) {
               shape.coordinate[0].y = axis!.getOriginalY(y);
               shape.height = (_preBBox.minY - y) / axis!.scale;
+              switchingMap.sw = 'nw';
+              switchingMap.se = 'ne';
+              switchingMap.nw = 'sw';
+              switchingMap.ne = 'se';
+            }
+
+            if (x >= _preBBox.maxX && y <= _preBBox.minY) {
+              switchingMap.sw = 'ne';
+              switchingMap.se = 'nw';
+              switchingMap.nw = 'se';
+              switchingMap.ne = 'sw';
             }
           }
         }
       });
+
+      this._positionSwitchingMap = switchingMap;
 
       // 手动更新组合的包围盒
       draft.group.update();
@@ -484,6 +552,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   };
 
   private _handleMouseUp = () => {
+    const { _positionSwitchingMap } = this;
+
     if (this._isRectPicked) {
       this.previousCoordinates = this.getCoordinates();
       this._isRectPicked = false;
@@ -492,7 +562,13 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       this._preBBox = cloneDeep(this.draft!.group.bbox);
 
       // 拖动点松开鼠标后，重新建立草稿，更新点的方位
-      // this._reloadDraft();
+      this.draft?.group.each((shape) => {
+        if (shape instanceof Point && shape.name && shape.name in _positionSwitchingMap) {
+          shape.name = _positionSwitchingMap[shape.name as PointPosition] as PointPosition;
+          this.draft?.pointPositionMapping.set(shape.name as PointPosition, shape);
+        }
+      });
+      this._positionSwitchingMap = {} as Record<PointPosition, PointPosition>;
     }
   };
 
