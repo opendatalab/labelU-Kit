@@ -53,8 +53,28 @@ export class Shape<Style> {
    * 更新坐标后自动更新偏移后的坐标及bbox
    */
   private _coordinateHandler: ProxyHandler<AxisPoint[]> = {
+    get: (target: AxisPoint[], key: PropertyKey) => {
+      if (!isNaN(Number(key))) {
+        return new Proxy(target[Number(key)], this._coordinateItemHandler);
+      } else {
+        // @ts-ignore
+        return target[key];
+      }
+    },
     set: (target, key, value) => {
       target[Number(key)] = value;
+      this.update();
+      return true;
+    },
+  };
+
+  private _coordinateItemHandler: ProxyHandler<AxisPoint> = {
+    set: (target, key, value) => {
+      if (key !== 'x' && key !== 'y') {
+        throw Error('key must be x or y!');
+      }
+
+      target[key as 'x' | 'y'] = value;
       this.update();
       return true;
     },
@@ -151,6 +171,7 @@ export class Shape<Style> {
 
   public set coordinate(coordinate: AxisPoint[]) {
     if (Array.isArray(coordinate)) {
+      console.log('set coordinate', coordinate);
       this._coordinate = new Proxy(coordinate, this._coordinateHandler);
 
       this.update();
@@ -164,7 +185,7 @@ export class Shape<Style> {
   }
 
   public get dynamicCoordinate() {
-    return this._coordinate;
+    return this._dynamicCoordinate;
   }
 
   public update = () => {

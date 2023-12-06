@@ -401,8 +401,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       }
 
       // 手动更新组合的包围盒
-      draft.group.updateBBox();
-      draft.group.updateRBush();
+      draft.group.update();
 
       draft.syncCoordToData();
     } else if (draft && _isSelectionPicked) {
@@ -426,8 +425,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       });
 
       // 手动更新组合的包围盒
-      draft.group.updateBBox();
-      draft.group.updateRBush();
+      draft.group.update();
 
       draft.syncCoordToData();
     } else if (_creatingShapes) {
@@ -436,8 +434,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       const lastShape = shapes[shapes.length - 1];
       lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
       lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
-      _creatingShapes.updateBBox();
-      _creatingShapes.updateRBush();
+      _creatingShapes.update();
     }
   };
 

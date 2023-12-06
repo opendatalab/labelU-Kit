@@ -48,11 +48,15 @@ export class Group<T extends Shape<Style>, Style> {
   private _onAxisChange = () => {
     // 组合在图形之后创建，所以需要延迟一帧更新
     setTimeout(() => {
-      this.updateBBox().updateRBush();
+      this._updateBBox()._updateRBush();
     });
   };
 
-  public updateBBox() {
+  public update() {
+    this._updateBBox()._updateRBush();
+  }
+
+  private _updateBBox() {
     const finalShapes = this.shapes.filter((shape) => {
       if (shape instanceof Point && shape.groupIgnoreRadius) {
         return false;
@@ -75,7 +79,7 @@ export class Group<T extends Shape<Style>, Style> {
     return this;
   }
 
-  public updateRBush() {
+  private _updateRBush() {
     const { _cachedRBush, bbox } = this;
 
     if (_cachedRBush) {
@@ -116,7 +120,7 @@ export class Group<T extends Shape<Style>, Style> {
       this._shapeMapping.set(shape.id, shape);
     });
 
-    this.updateBBox().updateRBush();
+    this.update();
   }
 
   /**
@@ -139,7 +143,7 @@ export class Group<T extends Shape<Style>, Style> {
       this._shapeMapping.delete(shape.id);
     });
 
-    this.updateBBox().updateRBush();
+    this.update();
   }
 
   public each(callback: (shape: T, idx: number) => void | boolean) {

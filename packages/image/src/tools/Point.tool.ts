@@ -171,8 +171,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
         }),
       ];
     });
-    draft.group.updateBBox();
-    draft.group.updateRBush();
+    draft.group.update();
     draft.syncCoordToData();
   };
 

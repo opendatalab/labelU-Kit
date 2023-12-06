@@ -251,6 +251,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     });
   }
 
+  private _reloadDraft() {
+    const { draft } = this;
+
+    if (draft) {
+      const data = cloneDeep(draft.data);
+      draft.destroy();
+      this.draft = null;
+      this._createDraft(data);
+    }
+  }
+
   private _archiveDraft() {
     const { draft } = this;
 
@@ -443,8 +454,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       });
 
       // 手动更新组合的包围盒
-      draft.group.updateBBox();
-      draft.group.updateRBush();
+      draft.group.update();
 
       draft.syncCoordToData();
     } else if (draft && _isRectPicked) {
@@ -456,12 +466,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             y: previousCoordinates[index][0].y + axis!.distance.y,
           }),
         ];
-        // 手动更新图形内部的包围盒
       });
 
       // 手动更新组合的包围盒
-      draft.group.updateBBox();
-      draft.group.updateRBush();
+      draft.group.update();
 
       draft.syncCoordToData();
     } else if (_creatingShapes) {
@@ -471,8 +479,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
       lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
 
-      _creatingShapes.updateBBox();
-      _creatingShapes.updateRBush();
+      _creatingShapes.update();
     }
   };
 
@@ -483,6 +490,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     } else if (this._selectedPoint) {
       this._selectedPoint = null;
       this._preBBox = cloneDeep(this.draft!.group.bbox);
+
+      // 拖动点松开鼠标后，重新建立草稿，更新点的方位
+      // this._reloadDraft();
     }
   };
 
