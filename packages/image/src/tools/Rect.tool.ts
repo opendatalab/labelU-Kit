@@ -126,7 +126,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    */
   private _selectedPoint: Point | null = null;
 
-  private _isRectPicked: boolean = false;
+  private _isShapePicked: boolean = false;
 
   private _preBBox: BBox | null = null;
 
@@ -288,7 +288,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       }
 
       if (draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY })) {
-        this._isRectPicked = true;
+        this._isShapePicked = true;
         this.previousCoordinates = this.getCoordinates();
 
         return;
@@ -337,7 +337,15 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { draft, _selectedPoint, previousCoordinates, _preBBox, _creatingShape, _isRectPicked, _startPoint } = this;
+    const {
+      draft,
+      _selectedPoint,
+      previousCoordinates,
+      _preBBox,
+      _creatingShape,
+      _isShapePicked: _isRectPicked,
+      _startPoint,
+    } = this;
 
     // 选中点
     if (draft && _selectedPoint && _preBBox) {
@@ -566,9 +574,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   private _handleMouseUp = () => {
     const { _positionSwitchingMap } = this;
 
-    if (this._isRectPicked) {
+    if (this._isShapePicked) {
       this.previousCoordinates = this.getCoordinates();
-      this._isRectPicked = false;
+      this._isShapePicked = false;
     } else if (this._selectedPoint) {
       this._selectedPoint = null;
       this._preBBox = cloneDeep(this.draft!.group.bbox);

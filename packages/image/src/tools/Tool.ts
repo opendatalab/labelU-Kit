@@ -90,8 +90,9 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   public drawing: Map<string, IAnnotation<Data, Style>> | null = new Map();
 
   /**
-   * 绘制过程中的临时数据，并未真正添加到数据中
-   * Group<Line, LineStyle>
+   * 选中的标注切换成草稿
+   *
+   * @description 绘制过程中的标注不一定在这个字段下，可能视情况而定
    */
   public draft: IAnnotation<Data, Style> | null = null;
 

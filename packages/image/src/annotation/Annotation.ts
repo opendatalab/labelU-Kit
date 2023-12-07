@@ -9,7 +9,7 @@ export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   id: string;
   data: Data;
   style: Style;
-  hoveredStyle?: Style;
+  hoveredStyle?: Style | ((style: Style) => Style);
 
   onBBoxOver?: (e: MouseEvent, annotation: any) => void;
   onBBoxOut?: (e: MouseEvent, annotation: any) => void;
@@ -29,7 +29,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
   public group: Group<IShape, Style>;
 
-  public hoveredStyle?: Style;
+  public hoveredStyle?: Style | ((style: Style) => Style);
 
   public eventHandlers: {
     onBBoxOver?: (e: MouseEvent, annotation: any) => void;
@@ -123,7 +123,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
       group.updateStyle({
         ...style,
-        ...(hoveredStyle ?? {}),
+        ...(typeof hoveredStyle === 'function' ? (hoveredStyle as (style: Style) => Style)(style) : hoveredStyle ?? {}),
       });
     }
   };

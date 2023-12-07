@@ -12,6 +12,8 @@ import { EInternalEvent } from './enums';
 import type { Monitor } from './core/Monitor';
 import { createAxis } from './singletons/axis';
 import { createMonitor, eventEmitter } from './singletons';
+import type { PolygonToolOptions } from './tools/Polygon.tool';
+import { PolygonTool } from './tools/Polygon.tool';
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -28,6 +30,7 @@ export interface AnnotatorOptions {
   line?: LineToolOptions;
   point?: PointToolOptions;
   rect?: RectToolOptions;
+  polygon?: PolygonToolOptions;
   image: ImageOption;
 }
 
@@ -225,6 +228,13 @@ export class Annotator {
         new RectTool({
           ...this._config.rect,
           data: data as AnnotationToolData<'rect'>,
+        }),
+      );
+    } else if (toolName == 'polygon') {
+      this.use(
+        new PolygonTool({
+          ...this._config.polygon,
+          data: data as AnnotationToolData<'polygon'>,
         }),
       );
     }

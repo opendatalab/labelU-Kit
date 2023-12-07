@@ -51,9 +51,9 @@ export class Line extends Shape<LineStyle> {
    * @param mouseCoord 鼠标坐标
    */
   public isUnderCursor(mouseCoord: AxisPoint) {
-    const { style } = this;
+    const { style, dynamicCoordinate } = this;
 
-    const distance = getDistanceToLine(mouseCoord, this);
+    const distance = getDistanceToLine(mouseCoord, dynamicCoordinate[0], dynamicCoordinate[1]);
 
     if (distance < Line.DISTANCE_THRESHOLD + (style.strokeWidth ?? 0) / 2) {
       return true;

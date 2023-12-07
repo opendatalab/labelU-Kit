@@ -1,5 +1,5 @@
-import type { LineData, PointData, RectData } from './annotation';
-import type { LineTool, PointTool, RectTool } from './tools';
+import type { LineData, PointData, PolygonData, RectData } from './annotation';
+import type { LineTool, PointTool, PolygonTool, RectTool } from './tools';
 
 /**
  * 图片标注结果的基础字段
@@ -24,9 +24,9 @@ export interface BasicImageAnnotation {
   attributes?: Record<string, string | string[]>;
 }
 
-export type AnnotationData = LineData | PointData | RectData;
+export type AnnotationData = LineData | PointData | RectData | PolygonData;
 
-export type AnnotationTool = LineTool | PointTool | RectTool;
+export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool;
 
 export type ToolName = 'line' | 'point' | 'polygon' | 'rect';
 
@@ -36,4 +36,6 @@ export type AnnotationToolData<T extends ToolName> = T extends 'line'
   ? PointData[]
   : T extends 'rect'
   ? RectData[]
+  : T extends 'polygon'
+  ? PolygonData[]
   : never;

@@ -1,3 +1,4 @@
+export * from './Polygon.shape';
 export * from './Line.shape';
 export * from './Rect.shape';
 export * from './Point.shape';

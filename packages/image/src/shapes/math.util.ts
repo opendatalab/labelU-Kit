@@ -1,4 +1,3 @@
-import type { Line } from './Line.shape';
 import type { AxisPoint } from './Point.shape';
 
 /**
@@ -21,12 +20,11 @@ export function getDistance(start: AxisPoint, end: AxisPoint) {
  * @param line 线
  * @returns 点到线的距离
  */
-export function getDistanceToLine(point: AxisPoint, line: Line) {
-  if (!line) {
+export function getDistanceToLine(point: AxisPoint, start: AxisPoint, end: AxisPoint) {
+  if (!start || !end) {
     throw Error('Line not found!');
   }
 
-  const [start, end] = line.dynamicCoordinate;
   const { x: x3, y: y3 } = point;
 
   const px = end.x - start.x;
@@ -46,4 +44,31 @@ export function getDistanceToLine(point: AxisPoint, line: Line) {
   const y = start.y + u * py;
 
   return getDistance(point, { x, y });
+}
+
+/**
+ * 判断点是否在多边形内
+ *
+ * @param point 点
+ * @param polygonCoordinate 多边形坐标
+ */
+export function isPointInPolygon(point: AxisPoint, polygonCoordinate: AxisPoint[]) {
+  const { x, y } = point;
+
+  let inside = false;
+
+  for (let i = 0, j = polygonCoordinate.length - 1; i < polygonCoordinate.length; j = i++) {
+    const xi = polygonCoordinate[i].x;
+    const yi = polygonCoordinate[i].y;
+    const xj = polygonCoordinate[j].x;
+    const yj = polygonCoordinate[j].y;
+
+    const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+
+    if (intersect) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
 }

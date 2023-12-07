@@ -35,7 +35,7 @@ export const useEngine = (containerRef: React.RefObject<HTMLDivElement>, options
   return engine;
 };
 
-const tools = [{ name: 'point' }, { name: 'line' }, { name: 'rect' }];
+const tools = [{ name: 'point' }, { name: 'line' }, { name: 'rect' }, { name: 'polygon' }];
 
 export default function App() {
   const ref = useRef<HTMLDivElement>(null);
@@ -120,6 +120,31 @@ export default function App() {
           value: 'car',
           key: '车子',
           color: '#6b66ff',
+        },
+      ],
+    },
+    polygon: {
+      style: {
+        strokeWidth: 3,
+      },
+      hoveredStyle: (style: any) => {
+        return {
+          ...style,
+          fill: '#007bff27',
+        };
+      },
+      labels: [
+        {
+          id: '1',
+          value: 'noneAttribute',
+          key: '无标签',
+          color: '#ff00d4',
+        },
+        {
+          id: 'car',
+          value: 'car',
+          key: '车子',
+          color: '#0920ef',
         },
       ],
     },
@@ -225,6 +250,38 @@ export default function App() {
           valid: true,
           id: 'AcO6GXyc',
           order: 7,
+          label: 'car',
+        },
+      ]);
+
+      engine.loadData('polygon', [
+        {
+          id: 'FuzuAJ4q',
+          valid: true,
+          isVisible: true,
+          pointList: [
+            {
+              x: 103.4969512195122,
+              y: 205.0312499999999,
+            },
+            {
+              x: 307.0365853658536,
+              y: 235.9977134146341,
+            },
+            {
+              x: 10.8368902439024,
+              y: 102.3711890243901,
+            },
+            {
+              x: 22.0746951219511,
+              y: 31.5785060975609,
+            },
+            {
+              x: 339.6859756097559,
+              y: 164.3254573170731,
+            },
+          ],
+          order: 12,
           label: 'car',
         },
       ]);
