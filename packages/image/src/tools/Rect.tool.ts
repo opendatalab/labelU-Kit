@@ -6,18 +6,17 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { RectData } from '../annotation';
 import { AnnotationRect } from '../annotation';
-import type { PointStyle, RectStyle } from '../shapes';
+import type { AxisPoint, PointStyle, RectStyle } from '../shapes';
 import { Rect, Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { EInternalEvent } from '../enums';
-import { Group } from '../shapes/Group';
 
-type PointPosition = 'nw' | 'ne' | 'se' | 'sw';
+type ControllerPosition = 'nw' | 'ne' | 'se' | 'sw';
 
 class DraftRect extends Annotation<RectData, Rect | Point, RectStyle | PointStyle> {
-  public pointPositionMapping: Map<PointPosition, Point> = new Map();
+  public pointPositionMapping: Map<ControllerPosition, Point> = new Map();
   constructor(params: AnnotationParams<RectData, RectStyle>) {
     super(params);
 
@@ -77,7 +76,7 @@ class DraftRect extends Annotation<RectData, Rect | Point, RectStyle | PointStyl
         groupIgnoreRadius: true,
       });
 
-      this.pointPositionMapping.set(points[i].name as PointPosition, point);
+      this.pointPositionMapping.set(points[i].name as ControllerPosition, point);
 
       group.add(point);
     }
@@ -131,9 +130,14 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   private _preBBox: BBox | null = null;
 
-  private _creatingShapes: Group<Rect | Point, RectStyle | PointStyle> | null = null;
+  private _creatingShape: Rect | null = null;
 
-  private _positionSwitchingMap: Record<PointPosition, PointPosition> = {} as Record<PointPosition, PointPosition>;
+  private _positionSwitchingMap: Record<ControllerPosition, ControllerPosition> = {} as Record<
+    ControllerPosition,
+    ControllerPosition
+  >;
+
+  private _startPoint: AxisPoint | null = null;
 
   public draft: DraftRect | null = null;
 
@@ -161,7 +165,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
-    eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 
   /**
@@ -175,8 +178,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationRect) => {
-    this?._creatingShapes?.destroy();
-    this._creatingShapes = null;
+    this?._creatingShape?.destroy();
+    this._creatingShape = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._archiveDraft();
@@ -194,8 +197,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   protected onUnSelect = (_e: MouseEvent) => {
     this._archiveDraft();
-    this?._creatingShapes?.destroy();
-    this._creatingShapes = null;
+    this?._creatingShape?.destroy();
+    this._creatingShape = null;
     // 重新渲染
     axis!.rerender();
   };
@@ -253,17 +256,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     });
   }
 
-  private _reloadDraft() {
-    const { draft } = this;
-
-    if (draft) {
-      const data = cloneDeep(draft.data);
-      draft.destroy();
-      this.draft = null;
-      this._createDraft(data);
-    }
-  }
-
   private _archiveDraft() {
     const { draft } = this;
 
@@ -275,9 +267,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
-    const { draft, _creatingShapes } = this;
+    const { draft, _creatingShape } = this;
 
-    if (draft && !_creatingShapes) {
+    if (draft && !_creatingShape) {
       // ====================== 点击点 ======================
       draft.group.each((shape) => {
         if (shape instanceof Point) {
@@ -313,29 +305,39 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     // 先归档上一次的草稿
     this._archiveDraft();
 
-    if (!_creatingShapes) {
-      this._creatingShapes = new Group(uuid(), monitor!.getMaxOrder() + 1);
-    }
+    if (_creatingShape) {
+      this._createDraft({
+        id: _creatingShape.id,
+        x: _creatingShape.coordinate[0].x,
+        y: _creatingShape.coordinate[0].y,
+        label: activeLabel,
+        width: _creatingShape.width,
+        height: _creatingShape.height,
+        order: monitor!.getMaxOrder() + 1,
+      });
+      _creatingShape.destroy();
+      this._creatingShape = null;
+      monitor!.setSelectedAnnotationId(_creatingShape.id);
+      axis!.rerender();
+    } else {
+      // 记录起始点坐标
+      this._startPoint = axis!.getOriginalCoord({
+        x: e.offsetX - axis!.distance.x,
+        y: e.offsetY - axis!.distance.y,
+      });
 
-    const startPoint = axis!.getOriginalCoord({
-      x: e.offsetX - axis!.distance.x,
-      y: e.offsetY - axis!.distance.y,
-    });
-
-    // 创建新的线段
-    this._creatingShapes?.add(
-      new Rect({
+      this._creatingShape = new Rect({
         id: uuid(),
         style: { ...style, stroke: this.getLabelColor(activeLabel) },
-        coordinate: startPoint,
+        coordinate: cloneDeep(this._startPoint),
         width: 1,
         height: 1,
-      }),
-    );
+      });
+    }
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { draft, _selectedPoint, previousCoordinates, _preBBox, _creatingShapes, _isRectPicked } = this;
+    const { draft, _selectedPoint, previousCoordinates, _preBBox, _creatingShape, _isRectPicked, _startPoint } = this;
 
     // 选中点
     if (draft && _selectedPoint && _preBBox) {
@@ -353,8 +355,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       const sePoint = draft.pointPositionMapping.get('se')!;
       const swPoint = draft.pointPositionMapping.get('sw')!;
 
-      console.log(selectedPointName);
-
       // 更新端点坐标
       if (selectedPointName === 'nw') {
         swPoint.coordinate[0].x = axis!.getOriginalX(e.offsetX);
@@ -370,7 +370,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
         sePoint.coordinate[0].y = axis!.getOriginalY(e.offsetY);
       }
 
-      const switchingMap: Record<PointPosition, PointPosition> = {} as Record<PointPosition, PointPosition>;
+      const switchingMap: Record<ControllerPosition, ControllerPosition> = {} as Record<
+        ControllerPosition,
+        ControllerPosition
+      >;
 
       // 更新矩形的坐标
       draft.group.each((shape) => {
@@ -412,7 +415,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
             }
           } else if (selectedPointName === 'ne') {
             if (x > _preBBox.minX) {
-              shape.coordinate[0].x = _preBBox.minX;
+              shape.coordinate[0].x = axis!.getOriginalX(_preBBox.minX);
               shape.width = (x - _preBBox.minX) / axis!.scale;
             }
 
@@ -540,14 +543,23 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       draft.group.update();
 
       draft.syncCoordToData();
-    } else if (_creatingShapes) {
-      // 正在绘制的线段，最后一个端点的坐标跟随鼠标
-      const { shapes } = _creatingShapes;
-      const lastShape = shapes[shapes.length - 1];
-      lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
-      lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
+    } else if (_creatingShape && _startPoint) {
+      if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
+        _creatingShape.coordinate[0].x = axis!.getOriginalX(e.offsetX);
+      } else {
+        _creatingShape.coordinate[0].x = _startPoint.x;
+      }
 
-      _creatingShapes.update();
+      if (e.offsetY < axis!.getScaledY(_startPoint.y)) {
+        _creatingShape.coordinate[0].y = axis!.getOriginalY(e.offsetY);
+      } else {
+        _creatingShape.coordinate[0].y = _startPoint.y;
+      }
+
+      _creatingShape.width = Math.abs(axis!.getOriginalX(e.offsetX) - _startPoint.x);
+      _creatingShape.height = Math.abs(axis!.getOriginalY(e.offsetY) - _startPoint.y);
+
+      _creatingShape.update();
     }
   };
 
@@ -564,50 +576,19 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       // 拖动点松开鼠标后，重新建立草稿，更新点的方位
       this.draft?.group.each((shape) => {
         if (shape instanceof Point && shape.name && shape.name in _positionSwitchingMap) {
-          shape.name = _positionSwitchingMap[shape.name as PointPosition] as PointPosition;
-          this.draft?.pointPositionMapping.set(shape.name as PointPosition, shape);
+          shape.name = _positionSwitchingMap[shape.name as ControllerPosition] as ControllerPosition;
+          this.draft?.pointPositionMapping.set(shape.name as ControllerPosition, shape);
         }
       });
-      this._positionSwitchingMap = {} as Record<PointPosition, PointPosition>;
-    }
-  };
-
-  private _handleRightMouseUp = () => {
-    // 归档创建中的图形
-    if (this._creatingShapes) {
-      const startPoint = axis!.getOriginalCoord({
-        x: this._creatingShapes.bbox.minX,
-        y: this._creatingShapes.bbox.minY,
-      });
-
-      const endPoint = axis!.getOriginalCoord({
-        x: this._creatingShapes.bbox.maxX,
-        y: this._creatingShapes.bbox.maxY,
-      });
-      const data: RectData = {
-        id: uuid(),
-        x: startPoint.x,
-        y: startPoint.y,
-        width: endPoint.x - startPoint.x,
-        height: endPoint.y - startPoint.y,
-        label: this.activeLabel,
-        order: monitor!.getMaxOrder() + 1,
-      };
-
-      this._addAnnotation(data);
-      this._creatingShapes.destroy();
-      this._creatingShapes = null;
-      axis!.rerender();
-      this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationRect);
-      monitor!.setSelectedAnnotationId(data.id);
+      this._positionSwitchingMap = {} as Record<ControllerPosition, ControllerPosition>;
     }
   };
 
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 
-    if (this._creatingShapes) {
-      this._creatingShapes.render(ctx);
+    if (this._creatingShape) {
+      this._creatingShape.render(ctx);
     }
   }
 
@@ -617,6 +598,5 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
-    eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 }
