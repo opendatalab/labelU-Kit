@@ -5,7 +5,7 @@ import type { Shape } from './Shape';
 import { EInternalEvent } from '../enums';
 import type { RBushItem } from '../singletons';
 import { eventEmitter, rbush } from '../singletons';
-import { Point, type AxisPoint } from './Point.shape';
+import { type AxisPoint } from './Point.shape';
 
 /**
  * 组合类，用于组合多个图形
@@ -57,17 +57,19 @@ export class Group<T extends Shape<Style>, Style> {
   }
 
   private _updateBBox() {
-    const finalShapes = this.shapes.filter((shape) => {
-      if (shape instanceof Point && shape.groupIgnoreRadius) {
-        return false;
-      }
-      return true;
-    });
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
 
-    const minX = Math.min(...finalShapes.map((shape) => shape.bbox.minX));
-    const minY = Math.min(...finalShapes.map((shape) => shape.bbox.minY));
-    const maxX = Math.max(...finalShapes.map((shape) => shape.bbox.maxX));
-    const maxY = Math.max(...finalShapes.map((shape) => shape.bbox.maxY));
+    for (let i = 0; i < this.shapes.length; i += 1) {
+      const shape = this.shapes[i];
+
+      minX = Math.min(minX, shape.bbox.minX);
+      minY = Math.min(minY, shape.bbox.minY);
+      maxX = Math.max(maxX, shape.bbox.maxX);
+      maxY = Math.max(maxY, shape.bbox.maxY);
+    }
 
     this.bbox = {
       minX,
@@ -156,6 +158,22 @@ export class Group<T extends Shape<Style>, Style> {
 
       shouldContinue = callback(this.shapes[i], i) as boolean;
     }
+  }
+
+  public reverseEach(callback: (shape: T, idx: number) => void | boolean) {
+    let shouldContinue = true;
+
+    for (let i = this.shapes.length - 1; i >= 0; i -= 1) {
+      if (shouldContinue === false) {
+        break;
+      }
+
+      shouldContinue = callback(this.shapes[i], i) as boolean;
+    }
+  }
+
+  public indexOf(shape: T) {
+    return this.shapes.indexOf(shape);
   }
 
   public render(ctx: CanvasRenderingContext2D) {

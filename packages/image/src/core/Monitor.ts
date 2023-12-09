@@ -12,11 +12,11 @@ export class Monitor {
 
   public _hoveredGroup: any = null;
 
+  private _hoveredShape: any = null;
+
   public selectedAnnotationId: string | null = null;
 
   private _orderIndexedAnnotationIds: string[] = [];
-
-  private _isSelectedGroupHold = false;
 
   constructor(canvas: HTMLCanvasElement) {
     if (!canvas) {
@@ -64,8 +64,6 @@ export class Monitor {
   private _handleMouseUp = (e: MouseEvent) => {
     e.preventDefault();
 
-    this._isSelectedGroupHold = false;
-
     if (e.button === 0) {
       eventEmitter.emit(EInternalEvent.LeftMouseUp, e);
     } else if (e.button === 2) {
@@ -85,7 +83,7 @@ export class Monitor {
    * @description 用于处理鼠标移动到标注上时，触发标注的 hover 事件；同时，选中标注的逻辑也会依赖此处理函数
    */
   private _handleMouseOver = (e: MouseEvent) => {
-    const { _hoveredGroup } = this;
+    const { _hoveredGroup, _hoveredShape } = this;
     const rbushItems = this.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
     const orderIndexedGroup: any[] = [];
 
@@ -108,14 +106,33 @@ export class Monitor {
     if (lastGroup) {
       lastGroup.emit(EInternalEvent.BBoxOver, e);
 
+      lastGroup.reverseEach((shape: any) => {
+        if (shape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+          shape.emit(EInternalEvent.ShapeOver, e, shape);
+          this._hoveredShape = shape;
+          // 只给一个shape发送事件，避免多个shape同时hover
+          return false;
+        }
+      });
+
       if (_hoveredGroup && _hoveredGroup.id !== lastGroup.id) {
         // 向上一次hover的group发送鼠标离开事件，避免多个group同时hover
         _hoveredGroup.emit(EInternalEvent.BBoxOut, e);
       }
 
+      if (_hoveredShape && _hoveredShape.id !== this._hoveredShape.id) {
+        _hoveredShape.emit(EInternalEvent.ShapeOut, e, _hoveredShape);
+      }
+
       this._hoveredGroup = lastGroup;
     } else {
       eventEmitter.emit(EInternalEvent.NoTarget, e);
+
+      if (_hoveredShape) {
+        _hoveredShape.emit(EInternalEvent.ShapeOut, e, _hoveredShape);
+        this._hoveredShape = null;
+      }
+
       this._hoveredGroup = null;
 
       return;
@@ -125,6 +142,9 @@ export class Monitor {
       if (rbushItem._group && lastGroup.id !== rbushItem._group.id) {
         // 向其他group发送鼠标离开事件
         rbushItem._group.emit(EInternalEvent.BBoxOut, e);
+        rbushItem._group.each((shape: any) => {
+          shape.emit(EInternalEvent.ShapeOut, e);
+        });
       }
     }
   };

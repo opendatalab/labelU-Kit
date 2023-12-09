@@ -62,15 +62,6 @@ export interface PointParams {
   name?: string;
   coordinate: AxisPoint;
   style?: PointStyle;
-
-  /**
-   * 计算包围盒时是否忽略半径
-   *
-   * @description 当计算组Group的包围盒时，需要忽略半径
-   *
-   * @default false
-   */
-  groupIgnoreRadius?: boolean;
 }
 
 /**
@@ -79,10 +70,8 @@ export interface PointParams {
 export class Point extends Shape<PointStyle> {
   /**
    * Rbush 碰撞检测阈值
-   *
-   * TODO: 阈值是否可配置
    */
-  static DISTANCE_THRESHOLD = 2 as const;
+  static DISTANCE_THRESHOLD = 0 as const;
 
   static DEFAULT_STYLE: Required<PointStyle> = {
     stroke: '#000',
@@ -98,9 +87,7 @@ export class Point extends Shape<PointStyle> {
 
   name: string | undefined;
 
-  public groupIgnoreRadius: boolean = false;
-
-  constructor({ id, name, coordinate, style, groupIgnoreRadius = false }: PointParams) {
+  constructor({ id, name, coordinate, style }: PointParams) {
     super(id, coordinate);
 
     this.name = name;
@@ -109,21 +96,10 @@ export class Point extends Shape<PointStyle> {
       this.style = { ...this.style, ...style };
     }
 
-    this.groupIgnoreRadius = groupIgnoreRadius;
-
-    this.setBBoxUpdater(() => {
+    this.onCoordinateChange(() => {
       const [{ x, y }] = this.dynamicCoordinate;
 
-      if (this.groupIgnoreRadius) {
-        return {
-          minX: x,
-          minY: y,
-          maxX: x,
-          maxY: y,
-        };
-      }
-
-      return {
+      this.bbox = {
         minX: x - this.style.radius,
         minY: y - this.style.radius,
         maxX: x + this.style.radius,

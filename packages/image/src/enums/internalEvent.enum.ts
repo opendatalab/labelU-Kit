@@ -50,6 +50,12 @@ export enum EInternalEvent {
   /** 鼠标经过 */
   MouseOver = '__mouse_over__',
 
+  /** 鼠标经过图形对象 */
+  ShapeOver = '__shape_over__',
+
+  /** 鼠标经过图形对象 */
+  ShapeOut = '__shape_out__',
+
   /** 经过包围盒 */
   BBoxOver = '__bbox_over__',
 

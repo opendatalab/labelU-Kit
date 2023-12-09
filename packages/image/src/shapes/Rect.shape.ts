@@ -67,11 +67,11 @@ export class Rect extends Shape<RectStyle> {
       this.style = { ...this.style, ...style };
     }
 
-    this.setBBoxUpdater(() => {
-      const { _width: settledWidth, _height: settledHeight } = this;
-      const [{ x, y }] = this.dynamicCoordinate;
+    this.onCoordinateChange(() => {
+      const { _width: settledWidth, _height: settledHeight, dynamicCoordinate } = this;
+      const [{ x, y }] = dynamicCoordinate;
 
-      return {
+      this.bbox = {
         minX: x,
         minY: y,
         maxX: x + settledWidth * axis!.scale,

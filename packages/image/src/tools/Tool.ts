@@ -1,10 +1,9 @@
 import { type Attribute, type ILabel } from '@labelu/interface';
-import cloneDeep from 'lodash.clonedeep';
 
 import { EInternalEvent } from '../enums';
 import type { Annotation } from '../annotation/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
-import type { AxisPoint, Shape } from '../shapes';
+import type { Shape } from '../shapes';
 import { eventEmitter } from '../singletons';
 
 export function MouseDecorator<T extends { new (...args: any[]): any }>(constructor: T) {
@@ -37,7 +36,7 @@ export function MouseDecorator<T extends { new (...args: any[]): any }>(construc
     public destroy() {
       super.destroy();
       eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-      eventEmitter.off(EInternalEvent.LeftMouseMove, this._handleMouseMove);
+      eventEmitter.off(EInternalEvent.AnnotationMove, this._handleMouseMove);
       eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
     }
   };
@@ -96,8 +95,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
    */
   public draft: IAnnotation<Data, Style> | null = null;
 
-  protected previousCoordinates: AxisPoint[][] = [];
-
   constructor({ name, data, style, hoveredStyle, selectedStyle, ...config }: Required<Config> & ExtraParams) {
     // 创建标签映射
     this._createLabelMapping(config.labels);
@@ -153,17 +150,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   public deactivate() {
     this.activeLabel = undefined;
-    this.previousCoordinates = [];
-  }
-
-  public getCoordinates() {
-    const { draft } = this;
-
-    if (!draft) {
-      return [];
-    }
-
-    return draft.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
   }
 
   _createLabelMapping(labels: ILabel[] | undefined) {

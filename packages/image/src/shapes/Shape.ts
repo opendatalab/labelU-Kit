@@ -7,8 +7,7 @@ import { EInternalEvent } from '../enums';
 import type { AxisPoint } from './Point.shape';
 
 type Coord = AxisPoint | AxisPoint[];
-type CoordinateUpdater = () => AxisPoint[];
-type BBoxUpdater = (coordinates: AxisPoint[]) => BBox;
+type CoordinateChangeHandler = () => void;
 
 /**
  * 画布上的图形对象（基类）
@@ -18,9 +17,9 @@ export class Shape<Style> {
 
   private _cachedRBush: RBushItem | null = null;
 
-  private _coordinateUpdater?: CoordinateUpdater;
+  public isMouseOver = false;
 
-  private _bboxUpdater?: BBoxUpdater;
+  private _onCoordinateChangeHandlers: CoordinateChangeHandler[] = [];
 
   /**
    * 动态坐标
@@ -48,6 +47,29 @@ export class Shape<Style> {
    * 图形对象原始的坐标
    */
   private _coordinate: AxisPoint[];
+
+  /**
+   * 样式
+   */
+  public style: Style = {} as Style;
+
+  /**
+   * @param id 图形对象的唯一标识
+   * @param coordinate 图形对象的原始坐标，不随缩放拖拽等操作而改变
+   */
+  constructor(id: string, coordinate: Coord) {
+    this.id = id;
+
+    if (!coordinate) {
+      throw Error('coordinate is not a valid AxisPoint!');
+    }
+    this._coordinate = new Proxy(!Array.isArray(coordinate) ? [coordinate] : coordinate, this._coordinateHandler);
+
+    this._bindEvents();
+    this.onCoordinateChange(this._updateBBox.bind(this));
+    this.onCoordinateChange(this._updateRBush.bind(this));
+    this.update();
+  }
 
   /**
    * 更新坐标后自动更新偏移后的坐标及bbox
@@ -80,68 +102,46 @@ export class Shape<Style> {
     },
   };
 
-  /**
-   * 样式
-   */
-  public style: Style = {} as Style;
-
-  /**
-   * @param id 图形对象的唯一标识
-   * @param coordinate 图形对象的原始坐标，不随缩放拖拽等操作而改变
-   */
-  constructor(id: string, coordinate: Coord) {
-    this.id = id;
-
-    if (!coordinate) {
-      throw Error('coordinate is not a valid AxisPoint!');
-    }
-    this._coordinate = new Proxy(!Array.isArray(coordinate) ? [coordinate] : coordinate, this._coordinateHandler);
-
-    this._bindEvents();
-    this.update();
-  }
-
   private _bindEvents() {
     eventEmitter.on(EInternalEvent.AxisChange, this.update);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this.update);
   }
 
   private _syncCoordinateToDynamic() {
-    const { _coordinate, _coordinateUpdater } = this;
-    let newCoordinate = _coordinateUpdater?.();
+    const { _coordinate } = this;
 
-    if (!newCoordinate) {
-      // 使用默认的坐标更新器
-
-      newCoordinate = _coordinate.map((point) => {
-        return axis!.getScaledCoord(point);
-      });
-    }
+    const newCoordinate = _coordinate.map((point) => {
+      return axis!.getScaledCoord(point);
+    });
 
     this._dynamicCoordinate = newCoordinate;
   }
 
   private _updateBBox() {
-    const { _dynamicCoordinate, _bboxUpdater } = this;
+    const { _dynamicCoordinate } = this;
 
     if (!_dynamicCoordinate) {
       throw Error('dynamicCoordinate is not defined!');
     }
 
-    let bbox = _bboxUpdater?.(_dynamicCoordinate);
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
 
-    if (!bbox) {
-      // 使用默认的bbox更新器
-
-      bbox = {
-        minX: Math.min(..._dynamicCoordinate.map((point) => point.x)),
-        minY: Math.min(..._dynamicCoordinate.map((point) => point.y)),
-        maxX: Math.max(..._dynamicCoordinate.map((point) => point.x)),
-        maxY: Math.max(..._dynamicCoordinate.map((point) => point.y)),
-      };
+    for (const point of _dynamicCoordinate) {
+      minX = Math.min(minX, point.x);
+      minY = Math.min(minY, point.y);
+      maxX = Math.max(maxX, point.x);
+      maxY = Math.max(maxY, point.y);
     }
 
-    this.bbox = bbox;
+    this.bbox = {
+      minX,
+      minY,
+      maxX,
+      maxY,
+    };
   }
 
   private _updateRBush() {
@@ -187,23 +187,35 @@ export class Shape<Style> {
     return this._dynamicCoordinate;
   }
 
+  /**
+   * 坐标变化时触发
+   * @param handler 坐标变化时的回调函数
+   * @returns 取消监听函数
+   */
+  public onCoordinateChange(handler: CoordinateChangeHandler) {
+    this._onCoordinateChangeHandlers.push(handler);
+
+    // 添加监听后立即执行更新
+    this.update();
+
+    return () => {
+      const index = this._onCoordinateChangeHandlers.indexOf(handler);
+
+      if (index !== -1) {
+        this._onCoordinateChangeHandlers.splice(index, 1);
+      }
+    };
+  }
+
   public update = () => {
     this._syncCoordinateToDynamic();
-    this._updateBBox();
-    this._updateRBush();
+
+    for (const handler of this._onCoordinateChangeHandlers) {
+      handler();
+    }
   };
 
-  public setCoordinateUpdater(updater: CoordinateUpdater) {
-    this._coordinateUpdater = updater;
-    this.update();
-  }
-
-  public setBBoxUpdater(updater: BBoxUpdater) {
-    this._bboxUpdater = updater;
-    this.update();
-  }
-
-  public isUnderCursor(_mouseCoord: AxisPoint) {
+  public isUnderCursor(_mouseCoord: AxisPoint, _fromGroup?: boolean) {
     console.error('isUnderCursor is not implemented!');
 
     return false;
@@ -231,6 +243,26 @@ export class Shape<Style> {
 
   // ================= 增加event代理 =================
   public on(eventName: EInternalEvent, listener: (...args: any[]) => void) {
+    if (eventName === EInternalEvent.ShapeOver) {
+      const handler = (...args: any[]) => {
+        this.isMouseOver = true;
+        listener(...args);
+      };
+
+      return this._event.on(eventName, handler);
+    }
+
+    if (eventName === EInternalEvent.ShapeOut) {
+      const handler = (...args: any[]) => {
+        if (this.isMouseOver) {
+          this.isMouseOver = false;
+          listener(...args);
+        }
+      };
+
+      return this._event.on(eventName, handler);
+    }
+
     return this._event.on(eventName, listener);
   }
 

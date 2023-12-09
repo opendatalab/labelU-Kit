@@ -42,8 +42,8 @@ export class Polygon extends Shape<PolygonStyle> {
       this.style = { ...this.style, ...style };
     }
 
-    this.setBBoxUpdater(() => {
-      const { dynamicCoordinate, style: rendererStyle } = this;
+    this.onCoordinateChange(() => {
+      const { style: rendererStyle, dynamicCoordinate } = this;
       let minX = Infinity,
         minY = Infinity,
         maxX = -Infinity,
