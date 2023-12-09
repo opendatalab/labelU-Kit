@@ -170,7 +170,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     // ====================== 绘制 ======================
     const { activeLabel, style, draft } = this;
 
-    const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
+    const isUnderDraft = draft && draft.isRectAndControllersUnderCursor({ x: e.offsetX, y: e.offsetY });
 
     if (!activeLabel || isUnderDraft) {
       return;

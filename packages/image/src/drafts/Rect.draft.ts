@@ -4,29 +4,30 @@ import type { BBox } from 'rbush';
 
 import type { RectStyle } from '../shapes/Rect.shape';
 import type { RectData } from '../annotation';
-import type { AxisPoint, PointStyle } from '../shapes';
-import { Rect, Point } from '../shapes';
+import type { AxisPoint, LineCoordinate, PointStyle, Point } from '../shapes';
 import { axis } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
+import { ControllerEdge } from './ControllerEdge';
 
 type ControllerPosition = 'nw' | 'ne' | 'se' | 'sw';
 
-export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Point, RectStyle | PointStyle>) {
+type EdgePosition = 'top' | 'right' | 'bottom' | 'left';
+
+export class DraftRect extends DraftObserverMixin(
+  Annotation<RectData, ControllerEdge | Point, RectStyle | PointStyle>,
+) {
   private _isControllerPicked: boolean = false;
 
   private _preBBox: BBox | null = null;
 
   private _previousDynamicCoordinates: AxisPoint[][] | null = null;
 
-  public pointPositionMapping: Map<ControllerPosition, Point> = new Map();
+  private _controllerPositionMapping: Map<ControllerPosition, ControllerPoint> = new Map();
 
-  private _positionSwitchingMap: Record<ControllerPosition, ControllerPosition> = {} as Record<
-    ControllerPosition,
-    ControllerPosition
-  >;
+  private _edgePositionMapping: Map<EdgePosition, ControllerEdge> = new Map();
 
   constructor(params: AnnotationParams<RectData, RectStyle>) {
     super(params);
@@ -43,18 +44,56 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
   private _setupShapes() {
     const { data, group, style } = this;
 
-    group.add(
-      new Rect({
-        id: data.id,
-        coordinate: {
-          x: data.x,
-          y: data.y,
-        },
-        width: data.width,
-        height: data.height,
-        style,
-      }),
-    );
+    const lineCoordinates: {
+      name: EdgePosition;
+      coordinate: LineCoordinate;
+    }[] = [
+      // Top
+      {
+        name: 'top',
+        coordinate: [
+          { x: data.x, y: data.y },
+          { x: data.x + data.width, y: data.y },
+        ],
+      },
+      // Right
+      {
+        name: 'right',
+        coordinate: [
+          { x: data.x + data.width, y: data.y },
+          { x: data.x + data.width, y: data.y + data.height },
+        ],
+      },
+      // Bottom
+      {
+        name: 'bottom',
+        coordinate: [
+          { x: data.x + data.width, y: data.y + data.height },
+          { x: data.x, y: data.y + data.height },
+        ],
+      },
+      // Left
+      {
+        name: 'left',
+        coordinate: [
+          { x: data.x, y: data.y + data.height },
+          { x: data.x, y: data.y },
+        ],
+      },
+    ];
+
+    for (let i = 0; i < lineCoordinates.length; i++) {
+      const edge = new ControllerEdge({
+        id: uuid(),
+        name: lineCoordinates[i].name,
+        coordinate: lineCoordinates[i].coordinate,
+        style: { ...style, strokeWidth: 5 },
+      });
+
+      this._edgePositionMapping.set(lineCoordinates[i].name as EdgePosition, edge);
+
+      group.add(edge);
+    }
 
     const points = [
       {
@@ -92,7 +131,7 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
         style: { ...style, radius: 8, stroke: 'transparent', fill: 'blue' },
       });
 
-      this.pointPositionMapping.set(points[i].name as ControllerPosition, point);
+      this._controllerPositionMapping.set(points[i].name as ControllerPosition, point);
 
       point.onMouseDown(this._onControllerPointDown);
       point.onMove(this._onControllerPointMove);
@@ -101,6 +140,8 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
       group.add(point);
     }
   }
+
+  // ========================== 选中的标注草稿 ==========================
 
   /**
    * 选中草稿
@@ -130,12 +171,25 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
 
     // 更新草稿坐标
     group.each((shape, index) => {
-      shape.coordinate = [
-        axis!.getOriginalCoord({
-          x: _previousDynamicCoordinates[index][0].x + axis!.distance.x,
-          y: _previousDynamicCoordinates[index][0].y + axis!.distance.y,
-        }),
-      ];
+      if (shape instanceof ControllerPoint) {
+        shape.coordinate = [
+          axis!.getOriginalCoord({
+            x: _previousDynamicCoordinates[index][0].x + axis!.distance.x,
+            y: _previousDynamicCoordinates[index][0].y + axis!.distance.y,
+          }),
+        ];
+      } else {
+        shape.coordinate = [
+          axis!.getOriginalCoord({
+            x: _previousDynamicCoordinates[index][0].x + axis!.distance.x,
+            y: _previousDynamicCoordinates[index][0].y + axis!.distance.y,
+          }),
+          axis!.getOriginalCoord({
+            x: _previousDynamicCoordinates[index][1].x + axis!.distance.x,
+            y: _previousDynamicCoordinates[index][1].y + axis!.distance.y,
+          }),
+        ];
+      }
     });
 
     // 手动更新组合的包围盒
@@ -149,6 +203,7 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
     this._previousDynamicCoordinates = null;
   };
 
+  // ========================== 控制点 ==========================
   /**
    * 按下控制点
    * @param point
@@ -165,187 +220,89 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
    * @description 控制点移动时，更新线段的端点
    */
   private _onControllerPointMove = (controllerPoint: ControllerPoint) => {
-    const { pointPositionMapping, group, _preBBox } = this;
+    const { _controllerPositionMapping, _edgePositionMapping, _preBBox } = this;
 
     if (!_preBBox) {
       return;
     }
 
     const { name: selectedPointName } = controllerPoint;
-    const { x, y } = controllerPoint.dynamicCoordinate[0];
-    const nwPoint = pointPositionMapping.get('nw')!;
-    const nePoint = pointPositionMapping.get('ne')!;
-    const sePoint = pointPositionMapping.get('se')!;
-    const swPoint = pointPositionMapping.get('sw')!;
+    const nwPoint = _controllerPositionMapping.get('nw')!;
+    const nePoint = _controllerPositionMapping.get('ne')!;
+    const sePoint = _controllerPositionMapping.get('se')!;
+    const swPoint = _controllerPositionMapping.get('sw')!;
+
+    const topEdge = _edgePositionMapping.get('top')!;
+    const rightEdge = _edgePositionMapping.get('right')!;
+    const bottomEdge = _edgePositionMapping.get('bottom')!;
+    const leftEdge = _edgePositionMapping.get('left')!;
 
     // 更新端点坐标
     if (selectedPointName === 'nw') {
       swPoint.coordinate[0].x = controllerPoint.coordinate[0].x;
       nePoint.coordinate[0].y = controllerPoint.coordinate[0].y;
+
+      // 更新Top线段坐标
+      topEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      topEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
+      topEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
+      // 更新Left线段坐标
+      leftEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
+      leftEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
+      leftEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      // 更新Bottom线段坐标
+      bottomEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
+      // 更新Right线段坐标
+      rightEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
     } else if (selectedPointName === 'ne') {
       sePoint.coordinate[0].x = controllerPoint.coordinate[0].x;
       nwPoint.coordinate[0].y = controllerPoint.coordinate[0].y;
+
+      // 更新Top线段坐标
+      topEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
+      topEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
+      topEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
+      // 更新Right线段坐标
+      rightEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      rightEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
+      rightEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
+      // 更新Bottom线段坐标
+      bottomEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      // 更新Left线段坐标
+      leftEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
     } else if (selectedPointName === 'se') {
       nePoint.coordinate[0].x = controllerPoint.coordinate[0].x;
       swPoint.coordinate[0].y = controllerPoint.coordinate[0].y;
+
+      // 更新Right线段坐标
+      rightEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
+      rightEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
+      rightEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      // 更新Bottom线段坐标
+      bottomEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      bottomEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
+      bottomEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
+      // 更新Left线段坐标
+      leftEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
+      // 更新Top线段坐标
+      topEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
     } else if (selectedPointName === 'sw') {
       nwPoint.coordinate[0].x = controllerPoint.coordinate[0].x;
       sePoint.coordinate[0].y = controllerPoint.coordinate[0].y;
+
+      // 更新Left线段坐标
+      leftEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      leftEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
+      leftEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
+      // 更新Bottom线段坐标
+      bottomEdge.coordinate[1].x = controllerPoint.coordinate[0].x;
+      bottomEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
+      bottomEdge.coordinate[0].y = controllerPoint.coordinate[0].y;
+      // 更新Top线段坐标
+      topEdge.coordinate[0].x = controllerPoint.coordinate[0].x;
+      // 更新Right线段坐标
+      rightEdge.coordinate[1].y = controllerPoint.coordinate[0].y;
     }
-
-    const switchingMap: Record<ControllerPosition, ControllerPosition> = {} as Record<
-      ControllerPosition,
-      ControllerPosition
-    >;
-
-    // 更新矩形的坐标
-    group.each((shape) => {
-      if (shape instanceof Rect) {
-        if (selectedPointName === 'nw') {
-          if (x < _preBBox.maxX) {
-            shape.coordinate[0].x = axis!.getOriginalX(x);
-            shape.width = (_preBBox.maxX - x) / axis!.scale;
-          }
-
-          if (x >= _preBBox.maxX) {
-            shape.coordinate[0].x = axis!.getOriginalX(_preBBox.maxX);
-            shape.width = (x - _preBBox.maxX) / axis!.scale;
-            switchingMap.nw = 'ne';
-            switchingMap.sw = 'se';
-            switchingMap.ne = 'nw';
-            switchingMap.se = 'sw';
-          }
-
-          if (y < _preBBox.maxY) {
-            shape.coordinate[0].y = axis!.getOriginalY(y);
-            shape.height = (_preBBox.maxY - y) / axis!.scale;
-          }
-
-          if (y >= _preBBox.maxY) {
-            shape.coordinate[0].y = axis!.getOriginalY(_preBBox.maxY);
-            shape.height = (y - _preBBox.maxY) / axis!.scale;
-            switchingMap.nw = 'sw';
-            switchingMap.ne = 'se';
-            switchingMap.sw = 'nw';
-            switchingMap.se = 'ne';
-          }
-
-          if (x >= _preBBox.maxX && y >= _preBBox.maxY) {
-            switchingMap.nw = 'se';
-            switchingMap.ne = 'sw';
-            switchingMap.sw = 'ne';
-            switchingMap.se = 'nw';
-          }
-        } else if (selectedPointName === 'ne') {
-          if (x > _preBBox.minX) {
-            shape.coordinate[0].x = axis!.getOriginalX(_preBBox.minX);
-            shape.width = (x - _preBBox.minX) / axis!.scale;
-          }
-
-          if (x <= _preBBox.minX) {
-            shape.coordinate[0].x = axis!.getOriginalX(x);
-            shape.width = (_preBBox.minX - x) / axis!.scale;
-            switchingMap.ne = 'nw';
-            switchingMap.se = 'sw';
-            switchingMap.nw = 'ne';
-            switchingMap.sw = 'se';
-          }
-
-          if (y < _preBBox.maxY) {
-            shape.coordinate[0].y = axis!.getOriginalY(y);
-            shape.height = (_preBBox.maxY - y) / axis!.scale;
-          }
-
-          if (y >= _preBBox.maxY) {
-            shape.coordinate[0].y = axis!.getOriginalY(_preBBox.maxY);
-            shape.height = (y - _preBBox.maxY) / axis!.scale;
-            switchingMap.ne = 'se';
-            switchingMap.nw = 'sw';
-            switchingMap.se = 'ne';
-            switchingMap.sw = 'nw';
-          }
-
-          if (x <= _preBBox.minX && y >= _preBBox.maxY) {
-            switchingMap.ne = 'sw';
-            switchingMap.nw = 'se';
-            switchingMap.se = 'nw';
-            switchingMap.sw = 'ne';
-          }
-        } else if (selectedPointName === 'se') {
-          if (x > _preBBox.minX) {
-            shape.width = (x - _preBBox.minX) / axis!.scale;
-            shape.coordinate[0].x = axis!.getOriginalX(_preBBox.minX);
-          }
-
-          if (x <= _preBBox.minX) {
-            shape.width = (_preBBox.minX - x) / axis!.scale;
-            shape.coordinate[0].x = axis!.getOriginalX(x);
-            switchingMap.se = 'sw';
-            switchingMap.ne = 'nw';
-            switchingMap.sw = 'se';
-            switchingMap.nw = 'ne';
-          }
-
-          if (y > _preBBox.minY) {
-            shape.height = (y - _preBBox.minY) / axis!.scale;
-            shape.coordinate[0].y = axis!.getOriginalY(_preBBox.minY);
-          }
-
-          if (y <= _preBBox.minY) {
-            shape.height = (_preBBox.minY - y) / axis!.scale;
-            shape.coordinate[0].y = axis!.getOriginalY(y);
-            switchingMap.se = 'ne';
-            switchingMap.sw = 'nw';
-            switchingMap.ne = 'se';
-            switchingMap.nw = 'sw';
-          }
-
-          if (x <= _preBBox.minX && y <= _preBBox.minY) {
-            switchingMap.se = 'nw';
-            switchingMap.sw = 'ne';
-            switchingMap.ne = 'sw';
-            switchingMap.nw = 'se';
-          }
-        } else if (selectedPointName === 'sw') {
-          if (x < _preBBox.maxX) {
-            shape.coordinate[0].x = axis!.getOriginalX(x);
-            shape.width = (_preBBox.maxX - x) / axis!.scale;
-          }
-
-          if (x >= _preBBox.maxX) {
-            shape.coordinate[0].x = axis!.getOriginalX(_preBBox.maxX);
-            shape.width = (x - _preBBox.maxX) / axis!.scale;
-            switchingMap.sw = 'se';
-            switchingMap.nw = 'ne';
-            switchingMap.se = 'sw';
-            switchingMap.ne = 'nw';
-          }
-
-          if (y > _preBBox.minY) {
-            shape.coordinate[0].y = axis!.getOriginalY(_preBBox.minY);
-            shape.height = (y - _preBBox.minY) / axis!.scale;
-          }
-
-          if (y <= _preBBox.minY) {
-            shape.coordinate[0].y = axis!.getOriginalY(y);
-            shape.height = (_preBBox.minY - y) / axis!.scale;
-            switchingMap.sw = 'nw';
-            switchingMap.se = 'ne';
-            switchingMap.nw = 'sw';
-            switchingMap.ne = 'se';
-          }
-
-          if (x >= _preBBox.maxX && y <= _preBBox.minY) {
-            switchingMap.sw = 'ne';
-            switchingMap.se = 'nw';
-            switchingMap.nw = 'se';
-            switchingMap.ne = 'sw';
-          }
-        }
-      }
-    });
-
-    this._positionSwitchingMap = switchingMap;
 
     // 手动更新组合的包围盒
     this.group.update();
@@ -357,20 +314,8 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
    * 释放控制点
    */
   private _onControllerPointUp = () => {
-    const { _positionSwitchingMap } = this;
-
     this._preBBox = this.getBBoxWithoutControllerPoint();
     this._isControllerPicked = false;
-
-    // 拖动点松开鼠标后，重新建立草稿，更新点的方位
-    this.group.each((shape) => {
-      if (shape instanceof Point && shape.name && shape.name in _positionSwitchingMap) {
-        shape.name = _positionSwitchingMap[shape.name as ControllerPosition] as ControllerPosition;
-        this.pointPositionMapping.set(shape.name as ControllerPosition, shape);
-      }
-    });
-
-    this._positionSwitchingMap = {} as Record<ControllerPosition, ControllerPosition>;
   };
 
   protected getDynamicCoordinates() {
@@ -390,5 +335,25 @@ export class DraftRect extends DraftObserverMixin(Annotation<RectData, Rect | Po
     data.y = axis!.getOriginalY(bbox.minY);
     data.width = axis!.getOriginalX(bbox.maxX) - data.x;
     data.height = axis!.getOriginalY(bbox.maxY) - data.y;
+  }
+
+  public isRectAndControllersUnderCursor(mouseCoord: AxisPoint) {
+    const { group } = this;
+
+    if (this.isUnderCursor(mouseCoord)) {
+      return true;
+    }
+
+    for (let i = 0; i < group.shapes.length; i++) {
+      const shape = group.shapes[i];
+
+      if (shape instanceof ControllerPoint) {
+        if (shape.isUnderCursor(mouseCoord)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

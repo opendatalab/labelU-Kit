@@ -8,7 +8,7 @@ export interface LineStyle {
   opacity?: number;
 }
 
-type LineCoordinate = [
+export type LineCoordinate = [
   /** 起始点 */
   AxisPoint,
   /** 结束点 */
