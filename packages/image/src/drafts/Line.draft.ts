@@ -11,6 +11,7 @@ import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
+
 export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Point, LineStyle | PointStyle>) {
   private _selectionShape: Rect | null = null;
 
