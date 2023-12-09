@@ -168,9 +168,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   private _handleMouseDown = (e: MouseEvent) => {
     const { _creatingShape } = this;
     // ====================== 绘制 ======================
-    const { activeLabel, style } = this;
+    const { activeLabel, style, draft } = this;
 
-    if (!activeLabel) {
+    const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
+
+    if (!activeLabel || isUnderDraft) {
       return;
     }
 

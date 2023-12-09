@@ -4,8 +4,8 @@ import cloneDeep from 'lodash.clonedeep';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import { AnnotationPolygon } from '../annotation';
-import type { AxisPoint, PolygonStyle, Rect } from '../shapes';
-import { Point, Polygon } from '../shapes';
+import type { AxisPoint, LineStyle, PolygonStyle, Rect } from '../shapes';
+import { Line, Point, Polygon } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
@@ -62,7 +62,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   public draft: DraftPolygon | null = null;
 
-  private _creatingShapes: Group<Polygon, PolygonStyle> | null = null;
+  private _creatingShapes: Group<Polygon | Line, PolygonStyle | LineStyle> | null = null;
 
   constructor(params: PolygonToolOptions) {
     super({
@@ -195,33 +195,58 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
-    const { draft, _creatingShapes } = this;
-
-    if (draft) {
-      return;
-    }
-
     // ====================== 绘制 ======================
-    const { activeLabel, style } = this;
+    const { activeLabel, style, draft } = this;
 
-    if (!activeLabel) {
+    const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
+
+    if (!activeLabel || isUnderDraft) {
       return;
     }
 
     // 先归档上一次的草稿
     this._archiveDraft();
 
-    if (!_creatingShapes) {
-      this._creatingShapes = new Group(uuid(), monitor!.getMaxOrder() + 1);
-    }
-
     const startPoint = axis!.getOriginalCoord({
       x: e.offsetX - axis!.distance.x,
       y: e.offsetY - axis!.distance.y,
     });
 
-    console.log('startPoint', startPoint, style);
-    // TODO: 创建新多边形
+    if (!this._creatingShapes) {
+      this._creatingShapes = new Group(uuid(), monitor!.getMaxOrder() + 1);
+      this._creatingShapes?.add(
+        new Polygon({
+          id: uuid(),
+          style: { ...style, stroke: 'transparent', fill: '#f60', strokeWidth: 0 },
+          coordinate: [
+            {
+              ...startPoint,
+            },
+          ],
+        }),
+      );
+    }
+
+    // 多边形增加一个点
+    const { _creatingShapes } = this;
+
+    _creatingShapes.shapes[0].coordinate = [..._creatingShapes.shapes[0].plainCoordinate, cloneDeep(startPoint)];
+
+    // 创建新的线段
+    _creatingShapes?.add(
+      new Line({
+        id: uuid(),
+        style: { ...style, stroke: this.getLabelColor(activeLabel) },
+        coordinate: [
+          {
+            ...startPoint,
+          },
+          {
+            ...startPoint,
+          },
+        ],
+      }),
+    );
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
@@ -233,6 +258,10 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       const lastShape = shapes[shapes.length - 1];
       lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
       lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
+      // 更新多边形的最后一个点
+      _creatingShapes.shapes[0].coordinate[_creatingShapes.shapes[0].coordinate.length - 1] = cloneDeep(
+        lastShape.coordinate[1],
+      );
       _creatingShapes.update();
     }
   };
@@ -240,31 +269,18 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   private _handleRightMouseUp = () => {
     // 归档创建中的图形
     if (this._creatingShapes) {
+      // 最后一个点不加入标注
       const points = [];
-      // 最后一个点不需要加入标注
-      for (let i = 0; i < this._creatingShapes.shapes.length - 1; i++) {
-        const shape = this._creatingShapes.shapes[i];
-        if (i === 0) {
-          points.push(
-            {
-              id: shape.id,
-              x: axis!.getOriginalX(shape.dynamicCoordinate[0].x),
-              y: axis!.getOriginalY(shape.dynamicCoordinate[0].y),
-            },
-            {
-              id: uuid(),
-              x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
-              y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
-            },
-          );
-        } else {
-          points.push({
-            id: uuid(),
-            x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
-            y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
-          });
-        }
+
+      for (let i = 0; i < this._creatingShapes.shapes[0].coordinate.length - 1; i++) {
+        const shape = this._creatingShapes.shapes[0];
+        const point = shape.coordinate[i];
+        points.push({
+          id: uuid(),
+          ...point,
+        });
       }
+
       const data: PolygonData = {
         id: uuid(),
         pointList: points,

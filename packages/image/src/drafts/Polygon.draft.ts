@@ -247,17 +247,4 @@ export class DraftPolygon extends DraftObserverMixin(
       data.pointList[i].y = axis!.getOriginalY(polygonCoordinate[i].y);
     }
   }
-
-  public destroy() {
-    super.destroy();
-    this._destroySelection();
-  }
-
-  public render(ctx: CanvasRenderingContext2D) {
-    super.render(ctx);
-
-    if (this._selectionShape) {
-      this._selectionShape.render(ctx);
-    }
-  }
 }

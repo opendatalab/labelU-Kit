@@ -163,16 +163,20 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     if (draft) {
       this._addAnnotation(draft.data);
       draft.destroy();
-      // this._destroySelection();
       this.draft = null;
     }
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, _creatingShapes } = this;
+    const { activeLabel, style, _creatingShapes, draft } = this;
 
-    if (!activeLabel) {
+    const isUnderDraft =
+      draft &&
+      (draft.isUnderCursor({ x: e.offsetX, y: e.offsetY }) ||
+        draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY }));
+
+    if (!activeLabel || isUnderDraft) {
       return;
     }
 

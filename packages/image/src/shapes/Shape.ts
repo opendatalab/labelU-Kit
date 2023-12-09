@@ -183,6 +183,15 @@ export class Shape<Style> {
     return this._coordinate;
   }
 
+  public get plainCoordinate() {
+    return this._coordinate.map((point) => {
+      return {
+        x: point.x,
+        y: point.y,
+      };
+    });
+  }
+
   public get dynamicCoordinate() {
     return this._dynamicCoordinate;
   }
