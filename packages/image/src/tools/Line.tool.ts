@@ -146,7 +146,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _createDraft(data: LineData) {
     const { style } = this;
 
-    this.draft = new DraftLine({
+    this.draft = new DraftLine(this.config, {
       id: data.id,
       data,
       style: { ...style, stroke: this.getLabelColor(data.label) },

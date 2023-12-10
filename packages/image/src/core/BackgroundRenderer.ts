@@ -132,6 +132,16 @@ export class BackgroundRenderer extends Renderer {
       y: offsetY,
     });
 
+    const bbox = {
+      minX: coord.x,
+      minY: coord.y,
+      maxX: coord.x + renderWidth * scale,
+      maxY: coord.y + renderHeight * scale,
+    };
+
+    // 更新图片区域
+    axis!.setSafeZone(bbox);
+
     ctx.drawImage(this._image, coord.x, coord.y, renderWidth * scale, renderHeight * scale);
 
     return this;

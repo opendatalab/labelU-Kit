@@ -11,8 +11,11 @@ import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
+import type { LineToolOptions } from '../tools';
 
 export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Point, LineStyle | PointStyle>) {
+  public config: LineToolOptions;
+
   private _selectionShape: Rect | null = null;
 
   private _isControllerPicked: boolean = false;
@@ -21,8 +24,10 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
 
   private _previousDynamicCoordinates: AxisPoint[][] | null = null;
 
-  constructor(params: AnnotationParams<LineData, LineStyle>) {
+  constructor(config: LineToolOptions, params: AnnotationParams<LineData, LineStyle>) {
     super(params);
+
+    this.config = config;
 
     this._setupShapes();
     this.onMouseDown(this._onMouseDown);
@@ -35,7 +40,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style } = this;
+    const { data, group, style, config } = this;
 
     for (let i = 1; i < data.pointList.length; i++) {
       const startPoint = data.pointList[i - 1];
@@ -55,6 +60,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
       const pointItem = data.pointList[i];
       const point = new ControllerPoint({
         id: pointItem.id,
+        outOfCanvas: config.outOfCanvas,
         // 深拷贝，避免出现引用问题
         coordinate: cloneDeep(pointItem),
       });
@@ -89,13 +95,44 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    * 移动草稿
    */
   private _onMouseMove = () => {
-    const { isPicked, _previousDynamicCoordinates } = this;
+    const { isPicked, _previousDynamicCoordinates, config, group } = this;
 
     if (!isPicked || !_previousDynamicCoordinates) {
       return;
     }
 
     this._destroySelection();
+
+    let safeX: undefined | boolean;
+    let safeY: undefined | boolean;
+
+    // 保证x轴和y轴丝滑移动，x和y不互相影响
+    for (let i = 0; i < _previousDynamicCoordinates.length; i++) {
+      const shape = group.shapes[i];
+
+      const dx = _previousDynamicCoordinates[i][0].x + axis!.distance.x;
+      const dy = _previousDynamicCoordinates[i][0].y + axis!.distance.y;
+      const startCoord = { x: dx, y: dy };
+
+      if (shape instanceof Point) {
+        safeX = safeX === false ? false : config.outOfCanvas || axis!.isSafeX(startCoord.x);
+        safeY = safeY === false ? false : config.outOfCanvas || axis!.isSafeY(startCoord.y);
+      } else {
+        const ex = _previousDynamicCoordinates[i][1].x + axis!.distance.x;
+        const ey = _previousDynamicCoordinates[i][1].y + axis!.distance.y;
+        const endCoord = { x: ex, y: ey };
+
+        safeX =
+          safeX === false ? false : config.outOfCanvas || (axis!.isSafeX(startCoord.x) && axis!.isSafeX(endCoord.x));
+        safeY =
+          safeY === false ? false : config.outOfCanvas || (axis!.isSafeY(startCoord.y) && axis!.isSafeY(endCoord.y));
+      }
+
+      // 如果已经确定某个方向不安全，则无需再检查其余形状
+      if (safeX === false && safeY === false) {
+        break;
+      }
+    }
 
     // 更新草稿坐标
     this.group.each((shape, index) => {
@@ -105,13 +142,28 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
       });
 
       if (shape instanceof Point) {
-        shape.coordinate = [startPoint];
+        if (safeX) {
+          shape.coordinate[0].x = startPoint.x;
+        }
+
+        if (safeY) {
+          shape.coordinate[0].y = startPoint.y;
+        }
       } else {
         const endPoint = axis!.getOriginalCoord({
           x: _previousDynamicCoordinates[index][1].x + axis!.distance.x,
           y: _previousDynamicCoordinates[index][1].y + axis!.distance.y,
         });
-        shape.coordinate = [startPoint, endPoint];
+
+        if (safeX) {
+          shape.coordinate[0].x = startPoint.x;
+          shape.coordinate[1].x = endPoint.x;
+        }
+
+        if (safeY) {
+          shape.coordinate[0].y = startPoint.y;
+          shape.coordinate[1].y = endPoint.y;
+        }
       }
     });
 
@@ -163,6 +215,8 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    */
   private _onControllerPointMove = ({ coordinate }: ControllerPoint) => {
     const { _effectedLines } = this;
+    const x = coordinate[0].x;
+    const y = coordinate[0].y;
 
     if (!_effectedLines) {
       return;
@@ -172,14 +226,14 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
 
     // 更新受影响的线段端点
     if (_effectedLines[1] === undefined && _effectedLines[0]) {
-      _effectedLines[0].coordinate = [{ ...coordinate[0] }, { ..._effectedLines[0].coordinate[1] }];
+      _effectedLines[0].coordinate = [{ x, y }, { ..._effectedLines[0].coordinate[1] }];
     } else if (_effectedLines[0] === undefined && _effectedLines[1]) {
-      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { ...coordinate[0] }];
+      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { x, y }];
     } else if (_effectedLines[0] && _effectedLines[1]) {
       // 更新下一个线段的起点
-      _effectedLines[0].coordinate = [{ ...coordinate[0] }, { ..._effectedLines[0].coordinate[1] }];
+      _effectedLines[0].coordinate = [{ x, y }, { ..._effectedLines[0].coordinate[1] }];
       // 更新前一个线段的终点
-      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { ...coordinate[0] }];
+      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { x, y }];
     }
 
     // 手动更新组合的包围盒

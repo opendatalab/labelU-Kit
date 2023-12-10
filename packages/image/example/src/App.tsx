@@ -56,6 +56,7 @@ export default function App() {
         stroke: '#f60',
         strokeWidth: 10,
       },
+      outOfCanvas: false,
       labels: [
         {
           id: '1',

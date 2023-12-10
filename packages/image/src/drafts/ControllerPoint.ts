@@ -25,14 +25,18 @@ const HOVERED_STYLE = {
 export class ControllerPoint extends Point {
   private _previousDynamicCoordinate: AxisPoint | null = null;
 
+  private _outOfCanvas: boolean = true;
+
   private _onMoveHandlers: ((controller: ControllerPoint) => void)[] = [];
 
   private _onMouseDownHandlers: ((controller: ControllerPoint) => void)[] = [];
 
   private _onMouseUpHandlers: ((controller: ControllerPoint) => void)[] = [];
 
-  constructor(params: PointParams) {
+  constructor({ outOfCanvas, ...params }: PointParams & { outOfCanvas?: boolean }) {
     super({ ...params, style: DEFAULT_STYLE });
+
+    this._outOfCanvas = outOfCanvas ?? true;
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
@@ -60,18 +64,37 @@ export class ControllerPoint extends Point {
   };
 
   private _handleMouseMove = () => {
-    const { _previousDynamicCoordinate, _onMoveHandlers } = this;
+    const { _previousDynamicCoordinate, _onMoveHandlers, _outOfCanvas } = this;
 
     if (!_previousDynamicCoordinate) {
       return;
     }
 
-    this.coordinate = [
-      axis!.getOriginalCoord({
-        x: _previousDynamicCoordinate.x + axis!.distance.x,
-        y: _previousDynamicCoordinate.y + axis!.distance.y,
-      }),
-    ];
+    let x = _previousDynamicCoordinate.x + axis!.distance.x;
+    let y = _previousDynamicCoordinate.y + axis!.distance.y;
+
+    // 安全区域内移动
+    if (!_outOfCanvas) {
+      const safeZone = axis!.safeZone;
+
+      if (x > safeZone.maxX) {
+        x = safeZone.maxX;
+      }
+
+      if (x < safeZone.minX) {
+        x = safeZone.minX;
+      }
+
+      if (y > safeZone.maxY) {
+        y = safeZone.maxY;
+      }
+
+      if (y < safeZone.minY) {
+        y = safeZone.minY;
+      }
+    }
+
+    this.coordinate = [axis!.getOriginalCoord({ x, y })];
 
     for (const handler of _onMoveHandlers) {
       handler(this);

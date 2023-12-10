@@ -1,3 +1,5 @@
+import type { BBox } from 'rbush';
+
 import type { AxisPoint } from '../shapes/Point.shape';
 import { Cursor } from '../shapes/Cursor.shape';
 import { Ticker } from './Ticker';
@@ -31,6 +33,13 @@ export class Axis {
    * 移动画布时的起始点
    */
   private _startPanPoint: AxisPoint | null = null;
+
+  private _safeZone: BBox = {
+    minX: -Infinity,
+    minY: -Infinity,
+    maxX: Infinity,
+    maxY: Infinity,
+  };
 
   /**
    * 左键点击的起始点
@@ -260,6 +269,94 @@ export class Axis {
     });
 
     this._ticker.start();
+  }
+
+  /**
+   * 设置画笔的边界区域，超出区域不可绘制
+   */
+  public setSafeZone(bbox: BBox) {
+    if (bbox.minX > bbox.maxX || bbox.minY > bbox.maxY) {
+      throw new Error('Invalid bbox');
+    }
+
+    if (!bbox) {
+      throw new Error('bbox is required');
+    }
+
+    if ('minX' in bbox && 'minY' in bbox && 'maxX' in bbox && 'maxY' in bbox) {
+      this._safeZone = bbox;
+    }
+  }
+
+  public isPointSafe(point: AxisPoint) {
+    if (!point) {
+      throw new Error('point is required');
+    }
+
+    if (!('x' in point) && !('y' in point)) {
+      throw new Error('Invalid point');
+    }
+
+    return this.isSafeX(point.x) && this.isSafeY(point.y);
+  }
+
+  public isSafeX(x: number) {
+    if (typeof +x !== 'number') {
+      throw new Error('Invalid x');
+    }
+
+    const { minX, maxX } = this._safeZone;
+
+    return x >= minX && x <= maxX;
+  }
+
+  public isSafeY(y: number) {
+    if (typeof +y !== 'number') {
+      throw new Error('Invalid y');
+    }
+
+    const { minY, maxY } = this._safeZone;
+
+    return y >= minY && y <= maxY;
+  }
+
+  public getSafeCoordinate(point: AxisPoint) {
+    if (!point) {
+      throw new Error('point is required');
+    }
+
+    if (!('x' in point) && !('y' in point)) {
+      throw new Error('Invalid point');
+    }
+
+    return {
+      x: this.getSafeX(point.x),
+      y: this.getSafeY(point.y),
+    };
+  }
+
+  public getSafeX(x: number) {
+    if (typeof x !== 'number') {
+      throw new Error('Invalid x');
+    }
+
+    const { minX, maxX } = this._safeZone;
+
+    return Math.min(Math.max(x, minX), maxX);
+  }
+
+  public getSafeY(y: number) {
+    if (typeof y !== 'number') {
+      throw new Error('Invalid y');
+    }
+
+    const { minY, maxY } = this._safeZone;
+
+    return Math.min(Math.max(y, minY), maxY);
+  }
+
+  public get safeZone() {
+    return this._safeZone;
   }
 
   public get scale() {
