@@ -33,12 +33,6 @@ export interface PointToolOptions extends BasicToolParams<PointData, PointStyle>
    * @default true;
    */
   outOfCanvas?: boolean;
-
-  /**
-   * 边缘吸附
-   * @default true;
-   */
-  edgeAdsorptive?: boolean;
 }
 
 export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
@@ -52,7 +46,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       maxPointAmount: Infinity,
       minPointAmount: 0,
       outOfCanvas: true,
-      edgeAdsorptive: true,
       data: [],
       // ----------------
       ...params,

@@ -13,12 +13,6 @@ import { DraftRect } from '../drafts/Rect.draft';
 
 export interface RectToolOptions extends BasicToolParams<RectData, RectStyle> {
   /**
-   * 边缘吸附
-   * @default true;
-   */
-  edgeAdsorptive?: boolean;
-
-  /**
    * 最小宽度
    *
    * @default 1
@@ -49,7 +43,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   constructor(params: RectToolOptions) {
     super({
       name: 'rect',
-      edgeAdsorptive: true,
       outOfCanvas: true,
       minHeight: 1,
       minWidth: 1,
