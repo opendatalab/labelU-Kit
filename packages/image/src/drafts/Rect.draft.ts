@@ -21,6 +21,8 @@ export class DraftRect extends DraftObserverMixin(
 ) {
   private _isControllerPicked: boolean = false;
 
+  private _isEdgeControllerPicked: boolean = false;
+
   private _preBBox: BBox | null = null;
 
   private _previousDynamicCoordinates: AxisPoint[][] | null = null;
@@ -92,6 +94,10 @@ export class DraftRect extends DraftObserverMixin(
 
       this._edgePositionMapping.set(lineCoordinates[i].name as EdgePosition, edge);
 
+      edge.onMouseDown(this._onEdgeDown);
+      edge.onMove(this._onEdgeMove);
+      edge.onMouseUp(this._onEdgeUp);
+
       group.add(edge);
     }
 
@@ -147,10 +153,10 @@ export class DraftRect extends DraftObserverMixin(
    * 选中草稿
    */
   private _onMouseDown = () => {
-    const { _isControllerPicked } = this;
+    const { _isControllerPicked, _isEdgeControllerPicked } = this;
 
-    // 选中控制点时，不需要选中草稿
-    if (_isControllerPicked) {
+    // 选中控制点或控制边时，不需要选中草稿
+    if (_isControllerPicked || _isEdgeControllerPicked) {
       return;
     }
 
@@ -318,6 +324,72 @@ export class DraftRect extends DraftObserverMixin(
     this._isControllerPicked = false;
   };
 
+  // ========================== 控制边 ==========================
+
+  private _onEdgeDown = () => {
+    this._isEdgeControllerPicked = true;
+  };
+
+  private _onEdgeMove = (_e: MouseEvent, edge: ControllerEdge) => {
+    const { _controllerPositionMapping, _edgePositionMapping } = this;
+    const nwPoint = _controllerPositionMapping.get('nw')!;
+    const nePoint = _controllerPositionMapping.get('ne')!;
+    const sePoint = _controllerPositionMapping.get('se')!;
+    const swPoint = _controllerPositionMapping.get('sw')!;
+    const topEdge = _edgePositionMapping.get('top')!;
+    const rightEdge = _edgePositionMapping.get('right')!;
+    const bottomEdge = _edgePositionMapping.get('bottom')!;
+    const leftEdge = _edgePositionMapping.get('left')!;
+
+    const x = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
+    const y = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
+
+    if (edge.name === 'left' || edge.name === 'right') {
+      edge.coordinate[0].x = x;
+      edge.coordinate[1].x = x;
+    }
+
+    if (edge.name === 'left') {
+      nwPoint.coordinate[0].x = x;
+      swPoint.coordinate[0].x = x;
+      topEdge.coordinate[0].x = x;
+      bottomEdge.coordinate[1].x = x;
+    }
+
+    if (edge.name === 'right') {
+      nePoint.coordinate[0].x = x;
+      sePoint.coordinate[0].x = x;
+      topEdge.coordinate[1].x = x;
+      bottomEdge.coordinate[0].x = x;
+    }
+
+    if (edge.name === 'top' || edge.name === 'bottom') {
+      edge.coordinate[0].y = y;
+      edge.coordinate[1].y = y;
+    }
+
+    if (edge.name === 'top') {
+      nwPoint.coordinate[0].y = y;
+      nePoint.coordinate[0].y = y;
+      leftEdge.coordinate[1].y = y;
+      rightEdge.coordinate[0].y = y;
+    }
+
+    if (edge.name === 'bottom') {
+      swPoint.coordinate[0].y = y;
+      sePoint.coordinate[0].y = y;
+      leftEdge.coordinate[0].y = y;
+      rightEdge.coordinate[1].y = y;
+    }
+
+    this.group.update();
+    this.syncCoordToData();
+  };
+
+  private _onEdgeUp = () => {
+    this._isEdgeControllerPicked = false;
+  };
+
   protected getDynamicCoordinates() {
     return this.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
   }
@@ -347,7 +419,7 @@ export class DraftRect extends DraftObserverMixin(
     for (let i = 0; i < group.shapes.length; i++) {
       const shape = group.shapes[i];
 
-      if (shape instanceof ControllerPoint) {
+      if (shape instanceof ControllerPoint || shape instanceof ControllerEdge) {
         if (shape.isUnderCursor(mouseCoord)) {
           return true;
         }

@@ -59,7 +59,7 @@ export class ControllerPoint extends Point {
     }
   };
 
-  private _handleMouseMove = (e: MouseEvent) => {
+  private _handleMouseMove = () => {
     const { _previousDynamicCoordinate, _onMoveHandlers } = this;
 
     if (!_previousDynamicCoordinate) {
@@ -68,8 +68,8 @@ export class ControllerPoint extends Point {
 
     this.coordinate = [
       axis!.getOriginalCoord({
-        x: e.offsetX,
-        y: e.offsetY,
+        x: _previousDynamicCoordinate.x + axis!.distance.x,
+        y: _previousDynamicCoordinate.y + axis!.distance.y,
       }),
     ];
 

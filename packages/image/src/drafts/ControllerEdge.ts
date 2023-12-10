@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash.clonedeep';
 
-import { axis, eventEmitter } from '../singletons';
+import { eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { AxisPoint, LineParams } from '../shapes';
 import { Line } from '../shapes';
@@ -9,14 +9,16 @@ export interface ControllerEdgeOptions extends LineParams {
   name?: string;
 }
 
+type EdgeHandler = (e: MouseEvent, edge: ControllerEdge) => void;
+
 export class ControllerEdge extends Line {
-  private _previousDynamicCoordinate: AxisPoint | null = null;
+  public previousDynamicCoordinate: AxisPoint[] | null = null;
 
-  private _onMoveHandlers: ((edge: ControllerEdge) => void)[] = [];
+  private _onMoveHandlers: EdgeHandler[] = [];
 
-  private _onMouseDownHandlers: ((edge: ControllerEdge) => void)[] = [];
+  private _onMouseDownHandlers: EdgeHandler[] = [];
 
-  private _onMouseUpHandlers: ((edge: ControllerEdge) => void)[] = [];
+  private _onMouseUpHandlers: EdgeHandler[] = [];
 
   private _originalStyle: LineParams['style'] = {};
 
@@ -45,58 +47,51 @@ export class ControllerEdge extends Line {
     this.updateStyle(this._originalStyle ?? {});
   };
 
-  private _handleMouseDown = () => {
+  private _handleMouseDown = (e: MouseEvent) => {
     if (this.isMouseOver) {
-      this._previousDynamicCoordinate = cloneDeep(this.dynamicCoordinate[0]);
+      this.previousDynamicCoordinate = cloneDeep(this.dynamicCoordinate);
 
       for (const handler of this._onMouseDownHandlers) {
-        handler(this);
+        handler(e, this);
       }
     }
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { _previousDynamicCoordinate, _onMoveHandlers } = this;
+    const { previousDynamicCoordinate, _onMoveHandlers } = this;
 
-    if (!_previousDynamicCoordinate) {
+    if (!previousDynamicCoordinate) {
       return;
     }
-
-    this.coordinate = [
-      axis!.getOriginalCoord({
-        x: e.offsetX,
-        y: e.offsetY,
-      }),
-    ];
 
     for (const handler of _onMoveHandlers) {
-      handler(this);
+      handler(e, this);
     }
   };
 
-  private _handleMouseUp = () => {
-    const { _previousDynamicCoordinate } = this;
+  private _handleMouseUp = (e: MouseEvent) => {
+    const { previousDynamicCoordinate } = this;
 
-    if (!_previousDynamicCoordinate) {
+    if (!previousDynamicCoordinate) {
       return;
     }
 
-    this._previousDynamicCoordinate = null;
+    this.previousDynamicCoordinate = null;
 
     for (const handler of this._onMouseUpHandlers) {
-      handler(this);
+      handler(e, this);
     }
   };
 
-  public onMove(handler: (edge: ControllerEdge) => void) {
+  public onMove(handler: EdgeHandler) {
     this._onMoveHandlers.push(handler);
   }
 
-  public onMouseDown(handler: (edge: ControllerEdge) => void) {
+  public onMouseDown(handler: EdgeHandler) {
     this._onMouseDownHandlers.push(handler);
   }
 
-  public onMouseUp(handler: (edge: ControllerEdge) => void) {
+  public onMouseUp(handler: EdgeHandler) {
     this._onMouseUpHandlers.push(handler);
   }
 

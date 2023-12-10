@@ -4,17 +4,19 @@ import cloneDeep from 'lodash.clonedeep';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import type { PolygonData } from '../annotation';
-import type { AxisPoint, PointStyle, PolygonStyle, Rect, Point } from '../shapes';
+import type { AxisPoint, PointStyle, PolygonStyle, Point } from '../shapes';
 import { Polygon } from '../shapes';
 import { axis } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
+import { ControllerEdge } from './ControllerEdge';
+
 export class DraftPolygon extends DraftObserverMixin(
   Annotation<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle>,
 ) {
-  private _selectionShape: Rect | null = null;
+  private _isEdgeControllerPicked: boolean = false;
 
   private _isControllerPicked: boolean = false;
 
@@ -25,6 +27,25 @@ export class DraftPolygon extends DraftObserverMixin(
   private _previousPolygonCoordinates: AxisPoint[] = [];
 
   private _effectedLines: [Line | undefined, Line | undefined] | null = null;
+
+  /**
+   * 拖动控制边的时候受影响的控制点
+   */
+  private _effectedControllerPoints: ControllerPoint[] = [];
+
+  /**
+   * 拖动控制边的时候受影响的其他控制边和端点下标
+   *
+   * @description [edge, current edge point index, effected edge point index]
+   */
+  private _effectedControllerEdges: [ControllerEdge, number, number][] = [];
+
+  /**
+   * 拖动控制边的时候受影响的多边形坐标索引
+   *
+   * @description [current edge point index, coordinate index]
+   */
+  private _effectedCoordinateIndexes: [number, number][] = [];
 
   constructor(params: AnnotationParams<PolygonData, PolygonStyle>) {
     super(params);
@@ -52,17 +73,22 @@ export class DraftPolygon extends DraftObserverMixin(
 
     // 多线段用于控制多边形的边
     const fullPoints = [...data.pointList, data.pointList[0]];
+
     for (let i = 1; i < fullPoints.length; i++) {
       const startPoint = fullPoints[i - 1];
       const endPoint = fullPoints[i];
 
-      const line = new Line({
+      const edge = new ControllerEdge({
         id: uuid(),
         coordinate: cloneDeep([startPoint, endPoint]),
         style,
       });
 
-      group.add(line);
+      edge.onMouseDown(this._onEdgeDown);
+      edge.onMove(this._onEdgeMove);
+      edge.onMouseUp(this._onEdgeUp);
+
+      group.add(edge);
     }
 
     // 点要覆盖在线上
@@ -86,10 +112,10 @@ export class DraftPolygon extends DraftObserverMixin(
    * 选中草稿
    */
   private _onMouseDown = () => {
-    const { _isControllerPicked } = this;
+    const { _isControllerPicked, _isEdgeControllerPicked } = this;
 
     // 选中控制点时，不需要选中草稿
-    if (_isControllerPicked) {
+    if (_isControllerPicked || _isEdgeControllerPicked) {
       return;
     }
 
@@ -218,12 +244,120 @@ export class DraftPolygon extends DraftObserverMixin(
     this._isControllerPicked = false;
   };
 
-  private _destroySelection() {
-    if (this._selectionShape) {
-      this._selectionShape.destroy();
-      this._selectionShape = null;
-    }
-  }
+  // ========================== 控制边 ==========================
+
+  private _onEdgeDown = (_e: MouseEvent, edge: ControllerEdge) => {
+    this._isEdgeControllerPicked = true;
+
+    const { group } = this;
+
+    // 记录受影响的控制点
+    group.each((shape) => {
+      if (shape instanceof ControllerPoint) {
+        if (
+          (shape.dynamicCoordinate[0].x === edge.dynamicCoordinate[0].x &&
+            shape.dynamicCoordinate[0].y === edge.dynamicCoordinate[0].y) ||
+          (shape.dynamicCoordinate[0].x === edge.dynamicCoordinate[1].x &&
+            shape.dynamicCoordinate[0].y === edge.dynamicCoordinate[1].y)
+        ) {
+          this._effectedControllerPoints.push(shape);
+        }
+      }
+
+      if (shape instanceof ControllerEdge) {
+        if (
+          shape.dynamicCoordinate[0].x === edge.dynamicCoordinate[0].x &&
+          shape.dynamicCoordinate[0].y === edge.dynamicCoordinate[0].y
+        ) {
+          this._effectedControllerEdges.push([shape, 0, 0]);
+        }
+
+        if (
+          shape.dynamicCoordinate[1].x === edge.dynamicCoordinate[0].x &&
+          shape.dynamicCoordinate[1].y === edge.dynamicCoordinate[0].y
+        ) {
+          this._effectedControllerEdges.push([shape, 0, 1]);
+        }
+
+        if (
+          shape.dynamicCoordinate[0].x === edge.dynamicCoordinate[1].x &&
+          shape.dynamicCoordinate[0].y === edge.dynamicCoordinate[1].y
+        ) {
+          this._effectedControllerEdges.push([shape, 1, 0]);
+        }
+
+        if (
+          shape.dynamicCoordinate[1].x === edge.dynamicCoordinate[1].x &&
+          shape.dynamicCoordinate[1].y === edge.dynamicCoordinate[1].y
+        ) {
+          this._effectedControllerEdges.push([shape, 1, 1]);
+        }
+      }
+    });
+
+    // 记录受影响的多边形坐标索引
+    group.shapes[0].dynamicCoordinate.forEach((point, index) => {
+      if (point.x === edge.dynamicCoordinate[0].x && point.y === edge.dynamicCoordinate[0].y) {
+        this._effectedCoordinateIndexes.push([0, index]);
+      }
+
+      if (point.x === edge.dynamicCoordinate[1].x && point.y === edge.dynamicCoordinate[1].y) {
+        this._effectedCoordinateIndexes.push([1, index]);
+      }
+    });
+  };
+
+  private _onEdgeMove = (_e: MouseEvent, edge: ControllerEdge) => {
+    const x1 = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
+    const y1 = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
+    const x2 = axis!.getOriginalX(edge.previousDynamicCoordinate![1].x + axis!.distance.x);
+    const y2 = axis!.getOriginalY(edge.previousDynamicCoordinate![1].y + axis!.distance.y);
+
+    edge.coordinate[0].x = x1;
+    edge.coordinate[0].y = y1;
+    edge.coordinate[1].x = x2;
+    edge.coordinate[1].y = y2;
+
+    const { _effectedControllerPoints, _effectedCoordinateIndexes, _effectedControllerEdges } = this;
+
+    // 更新控制点的坐标
+    _effectedControllerPoints[0].coordinate[0].x = x1;
+    _effectedControllerPoints[0].coordinate[0].y = y1;
+    _effectedControllerPoints[1].coordinate[0].x = x2;
+    _effectedControllerPoints[1].coordinate[0].y = y2;
+
+    // 更新多边形的坐标
+    _effectedCoordinateIndexes.forEach(([edgePointIndex, coordinateIndex]) => {
+      if (edgePointIndex === 0) {
+        this.group.shapes[0].coordinate[coordinateIndex].x = x1;
+        this.group.shapes[0].coordinate[coordinateIndex].y = y1;
+      } else {
+        this.group.shapes[0].coordinate[coordinateIndex].x = x2;
+        this.group.shapes[0].coordinate[coordinateIndex].y = y2;
+      }
+    });
+
+    // 更新受影响的线段
+    _effectedControllerEdges.forEach(([edgeItem, currentEdgePointIndex, effectedPointIndex]) => {
+      if (currentEdgePointIndex === 0) {
+        edgeItem.coordinate[effectedPointIndex].x = x1;
+        edgeItem.coordinate[effectedPointIndex].y = y1;
+      } else {
+        edgeItem.coordinate[effectedPointIndex].x = x2;
+        edgeItem.coordinate[effectedPointIndex].y = y2;
+      }
+    });
+
+    this.group.update();
+    this.syncCoordToData();
+  };
+
+  private _onEdgeUp = () => {
+    this._isEdgeControllerPicked = false;
+    this._effectedControllerPoints = [];
+    this._effectedCoordinateIndexes = [];
+    this._effectedControllerEdges = [];
+  };
 
   protected getDynamicCoordinates() {
     return this.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
