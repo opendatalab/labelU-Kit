@@ -4,7 +4,7 @@ import cloneDeep from 'lodash.clonedeep';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import { AnnotationPolygon } from '../annotation';
-import type { AxisPoint, LineStyle, PolygonStyle, Rect } from '../shapes';
+import type { LineStyle, PolygonStyle, Rect } from '../shapes';
 import { Line, Point, Polygon } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
@@ -45,20 +45,6 @@ export interface PolygonToolOptions extends BasicToolParams<PolygonData, Polygon
 // @MouseDecorator
 export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOptions> {
   private _selectionShape: Rect | null = null;
-
-  /**
-   * 选中选框
-   */
-  private _isShapePicked: boolean = false;
-
-  /**
-   * 选中端点
-   */
-  private _selectedPoint: [Point, number] | null = null;
-
-  private _previousPointCoordinate: AxisPoint | null = null;
-
-  private _previousPolygonCoordinates: AxisPoint[] = [];
 
   public draft: DraftPolygon | null = null;
 
