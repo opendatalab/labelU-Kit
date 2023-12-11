@@ -169,7 +169,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   private _handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, _creatingShapes, draft } = this;
+    const { activeLabel, style, _creatingShapes, draft, config } = this;
 
     const isUnderDraft =
       draft &&
@@ -188,8 +188,9 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
 
     const startPoint = axis!.getOriginalCoord({
-      x: e.offsetX - axis!.distance.x,
-      y: e.offsetY - axis!.distance.y,
+      // 超出安全区域的点直接落在安全区域边缘
+      x: config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX),
+      y: config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY),
     });
 
     // 创建新的线段
@@ -210,19 +211,24 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { _creatingShapes } = this;
+    const { _creatingShapes, config } = this;
 
     if (_creatingShapes) {
       // 正在绘制的线段，最后一个端点的坐标跟随鼠标
       const { shapes } = _creatingShapes;
       const lastShape = shapes[shapes.length - 1];
-      lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
-      lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
+      lastShape.coordinate[1].x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
+      lastShape.coordinate[1].y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
       _creatingShapes.update();
     }
   };
 
   private _handleRightMouseUp = () => {
+    // 移动画布时的右键不归档
+    if (axis?.isMoved) {
+      return;
+    }
+
     // 归档创建中的图形
     if (this._creatingShapes) {
       const points = [];

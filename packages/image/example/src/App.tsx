@@ -73,6 +73,7 @@ export default function App() {
       ],
     },
     point: {
+      outOfCanvas: false,
       style: {
         strokeWidth: 3,
         radius: 5,
@@ -104,6 +105,7 @@ export default function App() {
       style: {
         strokeWidth: 3,
       },
+      outOfCanvas: false,
       hoveredStyle: {
         fill: '#007bff37',
         stroke: '#fff',
@@ -128,6 +130,7 @@ export default function App() {
       style: {
         strokeWidth: 3,
       },
+      outOfCanvas: false,
       hoveredStyle: (style: any) => {
         return {
           ...style,

@@ -75,23 +75,8 @@ export class ControllerPoint extends Point {
 
     // 安全区域内移动
     if (!_outOfCanvas) {
-      const safeZone = axis!.safeZone;
-
-      if (x > safeZone.maxX) {
-        x = safeZone.maxX;
-      }
-
-      if (x < safeZone.minX) {
-        x = safeZone.minX;
-      }
-
-      if (y > safeZone.maxY) {
-        y = safeZone.maxY;
-      }
-
-      if (y < safeZone.minY) {
-        y = safeZone.minY;
-      }
+      x = axis!.getSafeX(x);
+      y = axis!.getSafeY(y);
     }
 
     this.coordinate = [axis!.getOriginalCoord({ x, y })];

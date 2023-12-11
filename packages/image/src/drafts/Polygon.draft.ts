@@ -12,10 +12,13 @@ import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import { ControllerEdge } from './ControllerEdge';
+import type { PolygonToolOptions } from '../tools';
 
 export class DraftPolygon extends DraftObserverMixin(
   Annotation<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle>,
 ) {
+  public config: PolygonToolOptions;
+
   private _isEdgeControllerPicked: boolean = false;
 
   private _isControllerPicked: boolean = false;
@@ -47,8 +50,10 @@ export class DraftPolygon extends DraftObserverMixin(
    */
   private _effectedCoordinateIndexes: [number, number][] = [];
 
-  constructor(params: AnnotationParams<PolygonData, PolygonStyle>) {
+  constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>) {
     super(params);
+
+    this.config = config;
 
     this._setupShapes();
     this.onMouseDown(this._onMouseDown);
@@ -60,7 +65,7 @@ export class DraftPolygon extends DraftObserverMixin(
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style } = this;
+    const { data, group, style, config } = this;
 
     group.add(
       // 多边形用于颜色填充
@@ -96,6 +101,7 @@ export class DraftPolygon extends DraftObserverMixin(
       const pointItem = data.pointList[i];
       const point = new ControllerPoint({
         id: uuid(),
+        outOfCanvas: config.outOfCanvas,
         // 深拷贝，避免出现引用问题
         coordinate: cloneDeep(pointItem),
       });
@@ -129,11 +135,13 @@ export class DraftPolygon extends DraftObserverMixin(
    * 移动草稿
    */
   private _onMouseMove = () => {
-    const { isPicked, _previousDynamicCoordinates, _previousPolygonCoordinates } = this;
+    const { isPicked, config, _previousDynamicCoordinates, _previousPolygonCoordinates } = this;
 
     if (!isPicked || !_previousDynamicCoordinates) {
       return;
     }
+
+    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
 
     // 更新草稿坐标
     this.group.each((shape, shapeIndex) => {
@@ -147,16 +155,35 @@ export class DraftPolygon extends DraftObserverMixin(
           x: _previousDynamicCoordinates[shapeIndex][1].x + axis!.distance.x,
           y: _previousDynamicCoordinates[shapeIndex][1].y + axis!.distance.y,
         });
-        shape.coordinate = [startPoint, endPoint];
+
+        if (safeX) {
+          shape.coordinate[0].x = startPoint.x;
+          shape.coordinate[1].x = endPoint.x;
+        }
+
+        if (safeY) {
+          shape.coordinate[0].y = startPoint.y;
+          shape.coordinate[1].y = endPoint.y;
+        }
       } else if (shape instanceof Polygon) {
         shape.coordinate.forEach((point, index) => {
-          point.x = axis!.getOriginalX(_previousPolygonCoordinates[index].x + axis!.distance.x);
-          point.y = axis!.getOriginalY(_previousPolygonCoordinates[index].y + axis!.distance.y);
+          if (safeX) {
+            point.x = axis!.getOriginalX(_previousPolygonCoordinates[index].x + axis!.distance.x);
+          }
+
+          if (safeY) {
+            point.y = axis!.getOriginalY(_previousPolygonCoordinates[index].y + axis!.distance.y);
+          }
         });
       } else {
         // Point
-        shape.coordinate[0].x = axis!.getOriginalX(_previousDynamicCoordinates[shapeIndex][0].x + axis!.distance.x);
-        shape.coordinate[0].y = axis!.getOriginalY(_previousDynamicCoordinates[shapeIndex][0].y + axis!.distance.y);
+        if (safeX) {
+          shape.coordinate[0].x = axis!.getOriginalX(_previousDynamicCoordinates[shapeIndex][0].x + axis!.distance.x);
+        }
+
+        if (safeY) {
+          shape.coordinate[0].y = axis!.getOriginalY(_previousDynamicCoordinates[shapeIndex][0].y + axis!.distance.y);
+        }
       }
     });
 
@@ -308,43 +335,76 @@ export class DraftPolygon extends DraftObserverMixin(
   };
 
   private _onEdgeMove = (_e: MouseEvent, edge: ControllerEdge) => {
+    const { config, _effectedControllerPoints, _effectedCoordinateIndexes, _effectedControllerEdges } = this;
+    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+
     const x1 = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
     const y1 = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
     const x2 = axis!.getOriginalX(edge.previousDynamicCoordinate![1].x + axis!.distance.x);
     const y2 = axis!.getOriginalY(edge.previousDynamicCoordinate![1].y + axis!.distance.y);
 
-    edge.coordinate[0].x = x1;
-    edge.coordinate[0].y = y1;
-    edge.coordinate[1].x = x2;
-    edge.coordinate[1].y = y2;
+    // 安全区域内移动
+    if (!config.outOfCanvas) {
+      if (safeX) {
+        edge.coordinate[0].x = x1;
+        edge.coordinate[1].x = x2;
+      }
 
-    const { _effectedControllerPoints, _effectedCoordinateIndexes, _effectedControllerEdges } = this;
+      if (safeY) {
+        edge.coordinate[0].y = y1;
+        edge.coordinate[1].y = y2;
+      }
+    }
 
     // 更新控制点的坐标
-    _effectedControllerPoints[0].coordinate[0].x = x1;
-    _effectedControllerPoints[0].coordinate[0].y = y1;
-    _effectedControllerPoints[1].coordinate[0].x = x2;
-    _effectedControllerPoints[1].coordinate[0].y = y2;
+    if (safeX) {
+      _effectedControllerPoints[0].coordinate[0].x = x1;
+      _effectedControllerPoints[1].coordinate[0].x = x2;
+    }
+    if (safeY) {
+      _effectedControllerPoints[0].coordinate[0].y = y1;
+      _effectedControllerPoints[1].coordinate[0].y = y2;
+    }
 
     // 更新多边形的坐标
     _effectedCoordinateIndexes.forEach(([edgePointIndex, coordinateIndex]) => {
       if (edgePointIndex === 0) {
-        this.group.shapes[0].coordinate[coordinateIndex].x = x1;
-        this.group.shapes[0].coordinate[coordinateIndex].y = y1;
+        if (safeX) {
+          this.group.shapes[0].coordinate[coordinateIndex].x = x1;
+        }
+
+        if (safeY) {
+          this.group.shapes[0].coordinate[coordinateIndex].y = y1;
+        }
       } else {
-        this.group.shapes[0].coordinate[coordinateIndex].x = x2;
-        this.group.shapes[0].coordinate[coordinateIndex].y = y2;
+        if (safeX) {
+          this.group.shapes[0].coordinate[coordinateIndex].x = x2;
+        }
+
+        if (safeY) {
+          this.group.shapes[0].coordinate[coordinateIndex].y = y2;
+        }
       }
     });
 
     // 更新受影响的线段
     _effectedControllerEdges.forEach(([edgeItem, currentEdgePointIndex, effectedPointIndex]) => {
       if (currentEdgePointIndex === 0) {
-        edgeItem.coordinate[effectedPointIndex].x = x1;
-        edgeItem.coordinate[effectedPointIndex].y = y1;
+        if (safeX) {
+          edgeItem.coordinate[effectedPointIndex].x = x1;
+        }
+
+        if (safeY) {
+          edgeItem.coordinate[effectedPointIndex].y = y1;
+        }
       } else {
-        edgeItem.coordinate[effectedPointIndex].x = x2;
-        edgeItem.coordinate[effectedPointIndex].y = y2;
+        if (safeX) {
+          edgeItem.coordinate[effectedPointIndex].x = x2;
+        }
+
+        if (safeY) {
+          edgeItem.coordinate[effectedPointIndex].y = y2;
+        }
       }
     });
 

@@ -177,22 +177,23 @@ export class Axis {
   };
 
   private _handleRightMouseUp = (e: MouseEvent) => {
-    const { _annotator, _distanceX, _distanceY } = this;
+    const { _annotator } = this;
 
     _annotator!.renderer!.canvas.style.cursor = 'none';
-
-    const isMoved = _distanceX !== 0 || _distanceY !== 0;
 
     this._startPanPoint = null;
     this._startMovePoint = null;
 
-    if (!isMoved) {
+    if (!this.isMoved) {
       eventEmitter.emit(EInternalEvent.RightMouseUpWithoutAxisChange, e);
     } else {
-      this._distanceX = 0;
-      this._distanceY = 0;
+      // 内部可能有模块还在使用这些变量，所以延迟清空
+      setTimeout(() => {
+        this._distanceX = 0;
+        this._distanceY = 0;
 
-      eventEmitter.emit(EInternalEvent.PanEnd, e);
+        eventEmitter.emit(EInternalEvent.PanEnd, e);
+      });
     }
   };
 
@@ -377,6 +378,10 @@ export class Axis {
     };
   }
 
+  public get isMoved() {
+    return this._distanceX !== 0 || this._distanceY !== 0;
+  }
+
   /**
    * 获取缩放后的坐标
    *
@@ -442,6 +447,44 @@ export class Axis {
     const { _y, _scaleCenter, _scale } = this;
 
     return _y + (_scaleCenter.y + (y - _scaleCenter.y)) * _scale;
+  }
+
+  /** 判断坐标集合内坐标是否在安全区内 */
+  public isCoordinatesSafe(coordinates: AxisPoint[] | AxisPoint[][]) {
+    if (!Array.isArray(coordinates)) {
+      throw new Error('Invalid coordinates');
+    }
+
+    let safeX: undefined | boolean;
+    let safeY: undefined | boolean;
+
+    // 保证x轴和y轴丝滑移动，x和y不互相影响
+    for (let i = 0; i < coordinates.length; i++) {
+      if (Array.isArray(coordinates[i])) {
+        const result = this.isCoordinatesSafe(coordinates[i] as AxisPoint[]);
+
+        safeX = safeX === false ? false : result[0];
+        safeY = safeY === false ? false : result[1];
+
+        continue;
+      }
+
+      const coordinate = coordinates[i] as AxisPoint;
+
+      const dx = coordinate.x + this.distance.x;
+      const dy = coordinate.y + this.distance.y;
+      const startCoord = { x: dx, y: dy };
+
+      safeX = safeX === false ? false : this.isSafeX(startCoord.x);
+      safeY = safeY === false ? false : this.isSafeY(startCoord.y);
+
+      // 如果已经确定某个方向不安全，则无需再检查其余形状
+      if (safeX === false && safeY === false) {
+        break;
+      }
+    }
+
+    return [safeX, safeY];
   }
 
   public destroy() {

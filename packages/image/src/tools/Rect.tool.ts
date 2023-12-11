@@ -137,7 +137,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   private _createDraft(data: RectData) {
     const { style } = this;
 
-    this.draft = new DraftRect({
+    this.draft = new DraftRect(this.config, {
       id: data.id,
       data,
       style: { ...style, stroke: this.getLabelColor(data.label) },
@@ -159,9 +159,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
-    const { _creatingShape } = this;
     // ====================== 绘制 ======================
-    const { activeLabel, style, draft } = this;
+    const { activeLabel, style, draft, config, _creatingShape } = this;
 
     const isUnderDraft = draft && draft.isRectAndControllersUnderCursor({ x: e.offsetX, y: e.offsetY });
 
@@ -189,8 +188,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     } else {
       // 记录起始点坐标
       this._startPoint = axis!.getOriginalCoord({
-        x: e.offsetX - axis!.distance.x,
-        y: e.offsetY - axis!.distance.y,
+        // 超出安全区域的点直接落在安全区域边缘
+        x: config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX),
+        y: config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY),
       });
 
       this._creatingShape = new Rect({
@@ -204,24 +204,26 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { _creatingShape, _startPoint } = this;
+    const { _creatingShape, _startPoint, config } = this;
 
-    // 选中点
+    const x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
+    const y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
+
     if (_creatingShape && _startPoint) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
-        _creatingShape.coordinate[0].x = axis!.getOriginalX(e.offsetX);
+        _creatingShape.coordinate[0].x = x;
       } else {
         _creatingShape.coordinate[0].x = _startPoint.x;
       }
 
       if (e.offsetY < axis!.getScaledY(_startPoint.y)) {
-        _creatingShape.coordinate[0].y = axis!.getOriginalY(e.offsetY);
+        _creatingShape.coordinate[0].y = y;
       } else {
         _creatingShape.coordinate[0].y = _startPoint.y;
       }
 
-      _creatingShape.width = Math.abs(axis!.getOriginalX(e.offsetX) - _startPoint.x);
-      _creatingShape.height = Math.abs(axis!.getOriginalY(e.offsetY) - _startPoint.y);
+      _creatingShape.width = Math.abs(x - _startPoint.x);
+      _creatingShape.height = Math.abs(y - _startPoint.y);
 
       _creatingShape.update();
     }

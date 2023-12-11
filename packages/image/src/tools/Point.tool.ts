@@ -1,7 +1,8 @@
 import { v4 as uuid } from 'uuid';
+import cloneDeep from 'lodash.clonedeep';
 
 import { EInternalEvent } from '../enums';
-import type { PointStyle } from '../shapes/Point.shape';
+import type { AxisPoint, PointStyle } from '../shapes/Point.shape';
 import { Point } from '../shapes/Point.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
@@ -36,7 +37,7 @@ export interface PointToolOptions extends BasicToolParams<PointData, PointStyle>
 }
 
 export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
-  private _isSelectedPointPicked: boolean = false;
+  private _pickedCoordinate: AxisPoint | null = null;
   constructor(params: PointToolOptions) {
     super({
       name: 'point',
@@ -123,13 +124,14 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
   private _handleMouseDown = (e: MouseEvent) => {
     if (this.draft && this.draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY })) {
-      this._isSelectedPointPicked = true;
+      this._pickedCoordinate = cloneDeep(this.draft.group.shapes[0].dynamicCoordinate[0]);
+
       return;
     }
 
     // ====================== 绘制 ======================
 
-    const { activeLabel } = this;
+    const { activeLabel, config } = this;
 
     // 没有激活工具则不进行绘制
     if (!activeLabel) {
@@ -143,24 +145,49 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       order: monitor!.getMaxOrder() + 1,
       id: uuid(),
       label: activeLabel,
-      x: axis!.getOriginalX(e.offsetX),
-      y: axis!.getOriginalY(e.offsetY),
+      // 超出安全区域的点直接落在安全区域边缘
+      x: axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX)),
+      y: axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY)),
     });
 
     axis?.rerender();
   };
 
-  private _handleMouseMove = (e: MouseEvent) => {
-    const { draft, _isSelectedPointPicked } = this;
-    if (!draft || !_isSelectedPointPicked) {
+  private _handleMouseMove = () => {
+    const { draft, _pickedCoordinate, config } = this;
+    if (!draft || !_pickedCoordinate) {
       return;
+    }
+
+    let x = _pickedCoordinate.x + axis!.distance.x;
+    let y = _pickedCoordinate.y + axis!.distance.y;
+
+    // 安全区域内移动
+    if (!config.outOfCanvas) {
+      const safeZone = axis!.safeZone;
+
+      if (x > safeZone.maxX) {
+        x = safeZone.maxX;
+      }
+
+      if (x < safeZone.minX) {
+        x = safeZone.minX;
+      }
+
+      if (y > safeZone.maxY) {
+        y = safeZone.maxY;
+      }
+
+      if (y < safeZone.minY) {
+        y = safeZone.minY;
+      }
     }
 
     draft.group.each((shape) => {
       shape.coordinate = [
         axis!.getOriginalCoord({
-          x: e.offsetX,
-          y: e.offsetY,
+          x,
+          y,
         }),
       ];
     });
@@ -169,7 +196,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   };
 
   private _handleMouseUp = () => {
-    this._isSelectedPointPicked = false;
+    this._pickedCoordinate = null;
   };
 
   public destroy(): void {

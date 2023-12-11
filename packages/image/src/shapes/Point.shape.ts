@@ -85,7 +85,7 @@ export class Point extends Shape<PointStyle> {
 
   public style: Required<PointStyle> = Point.DEFAULT_STYLE;
 
-  name: string | undefined;
+  name?: string;
 
   constructor({ id, name, coordinate, style }: PointParams) {
     super(id, coordinate);

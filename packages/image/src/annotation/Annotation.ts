@@ -2,7 +2,7 @@ import type { BasicImageAnnotation } from '../interface';
 import { Group } from '../shapes/Group';
 import { type Shape } from '../shapes';
 import { EInternalEvent } from '../enums';
-import { eventEmitter, monitor } from '../singletons';
+import { axis, eventEmitter, monitor } from '../singletons';
 
 // TODO: 去除本类的any
 export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
@@ -88,7 +88,8 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   }
 
   private _handleSelect = (e: MouseEvent, id: string) => {
-    if (id !== this.id) {
+    // 正在移动过程中的右键不处理
+    if (id !== this.id || axis?.isMoved) {
       return;
     }
 
@@ -101,7 +102,8 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   };
 
   private _handleUnSelect = (e: MouseEvent, id: string) => {
-    if (id !== this.id) {
+    // 正在移动过程中不处理
+    if (id !== this.id || axis?.isMoved) {
       return;
     }
 

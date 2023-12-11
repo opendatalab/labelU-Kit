@@ -165,7 +165,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   private _createDraft(data: PolygonData) {
     const { style } = this;
 
-    this.draft = new DraftPolygon({
+    this.draft = new DraftPolygon(this.config, {
       id: data.id,
       data,
       style: { ...style, stroke: this.getLabelColor(data.label) },
@@ -196,7 +196,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   private _handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, draft } = this;
+    const { activeLabel, style, draft, config } = this;
 
     const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
 
@@ -208,8 +208,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this._archiveDraft();
 
     const startPoint = axis!.getOriginalCoord({
-      x: e.offsetX - axis!.distance.x,
-      y: e.offsetY - axis!.distance.y,
+      x: config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX),
+      y: config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY),
     });
 
     if (!this._creatingShapes) {
@@ -250,14 +250,14 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { _creatingShapes } = this;
+    const { _creatingShapes, config } = this;
 
     if (_creatingShapes) {
       // 正在绘制的线段，最后一个端点的坐标跟随鼠标
       const { shapes } = _creatingShapes;
       const lastShape = shapes[shapes.length - 1];
-      lastShape.coordinate[1].x = axis!.getOriginalX(e.offsetX);
-      lastShape.coordinate[1].y = axis!.getOriginalY(e.offsetY);
+      lastShape.coordinate[1].x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
+      lastShape.coordinate[1].y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
       // 更新多边形的最后一个点
       _creatingShapes.shapes[0].coordinate[_creatingShapes.shapes[0].coordinate.length - 1] = cloneDeep(
         lastShape.coordinate[1],
@@ -267,6 +267,11 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   };
 
   private _handleRightMouseUp = () => {
+    // 移动画布时的右键不归档
+    if (axis?.isMoved) {
+      return;
+    }
+
     // 归档创建中的图形
     if (this._creatingShapes) {
       // 最后一个点不加入标注

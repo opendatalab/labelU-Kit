@@ -11,6 +11,7 @@ import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import { ControllerEdge } from './ControllerEdge';
+import type { RectToolOptions } from '../tools';
 
 type ControllerPosition = 'nw' | 'ne' | 'se' | 'sw';
 
@@ -19,6 +20,7 @@ type EdgePosition = 'top' | 'right' | 'bottom' | 'left';
 export class DraftRect extends DraftObserverMixin(
   Annotation<RectData, ControllerEdge | Point, RectStyle | PointStyle>,
 ) {
+  public config: RectToolOptions;
   private _isControllerPicked: boolean = false;
 
   private _isEdgeControllerPicked: boolean = false;
@@ -31,8 +33,10 @@ export class DraftRect extends DraftObserverMixin(
 
   private _edgePositionMapping: Map<EdgePosition, ControllerEdge> = new Map();
 
-  constructor(params: AnnotationParams<RectData, RectStyle>) {
+  constructor(config: RectToolOptions, params: AnnotationParams<RectData, RectStyle>) {
     super(params);
+
+    this.config = config;
 
     this._setupShapes();
     this.onMouseDown(this._onMouseDown);
@@ -44,7 +48,7 @@ export class DraftRect extends DraftObserverMixin(
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style } = this;
+    const { data, group, style, config } = this;
 
     const lineCoordinates: {
       name: EdgePosition;
@@ -133,6 +137,7 @@ export class DraftRect extends DraftObserverMixin(
       const point = new ControllerPoint({
         id: uuid(),
         name: points[i].name,
+        outOfCanvas: config.outOfCanvas,
         coordinate: points[i],
         style: { ...style, radius: 8, stroke: 'transparent', fill: 'blue' },
       });
@@ -169,32 +174,34 @@ export class DraftRect extends DraftObserverMixin(
    * 移动草稿
    */
   private _onMouseMove = () => {
-    const { isPicked, _previousDynamicCoordinates, group } = this;
+    const { isPicked, _previousDynamicCoordinates, group, config } = this;
 
     if (!isPicked || !_previousDynamicCoordinates) {
       return;
     }
 
+    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
+
     // 更新草稿坐标
     group.each((shape, index) => {
       if (shape instanceof ControllerPoint) {
-        shape.coordinate = [
-          axis!.getOriginalCoord({
-            x: _previousDynamicCoordinates[index][0].x + axis!.distance.x,
-            y: _previousDynamicCoordinates[index][0].y + axis!.distance.y,
-          }),
-        ];
+        if (safeX) {
+          shape.coordinate[0].x = axis!.getOriginalX(_previousDynamicCoordinates[index][0].x + axis!.distance.x);
+        }
+
+        if (safeY) {
+          shape.coordinate[0].y = axis!.getOriginalY(_previousDynamicCoordinates[index][0].y + axis!.distance.y);
+        }
       } else {
-        shape.coordinate = [
-          axis!.getOriginalCoord({
-            x: _previousDynamicCoordinates[index][0].x + axis!.distance.x,
-            y: _previousDynamicCoordinates[index][0].y + axis!.distance.y,
-          }),
-          axis!.getOriginalCoord({
-            x: _previousDynamicCoordinates[index][1].x + axis!.distance.x,
-            y: _previousDynamicCoordinates[index][1].y + axis!.distance.y,
-          }),
-        ];
+        if (safeX) {
+          shape.coordinate[0].x = axis!.getOriginalX(_previousDynamicCoordinates[index][0].x + axis!.distance.x);
+          shape.coordinate[1].x = axis!.getOriginalX(_previousDynamicCoordinates[index][1].x + axis!.distance.x);
+        }
+
+        if (safeY) {
+          shape.coordinate[0].y = axis!.getOriginalY(_previousDynamicCoordinates[index][0].y + axis!.distance.y);
+          shape.coordinate[1].y = axis!.getOriginalY(_previousDynamicCoordinates[index][1].y + axis!.distance.y);
+        }
       }
     });
 
@@ -331,7 +338,7 @@ export class DraftRect extends DraftObserverMixin(
   };
 
   private _onEdgeMove = (_e: MouseEvent, edge: ControllerEdge) => {
-    const { _controllerPositionMapping, _edgePositionMapping } = this;
+    const { config, _controllerPositionMapping, _edgePositionMapping } = this;
     const nwPoint = _controllerPositionMapping.get('nw')!;
     const nePoint = _controllerPositionMapping.get('ne')!;
     const sePoint = _controllerPositionMapping.get('se')!;
@@ -344,38 +351,40 @@ export class DraftRect extends DraftObserverMixin(
     const x = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
     const y = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
 
-    if (edge.name === 'left' || edge.name === 'right') {
+    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+
+    if (safeX && (edge.name === 'left' || edge.name === 'right')) {
       edge.coordinate[0].x = x;
       edge.coordinate[1].x = x;
     }
 
-    if (edge.name === 'left') {
+    if (safeX && edge.name === 'left') {
       nwPoint.coordinate[0].x = x;
       swPoint.coordinate[0].x = x;
       topEdge.coordinate[0].x = x;
       bottomEdge.coordinate[1].x = x;
     }
 
-    if (edge.name === 'right') {
+    if (safeX && edge.name === 'right') {
       nePoint.coordinate[0].x = x;
       sePoint.coordinate[0].x = x;
       topEdge.coordinate[1].x = x;
       bottomEdge.coordinate[0].x = x;
     }
 
-    if (edge.name === 'top' || edge.name === 'bottom') {
+    if (safeY && (edge.name === 'top' || edge.name === 'bottom')) {
       edge.coordinate[0].y = y;
       edge.coordinate[1].y = y;
     }
 
-    if (edge.name === 'top') {
+    if (safeY && edge.name === 'top') {
       nwPoint.coordinate[0].y = y;
       nePoint.coordinate[0].y = y;
       leftEdge.coordinate[1].y = y;
       rightEdge.coordinate[0].y = y;
     }
 
-    if (edge.name === 'bottom') {
+    if (safeY && edge.name === 'bottom') {
       swPoint.coordinate[0].y = y;
       sePoint.coordinate[0].y = y;
       leftEdge.coordinate[0].y = y;

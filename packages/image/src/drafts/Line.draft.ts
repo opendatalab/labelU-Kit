@@ -95,7 +95,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    * 移动草稿
    */
   private _onMouseMove = () => {
-    const { isPicked, _previousDynamicCoordinates, config, group } = this;
+    const { isPicked, _previousDynamicCoordinates, config } = this;
 
     if (!isPicked || !_previousDynamicCoordinates) {
       return;
@@ -103,36 +103,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
 
     this._destroySelection();
 
-    let safeX: undefined | boolean;
-    let safeY: undefined | boolean;
-
-    // 保证x轴和y轴丝滑移动，x和y不互相影响
-    for (let i = 0; i < _previousDynamicCoordinates.length; i++) {
-      const shape = group.shapes[i];
-
-      const dx = _previousDynamicCoordinates[i][0].x + axis!.distance.x;
-      const dy = _previousDynamicCoordinates[i][0].y + axis!.distance.y;
-      const startCoord = { x: dx, y: dy };
-
-      if (shape instanceof Point) {
-        safeX = safeX === false ? false : config.outOfCanvas || axis!.isSafeX(startCoord.x);
-        safeY = safeY === false ? false : config.outOfCanvas || axis!.isSafeY(startCoord.y);
-      } else {
-        const ex = _previousDynamicCoordinates[i][1].x + axis!.distance.x;
-        const ey = _previousDynamicCoordinates[i][1].y + axis!.distance.y;
-        const endCoord = { x: ex, y: ey };
-
-        safeX =
-          safeX === false ? false : config.outOfCanvas || (axis!.isSafeX(startCoord.x) && axis!.isSafeX(endCoord.x));
-        safeY =
-          safeY === false ? false : config.outOfCanvas || (axis!.isSafeY(startCoord.y) && axis!.isSafeY(endCoord.y));
-      }
-
-      // 如果已经确定某个方向不安全，则无需再检查其余形状
-      if (safeX === false && safeY === false) {
-        break;
-      }
-    }
+    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
 
     // 更新草稿坐标
     this.group.each((shape, index) => {
@@ -174,6 +145,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
   };
 
   private _onMouseUp = () => {
+    debugger;
     this._createSelection();
     this.isPicked = false;
     this._previousDynamicCoordinates = null;
