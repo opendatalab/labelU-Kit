@@ -45,6 +45,16 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
 
 // @MouseDecorator
 export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
+  static convertToCanvasCoordinates(data: LineData[]) {
+    return data.map((item) => ({
+      ...item,
+      pointList: item.pointList.map((point) => ({
+        ...point,
+        ...axis!.convertSourceCoordinate(point),
+      })),
+    }));
+  }
+
   private _creatingShapes: Group<Line | Point, LineStyle | PointStyle> | null = null;
 
   public draft: DraftLine | null = null;

@@ -34,6 +34,13 @@ export interface RectToolOptions extends BasicToolParams<RectData, RectStyle> {
 }
 
 export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
+  static convertToCanvasCoordinates(data: RectData[]) {
+    return data.map((item) => ({
+      ...item,
+      ...axis!.convertSourceCoordinate(item),
+    }));
+  }
+
   private _creatingShape: Rect | null = null;
 
   private _startPoint: AxisPoint | null = null;

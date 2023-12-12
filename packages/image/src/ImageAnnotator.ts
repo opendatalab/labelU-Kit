@@ -216,28 +216,28 @@ export class Annotator {
       this.use(
         new LineTool({
           ...this._config.line,
-          data: data as AnnotationToolData<'line'>,
+          data: LineTool.convertToCanvasCoordinates(data as AnnotationToolData<'line'>),
         }),
       );
     } else if (toolName == 'point') {
       this.use(
         new PointTool({
           ...this._config.point,
-          data: data as AnnotationToolData<'point'>,
+          data: PointTool.convertToCanvasCoordinates(data as AnnotationToolData<'point'>),
         }),
       );
     } else if (toolName == 'rect') {
       this.use(
         new RectTool({
           ...this._config.rect,
-          data: data as AnnotationToolData<'rect'>,
+          data: RectTool.convertToCanvasCoordinates(data as AnnotationToolData<'rect'>),
         }),
       );
     } else if (toolName == 'polygon') {
       this.use(
         new PolygonTool({
           ...this._config.polygon,
-          data: data as AnnotationToolData<'polygon'>,
+          data: PolygonTool.convertToCanvasCoordinates(data as AnnotationToolData<'polygon'>),
         }),
       );
     }

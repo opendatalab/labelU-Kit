@@ -49,10 +49,10 @@ export class DraftRect extends DraftObserverMixin(
    */
   private _setupShapes() {
     const { data, group, style, config } = this;
-    const nwCoord = axis!.convertSourceCoordinate({ x: data.x, y: data.y });
-    const neCoord = axis!.convertSourceCoordinate({ x: data.x + data.width, y: data.y });
-    const seCoord = axis!.convertSourceCoordinate({ x: data.x + data.width, y: data.y + data.height });
-    const swCoord = axis!.convertSourceCoordinate({ x: data.x, y: data.y + data.height });
+    const nwCoord = { x: data.x, y: data.y };
+    const neCoord = { x: data.x + data.width, y: data.y };
+    const seCoord = { x: data.x + data.width, y: data.y + data.height };
+    const swCoord = { x: data.x, y: data.y + data.height };
 
     const lineCoordinates: {
       name: EdgePosition;
@@ -400,10 +400,10 @@ export class DraftRect extends DraftObserverMixin(
 
     const bbox = this.getBBoxWithoutControllerPoint();
 
-    data.x = axis!.convertCanvasCoordinateX(bbox.minX);
-    data.y = axis!.convertCanvasCoordinateY(bbox.minY);
-    data.width = axis!.convertCanvasCoordinateX(bbox.maxX) - data.x;
-    data.height = axis!.convertCanvasCoordinateY(bbox.maxY) - data.y;
+    data.x = axis!.getOriginalX(bbox.minX);
+    data.y = axis!.getOriginalY(bbox.minY);
+    data.width = axis!.getOriginalX(bbox.maxX) - data.x;
+    data.height = axis!.getOriginalY(bbox.maxY) - data.y;
   }
 
   public isRectAndControllersUnderCursor(mouseCoord: AxisPoint) {

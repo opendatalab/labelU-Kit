@@ -44,6 +44,16 @@ export interface PolygonToolOptions extends BasicToolParams<PolygonData, Polygon
 
 // @MouseDecorator
 export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOptions> {
+  static convertToCanvasCoordinates(data: PolygonData[]) {
+    return data.map((item) => ({
+      ...item,
+      pointList: item.pointList.map((point) => ({
+        ...point,
+        ...axis!.convertSourceCoordinate(point),
+      })),
+    }));
+  }
+
   private _selectionShape: Rect | null = null;
 
   public draft: DraftPolygon | null = null;

@@ -66,19 +66,18 @@ export class DraftPolygon extends DraftObserverMixin(
    */
   private _setupShapes() {
     const { data, group, style, config } = this;
-    const convertedPoints = data.pointList.map((item) => axis!.convertSourceCoordinate(item));
 
     group.add(
       // 多边形用于颜色填充
       new Polygon({
         id: data.id,
-        coordinate: convertedPoints,
+        coordinate: cloneDeep(data.pointList),
         style: { ...style, strokeWidth: 0, stroke: 'transparent' },
       }),
     );
 
     // 多线段用于控制多边形的边
-    const fullPoints = [...convertedPoints, convertedPoints[0]];
+    const fullPoints = [...data.pointList, data.pointList[0]];
 
     for (let i = 1; i < fullPoints.length; i++) {
       const startPoint = fullPoints[i - 1];
@@ -98,8 +97,8 @@ export class DraftPolygon extends DraftObserverMixin(
     }
 
     // 点要覆盖在线上
-    for (let i = 0; i < convertedPoints.length; i++) {
-      const pointItem = convertedPoints[i];
+    for (let i = 0; i < data.pointList.length; i++) {
+      const pointItem = data.pointList[i];
       const point = new ControllerPoint({
         id: uuid(),
         outOfCanvas: config.outOfCanvas,
@@ -438,8 +437,8 @@ export class DraftPolygon extends DraftObserverMixin(
     const polygonCoordinate = group.shapes[0].dynamicCoordinate;
 
     for (let i = 0; i < polygonCoordinate.length; i++) {
-      data.pointList[i].x = axis!.convertCanvasCoordinateX(polygonCoordinate[i].x);
-      data.pointList[i].y = axis!.convertCanvasCoordinateY(polygonCoordinate[i].y);
+      data.pointList[i].x = axis!.getOriginalX(polygonCoordinate[i].x);
+      data.pointList[i].y = axis!.getOriginalY(polygonCoordinate[i].y);
     }
   }
 }
