@@ -65,7 +65,7 @@ export class Annotator {
 
     this._config = params;
 
-    this.init();
+    this._init();
     this.render();
   }
 
@@ -73,7 +73,7 @@ export class Annotator {
     return this._config;
   }
 
-  public init() {
+  public _init() {
     // 添加鼠标光标
     this._initialContainer();
     this._initialAxis();
@@ -119,7 +119,10 @@ export class Annotator {
       return;
     }
 
-    this._axis = createAxis(this);
+    this._axis = createAxis({
+      renderer: this.renderer,
+      cursor: this._config.cursor,
+    });
     eventEmitter.on(EInternalEvent.Render, this.render);
   }
 

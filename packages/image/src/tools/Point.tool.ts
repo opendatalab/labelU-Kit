@@ -146,8 +146,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       id: uuid(),
       label: activeLabel,
       // 超出安全区域的点直接落在安全区域边缘
-      x: axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX)),
-      y: axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY)),
+      x: axis!.convertCanvasCoordinateX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX)),
+      y: axis!.convertCanvasCoordinateY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY)),
     });
 
     axis?.rerender();

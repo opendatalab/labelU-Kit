@@ -1,14 +1,24 @@
 import type { BBox } from 'rbush';
 
 import type { AxisPoint } from '../shapes/Point.shape';
+import type { CursorParams } from '../shapes/Cursor.shape';
 import { Cursor } from '../shapes/Cursor.shape';
 import { Ticker } from './Ticker';
-import type { Annotator } from '../ImageAnnotator';
 import { EInternalEvent } from '../enums';
 import * as eventEmitter from '../singletons/eventEmitter';
 import { rbush } from '../singletons';
+import type { Renderer } from './Renderer';
 
 const SCALE_FACTOR = 1.1;
+
+export interface AxisParams {
+  /**
+   * 画布元素
+   */
+  renderer: Renderer;
+
+  cursor?: CursorParams | false;
+}
 
 /**
  * 画布坐标系 Axis，用于管理画布的移动、缩放等操作
@@ -17,8 +27,6 @@ export class Axis {
   static MIN_SCALE = 0.1;
 
   static MAX_SCALE = 20;
-
-  private _annotator: Annotator | null = null;
 
   /** 画布相对左上角原点偏移的 x 距离 */
   private _x: number = 0;
@@ -52,6 +60,8 @@ export class Axis {
 
   private _cursor: Cursor | null = null;
 
+  private _renderer: Renderer | null = null;
+
   private _ticker: Ticker | null = null;
 
   /**
@@ -62,15 +72,34 @@ export class Axis {
     y: 0,
   };
 
-  constructor(annotator: Annotator) {
-    const { cursor } = annotator!.config;
+  private _initialBackgroundOffset: AxisPoint = {
+    x: 0,
+    y: 0,
+  };
 
-    // TODO：改成renderer参数
-    this._annotator = annotator;
+  private _initialBackgroundScale: number = 1;
 
+  public set initialBackgroundScale(scale: number) {
+    this._initialBackgroundScale = scale;
+  }
+
+  public get initialBackgroundScale() {
+    return this._initialBackgroundScale;
+  }
+
+  public set initialBackgroundOffset(offset: AxisPoint) {
+    this._initialBackgroundOffset = offset;
+  }
+
+  public get initialBackgroundOffset() {
+    return this._initialBackgroundOffset;
+  }
+
+  constructor({ renderer, cursor }: AxisParams) {
     this._createTicker();
     this._bindEvents();
     this._cursor = new Cursor({ x: 0, y: 0, ...cursor });
+    this._renderer = renderer;
     // NOTE: debug
     this._renderRBushTree();
   }
@@ -118,7 +147,7 @@ export class Axis {
   };
 
   private _pan = (e: MouseEvent) => {
-    const { _startPanPoint, _annotator, _startMovePoint } = this;
+    const { _startPanPoint, _renderer, _startMovePoint } = this;
     const point = {
       x: e.offsetX,
       y: e.offsetY,
@@ -130,7 +159,7 @@ export class Axis {
     this._x = point.x - _startPanPoint!.x;
     this._y = point.y - _startPanPoint!.y;
 
-    _annotator!.renderer!.canvas.style.cursor = 'grabbing';
+    _renderer!.canvas.style.cursor = 'grabbing';
 
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
@@ -177,9 +206,9 @@ export class Axis {
   };
 
   private _handleRightMouseUp = (e: MouseEvent) => {
-    const { _annotator } = this;
+    const { _renderer } = this;
 
-    _annotator!.renderer!.canvas.style.cursor = 'none';
+    _renderer!.canvas.style.cursor = 'none';
 
     this._startPanPoint = null;
     this._startMovePoint = null;
@@ -226,12 +255,69 @@ export class Axis {
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
 
-  public rerender() {
-    const { _cursor, _annotator } = this;
-    const { renderer } = _annotator!;
+  /**
+   * 根据图片的初始位置和缩放比例，计算在画布上的精确位置
+   *
+   * @description
+   * 初始数据加载需要考虑图片的缩放和在画布中的位置。
+   * 图片按比例在画布中居中显示，所以要考虑图片在画布中的偏移量和缩放比例。
+   * 在加载数据时，数据的原始坐标是以原始图片左上角为原点的坐标；
+   * 又因工具的数据结构并不都一致，所以需要各自的Tool中将原始坐标转换为画布中的坐标
+   */
+  public convertSourceCoordinate(coord: AxisPoint) {
+    if (!('x' in coord) || !('y' in coord)) {
+      throw new Error('Invalid coordinate');
+    }
 
-    eventEmitter.emit(EInternalEvent.Render, renderer!.ctx);
-    _cursor!.render(renderer!.ctx);
+    const { _initialBackgroundOffset, _initialBackgroundScale } = this;
+
+    return {
+      x: coord.x * _initialBackgroundScale + _initialBackgroundOffset.x,
+      y: coord.y * _initialBackgroundScale + _initialBackgroundOffset.y,
+    };
+  }
+
+  /**
+   * 由画布上的坐标转换为以原始图片左上角为原点的坐标
+   *
+   * @param coord 画布上的坐标
+   */
+  public convertCanvasCoordinate(coord: AxisPoint) {
+    if (!('x' in coord) || !('y' in coord)) {
+      throw new Error('Invalid coordinate');
+    }
+
+    return {
+      x: this.convertCanvasCoordinateX(coord.x),
+      y: this.convertCanvasCoordinateY(coord.y),
+    };
+  }
+
+  public convertCanvasCoordinateX(x: number) {
+    if (typeof x !== 'number') {
+      throw new Error('Invalid x');
+    }
+
+    const { _initialBackgroundOffset, _initialBackgroundScale } = this;
+
+    return (this.getOriginalX(x) - _initialBackgroundOffset.x) / _initialBackgroundScale;
+  }
+
+  public convertCanvasCoordinateY(y: number) {
+    if (typeof y !== 'number') {
+      throw new Error('Invalid y');
+    }
+
+    const { _initialBackgroundOffset, _initialBackgroundScale } = this;
+
+    return (this.getOriginalY(y) - _initialBackgroundOffset.y) / _initialBackgroundScale;
+  }
+
+  public rerender() {
+    const { _cursor, _renderer } = this;
+
+    eventEmitter.emit(EInternalEvent.Render, _renderer!.ctx);
+    _cursor!.render(_renderer!.ctx);
     // debug
     this._renderRBushTree();
   }
@@ -240,7 +326,7 @@ export class Axis {
    * Debug使用，渲染R-Tree
    */
   private _renderRBushTree() {
-    const { ctx } = this._annotator!.renderer!;
+    const { ctx } = this._renderer!;
 
     ctx!.save();
     ctx!.strokeStyle = '#666';

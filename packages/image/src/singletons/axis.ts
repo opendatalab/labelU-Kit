@@ -1,10 +1,10 @@
-import type { Annotator } from '../ImageAnnotator';
+import type { AxisParams } from '../core/Axis';
 import { Axis } from '../core/Axis';
 
 let axis: Axis | null = null;
 
-export function createAxis(annotator: Annotator) {
-  axis = new Axis(annotator);
+export function createAxis(params: AxisParams) {
+  axis = new Axis(params);
 
   return axis;
 }

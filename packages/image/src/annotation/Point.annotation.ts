@@ -19,7 +19,7 @@ export class AnnotationPoint extends Annotation<PointData, Point, PointStyle> {
 
     const point = new Point({
       id: data.id,
-      coordinate: data,
+      coordinate: axis!.convertSourceCoordinate(data),
       style,
     });
 
@@ -30,8 +30,8 @@ export class AnnotationPoint extends Annotation<PointData, Point, PointStyle> {
     const { group, data } = this;
 
     group.each((shape) => {
-      data.x = axis!.getOriginalX(shape.dynamicCoordinate[0].x);
-      data.y = axis!.getOriginalY(shape.dynamicCoordinate[0].y);
+      data.x = axis!.convertCanvasCoordinateX(shape.dynamicCoordinate[0].x);
+      data.y = axis!.convertCanvasCoordinateY(shape.dynamicCoordinate[0].y);
     });
   }
 

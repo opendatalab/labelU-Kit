@@ -1,3 +1,4 @@
+import { axis } from '../singletons';
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
@@ -24,11 +25,11 @@ export class AnnotationLine extends Annotation<LineData, Line, LineStyle> {
     const { data, group, style } = this;
 
     for (let i = 1; i < data.pointList.length; i++) {
-      const startPoint = data.pointList[i - 1];
-      const endPoint = data.pointList[i];
+      const startPoint = axis!.convertSourceCoordinate(data.pointList[i - 1]);
+      const endPoint = axis!.convertSourceCoordinate(data.pointList[i]);
 
       const line = new Line({
-        id: startPoint.id,
+        id: data.pointList[i - 1].id,
         coordinate: [startPoint, endPoint],
         style,
       });

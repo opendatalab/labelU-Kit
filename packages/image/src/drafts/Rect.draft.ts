@@ -49,6 +49,10 @@ export class DraftRect extends DraftObserverMixin(
    */
   private _setupShapes() {
     const { data, group, style, config } = this;
+    const nwCoord = axis!.convertSourceCoordinate({ x: data.x, y: data.y });
+    const neCoord = axis!.convertSourceCoordinate({ x: data.x + data.width, y: data.y });
+    const seCoord = axis!.convertSourceCoordinate({ x: data.x + data.width, y: data.y + data.height });
+    const swCoord = axis!.convertSourceCoordinate({ x: data.x, y: data.y + data.height });
 
     const lineCoordinates: {
       name: EdgePosition;
@@ -57,34 +61,22 @@ export class DraftRect extends DraftObserverMixin(
       // Top
       {
         name: 'top',
-        coordinate: [
-          { x: data.x, y: data.y },
-          { x: data.x + data.width, y: data.y },
-        ],
+        coordinate: [nwCoord, neCoord],
       },
       // Right
       {
         name: 'right',
-        coordinate: [
-          { x: data.x + data.width, y: data.y },
-          { x: data.x + data.width, y: data.y + data.height },
-        ],
+        coordinate: [neCoord, seCoord],
       },
       // Bottom
       {
         name: 'bottom',
-        coordinate: [
-          { x: data.x + data.width, y: data.y + data.height },
-          { x: data.x, y: data.y + data.height },
-        ],
+        coordinate: [seCoord, swCoord],
       },
       // Left
       {
         name: 'left',
-        coordinate: [
-          { x: data.x, y: data.y + data.height },
-          { x: data.x, y: data.y },
-        ],
+        coordinate: [swCoord, nwCoord],
       },
     ];
 
@@ -109,26 +101,22 @@ export class DraftRect extends DraftObserverMixin(
       {
         // 左上角
         name: 'nw',
-        x: data.x,
-        y: data.y,
+        ...nwCoord,
       },
       {
         // 右上角
         name: 'ne',
-        x: data.x + data.width,
-        y: data.y,
+        ...neCoord,
       },
       {
         // 右下角
         name: 'se',
-        x: data.x + data.width,
-        y: data.y + data.height,
+        ...seCoord,
       },
       {
         // 左下角
         name: 'sw',
-        x: data.x,
-        y: data.y + data.height,
+        ...swCoord,
       },
     ];
 
@@ -412,10 +400,10 @@ export class DraftRect extends DraftObserverMixin(
 
     const bbox = this.getBBoxWithoutControllerPoint();
 
-    data.x = axis!.getOriginalX(bbox.minX);
-    data.y = axis!.getOriginalY(bbox.minY);
-    data.width = axis!.getOriginalX(bbox.maxX) - data.x;
-    data.height = axis!.getOriginalY(bbox.maxY) - data.y;
+    data.x = axis!.convertCanvasCoordinateX(bbox.minX);
+    data.y = axis!.convertCanvasCoordinateY(bbox.minY);
+    data.width = axis!.convertCanvasCoordinateX(bbox.maxX) - data.x;
+    data.height = axis!.convertCanvasCoordinateY(bbox.maxY) - data.y;
   }
 
   public isRectAndControllersUnderCursor(mouseCoord: AxisPoint) {

@@ -43,12 +43,12 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     const { data, group, style, config } = this;
 
     for (let i = 1; i < data.pointList.length; i++) {
-      const startPoint = data.pointList[i - 1];
-      const endPoint = data.pointList[i];
+      const startPoint = axis!.convertSourceCoordinate(data.pointList[i - 1]);
+      const endPoint = axis!.convertSourceCoordinate(data.pointList[i]);
 
       const line = new Line({
         id: uuid(),
-        coordinate: cloneDeep([startPoint, endPoint]),
+        coordinate: [startPoint, endPoint],
         style,
       });
 
@@ -62,7 +62,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
         id: pointItem.id,
         outOfCanvas: config.outOfCanvas,
         // 深拷贝，避免出现引用问题
-        coordinate: cloneDeep(pointItem),
+        coordinate: axis!.convertSourceCoordinate(pointItem),
       });
 
       point.onMouseDown(this._onControllerPointDown);
@@ -145,7 +145,6 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
   };
 
   private _onMouseUp = () => {
-    debugger;
     this._createSelection();
     this.isPicked = false;
     this._previousDynamicCoordinates = null;
@@ -267,8 +266,8 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     const pointSize = data.pointList.length;
 
     for (let i = pointSize - 1; i < group.shapes.length; i++) {
-      data.pointList[i - pointSize + 1].x = axis!.getOriginalX(group.shapes[i].dynamicCoordinate[0].x);
-      data.pointList[i - pointSize + 1].y = axis!.getOriginalY(group.shapes[i].dynamicCoordinate[0].y);
+      data.pointList[i - pointSize + 1].x = axis!.convertCanvasCoordinateX(group.shapes[i].dynamicCoordinate[0].x);
+      data.pointList[i - pointSize + 1].y = axis!.convertCanvasCoordinateY(group.shapes[i].dynamicCoordinate[0].y);
     }
   }
 

@@ -1,6 +1,7 @@
 import type { RendererOptions } from './Renderer';
 import { Renderer } from './Renderer';
 import { axis } from '../singletons';
+import type { AxisPoint } from '../shapes';
 
 export interface ImageOption extends RendererOptions {
   url?: string;
@@ -35,6 +36,17 @@ export interface ImageOption extends RendererOptions {
 
 export class BackgroundRenderer extends Renderer {
   private _image: HTMLImageElement | null = null;
+
+  private _initialScale = 1;
+
+  private _renderWidth: number = 0;
+
+  private _renderHeight: number = 0;
+
+  private _initialCoordinate: AxisPoint = {
+    x: 0,
+    y: 0,
+  };
 
   public options: ImageOption = {
     rotate: 0,
@@ -85,6 +97,40 @@ export class BackgroundRenderer extends Renderer {
       _image.src = imageUrl;
       _image.onload = () => {
         this._image = _image;
+
+        const { width, height } = this.options;
+
+        const imageWidth = _image.width;
+        const imageHeight = _image.height;
+
+        // 按比例渲染图片
+        let renderHeight = imageHeight * (width / imageWidth);
+        let renderWidth = width;
+        let offsetX = 0;
+        const offsetY = (height - renderHeight) / 2;
+
+        if (imageHeight > imageWidth) {
+          renderHeight = height;
+          renderWidth = imageWidth * (height / imageHeight);
+          offsetX = (width - renderWidth) / 2;
+        }
+
+        this._renderWidth = renderWidth;
+        this._renderHeight = renderHeight;
+        // 初始缩放比例根据图片宽度计算
+        this._initialCoordinate = {
+          x: offsetX,
+          y: offsetY,
+        };
+        this._initialScale = renderWidth / imageWidth;
+
+        axis!.initialBackgroundOffset = {
+          x: offsetX,
+          y: offsetY,
+        };
+
+        axis!.initialBackgroundScale = this._initialScale;
+
         this.render();
 
         resolve(this);
@@ -97,8 +143,12 @@ export class BackgroundRenderer extends Renderer {
     });
   }
 
+  public get image() {
+    return this._image;
+  }
+
   render() {
-    const { ctx } = this;
+    const { ctx, _initialCoordinate, _renderWidth, _renderHeight } = this;
 
     if (!ctx) {
       return;
@@ -108,41 +158,21 @@ export class BackgroundRenderer extends Renderer {
       return;
     }
 
-    const { width, height } = this.options;
-
-    const _width = this._image?.width || 0;
-    const _height = this._image?.height || 0;
-
-    // 按比例渲染图片
-    let renderHeight = _height * (width / _width);
-    let renderWidth = width;
-    let offsetX = 0;
-    const offsetY = (height - renderHeight) / 2;
-
-    if (_height > _width) {
-      renderHeight = height;
-      renderWidth = _width * (height / _height);
-      offsetX = (width - renderWidth) / 2;
-    }
-
     const { scale } = axis!;
 
-    const coord = axis!.getScaledCoord({
-      x: offsetX,
-      y: offsetY,
-    });
+    const coord = axis!.getScaledCoord(_initialCoordinate);
 
     const bbox = {
       minX: coord.x,
       minY: coord.y,
-      maxX: coord.x + renderWidth * scale,
-      maxY: coord.y + renderHeight * scale,
+      maxX: coord.x + _renderWidth * scale,
+      maxY: coord.y + _renderHeight * scale,
     };
 
     // 更新图片区域
     axis!.setSafeZone(bbox);
 
-    ctx.drawImage(this._image, coord.x, coord.y, renderWidth * scale, renderHeight * scale);
+    ctx.drawImage(this._image, coord.x, coord.y, _renderWidth * scale, _renderHeight * scale);
 
     return this;
   }
