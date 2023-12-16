@@ -49,6 +49,7 @@ export default function App() {
       },
     },
     line: {
+      lineType: 'curve',
       style: {
         strokeWidth: 5,
       },
@@ -189,6 +190,7 @@ export default function App() {
           ],
           id: 'rW5Jbd8G',
           attributes: {},
+          type: 'line',
           order: 1,
           label: 'noneAttribute',
         },
@@ -212,6 +214,7 @@ export default function App() {
           ],
           id: 'rW5Jbd8G2',
           attributes: {},
+          type: 'line',
           order: 2,
           label: 'car',
         },
