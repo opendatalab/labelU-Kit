@@ -74,7 +74,7 @@ export class Shape<Style> {
   /**
    * 更新坐标后自动更新偏移后的坐标及bbox
    */
-  private _coordinateHandler: ProxyHandler<AxisPoint[]> = {
+  protected _coordinateHandler: ProxyHandler<AxisPoint[]> = {
     get: (target: AxisPoint[], key: PropertyKey) => {
       if (!isNaN(Number(key))) {
         return new Proxy(target[Number(key)], this._coordinateItemHandler);
@@ -90,7 +90,7 @@ export class Shape<Style> {
     },
   };
 
-  private _coordinateItemHandler: ProxyHandler<AxisPoint> = {
+  protected _coordinateItemHandler: ProxyHandler<AxisPoint> = {
     set: (target, key, value) => {
       if (key !== 'x' && key !== 'y') {
         throw Error('key must be x or y!');

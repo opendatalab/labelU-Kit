@@ -573,6 +573,10 @@ export class Axis {
     return [safeX, safeY];
   }
 
+  public get renderer() {
+    return this._renderer;
+  }
+
   public destroy() {
     this._offEvents();
     this._ticker?.stop();

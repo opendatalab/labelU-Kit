@@ -380,11 +380,11 @@ export class DraftRect extends DraftObserverMixin(
     }
 
     this.group.update();
-    this.syncCoordToData();
   };
 
   private _onEdgeUp = () => {
     this._isEdgeControllerPicked = false;
+    this.syncCoordToData();
   };
 
   protected getDynamicCoordinates() {

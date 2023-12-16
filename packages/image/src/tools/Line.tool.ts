@@ -4,14 +4,15 @@ import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import type { LineData } from '../annotation';
+import type { LineData, PointItem } from '../annotation';
 import { AnnotationLine } from '../annotation';
-import type { PointStyle } from '../shapes';
+import type { AxisPoint, PointStyle } from '../shapes';
 import { Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
-import { DraftLine } from '../drafts/Line.draft';
+import { DraftLine, DraftCurve } from '../drafts';
+import { BezierCurve } from '../shapes/BezierCurve.shape';
 
 export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   /**
@@ -55,9 +56,15 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }));
   }
 
-  private _creatingShapes: Group<Line | Point, LineStyle | PointStyle> | null = null;
+  private _creatingLines: Group<Line | Point, LineStyle | PointStyle> | null = null;
 
-  public draft: DraftLine | null = null;
+  public draft: DraftLine | DraftCurve | null = null;
+
+  public _creatingCurves: Group<BezierCurve | Line | Point, LineStyle | PointStyle> | null = null;
+
+  private _holdingSlopes: Point[] | null = null;
+
+  private _holdingSlopeEdge: Line | null = null;
 
   constructor(params: LineToolOptions) {
     super({
@@ -80,7 +87,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     this._init();
 
-    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
@@ -96,8 +104,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
-    this?._creatingShapes?.destroy();
-    this._creatingShapes = null;
+    this?._creatingLines?.destroy();
+    this._creatingLines = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._archiveDraft();
@@ -156,15 +164,26 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _createDraft(data: LineData) {
     const { style } = this;
 
-    this.draft = new DraftLine(this.config, {
-      id: data.id,
-      data,
-      style: { ...style, stroke: this.getLabelColor(data.label) },
-      // 在草稿上添加取消选中的事件监听
-      onUnSelect: this.onUnSelect,
-      onBBoxOut: this.handlePointStyle,
-      onBBoxOver: this.handlePointStyle,
-    });
+    this.draft =
+      data.type === 'line'
+        ? new DraftLine(this.config, {
+            id: data.id,
+            data,
+            style: { ...style, stroke: this.getLabelColor(data.label) },
+            // 在草稿上添加取消选中的事件监听
+            onUnSelect: this.onUnSelect,
+            onBBoxOut: this.handlePointStyle,
+            onBBoxOver: this.handlePointStyle,
+          })
+        : new DraftCurve(this.config, {
+            id: data.id,
+            data,
+            style: { ...style, stroke: this.getLabelColor(data.label) },
+            // 在草稿上添加取消选中的事件监听
+            onUnSelect: this.onUnSelect,
+            onBBoxOut: this.handlePointStyle,
+            onBBoxOver: this.handlePointStyle,
+          });
   }
 
   private _archiveDraft() {
@@ -177,9 +196,9 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  private _handleMouseDown = (e: MouseEvent) => {
+  private _handleLeftMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, _creatingShapes, draft, config } = this;
+    const { activeLabel, style, _creatingLines, draft, config } = this;
 
     const isUnderDraft =
       draft &&
@@ -190,21 +209,80 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    // 先归档选中的草稿
-    this._archiveDraft();
-
-    if (!_creatingShapes) {
-      this._creatingShapes = new Group(uuid(), monitor!.getMaxOrder() + 1);
-    }
-
     const startPoint = axis!.getOriginalCoord({
       // 超出安全区域的点直接落在安全区域边缘
       x: config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX),
       y: config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY),
     });
 
+    // 先归档选中的草稿
+    this._archiveDraft();
+
+    if (config.lineType === 'curve') {
+      if (!this._creatingCurves) {
+        this._creatingCurves = new Group(uuid(), monitor!.getMaxOrder() + 1);
+      }
+
+      // 按下鼠标左键的时候默认是拖拽第一个控制点
+      const slopeStartPoint = new Point({
+        id: uuid(),
+        style: { ...style, fill: '#fff', radius: 4, strokeWidth: 0, opacity: 0.5 },
+        coordinate: { ...startPoint },
+      });
+      const slopeEndPoint = new Point({
+        id: uuid(),
+        style: { ...style, fill: '#fff', radius: 4, strokeWidth: 0, opacity: 0.5 },
+        coordinate: { ...startPoint },
+      });
+      this._holdingSlopes = [slopeStartPoint, slopeEndPoint];
+      this._creatingCurves.add(
+        new BezierCurve({
+          id: uuid(),
+          style: { ...style, stroke: this.getLabelColor(activeLabel) },
+          coordinate: [
+            {
+              ...startPoint,
+            },
+            {
+              ...startPoint,
+            },
+          ],
+          controlPoints: [
+            {
+              ...startPoint,
+            },
+            {
+              ...startPoint,
+            },
+          ],
+        }),
+      );
+      const slopeEdge = new Line({
+        id: uuid(),
+        style: { ...style, stroke: '#fff', strokeWidth: 1, opacity: 0.5 },
+        coordinate: [
+          {
+            ...startPoint,
+          },
+          {
+            ...startPoint,
+          },
+        ],
+      });
+      this._holdingSlopeEdge = slopeEdge;
+      this._creatingCurves.add(slopeEdge);
+      this._creatingCurves.add(slopeStartPoint);
+      this._creatingCurves.add(slopeEndPoint);
+      return;
+    }
+
+    // 绘制直线
+    if (!_creatingLines) {
+      this._creatingLines = new Group(uuid(), monitor!.getMaxOrder() + 1);
+    }
+
     // 创建新的线段
-    this._creatingShapes?.add(
+    this._creatingLines?.add(
       new Line({
         id: uuid(),
         style: { ...style, stroke: this.getLabelColor(activeLabel) },
@@ -221,16 +299,83 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { _creatingShapes, config } = this;
+    const { _creatingLines, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config } = this;
 
-    if (_creatingShapes) {
+    const x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
+    const y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
+
+    if (_creatingCurves) {
+      const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as BezierCurve;
+
+      // 创建点不松开鼠标，等效拖拽控制点
+      if (_holdingSlopes) {
+        // 第一条曲线
+        if (_creatingCurves.shapes.length === 4) {
+          // 更新斜率点的坐标
+          _holdingSlopes[0].coordinate[0].x = x;
+          _holdingSlopes[0].coordinate[0].y = y;
+          _holdingSlopes[1].coordinate[0].x = x;
+          _holdingSlopes[1].coordinate[0].y = y;
+
+          _holdingSlopeEdge!.coordinate[1].x = x;
+          _holdingSlopeEdge!.coordinate[1].y = y;
+
+          // 更新曲线的控制点
+          lastCurve.controlPoints[0].x = x;
+          lastCurve.controlPoints[0].y = y;
+          lastCurve.controlPoints[1].x = x;
+          lastCurve.controlPoints[1].y = y;
+          // 更新曲线结束点坐标
+          lastCurve.coordinate[1].x = x;
+          lastCurve.coordinate[1].y = y;
+        } else {
+          const preCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 8] as BezierCurve;
+
+          _holdingSlopeEdge!.coordinate[1].x = x;
+          _holdingSlopeEdge!.coordinate[1].y = y;
+          lastCurve.controlPoints[0].x = x;
+          lastCurve.controlPoints[0].y = y;
+
+          // 更新曲线结束点坐标
+          lastCurve.coordinate[1].x = x;
+          lastCurve.coordinate[1].y = y;
+
+          _holdingSlopes[1].coordinate[0].x = x;
+          _holdingSlopes[1].coordinate[0].y = y;
+
+          // 对称控制点更新(对称点坐标计算公式：对称点坐标 = 轴点坐标 * 2 - 当前点坐标)
+          // 绘制第二条以上的曲线时，需要更新上一条曲线的**结束**控制点，这个点是当前鼠标移动点的对称点
+          preCurve.controlPoints[1].x = 2 * lastCurve.coordinate[0].x - x;
+          preCurve.controlPoints[1].y = 2 * lastCurve.coordinate[0].y - y;
+          _holdingSlopeEdge!.coordinate[0].x = 2 * lastCurve.coordinate[0].x - x;
+          _holdingSlopeEdge!.coordinate[0].y = 2 * lastCurve.coordinate[0].y - y;
+
+          _holdingSlopes[0].coordinate[0].x = 2 * lastCurve.coordinate[0].x - x;
+          _holdingSlopes[0].coordinate[0].y = 2 * lastCurve.coordinate[0].y - y;
+        }
+      } else {
+        // 更新曲线结束点，结束点需要跟随鼠标
+        lastCurve.coordinate[1].x = x;
+        lastCurve.coordinate[1].y = y;
+        // 结束控制点也设为鼠标当前点
+        lastCurve.controlPoints[1].x = x;
+        lastCurve.controlPoints[1].y = y;
+      }
+
+      _creatingCurves.update();
+    } else if (_creatingLines) {
       // 正在绘制的线段，最后一个端点的坐标跟随鼠标
-      const { shapes } = _creatingShapes;
+      const { shapes } = _creatingLines;
       const lastShape = shapes[shapes.length - 1];
-      lastShape.coordinate[1].x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
-      lastShape.coordinate[1].y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
-      _creatingShapes.update();
+      lastShape.coordinate[1].x = x;
+      lastShape.coordinate[1].y = y;
+      _creatingLines.update();
     }
+  };
+
+  private _handleLeftMouseUp = () => {
+    this._holdingSlopes = null;
+    this._holdingSlopeEdge = null;
   };
 
   private _handleRightMouseUp = () => {
@@ -239,62 +384,134 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
+    const { _creatingLines, _creatingCurves } = this;
+
     // 归档创建中的图形
-    if (this._creatingShapes) {
-      const points = [];
-      // 最后一个点不需要加入标注
-      for (let i = 0; i < this._creatingShapes.shapes.length - 1; i++) {
-        const shape = this._creatingShapes.shapes[i];
-        if (i === 0) {
-          points.push(
-            {
-              id: shape.id,
-              x: axis!.getOriginalX(shape.dynamicCoordinate[0].x),
-              y: axis!.getOriginalY(shape.dynamicCoordinate[0].y),
-            },
-            {
-              id: uuid(),
-              x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
-              y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
-            },
-          );
-        } else {
-          points.push({
+    if (_creatingLines) {
+      this._archiveLines();
+    } else if (_creatingCurves) {
+      this._archiveCurves();
+    }
+  };
+
+  private _archiveLines() {
+    const { _creatingLines } = this;
+
+    if (!_creatingLines) {
+      return;
+    }
+
+    const points = [];
+    // 最后一个点不需要加入标注
+    for (let i = 0; i < _creatingLines.shapes.length - 1; i++) {
+      const shape = _creatingLines.shapes[i];
+
+      // 第一条曲线要把开始点也加上
+      if (i === 0) {
+        points.push(
+          {
+            id: shape.id,
+            x: axis!.getOriginalX(shape.dynamicCoordinate[0].x),
+            y: axis!.getOriginalY(shape.dynamicCoordinate[0].y),
+          },
+          {
             id: uuid(),
             x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
             y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
-          });
-        }
+          },
+        );
+      } else {
+        points.push({
+          id: uuid(),
+          x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
+          y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
+        });
       }
-      const data: LineData = {
-        id: uuid(),
-        pointList: points,
-        label: this.activeLabel,
-        order: monitor!.getMaxOrder() + 1,
-      };
-
-      this._addAnnotation(data);
-      this._creatingShapes.destroy();
-      this._creatingShapes = null;
-      axis!.rerender();
-      this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationLine);
-      monitor!.setSelectedAnnotationId(data.id);
     }
-  };
+    const data: LineData = {
+      id: uuid(),
+      type: 'line',
+      pointList: points,
+      label: this.activeLabel,
+      order: monitor!.getMaxOrder() + 1,
+    };
+
+    this._addAnnotation(data);
+
+    _creatingLines.destroy();
+    this._creatingLines = null;
+    axis!.rerender();
+    this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationLine);
+    monitor!.setSelectedAnnotationId(data.id);
+  }
+
+  private _archiveCurves() {
+    const { _creatingCurves } = this;
+
+    if (!_creatingCurves) {
+      return;
+    }
+
+    const points: PointItem[] = [];
+    // 最后一个点不需要加入标注
+    // 以四个图形为一组，分别是曲线、连接线，开始控制点、结束控制点，当前的i表示结束控制点
+    const controlPoints: AxisPoint[] = [];
+
+    for (let i = 0; i < _creatingCurves.shapes.length - 4; i += 4) {
+      const curve = _creatingCurves.shapes[i] as BezierCurve;
+
+      controlPoints.push(...curve.plainControlPoints);
+
+      if (i === 0) {
+        // 第一条曲线取开始点和结束点
+        points.push({
+          id: uuid(),
+          x: curve.coordinate[0].x,
+          y: curve.coordinate[0].y,
+        });
+      }
+      points.push({
+        id: uuid(),
+        x: curve.coordinate[1].x,
+        y: curve.coordinate[1].y,
+      });
+    }
+    const data: LineData = {
+      id: uuid(),
+      type: 'curve',
+      pointList: points,
+      controlPoints,
+      label: this.activeLabel,
+      order: monitor!.getMaxOrder() + 1,
+    };
+
+    this._addAnnotation(data);
+
+    _creatingCurves.destroy();
+    this._creatingCurves = null;
+    axis!.rerender();
+    this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationLine);
+    monitor!.setSelectedAnnotationId(data.id);
+  }
 
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 
-    if (this._creatingShapes) {
-      this._creatingShapes.render(ctx);
+    if (this._creatingLines) {
+      this._creatingLines.render(ctx);
+    }
+
+    if (this._creatingCurves) {
+      this._creatingCurves.render(ctx);
     }
   }
 
   public destroy(): void {
     super.destroy();
 
-    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
+    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 }

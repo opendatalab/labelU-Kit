@@ -73,4 +73,12 @@ export enum EInternalEvent {
 
   /** 取消选中事件 */
   UnSelect = '__un_select__',
+
+  SlopeDown = '__slope_down__',
+  SlopeMove = '__slope_move__',
+  SlopeUp = '__slope_up__',
+
+  ContactDown = '__contact_down__',
+  ContactMove = '__contact_move__',
+  ContactUp = '__contact_up__',
 }
