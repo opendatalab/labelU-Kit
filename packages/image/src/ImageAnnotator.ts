@@ -135,6 +135,19 @@ export class Annotator {
     return this._monitor;
   }
 
+  public rotate(angle: number) {
+    const { backgroundRenderer } = this;
+
+    // TODO：有标注数据时不可旋转
+
+    if (!backgroundRenderer) {
+      throw new Error('backgroundRenderer is not initialized');
+    }
+
+    backgroundRenderer.clear();
+    backgroundRenderer.rotate(angle);
+  }
+
   public use(instance: AnnotationTool) {
     const { _tools } = this;
     if (_tools.has(instance.name)) {
