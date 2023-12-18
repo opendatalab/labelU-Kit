@@ -18,8 +18,6 @@ export class BezierCurve extends Shape<LineStyle> {
 
   private _dynamicControlPoints: [AxisPoint, AxisPoint];
 
-  private _path: Path2D = new Path2D();
-
   public style: Required<LineStyle> = BezierCurve.DEFAULT_STYLE;
 
   constructor({ id, controlPoints, coordinate, style }: CurveParams) {

@@ -11,7 +11,7 @@ import { Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
-import { DraftLine, DraftCurve } from '../drafts';
+import { DraftLine, DraftLineCurve } from '../drafts';
 import { BezierCurve } from '../shapes/BezierCurve.shape';
 
 export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
@@ -58,13 +58,13 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   private _creatingLines: Group<Line | Point, LineStyle | PointStyle> | null = null;
 
-  public draft: DraftLine | DraftCurve | null = null;
-
-  public _creatingCurves: Group<BezierCurve | Line | Point, LineStyle | PointStyle> | null = null;
+  private _creatingCurves: Group<BezierCurve | Line | Point, LineStyle | PointStyle> | null = null;
 
   private _holdingSlopes: Point[] | null = null;
 
   private _holdingSlopeEdge: Line | null = null;
+
+  public draft: DraftLine | DraftLineCurve | null = null;
 
   constructor(params: LineToolOptions) {
     super({
@@ -88,8 +88,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this._init();
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
-    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 
@@ -175,7 +175,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
             onBBoxOut: this.handlePointStyle,
             onBBoxOver: this.handlePointStyle,
           })
-        : new DraftCurve(this.config, {
+        : new DraftLineCurve(this.config, {
             id: data.id,
             data,
             style: { ...style, stroke: this.getLabelColor(data.label) },
@@ -220,7 +220,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     if (config.lineType === 'curve') {
       if (!this._creatingCurves) {
-        this._creatingCurves = new Group(uuid(), monitor!.getMaxOrder() + 1);
+        this._creatingCurves = new Group(uuid(), monitor!.getNextOrder());
       }
 
       // 按下鼠标左键的时候默认是拖拽第一个控制点
@@ -273,12 +273,13 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       this._creatingCurves.add(slopeEdge);
       this._creatingCurves.add(slopeStartPoint);
       this._creatingCurves.add(slopeEndPoint);
+
       return;
     }
 
     // 绘制直线
     if (!_creatingLines) {
-      this._creatingLines = new Group(uuid(), monitor!.getMaxOrder() + 1);
+      this._creatingLines = new Group(uuid(), monitor!.getNextOrder());
     }
 
     // 创建新的线段
@@ -433,7 +434,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       type: 'line',
       pointList: points,
       label: this.activeLabel,
-      order: monitor!.getMaxOrder() + 1,
+      order: monitor!.getNextOrder(),
     };
 
     this._addAnnotation(data);
@@ -482,7 +483,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       pointList: points,
       controlPoints,
       label: this.activeLabel,
-      order: monitor!.getMaxOrder() + 1,
+      order: monitor!.getNextOrder(),
     };
 
     this._addAnnotation(data);

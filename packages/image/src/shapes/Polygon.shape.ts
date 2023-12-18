@@ -107,7 +107,7 @@ export class Polygon extends Shape<PolygonStyle> {
     ctx.moveTo(start.x, start.y);
     const newCoordinate = [...dynamicCoordinate, start];
 
-    for (let i = 0; i < newCoordinate.length; i += 1) {
+    for (let i = 1; i < newCoordinate.length; i += 1) {
       const { x, y } = newCoordinate[i];
 
       ctx.lineTo(x, y);

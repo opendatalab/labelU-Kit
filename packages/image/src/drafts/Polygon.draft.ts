@@ -269,6 +269,7 @@ export class DraftPolygon extends DraftObserverMixin(
    */
   private _onControllerPointUp = () => {
     this._isControllerPicked = false;
+    this._pointIndex = null;
   };
 
   // ========================== 控制边 ==========================

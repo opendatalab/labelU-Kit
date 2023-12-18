@@ -128,6 +128,7 @@ export default function App() {
       ],
     },
     polygon: {
+      lineType: 'curve',
       style: {
         strokeWidth: 3,
       },
@@ -265,6 +266,7 @@ export default function App() {
         {
           id: 'FuzuAJ4q',
           valid: true,
+          type: 'line',
           isVisible: true,
           pointList: [
             {

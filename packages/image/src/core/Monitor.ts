@@ -212,6 +212,10 @@ export class Monitor {
     return this._orderIndexedAnnotationIds.length - 1;
   }
 
+  public getNextOrder() {
+    return this.getMaxOrder() + 1;
+  }
+
   public destroy() {
     const { _canvas } = this;
 

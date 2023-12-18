@@ -6,7 +6,7 @@ import type { AxisPoint, LineStyle, Point, PointStyle } from '../shapes';
 import { Line } from '../shapes';
 import { Group } from '../shapes/Group';
 import { ControllerPoint } from './ControllerPoint';
-import { axis } from '../singletons';
+import { axis, monitor } from '../singletons';
 
 export interface SlopeEdgeParams {
   /** 前一条曲线的结束控制点，第一条曲线没有 */
@@ -37,7 +37,7 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
   public name?: string;
 
   constructor({ prevCurveEndControl, nextCurveStartControl, contact }: SlopeEdgeParams) {
-    super(uuid(), 1);
+    super(uuid(), monitor!.getMaxOrder()! + 1);
 
     this._prevCurveEndControlCoord = prevCurveEndControl;
     this._nextCurveStartControlCoord = nextCurveStartControl;
@@ -203,7 +203,5 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
     return this._nextCurveEndSlopePoint;
   }
 
-  public isUnderCursor() {
-    return false;
-  }
+  public isUnderCursor = this.isShapesUnderCursor;
 }

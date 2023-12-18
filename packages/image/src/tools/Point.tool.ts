@@ -149,7 +149,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     // 创建草稿
     this._createDraft({
-      order: monitor!.getMaxOrder() + 1,
+      order: monitor!.getNextOrder(),
       id: uuid(),
       label: activeLabel,
       // 超出安全区域的点直接落在安全区域边缘

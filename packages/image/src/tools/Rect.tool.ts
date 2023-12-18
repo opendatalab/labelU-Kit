@@ -186,7 +186,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
         label: activeLabel,
         width: _creatingShape.width,
         height: _creatingShape.height,
-        order: monitor!.getMaxOrder() + 1,
+        order: monitor!.getNextOrder(),
       });
       _creatingShape.destroy();
       this._creatingShape = null;
