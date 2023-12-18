@@ -50,7 +50,7 @@ const LINE_HEIGHT = 20;
 
 export class ShapeText extends Shape<TextStyle> {
   public style: Required<TextStyle> = {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Arial',
     stroke: 'transparent',
     strokeWidth: 0,

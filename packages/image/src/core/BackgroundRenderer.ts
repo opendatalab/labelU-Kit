@@ -3,6 +3,8 @@ import { Renderer } from './Renderer';
 import { axis } from '../singletons';
 import type { AxisPoint } from '../shapes';
 
+const ImageProperties = ['contrast', 'saturation', 'brightness'] as const;
+
 export interface ImageOption extends RendererOptions {
   url?: string;
   /**
@@ -15,21 +17,21 @@ export interface ImageOption extends RendererOptions {
   /**
    * 对比度
    *
-   * @default 1
+   * @default 0
    */
   contrast?: number;
 
   /**
    * 饱和度
    *
-   * @default 1
+   * @default 0
    */
   saturation?: number;
 
   /**
    * 曝光度
    *
-   * @default 1
+   * @default 0
    */
   brightness?: number;
 }
@@ -50,11 +52,13 @@ export class BackgroundRenderer extends Renderer {
 
   private _rotate: number = 0;
 
+  private _imageUrl: string | null = null;
+
   public options: ImageOption = {
     rotate: 0,
-    contrast: 1,
-    saturation: 1,
-    brightness: 1,
+    contrast: 0,
+    saturation: 0,
+    brightness: 0,
     width: 0,
     height: 0,
   } as ImageOption;
@@ -62,7 +66,10 @@ export class BackgroundRenderer extends Renderer {
   constructor(options: ImageOption) {
     super(options);
 
-    this.options = options;
+    this.options = {
+      ...this.options,
+      ...options,
+    };
     this._rotate = options.rotate || 0;
   }
 
@@ -123,12 +130,14 @@ export class BackgroundRenderer extends Renderer {
    * @param url 图片URL
    * @returns this
    */
-  public loadImage(url: string | undefined, options: Omit<ImageOption, 'url'> | undefined): Promise<this> {
+  public loadImage(url: string, options: Omit<ImageOption, 'url'> | undefined): Promise<this> {
     const { ctx } = this;
 
-    if (url) {
-      this.options.url = url;
+    if (!url) {
+      throw new Error('image url is required');
     }
+
+    this._imageUrl = url;
 
     if (options) {
       this.options = {
@@ -137,17 +146,11 @@ export class BackgroundRenderer extends Renderer {
       };
     }
 
-    const { url: imageUrl, rotate } = this.options;
-
     if (!ctx) {
-      return Promise.resolve(this);
+      Promise.reject(new Error('canvas context is null'));
     }
 
-    if (!imageUrl) {
-      throw new Error('image url is required');
-    }
-
-    return BackgroundRenderer.createRotatedImage(imageUrl, rotate).then((_image) => {
+    return BackgroundRenderer.createRotatedImage(url, this._rotate).then((_image) => {
       this._image = _image;
 
       const { width, height } = this.options;
@@ -189,9 +192,36 @@ export class BackgroundRenderer extends Renderer {
     });
   }
 
+  /**
+   * 旋转图片
+   * @param deg 旋转角度
+   */
   public rotate(deg: number) {
     this._rotate = deg;
-    this.loadImage(this.options.url, { ...this.options, rotate: deg });
+    this.loadImage(this._imageUrl!, { ...this.options, rotate: deg });
+  }
+
+  /**
+   * 设置图片属性
+   * @param key 属性名 contrast | saturation | brightness
+   * @param value 属性值 -100 ~ 100
+   */
+  public attr(key: 'contrast' | 'saturation' | 'brightness', value: number) {
+    if (!ImageProperties.includes(key)) {
+      throw new Error(`invalid image property ${key}. Valid properties are ${ImageProperties.join(', ')}`);
+    }
+
+    const { ctx } = this;
+
+    if (!ctx) {
+      return;
+    }
+
+    this.options[key] = value;
+    const { contrast, saturation, brightness } = this.options;
+    ctx.filter = `brightness(${brightness! + 100}%) contrast(${contrast! + 100}%) saturate(${saturation! + 100}%)`;
+    this.clear();
+    this.render();
   }
 
   public get image() {

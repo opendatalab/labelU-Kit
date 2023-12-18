@@ -8,6 +8,7 @@ export interface RendererOptions {
 
 export class Renderer extends EventEmitter {
   protected ratio: number = 1;
+
   public options: RendererOptions;
 
   public canvas: HTMLCanvasElement = document.createElement('canvas');
