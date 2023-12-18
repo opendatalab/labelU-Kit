@@ -151,6 +151,13 @@ export function DraftObserverMixin<
       return false;
     }
 
+    public render(ctx: CanvasRenderingContext2D) {
+      // 选中的标注需要在最上层
+      Promise.resolve().then(() => {
+        this.group.render(ctx);
+      });
+    }
+
     public destroy() {
       super.destroy();
 

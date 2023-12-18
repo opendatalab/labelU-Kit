@@ -317,7 +317,8 @@ export class Axis {
     const { _cursor, _renderer } = this;
 
     eventEmitter.emit(EInternalEvent.Render, _renderer!.ctx);
-    _cursor!.render(_renderer!.ctx);
+    // 光标需要在最上层
+    Promise.resolve().then(() => _cursor!.render(_renderer!.ctx));
     // debug
     this._renderRBushTree();
   }
