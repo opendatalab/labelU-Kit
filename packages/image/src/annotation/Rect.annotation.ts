@@ -1,8 +1,11 @@
+import { v4 as uuid } from 'uuid';
+
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import { Rect, type RectStyle } from '../shapes/Rect.shape';
 import type { Line } from '../shapes/Line.shape';
+import { ShapeText } from '../shapes/Text.shape';
 
 export interface RectData extends BasicImageAnnotation {
   x: number;
@@ -11,7 +14,7 @@ export interface RectData extends BasicImageAnnotation {
   height: number;
 }
 
-export class AnnotationRect extends Annotation<RectData, Line, RectStyle> {
+export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectStyle> {
   constructor(params: AnnotationParams<RectData, RectStyle>) {
     super(params);
 
@@ -31,6 +34,22 @@ export class AnnotationRect extends Annotation<RectData, Line, RectStyle> {
         width: data.width,
         height: data.height,
         style,
+      }),
+    );
+
+    group.add(
+      new ShapeText({
+        id: uuid(),
+        coordinate: {
+          x: data.x,
+          y: data.y + data.height,
+        },
+        text: this.label,
+        style: {
+          // TODO: 注意undefined的情况
+          fill: style.stroke!,
+          strokeWidth: 0,
+        },
       }),
     );
   }

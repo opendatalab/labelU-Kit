@@ -6,6 +6,7 @@ import { EInternalEvent } from '../enums';
 import type { RBushItem } from '../singletons';
 import { eventEmitter, rbush } from '../singletons';
 import { type AxisPoint } from './Point.shape';
+import { ShapeText } from './Text.shape';
 
 /**
  * 组合类，用于组合多个图形
@@ -108,9 +109,18 @@ export class Group<T extends Shape<Style>, Style> {
   }
 
   public updateStyle(style: Style) {
-    this.shapes.forEach((shape) => {
-      shape.updateStyle(style);
-    });
+    const shapes = this.shapes;
+
+    for (let i = 0; i < shapes.length; i += 1) {
+      const item = shapes[i];
+
+      // 文本不更新样式
+      if (item instanceof ShapeText) {
+        continue;
+      }
+
+      item.updateStyle(style);
+    }
   }
 
   public add(...shapes: T[]) {
@@ -133,6 +143,10 @@ export class Group<T extends Shape<Style>, Style> {
 
     for (let i = 0; i < shapes.length; i += 1) {
       const item = shapes[i];
+
+      if (item instanceof ShapeText) {
+        continue;
+      }
 
       if (item.isUnderCursor(mouseCoord)) {
         return item.id;

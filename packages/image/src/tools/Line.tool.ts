@@ -138,6 +138,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       new AnnotationLine({
         id: data.id,
         data,
+        label: this.getLabelText(data.label),
         style: { ...style, stroke: this.getLabelColor(data.label) },
         hoveredStyle,
         onSelect: this.onSelect,

@@ -8,6 +8,7 @@ import { axis, eventEmitter, monitor } from '../singletons';
 export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   id: string;
   data: Data;
+  label: string;
   style: Style;
   hoveredStyle?: Style | ((style: Style) => Style);
 
@@ -29,6 +30,8 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
   public group: Group<IShape, Style>;
 
+  public label: string;
+
   public hoveredStyle?: Style | ((style: Style) => Style);
 
   public eventHandlers: {
@@ -48,6 +51,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   constructor({
     id,
     data,
+    label,
     style,
     hoveredStyle,
     onBBoxOver,
@@ -62,6 +66,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     this.data = data;
     this.style = style;
     this.hoveredStyle = hoveredStyle;
+    this.label = label || '无标签';
 
     this.eventHandlers = {
       onBBoxOver,

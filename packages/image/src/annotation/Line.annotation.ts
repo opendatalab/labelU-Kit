@@ -1,10 +1,13 @@
+import { v4 as uuid } from 'uuid';
+
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import type { AxisPoint } from '../shapes/Point.shape';
-import { BezierCurve } from '../shapes';
+import type { TextStyle } from '../shapes';
+import { BezierCurve, ShapeText } from '../shapes';
 
 export interface PointItem extends AxisPoint {
   id: string;
@@ -20,7 +23,7 @@ export interface LineData extends BasicImageAnnotation {
   controlPoints?: AxisPoint[];
 }
 
-export class AnnotationLine extends Annotation<LineData, Line, LineStyle> {
+export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineStyle | TextStyle> {
   constructor(params: AnnotationParams<LineData, LineStyle>) {
     super(params);
 
@@ -96,5 +99,18 @@ export class AnnotationLine extends Annotation<LineData, Line, LineStyle> {
     } else {
       throw new Error('Invalid line type!');
     }
+
+    group.add(
+      new ShapeText({
+        id: uuid(),
+        coordinate: data.pointList[0],
+        text: this.label,
+        style: {
+          // TODO: 注意undefined的情况
+          fill: style.stroke!,
+          strokeWidth: 0,
+        },
+      }),
+    );
   }
 }

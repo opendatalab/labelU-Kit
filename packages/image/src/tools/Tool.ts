@@ -74,7 +74,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   public name: ToolName;
   public defaultColor = '#000';
 
-  public labelMapping = new Map();
+  public labelMapping: Map<string, ILabel> = new Map();
 
   public style = {} as Required<Style>;
 
@@ -164,19 +164,26 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   public getLabelByValue(value: string | undefined) {
     if (typeof value !== 'string') {
-      console.warn('value is not a string', value);
-      return undefined;
+      throw Error('value is not a string', value);
     }
 
     return this.labelMapping.get(value);
   }
 
-  public getLabelColor(label: string | undefined) {
-    if (!label) {
+  public getLabelText(value: string | undefined) {
+    if (typeof value !== 'string') {
+      throw Error('value is not a string', value);
+    }
+
+    return this.getLabelByValue(value)?.key ?? '无标签';
+  }
+
+  public getLabelColor(value: string | undefined) {
+    if (!value) {
       return this.defaultColor;
     }
 
-    return this.getLabelByValue(label)?.color ?? this.defaultColor;
+    return this.getLabelByValue(value)?.color ?? this.defaultColor;
   }
 
   public removeFromDrawing(id: string) {

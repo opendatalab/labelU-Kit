@@ -62,7 +62,7 @@ export default function App() {
         {
           id: '1',
           value: 'noneAttribute',
-          key: '无标签',
+          key: '撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本',
           color: '#ff0000',
         },
         {
@@ -143,7 +143,7 @@ export default function App() {
         {
           id: '1',
           value: 'noneAttribute',
-          key: '无标签',
+          key: '撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本',
           color: '#ff00d4',
         },
         {

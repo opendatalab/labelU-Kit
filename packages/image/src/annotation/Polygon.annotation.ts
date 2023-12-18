@@ -1,11 +1,12 @@
 import cloneDeep from 'lodash.clonedeep';
+import { v4 as uuid } from 'uuid';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import { Polygon, type PolygonStyle } from '../shapes/Polygon.shape';
 import { AnnotationLine, type PointItem } from './Line.annotation';
-import { PolygonCurve, type AxisPoint } from '../shapes';
+import { PolygonCurve, type AxisPoint, ShapeText } from '../shapes';
 
 export interface PolygonData extends BasicImageAnnotation {
   pointList: PointItem[];
@@ -59,5 +60,18 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
     } else {
       throw Error('Invalid type, only "line" and "curve" are supported');
     }
+
+    group.add(
+      new ShapeText({
+        id: uuid(),
+        coordinate: data.pointList[0],
+        text: this.label,
+        style: {
+          // TODO: 注意undefined的情况
+          fill: style.stroke!,
+          strokeWidth: 0,
+        },
+      }),
+    );
   }
 }

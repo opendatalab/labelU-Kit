@@ -5,5 +5,6 @@ export * from './Point.shape';
 export * from './Cursor.shape';
 export * from './BezierCurve.shape';
 export * from './PolygonCurve.shape';
+export * from './Text.shape';
 export * from './Group';
 export * from './Shape';
