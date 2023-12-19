@@ -110,17 +110,17 @@ export function DraftObserverMixin<
      * @description 对于一些特殊的图形，比如圆，创建选框时在组内需要忽略半径
      */
     public getBBoxWithoutControllerPoint() {
-      const finalShapes = this.group.shapes.filter((shape) => {
-        return !(shape instanceof Point);
-      });
-
       let minX = Infinity;
       let minY = Infinity;
       let maxX = -Infinity;
       let maxY = -Infinity;
 
-      for (let i = 0; i < finalShapes.length; i += 1) {
-        const shape = finalShapes[i];
+      for (let i = 0; i < this.group.shapes.length; i += 1) {
+        const shape = this.group.shapes[i];
+
+        if (shape instanceof Point) {
+          continue;
+        }
 
         minX = Math.min(minX, shape.bbox.minX);
         minY = Math.min(minY, shape.bbox.minY);

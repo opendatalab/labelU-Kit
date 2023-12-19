@@ -53,9 +53,13 @@ export class Rect extends Shape<RectStyle> {
 
   public style: Required<RectStyle> = Rect.DEFAULT_STYLE;
 
-  public _width: number = 0;
+  private _width: number = 0;
 
-  public _height: number = 0;
+  private _height: number = 0;
+
+  private _scaledWidth: number = 0;
+
+  private _scaledHeight: number = 0;
 
   constructor({ id, coordinate, width, height, style }: RectParams) {
     super(id, coordinate);
@@ -71,11 +75,17 @@ export class Rect extends Shape<RectStyle> {
       const { _width: settledWidth, _height: settledHeight, dynamicCoordinate } = this;
       const [{ x, y }] = dynamicCoordinate;
 
+      const maxX = x + settledWidth * axis!.scale;
+      const maxY = y + settledHeight * axis!.scale;
+
+      this._scaledWidth = settledWidth * axis!.scale;
+      this._scaledHeight = settledHeight * axis!.scale;
+
       this.bbox = {
         minX: x,
         minY: y,
-        maxX: x + settledWidth * axis!.scale,
-        maxY: y + settledHeight * axis!.scale,
+        maxX,
+        maxY,
       };
     });
   }
@@ -86,7 +96,7 @@ export class Rect extends Shape<RectStyle> {
   }
 
   public get width() {
-    return this._width;
+    return this._scaledWidth;
   }
 
   public set height(height: number) {
@@ -95,7 +105,7 @@ export class Rect extends Shape<RectStyle> {
   }
 
   public get height() {
-    return this._height;
+    return this._scaledHeight;
   }
 
   /**

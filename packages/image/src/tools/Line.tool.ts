@@ -131,7 +131,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   }
 
   private _addAnnotation(data: LineData) {
-    const { style, hoveredStyle, drawing } = this;
+    const { drawing } = this;
 
     drawing!.set(
       data.id,
@@ -139,11 +139,35 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         id: data.id,
         data,
         label: this.getLabelText(data.label),
-        style: { ...style, stroke: this.getLabelColor(data.label) },
-        hoveredStyle,
+        style: this._makeStaticStyle(data.label),
+        hoveredStyle: this._makeHoveredStyle(data.label),
         onSelect: this.onSelect,
       }),
     );
+  }
+
+  private _makeStaticStyle(label?: string) {
+    const { style } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    return { ...style, stroke: this.getLabelColor(label) };
+  }
+
+  private _makeHoveredStyle(label?: string) {
+    const { style, hoveredStyle } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    if (hoveredStyle && Object.keys(hoveredStyle).length > 0) {
+      return hoveredStyle;
+    }
+
+    return { ...style, stroke: this.getLabelColor(label), strokeWidth: style.strokeWidth! + 2 };
   }
 
   protected handlePointStyle = () => {
@@ -173,12 +197,14 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
             style: { ...style, stroke: this.getLabelColor(data.label) },
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,
+            label: '',
             onBBoxOut: this.handlePointStyle,
             onBBoxOver: this.handlePointStyle,
           })
         : new DraftLineCurve(this.config, {
             id: data.id,
             data,
+            label: '',
             style: { ...style, stroke: this.getLabelColor(data.label) },
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,

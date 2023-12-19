@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+import Color from 'color';
 
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
@@ -111,18 +112,70 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   }
 
   private _addAnnotation(data: RectData) {
-    const { style, hoveredStyle, drawing } = this;
+    const { drawing } = this;
 
     drawing!.set(
       data.id,
       new AnnotationRect({
         id: data.id,
         data,
-        style: { ...style, stroke: this.getLabelColor(data.label) },
-        hoveredStyle,
+        label: this.getLabelText(data.label),
+        style: this._makeStaticStyle(data.label),
+        hoveredStyle: this._makeHoveredStyle(data.label),
         onSelect: this.onSelect,
       }),
     );
+  }
+
+  private _makeStaticStyle(label?: string) {
+    const { style } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    return { ...style, stroke: this.getLabelColor(label) };
+  }
+
+  private _makeHoveredStyle(label?: string) {
+    const { style, hoveredStyle } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    if (hoveredStyle && Object.keys(hoveredStyle).length > 0) {
+      return hoveredStyle;
+    }
+
+    const labelColor = this.getLabelColor(label);
+
+    return {
+      ...style,
+      stroke: labelColor,
+      strokeWidth: style.strokeWidth! + 2,
+      fill: Color(labelColor).alpha(0.5).toString(),
+    };
+  }
+
+  private _makeSelectedStyle(label?: string) {
+    const { style, selectedStyle } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    if (selectedStyle && Object.keys(selectedStyle).length > 0) {
+      return selectedStyle;
+    }
+
+    const labelColor = this.getLabelColor(label);
+
+    return {
+      ...style,
+      stroke: labelColor,
+      fill: Color(labelColor).alpha(0.4).toString(),
+    };
   }
 
   protected handlePointStyle = () => {
@@ -142,12 +195,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   };
 
   private _createDraft(data: RectData) {
-    const { style } = this;
-
     this.draft = new DraftRect(this.config, {
       id: data.id,
       data,
-      style: { ...style, stroke: this.getLabelColor(data.label) },
+      label: '',
+      style: this._makeSelectedStyle(data.label),
       // 在草稿上添加取消选中的事件监听
       onUnSelect: this.onUnSelect,
       onBBoxOut: this.handlePointStyle,

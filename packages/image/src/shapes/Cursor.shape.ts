@@ -19,10 +19,12 @@ export interface CursorParams {
   style?: CursorStyle;
 }
 
+const dpr = window.devicePixelRatio || 1;
+
 export class Cursor {
   public style: Required<CursorStyle> = {
     stroke: '#000',
-    strokeWidth: 2,
+    strokeWidth: dpr,
     fill: '#fff',
   };
 
@@ -71,22 +73,22 @@ export class Cursor {
     ctx.lineWidth = strokeWidth;
     // 根据给定的坐标在canvas上画十字线
     ctx.beginPath();
-    ctx.globalAlpha = 0.7;
-    ctx.moveTo(finalX - 0.5, 0);
-    ctx.lineTo(finalX - 0.5, canvas.height);
-    ctx.moveTo(0, finalY - 0.5);
-    ctx.lineTo(canvas.width, finalY - 0.5);
+    ctx.globalAlpha = 0.8;
+    ctx.moveTo(finalX, 0);
+    ctx.lineTo(finalX, canvas.height);
+    ctx.moveTo(0, finalY);
+    ctx.lineTo(canvas.width, finalY);
     ctx.stroke();
-    ctx.translate(finalX - 0.5, finalY - 0.5);
+    ctx.translate(finalX, finalY);
     // 中心点白色
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.8;
     ctx.fillStyle = fill;
     ctx.strokeStyle = 'transparent';
     ctx.lineWidth = 0;
-    ctx.arc(0, 0, 1, 0, 2 * Math.PI, false);
+    ctx.arc(0, 0, dpr, 0, 2 * Math.PI, false);
     ctx.fill();
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.restore();
   }
 }

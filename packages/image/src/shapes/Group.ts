@@ -156,6 +156,7 @@ export class Group<T extends Shape<Style>, Style> {
 
   public remove(...shapes: T[]) {
     shapes.forEach((shape) => {
+      shape.destroy();
       this._shapeMapping.delete(shape.id);
     });
 

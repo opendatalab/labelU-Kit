@@ -82,6 +82,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this.draft = new AnnotationPoint({
       id: data.id || uuid(),
       data,
+      label: '',
       style: { ...style, ...selectedStyle },
       onUnSelect: this.onUnSelect,
     });
@@ -96,6 +97,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       new AnnotationPoint({
         id: data.id,
         data,
+        label: this.getLabelText(data.label),
         style: { ...style, fill: this.getLabelColor(data.label) },
         hoveredStyle,
         onSelect: this.onSelect,

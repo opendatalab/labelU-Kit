@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@labelu/interface": "workspace:1.2.1",
+    "color": "^4.2.3",
     "eventemitter3": "^5.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.debounce": "^4.0.8",
@@ -52,6 +53,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/color": "^3.0.6",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/rbush": "^3.0.3",
     "@types/uuid": "^9.0.0",

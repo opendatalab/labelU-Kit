@@ -141,6 +141,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       new AnnotationPolygon({
         id: data.id,
         data,
+        label: this.getLabelText(data.label),
         style: { ...style, stroke: this.getLabelColor(data.label) },
         hoveredStyle,
         onSelect: this.onSelect,
@@ -172,6 +173,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         ? new DraftPolygon(this.config, {
             id: data.id,
             data,
+            label: '',
             style: { ...style, stroke: this.getLabelColor(data.label) },
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,
@@ -181,6 +183,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         : new DraftPolygonCurve(this.config, {
             id: data.id,
             data,
+            label: '',
             style: { ...style, stroke: this.getLabelColor(data.label) },
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,

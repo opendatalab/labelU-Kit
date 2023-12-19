@@ -44,19 +44,11 @@ export default function App() {
     height: 600,
     cursor: {
       style: {
-        strokeWidth: 1,
         stroke: '#91ff00',
       },
     },
     line: {
       lineType: 'curve',
-      style: {
-        strokeWidth: 5,
-      },
-      hoveredStyle: {
-        stroke: '#f60',
-        strokeWidth: 10,
-      },
       outOfCanvas: false,
       labels: [
         {
@@ -103,15 +95,10 @@ export default function App() {
       ],
     },
     rect: {
-      style: {
-        strokeWidth: 3,
-      },
+      // style: {
+      //   strokeWidth: 3,
+      // },
       outOfCanvas: false,
-      hoveredStyle: {
-        fill: '#007bff37',
-        stroke: '#fff',
-        strokeWidth: 5,
-      },
       labels: [
         {
           id: '1',
