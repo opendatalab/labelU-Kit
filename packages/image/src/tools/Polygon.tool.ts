@@ -600,6 +600,12 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     return cloneDeep(draft.group.shapes[0].dynamicCoordinate);
   }
 
+  public deactivate(): void {
+    super.deactivate();
+    this._archiveDraft();
+    axis!.rerender();
+  }
+
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 

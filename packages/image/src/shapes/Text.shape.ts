@@ -45,7 +45,7 @@ export interface TextParams {
 }
 
 const MARGIN = 5;
-const MAX_WIDTH = 100;
+const MAX_WIDTH = 300;
 const LINE_HEIGHT = 20;
 
 export class ShapeText extends Shape<TextStyle> {

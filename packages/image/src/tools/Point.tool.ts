@@ -206,6 +206,12 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this._pickedCoordinate = null;
   };
 
+  public deactivate(): void {
+    super.deactivate();
+    this._archive();
+    axis!.rerender();
+  }
+
   public destroy(): void {
     super.destroy();
 

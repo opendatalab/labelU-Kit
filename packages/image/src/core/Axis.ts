@@ -1,8 +1,8 @@
 import type { BBox } from 'rbush';
 
 import type { AxisPoint } from '../shapes/Point.shape';
-import type { CursorParams } from '../shapes/Cursor.shape';
 import { Cursor } from '../shapes/Cursor.shape';
+import type { CursorParams } from '../shapes/Cursor.shape';
 import { Ticker } from './Ticker';
 import { EInternalEvent } from '../enums';
 import * as eventEmitter from '../singletons/eventEmitter';
@@ -467,6 +467,10 @@ export class Axis {
 
   public get isMoved() {
     return this._distanceX !== 0 || this._distanceY !== 0;
+  }
+
+  public get cursor() {
+    return this._cursor;
   }
 
   /**

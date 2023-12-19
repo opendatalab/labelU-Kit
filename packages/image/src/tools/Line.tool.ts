@@ -496,6 +496,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     monitor!.setSelectedAnnotationId(data.id);
   }
 
+  public deactivate(): void {
+    super.deactivate();
+    this._archiveDraft();
+    axis!.rerender();
+  }
+
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 

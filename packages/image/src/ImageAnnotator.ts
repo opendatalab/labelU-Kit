@@ -189,6 +189,7 @@ export class Annotator {
     }
 
     this.activeToolName = toolName;
+    this._axis!.cursor!.style.stroke = tool.getLabelColor(label);
     tool.activate(label);
   }
 

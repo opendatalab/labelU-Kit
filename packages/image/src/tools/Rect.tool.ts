@@ -236,6 +236,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   };
 
+  public deactivate(): void {
+    super.deactivate();
+    this._archiveDraft();
+    axis!.rerender();
+  }
+
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 
