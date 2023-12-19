@@ -282,6 +282,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       }
 
       _creatingShape.width = Math.abs(x - _startPoint.x);
+      console.log(_creatingShape.width);
       _creatingShape.height = Math.abs(y - _startPoint.y);
 
       _creatingShape.update();

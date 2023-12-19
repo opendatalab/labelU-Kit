@@ -96,7 +96,7 @@ export class Rect extends Shape<RectStyle> {
   }
 
   public get width() {
-    return this._scaledWidth;
+    return this._width;
   }
 
   public set height(height: number) {
@@ -105,7 +105,7 @@ export class Rect extends Shape<RectStyle> {
   }
 
   public get height() {
-    return this._scaledHeight;
+    return this._height;
   }
 
   /**
