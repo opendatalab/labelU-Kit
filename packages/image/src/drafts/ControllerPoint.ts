@@ -6,19 +6,17 @@ import type { AxisPoint, PointParams } from '../shapes';
 import { Point } from '../shapes';
 
 const DEFAULT_STYLE = {
-  ...Point.DEFAULT_STYLE,
   stroke: 'transparent',
   strokeWidth: 0,
-  fill: 'blue',
-  radius: 8,
+  fill: '#e6e6e6',
+  radius: 4,
 };
 
 const HOVERED_STYLE = {
-  ...Point.DEFAULT_STYLE,
   stroke: '#fff',
   strokeWidth: 4,
-  fill: 'blue',
-  radius: 8,
+  fill: '#e6e6e6',
+  radius: 4,
 };
 
 // TODO: 增加控制点的样式配置

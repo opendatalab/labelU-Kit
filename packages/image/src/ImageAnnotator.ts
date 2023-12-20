@@ -14,6 +14,12 @@ import { createAxis } from './singletons/axis';
 import { createMonitor, eventEmitter } from './singletons';
 import type { PolygonToolOptions } from './tools/Polygon.tool';
 import { PolygonTool } from './tools/Polygon.tool';
+import type { LineStyle, PointStyle } from './shapes';
+
+export interface ControllerStyle {
+  edge?: LineStyle;
+  point?: PointStyle;
+}
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;

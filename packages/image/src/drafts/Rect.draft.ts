@@ -282,9 +282,9 @@ export class DraftRect extends DraftObserverMixin(
    * @description 控制点移动时，更新线段的端点
    */
   private _onControllerPointMove = (controllerPoint: ControllerPoint) => {
-    const { _controllerPositionMapping, _edgePositionMapping, _preBBox, _unscaledPreBBox, group } = this;
+    const { _controllerPositionMapping, _edgePositionMapping, _unscaledPreBBox, group } = this;
 
-    if (!_preBBox || !_unscaledPreBBox) {
+    if (!_unscaledPreBBox) {
       return;
     }
 
@@ -310,7 +310,7 @@ export class DraftRect extends DraftObserverMixin(
       // 更新Top线段坐标
       topEdge.coordinate[0].x = x;
       topEdge.coordinate[0].y = y;
-      topEdge.coordinate[1].x = _preBBox.maxX;
+      topEdge.coordinate[1].x = _unscaledPreBBox.maxX;
       topEdge.coordinate[1].y = y;
       // 更新Left线段坐标
       leftEdge.coordinate[1].x = x;
