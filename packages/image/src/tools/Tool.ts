@@ -88,7 +88,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   public hoveredStyle = {} as Style;
 
   public selectedStyle = {} as Style;
-  public data: Data[];
   public config;
 
   public activeLabel: string | undefined = undefined;
@@ -103,6 +102,8 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   public draft: IAnnotation<Data, Style> | null = null;
 
   public showOrder: boolean;
+
+  protected _data: Data[];
 
   constructor({
     name,
@@ -134,7 +135,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
       this.selectedStyle = selectedStyle;
     }
     this.config = config as ConfigOmit<Config>;
-    this.data = data || [];
+    this._data = data || [];
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -204,16 +205,30 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     return this.getLabelByValue(value)?.color ?? this.defaultColor;
   }
 
-  public removeFromDrawing(id: string) {
+  protected removeFromDrawing(id: string) {
     this.drawing?.get(id)?.destroy();
     this.drawing?.delete(id);
   }
 
-  public clearDrawing() {
+  protected clearDrawing() {
     this.drawing?.forEach((annotation) => {
       annotation.destroy();
     });
     this.drawing?.clear();
+  }
+
+  public get data() {
+    const { drawing, draft } = this;
+
+    if (!drawing) {
+      return [];
+    }
+
+    if (draft) {
+      return [...Array.from(drawing.values()).map((annotation) => annotation.data), draft.data];
+    }
+
+    return Array.from(drawing.values()).map((annotation) => annotation.data);
   }
 
   public destroy(): void;
@@ -225,6 +240,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.draft?.destroy();
     this.draft = null;
 
-    this.data = [];
+    this._data = [];
   }
 }

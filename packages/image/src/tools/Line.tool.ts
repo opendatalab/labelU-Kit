@@ -124,9 +124,9 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   private _setupShapes() {
-    const { data = [] } = this;
+    const { _data = [] } = this;
 
-    for (const annotation of data) {
+    for (const annotation of _data) {
       this._addAnnotation(annotation);
     }
   }
@@ -191,30 +191,33 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _createDraft(data: LineData) {
     const { style } = this;
 
-    this.draft =
-      data.type === 'line'
-        ? new DraftLine(this.config, {
-            id: data.id,
-            data,
-            style: { ...style, stroke: this.getLabelColor(data.label) },
-            // 在草稿上添加取消选中的事件监听
-            onUnSelect: this.onUnSelect,
-            label: '',
-            showOrder: this.showOrder,
-            onBBoxOut: this.handlePointStyle,
-            onBBoxOver: this.handlePointStyle,
-          })
-        : new DraftLineCurve(this.config, {
-            id: data.id,
-            data,
-            label: '',
-            showOrder: this.showOrder,
-            style: { ...style, stroke: this.getLabelColor(data.label) },
-            // 在草稿上添加取消选中的事件监听
-            onUnSelect: this.onUnSelect,
-            onBBoxOut: this.handlePointStyle,
-            onBBoxOver: this.handlePointStyle,
-          });
+    if (data.type === 'line') {
+      this.draft = new DraftLine(this.config, {
+        id: data.id,
+        data,
+        style: { ...style, stroke: this.getLabelColor(data.label) },
+        // 在草稿上添加取消选中的事件监听
+        onUnSelect: this.onUnSelect,
+        label: '',
+        showOrder: this.showOrder,
+        onBBoxOut: this.handlePointStyle,
+        onBBoxOver: this.handlePointStyle,
+      });
+    } else if (data.type === 'curve') {
+      this.draft = new DraftLineCurve(this.config, {
+        id: data.id,
+        data,
+        label: '',
+        showOrder: this.showOrder,
+        style: { ...style, stroke: this.getLabelColor(data.label) },
+        // 在草稿上添加取消选中的事件监听
+        onUnSelect: this.onUnSelect,
+        onBBoxOut: this.handlePointStyle,
+        onBBoxOver: this.handlePointStyle,
+      });
+    } else {
+      throw new Error('Invalid line type!');
+    }
   }
 
   private _archiveDraft() {
@@ -225,6 +228,18 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       draft.destroy();
       this.draft = null;
     }
+  }
+
+  private _rebuildDraft(data?: LineData) {
+    if (!this.draft) {
+      return;
+    }
+
+    const dataClone = cloneDeep(data ?? this.draft.data);
+
+    this.draft.destroy();
+    this.draft = null;
+    this._createDraft(dataClone);
   }
 
   private _handleLeftMouseDown = (e: MouseEvent) => {
@@ -546,15 +561,14 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
+    this.activate(value);
+
     const data = cloneDeep(draft.data);
 
-    this.activate(value);
-    this._archiveDraft();
-    this._createDraft({
+    this._rebuildDraft({
       ...data,
       label: value,
     });
-    this.removeFromDrawing(data.id);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

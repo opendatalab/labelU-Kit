@@ -70,7 +70,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
   }
 
-  private _setupShapes(data: PointData[] = this.data) {
+  private _setupShapes(data: PointData[] = this._data) {
     for (const item of data) {
       this._addAnnotation(item);
     }
@@ -256,6 +256,18 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this._pickedCoordinate = null;
   };
 
+  private _rebuildDraft(data?: PointData) {
+    if (!this.draft) {
+      return;
+    }
+
+    const dataClone = cloneDeep(data ?? this.draft.data);
+
+    this.draft.destroy();
+    this.draft = null;
+    this._createDraft(dataClone);
+  }
+
   public deactivate(): void {
     super.deactivate();
     this._archive();
@@ -269,15 +281,14 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       return;
     }
 
+    this.activate(value);
+
     const data = cloneDeep(draft.data);
 
-    this.activate(value);
-    this._archive();
-    this._createDraft({
+    this._rebuildDraft({
       ...data,
       label: value,
     });
-    this.removeFromDrawing(data.id);
   }
 
   public toggleOrderVisible(visible: boolean): void {
@@ -285,6 +296,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     this.clearDrawing();
     this._setupShapes();
+    this._rebuildDraft();
   }
 
   public destroy(): void {

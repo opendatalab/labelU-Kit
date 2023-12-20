@@ -145,7 +145,13 @@ export class Annotator {
   public rotate(angle: number) {
     const { backgroundRenderer } = this;
 
-    // TODO：有标注数据时不可旋转
+    const data = this.flatData;
+
+    if (data.length > 0) {
+      this.emit('error', '有标注数据时不可旋转');
+
+      return;
+    }
 
     if (!backgroundRenderer) {
       throw new Error('backgroundRenderer is not initialized');
@@ -233,6 +239,26 @@ export class Annotator {
     }
 
     this._axis?.rerender();
+  }
+
+  public get flatData() {
+    const result: any = [];
+
+    Array.from(this._tools.values()).forEach((tool) => {
+      result.push(...tool.data);
+    });
+
+    return result;
+  }
+
+  public get dataByTool() {
+    const result: Record<string, any> = {};
+
+    Array.from(this._tools.values()).forEach((tool) => {
+      result[tool.name] = tool.data;
+    });
+
+    return result;
   }
 
   public get showOrder() {

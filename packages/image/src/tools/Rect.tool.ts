@@ -104,9 +104,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   };
 
   private _setupShapes() {
-    const { data = [] } = this;
+    const { _data = [] } = this;
 
-    for (const annotation of data) {
+    for (const annotation of _data) {
       this._addAnnotation(annotation);
     }
   }
@@ -219,6 +219,18 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
+  private _rebuildDraft(data?: RectData) {
+    if (!this.draft) {
+      return;
+    }
+
+    const dataClone = cloneDeep(data ?? this.draft.data);
+
+    this.draft.destroy();
+    this.draft = null;
+    this._createDraft(dataClone);
+  }
+
   private _handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
     const { activeLabel, style, draft, config, _creatingShape } = this;
@@ -310,15 +322,14 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       return;
     }
 
+    this.activate(value);
+
     const data = cloneDeep(draft.data);
 
-    this.activate(value);
-    this._archiveDraft();
-    this._createDraft({
+    this._rebuildDraft({
       ...data,
       label: value,
     });
-    this.removeFromDrawing(data.id);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

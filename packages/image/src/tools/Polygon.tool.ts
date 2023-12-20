@@ -127,9 +127,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   };
 
   private _setupShapes() {
-    const { data = [] } = this;
+    const { _data = [] } = this;
 
-    for (const annotation of data) {
+    for (const annotation of _data) {
       this._addAnnotation(annotation);
     }
   }
@@ -255,6 +255,18 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       draft.destroy();
       this.draft = null;
     }
+  }
+
+  private _rebuildDraft(data?: PolygonData) {
+    if (!this.draft) {
+      return;
+    }
+
+    const dataClone = cloneDeep(data ?? this.draft.data);
+
+    this.draft.destroy();
+    this.draft = null;
+    this._createDraft(dataClone);
   }
 
   private _handleLeftMouseDown = (e: MouseEvent) => {
@@ -678,15 +690,14 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
+    this.activate(value);
+
     const data = cloneDeep(draft.data);
 
-    this.activate(value);
-    this._archiveDraft();
-    this._createDraft({
+    this._rebuildDraft({
       ...data,
       label: value,
     });
-    this.removeFromDrawing(data.id);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

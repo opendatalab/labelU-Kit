@@ -12,6 +12,7 @@ export type EventName =
   | 'toolChange'
   | 'click'
   | 'dblclick'
+  | 'error'
   | 'contextmenu';
 
 const eventEmitter = new EventEmitter();
