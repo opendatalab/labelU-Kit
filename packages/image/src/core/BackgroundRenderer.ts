@@ -228,6 +228,10 @@ export class BackgroundRenderer extends Renderer {
     return this._image;
   }
 
+  public get rotateDegree() {
+    return this._rotate;
+  }
+
   render() {
     const { ctx, _initialCoordinate, _renderWidth, _renderHeight } = this;
 

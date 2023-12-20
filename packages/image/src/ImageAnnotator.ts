@@ -145,7 +145,7 @@ export class Annotator {
   public rotate(angle: number) {
     const { backgroundRenderer } = this;
 
-    const data = this.flatData;
+    const data = this.getFlatData();
 
     if (data.length > 0) {
       this.emit('error', '有标注数据时不可旋转');
@@ -241,7 +241,7 @@ export class Annotator {
     this._axis?.rerender();
   }
 
-  public get flatData() {
+  public getFlatData() {
     const result: any = [];
 
     Array.from(this._tools.values()).forEach((tool) => {
@@ -251,7 +251,7 @@ export class Annotator {
     return result;
   }
 
-  public get dataByTool() {
+  public getDataByTool() {
     const result: Record<string, any> = {};
 
     Array.from(this._tools.values()).forEach((tool) => {
@@ -259,6 +259,25 @@ export class Annotator {
     });
 
     return result;
+  }
+
+  public export() {
+    const { backgroundRenderer } = this;
+
+    if (!backgroundRenderer) {
+      throw new Error('backgroundRenderer is not initialized');
+    }
+
+    if (!backgroundRenderer.image) {
+      throw new Error('backgroundRenderer.image is not initialized');
+    }
+
+    return {
+      width: backgroundRenderer.image.width,
+      height: backgroundRenderer.image.height,
+      rotate: backgroundRenderer.rotateDegree,
+      data: this.getDataByTool(),
+    };
   }
 
   public get showOrder() {
