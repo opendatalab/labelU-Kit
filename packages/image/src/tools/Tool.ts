@@ -217,6 +217,14 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.drawing?.clear();
   }
 
+  static error(message: { type: string; message: string }) {
+    eventEmitter.emit('error', message);
+  }
+
+  static drawEnd<T>(e: MouseEvent, data: T) {
+    eventEmitter.emit('drawEnd', e, data);
+  }
+
   public get data() {
     const { drawing, draft } = this;
 

@@ -111,6 +111,33 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
+  private _validate(data: RectData) {
+    const { config } = this;
+
+    const realWidth = data.width / axis!.scale;
+    const realHeight = data.height / axis!.scale;
+
+    if (realWidth < config.minWidth!) {
+      Tool.error({
+        type: 'minWidth',
+        message: `The width of the rectangle is too small! Minimum width is ${config.minWidth!}!`,
+      });
+
+      return false;
+    }
+
+    if (realHeight < config.minHeight!) {
+      Tool.error({
+        type: 'minHeight',
+        message: `The height of the rectangle is too small! Minimum height is ${config.minHeight!}!`,
+      });
+
+      return false;
+    }
+
+    return true;
+  }
+
   private _addAnnotation(data: RectData) {
     const { drawing } = this;
 
@@ -245,7 +272,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this._archiveDraft();
 
     if (_creatingShape) {
-      this._createDraft({
+      const data = {
         id: _creatingShape.id,
         x: _creatingShape.coordinate[0].x,
         y: _creatingShape.coordinate[0].y,
@@ -253,7 +280,13 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
         width: _creatingShape.width,
         height: _creatingShape.height,
         order: monitor!.getNextOrder(),
-      });
+      };
+
+      if (!this._validate(data)) {
+        return;
+      }
+
+      this._createDraft(data);
       _creatingShape.destroy();
       this._creatingShape = null;
       monitor!.setSelectedAnnotationId(_creatingShape.id);

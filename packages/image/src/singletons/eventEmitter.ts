@@ -8,6 +8,7 @@ export type EventName =
   | 'move'
   | 'zoom'
   | 'select'
+  | 'drawEnd'
   | 'unselect'
   | 'toolChange'
   | 'click'

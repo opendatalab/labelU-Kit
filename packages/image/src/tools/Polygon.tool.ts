@@ -220,6 +220,21 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     });
   };
 
+  private _validate(data: PolygonData) {
+    const { config } = this;
+
+    if (data.pointList.length < config.closingPointAmount!) {
+      Tool.error({
+        type: 'closingPointAmount',
+        message: `Polygon must have at least ${config.closingPointAmount} points!`,
+      });
+
+      return false;
+    }
+
+    return true;
+  }
+
   private _createDraft(data: PolygonData) {
     this.draft =
       data.type === 'line'
@@ -617,6 +632,10 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       order: monitor!.getNextOrder(),
     };
 
+    if (!this._validate(data)) {
+      return;
+    }
+
     this._addAnnotation(data);
     _creatingCurves.destroy();
     this._creatingCurves = null;
@@ -651,6 +670,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       label: this.activeLabel,
       order: monitor!.getNextOrder(),
     };
+
+    if (!this._validate(data)) {
+      _creatingShapes.destroy();
+      this._creatingShapes = null;
+
+      return;
+    }
 
     this._addAnnotation(data);
     _creatingShapes.destroy();

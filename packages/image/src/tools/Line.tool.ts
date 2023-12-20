@@ -38,11 +38,11 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   outOfCanvas?: boolean;
 
   /**
-   * 闭合点个数
+   * 最小点数
    * @description 至少两个点
    * @default 2
    */
-  closingPointAmount?: number;
+  minPointAmount?: number;
 }
 
 // @MouseDecorator
@@ -73,7 +73,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       lineType: 'line',
       edgeAdsorptive: true,
       outOfCanvas: true,
-      closingPointAmount: 2,
+      minPointAmount: 2,
       labels: [],
       hoveredStyle: {},
       selectedStyle: {},
@@ -129,6 +129,21 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     for (const annotation of _data) {
       this._addAnnotation(annotation);
     }
+  }
+
+  private _validate(data: LineData) {
+    const { config } = this;
+
+    if (data.pointList.length < config.minPointAmount!) {
+      Tool.error({
+        type: 'minPointAmount',
+        message: `Line must have at least ${config.minPointAmount} points!`,
+      });
+
+      return false;
+    }
+
+    return true;
   }
 
   private _addAnnotation(data: LineData) {
@@ -425,7 +440,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this._holdingSlopeEdge = null;
   };
 
-  private _handleRightMouseUp = () => {
+  private _handleRightMouseUp = (e: MouseEvent) => {
     // 移动画布时的右键不归档
     if (axis?.isMoved) {
       return;
@@ -435,13 +450,13 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     // 归档创建中的图形
     if (_creatingLines) {
-      this._archiveLines();
+      this._archiveLines(e);
     } else if (_creatingCurves) {
-      this._archiveCurves();
+      this._archiveCurves(e);
     }
   };
 
-  private _archiveLines() {
+  private _archiveLines(e: MouseEvent) {
     const { _creatingLines } = this;
 
     if (!_creatingLines) {
@@ -483,6 +498,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       order: monitor!.getNextOrder(),
     };
 
+    if (!this._validate(data)) {
+      return;
+    }
+
+    Tool.drawEnd(e, data);
+
     this._addAnnotation(data);
 
     _creatingLines.destroy();
@@ -492,7 +513,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     monitor!.setSelectedAnnotationId(data.id);
   }
 
-  private _archiveCurves() {
+  private _archiveCurves(e: MouseEvent) {
     const { _creatingCurves } = this;
 
     if (!_creatingCurves) {
@@ -531,6 +552,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       label: this.activeLabel,
       order: monitor!.getNextOrder(),
     };
+
+    if (!this._validate(data)) {
+      return;
+    }
+
+    Tool.drawEnd(e, data);
 
     this._addAnnotation(data);
 

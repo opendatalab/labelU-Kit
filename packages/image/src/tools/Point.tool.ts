@@ -76,6 +76,21 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     }
   }
 
+  private _validate() {
+    const { config, data } = this;
+
+    if (data.length >= config.maxPointAmount!) {
+      Tool.error({
+        type: 'maxPointAmount',
+        message: `Maximum number of points reached!`,
+      });
+
+      return false;
+    }
+
+    return true;
+  }
+
   private _createDraft(data: PointData) {
     this.draft = new AnnotationPoint({
       id: data.id || uuid(),
@@ -197,15 +212,23 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     this._archive();
 
-    // 创建草稿
-    this._createDraft({
+    if (!this._validate()) {
+      return;
+    }
+
+    const data = {
       order: monitor!.getNextOrder(),
       id: uuid(),
       label: activeLabel,
       // 超出安全区域的点直接落在安全区域边缘
       x: axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX)),
       y: axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY)),
-    });
+    };
+
+    Tool.drawEnd(e, data);
+
+    // 创建草稿
+    this._createDraft(data);
 
     axis?.rerender();
   };

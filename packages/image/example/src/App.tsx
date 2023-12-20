@@ -85,6 +85,8 @@ export default function App() {
     },
     rect: {
       outOfCanvas: false,
+      minWidth: 100,
+      minHeight: 50,
       labels: [
         {
           id: '1',
@@ -103,6 +105,7 @@ export default function App() {
     polygon: {
       lineType: 'curve',
       outOfCanvas: false,
+      closingPointAmount: 5,
       labels: [
         {
           id: '1',
@@ -266,11 +269,15 @@ export default function App() {
       console.log('hover', data);
     });
 
+    engine.on('drawEnd', (...args) => {
+      console.info('drawEnd', ...args);
+    });
+
     engine.on('complete', () => {
       console.log("Engine's ready");
     });
-    engine.on('error', () => {
-      console.error('Error');
+    engine.on('error', (error) => {
+      console.error('Error', error);
     });
     engine.on('render', () => {
       console.log('Render');
