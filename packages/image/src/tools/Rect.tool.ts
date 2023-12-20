@@ -286,6 +286,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
         return;
       }
 
+      Tool.drawEnd(e, {
+        ...data,
+        ...this._convertAnnotationItem(data),
+      });
+
       this._createDraft(data);
       _creatingShape.destroy();
       this._creatingShape = null;
@@ -335,6 +340,14 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   };
 
+  private _convertAnnotationItem(data: RectData) {
+    return {
+      ...axis!.convertCanvasCoordinate(data),
+      width: data.width / axis!.initialBackgroundScale,
+      height: data.height / axis!.initialBackgroundScale,
+    };
+  }
+
   public deactivate(): void {
     super.deactivate();
     this._archiveDraft();
@@ -371,7 +384,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     return result.map((item) => {
       return {
         ...item,
-        ...axis!.convertCanvasCoordinate(item),
+        ...this._convertAnnotationItem(item),
       };
     });
   }

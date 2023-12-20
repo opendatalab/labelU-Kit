@@ -225,7 +225,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       y: axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY)),
     };
 
-    Tool.drawEnd(e, data);
+    Tool.drawEnd(e, { ...data, ...axis!.convertCanvasCoordinate(data) });
 
     // 创建草稿
     this._createDraft(data);
