@@ -83,6 +83,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationRect) => {
+    Tool.emitSelect(_e, this._convertAnnotationItem(annotation.data));
     this?._creatingShape?.destroy();
     this._creatingShape = null;
     this.activate(annotation.data.label);
@@ -96,6 +97,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   };
 
   protected onUnSelect = (_e: MouseEvent) => {
+    if (this.draft) {
+      Tool.emitUnSelect(_e, this._convertAnnotationItem(this.draft.data));
+    }
+
     this._archiveDraft();
     this?._creatingShape?.destroy();
     this._creatingShape = null;
@@ -342,6 +347,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   private _convertAnnotationItem(data: RectData) {
     return {
+      ...data,
       ...axis!.convertCanvasCoordinate(data),
       width: data.width / axis!.initialBackgroundScale,
       height: data.height / axis!.initialBackgroundScale,
@@ -382,10 +388,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     const result = super.data;
 
     return result.map((item) => {
-      return {
-        ...item,
-        ...this._convertAnnotationItem(item),
-      };
+      return this._convertAnnotationItem(item);
     });
   }
 

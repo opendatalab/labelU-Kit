@@ -225,6 +225,14 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     eventEmitter.emit('drawEnd', e, data);
   }
 
+  static emitSelect<T>(e: MouseEvent, data: T) {
+    eventEmitter.emit('select', e, data);
+  }
+
+  static emitUnSelect<T>(e: MouseEvent, data: T) {
+    eventEmitter.emit('unselect', e, data);
+  }
+
   public get data() {
     const { drawing, draft } = this;
 

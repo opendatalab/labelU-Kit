@@ -103,6 +103,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationPolygon) => {
+    Tool.emitSelect(_e, this._convertAnnotationItem(annotation.data));
+
     this?._creatingShapes?.destroy();
     this._creatingShapes = null;
     this.activate(annotation.data.label);
@@ -117,6 +119,10 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   };
 
   protected onUnSelect = (_e: MouseEvent) => {
+    if (this.draft) {
+      Tool.emitUnSelect(_e, this._convertAnnotationItem(this.draft.data));
+    }
+
     this._archiveDraft();
     this?._creatingShapes?.destroy();
     this._creatingShapes = null;
@@ -599,6 +605,29 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     }
   };
 
+  private _convertAnnotationItem(data: PolygonData) {
+    const _temp = {
+      ...data,
+      pointList: data.pointList.map((point) => {
+        return {
+          ...point,
+          ...axis!.convertCanvasCoordinate(point),
+        };
+      }),
+    };
+
+    if (_temp.type === 'curve') {
+      _temp.controlPoints = data.controlPoints!.map((point) => {
+        return {
+          ...point,
+          ...axis!.convertCanvasCoordinate(point),
+        };
+      });
+    }
+
+    return _temp;
+  }
+
   private _archivePolygonCurves(e: MouseEvent) {
     const { _creatingCurves } = this;
 
@@ -738,26 +767,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     const result = super.data;
 
     return result.map((item) => {
-      const _temp = {
-        ...item,
-        pointList: item.pointList.map((point) => {
-          return {
-            ...point,
-            ...axis!.convertCanvasCoordinate(point),
-          };
-        }),
-      };
-
-      if (_temp.type === 'curve') {
-        _temp.controlPoints = item.controlPoints!.map((point) => {
-          return {
-            ...point,
-            ...axis!.convertCanvasCoordinate(point),
-          };
-        });
-      }
-
-      return _temp;
+      return this._convertAnnotationItem(item);
     });
   }
 

@@ -273,6 +273,14 @@ export default function App() {
       console.info('drawEnd', ...args);
     });
 
+    engine.on('select', (...args) => {
+      console.info('select', ...args);
+    });
+
+    engine.on('unselect', (...args) => {
+      console.info('unselect', ...args);
+    });
+
     engine.on('complete', () => {
       console.log("Engine's ready");
     });

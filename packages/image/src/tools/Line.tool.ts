@@ -105,6 +105,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
+    Tool.emitSelect(_e, this._convertAnnotationItem(annotation.data));
     this?._creatingLines?.destroy();
     this._creatingLines = null;
     this.activate(annotation.data.label);
@@ -118,6 +119,10 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   protected onUnSelect = (_e: MouseEvent) => {
+    if (this.draft) {
+      Tool.emitUnSelect(_e, this._convertAnnotationItem(this.draft.data));
+    }
+
     this._archiveDraft();
     // 重新渲染
     axis!.rerender();
@@ -456,6 +461,29 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   };
 
+  private _convertAnnotationItem(data: LineData) {
+    const _temp = {
+      ...data,
+      pointList: data.pointList.map((point) => {
+        return {
+          ...point,
+          ...axis!.convertCanvasCoordinate(point),
+        };
+      }),
+    };
+
+    if (_temp.type === 'curve') {
+      _temp.controlPoints = data.controlPoints!.map((point) => {
+        return {
+          ...point,
+          ...axis!.convertCanvasCoordinate(point),
+        };
+      });
+    }
+
+    return _temp;
+  }
+
   private _archiveLines(e: MouseEvent) {
     const { _creatingLines } = this;
 
@@ -618,26 +646,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     const result = super.data;
 
     return result.map((item) => {
-      const _temp = {
-        ...item,
-        pointList: item.pointList.map((point) => {
-          return {
-            ...point,
-            ...axis!.convertCanvasCoordinate(point),
-          };
-        }),
-      };
-
-      if (_temp.type === 'curve') {
-        _temp.controlPoints = item.controlPoints!.map((point) => {
-          return {
-            ...point,
-            ...axis!.convertCanvasCoordinate(point),
-          };
-        });
-      }
-
-      return _temp;
+      return this._convertAnnotationItem(item);
     });
   }
 

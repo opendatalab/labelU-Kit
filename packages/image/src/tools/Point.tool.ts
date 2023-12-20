@@ -169,6 +169,11 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   }
 
   protected onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
+    Tool.emitSelect(_e, {
+      ...annotation.data,
+      ...axis!.convertCanvasCoordinate(annotation.data),
+    });
+
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._archive();
@@ -179,6 +184,13 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   };
 
   protected onUnSelect = (_e: MouseEvent) => {
+    if (this.draft) {
+      Tool.emitUnSelect(_e, {
+        ...this.draft.data,
+        ...axis!.convertCanvasCoordinate(this.draft.data),
+      });
+    }
+
     this._archive();
     // 重新渲染
     axis!.rerender();
