@@ -300,7 +300,7 @@ export class Axis {
 
     const { _initialBackgroundOffset, _initialBackgroundScale } = this;
 
-    return (this.getOriginalX(x) - _initialBackgroundOffset.x) / _initialBackgroundScale;
+    return (x - _initialBackgroundOffset.x) / _initialBackgroundScale;
   }
 
   public convertCanvasCoordinateY(y: number) {
@@ -310,7 +310,7 @@ export class Axis {
 
     const { _initialBackgroundOffset, _initialBackgroundScale } = this;
 
-    return (this.getOriginalY(y) - _initialBackgroundOffset.y) / _initialBackgroundScale;
+    return (y - _initialBackgroundOffset.y) / _initialBackgroundScale;
   }
 
   public rerender() {
