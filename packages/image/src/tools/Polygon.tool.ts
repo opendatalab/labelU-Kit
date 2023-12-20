@@ -700,6 +700,33 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     });
   }
 
+  public get data() {
+    const result = super.data;
+
+    return result.map((item) => {
+      const _temp = {
+        ...item,
+        pointList: item.pointList.map((point) => {
+          return {
+            ...point,
+            ...axis!.convertCanvasCoordinate(point),
+          };
+        }),
+      };
+
+      if (_temp.type === 'curve') {
+        _temp.controlPoints = item.controlPoints!.map((point) => {
+          return {
+            ...point,
+            ...axis!.convertCanvasCoordinate(point),
+          };
+        });
+      }
+
+      return _temp;
+    });
+  }
+
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 

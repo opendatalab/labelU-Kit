@@ -583,6 +583,33 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
+  public get data() {
+    const result = super.data;
+
+    return result.map((item) => {
+      const _temp = {
+        ...item,
+        pointList: item.pointList.map((point) => {
+          return {
+            ...point,
+            ...axis!.convertCanvasCoordinate(point),
+          };
+        }),
+      };
+
+      if (_temp.type === 'curve') {
+        _temp.controlPoints = item.controlPoints!.map((point) => {
+          return {
+            ...point,
+            ...axis!.convertCanvasCoordinate(point),
+          };
+        });
+      }
+
+      return _temp;
+    });
+  }
+
   public destroy(): void {
     super.destroy();
 

@@ -332,6 +332,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     });
   }
 
+  public get data() {
+    const result = super.data;
+
+    return result.map((item) => {
+      return {
+        ...item,
+        ...axis!.convertCanvasCoordinate(item),
+      };
+    });
+  }
+
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 

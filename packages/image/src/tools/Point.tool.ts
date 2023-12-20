@@ -299,6 +299,17 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this._rebuildDraft();
   }
 
+  public get data() {
+    const result = super.data;
+
+    return result.map((item) => {
+      return {
+        ...item,
+        ...axis!.convertCanvasCoordinate(item),
+      };
+    });
+  }
+
   public destroy(): void {
     super.destroy();
 
