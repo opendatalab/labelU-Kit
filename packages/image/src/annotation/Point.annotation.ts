@@ -38,7 +38,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
           x: data.x,
           y: data.y,
         },
-        text: this.label,
+        text: this.getLabelText(),
         style: {
           fill: style.fill!,
           strokeWidth: 0,

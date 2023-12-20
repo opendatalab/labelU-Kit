@@ -30,7 +30,7 @@ export class Polygon extends Shape<PolygonStyle> {
     stroke: '#000',
     strokeWidth: 2,
     opacity: 1,
-    fill: 'rgba(0, 0, 0, 0.5)',
+    fill: 'transparent',
   };
 
   public style: Required<PolygonStyle> = Polygon.DEFAULT_STYLE;

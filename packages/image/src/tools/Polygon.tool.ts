@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+import Color from 'color';
 
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
@@ -83,7 +84,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       },
     });
 
-    this._init();
+    this._setupShapes();
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleLeftMouseMove);
@@ -125,7 +126,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     axis!.rerender();
   };
 
-  private _init() {
+  private _setupShapes() {
     const { data = [] } = this;
 
     for (const annotation of data) {
@@ -134,19 +135,73 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   }
 
   private _addAnnotation(data: PolygonData) {
-    const { style, hoveredStyle, drawing } = this;
+    const { drawing } = this;
 
     drawing!.set(
       data.id,
       new AnnotationPolygon({
         id: data.id,
         data,
+        showOrder: this.showOrder,
         label: this.getLabelText(data.label),
-        style: { ...style, stroke: this.getLabelColor(data.label) },
-        hoveredStyle,
+        style: this._makeStaticStyle(data.label),
+        hoveredStyle: this._makeHoveredStyle(data.label),
         onSelect: this.onSelect,
       }),
     );
+  }
+
+  private _makeStaticStyle(label?: string) {
+    const { style } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    const labelColor = this.getLabelColor(label);
+
+    return { ...style, stroke: labelColor, fill: Color(labelColor).alpha(0.3).toString() };
+  }
+
+  private _makeHoveredStyle(label?: string) {
+    const { style, hoveredStyle } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    if (hoveredStyle && Object.keys(hoveredStyle).length > 0) {
+      return hoveredStyle;
+    }
+
+    const labelColor = this.getLabelColor(label);
+
+    return {
+      ...style,
+      stroke: labelColor,
+      strokeWidth: style.strokeWidth! + 2,
+      fill: Color(labelColor).alpha(0.6).toString(),
+    };
+  }
+
+  private _makeSelectedStyle(label?: string) {
+    const { style, selectedStyle } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    if (selectedStyle && Object.keys(selectedStyle).length > 0) {
+      return selectedStyle;
+    }
+
+    const labelColor = this.getLabelColor(label);
+
+    return {
+      ...style,
+      stroke: labelColor,
+      fill: Color(labelColor).alpha(0.6).toString(),
+    };
   }
 
   protected handlePointStyle = () => {
@@ -166,15 +221,14 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   };
 
   private _createDraft(data: PolygonData) {
-    const { style } = this;
-
     this.draft =
       data.type === 'line'
         ? new DraftPolygon(this.config, {
             id: data.id,
             data,
+            showOrder: false,
             label: '',
-            style: { ...style, stroke: this.getLabelColor(data.label) },
+            style: this._makeSelectedStyle(data.label),
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,
             onBBoxOut: this.handlePointStyle,
@@ -183,8 +237,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         : new DraftPolygonCurve(this.config, {
             id: data.id,
             data,
+            showOrder: false,
             label: '',
-            style: { ...style, stroke: this.getLabelColor(data.label) },
+            style: this._makeSelectedStyle(data.label),
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,
             onBBoxOut: this.handlePointStyle,
@@ -227,7 +282,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         this._creatingCurves.add(
           new PolygonCurve({
             id: uuid(),
-            style: { ...style, stroke: this.getLabelColor(activeLabel), strokeWidth: 8 },
+            style: this._makeStaticStyle(activeLabel),
             coordinate: [
               {
                 ...startPoint,
@@ -332,7 +387,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       this._creatingShapes?.add(
         new Polygon({
           id: uuid(),
-          style: { ...style, stroke: 'transparent', fill: '#f60', strokeWidth: 0 },
+          style: this._makeStaticStyle(activeLabel),
           coordinate: [
             {
               ...startPoint,
@@ -607,6 +662,31 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     super.deactivate();
     this._archiveDraft();
     axis!.rerender();
+  }
+
+  public toggleOrderVisible(visible: boolean): void {
+    this.showOrder = visible;
+
+    this.clearDrawing();
+    this._setupShapes();
+  }
+
+  public setLabel(value: string): void {
+    const { draft, activeLabel } = this;
+
+    if (!draft || !activeLabel || activeLabel === value) {
+      return;
+    }
+
+    const data = cloneDeep(draft.data);
+
+    this.activate(value);
+    this._archiveDraft();
+    this._createDraft({
+      ...data,
+      label: value,
+    });
+    this.removeFromDrawing(data.id);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

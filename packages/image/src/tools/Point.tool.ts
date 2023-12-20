@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+import Color from 'color';
 
 import { EInternalEvent } from '../enums';
 import type { AxisPoint, PointStyle } from '../shapes/Point.shape';
@@ -8,7 +9,6 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { PointData } from '../annotation/Point.annotation';
 import { AnnotationPoint } from '../annotation/Point.annotation';
-// import { PointPen } from '../pen';
 import { axis, eventEmitter, monitor } from '../singletons';
 
 /**
@@ -63,46 +63,94 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       },
     });
 
-    this._createDrawingFromData();
+    this._setupShapes();
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
   }
 
-  private _createDrawingFromData(data: PointData[] = this.data) {
+  private _setupShapes(data: PointData[] = this.data) {
     for (const item of data) {
       this._addAnnotation(item);
     }
   }
 
   private _createDraft(data: PointData) {
-    const { style, selectedStyle } = this;
-
     this.draft = new AnnotationPoint({
       id: data.id || uuid(),
       data,
-      label: '',
-      style: { ...style, ...selectedStyle },
+      showOrder: this.showOrder,
+      label: this.getLabelText(data.label),
+      style: this._makeSelectedStyle(data.label),
       onUnSelect: this.onUnSelect,
     });
     monitor!.setSelectedAnnotationId(this.draft.id);
   }
 
   private _addAnnotation(data: PointData) {
-    const { style, hoveredStyle } = this;
-
     this.drawing!.set(
       data.id,
       new AnnotationPoint({
         id: data.id,
         data,
+        showOrder: this.showOrder,
         label: this.getLabelText(data.label),
-        style: { ...style, fill: this.getLabelColor(data.label) },
-        hoveredStyle,
+        style: this._makeStaticStyle(data.label),
+        hoveredStyle: this._makeHoveredStyle(data.label),
         onSelect: this.onSelect,
       }),
     );
+  }
+
+  private _makeStaticStyle(label?: string) {
+    const { style } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    return { ...style, fill: this.getLabelColor(label) };
+  }
+
+  private _makeHoveredStyle(label?: string) {
+    const { style, hoveredStyle } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    if (hoveredStyle && Object.keys(hoveredStyle).length > 0) {
+      return hoveredStyle;
+    }
+
+    return {
+      ...style,
+      stroke: '#000',
+      strokeWidth: 2,
+      fill: Color('#fff').toString(),
+    };
+  }
+
+  private _makeSelectedStyle(label?: string) {
+    const { style, selectedStyle } = this;
+
+    if (typeof label !== 'string') {
+      throw new Error('Invalid label! Must be string!');
+    }
+
+    if (selectedStyle && Object.keys(selectedStyle).length > 0) {
+      return selectedStyle;
+    }
+
+    const labelColor = this.getLabelColor(label);
+
+    return {
+      ...style,
+      stroke: labelColor,
+      strokeWidth: 4,
+      fill: Color('#fff').toString(),
+    };
   }
 
   protected onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
@@ -212,6 +260,31 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     super.deactivate();
     this._archive();
     axis!.rerender();
+  }
+
+  public setLabel(value: string): void {
+    const { draft, activeLabel } = this;
+
+    if (!draft || !activeLabel || activeLabel === value) {
+      return;
+    }
+
+    const data = cloneDeep(draft.data);
+
+    this.activate(value);
+    this._archive();
+    this._createDraft({
+      ...data,
+      label: value,
+    });
+    this.removeFromDrawing(data.id);
+  }
+
+  public toggleOrderVisible(visible: boolean): void {
+    this.showOrder = visible;
+
+    this.clearDrawing();
+    this._setupShapes();
   }
 
   public destroy(): void {

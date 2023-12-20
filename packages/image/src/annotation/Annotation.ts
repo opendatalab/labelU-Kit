@@ -12,6 +12,13 @@ export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   style: Style;
   hoveredStyle?: Style | ((style: Style) => Style);
 
+  /**
+   * 是否显示标注顺序
+   *
+   * @default false
+   */
+  showOrder: boolean;
+
   onBBoxOver?: (e: MouseEvent, annotation: any) => void;
   onBBoxOut?: (e: MouseEvent, annotation: any) => void;
   onSelect?: (e: MouseEvent, annotation: any) => void;
@@ -34,6 +41,8 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
   public hoveredStyle?: Style | ((style: Style) => Style);
 
+  public showOrder: boolean = false;
+
   public eventHandlers: {
     onBBoxOver?: (e: MouseEvent, annotation: any) => void;
     onBBoxOut?: (e: MouseEvent, annotation: any) => void;
@@ -54,6 +63,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     label,
     style,
     hoveredStyle,
+    showOrder,
     onBBoxOver,
     onBBoxOut,
     onSelect,
@@ -67,6 +77,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     this.style = style;
     this.hoveredStyle = hoveredStyle;
     this.label = label || '无标签';
+    this.showOrder = showOrder;
 
     this.eventHandlers = {
       onBBoxOver,
@@ -157,6 +168,16 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
   public render(_ctx: CanvasRenderingContext2D) {
     this.group.render(_ctx);
+  }
+
+  public getLabelText() {
+    const { data, label, showOrder } = this;
+
+    if (showOrder) {
+      return `${data.order} ${label}`;
+    }
+
+    return label;
   }
 
   public destroy() {

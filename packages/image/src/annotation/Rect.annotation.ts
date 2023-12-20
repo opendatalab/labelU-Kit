@@ -44,7 +44,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
           x: data.x,
           y: data.y + data.height,
         },
-        text: this.label,
+        text: this.getLabelText(),
         style: {
           // TODO: 注意undefined的情况
           fill: style.stroke!,

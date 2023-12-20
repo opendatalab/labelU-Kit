@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import cloneDeep from 'lodash.clonedeep';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
@@ -85,7 +86,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       },
     });
 
-    this._init();
+    this._setupShapes();
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
@@ -122,7 +123,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     axis!.rerender();
   };
 
-  private _init() {
+  private _setupShapes() {
     const { data = [] } = this;
 
     for (const annotation of data) {
@@ -141,6 +142,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         label: this.getLabelText(data.label),
         style: this._makeStaticStyle(data.label),
         hoveredStyle: this._makeHoveredStyle(data.label),
+        showOrder: this.showOrder,
         onSelect: this.onSelect,
       }),
     );
@@ -198,6 +200,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,
             label: '',
+            showOrder: this.showOrder,
             onBBoxOut: this.handlePointStyle,
             onBBoxOver: this.handlePointStyle,
           })
@@ -205,6 +208,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
             id: data.id,
             data,
             label: '',
+            showOrder: this.showOrder,
             style: { ...style, stroke: this.getLabelColor(data.label) },
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,
@@ -526,6 +530,31 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     super.deactivate();
     this._archiveDraft();
     axis!.rerender();
+  }
+
+  public toggleOrderVisible(visible: boolean): void {
+    this.showOrder = visible;
+
+    this.clearDrawing();
+    this._setupShapes();
+  }
+
+  public setLabel(value: string): void {
+    const { draft, activeLabel } = this;
+
+    if (!draft || !activeLabel || activeLabel === value) {
+      return;
+    }
+
+    const data = cloneDeep(draft.data);
+
+    this.activate(value);
+    this._archiveDraft();
+    this._createDraft({
+      ...data,
+      label: value,
+    });
+    this.removeFromDrawing(data.id);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

@@ -74,10 +74,10 @@ export class Point extends Shape<PointStyle> {
   static DISTANCE_THRESHOLD = 0 as const;
 
   static DEFAULT_STYLE: Required<PointStyle> = {
-    stroke: '#000',
+    stroke: 'transparent',
     strokeWidth: 0,
     fill: '#000',
-    radius: 2,
+    radius: 3,
     opacity: 1,
     startAngle: 0,
     endAngle: Math.PI * 2,

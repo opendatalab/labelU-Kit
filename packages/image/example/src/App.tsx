@@ -42,6 +42,7 @@ export default function App() {
   const engine = useEngine(ref, {
     width: 800,
     height: 600,
+    showOrder: true,
     cursor: {
       style: {
         stroke: '#91ff00',
@@ -67,18 +68,6 @@ export default function App() {
     },
     point: {
       outOfCanvas: false,
-      style: {
-        strokeWidth: 3,
-        radius: 5,
-      },
-      hoveredStyle: {
-        fill: '#007bff',
-        stroke: '#fff',
-        strokeWidth: 10,
-      },
-      selectedStyle: {
-        fill: '#fff',
-      },
       labels: [
         {
           id: '1',
@@ -95,9 +84,6 @@ export default function App() {
       ],
     },
     rect: {
-      // style: {
-      //   strokeWidth: 3,
-      // },
       outOfCanvas: false,
       labels: [
         {
@@ -116,16 +102,7 @@ export default function App() {
     },
     polygon: {
       lineType: 'curve',
-      style: {
-        strokeWidth: 3,
-      },
       outOfCanvas: false,
-      hoveredStyle: (style: any) => {
-        return {
-          ...style,
-          fill: '#007bff27',
-        };
-      },
       labels: [
         {
           id: '1',

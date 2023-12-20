@@ -66,7 +66,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       },
     });
 
-    this._init();
+    this._setupShapes();
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
@@ -103,7 +103,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     axis!.rerender();
   };
 
-  private _init() {
+  private _setupShapes() {
     const { data = [] } = this;
 
     for (const annotation of data) {
@@ -119,6 +119,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       new AnnotationRect({
         id: data.id,
         data,
+        showOrder: this.showOrder,
         label: this.getLabelText(data.label),
         style: this._makeStaticStyle(data.label),
         hoveredStyle: this._makeHoveredStyle(data.label),
@@ -199,6 +200,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       id: data.id,
       data,
       label: '',
+      showOrder: false,
       style: this._makeSelectedStyle(data.label),
       // 在草稿上添加取消选中的事件监听
       onUnSelect: this.onUnSelect,
@@ -282,7 +284,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       }
 
       _creatingShape.width = Math.abs(x - _startPoint.x);
-      console.log(_creatingShape.width);
       _creatingShape.height = Math.abs(y - _startPoint.y);
 
       _creatingShape.update();
@@ -293,6 +294,31 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     super.deactivate();
     this._archiveDraft();
     axis!.rerender();
+  }
+
+  public toggleOrderVisible(visible: boolean): void {
+    this.showOrder = visible;
+
+    this.clearDrawing();
+    this._setupShapes();
+  }
+
+  public setLabel(value: string): void {
+    const { draft, activeLabel } = this;
+
+    if (!draft || !activeLabel || activeLabel === value) {
+      return;
+    }
+
+    const data = cloneDeep(draft.data);
+
+    this.activate(value);
+    this._archiveDraft();
+    this._createDraft({
+      ...data,
+      label: value,
+    });
+    this.removeFromDrawing(data.id);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

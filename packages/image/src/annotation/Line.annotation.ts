@@ -104,7 +104,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
       new ShapeText({
         id: uuid(),
         coordinate: data.pointList[0],
-        text: this.label,
+        text: this.getLabelText(),
         style: {
           // TODO: 注意undefined的情况
           fill: style.stroke!,

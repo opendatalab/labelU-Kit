@@ -57,6 +57,13 @@ export interface BasicToolParams<Data, Style> {
 
   /** 标注选中的样式 */
   selectedStyle?: Style;
+
+  /**
+   * 是否显示标注顺序
+   *
+   * @default false
+   */
+  showOrder: boolean;
 }
 
 type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Shape<Style>, Style>;
@@ -95,11 +102,22 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
    */
   public draft: IAnnotation<Data, Style> | null = null;
 
-  constructor({ name, data, style, hoveredStyle, selectedStyle, ...config }: Required<Config> & ExtraParams) {
+  public showOrder: boolean;
+
+  constructor({
+    name,
+    data,
+    style,
+    hoveredStyle,
+    selectedStyle,
+    showOrder,
+    ...config
+  }: Required<Config> & ExtraParams) {
     // 创建标签映射
     this._createLabelMapping(config.labels);
 
     this.name = name;
+    this.showOrder = Boolean(showOrder);
 
     if (style) {
       this.style = {
@@ -189,6 +207,13 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   public removeFromDrawing(id: string) {
     this.drawing?.get(id)?.destroy();
     this.drawing?.delete(id);
+  }
+
+  public clearDrawing() {
+    this.drawing?.forEach((annotation) => {
+      annotation.destroy();
+    });
+    this.drawing?.clear();
   }
 
   public destroy(): void;

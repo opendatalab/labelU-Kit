@@ -32,6 +32,13 @@ export interface AnnotatorOptions {
   rect?: RectToolOptions;
   polygon?: PolygonToolOptions;
   image: ImageOption;
+
+  /**
+   * 是否显示标注顺序
+   *
+   * @default false
+   */
+  showOrder?: boolean;
 }
 
 export class Annotator {
@@ -218,6 +225,37 @@ export class Annotator {
     return this.backgroundRenderer!.loadImage(url, options);
   }
 
+  public set showOrder(value: boolean) {
+    this.config.showOrder = Boolean(value);
+
+    for (const tool of this._tools.values()) {
+      tool.toggleOrderVisible(value);
+    }
+
+    this._axis?.rerender();
+  }
+
+  public get showOrder() {
+    return this.config.showOrder as boolean;
+  }
+
+  public setLabel(value: string) {
+    if (typeof value !== 'string') {
+      throw Error('value is not a string', value);
+    }
+
+    const { activeToolName, _tools } = this;
+
+    if (!activeToolName) {
+      return;
+    }
+    const currentTool = _tools.get(activeToolName);
+
+    currentTool!.setLabel(value);
+    this._axis!.cursor!.style.stroke = currentTool!.getLabelColor(value);
+    this._axis?.rerender();
+  }
+
   /**
    * 加载标注数据
    */
@@ -226,10 +264,13 @@ export class Annotator {
       return;
     }
 
+    const { config } = this;
+
     if (toolName == 'line') {
       this.use(
         new LineTool({
           ...this._config.line,
+          showOrder: config.showOrder ?? false,
           data: LineTool.convertToCanvasCoordinates(data as AnnotationToolData<'line'>),
         }),
       );
@@ -237,6 +278,7 @@ export class Annotator {
       this.use(
         new PointTool({
           ...this._config.point,
+          showOrder: config.showOrder ?? false,
           data: PointTool.convertToCanvasCoordinates(data as AnnotationToolData<'point'>),
         }),
       );
@@ -244,6 +286,7 @@ export class Annotator {
       this.use(
         new RectTool({
           ...this._config.rect,
+          showOrder: config.showOrder ?? false,
           data: RectTool.convertToCanvasCoordinates(data as AnnotationToolData<'rect'>),
         }),
       );
@@ -251,6 +294,7 @@ export class Annotator {
       this.use(
         new PolygonTool({
           ...this._config.polygon,
+          showOrder: config.showOrder ?? false,
           data: PolygonTool.convertToCanvasCoordinates(data as AnnotationToolData<'polygon'>),
         }),
       );

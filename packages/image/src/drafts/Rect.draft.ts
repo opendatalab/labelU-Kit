@@ -273,7 +273,7 @@ export class DraftRect extends DraftObserverMixin(
    */
   private _onControllerPointDown = () => {
     this._isControllerPicked = true;
-    this._updateControllerAndEdge();
+    this._updateControllerAndEdgeAndPreBBox();
   };
 
   /**
@@ -446,7 +446,7 @@ export class DraftRect extends DraftObserverMixin(
 
   private _onEdgeDown = () => {
     this._isEdgeControllerPicked = true;
-    this._updateControllerAndEdge();
+    this._updateControllerAndEdgeAndPreBBox();
   };
 
   /**
@@ -535,7 +535,7 @@ export class DraftRect extends DraftObserverMixin(
   /**
    * 更新控制点和控制边及其方位信息
    */
-  private _updateControllerAndEdge() {
+  private _updateControllerAndEdgeAndPreBBox() {
     this._preBBox = this._getBBox();
     this._unscaledPreBBox = {
       minX: axis!.getOriginalX(this._preBBox!.minX),
@@ -544,8 +544,8 @@ export class DraftRect extends DraftObserverMixin(
       maxY: axis!.getOriginalY(this._preBBox!.maxY),
     };
 
-    const { group, _preBBox, _edgePositionMapping, _controllerPositionMapping } = this;
-    const { minX, minY, maxX, maxY } = _preBBox;
+    const { group, _unscaledPreBBox, _edgePositionMapping, _controllerPositionMapping } = this;
+    const { minX, minY, maxX, maxY } = _unscaledPreBBox;
 
     group.each((shape) => {
       if (shape instanceof ControllerPoint) {
