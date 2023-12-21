@@ -30,10 +30,10 @@ export interface PolygonToolOptions extends BasicToolParams<PolygonData, Polygon
   edgeAdsorptive?: boolean;
 
   /**
-   * 画布外标注
+   * 图片外标注
    * @default true;
    */
-  outOfCanvas?: boolean;
+  outOfImage?: boolean;
 
   /**
    * 闭合点个数
@@ -70,7 +70,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       name: 'polygon',
       lineType: 'line',
       edgeAdsorptive: true,
-      outOfCanvas: true,
+      outOfImage: true,
       closingPointAmount: 2,
       labels: [],
       hoveredStyle: {},
@@ -317,8 +317,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     }
 
     const startPoint = axis!.getOriginalCoord({
-      x: config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX),
-      y: config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY),
+      x: config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX),
+      y: config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY),
     });
 
     // 先归档上一次的草稿
@@ -471,8 +471,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   private _handleLeftMouseMove = (e: MouseEvent) => {
     const { _creatingShapes, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config } = this;
 
-    const x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
-    const y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
+    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
+    const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
     if (_creatingCurves) {
       const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as BezierCurve;

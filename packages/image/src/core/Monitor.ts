@@ -4,12 +4,13 @@ import type { AxisPoint } from '../shapes';
 
 const keyEventMapping = {
   Space: EInternalEvent.Space,
-  Shift: EInternalEvent.MetaShift,
-  Alt: EInternalEvent.MetaAlt,
-  Ctrl: EInternalEvent.MetaCtrl,
+  Shift: EInternalEvent.Shift,
+  Alt: EInternalEvent.Alt,
+  Control: EInternalEvent.Control,
   Backspace: EInternalEvent.BackSpace,
   Delete: EInternalEvent.Delete,
   Escape: EInternalEvent.Escape,
+  Meta: EInternalEvent.Meta,
 };
 
 type EventKeyName = keyof typeof keyEventMapping;
@@ -36,9 +37,10 @@ export class Monitor {
     Space: false,
     Shift: false,
     Alt: false,
-    Ctrl: false,
+    Control: false,
     Backspace: false,
     Delete: false,
+    Meta: false,
     Escape: false,
   };
 
@@ -75,7 +77,6 @@ export class Monitor {
   private _handleKeyDown = (e: KeyboardEvent) => {
     if (keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
-      e.stopPropagation();
       this._setKeyStatus(e);
       eventEmitter.emit(keyEventMapping[e.key as EventKeyName], e);
     }
@@ -86,7 +87,6 @@ export class Monitor {
   private _handleKeyUp = (e: KeyboardEvent) => {
     if (keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
-      e.stopPropagation();
       this._resetKeyStatus();
     }
 
@@ -97,7 +97,7 @@ export class Monitor {
     this._keyStatus.Space = e.key === ' ';
     this._keyStatus.Shift = e.key === 'Shift';
     this._keyStatus.Alt = e.key === 'Alt';
-    this._keyStatus.Ctrl = e.key === 'Control';
+    this._keyStatus.Control = e.key === 'Control';
     this._keyStatus.Backspace = e.key === 'Backspace';
     this._keyStatus.Delete = e.key === 'Delete';
     this._keyStatus.Escape = e.key === 'Escape';
@@ -107,7 +107,7 @@ export class Monitor {
     this._keyStatus.Space = false;
     this._keyStatus.Shift = false;
     this._keyStatus.Alt = false;
-    this._keyStatus.Ctrl = false;
+    this._keyStatus.Control = false;
     this._keyStatus.Backspace = false;
     this._keyStatus.Delete = false;
     this._keyStatus.Escape = false;

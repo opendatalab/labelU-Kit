@@ -142,7 +142,7 @@ export class DraftRect extends DraftObserverMixin(
       const point = new ControllerPoint({
         id: uuid(),
         name: points[i].name,
-        outOfCanvas: config.outOfCanvas,
+        outOfImage: config.outOfImage,
         coordinate: points[i],
         style: { ...style, radius: 8, stroke: 'transparent', fill: 'blue' },
       });
@@ -214,7 +214,7 @@ export class DraftRect extends DraftObserverMixin(
       return;
     }
 
-    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
+    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
     const rect = group.shapes[0] as Rect;
     // 更新rect矩形坐标
     if (safeX) {
@@ -304,6 +304,13 @@ export class DraftRect extends DraftObserverMixin(
 
     // 更新端点坐标
     if (selectedPointName === 'nw') {
+      const width = Math.abs(x - _unscaledPreBBox.maxX);
+      const height = Math.abs(y - _unscaledPreBBox.maxY);
+
+      // TODO: 修改宽高时，可以加上尺寸限制
+      rect.width = width;
+      rect.height = height;
+
       swPoint.coordinate[0].x = x;
       nePoint.coordinate[0].y = y;
 
@@ -320,9 +327,6 @@ export class DraftRect extends DraftObserverMixin(
       bottomEdge.coordinate[1].x = x;
       // 更新Right线段坐标
       rightEdge.coordinate[0].y = y;
-
-      rect.width = Math.abs(x - _unscaledPreBBox.maxX);
-      rect.height = Math.abs(y - _unscaledPreBBox.maxY);
 
       if (x > _unscaledPreBBox.maxX) {
         rect.coordinate[0].x = _unscaledPreBBox.maxX;
@@ -468,7 +472,7 @@ export class DraftRect extends DraftObserverMixin(
     const x = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
     const y = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
 
-    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
 
     if (safeX && (edge.name === 'left' || edge.name === 'right')) {
       edge.coordinate[0].x = x;

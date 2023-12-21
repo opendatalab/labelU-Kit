@@ -30,15 +30,16 @@ export enum EInternalEvent {
   Escape = '__escape__',
 
   /** Ctrl */
-  MetaCtrl = '__meta_ctrl__',
+  Control = '__control__',
 
   /** Alt */
-  MetaAlt = '__meta_alt__',
+  Alt = '__alt__',
 
   /** Shift */
-  MetaShift = '__meta_shift__',
+  Shift = '__shift__',
 
-  MetaCmd = '__meta_cmd__',
+  /** Command */
+  Meta = '__meta__',
 
   /** 鼠标移动 */
   MouseMove = '__mouse_move__',

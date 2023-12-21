@@ -28,10 +28,10 @@ export interface RectToolOptions extends BasicToolParams<RectData, RectStyle> {
   minHeight?: number;
 
   /**
-   * 画布外标注
+   * 图片外标注
    * @default true;
    */
-  outOfCanvas?: boolean;
+  outOfImage?: boolean;
 }
 
 export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
@@ -51,7 +51,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   constructor(params: RectToolOptions) {
     super({
       name: 'rect',
-      outOfCanvas: true,
+      outOfImage: true,
       minHeight: 1,
       minWidth: 1,
       labels: [],
@@ -325,8 +325,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       // 记录起始点坐标
       this._startPoint = axis!.getOriginalCoord({
         // 超出安全区域的点直接落在安全区域边缘
-        x: config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX),
-        y: config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY),
+        x: config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX),
+        y: config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY),
       });
 
       this._creatingShape = new Rect({
@@ -342,8 +342,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   private _handleMouseMove = (e: MouseEvent) => {
     const { _creatingShape, _startPoint, config } = this;
 
-    const x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
-    const y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
+    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
+    const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
     if (_creatingShape && _startPoint) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {

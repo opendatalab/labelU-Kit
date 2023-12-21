@@ -101,7 +101,7 @@ export class DraftPolygon extends DraftObserverMixin(
       const pointItem = data.pointList[i];
       const point = new ControllerPoint({
         id: uuid(),
-        outOfCanvas: config.outOfCanvas,
+        outOfImage: config.outOfImage,
         // 深拷贝，避免出现引用问题
         coordinate: cloneDeep(pointItem),
       });
@@ -141,7 +141,7 @@ export class DraftPolygon extends DraftObserverMixin(
       return;
     }
 
-    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
+    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
 
     // 更新草稿坐标
     this.group.each((shape, shapeIndex) => {
@@ -337,7 +337,7 @@ export class DraftPolygon extends DraftObserverMixin(
 
   private _onEdgeMove = (_e: MouseEvent, edge: ControllerEdge) => {
     const { config, _effectedControllerPoints, _effectedCoordinateIndexes, _effectedControllerEdges } = this;
-    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
 
     const x1 = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
     const y1 = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
@@ -345,7 +345,7 @@ export class DraftPolygon extends DraftObserverMixin(
     const y2 = axis!.getOriginalY(edge.previousDynamicCoordinate![1].y + axis!.distance.y);
 
     // 安全区域内移动
-    if (!config.outOfCanvas) {
+    if (!config.outOfImage) {
       if (safeX) {
         edge.coordinate[0].x = x1;
         edge.coordinate[1].x = x2;

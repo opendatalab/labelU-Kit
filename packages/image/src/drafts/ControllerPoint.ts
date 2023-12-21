@@ -19,7 +19,6 @@ const HOVERED_STYLE = {
   radius: 4,
 };
 
-// TODO: 增加控制点的样式配置
 export class ControllerPoint extends Point {
   private _previousDynamicCoordinate: AxisPoint | null = null;
 
@@ -31,10 +30,10 @@ export class ControllerPoint extends Point {
 
   private _onMouseUpHandlers: ((controller: ControllerPoint) => void)[] = [];
 
-  constructor({ outOfCanvas, ...params }: PointParams & { outOfCanvas?: boolean }) {
+  constructor({ outOfImage, ...params }: PointParams & { outOfImage?: boolean }) {
     super({ ...params, style: DEFAULT_STYLE });
 
-    this._outOfCanvas = outOfCanvas ?? true;
+    this._outOfCanvas = outOfImage ?? true;
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);

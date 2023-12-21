@@ -32,10 +32,10 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   edgeAdsorptive?: boolean;
 
   /**
-   * 画布外标注
+   * 图片外标注
    * @default true;
    */
-  outOfCanvas?: boolean;
+  outOfImage?: boolean;
 
   /**
    * 最小点数
@@ -72,7 +72,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       name: 'line',
       lineType: 'line',
       edgeAdsorptive: true,
-      outOfCanvas: true,
+      outOfImage: true,
       minPointAmount: 2,
       labels: [],
       hoveredStyle: {},
@@ -289,8 +289,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     const startPoint = axis!.getOriginalCoord({
       // 超出安全区域的点直接落在安全区域边缘
-      x: config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX),
-      y: config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY),
+      x: config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX),
+      y: config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY),
     });
 
     // 先归档选中的草稿
@@ -380,8 +380,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _handleMouseMove = (e: MouseEvent) => {
     const { _creatingLines, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config } = this;
 
-    const x = axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX));
-    const y = axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY));
+    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
+    const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
     if (_creatingCurves) {
       const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as BezierCurve;

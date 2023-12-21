@@ -60,7 +60,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
       const pointItem = data.pointList[i];
       const point = new ControllerPoint({
         id: pointItem.id,
-        outOfCanvas: config.outOfCanvas,
+        outOfImage: config.outOfImage,
         // 深拷贝，避免出现引用问题
         coordinate: { ...pointItem },
       });
@@ -103,7 +103,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
 
     this._destroySelection();
 
-    const [safeX, safeY] = config.outOfCanvas ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
+    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
 
     // 更新草稿坐标
     this.group.each((shape, index) => {

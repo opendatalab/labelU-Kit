@@ -182,7 +182,7 @@ export class Axis {
     if (this._startPanPoint) {
       this._pan(e);
 
-      // 移动画布时隐藏鼠标指针，移动时始终在画布外面
+      // 移动画布时隐藏鼠标指针，移动时始终在图片外面
       this._cursor!.updateCoordinate(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
     } else {
       this._calcMouseMove(e);

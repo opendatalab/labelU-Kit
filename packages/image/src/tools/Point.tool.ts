@@ -30,10 +30,10 @@ export interface PointToolOptions extends BasicToolParams<PointData, PointStyle>
   minPointAmount?: number;
 
   /**
-   * 画布外标注
+   * 图片外标注
    * @default true;
    */
-  outOfCanvas?: boolean;
+  outOfImage?: boolean;
 }
 
 export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
@@ -53,7 +53,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       selectedStyle: {},
       maxPointAmount: Infinity,
       minPointAmount: 0,
-      outOfCanvas: true,
+      outOfImage: true,
       data: [],
       // ----------------
       ...params,
@@ -234,8 +234,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       id: uuid(),
       label: activeLabel,
       // 超出安全区域的点直接落在安全区域边缘
-      x: axis!.getOriginalX(config.outOfCanvas ? e.offsetX : axis!.getSafeX(e.offsetX)),
-      y: axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY)),
+      x: axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX)),
+      y: axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY)),
     };
 
     Tool.drawEnd({ ...data, ...axis!.convertCanvasCoordinate(data) });
@@ -256,7 +256,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     let y = _pickedCoordinate.y + axis!.distance.y;
 
     // 安全区域内移动
-    if (!config.outOfCanvas) {
+    if (!config.outOfImage) {
       const safeZone = axis!.safeZone;
 
       if (x > safeZone.maxX) {
