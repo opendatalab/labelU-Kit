@@ -2,6 +2,18 @@ import { EInternalEvent } from '../enums';
 import { eventEmitter, rbush } from '../singletons';
 import type { AxisPoint } from '../shapes';
 
+const keyEventMapping = {
+  space: EInternalEvent.Space,
+  shift: EInternalEvent.MetaShift,
+  alt: EInternalEvent.MetaAlt,
+  ctrl: EInternalEvent.MetaCtrl,
+  backspace: EInternalEvent.BackSpace,
+  delete: EInternalEvent.Delete,
+  escape: EInternalEvent.Escape,
+};
+
+type EventKeyName = keyof typeof keyEventMapping;
+
 /**
  * 画布监控器
  *
@@ -17,6 +29,18 @@ export class Monitor {
   public selectedAnnotationId: string | null = null;
 
   private _orderIndexedAnnotationIds: string[] = [];
+
+  /** 键盘按键记录 */
+
+  private _keyStatus: Record<EventKeyName, boolean> = {
+    space: false,
+    shift: false,
+    alt: false,
+    ctrl: false,
+    backspace: false,
+    delete: false,
+    escape: false,
+  };
 
   constructor(canvas: HTMLCanvasElement) {
     if (!canvas) {
@@ -38,6 +62,8 @@ export class Monitor {
     _canvas.addEventListener('mousemove', this._handleMouseMove, false);
     _canvas.addEventListener('mouseup', this._handleMouseUp, false);
     _canvas.addEventListener('wheel', this._handleWheel, false);
+    document.addEventListener('keydown', this._handleKeyDown, false);
+    document.addEventListener('keyup', this._handleKeyUp, false);
 
     eventEmitter.on(EInternalEvent.RightMouseUpWithoutAxisChange, this._handleRightMouseUp);
   }
@@ -45,6 +71,42 @@ export class Monitor {
   private _handleContextMenu = (e: MouseEvent) => {
     e.preventDefault();
   };
+
+  private _handleKeyDown = (e: KeyboardEvent) => {
+    this._setKeyStatus(e);
+
+    if (keyEventMapping[e.key as EventKeyName]) {
+      e.preventDefault();
+      eventEmitter.emit(keyEventMapping[e.key as EventKeyName], e);
+    }
+
+    eventEmitter.emit(EInternalEvent.KeyDown, e);
+  };
+
+  private _handleKeyUp = (e: KeyboardEvent) => {
+    eventEmitter.emit(EInternalEvent.KeyUp, e);
+    this._resetKeyStatus();
+  };
+
+  private _setKeyStatus(e: KeyboardEvent) {
+    this._keyStatus.space = e.key === ' ';
+    this._keyStatus.shift = e.key === 'Shift';
+    this._keyStatus.alt = e.key === 'Alt';
+    this._keyStatus.ctrl = e.key === 'Control';
+    this._keyStatus.backspace = e.key === 'Backspace';
+    this._keyStatus.delete = e.key === 'Delete';
+    this._keyStatus.escape = e.key === 'Escape';
+  }
+
+  private _resetKeyStatus() {
+    this._keyStatus.space = false;
+    this._keyStatus.shift = false;
+    this._keyStatus.alt = false;
+    this._keyStatus.ctrl = false;
+    this._keyStatus.backspace = false;
+    this._keyStatus.delete = false;
+    this._keyStatus.escape = false;
+  }
 
   private _handleMouseDown = (e: MouseEvent) => {
     if (e.button === 0) {
@@ -150,6 +212,13 @@ export class Monitor {
   };
 
   /**
+   * 获取键盘状态
+   */
+  public get keyboard() {
+    return this._keyStatus;
+  }
+
+  /**
    * 处理全局的右键事件
    *
    * @description 右键点击选中和取消选中标注
@@ -224,6 +293,8 @@ export class Monitor {
     _canvas.removeEventListener('mousemove', this._handleMouseMove);
     _canvas.removeEventListener('mouseup', this._handleMouseUp);
     _canvas.removeEventListener('wheel', this._handleWheel);
+    document.removeEventListener('keydown', this._handleKeyDown);
+    document.removeEventListener('keyup', this._handleKeyUp);
 
     eventEmitter.off(EInternalEvent.RightMouseUpWithoutAxisChange, this._handleRightMouseUp);
   }

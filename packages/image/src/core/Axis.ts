@@ -6,7 +6,7 @@ import type { CursorParams } from '../shapes/Cursor.shape';
 import { Ticker } from './Ticker';
 import { EInternalEvent } from '../enums';
 import * as eventEmitter from '../singletons/eventEmitter';
-import { rbush } from '../singletons';
+import { monitor, rbush } from '../singletons';
 import type { Renderer } from './Renderer';
 
 const SCALE_FACTOR = 1.1;
@@ -114,6 +114,7 @@ export class Axis {
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
     eventEmitter.on(EInternalEvent.Wheel, this._handleScroll);
+    eventEmitter.on(EInternalEvent.KeyUp, this._handleKeyUp);
   }
 
   private _offEvents() {
@@ -124,6 +125,12 @@ export class Axis {
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
     eventEmitter.off(EInternalEvent.Wheel, this._handleScroll);
   }
+
+  private _handleKeyUp = () => {
+    const { _renderer } = this;
+
+    _renderer!.canvas.style.cursor = 'none';
+  };
 
   private _handleMoveStart = (e: MouseEvent) => {
     // 起始点：鼠标点击位置：在画布内的真实坐标
@@ -144,6 +151,13 @@ export class Axis {
       x: e.offsetX,
       y: e.offsetY,
     };
+
+    if (monitor?.keyboard.space) {
+      this._startPanPoint = {
+        x: e.offsetX - this._x,
+        y: e.offsetY - this._y,
+      };
+    }
   };
 
   private _pan = (e: MouseEvent) => {
@@ -167,12 +181,13 @@ export class Axis {
   private _handleMouseMove = (e: MouseEvent) => {
     if (this._startPanPoint) {
       this._pan(e);
+
       // 移动画布时隐藏鼠标指针，移动时始终在画布外面
       this._cursor!.updateCoordinate(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
     } else {
       this._calcMouseMove(e);
-      this._cursor!.updateCoordinate(e.offsetX, e.offsetY);
       eventEmitter.emit(EInternalEvent.MouseMoveWithoutAxisChange, e);
+      this._cursor!.updateCoordinate(e.offsetX, e.offsetY);
     }
 
     // 只要鼠标在画布内移动，触发画布更新
@@ -199,6 +214,7 @@ export class Axis {
     // 内部可能有模块还在使用这些变量，所以延迟清空
     setTimeout(() => {
       this._startMovePoint = null;
+      this._startPanPoint = null;
 
       this._distanceX = 0;
       this._distanceY = 0;

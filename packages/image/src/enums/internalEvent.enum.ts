@@ -14,6 +14,32 @@ export enum EInternalEvent {
   /** 移动结束 */
   PanEnd = '__pan_end__',
 
+  /** 按下键盘 */
+  KeyDown = '__key_down__',
+
+  /** 松开键盘 */
+  KeyUp = '__key_up__',
+
+  Space = '__space__',
+
+  Delete = '__delete__',
+
+  BackSpace = '__back_space__',
+
+  /** 按下ESC */
+  Escape = '__escape__',
+
+  /** Ctrl */
+  MetaCtrl = '__meta_ctrl__',
+
+  /** Alt */
+  MetaAlt = '__meta_alt__',
+
+  /** Shift */
+  MetaShift = '__meta_shift__',
+
+  MetaCmd = '__meta_cmd__',
+
   /** 鼠标移动 */
   MouseMove = '__mouse_move__',
 
@@ -61,9 +87,6 @@ export enum EInternalEvent {
 
   /** 普通鼠标移动，没有坐标变化 */
   MouseMoveWithoutAxisChange = '__mouse_move_without_axis_change__',
-
-  /** 左键双击 */
-  DblClick = '__right_double_click__',
 
   /** 渲染 */
   Render = '__render__',

@@ -217,8 +217,9 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     const { activeLabel, config } = this;
 
-    // 没有激活工具则不进行绘制
-    if (!activeLabel) {
+    // 1. 没有激活工具则不进行绘制
+    // 2. 按下空格键时不进行绘制
+    if (!activeLabel || monitor?.keyboard.space) {
       return;
     }
 
