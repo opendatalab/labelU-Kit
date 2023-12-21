@@ -13,17 +13,17 @@ import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
 import { DraftLine, DraftLineCurve } from '../drafts';
-import { BezierCurve } from '../shapes/BezierCurve.shape';
+import { Spline } from '../shapes/Spline.shape';
 
 export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   /**
    * 线条类型
    * @description
    * - line: 直线
-   * - curve: 曲线
+   * - spline: 曲线
    * @default 'line'
    */
-  lineType?: 'line' | 'curve';
+  lineType?: 'line' | 'spline';
 
   /**
    * 边缘吸附
@@ -45,7 +45,6 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   minPointAmount?: number;
 }
 
-// @MouseDecorator
 export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   static convertToCanvasCoordinates(data: LineData[]) {
     return data.map((item) => ({
@@ -59,7 +58,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   private _creatingLines: Group<Line | Point, LineStyle | PointStyle> | null = null;
 
-  private _creatingCurves: Group<BezierCurve | Line | Point, LineStyle | PointStyle> | null = null;
+  private _creatingCurves: Group<Spline | Line | Point, LineStyle | PointStyle> | null = null;
 
   private _holdingSlopes: Point[] | null = null;
 
@@ -224,7 +223,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         onBBoxOut: this.handlePointStyle,
         onBBoxOver: this.handlePointStyle,
       });
-    } else if (data.type === 'curve') {
+    } else if (data.type === 'spline') {
       this.draft = new DraftLineCurve(this.config, {
         id: data.id,
         data,
@@ -296,7 +295,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     // 先归档选中的草稿
     this._archiveDraft();
 
-    if (config.lineType === 'curve') {
+    if (config.lineType === 'spline') {
       if (!this._creatingCurves) {
         this._creatingCurves = new Group(uuid(), monitor!.getNextOrder());
       }
@@ -314,7 +313,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       });
       this._holdingSlopes = [slopeStartPoint, slopeEndPoint];
       this._creatingCurves.add(
-        new BezierCurve({
+        new Spline({
           id: uuid(),
           style: { ...style, stroke: this.getLabelColor(activeLabel) },
           coordinate: [
@@ -384,7 +383,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
     if (_creatingCurves) {
-      const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as BezierCurve;
+      const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as Spline;
 
       // 创建点不松开鼠标，等效拖拽控制点
       if (_holdingSlopes) {
@@ -408,7 +407,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
           lastCurve.coordinate[1].x = x;
           lastCurve.coordinate[1].y = y;
         } else {
-          const preCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 8] as BezierCurve;
+          const preCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 8] as Spline;
 
           _holdingSlopeEdge!.coordinate[1].x = x;
           _holdingSlopeEdge!.coordinate[1].y = y;
@@ -481,7 +480,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       }),
     };
 
-    if (_temp.type === 'curve') {
+    if (_temp.type === 'spline') {
       _temp.controlPoints = data.controlPoints!.map((point) => {
         return {
           ...point,
@@ -563,7 +562,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     const controlPoints: AxisPoint[] = [];
 
     for (let i = 0; i < _creatingCurves.shapes.length - 4; i += 4) {
-      const curve = _creatingCurves.shapes[i] as BezierCurve;
+      const curve = _creatingCurves.shapes[i] as Spline;
 
       controlPoints.push(...curve.plainControlPoints);
 
@@ -583,7 +582,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
     const data: LineData = {
       id: uuid(),
-      type: 'curve',
+      type: 'spline',
       pointList: points,
       controlPoints,
       label: this.activeLabel,

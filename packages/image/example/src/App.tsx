@@ -49,7 +49,7 @@ export default function App() {
       },
     },
     line: {
-      lineType: 'line',
+      lineType: 'spline',
       outOfCanvas: false,
       labels: [
         {

@@ -7,7 +7,7 @@ import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import type { AxisPoint } from '../shapes/Point.shape';
 import type { TextStyle } from '../shapes';
-import { BezierCurve, ShapeText } from '../shapes';
+import { Spline, ShapeText } from '../shapes';
 
 export interface PointItem extends AxisPoint {
   id: string;
@@ -15,7 +15,7 @@ export interface PointItem extends AxisPoint {
 
 export interface LineData extends BasicImageAnnotation {
   pointList: PointItem[];
-  type: 'line' | 'curve';
+  type: 'line' | 'spline';
   /**
    * 控制点坐标
    * @description 仅在曲线时有效；两两成对，每两个点为一条曲线的控制点
@@ -78,7 +78,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
 
         group.add(line);
       }
-    } else if (data.type === 'curve') {
+    } else if (data.type === 'spline') {
       // 将控制点分组
       const controlPoints = AnnotationLine.chunk(data.controlPoints!, 2);
 
@@ -87,7 +87,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
         const endPoint = data.pointList[i];
         const [startControl, endControl] = controlPoints[i - 1];
 
-        const curve = new BezierCurve({
+        const curve = new Spline({
           id: data.pointList[i - 1].id,
           coordinate: [startPoint, endPoint],
           controlPoints: [{ ...startControl }, { ...endControl }],

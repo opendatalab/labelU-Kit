@@ -6,11 +6,11 @@ import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import { Polygon, type PolygonStyle } from '../shapes/Polygon.shape';
 import { AnnotationLine, type PointItem } from './Line.annotation';
-import { PolygonCurve, type AxisPoint, ShapeText } from '../shapes';
+import { ClosedSpline, type AxisPoint, ShapeText } from '../shapes';
 
 export interface PolygonData extends BasicImageAnnotation {
   pointList: PointItem[];
-  type: 'line' | 'curve';
+  type: 'line' | 'spline';
   /**
    * 控制点坐标
    * @description 仅在曲线时有效；两两成对，每两个点为一条曲线的控制点
@@ -48,9 +48,9 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
           style,
         }),
       );
-    } else if (data.type === 'curve') {
+    } else if (data.type === 'spline') {
       group.add(
-        new PolygonCurve({
+        new ClosedSpline({
           id: data.id,
           coordinate: cloneDeep(data.pointList),
           controlPoints: data.controlPoints!,
@@ -58,7 +58,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
         }),
       );
     } else {
-      throw Error('Invalid type, only "line" and "curve" are supported');
+      throw Error('Invalid type, only "line" and "spline" are supported');
     }
 
     group.add(

@@ -10,50 +10,54 @@ import { axis, monitor } from '../singletons';
 
 export interface SlopeEdgeParams {
   /** 前一条曲线的结束控制点，第一条曲线没有 */
-  prevCurveEndControl?: AxisPoint;
+  endControlOfPrevCurve?: AxisPoint;
 
   /** 曲线切点 */
   contact: AxisPoint;
 
   /** 后一条曲线的开始控制点，最后一条曲线没有 */
-  nextCurveStartControl?: AxisPoint;
+  startControlOfNextCurve?: AxisPoint;
 }
 
-export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
+export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
+  public name?: string;
+
   public previousDynamicCoordinate: AxisPoint[][] | null = null;
 
-  private _prevCurveEndControlCoord: AxisPoint | undefined;
+  private _endControlCoordOfPrevCurve: AxisPoint | undefined;
 
-  private _prevCurveEndSlopePoint: ControllerPoint | null = null;
+  private _endSlopePointOfPrevCurve: ControllerPoint | null = null;
 
-  private _nextCurveEndSlopePoint: ControllerPoint | null = null;
+  private _startSlopePointOfNextCurve: ControllerPoint | null = null;
 
-  private _nextCurveStartControlCoord: AxisPoint | undefined;
+  private _startControlCoordOfNextCurve: AxisPoint | undefined;
 
   private _contactCoord: AxisPoint;
 
   private _contactPoint: ControllerPoint | null = null;
 
-  public name?: string;
-
-  constructor({ prevCurveEndControl, nextCurveStartControl, contact }: SlopeEdgeParams) {
+  constructor({
+    endControlOfPrevCurve: prevCurveEndControl,
+    startControlOfNextCurve: nextCurveStartControl,
+    contact,
+  }: SlopeEdgeParams) {
     super(uuid(), monitor!.getMaxOrder()! + 1);
 
-    this._prevCurveEndControlCoord = prevCurveEndControl;
-    this._nextCurveStartControlCoord = nextCurveStartControl;
+    this._endControlCoordOfPrevCurve = prevCurveEndControl;
+    this._startControlCoordOfNextCurve = nextCurveStartControl;
     this._contactCoord = contact;
 
     this._setupShapes();
   }
 
   private _setupShapes() {
-    const { _prevCurveEndControlCoord, _nextCurveStartControlCoord, _contactCoord } = this;
+    const { _endControlCoordOfPrevCurve, _startControlCoordOfNextCurve, _contactCoord } = this;
 
-    if (_prevCurveEndControlCoord) {
+    if (_endControlCoordOfPrevCurve) {
       this.add(
         new Line({
           id: uuid(),
-          coordinate: [{ ..._prevCurveEndControlCoord }, { ..._contactCoord }],
+          coordinate: [{ ..._endControlCoordOfPrevCurve }, { ..._contactCoord }],
           style: {
             stroke: '#fff',
             strokeWidth: 1,
@@ -64,10 +68,10 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
         // 如果是从左往右画，这个点是上一个曲线的结束控制点
         name: 'end',
         id: uuid(),
-        coordinate: { ..._prevCurveEndControlCoord },
+        coordinate: { ..._endControlCoordOfPrevCurve },
       });
 
-      this._prevCurveEndSlopePoint = prevCurveEndControl;
+      this._endSlopePointOfPrevCurve = prevCurveEndControl;
 
       prevCurveEndControl.onMouseDown(this._handleSlopeDown);
       prevCurveEndControl.onMove(this._handleSlopeMove);
@@ -76,11 +80,11 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
       this.add(prevCurveEndControl);
     }
 
-    if (_nextCurveStartControlCoord) {
+    if (_startControlCoordOfNextCurve) {
       this.add(
         new Line({
           id: uuid(),
-          coordinate: [{ ..._contactCoord }, { ..._nextCurveStartControlCoord }],
+          coordinate: [{ ..._contactCoord }, { ..._startControlCoordOfNextCurve }],
           style: {
             stroke: '#fff',
             strokeWidth: 1,
@@ -90,10 +94,10 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
       const nextCurveStartControl = new ControllerPoint({
         name: 'start',
         id: uuid(),
-        coordinate: { ..._nextCurveStartControlCoord },
+        coordinate: { ..._startControlCoordOfNextCurve },
       });
 
-      this._nextCurveEndSlopePoint = nextCurveStartControl;
+      this._startSlopePointOfNextCurve = nextCurveStartControl;
 
       nextCurveStartControl.onMouseDown(this._handleSlopeDown);
       nextCurveStartControl.onMove(this._handleSlopeMove);
@@ -123,12 +127,12 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
   };
 
   private _handleSlopeMove = (point: ControllerPoint) => {
-    const { _prevCurveEndControlCoord } = this;
+    const { _endControlCoordOfPrevCurve } = this;
     if (point.name === 'end') {
       this.shapes[0].coordinate[0].x = point.coordinate[0].x;
       this.shapes[0].coordinate[0].y = point.coordinate[0].y;
     } else if (point.name === 'start') {
-      if (!_prevCurveEndControlCoord) {
+      if (!_endControlCoordOfPrevCurve) {
         // 最后一个曲线的结束点，没有结束控制点，所以只有一条线
         this.shapes[0].coordinate[1].x = point.coordinate[0].x;
         this.shapes[0].coordinate[1].y = point.coordinate[0].y;
@@ -150,11 +154,11 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
   };
 
   private _handleContactDown = (point: ControllerPoint) => {
-    const { _prevCurveEndSlopePoint, _nextCurveEndSlopePoint } = this;
-    this.previousDynamicCoordinate = this.shapes.map((shape: Point | Line) => {
+    const { _endSlopePointOfPrevCurve, _startSlopePointOfNextCurve } = this;
+    this.previousDynamicCoordinate = this.shapes.map((shape) => {
       return cloneDeep(shape.dynamicCoordinate);
     });
-    this.emit(EInternalEvent.ContactDown, point, _prevCurveEndSlopePoint, _nextCurveEndSlopePoint);
+    this.emit(EInternalEvent.ContactDown, point, _endSlopePointOfPrevCurve, _startSlopePointOfNextCurve);
   };
 
   /**
@@ -163,10 +167,10 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
    * @param point
    */
   private _handleContactMove = (point: ControllerPoint) => {
-    const { previousDynamicCoordinate, _prevCurveEndSlopePoint, _nextCurveEndSlopePoint } = this;
+    const { previousDynamicCoordinate, _endSlopePointOfPrevCurve, _startSlopePointOfNextCurve } = this;
 
     this.each((shape, index) => {
-      if (shape.name !== 'contact' && previousDynamicCoordinate) {
+      if ((shape as Point).name !== 'contact' && previousDynamicCoordinate) {
         shape.coordinate[0].x = axis!.getOriginalX(previousDynamicCoordinate[index][0].x + axis!.distance.x);
         shape.coordinate[0].y = axis!.getOriginalY(previousDynamicCoordinate[index][0].y + axis!.distance.y);
 
@@ -176,12 +180,11 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
         }
       }
     });
-    this.emit(EInternalEvent.ContactMove, point, _prevCurveEndSlopePoint, _nextCurveEndSlopePoint);
+    this.emit(EInternalEvent.ContactMove, point, _endSlopePointOfPrevCurve, _startSlopePointOfNextCurve);
     this.update();
   };
 
   private _handleContactUp = () => {
-    console.log('up');
     this.emit(EInternalEvent.ContactUp);
   };
 
@@ -195,12 +198,12 @@ export class SlopeEdge extends Group<any, LineStyle | PointStyle> {
     return this._contactPoint;
   }
 
-  public get prevCurveEndControl() {
-    return this._prevCurveEndSlopePoint;
+  public get endControlOfPrevCurve() {
+    return this._endSlopePointOfPrevCurve;
   }
 
-  public get nextCurveStartControl() {
-    return this._nextCurveEndSlopePoint;
+  public get startControlOfNextCurve() {
+    return this._startSlopePointOfNextCurve;
   }
 
   public isUnderCursor = this.isShapesUnderCursor;

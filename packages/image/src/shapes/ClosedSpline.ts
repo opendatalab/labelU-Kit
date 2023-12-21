@@ -3,11 +3,11 @@ import type { AxisPoint } from './Point.shape';
 import { axis } from '../singletons';
 import type { PolygonParams, PolygonStyle } from './Polygon.shape';
 
-export interface PolygonCurveParams extends PolygonParams {
+export interface ClosedSplineParams extends PolygonParams {
   controlPoints: AxisPoint[];
 }
 
-export class PolygonCurve extends Shape<PolygonStyle> {
+export class ClosedSpline extends Shape<PolygonStyle> {
   static DEFAULT_STYLE: Required<PolygonStyle> = {
     stroke: '#000',
     strokeWidth: 2,
@@ -19,9 +19,9 @@ export class PolygonCurve extends Shape<PolygonStyle> {
 
   private _dynamicControlPoints: AxisPoint[];
 
-  public style: Required<PolygonStyle> = PolygonCurve.DEFAULT_STYLE;
+  public style: Required<PolygonStyle> = ClosedSpline.DEFAULT_STYLE;
 
-  constructor({ id, controlPoints, coordinate, style }: PolygonCurveParams) {
+  constructor({ id, controlPoints, coordinate, style }: ClosedSplineParams) {
     super(id, coordinate);
 
     this._controlPoints = new Proxy(controlPoints, this._coordinateHandler);

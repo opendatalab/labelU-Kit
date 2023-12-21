@@ -7,7 +7,7 @@ export interface CurveParams extends LineParams {
   controlPoints: [AxisPoint, AxisPoint];
 }
 
-export class BezierCurve extends Shape<LineStyle> {
+export class Spline extends Shape<LineStyle> {
   static DEFAULT_STYLE: Required<LineStyle> = {
     stroke: '#000',
     strokeWidth: 2,
@@ -18,7 +18,7 @@ export class BezierCurve extends Shape<LineStyle> {
 
   private _dynamicControlPoints: [AxisPoint, AxisPoint];
 
-  public style: Required<LineStyle> = BezierCurve.DEFAULT_STYLE;
+  public style: Required<LineStyle> = Spline.DEFAULT_STYLE;
 
   constructor({ id, controlPoints, coordinate, style }: CurveParams) {
     super(id, coordinate);

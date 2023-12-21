@@ -6,7 +6,7 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import { AnnotationPolygon } from '../annotation';
 import type { AxisPoint, LineStyle, PointStyle, PolygonStyle } from '../shapes';
-import { BezierCurve, PolygonCurve, Line, Point, Polygon } from '../shapes';
+import { Spline, ClosedSpline, Line, Point, Polygon } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
@@ -21,7 +21,7 @@ export interface PolygonToolOptions extends BasicToolParams<PolygonData, Polygon
    * - curve: 曲线
    * @default 'line'
    */
-  lineType?: 'line' | 'curve';
+  lineType?: 'line' | 'spline';
 
   /**
    * 边缘吸附
@@ -63,7 +63,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   private _holdingSlopeEdge: Line | null = null;
 
-  public _creatingCurves: Group<PolygonCurve | Line | Point, LineStyle | PointStyle> | null = null;
+  public _creatingCurves: Group<ClosedSpline | Line | Point, LineStyle | PointStyle> | null = null;
 
   constructor(params: PolygonToolOptions) {
     super({
@@ -324,12 +324,12 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     // 先归档上一次的草稿
     this._archiveDraft();
 
-    if (config.lineType === 'curve') {
+    if (config.lineType === 'spline') {
       if (!this._creatingCurves) {
         this._creatingCurves = new Group(uuid(), monitor!.getNextOrder());
         // 背景填充
         this._creatingCurves.add(
-          new PolygonCurve({
+          new ClosedSpline({
             id: uuid(),
             style: this._makeStaticStyle(activeLabel),
             coordinate: [
@@ -358,7 +358,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         );
       } else {
         // 往曲线中增加一个点
-        const currentCreatingPolygonCurve = this._creatingCurves.shapes[0] as PolygonCurve;
+        const currentCreatingPolygonCurve = this._creatingCurves.shapes[0] as ClosedSpline;
         currentCreatingPolygonCurve.coordinate = [
           ...currentCreatingPolygonCurve.plainCoordinate,
           cloneDeep(startPoint),
@@ -390,7 +390,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       });
       this._holdingSlopes = [slopeStartPoint, slopeEndPoint];
       this._creatingCurves.add(
-        new BezierCurve({
+        new Spline({
           id: uuid(),
           style: { ...style, stroke: this.getLabelColor(activeLabel) },
           coordinate: [
@@ -475,8 +475,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
     if (_creatingCurves) {
-      const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as BezierCurve;
-      const polygonCurve = _creatingCurves.shapes[0] as PolygonCurve;
+      const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as Spline;
+      const polygonCurve = _creatingCurves.shapes[0] as ClosedSpline;
 
       // 创建点不松开鼠标，等效拖拽控制点
       if (_holdingSlopes) {
@@ -520,7 +520,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           _holdingSlopes[0].coordinate[0].x = 2 * lastCurve.coordinate[0].x - x;
           _holdingSlopes[0].coordinate[0].y = 2 * lastCurve.coordinate[0].y - y;
         } else {
-          const preCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 8] as BezierCurve;
+          const preCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 8] as Spline;
 
           _holdingSlopeEdge!.coordinate[1].x = x;
           _holdingSlopeEdge!.coordinate[1].y = y;
@@ -632,7 +632,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       }),
     };
 
-    if (_temp.type === 'curve') {
+    if (_temp.type === 'spline') {
       _temp.controlPoints = data.controlPoints!.map((point) => {
         return {
           ...point,
@@ -652,7 +652,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     }
 
     const points = [];
-    const polygonCurve = _creatingCurves.shapes[0] as PolygonCurve;
+    const polygonCurve = _creatingCurves.shapes[0] as ClosedSpline;
     const controlPoints: AxisPoint[] = [
       ...polygonCurve.plainControlPoints.slice(0, polygonCurve.plainControlPoints.length - 3),
       polygonCurve.plainControlPoints[polygonCurve.plainControlPoints.length - 1],
@@ -670,7 +670,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     const data: PolygonData = {
       id: uuid(),
-      type: 'curve',
+      type: 'spline',
       pointList: points,
       controlPoints,
       label: this.activeLabel,
