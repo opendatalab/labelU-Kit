@@ -50,7 +50,7 @@ export default function App() {
     },
     line: {
       lineType: 'spline',
-      outOfCanvas: false,
+      outOfImage: false,
       labels: [
         {
           id: '1',

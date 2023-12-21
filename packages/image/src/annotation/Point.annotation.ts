@@ -20,16 +20,16 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
   private _setupShapes() {
     const { data, style, group } = this;
 
-    const point = new Point({
-      id: data.id,
-      coordinate: {
-        x: data.x,
-        y: data.y,
-      },
-      style,
-    });
-
-    group.add(point);
+    group.add(
+      new Point({
+        id: data.id,
+        coordinate: {
+          x: data.x,
+          y: data.y,
+        },
+        style,
+      }),
+    );
 
     group.add(
       new ShapeText({

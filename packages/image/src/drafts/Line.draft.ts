@@ -153,12 +153,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    * 选中草稿
    */
   private _onMouseDown = () => {
-    const { _selectionShape, _isControllerPicked } = this;
-
-    // 选中控制点时，不需要选中草稿
-    if (_isControllerPicked) {
-      return;
-    }
+    const { _selectionShape } = this;
 
     if (_selectionShape) {
       this._isControllerPicked = false;
@@ -391,6 +386,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
   public destroy() {
     super.destroy();
     this._destroySelection();
+    eventEmitter.off(EInternalEvent.KeyUp, this._onKeyUp);
   }
 
   public render(ctx: CanvasRenderingContext2D) {

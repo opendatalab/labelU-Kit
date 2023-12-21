@@ -39,7 +39,7 @@ export class ControllerEdge extends Line {
 
   private _onShapeOver = () => {
     this.updateStyle({
-      strokeWidth: 10,
+      strokeWidth: (this._originalStyle?.strokeWidth ?? 4) + 4,
     });
   };
 
