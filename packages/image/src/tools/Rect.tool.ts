@@ -70,6 +70,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
   }
 
   /**
@@ -83,7 +84,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationRect) => {
-    Tool.emitSelect(_e, this._convertAnnotationItem(annotation.data));
+    Tool.emitSelect(this._convertAnnotationItem(annotation.data));
     this?._creatingShape?.destroy();
     this._creatingShape = null;
     this.activate(annotation.data.label);
@@ -98,7 +99,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   protected onUnSelect = (_e: MouseEvent) => {
     if (this.draft) {
-      Tool.emitUnSelect(_e, this._convertAnnotationItem(this.draft.data));
+      Tool.emitUnSelect(this._convertAnnotationItem(this.draft.data));
     }
 
     this._archiveDraft();
@@ -251,6 +252,39 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
+  private _archiveCreatingShapes() {
+    const { _creatingShape, activeLabel } = this;
+
+    if (!_creatingShape) {
+      return;
+    }
+
+    const data = {
+      id: _creatingShape.id,
+      x: _creatingShape.coordinate[0].x,
+      y: _creatingShape.coordinate[0].y,
+      label: activeLabel,
+      width: _creatingShape.width,
+      height: _creatingShape.height,
+      order: monitor!.getNextOrder(),
+    };
+
+    if (!this._validate(data)) {
+      return;
+    }
+
+    Tool.drawEnd({
+      ...data,
+      ...this._convertAnnotationItem(data),
+    });
+
+    this._createDraft(data);
+    _creatingShape.destroy();
+    this._creatingShape = null;
+    monitor!.setSelectedAnnotationId(_creatingShape.id);
+    axis!.rerender();
+  }
+
   private _rebuildDraft(data?: RectData) {
     if (!this.draft) {
       return;
@@ -263,13 +297,22 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this._createDraft(dataClone);
   }
 
+  /**
+   * Esc键取消绘制
+   */
+  private _handleEscape = () => {
+    this._creatingShape?.destroy();
+    this._creatingShape = null;
+    axis?.rerender();
+  };
+
   private _handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
     const { activeLabel, style, draft, config, _creatingShape } = this;
 
     const isUnderDraft = draft && draft.isRectAndControllersUnderCursor({ x: e.offsetX, y: e.offsetY });
 
-    if (!activeLabel || isUnderDraft) {
+    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
       return;
     }
 
@@ -277,30 +320,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this._archiveDraft();
 
     if (_creatingShape) {
-      const data = {
-        id: _creatingShape.id,
-        x: _creatingShape.coordinate[0].x,
-        y: _creatingShape.coordinate[0].y,
-        label: activeLabel,
-        width: _creatingShape.width,
-        height: _creatingShape.height,
-        order: monitor!.getNextOrder(),
-      };
-
-      if (!this._validate(data)) {
-        return;
-      }
-
-      Tool.drawEnd(e, {
-        ...data,
-        ...this._convertAnnotationItem(data),
-      });
-
-      this._createDraft(data);
-      _creatingShape.destroy();
-      this._creatingShape = null;
-      monitor!.setSelectedAnnotationId(_creatingShape.id);
-      axis!.rerender();
+      this._archiveCreatingShapes();
     } else {
       // 记录起始点坐标
       this._startPoint = axis!.getOriginalCoord({
@@ -405,5 +425,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
+    eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
   }
 }

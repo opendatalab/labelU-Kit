@@ -169,7 +169,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   }
 
   protected onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
-    Tool.emitSelect(_e, {
+    Tool.emitSelect({
       ...annotation.data,
       ...axis!.convertCanvasCoordinate(annotation.data),
     });
@@ -185,7 +185,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
   protected onUnSelect = (_e: MouseEvent) => {
     if (this.draft) {
-      Tool.emitUnSelect(_e, {
+      Tool.emitUnSelect({
         ...this.draft.data,
         ...axis!.convertCanvasCoordinate(this.draft.data),
       });
@@ -219,7 +219,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     // 1. 没有激活工具则不进行绘制
     // 2. 按下空格键时不进行绘制
-    if (!activeLabel || monitor?.keyboard.space) {
+    if (!activeLabel || monitor?.keyboard.Space) {
       return;
     }
 
@@ -238,7 +238,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       y: axis!.getOriginalY(config.outOfCanvas ? e.offsetY : axis!.getSafeY(e.offsetY)),
     };
 
-    Tool.drawEnd(e, { ...data, ...axis!.convertCanvasCoordinate(data) });
+    Tool.drawEnd({ ...data, ...axis!.convertCanvasCoordinate(data) });
 
     // 创建草稿
     this._createDraft(data);

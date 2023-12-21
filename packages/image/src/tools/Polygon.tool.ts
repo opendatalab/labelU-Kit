@@ -90,6 +90,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     eventEmitter.on(EInternalEvent.MouseMove, this._handleLeftMouseMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+    eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
   }
 
   /**
@@ -103,7 +104,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationPolygon) => {
-    Tool.emitSelect(_e, this._convertAnnotationItem(annotation.data));
+    Tool.emitSelect(this._convertAnnotationItem(annotation.data));
 
     this?._creatingShapes?.destroy();
     this._creatingShapes = null;
@@ -120,7 +121,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   protected onUnSelect = (_e: MouseEvent) => {
     if (this.draft) {
-      Tool.emitUnSelect(_e, this._convertAnnotationItem(this.draft.data));
+      Tool.emitUnSelect(this._convertAnnotationItem(this.draft.data));
     }
 
     this._archiveDraft();
@@ -290,13 +291,28 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this._createDraft(dataClone);
   }
 
+  private _archiveCreatingShapes() {
+    const { _creatingShapes, _creatingCurves } = this;
+
+    // 归档创建中的图形
+    if (_creatingCurves) {
+      this._archivePolygonCurves();
+    } else if (_creatingShapes) {
+      this._archivePolygons();
+    }
+  }
+
+  private _handleEscape = () => {
+    this._archiveCreatingShapes();
+  };
+
   private _handleLeftMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
     const { activeLabel, style, draft, config } = this;
 
     const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
 
-    if (!activeLabel || isUnderDraft) {
+    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
       return;
     }
 
@@ -590,7 +606,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this._holdingSlopeEdge = null;
   };
 
-  private _handleRightMouseUp = (e: MouseEvent) => {
+  private _handleRightMouseUp = () => {
     const { _creatingShapes, _creatingCurves } = this;
     // 移动画布时的右键不归档
     if (axis?.isMoved) {
@@ -599,9 +615,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     // 归档创建中的图形
     if (_creatingCurves) {
-      this._archivePolygonCurves(e);
+      this._archivePolygonCurves();
     } else if (_creatingShapes) {
-      this._archivePolygons(e);
+      this._archivePolygons();
     }
   };
 
@@ -628,7 +644,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     return _temp;
   }
 
-  private _archivePolygonCurves(e: MouseEvent) {
+  private _archivePolygonCurves() {
     const { _creatingCurves } = this;
 
     if (!_creatingCurves) {
@@ -665,7 +681,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
-    Tool.drawEnd(e, {
+    Tool.drawEnd({
       ...data,
       pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
       controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
@@ -679,7 +695,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     monitor!.setSelectedAnnotationId(data.id);
   }
 
-  private _archivePolygons(e: MouseEvent) {
+  private _archivePolygons() {
     const { _creatingShapes } = this;
 
     if (!_creatingShapes) {
@@ -710,7 +726,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
-    Tool.drawEnd(e, {
+    Tool.drawEnd({
       ...data,
       pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
     });
@@ -790,5 +806,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     eventEmitter.off(EInternalEvent.MouseMove, this._handleLeftMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+    eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
   }
 }

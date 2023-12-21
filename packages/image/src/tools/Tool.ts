@@ -221,16 +221,16 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     eventEmitter.emit('error', message);
   }
 
-  static drawEnd<T>(e: MouseEvent, data: T) {
-    eventEmitter.emit('drawEnd', e, data);
+  static drawEnd<T>(data: T) {
+    eventEmitter.emit('drawEnd', data);
   }
 
-  static emitSelect<T>(e: MouseEvent, data: T) {
-    eventEmitter.emit('select', e, data);
+  static emitSelect<T>(data: T) {
+    eventEmitter.emit('select', data);
   }
 
-  static emitUnSelect<T>(e: MouseEvent, data: T) {
-    eventEmitter.emit('unselect', e, data);
+  static emitUnSelect<T>(data: T) {
+    eventEmitter.emit('unselect', data);
   }
 
   public get data() {

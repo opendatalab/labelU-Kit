@@ -3,13 +3,13 @@ import { eventEmitter, rbush } from '../singletons';
 import type { AxisPoint } from '../shapes';
 
 const keyEventMapping = {
-  space: EInternalEvent.Space,
-  shift: EInternalEvent.MetaShift,
-  alt: EInternalEvent.MetaAlt,
-  ctrl: EInternalEvent.MetaCtrl,
-  backspace: EInternalEvent.BackSpace,
-  delete: EInternalEvent.Delete,
-  escape: EInternalEvent.Escape,
+  Space: EInternalEvent.Space,
+  Shift: EInternalEvent.MetaShift,
+  Alt: EInternalEvent.MetaAlt,
+  Ctrl: EInternalEvent.MetaCtrl,
+  Backspace: EInternalEvent.BackSpace,
+  Delete: EInternalEvent.Delete,
+  Escape: EInternalEvent.Escape,
 };
 
 type EventKeyName = keyof typeof keyEventMapping;
@@ -33,13 +33,13 @@ export class Monitor {
   /** 键盘按键记录 */
 
   private _keyStatus: Record<EventKeyName, boolean> = {
-    space: false,
-    shift: false,
-    alt: false,
-    ctrl: false,
-    backspace: false,
-    delete: false,
-    escape: false,
+    Space: false,
+    Shift: false,
+    Alt: false,
+    Ctrl: false,
+    Backspace: false,
+    Delete: false,
+    Escape: false,
   };
 
   constructor(canvas: HTMLCanvasElement) {
@@ -73,10 +73,10 @@ export class Monitor {
   };
 
   private _handleKeyDown = (e: KeyboardEvent) => {
-    this._setKeyStatus(e);
-
     if (keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
+      e.stopPropagation();
+      this._setKeyStatus(e);
       eventEmitter.emit(keyEventMapping[e.key as EventKeyName], e);
     }
 
@@ -84,28 +84,33 @@ export class Monitor {
   };
 
   private _handleKeyUp = (e: KeyboardEvent) => {
+    if (keyEventMapping[e.key as EventKeyName]) {
+      e.preventDefault();
+      e.stopPropagation();
+      this._resetKeyStatus();
+    }
+
     eventEmitter.emit(EInternalEvent.KeyUp, e);
-    this._resetKeyStatus();
   };
 
   private _setKeyStatus(e: KeyboardEvent) {
-    this._keyStatus.space = e.key === ' ';
-    this._keyStatus.shift = e.key === 'Shift';
-    this._keyStatus.alt = e.key === 'Alt';
-    this._keyStatus.ctrl = e.key === 'Control';
-    this._keyStatus.backspace = e.key === 'Backspace';
-    this._keyStatus.delete = e.key === 'Delete';
-    this._keyStatus.escape = e.key === 'Escape';
+    this._keyStatus.Space = e.key === ' ';
+    this._keyStatus.Shift = e.key === 'Shift';
+    this._keyStatus.Alt = e.key === 'Alt';
+    this._keyStatus.Ctrl = e.key === 'Control';
+    this._keyStatus.Backspace = e.key === 'Backspace';
+    this._keyStatus.Delete = e.key === 'Delete';
+    this._keyStatus.Escape = e.key === 'Escape';
   }
 
   private _resetKeyStatus() {
-    this._keyStatus.space = false;
-    this._keyStatus.shift = false;
-    this._keyStatus.alt = false;
-    this._keyStatus.ctrl = false;
-    this._keyStatus.backspace = false;
-    this._keyStatus.delete = false;
-    this._keyStatus.escape = false;
+    this._keyStatus.Space = false;
+    this._keyStatus.Shift = false;
+    this._keyStatus.Alt = false;
+    this._keyStatus.Ctrl = false;
+    this._keyStatus.Backspace = false;
+    this._keyStatus.Delete = false;
+    this._keyStatus.Escape = false;
   }
 
   private _handleMouseDown = (e: MouseEvent) => {

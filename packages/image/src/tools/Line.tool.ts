@@ -92,6 +92,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+    eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
   }
 
   /**
@@ -105,7 +106,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
-    Tool.emitSelect(_e, this._convertAnnotationItem(annotation.data));
+    Tool.emitSelect(this._convertAnnotationItem(annotation.data));
     this?._creatingLines?.destroy();
     this._creatingLines = null;
     this.activate(annotation.data.label);
@@ -120,7 +121,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   protected onUnSelect = (_e: MouseEvent) => {
     if (this.draft) {
-      Tool.emitUnSelect(_e, this._convertAnnotationItem(this.draft.data));
+      Tool.emitUnSelect(this._convertAnnotationItem(this.draft.data));
     }
 
     this._archiveDraft();
@@ -250,6 +251,17 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
+  private _archiveCreatingShapes() {
+    const { _creatingLines, _creatingCurves } = this;
+
+    // 归档创建中的图形
+    if (_creatingLines) {
+      this._archiveLines();
+    } else if (_creatingCurves) {
+      this._archiveCurves();
+    }
+  }
+
   private _rebuildDraft(data?: LineData) {
     if (!this.draft) {
       return;
@@ -271,7 +283,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       (draft.isUnderCursor({ x: e.offsetX, y: e.offsetY }) ||
         draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY }));
 
-    if (!activeLabel || isUnderDraft) {
+    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
       return;
     }
 
@@ -445,20 +457,17 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this._holdingSlopeEdge = null;
   };
 
-  private _handleRightMouseUp = (e: MouseEvent) => {
+  private _handleRightMouseUp = () => {
     // 移动画布时的右键不归档
     if (axis?.isMoved) {
       return;
     }
 
-    const { _creatingLines, _creatingCurves } = this;
+    this._archiveCreatingShapes();
+  };
 
-    // 归档创建中的图形
-    if (_creatingLines) {
-      this._archiveLines(e);
-    } else if (_creatingCurves) {
-      this._archiveCurves(e);
-    }
+  private _handleEscape = () => {
+    this._archiveCreatingShapes();
   };
 
   private _convertAnnotationItem(data: LineData) {
@@ -484,7 +493,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     return _temp;
   }
 
-  private _archiveLines(e: MouseEvent) {
+  private _archiveLines() {
     const { _creatingLines } = this;
 
     if (!_creatingLines) {
@@ -530,7 +539,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.drawEnd(e, { ...data, pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)) });
+    Tool.drawEnd({ ...data, pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)) });
 
     this._addAnnotation(data);
 
@@ -541,7 +550,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     monitor!.setSelectedAnnotationId(data.id);
   }
 
-  private _archiveCurves(e: MouseEvent) {
+  private _archiveCurves() {
     const { _creatingCurves } = this;
 
     if (!_creatingCurves) {
@@ -585,7 +594,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.drawEnd(e, {
+    Tool.drawEnd({
       ...data,
       pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
       controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
@@ -657,5 +666,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+    eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
   }
 }
