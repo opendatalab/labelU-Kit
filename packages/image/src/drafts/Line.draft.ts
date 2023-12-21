@@ -84,6 +84,10 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
   }
 
   private _onKeyUp = () => {
+    this._removeTempPoint();
+  };
+
+  private _removeTempPoint() {
     const { group, _pointToBeAdded } = this;
 
     // 松开鼠标右键时，删除待添加的控制点
@@ -92,7 +96,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
       this._pointToBeAdded = null;
       axis?.rerender();
     }
-  };
+  }
 
   private _onLineOver = (_e: MouseEvent, line: Line) => {
     const { style, config, group, _pointToBeAdded } = this;
@@ -129,10 +133,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
       });
 
       point.on(EInternalEvent.ShapeOut, () => {
-        // 离开控制点时，删除待添加的控制点
-        group.remove(point);
-        this._pointToBeAdded = null;
-        axis?.rerender();
+        this._removeTempPoint();
       });
       point.onMouseDown(this._onControllerPointDown);
 
