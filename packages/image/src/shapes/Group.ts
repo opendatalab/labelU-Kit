@@ -28,6 +28,8 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _cachedRBush: RBushItem | null = null;
 
+  private _shapes: Shape<Style>[] = [];
+
   private _shapeMapping: Map<string, T> = new Map();
 
   private _event = new EventEmitter();
@@ -130,6 +132,7 @@ export class Group<T extends Shape<Style>, Style> {
       }
 
       this._shapeMapping.set(shape.id, shape);
+      this._shapes.push(shape);
     });
 
     this.update();
@@ -154,16 +157,32 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
-  public remove(...shapes: T[]) {
+  public insert(index: number, ...shapes: T[]) {
     shapes.forEach((shape) => {
-      shape.destroy();
-      this._shapeMapping.delete(shape.id);
+      if (this._shapeMapping.has(shape.id)) {
+        throw Error(`Shape with id ${shape.id} already exists!`);
+      }
+
+      this._shapeMapping.set(shape.id, shape);
+      this._shapes.splice(index, 0, shape);
     });
 
     this.update();
   }
 
-  public each(callback: (shape: T, idx: number) => void | boolean) {
+  public remove(...shapes: T[]) {
+    const { _shapeMapping, _shapes } = this;
+
+    shapes.forEach((shape) => {
+      shape.destroy();
+      _shapeMapping.delete(shape.id);
+      _shapes.splice(_shapes.indexOf(shape), 1);
+    });
+
+    this.update();
+  }
+
+  public each(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = 0; i < this.shapes.length; i += 1) {
@@ -175,7 +194,7 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
-  public reverseEach(callback: (shape: T, idx: number) => void | boolean) {
+  public reverseEach(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = this.shapes.length - 1; i >= 0; i -= 1) {
@@ -210,8 +229,17 @@ export class Group<T extends Shape<Style>, Style> {
     eventEmitter.off(EInternalEvent.Zoom, this._onAxisChange);
   }
 
+  public clear() {
+    this._shapes.forEach((shape) => {
+      shape.destroy();
+    });
+    this._shapes = [];
+    rbush.remove(this._cachedRBush!);
+    this._shapeMapping.clear();
+  }
+
   public get shapes() {
-    return Array.from(this._shapeMapping.values());
+    return this._shapes;
   }
 
   public get(id: string) {

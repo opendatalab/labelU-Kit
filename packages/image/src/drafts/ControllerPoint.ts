@@ -97,6 +97,14 @@ export class ControllerPoint extends Point {
     }
   };
 
+  public clone() {
+    return new ControllerPoint({
+      id: this.id,
+      coordinate: cloneDeep(this.coordinate[0]),
+      outOfImage: this._outOfCanvas,
+    });
+  }
+
   public onMove(handler: (controller: ControllerPoint) => void) {
     this._onMoveHandlers.push(handler);
   }

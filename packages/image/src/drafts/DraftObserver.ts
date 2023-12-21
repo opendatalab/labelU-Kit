@@ -6,6 +6,8 @@ import type { Annotation } from '../annotation/Annotation';
 import type { BasicImageAnnotation } from '../interface';
 import { Point } from '../shapes';
 import type { AxisPoint, Shape } from '../shapes';
+import { ControllerPoint } from './ControllerPoint';
+import { ControllerEdge } from './ControllerEdge';
 
 type Constructor<T extends {}> = new (...args: any[]) => T;
 
@@ -20,6 +22,9 @@ export interface IDraftObserver {
   onMouseUp: MouseListenerHandler;
   // eslint-disable-next-line @typescript-eslint/method-signature-style
   destroy(): void;
+
+  // eslint-disable-next-line @typescript-eslint/method-signature-style
+  clearHandlers(): void;
 
   // eslint-disable-next-line @typescript-eslint/method-signature-style
   isUnderCursor(mouseCoord: AxisPoint): boolean;
@@ -56,6 +61,11 @@ export function DraftObserverMixin<
     }
 
     private _handleMouseDown = (e: MouseEvent) => {
+      // 如果鼠标落在控制点或者控制边上，不选中草稿
+      if (this._isControlUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+        return;
+      }
+
       // 存在草稿说明当前处于编辑状态，只需要判断鼠标是否落在在草稿上即可
       if (this.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
         this.isPicked = true;
@@ -65,6 +75,31 @@ export function DraftObserverMixin<
         }
       }
     };
+
+    private _isControlUnderCursor(mouseCoord: AxisPoint) {
+      const controls = this._getControls();
+
+      for (const control of controls) {
+        if (control.isUnderCursor(mouseCoord)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private _getControls() {
+      const { group } = this;
+      const controls: (ControllerPoint | ControllerEdge)[] = [];
+
+      for (const shape of group.shapes) {
+        if (shape instanceof ControllerPoint || shape instanceof ControllerEdge) {
+          controls.push(shape);
+        }
+      }
+
+      return controls;
+    }
 
     private _handleMouseMove = (e: MouseEvent) => {
       const { _onMoveHandlers, isPicked } = this;
@@ -156,6 +191,12 @@ export function DraftObserverMixin<
       Promise.resolve().then(() => {
         this.group.render(ctx);
       });
+    }
+
+    public clearHandlers() {
+      this._onMoveHandlers = [];
+      this._onMouseDownHandlers = [];
+      this._onMouseUpHandlers = [];
     }
 
     public destroy() {

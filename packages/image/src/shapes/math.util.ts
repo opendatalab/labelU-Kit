@@ -72,3 +72,57 @@ export function isPointInPolygon(point: AxisPoint, polygonCoordinate: AxisPoint[
 
   return inside;
 }
+
+/**
+ * 获取点到两点间的最近点
+ *
+ * @param point 点
+ * @param start 起始点
+ * @param end 结束点
+ * @returns 点到两点间的最近点
+ */
+export function getLatestPointOnLine(point: AxisPoint, start: AxisPoint, end: AxisPoint) {
+  if (!start || !end) {
+    throw Error('Line not found!');
+  }
+
+  if (!point) {
+    throw Error('Point not found!');
+  }
+
+  if (start.x === end.x && start.y === end.y) {
+    return start;
+  }
+
+  if (point.x === start.x && point.y === start.y) {
+    return start;
+  }
+
+  if (point.x === end.x && point.y === end.y) {
+    return end;
+  }
+
+  // 计算向量 AB 和 AP
+  const AB = { x: end.x - start.x, y: end.y - start.y };
+  const AP = { x: point.x - start.x, y: point.y - start.y };
+
+  // 计算点积
+  const dotProduct = AB.x * AP.x + AB.y * AP.y;
+  const squareLengthAB = AB.x * AB.x + AB.y * AB.y;
+
+  let pointOnLine; // 线段上离鼠标最近的点
+
+  if (dotProduct < 0) {
+    pointOnLine = start;
+  } else if (dotProduct > squareLengthAB) {
+    pointOnLine = end;
+  } else {
+    const ratio = dotProduct / squareLengthAB;
+    pointOnLine = {
+      x: start.x + ratio * AB.x,
+      y: start.y + ratio * AB.y,
+    };
+  }
+
+  return pointOnLine;
+}

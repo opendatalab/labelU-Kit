@@ -6,12 +6,15 @@ import { Line } from '../shapes/Line.shape';
 import type { LineData } from '../annotation';
 import type { AxisPoint, PointStyle } from '../shapes';
 import { Rect, Point } from '../shapes';
-import { axis } from '../singletons';
+import { axis, eventEmitter, monitor } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import type { LineToolOptions } from '../tools';
+import { EInternalEvent } from '../enums';
+import { getLatestPointOnLine } from '../shapes/math.util';
+import { Tool } from '../tools/Tool';
 
 export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Point, LineStyle | PointStyle>) {
   public config: LineToolOptions;
@@ -24,6 +27,8 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
 
   private _previousDynamicCoordinates: AxisPoint[][] | null = null;
 
+  private _pointToBeAdded: ControllerPoint | null = null;
+
   constructor(config: LineToolOptions, params: AnnotationParams<LineData, LineStyle>) {
     super(params);
 
@@ -34,6 +39,8 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     this.onMove(this._onMouseMove);
     this.onMouseUp(this._onMouseUp);
     this._createSelection();
+
+    eventEmitter.on(EInternalEvent.KeyUp, this._onKeyUp);
   }
 
   /**
@@ -51,6 +58,9 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
         coordinate: [{ ...startPoint }, { ...endPoint }],
         style,
       });
+
+      line.on(EInternalEvent.ShapeOver, this._onLineOver);
+      line.on(EInternalEvent.ShapeOut, this._onLineOut);
 
       group.add(line);
     }
@@ -72,6 +82,71 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
       group.add(point);
     }
   }
+
+  private _onKeyUp = () => {
+    const { group, _pointToBeAdded } = this;
+
+    // 松开鼠标右键时，删除待添加的控制点
+    if (_pointToBeAdded) {
+      group.remove(_pointToBeAdded);
+      this._pointToBeAdded = null;
+      axis?.rerender();
+    }
+  };
+
+  private _onLineOver = (_e: MouseEvent, line: Line) => {
+    const { style, config, group, _pointToBeAdded } = this;
+
+    // 只有按下 alt 键时，才能在线段上增加控制点
+    if (!monitor?.keyboard.Alt) {
+      return;
+    }
+
+    line.updateStyle({
+      strokeWidth: style.strokeWidth! + 2,
+    });
+
+    const latestPointOnLine = getLatestPointOnLine(
+      {
+        x: _e.offsetX,
+        y: _e.offsetY,
+      },
+      line.dynamicCoordinate[0],
+      line.dynamicCoordinate[1],
+    );
+
+    // 如果存在则只更新坐标
+    if (_pointToBeAdded) {
+      _pointToBeAdded.coordinate[0] = axis!.getOriginalCoord(latestPointOnLine);
+    } else {
+      // 往线上添加点
+      const point = new ControllerPoint({
+        // name存储线段的索引
+        name: group.shapes.indexOf(line).toString(),
+        id: uuid(),
+        coordinate: axis!.getOriginalCoord(latestPointOnLine),
+        outOfImage: config.outOfImage,
+      });
+
+      point.on(EInternalEvent.ShapeOut, () => {
+        // 离开控制点时，删除待添加的控制点
+        group.remove(point);
+        this._pointToBeAdded = null;
+        axis?.rerender();
+      });
+      point.onMouseDown(this._onControllerPointDown);
+
+      this._pointToBeAdded = point;
+
+      group.add(point);
+    }
+  };
+
+  private _onLineOut = (_e: MouseEvent, line: Line) => {
+    const { style } = this;
+
+    line.updateStyle(style);
+  };
 
   /**
    * 选中草稿
@@ -156,6 +231,47 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    * @description 按下控制点时，记录受影响的线段
    */
   private _onControllerPointDown = (point: ControllerPoint) => {
+    const { data, _pointToBeAdded, group, config } = this;
+
+    // 插入控制点
+    if (_pointToBeAdded) {
+      const insertIndex = Number(_pointToBeAdded.name);
+      // 先往data里增加一个点
+      data.pointList.splice(insertIndex + 1, 0, {
+        id: _pointToBeAdded.id,
+        x: _pointToBeAdded.coordinate[0].x,
+        y: _pointToBeAdded.coordinate[0].y,
+      });
+      group.clear();
+      this._setupShapes();
+      this._pointToBeAdded = null;
+      axis?.rerender();
+
+      return;
+    }
+
+    // 删除端点
+    if (monitor?.keyboard.Alt) {
+      // 少于两个点或少于配置的最少点数时，不允许删除
+      if (data.pointList.length <= 2 || data.pointList.length <= config.minPointAmount!) {
+        Tool.error({
+          type: 'minPointAmount',
+          message: `At least ${config.minPointAmount} points are required`,
+        });
+
+        return;
+      }
+      const deleteIndex = group.shapes.indexOf(point) - data.pointList.length + 1;
+      data.pointList.splice(deleteIndex, 1);
+      group.clear();
+      this._setupShapes();
+      this._destroySelection();
+      this._createSelection();
+      axis?.rerender();
+
+      return;
+    }
+
     this._effectedLines = [undefined, undefined];
     this._isControllerPicked = true;
 

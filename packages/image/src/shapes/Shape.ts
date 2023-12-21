@@ -48,6 +48,8 @@ export class Shape<Style> {
    */
   private _coordinate: AxisPoint[];
 
+  private _outCount = 0;
+
   /**
    * 样式
    */
@@ -255,6 +257,7 @@ export class Shape<Style> {
     if (eventName === EInternalEvent.ShapeOver) {
       const handler = (...args: any[]) => {
         this.isMouseOver = true;
+        this._outCount = this._event.listenerCount(EInternalEvent.ShapeOut);
         listener(...args);
       };
 
@@ -264,7 +267,13 @@ export class Shape<Style> {
     if (eventName === EInternalEvent.ShapeOut) {
       const handler = (...args: any[]) => {
         if (this.isMouseOver) {
-          this.isMouseOver = false;
+          this._outCount--;
+
+          // 当所有监听器都触发过一次后，才认为鼠标已经移出
+          if (this._outCount === 0) {
+            this.isMouseOver = false;
+          }
+
           listener(...args);
         }
       };

@@ -49,7 +49,7 @@ export default function App() {
       },
     },
     line: {
-      lineType: 'curve',
+      lineType: 'line',
       outOfCanvas: false,
       labels: [
         {
@@ -103,7 +103,7 @@ export default function App() {
       ],
     },
     polygon: {
-      lineType: 'curve',
+      lineType: 'line',
       outOfCanvas: false,
       closingPointAmount: 5,
       labels: [
