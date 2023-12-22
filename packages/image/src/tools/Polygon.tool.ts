@@ -37,8 +37,8 @@ export interface PolygonToolOptions extends BasicToolParams<PolygonData, Polygon
 
   /**
    * 闭合点个数
-   * @description 至少两个点
-   * @default 2
+   * @description 至少三个点
+   * @default 3
    */
   closingPointAmount?: number;
 }
@@ -71,7 +71,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       lineType: 'line',
       edgeAdsorptive: true,
       outOfImage: true,
-      closingPointAmount: 2,
+      closingPointAmount: 3,
       labels: [],
       hoveredStyle: {},
       selectedStyle: {},

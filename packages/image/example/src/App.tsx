@@ -49,7 +49,7 @@ export default function App() {
       },
     },
     line: {
-      lineType: 'spline',
+      lineType: 'line',
       outOfImage: false,
       labels: [
         {
@@ -105,7 +105,6 @@ export default function App() {
     polygon: {
       lineType: 'line',
       outOfCanvas: false,
-      closingPointAmount: 5,
       labels: [
         {
           id: '1',

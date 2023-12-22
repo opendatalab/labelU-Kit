@@ -206,6 +206,10 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
+  public last() {
+    return this.shapes[this.shapes.length - 1];
+  }
+
   public indexOf(shape: T) {
     return this.shapes.indexOf(shape);
   }

@@ -362,13 +362,14 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
 
     // 创建新的线段
+    const lastLine = this._creatingLines?.last() as Line | null;
     this._creatingLines?.add(
       new Line({
         id: uuid(),
         style: { ...style, stroke: this.getLabelColor(activeLabel) },
         coordinate: [
           {
-            ...startPoint,
+            ...(lastLine ? lastLine.coordinate[1] : startPoint),
           },
           {
             ...startPoint,
@@ -447,8 +448,21 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       // 正在绘制的线段，最后一个端点的坐标跟随鼠标
       const { shapes } = _creatingLines;
       const lastShape = shapes[shapes.length - 1];
-      lastShape.coordinate[1].x = x;
-      lastShape.coordinate[1].y = y;
+
+      // 按住shift绘制水平或垂直线
+      if (monitor?.keyboard.Shift) {
+        // x距离大于y距离，绘制水平线
+        if (Math.abs(x - lastShape.dynamicCoordinate[0].x) > Math.abs(y - lastShape.dynamicCoordinate[0].y)) {
+          lastShape.coordinate[1].x = x;
+          lastShape.coordinate[1].y = lastShape.dynamicCoordinate[0].y;
+        } else {
+          lastShape.coordinate[1].x = lastShape.dynamicCoordinate[0].x;
+          lastShape.coordinate[1].y = y;
+        }
+      } else {
+        lastShape.coordinate[1].x = x;
+        lastShape.coordinate[1].y = y;
+      }
       _creatingLines.update();
     }
   };
