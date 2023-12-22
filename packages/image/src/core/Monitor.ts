@@ -4,7 +4,7 @@ import type { AxisPoint } from '../shapes';
 import type { AnnotationShape, GroupInAnnotation } from '../interface';
 
 const keyEventMapping = {
-  Space: EInternalEvent.Space,
+  ' ': EInternalEvent.Space,
   Shift: EInternalEvent.Shift,
   Alt: EInternalEvent.Alt,
   Control: EInternalEvent.Control,
@@ -33,7 +33,6 @@ export class Monitor {
   private _orderIndexedAnnotationIds: string[] = [];
 
   /** 键盘按键记录 */
-
   private _keyStatus: Record<EventKeyName, boolean> = {
     Space: false,
     Shift: false,
@@ -153,7 +152,7 @@ export class Monitor {
   private _handleMouseOver = (e: MouseEvent) => {
     const { _hoveredGroup, _hoveredShape } = this;
     const rbushItems = this.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
-    const orderIndexedGroup: any[] = [];
+    const orderIndexedGroup: GroupInAnnotation[] = [];
 
     for (const rbushItem of rbushItems) {
       if (rbushItem._group) {
@@ -210,7 +209,7 @@ export class Monitor {
       if (rbushItem._group && lastGroup.id !== rbushItem._group.id) {
         // 向其他group发送鼠标离开事件
         rbushItem._group.emit(EInternalEvent.BBoxOut, e);
-        rbushItem._group.each((shape: any) => {
+        rbushItem._group.each((shape) => {
           shape.emit(EInternalEvent.ShapeOut, e);
         });
       }

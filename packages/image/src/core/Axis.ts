@@ -152,6 +152,8 @@ export class Axis {
       y: e.offsetY,
     };
 
+    console.log(monitor?.keyboard);
+
     if (monitor?.keyboard.Space) {
       this._startPanPoint = {
         x: e.offsetX - this._x,
