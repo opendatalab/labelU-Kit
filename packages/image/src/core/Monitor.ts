@@ -4,7 +4,7 @@ import type { AxisPoint } from '../shapes';
 import type { AnnotationShape, GroupInAnnotation } from '../interface';
 
 const keyEventMapping = {
-  ' ': EInternalEvent.Space,
+  Space: EInternalEvent.Space,
   Shift: EInternalEvent.Shift,
   Alt: EInternalEvent.Alt,
   Control: EInternalEvent.Control,
@@ -76,7 +76,7 @@ export class Monitor {
   };
 
   private _handleKeyDown = (e: KeyboardEvent) => {
-    if (keyEventMapping[e.key as EventKeyName]) {
+    if (e.key === ' ' || keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
       this._updateKeyStatus(e.key, true);
       eventEmitter.emit(keyEventMapping[e.key as EventKeyName], e);
@@ -86,7 +86,7 @@ export class Monitor {
   };
 
   private _handleKeyUp = (e: KeyboardEvent) => {
-    if (keyEventMapping[e.key as EventKeyName]) {
+    if (e.key === ' ' || keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
       this._updateKeyStatus(e.key, false);
     }
