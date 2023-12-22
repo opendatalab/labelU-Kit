@@ -21,10 +21,8 @@ export interface PolygonParams {
 export class Polygon extends Shape<PolygonStyle> {
   /**
    * Rbush 碰撞检测阈值
-   *
-   * TODO: 阈值是否可配置
    */
-  static DISTANCE_THRESHOLD = 2 as const;
+  static DISTANCE_THRESHOLD = 10 as const;
 
   static DEFAULT_STYLE: Required<PolygonStyle> = {
     stroke: '#000',
@@ -63,9 +61,9 @@ export class Polygon extends Shape<PolygonStyle> {
         }
       }
 
-      const extra = rendererStyle.strokeWidth ?? 0 + Polygon.DISTANCE_THRESHOLD;
+      const extra = (rendererStyle.strokeWidth ?? 0) + Polygon.DISTANCE_THRESHOLD;
 
-      return {
+      this.bbox = {
         minX: minX - extra,
         minY: minY - extra,
         maxX: maxX + extra,

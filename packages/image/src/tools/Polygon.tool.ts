@@ -506,6 +506,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
     const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
+    // TODO: 边缘吸附
+
     if (_creatingCurves) {
       const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as Spline;
       const polygonCurve = _creatingCurves.shapes[0] as ClosedSpline;
