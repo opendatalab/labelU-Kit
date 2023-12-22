@@ -208,6 +208,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   protected removeFromDrawing(id: string) {
     this.drawing?.get(id)?.destroy();
     this.drawing?.delete(id);
+    this._removeDataItem(id);
   }
 
   protected clearDrawing() {
@@ -217,12 +218,26 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.drawing?.clear();
   }
 
+  protected deleteDraft() {
+    const { draft } = this;
+
+    if (draft) {
+      draft.destroy();
+      this.draft = null;
+    }
+  }
+
+  private _removeDataItem(id: string) {
+    const index = this._data.findIndex((item) => item.id === id);
+    this._data.splice(index, 1);
+  }
+
   static error(message: { type: string; message: string }) {
     eventEmitter.emit('error', message);
   }
 
-  static drawEnd<T>(data: T) {
-    eventEmitter.emit('drawEnd', data);
+  static onAdd<T>(data: T, e: MouseEvent) {
+    eventEmitter.emit('add', data, e);
   }
 
   static emitSelect<T>(data: T) {
@@ -231,6 +246,10 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   static emitUnSelect<T>(data: T) {
     eventEmitter.emit('unselect', data);
+  }
+
+  static onDelete<T>(data: T) {
+    eventEmitter.emit('delete', data);
   }
 
   public get data() {

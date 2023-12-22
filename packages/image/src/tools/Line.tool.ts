@@ -92,6 +92,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
     eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
+    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
   }
 
   /**
@@ -250,14 +252,14 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  private _archiveCreatingShapes() {
+  private _archiveCreatingShapes(e: MouseEvent) {
     const { _creatingLines, _creatingCurves } = this;
 
     // 归档创建中的图形
     if (_creatingLines) {
-      this._archiveLines();
+      this._archiveLines(e);
     } else if (_creatingCurves) {
-      this._archiveCurves();
+      this._archiveCurves(e);
     }
   }
 
@@ -456,17 +458,43 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this._holdingSlopeEdge = null;
   };
 
-  private _handleRightMouseUp = () => {
+  private _handleRightMouseUp = (e: MouseEvent) => {
     // 移动画布时的右键不归档
     if (axis?.isMoved) {
       return;
     }
 
-    this._archiveCreatingShapes();
+    this._archiveCreatingShapes(e);
   };
 
   private _handleEscape = () => {
-    this._archiveCreatingShapes();
+    this._archiveCreatingShapes(
+      new MouseEvent('escape', {
+        bubbles: true,
+        cancelable: true,
+        clientX: axis?.cursor?.coordinate.x,
+        clientY: axis?.cursor?.coordinate.y,
+      }) as MouseEvent,
+    );
+  };
+
+  private _handleDelete = () => {
+    const { _creatingLines, _creatingCurves, draft } = this;
+
+    // 如果正在创建，则取消创建
+    if (_creatingLines || _creatingCurves) {
+      _creatingLines?.destroy();
+      _creatingCurves?.destroy();
+      this._creatingLines = null;
+      this._creatingCurves = null;
+      axis?.rerender();
+    } else if (draft) {
+      // 如果选中了草稿，则删除草稿
+      const data = cloneDeep(draft.data);
+      this.deleteDraft();
+      axis?.rerender();
+      Tool.onDelete(this._convertAnnotationItem(data));
+    }
   };
 
   private _convertAnnotationItem(data: LineData) {
@@ -492,7 +520,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     return _temp;
   }
 
-  private _archiveLines() {
+  private _archiveLines(e: MouseEvent) {
     const { _creatingLines } = this;
 
     if (!_creatingLines) {
@@ -538,7 +566,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.drawEnd({ ...data, pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)) });
+    Tool.onAdd({ ...data, pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)) }, e);
 
     this._addAnnotation(data);
 
@@ -549,7 +577,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     monitor!.setSelectedAnnotationId(data.id);
   }
 
-  private _archiveCurves() {
+  private _archiveCurves(e: MouseEvent) {
     const { _creatingCurves } = this;
 
     if (!_creatingCurves) {
@@ -593,11 +621,14 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.drawEnd({
-      ...data,
-      pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
-      controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
-    });
+    Tool.onAdd(
+      {
+        ...data,
+        pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
+        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
+      },
+      e,
+    );
 
     this._addAnnotation(data);
 
@@ -666,5 +697,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
     eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
+    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }
 }

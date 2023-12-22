@@ -68,6 +68,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
+    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
   }
 
   private _setupShapes(data: PointData[] = this._data) {
@@ -168,6 +170,19 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     };
   }
 
+  private _handleDelete = () => {
+    const { draft } = this;
+
+    // 如果正在创建，则取消创建
+    if (draft) {
+      // 如果选中了草稿，则删除草稿
+      const data = cloneDeep(draft.data);
+      this.deleteDraft();
+      axis?.rerender();
+      Tool.onDelete({ ...data, ...axis!.convertCanvasCoordinate(data) });
+    }
+  };
+
   protected onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
     Tool.emitSelect({
       ...annotation.data,
@@ -238,7 +253,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       y: axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY)),
     };
 
-    Tool.drawEnd({ ...data, ...axis!.convertCanvasCoordinate(data) });
+    Tool.onAdd({ ...data, ...axis!.convertCanvasCoordinate(data) }, e);
 
     // 创建草稿
     this._createDraft(data);
@@ -352,6 +367,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
+    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

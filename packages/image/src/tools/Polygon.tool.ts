@@ -91,6 +91,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
     eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
+    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
   }
 
   /**
@@ -291,19 +293,45 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this._createDraft(dataClone);
   }
 
-  private _archiveCreatingShapes() {
+  private _archiveCreatingShapes(e: MouseEvent) {
     const { _creatingShapes, _creatingCurves } = this;
 
     // 归档创建中的图形
     if (_creatingCurves) {
-      this._archivePolygonCurves();
+      this._archivePolygonCurves(e);
     } else if (_creatingShapes) {
-      this._archivePolygons();
+      this._archivePolygons(e);
     }
   }
 
   private _handleEscape = () => {
-    this._archiveCreatingShapes();
+    this._archiveCreatingShapes(
+      new MouseEvent('escape', {
+        bubbles: true,
+        cancelable: true,
+        clientX: axis?.cursor?.coordinate.x,
+        clientY: axis?.cursor?.coordinate.y,
+      }) as MouseEvent,
+    );
+  };
+
+  private _handleDelete = () => {
+    const { _creatingShapes, _creatingCurves, draft } = this;
+
+    // 如果正在创建，则取消创建
+    if (_creatingShapes || _creatingCurves) {
+      _creatingShapes?.destroy();
+      _creatingCurves?.destroy();
+      this._creatingShapes = null;
+      this._creatingCurves = null;
+      axis?.rerender();
+    } else if (draft) {
+      // 如果选中了草稿，则删除草稿
+      const data = cloneDeep(draft.data);
+      this.deleteDraft();
+      axis?.rerender();
+      Tool.onDelete(this._convertAnnotationItem(data));
+    }
   };
 
   private _handleLeftMouseDown = (e: MouseEvent) => {
@@ -606,7 +634,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this._holdingSlopeEdge = null;
   };
 
-  private _handleRightMouseUp = () => {
+  private _handleRightMouseUp = (e: MouseEvent) => {
     const { _creatingShapes, _creatingCurves } = this;
     // 移动画布时的右键不归档
     if (axis?.isMoved) {
@@ -615,9 +643,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     // 归档创建中的图形
     if (_creatingCurves) {
-      this._archivePolygonCurves();
+      this._archivePolygonCurves(e);
     } else if (_creatingShapes) {
-      this._archivePolygons();
+      this._archivePolygons(e);
     }
   };
 
@@ -644,7 +672,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     return _temp;
   }
 
-  private _archivePolygonCurves() {
+  private _archivePolygonCurves(e: MouseEvent) {
     const { _creatingCurves } = this;
 
     if (!_creatingCurves) {
@@ -681,11 +709,14 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
-    Tool.drawEnd({
-      ...data,
-      pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
-      controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
-    });
+    Tool.onAdd(
+      {
+        ...data,
+        pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
+        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
+      },
+      e,
+    );
 
     this._addAnnotation(data);
     _creatingCurves.destroy();
@@ -695,7 +726,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     monitor!.setSelectedAnnotationId(data.id);
   }
 
-  private _archivePolygons() {
+  private _archivePolygons(e: MouseEvent) {
     const { _creatingShapes } = this;
 
     if (!_creatingShapes) {
@@ -726,10 +757,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
-    Tool.drawEnd({
-      ...data,
-      pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
-    });
+    Tool.onAdd(
+      {
+        ...data,
+        pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
+      },
+      e,
+    );
 
     this._addAnnotation(data);
     _creatingShapes.destroy();
@@ -807,5 +841,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
     eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
+    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }
 }

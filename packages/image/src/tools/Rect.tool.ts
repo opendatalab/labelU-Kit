@@ -71,6 +71,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
+    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
   }
 
   /**
@@ -252,7 +254,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
-  private _archiveCreatingShapes() {
+  private _archiveCreatingShapes(e: MouseEvent) {
     const { _creatingShape, activeLabel } = this;
 
     if (!_creatingShape) {
@@ -273,10 +275,13 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       return;
     }
 
-    Tool.drawEnd({
-      ...data,
-      ...this._convertAnnotationItem(data),
-    });
+    Tool.onAdd(
+      {
+        ...data,
+        ...this._convertAnnotationItem(data),
+      },
+      e,
+    );
 
     this._createDraft(data);
     _creatingShape.destroy();
@@ -297,6 +302,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this._createDraft(dataClone);
   }
 
+  // ================== 键盘事件 ==================
   /**
    * Esc键取消绘制
    */
@@ -304,6 +310,23 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this._creatingShape?.destroy();
     this._creatingShape = null;
     axis?.rerender();
+  };
+
+  private _handleDelete = () => {
+    const { _creatingShape, draft } = this;
+
+    // 如果正在创建，则取消创建
+    if (_creatingShape) {
+      _creatingShape.destroy();
+      this._creatingShape = null;
+      axis?.rerender();
+    } else if (draft) {
+      // 如果选中了草稿，则删除草稿
+      const data = cloneDeep(draft.data);
+      this.deleteDraft();
+      axis?.rerender();
+      Tool.onDelete(this._convertAnnotationItem(data));
+    }
   };
 
   private _handleMouseDown = (e: MouseEvent) => {
@@ -320,7 +343,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this._archiveDraft();
 
     if (_creatingShape) {
-      this._archiveCreatingShapes();
+      this._archiveCreatingShapes(e);
     } else {
       // 记录起始点坐标
       this._startPoint = axis!.getOriginalCoord({
@@ -426,5 +449,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
+    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
+    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }
 }

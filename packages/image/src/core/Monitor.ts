@@ -68,6 +68,7 @@ export class Monitor {
     document.addEventListener('keyup', this._handleKeyUp, false);
 
     eventEmitter.on(EInternalEvent.RightMouseUpWithoutAxisChange, this._handleRightMouseUp);
+    eventEmitter.on('delete', this._updateOrderIndexedAnnotationIds);
   }
 
   private _handleContextMenu = (e: MouseEvent) => {
@@ -77,7 +78,7 @@ export class Monitor {
   private _handleKeyDown = (e: KeyboardEvent) => {
     if (keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
-      this._setKeyStatus(e);
+      this._updateKeyStatus(e.key, true);
       eventEmitter.emit(keyEventMapping[e.key as EventKeyName], e);
     }
 
@@ -87,31 +88,30 @@ export class Monitor {
   private _handleKeyUp = (e: KeyboardEvent) => {
     if (keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
-      this._resetKeyStatus();
+      this._updateKeyStatus(e.key, false);
     }
 
     eventEmitter.emit(EInternalEvent.KeyUp, e);
   };
 
-  private _setKeyStatus(e: KeyboardEvent) {
-    this._keyStatus.Space = e.key === ' ';
-    this._keyStatus.Shift = e.key === 'Shift';
-    this._keyStatus.Alt = e.key === 'Alt';
-    this._keyStatus.Control = e.key === 'Control';
-    this._keyStatus.Backspace = e.key === 'Backspace';
-    this._keyStatus.Delete = e.key === 'Delete';
-    this._keyStatus.Escape = e.key === 'Escape';
+  private _updateKeyStatus(key: string, value: boolean) {
+    if (key === ' ') {
+      this._keyStatus.Space = value;
+    } else {
+      this._keyStatus[key as EventKeyName] = value;
+    }
   }
 
-  private _resetKeyStatus() {
-    this._keyStatus.Space = false;
-    this._keyStatus.Shift = false;
-    this._keyStatus.Alt = false;
-    this._keyStatus.Control = false;
-    this._keyStatus.Backspace = false;
-    this._keyStatus.Delete = false;
-    this._keyStatus.Escape = false;
-  }
+  private _updateOrderIndexedAnnotationIds = (data: any) => {
+    const { _orderIndexedAnnotationIds } = this;
+    const { order } = data;
+
+    if (order === undefined) {
+      return;
+    }
+
+    _orderIndexedAnnotationIds.splice(order, 1);
+  };
 
   private _handleMouseDown = (e: MouseEvent) => {
     if (e.button === 0) {

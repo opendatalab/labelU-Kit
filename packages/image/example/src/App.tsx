@@ -269,8 +269,8 @@ export default function App() {
       console.log('hover', data);
     });
 
-    engine.on('drawEnd', (...args) => {
-      console.info('drawEnd', ...args);
+    engine.on('add', (...args) => {
+      console.info('add', ...args);
     });
 
     engine.on('select', (...args) => {
@@ -286,6 +286,9 @@ export default function App() {
     });
     engine.on('error', (error) => {
       console.error('Error', error);
+    });
+    engine.on('delete', (...args) => {
+      console.info('Delete', ...args);
     });
     engine.on('render', () => {
       console.log('Render');
