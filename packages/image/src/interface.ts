@@ -1,4 +1,14 @@
-import type { LineData, PointData, PolygonData, RectData } from './annotation';
+import type {
+  LineData,
+  LineGroup,
+  PointData,
+  PointGroup,
+  PolygonData,
+  PolygonGroup,
+  RectData,
+  RectGroup,
+} from './annotation';
+import type { ClosedSpline, Line, Point, Polygon, Rect, Spline } from './shapes';
 import type {
   LineTool,
   LineToolOptions,
@@ -9,6 +19,8 @@ import type {
   RectTool,
   RectToolOptions,
 } from './tools';
+
+export type GroupInAnnotation = LineGroup | PointGroup | PolygonGroup | RectGroup;
 
 /**
  * 图片标注结果的基础字段
@@ -38,6 +50,8 @@ export type ToolOptions = LineToolOptions | PointToolOptions | RectToolOptions |
 export type AnnotationData = LineData | PointData | RectData | PolygonData;
 
 export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool;
+
+export type AnnotationShape = Line | Point | Rect | Polygon | Spline | ClosedSpline;
 
 export type ToolName = 'line' | 'point' | 'polygon' | 'rect';
 

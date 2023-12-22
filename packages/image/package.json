@@ -49,6 +49,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
+    "polygon-clipping": "^0.15.7",
     "rbush": "^3.0.1",
     "uuid": "^9.0.0"
   },

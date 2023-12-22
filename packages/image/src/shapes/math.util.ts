@@ -1,3 +1,5 @@
+import type { BBox } from 'rbush';
+
 import type { AxisPoint } from './Point.shape';
 
 /**
@@ -125,4 +127,34 @@ export function getLatestPointOnLine(point: AxisPoint, start: AxisPoint, end: Ax
   }
 
   return pointOnLine;
+}
+
+/**
+ * 判定两个矩形是否相交
+ *
+ * @param bbox1 矩形1
+ * @param bbox2 矩形2
+ */
+export function isBBoxIntersect(bbox1: BBox, bbox2: BBox) {
+  const { minX: minX1, minY: minY1, maxX: maxX1, maxY: maxY1 } = bbox1;
+  const { minX: minX2, minY: minY2, maxX: maxX2, maxY: maxY2 } = bbox2;
+
+  return !(minX2 > maxX1 || maxX2 < minX1 || minY2 > maxY1 || maxY2 < minY1);
+}
+
+/**
+ * 用一个多边形减去多个多边形，生成新的多边形
+ *
+ * @param source 被减数
+ * @param targets 减数
+ * @returns Promise 差集
+ */
+export async function generatePolygonsFromDifference(source: AxisPoint[], targets: AxisPoint[][]) {
+  const sourcePolygon = source.map((point) => [point.x, point.y]);
+  const targetPolygons = targets.map((target) => [target.map((point) => [point.x, point.y])]);
+
+  // @ts-ignore
+  return import('polygon-clipping').then(({ default: polygonClipping }) => {
+    return polygonClipping.difference([sourcePolygon] as any, targetPolygons as any);
+  });
 }

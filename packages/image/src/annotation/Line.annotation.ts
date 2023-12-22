@@ -6,12 +6,14 @@ import { Annotation } from './Annotation';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import type { AxisPoint } from '../shapes/Point.shape';
-import type { TextStyle } from '../shapes';
+import type { Group, TextStyle } from '../shapes';
 import { Spline, ShapeText } from '../shapes';
 
 export interface PointItem extends AxisPoint {
   id: string;
 }
+
+export type LineGroup = Group<Line | ShapeText, LineStyle>;
 
 export interface LineData extends BasicImageAnnotation {
   pointList: PointItem[];

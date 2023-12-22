@@ -1,6 +1,7 @@
 import { EInternalEvent } from '../enums';
 import { eventEmitter, rbush } from '../singletons';
 import type { AxisPoint } from '../shapes';
+import type { AnnotationShape, GroupInAnnotation } from '../interface';
 
 const keyEventMapping = {
   Space: EInternalEvent.Space,
@@ -23,9 +24,9 @@ type EventKeyName = keyof typeof keyEventMapping;
 export class Monitor {
   private _canvas: HTMLCanvasElement;
 
-  public _hoveredGroup: any = null;
+  public _hoveredGroup: GroupInAnnotation | null = null;
 
-  private _hoveredShape: any = null;
+  private _hoveredShape: AnnotationShape | null = null;
 
   public selectedAnnotationId: string | null = null;
 
@@ -187,7 +188,7 @@ export class Monitor {
         _hoveredGroup.emit(EInternalEvent.BBoxOut, e);
       }
 
-      if (_hoveredShape && _hoveredShape.id !== this._hoveredShape.id) {
+      if (_hoveredShape && _hoveredShape.id !== this._hoveredShape?.id) {
         _hoveredShape.emit(EInternalEvent.ShapeOut, e, _hoveredShape);
       }
 

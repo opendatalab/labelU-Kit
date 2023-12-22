@@ -6,6 +6,7 @@ import { Annotation } from './Annotation';
 import { Rect, type RectStyle } from '../shapes/Rect.shape';
 import type { Line } from '../shapes/Line.shape';
 import { ShapeText } from '../shapes/Text.shape';
+import type { Group } from '../shapes';
 
 export interface RectData extends BasicImageAnnotation {
   x: number;
@@ -13,6 +14,8 @@ export interface RectData extends BasicImageAnnotation {
   width: number;
   height: number;
 }
+
+export type RectGroup = Group<Rect | ShapeText, RectStyle>;
 
 export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectStyle> {
   constructor(params: AnnotationParams<RectData, RectStyle>) {

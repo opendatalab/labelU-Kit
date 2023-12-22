@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
-import type { PolygonData } from '../annotation';
+import type { PolygonData, PolygonGroup } from '../annotation';
 import type { AxisPoint, PointStyle, PolygonStyle, Point } from '../shapes';
 import { Polygon } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
@@ -12,17 +12,15 @@ import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import { ControllerEdge } from './ControllerEdge';
-import type { PolygonToolOptions } from '../tools';
+import type { PolygonTool, PolygonToolOptions } from '../tools';
 import { EInternalEvent } from '../enums';
-import { getLatestPointOnLine } from '../shapes/math.util';
+import { generatePolygonsFromDifference, getLatestPointOnLine, isBBoxIntersect } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
 
 export class DraftPolygon extends DraftObserverMixin(
   Annotation<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle>,
 ) {
   public config: PolygonToolOptions;
-
-  private _isEdgeControllerPicked: boolean = false;
 
   private _isControllerPicked: boolean = false;
 
@@ -55,16 +53,22 @@ export class DraftPolygon extends DraftObserverMixin(
 
   private _pointToBeAdded: ControllerPoint | null = null;
 
-  constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>) {
+  /**
+   * 工具引用，用于获取所有多边形
+   */
+  private _tool: PolygonTool;
+
+  constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>, tool: PolygonTool) {
     super(params);
 
     this.config = config;
-
+    this._tool = tool;
     this._setupShapes();
     this.onMouseDown(this._onMouseDown);
     this.onMove(this._onMouseMove);
     this.onMouseUp(this._onMouseUp);
 
+    eventEmitter.on(EInternalEvent.KeyDown, this._onKeyDown);
     eventEmitter.on(EInternalEvent.KeyUp, this._onKeyUp);
   }
 
@@ -120,6 +124,77 @@ export class DraftPolygon extends DraftObserverMixin(
       point.onMouseUp(this._onControllerPointUp);
 
       group.add(point);
+    }
+  }
+
+  /**
+   * 按下键盘
+   *
+   * @description
+   * 1. 按下 alt + x，减去跟其他多边形重合的部分
+   */
+  _onKeyDown = (e: KeyboardEvent) => {
+    if (e.code === 'KeyX' && e.altKey) {
+      e.preventDefault();
+      this._cutPolygon();
+    }
+  };
+
+  /**
+   * 减去跟其他多边形重合的部分
+   */
+  private async _cutPolygon() {
+    // 找出有交集的其他多边形
+    const groups: PolygonGroup[] = [];
+    const polygon = this.group.shapes[0] as Polygon;
+
+    this._tool.drawing?.forEach((annotation) => {
+      if (annotation.group.id !== this.group.id && isBBoxIntersect(polygon.bbox, annotation.group.bbox)) {
+        groups.push(annotation.group as PolygonGroup);
+      }
+    });
+
+    // 从多边形中减去跟其他多边形重合的部分
+    const polygons = await generatePolygonsFromDifference(
+      polygon.dynamicCoordinate,
+      groups.map((group) => {
+        return (group.shapes[0] as Polygon).dynamicCoordinate;
+      }),
+    );
+
+    if (polygons.length > 0) {
+      const firstPolygon = polygons.shift();
+      // 说明交集后生成的多边形只有一个，则使用当前多边形的id
+      this.data.pointList = firstPolygon![0].map((item: number[]) => {
+        return {
+          id: uuid(),
+          ...axis!.getOriginalCoord({
+            x: item[0],
+            y: item[1],
+          }),
+        };
+      });
+      // 更新当前草稿
+      this.group.clear();
+      this._setupShapes();
+      // 创建新的多边形标注
+      const newAnnotationsData = polygons.map((items) => {
+        return {
+          ...cloneDeep(this.data),
+          id: uuid(),
+          pointList: items[0].map((item: number[]) => {
+            return {
+              id: uuid(),
+              ...axis!.getOriginalCoord({
+                x: item[0],
+                y: item[1],
+              }),
+            };
+          }),
+        };
+      });
+      this._tool.createAnnotationsFromData(newAnnotationsData);
+      axis?.rerender();
     }
   }
 
@@ -371,8 +446,6 @@ export class DraftPolygon extends DraftObserverMixin(
   // ========================== 控制边 ==========================
 
   private _onEdgeDown = (_e: MouseEvent, edge: ControllerEdge) => {
-    this._isEdgeControllerPicked = true;
-
     const { group } = this;
 
     // 记录受影响的控制点
@@ -510,7 +583,6 @@ export class DraftPolygon extends DraftObserverMixin(
   };
 
   private _onEdgeUp = () => {
-    this._isEdgeControllerPicked = false;
     this._effectedControllerPoints = [];
     this._effectedCoordinateIndexes = [];
     this._effectedControllerEdges = [];
@@ -530,6 +602,7 @@ export class DraftPolygon extends DraftObserverMixin(
 
   public destroy() {
     super.destroy();
+    eventEmitter.off(EInternalEvent.KeyDown, this._onKeyDown);
     eventEmitter.off(EInternalEvent.KeyUp, this._onKeyUp);
   }
 

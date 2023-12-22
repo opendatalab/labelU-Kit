@@ -6,7 +6,8 @@ import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import { Polygon, type PolygonStyle } from '../shapes/Polygon.shape';
 import { AnnotationLine, type PointItem } from './Line.annotation';
-import { ClosedSpline, type AxisPoint, ShapeText } from '../shapes';
+import { ClosedSpline, ShapeText } from '../shapes';
+import type { Group, AxisPoint } from '../shapes';
 
 export interface PolygonData extends BasicImageAnnotation {
   pointList: PointItem[];
@@ -17,6 +18,8 @@ export interface PolygonData extends BasicImageAnnotation {
    */
   controlPoints?: AxisPoint[];
 }
+
+export type PolygonGroup = Group<Polygon | ShapeText, PolygonStyle>;
 
 export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonStyle> {
   constructor(params: AnnotationParams<PolygonData, PolygonStyle>) {

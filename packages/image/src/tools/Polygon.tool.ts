@@ -247,17 +247,21 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   private _createDraft(data: PolygonData) {
     this.draft =
       data.type === 'line'
-        ? new DraftPolygon(this.config, {
-            id: data.id,
-            data,
-            showOrder: false,
-            label: '',
-            style: this._makeSelectedStyle(data.label),
-            // 在草稿上添加取消选中的事件监听
-            onUnSelect: this.onUnSelect,
-            onBBoxOut: this.handlePointStyle,
-            onBBoxOver: this.handlePointStyle,
-          })
+        ? new DraftPolygon(
+            this.config,
+            {
+              id: data.id,
+              data,
+              showOrder: false,
+              label: '',
+              style: this._makeSelectedStyle(data.label),
+              // 在草稿上添加取消选中的事件监听
+              onUnSelect: this.onUnSelect,
+              onBBoxOut: this.handlePointStyle,
+              onBBoxOver: this.handlePointStyle,
+            },
+            this,
+          )
         : new DraftPolygonCurve(this.config, {
             id: data.id,
             data,
@@ -773,14 +777,27 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     monitor!.setSelectedAnnotationId(data.id);
   }
 
-  public getPolygonCoordinates() {
-    const { draft } = this;
+  public createAnnotationsFromData(datas: PolygonData[]) {
+    const { drawing } = this;
 
-    if (!draft) {
-      return [];
+    if (!datas) {
+      return;
     }
 
-    return cloneDeep(draft.group.shapes[0].dynamicCoordinate);
+    datas.forEach((data) => {
+      drawing!.set(
+        data.id,
+        new AnnotationPolygon({
+          id: data.id,
+          data,
+          showOrder: this.showOrder,
+          label: this.getLabelText(data.label),
+          style: this._makeStaticStyle(data.label),
+          hoveredStyle: this._makeHoveredStyle(data.label),
+          onSelect: this.onSelect,
+        }),
+      );
+    });
   }
 
   public deactivate(): void {

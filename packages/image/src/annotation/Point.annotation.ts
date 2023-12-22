@@ -7,8 +7,11 @@ import { Point } from '../shapes/Point.shape';
 import type { AxisPoint, PointStyle } from '../shapes/Point.shape';
 import { axis } from '../singletons';
 import { ShapeText } from '../shapes/Text.shape';
+import type { Group } from '../shapes';
 
 export type PointData = BasicImageAnnotation & AxisPoint;
+
+export type PointGroup = Group<Point | ShapeText, PointStyle>;
 
 export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, PointStyle> {
   constructor(params: AnnotationParams<PointData, PointStyle>) {
