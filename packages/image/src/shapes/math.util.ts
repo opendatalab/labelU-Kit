@@ -154,7 +154,12 @@ export async function generatePolygonsFromDifference(source: AxisPoint[], target
   const targetPolygons = targets.map((target) => [target.map((point) => [point.x, point.y])]);
 
   // @ts-ignore
-  return import('polygon-clipping').then(({ default: polygonClipping }) => {
-    return polygonClipping.difference([sourcePolygon] as any, targetPolygons as any);
-  });
+  return import('polygon-clipping')
+    .then(({ default: polygonClipping }) => {
+      return polygonClipping.difference([sourcePolygon] as any, targetPolygons as any);
+    })
+    .catch((error) => {
+      console.error(error);
+      return [];
+    });
 }
