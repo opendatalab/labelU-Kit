@@ -6,7 +6,7 @@ import { Line } from '../shapes/Line.shape';
 import type { PolygonData, PolygonGroup } from '../annotation';
 import type { AxisPoint, PointStyle, PolygonStyle, Point } from '../shapes';
 import { Polygon } from '../shapes';
-import { axis, eventEmitter, monitor } from '../singletons';
+import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotation/Annotation';
 import { Annotation } from '../annotation/Annotation';
 import { ControllerPoint } from './ControllerPoint';
@@ -164,7 +164,9 @@ export class DraftPolygon extends DraftObserverMixin(
 
     if (polygons.length > 0) {
       const firstPolygon = polygons.shift();
-      // 说明交集后生成的多边形只有一个，则使用当前多边形的id
+      // NOTE: 生成的多边形坐标最后一个点和第一个点是重复的，需要删除
+      firstPolygon![0].pop();
+      // 第一个多边形使用当前多边形的id
       this.data.pointList = firstPolygon![0].map((item: number[]) => {
         return {
           id: uuid(),
@@ -179,6 +181,9 @@ export class DraftPolygon extends DraftObserverMixin(
       this._setupShapes();
       // 创建新的多边形标注
       const newAnnotationsData = polygons.map((items) => {
+        // NOTE: 生成的多边形坐标最后一个点和第一个点是重复的，需要删除
+        items[0].pop();
+
         return {
           ...cloneDeep(this.data),
           id: uuid(),
@@ -407,26 +412,45 @@ export class DraftPolygon extends DraftObserverMixin(
    * @param changedCoordinate
    * @description 控制点移动时，更新线段的端点
    */
-  private _onControllerPointMove = ({ coordinate }: ControllerPoint) => {
+  private _onControllerPointMove = ({ coordinate }: ControllerPoint, e: MouseEvent) => {
     const { _pointIndex, _isControllerPicked, _effectedLines } = this;
 
     if (!_isControllerPicked || _pointIndex === null || !_effectedLines) {
       return;
     }
 
-    this.group.shapes[0].coordinate[_pointIndex].x = coordinate[0].x;
-    this.group.shapes[0].coordinate[_pointIndex].y = coordinate[0].y;
+    let x = coordinate[0].x;
+    let y = coordinate[0].y;
+
+    const latestPoint = rbush.scanPolygonsAndSetNearestPoint(
+      {
+        x: e.offsetX,
+        y: e.offsetY,
+      },
+      10,
+      [this.group.id],
+    );
+
+    if (latestPoint) {
+      x = latestPoint.x;
+      y = latestPoint.y;
+      coordinate[0].x = x;
+      coordinate[0].y = y;
+    }
+
+    this.group.shapes[0].coordinate[_pointIndex].x = x;
+    this.group.shapes[0].coordinate[_pointIndex].y = y;
 
     // 更新受影响的线段端点
     if (_effectedLines[1] === undefined && _effectedLines[0]) {
-      _effectedLines[0].coordinate = [{ ...coordinate[0] }, { ..._effectedLines[0].coordinate[1] }];
+      _effectedLines[0].coordinate = [{ x, y }, { ..._effectedLines[0].coordinate[1] }];
     } else if (_effectedLines[0] === undefined && _effectedLines[1]) {
-      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { ...coordinate[0] }];
+      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { x, y }];
     } else if (_effectedLines[0] && _effectedLines[1]) {
       // 更新下一个线段的起点
-      _effectedLines[0].coordinate = [{ ...coordinate[0] }, { ..._effectedLines[0].coordinate[1] }];
+      _effectedLines[0].coordinate = [{ x, y }, { ..._effectedLines[0].coordinate[1] }];
       // 更新前一个线段的终点
-      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { ...coordinate[0] }];
+      _effectedLines[1].coordinate = [{ ..._effectedLines[1].coordinate[0] }, { x, y }];
     }
 
     // 手动更新组合的包围盒

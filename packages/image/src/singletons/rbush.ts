@@ -1,16 +1,4 @@
-import type { BBox } from 'rbush';
-import RBush from 'rbush';
-
-import type { Shape } from '@/shapes';
-import type { Group } from '@/shapes/Group';
-
-export interface RBushItem extends BBox {
-  id: string;
-  _shape?: Shape<any>;
-  _group?: Group<Shape<any>, any>;
-  /** 标注顺序，目前只在group当中有这个值 */
-  _order?: number;
-}
+import { CustomRBush } from '../core/CustomRBush';
 
 /**
  * 以 R-Tree 为基础的空间索引
@@ -18,4 +6,4 @@ export interface RBushItem extends BBox {
  *
  * @see https://github.com/mourner/rbush#readme
  */
-export const rbush = new RBush<RBushItem>();
+export const rbush = new CustomRBush();

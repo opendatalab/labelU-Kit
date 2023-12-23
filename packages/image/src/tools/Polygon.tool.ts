@@ -7,7 +7,7 @@ import { Tool } from './Tool';
 import { AnnotationPolygon } from '../annotation';
 import type { AxisPoint, LineStyle, PointStyle, PolygonStyle } from '../shapes';
 import { Spline, ClosedSpline, Line, Point, Polygon } from '../shapes';
-import { axis, eventEmitter, monitor } from '../singletons';
+import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
 import type { PolygonData } from '../annotation/Polygon.annotation';
@@ -63,7 +63,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   private _holdingSlopeEdge: Line | null = null;
 
-  public _creatingCurves: Group<ClosedSpline | Line | Point, LineStyle | PointStyle> | null = null;
+  private _creatingCurves: Group<ClosedSpline | Line | Point, LineStyle | PointStyle> | null = null;
 
   constructor(params: PolygonToolOptions) {
     super({
@@ -97,13 +97,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   /**
    * 点击画布事件处理
-   *
-   * @description
-   * 点击标注时：
-   * 1. 销毁被点击的标注的drawing（成品）
-   * 2. 进入pen的编辑模式
-   *  2.1. 创建新的drawing（成品），需要包含点、线
-   *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationPolygon) => {
     Tool.emitSelect(this._convertAnnotationItem(annotation.data));
@@ -471,7 +464,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           style: this._makeStaticStyle(activeLabel),
           coordinate: [
             {
-              ...startPoint,
+              ...(rbush.nearestPoint?.coordinate[0] ?? startPoint),
             },
           ],
         }),
@@ -490,7 +483,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         style: { ...style, stroke: this.getLabelColor(activeLabel) },
         coordinate: [
           {
-            ...startPoint,
+            ...(rbush.nearestPoint?.coordinate[0] ?? startPoint),
           },
           {
             ...startPoint,
@@ -501,12 +494,24 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   };
 
   private _handleLeftMouseMove = (e: MouseEvent) => {
-    const { _creatingShapes, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config } = this;
+    const { _creatingShapes, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config, activeLabel } = this;
 
-    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
-    const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
+    let x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
+    let y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
-    // TODO: 边缘吸附
+    // 激活状态才能吸附
+    if (activeLabel && config.lineType === 'line' && config.edgeAdsorptive) {
+      const nearestPoint = rbush.scanPolygonsAndSetNearestPoint(
+        { x: e.offsetX, y: e.offsetY },
+        10,
+        _creatingShapes ? [_creatingShapes.id] : [],
+      );
+
+      if (nearestPoint) {
+        x = nearestPoint.x;
+        y = nearestPoint.y;
+      }
+    }
 
     if (_creatingCurves) {
       const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as Spline;

@@ -3,7 +3,7 @@ import type { BBox } from 'rbush';
 
 import type { Shape } from './Shape';
 import { EInternalEvent } from '../enums';
-import type { RBushItem } from '../singletons';
+import type { RBushItem } from '../core/CustomRBush';
 import { eventEmitter, rbush } from '../singletons';
 import { type AxisPoint } from './Point.shape';
 import { ShapeText } from './Text.shape';

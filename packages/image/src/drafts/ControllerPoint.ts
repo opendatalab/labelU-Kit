@@ -19,18 +19,24 @@ const HOVERED_STYLE = {
   radius: 4,
 };
 
+type ControlMoveHandler = (controller: ControllerPoint, e: MouseEvent) => void;
+
+export interface ControllerPointParams extends PointParams {
+  outOfImage?: boolean;
+}
+
 export class ControllerPoint extends Point {
   private _previousDynamicCoordinate: AxisPoint | null = null;
 
   private _outOfCanvas: boolean = true;
 
-  private _onMoveHandlers: ((controller: ControllerPoint) => void)[] = [];
+  private _onMoveHandlers: ControlMoveHandler[] = [];
 
-  private _onMouseDownHandlers: ((controller: ControllerPoint) => void)[] = [];
+  private _onMouseDownHandlers: ControlMoveHandler[] = [];
 
-  private _onMouseUpHandlers: ((controller: ControllerPoint) => void)[] = [];
+  private _onMouseUpHandlers: ControlMoveHandler[] = [];
 
-  constructor({ outOfImage, ...params }: PointParams & { outOfImage?: boolean }) {
+  constructor({ outOfImage, ...params }: ControllerPointParams) {
     super({ ...params, style: DEFAULT_STYLE });
 
     this._outOfCanvas = outOfImage ?? true;
@@ -50,17 +56,17 @@ export class ControllerPoint extends Point {
     this.updateStyle(DEFAULT_STYLE);
   };
 
-  private _handleMouseDown = () => {
+  private _handleMouseDown = (e: MouseEvent) => {
     if (this.isMouseOver) {
       this._previousDynamicCoordinate = cloneDeep(this.dynamicCoordinate[0]);
 
       for (const handler of this._onMouseDownHandlers) {
-        handler(this);
+        handler(this, e);
       }
     }
   };
 
-  private _handleMouseMove = () => {
+  private _handleMouseMove = (e: MouseEvent) => {
     const { _previousDynamicCoordinate, _onMoveHandlers, _outOfCanvas } = this;
 
     if (!_previousDynamicCoordinate) {
@@ -79,11 +85,11 @@ export class ControllerPoint extends Point {
     this.coordinate = [axis!.getOriginalCoord({ x, y })];
 
     for (const handler of _onMoveHandlers) {
-      handler(this);
+      handler(this, e);
     }
   };
 
-  private _handleMouseUp = () => {
+  private _handleMouseUp = (e: MouseEvent) => {
     const { _previousDynamicCoordinate } = this;
 
     if (!_previousDynamicCoordinate) {
@@ -93,7 +99,7 @@ export class ControllerPoint extends Point {
     this._previousDynamicCoordinate = null;
 
     for (const handler of this._onMouseUpHandlers) {
-      handler(this);
+      handler(this, e);
     }
   };
 
@@ -105,15 +111,15 @@ export class ControllerPoint extends Point {
     });
   }
 
-  public onMove(handler: (controller: ControllerPoint) => void) {
+  public onMove(handler: ControlMoveHandler) {
     this._onMoveHandlers.push(handler);
   }
 
-  public onMouseDown(handler: (controller: ControllerPoint) => void) {
+  public onMouseDown(handler: ControlMoveHandler) {
     this._onMouseDownHandlers.push(handler);
   }
 
-  public onMouseUp(handler: (controller: ControllerPoint) => void) {
+  public onMouseUp(handler: ControlMoveHandler) {
     this._onMouseUpHandlers.push(handler);
   }
 

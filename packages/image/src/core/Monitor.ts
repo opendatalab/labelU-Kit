@@ -1,6 +1,5 @@
 import { EInternalEvent } from '../enums';
 import { eventEmitter, rbush } from '../singletons';
-import type { AxisPoint } from '../shapes';
 import type { AnnotationShape, GroupInAnnotation } from '../interface';
 
 const keyEventMapping = {
@@ -151,7 +150,7 @@ export class Monitor {
    */
   private _handleMouseOver = (e: MouseEvent) => {
     const { _hoveredGroup, _hoveredShape } = this;
-    const rbushItems = this.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
+    const rbushItems = rbush.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
     const orderIndexedGroup: GroupInAnnotation[] = [];
 
     for (const rbushItem of rbushItems) {
@@ -242,25 +241,6 @@ export class Monitor {
       eventEmitter.emit(EInternalEvent.UnSelect, e, selectedAnnotationId);
     }
   };
-
-  /**
-   * 扫描鼠标经过画布内的图形元素，触发move事件
-   *
-   * @description
-   *
-   * 1. 首先通过鼠标坐标，从 R-Tree 中搜索出所有可能的图形元素
-   * 2. 从id中取得映射的图形元素
-   * 3. 根据图形类别，判断鼠标是否真实落在图形上
-   * @param e
-   */
-  public scanCanvasObject(mouseCoord: AxisPoint) {
-    return rbush.search({
-      minX: mouseCoord.x,
-      minY: mouseCoord.y,
-      maxX: mouseCoord.x,
-      maxY: mouseCoord.y,
-    });
-  }
 
   public setSelectedAnnotationId(id: string | null) {
     this.selectedAnnotationId = id;
