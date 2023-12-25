@@ -1,48 +1,9 @@
 import { type Attribute, type ILabel } from '@labelu/interface';
 
-import { EInternalEvent } from '../enums';
-import type { Annotation } from '../annotation/Annotation';
+import type { Annotation } from '../annotations/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
 import type { Shape } from '../shapes';
 import { eventEmitter } from '../singletons';
-
-export function MouseDecorator<T extends { new (...args: any[]): any }>(constructor: T) {
-  return class extends constructor {
-    constructor(...args: any[]) {
-      super(...args);
-
-      eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-      eventEmitter.on(EInternalEvent.AnnotationMove, this._handleMouseMove);
-      eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
-    }
-    public _handleMouseDown = (e: MouseEvent) => {
-      if (typeof this.onMouseDown === 'function') {
-        this.onMouseDown(e);
-      }
-    };
-
-    public _handleMouseMove = (e: MouseEvent) => {
-      if (typeof this.onMouseMove === 'function') {
-        this.onMouseMove(e);
-      }
-    };
-
-    public _handleMouseUp = (e: MouseEvent) => {
-      if (typeof this.onMouseUp === 'function') {
-        this.onMouseUp(e);
-      }
-    };
-
-    public destroy() {
-      super.destroy();
-      eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-      eventEmitter.off(EInternalEvent.AnnotationMove, this._handleMouseMove);
-      eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
-    }
-  };
-}
-
-export const TOOL_HOVER = 'tool:hover';
 
 export interface BasicToolParams<Data, Style> {
   /** 标签配置 */
@@ -79,15 +40,15 @@ interface ExtraParams {
  */
 export class Tool<Data extends BasicImageAnnotation, Style, Config extends BasicToolParams<Data, Style>> {
   public name: ToolName;
-  public defaultColor = '#000';
 
   public labelMapping: Map<string, ILabel> = new Map();
 
   public style = {} as Required<Style>;
 
-  public hoveredStyle = {} as Style;
+  public hoveredStyle;
 
-  public selectedStyle = {} as Style;
+  public selectedStyle;
+
   public config;
 
   public activeLabel: string | undefined = undefined;
@@ -105,15 +66,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   protected _data: Data[];
 
-  constructor({
-    name,
-    data,
-    style,
-    hoveredStyle,
-    selectedStyle,
-    showOrder,
-    ...config
-  }: Required<Config> & ExtraParams) {
+  constructor({ name, data, style, hoveredStyle, selectedStyle, showOrder, ...config }: Config & ExtraParams) {
     // 创建标签映射
     this._createLabelMapping(config.labels);
 
@@ -179,30 +132,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     for (const label of labels) {
       this.labelMapping.set(label.value, label);
     }
-  }
-
-  public getLabelByValue(value: string | undefined) {
-    if (typeof value !== 'string') {
-      throw Error('value is not a string', value);
-    }
-
-    return this.labelMapping.get(value);
-  }
-
-  public getLabelText(value: string | undefined) {
-    if (typeof value !== 'string') {
-      throw Error('value is not a string', value);
-    }
-
-    return this.getLabelByValue(value)?.key ?? '无标签';
-  }
-
-  public getLabelColor(value: string | undefined) {
-    if (!value) {
-      return this.defaultColor;
-    }
-
-    return this.getLabelByValue(value)?.color ?? this.defaultColor;
   }
 
   protected removeFromDrawing(id: string) {

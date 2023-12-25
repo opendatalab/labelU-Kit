@@ -3,12 +3,12 @@ import cloneDeep from 'lodash.clonedeep';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
-import type { LineData } from '../annotation';
-import type { AxisPoint, PointStyle } from '../shapes';
-import { Rect, Point } from '../shapes';
+import { AnnotationLine, type LineData } from '../annotations';
+import type { AxisPoint, PointStyle, Point } from '../shapes';
+import { Rect } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
-import type { AnnotationParams } from '../annotation/Annotation';
-import { Annotation } from '../annotation/Annotation';
+import type { AnnotationParams } from '../annotations/Annotation';
+import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import type { LineToolOptions } from '../tools';
@@ -21,8 +21,6 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
 
   private _selectionShape: Rect | null = null;
 
-  private _isControllerPicked: boolean = false;
-
   private _effectedLines: [Line | undefined, Line | undefined] | null = null;
 
   private _previousDynamicCoordinates: AxisPoint[][] | null = null;
@@ -33,9 +31,9 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     super(params);
 
     this.config = config;
+    this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
 
     this._setupShapes();
-    this.onMouseDown(this._onMouseDown);
     this.onMove(this._onMouseMove);
     this.onMouseUp(this._onMouseUp);
     this._createSelection();
@@ -47,16 +45,19 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config } = this;
+    const { data, group, style, config, labelColor } = this;
 
-    for (let i = 1; i < data.pointList.length; i++) {
-      const startPoint = data.pointList[i - 1];
-      const endPoint = data.pointList[i];
+    for (let i = 1; i < data.points.length; i++) {
+      const startPoint = data.points[i - 1];
+      const endPoint = data.points[i];
 
       const line = new Line({
         id: uuid(),
         coordinate: [{ ...startPoint }, { ...endPoint }],
-        style,
+        style: {
+          ...style,
+          stroke: labelColor,
+        },
       });
 
       line.on(EInternalEvent.ShapeOver, this._onLineOver);
@@ -66,8 +67,8 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     }
 
     // 点要覆盖在线上
-    for (let i = 0; i < data.pointList.length; i++) {
-      const pointItem = data.pointList[i];
+    for (let i = 0; i < data.points.length; i++) {
+      const pointItem = data.points[i];
       const point = new ControllerPoint({
         id: pointItem.id,
         outOfImage: config.outOfImage,
@@ -144,81 +145,21 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
   };
 
   private _onLineOut = (_e: MouseEvent, line: Line) => {
-    const { style } = this;
+    const { style, data } = this;
 
-    line.updateStyle(style);
-  };
-
-  /**
-   * 选中草稿
-   */
-  private _onMouseDown = () => {
-    const { _selectionShape } = this;
-
-    if (_selectionShape) {
-      this._isControllerPicked = false;
-      this.isPicked = true;
-      this._previousDynamicCoordinates = this.getDynamicCoordinates();
-    }
+    line.updateStyle({ ...style, stroke: AnnotationLine.labelStatic.getLabelColor(data.label) });
   };
 
   /**
    * 移动草稿
    */
   private _onMouseMove = () => {
-    const { isPicked, _previousDynamicCoordinates, config } = this;
-
-    if (!isPicked || !_previousDynamicCoordinates) {
-      return;
-    }
-
     this._destroySelection();
-
-    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
-
-    // 更新草稿坐标
-    this.group.each((shape, index) => {
-      const startPoint = axis!.getOriginalCoord({
-        x: _previousDynamicCoordinates[index][0].x + axis!.distance.x,
-        y: _previousDynamicCoordinates[index][0].y + axis!.distance.y,
-      });
-
-      if (shape instanceof Point) {
-        if (safeX) {
-          shape.coordinate[0].x = startPoint.x;
-        }
-
-        if (safeY) {
-          shape.coordinate[0].y = startPoint.y;
-        }
-      } else {
-        const endPoint = axis!.getOriginalCoord({
-          x: _previousDynamicCoordinates[index][1].x + axis!.distance.x,
-          y: _previousDynamicCoordinates[index][1].y + axis!.distance.y,
-        });
-
-        if (safeX) {
-          shape.coordinate[0].x = startPoint.x;
-          shape.coordinate[1].x = endPoint.x;
-        }
-
-        if (safeY) {
-          shape.coordinate[0].y = startPoint.y;
-          shape.coordinate[1].y = endPoint.y;
-        }
-      }
-    });
-
-    // 手动更新组合的包围盒
-    this.group.update();
-    // 手动将坐标同步到数据
-    this.syncCoordToData();
   };
 
   private _onMouseUp = () => {
     this._createSelection();
-    this.isPicked = false;
-    this._previousDynamicCoordinates = null;
+    this.syncCoordToData();
   };
 
   /**
@@ -233,7 +174,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     if (_pointToBeAdded) {
       const insertIndex = Number(_pointToBeAdded.name);
       // 先往data里增加一个点
-      data.pointList.splice(insertIndex + 1, 0, {
+      data.points.splice(insertIndex + 1, 0, {
         id: _pointToBeAdded.id,
         x: _pointToBeAdded.coordinate[0].x,
         y: _pointToBeAdded.coordinate[0].y,
@@ -249,7 +190,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     // 删除端点
     if (monitor?.keyboard.Alt) {
       // 少于两个点或少于配置的最少点数时，不允许删除
-      if (data.pointList.length <= 2 || data.pointList.length <= config.minPointAmount!) {
+      if (data.points.length <= 2 || data.points.length <= config.minPointAmount!) {
         Tool.error({
           type: 'minPointAmount',
           message: `At least ${config.minPointAmount} points are required`,
@@ -257,8 +198,8 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
 
         return;
       }
-      const deleteIndex = group.shapes.indexOf(point) - data.pointList.length + 1;
-      data.pointList.splice(deleteIndex, 1);
+      const deleteIndex = group.shapes.indexOf(point) - data.points.length + 1;
+      data.points.splice(deleteIndex, 1);
       group.clear();
       this._setupShapes();
       this._destroySelection();
@@ -269,7 +210,6 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     }
 
     this._effectedLines = [undefined, undefined];
-    this._isControllerPicked = true;
 
     this.group.each((shape) => {
       if (shape instanceof Line) {
@@ -330,7 +270,6 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    */
   private _onControllerPointUp = () => {
     this._createSelection();
-    this._isControllerPicked = false;
   };
 
   /**
@@ -369,17 +308,13 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     return this.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
   }
 
-  public get isControllerPicked() {
-    return this._isControllerPicked;
-  }
-
   public syncCoordToData() {
     const { group, data } = this;
-    const pointSize = data.pointList.length;
+    const pointSize = data.points.length;
 
     for (let i = pointSize - 1; i < group.shapes.length; i++) {
-      data.pointList[i - pointSize + 1].x = axis!.getOriginalX(group.shapes[i].dynamicCoordinate[0].x);
-      data.pointList[i - pointSize + 1].y = axis!.getOriginalY(group.shapes[i].dynamicCoordinate[0].y);
+      data.points[i - pointSize + 1].x = axis!.getOriginalX(group.shapes[i].dynamicCoordinate[0].x);
+      data.points[i - pointSize + 1].y = axis!.getOriginalY(group.shapes[i].dynamicCoordinate[0].y);
     }
   }
 

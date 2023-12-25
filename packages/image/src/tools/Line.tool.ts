@@ -5,8 +5,8 @@ import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import type { LineData, PointItem } from '../annotation';
-import { AnnotationLine } from '../annotation';
+import type { LineData, PointItem } from '../annotations';
+import { AnnotationLine } from '../annotations';
 import type { AxisPoint, PointStyle } from '../shapes';
 import { Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
@@ -49,7 +49,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   static convertToCanvasCoordinates(data: LineData[]) {
     return data.map((item) => ({
       ...item,
-      pointList: item.pointList.map((point) => ({
+      points: item.points.map((point) => ({
         ...point,
         ...axis!.convertSourceCoordinate(point),
       })),
@@ -74,7 +74,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       outOfImage: true,
       minPointAmount: 2,
       labels: [],
-      hoveredStyle: {},
       selectedStyle: {},
       // ----------------
       data: [],
@@ -84,6 +83,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         ...params.style,
       },
     });
+
+    AnnotationLine.buildLabelMapping(params.labels ?? []);
 
     this._setupShapes();
 
@@ -141,7 +142,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _validate(data: LineData) {
     const { config } = this;
 
-    if (data.pointList.length < config.minPointAmount!) {
+    if (data.points.length < config.minPointAmount!) {
       Tool.error({
         type: 'minPointAmount',
         message: `Line must have at least ${config.minPointAmount} points!`,
@@ -154,61 +155,20 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   }
 
   private _addAnnotation(data: LineData) {
-    const { drawing } = this;
+    const { drawing, style, hoveredStyle } = this;
 
     drawing!.set(
       data.id,
       new AnnotationLine({
         id: data.id,
         data,
-        label: this.getLabelText(data.label),
-        style: this._makeStaticStyle(data.label),
-        hoveredStyle: this._makeHoveredStyle(data.label),
+        style,
+        hoveredStyle,
         showOrder: this.showOrder,
         onSelect: this.onSelect,
       }),
     );
   }
-
-  private _makeStaticStyle(label?: string) {
-    const { style } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    return { ...style, stroke: this.getLabelColor(label) };
-  }
-
-  private _makeHoveredStyle(label?: string) {
-    const { style, hoveredStyle } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    if (hoveredStyle && Object.keys(hoveredStyle).length > 0) {
-      return hoveredStyle;
-    }
-
-    return { ...style, stroke: this.getLabelColor(label), strokeWidth: style.strokeWidth! + 2 };
-  }
-
-  protected handlePointStyle = () => {
-    const { draft } = this;
-
-    if (!draft) {
-      return;
-    }
-
-    draft.group.each((shape) => {
-      if (shape instanceof Point) {
-        shape.updateStyle({
-          stroke: 'transparent',
-        });
-      }
-    });
-  };
 
   private _createDraft(data: LineData) {
     const { style } = this;
@@ -217,25 +177,19 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       this.draft = new DraftLine(this.config, {
         id: data.id,
         data,
-        style: { ...style, stroke: this.getLabelColor(data.label) },
+        style,
         // 在草稿上添加取消选中的事件监听
         onUnSelect: this.onUnSelect,
-        label: '',
         showOrder: this.showOrder,
-        onBBoxOut: this.handlePointStyle,
-        onBBoxOver: this.handlePointStyle,
       });
     } else if (data.type === 'spline') {
       this.draft = new DraftLineCurve(this.config, {
         id: data.id,
         data,
-        label: '',
         showOrder: this.showOrder,
-        style: { ...style, stroke: this.getLabelColor(data.label) },
+        style,
         // 在草稿上添加取消选中的事件监听
         onUnSelect: this.onUnSelect,
-        onBBoxOut: this.handlePointStyle,
-        onBBoxOver: this.handlePointStyle,
       });
     } else {
       throw new Error('Invalid line type!');
@@ -317,7 +271,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       this._creatingCurves.add(
         new Spline({
           id: uuid(),
-          style: { ...style, stroke: this.getLabelColor(activeLabel) },
+          style: { ...style, stroke: AnnotationLine.labelStatic.getLabelColor(activeLabel) },
           coordinate: [
             {
               ...startPoint,
@@ -366,7 +320,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this._creatingLines?.add(
       new Line({
         id: uuid(),
-        style: { ...style, stroke: this.getLabelColor(activeLabel) },
+        style: { ...style, stroke: AnnotationLine.labelStatic.getLabelColor(activeLabel) },
         coordinate: [
           {
             ...(lastLine ? lastLine.coordinate[1] : startPoint),
@@ -514,7 +468,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _convertAnnotationItem(data: LineData) {
     const _temp = {
       ...data,
-      pointList: data.pointList.map((point) => {
+      points: data.points.map((point) => {
         return {
           ...point,
           ...axis!.convertCanvasCoordinate(point),
@@ -571,7 +525,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     const data: LineData = {
       id: uuid(),
       type: 'line',
-      pointList: points,
+      points: points,
       label: this.activeLabel,
       order: monitor!.getNextOrder(),
     };
@@ -580,7 +534,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.onAdd({ ...data, pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)) }, e);
+    Tool.onAdd({ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }, e);
 
     this._addAnnotation(data);
 
@@ -625,7 +579,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     const data: LineData = {
       id: uuid(),
       type: 'spline',
-      pointList: points,
+      points: points,
       controlPoints,
       label: this.activeLabel,
       order: monitor!.getNextOrder(),
@@ -638,7 +592,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     Tool.onAdd(
       {
         ...data,
-        pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
+        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
         controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
       },
       e,

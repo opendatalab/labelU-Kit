@@ -1,14 +1,15 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
 import type { BBox } from 'rbush';
+import Color from 'color';
 
 import { Rect, type RectStyle } from '../shapes/Rect.shape';
-import type { RectData } from '../annotation';
+import { AnnotationRect, type RectData } from '../annotations';
 import type { AxisPoint, LineCoordinate, PointStyle } from '../shapes';
 import { Point } from '../shapes';
 import { axis } from '../singletons';
-import type { AnnotationParams } from '../annotation/Annotation';
-import { Annotation } from '../annotation/Annotation';
+import type { AnnotationParams } from '../annotations/Annotation';
+import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import { ControllerEdge } from './ControllerEdge';
@@ -22,9 +23,6 @@ export class DraftRect extends DraftObserverMixin(
   Annotation<RectData, ControllerEdge | Point | Rect, RectStyle | PointStyle>,
 ) {
   public config: RectToolOptions;
-  private _isControllerPicked: boolean = false;
-
-  private _isEdgeControllerPicked: boolean = false;
 
   private _preBBox: BBox | null = null;
 
@@ -40,10 +38,9 @@ export class DraftRect extends DraftObserverMixin(
     super(params);
 
     this.config = config;
+    this.labelColor = AnnotationRect.labelStatic.getLabelColor(params.data.label);
 
     this._setupShapes();
-    this.onMouseDown(this._onMouseDown);
-    this.onMove(this._onMouseMove);
     this.onMouseUp(this._onMouseUp);
   }
 
@@ -51,7 +48,7 @@ export class DraftRect extends DraftObserverMixin(
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config } = this;
+    const { data, group, style, config, labelColor } = this;
     const nwCoord = { x: data.x, y: data.y };
     const neCoord = { x: data.x + data.width, y: data.y };
     const seCoord = { x: data.x + data.width, y: data.y + data.height };
@@ -90,7 +87,7 @@ export class DraftRect extends DraftObserverMixin(
         width: data.width,
         height: data.height,
         // 只填充颜色，不描边
-        style: { ...style, strokeWidth: 0, stroke: 'transparent' },
+        style: { ...style, strokeWidth: 0, stroke: 'transparent', fill: Color(labelColor).alpha(0.5).string() },
       }),
     );
 
@@ -100,8 +97,8 @@ export class DraftRect extends DraftObserverMixin(
         name: lineCoordinates[i].name,
         coordinate: lineCoordinates[i].coordinate,
         style: {
-          stroke: style.stroke,
-          strokeWidth: style.strokeWidth,
+          ...style,
+          stroke: labelColor,
         },
       });
 
@@ -144,7 +141,6 @@ export class DraftRect extends DraftObserverMixin(
         name: points[i].name,
         outOfImage: config.outOfImage,
         coordinate: points[i],
-        style: { ...style, radius: 8, stroke: 'transparent', fill: 'blue' },
       });
 
       this._controllerPositionMapping.set(points[i].name as ControllerPosition, point);
@@ -188,79 +184,7 @@ export class DraftRect extends DraftObserverMixin(
 
   // ========================== 选中的标注草稿 ==========================
 
-  /**
-   * 选中草稿
-   */
-  private _onMouseDown = () => {
-    const { _isControllerPicked, _isEdgeControllerPicked } = this;
-
-    // 选中控制点或控制边时，不需要选中草稿
-    if (_isControllerPicked || _isEdgeControllerPicked) {
-      return;
-    }
-
-    this._isControllerPicked = false;
-    this.isPicked = true;
-    this._previousDynamicCoordinates = this.getDynamicCoordinates();
-  };
-
-  /**
-   * 移动草稿拉框
-   */
-  private _onMouseMove = () => {
-    const { isPicked, _previousDynamicCoordinates, group, config } = this;
-
-    if (!isPicked || !_previousDynamicCoordinates) {
-      return;
-    }
-
-    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
-    const rect = group.shapes[0] as Rect;
-    // 更新rect矩形坐标
-    if (safeX) {
-      rect.coordinate[0].x = axis!.getOriginalX(_previousDynamicCoordinates[0][0].x + axis!.distance.x);
-    }
-
-    if (safeY) {
-      rect.coordinate[0].y = axis!.getOriginalY(_previousDynamicCoordinates[0][0].y + axis!.distance.y);
-    }
-
-    // 更新草稿坐标
-    group.each((shape, index) => {
-      const x1 = axis!.getOriginalX(_previousDynamicCoordinates[index][0].x + axis!.distance.x);
-      const y1 = axis!.getOriginalY(_previousDynamicCoordinates[index][0].y + axis!.distance.y);
-
-      if (shape instanceof ControllerPoint) {
-        if (safeX) {
-          shape.coordinate[0].x = x1;
-        }
-
-        if (safeY) {
-          shape.coordinate[0].y = y1;
-        }
-      } else if (shape instanceof ControllerEdge) {
-        const x2 = axis!.getOriginalX(_previousDynamicCoordinates[index][1].x + axis!.distance.x);
-        const y2 = axis!.getOriginalY(_previousDynamicCoordinates[index][1].y + axis!.distance.y);
-
-        if (safeX) {
-          shape.coordinate[0].x = x1;
-          shape.coordinate[1].x = x2;
-        }
-
-        if (safeY) {
-          shape.coordinate[0].y = y1;
-          shape.coordinate[1].y = y2;
-        }
-      }
-    });
-
-    // 手动更新组合的包围盒
-    this.group.update();
-  };
-
   private _onMouseUp = () => {
-    this.isPicked = false;
-    this._previousDynamicCoordinates = null;
     // 手动将坐标同步到数据
     this.syncCoordToData();
   };
@@ -272,7 +196,6 @@ export class DraftRect extends DraftObserverMixin(
    * @description 按下控制点时，记录受影响的线段
    */
   private _onControllerPointDown = () => {
-    this._isControllerPicked = true;
     this._updateControllerAndEdgeAndPreBBox();
   };
 
@@ -442,14 +365,12 @@ export class DraftRect extends DraftObserverMixin(
    * 释放控制点
    */
   private _onControllerPointUp = () => {
-    this._isControllerPicked = false;
     this.syncCoordToData();
   };
 
   // ========================== 控制边 ==========================
 
   private _onEdgeDown = () => {
-    this._isEdgeControllerPicked = true;
     this._updateControllerAndEdgeAndPreBBox();
   };
 
@@ -531,7 +452,6 @@ export class DraftRect extends DraftObserverMixin(
   };
 
   private _onEdgeUp = () => {
-    this._isEdgeControllerPicked = false;
     this._preBBox = null;
     this.syncCoordToData();
   };
@@ -656,10 +576,6 @@ export class DraftRect extends DraftObserverMixin(
 
   protected getDynamicCoordinates() {
     return this.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
-  }
-
-  public get isControllerPicked() {
-    return this._isControllerPicked;
   }
 
   public syncCoordToData() {

@@ -1,5 +1,4 @@
 import { Shape } from './Shape';
-import { getDistance } from './math.util';
 
 export interface AxisPoint {
   x: number;
@@ -98,12 +97,13 @@ export class Point extends Shape<PointStyle> {
 
     this.onCoordinateChange(() => {
       const [{ x, y }] = this.dynamicCoordinate;
+      const strokeWidth = this.style.strokeWidth ?? 0;
 
       this.bbox = {
-        minX: x - this.style.radius,
-        minY: y - this.style.radius,
-        maxX: x + this.style.radius,
-        maxY: y + this.style.radius,
+        minX: x - this.style.radius - strokeWidth / 2,
+        minY: y - this.style.radius - strokeWidth / 2,
+        maxX: x + this.style.radius + strokeWidth / 2,
+        maxY: y + this.style.radius + strokeWidth / 2,
       };
     });
   }
@@ -114,15 +114,11 @@ export class Point extends Shape<PointStyle> {
    * @param mouseCoord 鼠标坐标
    */
   public isUnderCursor(mouseCoord: AxisPoint) {
-    const { style, dynamicCoordinate } = this;
+    const { bbox } = this;
 
-    const distance = getDistance(mouseCoord, dynamicCoordinate[0]);
-
-    if (distance < Point.DISTANCE_THRESHOLD + ((style.radius ?? 0) + (style.strokeWidth ?? 0))) {
-      return true;
-    }
-
-    return false;
+    return (
+      mouseCoord.x >= bbox.minX && mouseCoord.x <= bbox.maxX && mouseCoord.y >= bbox.minY && mouseCoord.y <= bbox.maxY
+    );
   }
 
   public render(ctx: CanvasRenderingContext2D | null) {

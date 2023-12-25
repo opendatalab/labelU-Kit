@@ -1,4 +1,5 @@
 import type {
+  CuboidData,
   LineData,
   LineGroup,
   PointData,
@@ -7,9 +8,11 @@ import type {
   PolygonGroup,
   RectData,
   RectGroup,
-} from './annotation';
+} from './annotations';
 import type { ClosedSpline, Line, Point, Polygon, Rect, Spline } from './shapes';
 import type {
+  CuboidTool,
+  CuboidToolOptions,
   LineTool,
   LineToolOptions,
   PointTool,
@@ -45,15 +48,15 @@ export interface BasicImageAnnotation {
   attributes?: Record<string, string | string[]>;
 }
 
-export type ToolOptions = LineToolOptions | PointToolOptions | RectToolOptions | PolygonToolOptions;
+export type ToolOptions = LineToolOptions | PointToolOptions | RectToolOptions | PolygonToolOptions | CuboidToolOptions;
 
-export type AnnotationData = LineData | PointData | RectData | PolygonData;
+export type AnnotationData = LineData | PointData | RectData | PolygonData | CuboidData;
 
-export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool;
+export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool | CuboidTool;
 
 export type AnnotationShape = Line | Point | Rect | Polygon | Spline | ClosedSpline;
 
-export type ToolName = 'line' | 'point' | 'polygon' | 'rect';
+export type ToolName = 'line' | 'point' | 'polygon' | 'rect' | 'cuboid';
 
 export type AnnotationToolData<T extends ToolName> = T extends 'line'
   ? LineData[]
@@ -63,4 +66,6 @@ export type AnnotationToolData<T extends ToolName> = T extends 'line'
   ? RectData[]
   : T extends 'polygon'
   ? PolygonData[]
+  : T extends 'cuboid'
+  ? CuboidData[]
   : never;

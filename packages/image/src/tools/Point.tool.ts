@@ -1,15 +1,15 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
-import Color from 'color';
 
 import { EInternalEvent } from '../enums';
 import type { AxisPoint, PointStyle } from '../shapes/Point.shape';
 import { Point } from '../shapes/Point.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import type { PointData } from '../annotation/Point.annotation';
-import { AnnotationPoint } from '../annotation/Point.annotation';
+import type { PointData } from '../annotations/Point.annotation';
+import { AnnotationPoint } from '../annotations/Point.annotation';
 import { axis, eventEmitter, monitor } from '../singletons';
+import { DraftPoint } from '../drafts';
 
 /**
  * 点标注工具配置
@@ -45,12 +45,13 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   }
 
   private _pickedCoordinate: AxisPoint | null = null;
+
+  public draft: DraftPoint | null = null;
+
   constructor(params: PointToolOptions) {
     super({
       name: 'point',
       labels: [],
-      hoveredStyle: {},
-      selectedStyle: {},
       maxPointAmount: Infinity,
       minPointAmount: 0,
       outOfImage: true,
@@ -63,11 +64,11 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       },
     });
 
+    AnnotationPoint.buildLabelMapping(params.labels ?? []);
+
     this._setupShapes();
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
-    eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleMouseUp);
     eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
     eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
   }
@@ -94,80 +95,32 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   }
 
   private _createDraft(data: PointData) {
-    this.draft = new AnnotationPoint({
+    const { style, config } = this;
+
+    this.draft = new DraftPoint(config, {
       id: data.id || uuid(),
       data,
       showOrder: this.showOrder,
-      label: this.getLabelText(data.label),
-      style: this._makeSelectedStyle(data.label),
+      style,
       onUnSelect: this.onUnSelect,
     });
     monitor!.setSelectedAnnotationId(this.draft.id);
   }
 
   private _addAnnotation(data: PointData) {
+    const { style, hoveredStyle } = this;
+
     this.drawing!.set(
       data.id,
       new AnnotationPoint({
         id: data.id,
         data,
         showOrder: this.showOrder,
-        label: this.getLabelText(data.label),
-        style: this._makeStaticStyle(data.label),
-        hoveredStyle: this._makeHoveredStyle(data.label),
+        style,
+        hoveredStyle,
         onSelect: this.onSelect,
       }),
     );
-  }
-
-  private _makeStaticStyle(label?: string) {
-    const { style } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    return { ...style, fill: this.getLabelColor(label) };
-  }
-
-  private _makeHoveredStyle(label?: string) {
-    const { style, hoveredStyle } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    if (hoveredStyle && Object.keys(hoveredStyle).length > 0) {
-      return hoveredStyle;
-    }
-
-    return {
-      ...style,
-      stroke: '#000',
-      strokeWidth: 2,
-      fill: Color('#fff').toString(),
-    };
-  }
-
-  private _makeSelectedStyle(label?: string) {
-    const { style, selectedStyle } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    if (selectedStyle && Object.keys(selectedStyle).length > 0) {
-      return selectedStyle;
-    }
-
-    const labelColor = this.getLabelColor(label);
-
-    return {
-      ...style,
-      stroke: labelColor,
-      strokeWidth: 4,
-      fill: Color('#fff').toString(),
-    };
   }
 
   private _handleDelete = () => {
@@ -222,19 +175,15 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
-    if (this.draft && this.draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY })) {
-      this._pickedCoordinate = cloneDeep(this.draft.group.shapes[0].dynamicCoordinate[0]);
-
-      return;
-    }
-
     // ====================== 绘制 ======================
 
-    const { activeLabel, config } = this;
+    const { activeLabel, config, draft } = this;
+
+    const isUnderDraft = draft && draft.isUnderCursor({ x: e.offsetX, y: e.offsetY });
 
     // 1. 没有激活工具则不进行绘制
     // 2. 按下空格键时不进行绘制
-    if (!activeLabel || monitor?.keyboard.Space) {
+    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
       return;
     }
 
@@ -259,52 +208,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this._createDraft(data);
 
     axis?.rerender();
-  };
-
-  private _handleMouseMove = () => {
-    const { draft, _pickedCoordinate, config } = this;
-    if (!draft || !_pickedCoordinate) {
-      return;
-    }
-
-    let x = _pickedCoordinate.x + axis!.distance.x;
-    let y = _pickedCoordinate.y + axis!.distance.y;
-
-    // 安全区域内移动
-    if (!config.outOfImage) {
-      const safeZone = axis!.safeZone;
-
-      if (x > safeZone.maxX) {
-        x = safeZone.maxX;
-      }
-
-      if (x < safeZone.minX) {
-        x = safeZone.minX;
-      }
-
-      if (y > safeZone.maxY) {
-        y = safeZone.maxY;
-      }
-
-      if (y < safeZone.minY) {
-        y = safeZone.minY;
-      }
-    }
-
-    draft.group.each((shape) => {
-      shape.coordinate = [
-        axis!.getOriginalCoord({
-          x,
-          y,
-        }),
-      ];
-    });
-    draft.group.update();
-    draft.syncCoordToData();
-  };
-
-  private _handleMouseUp = () => {
-    this._pickedCoordinate = null;
   };
 
   private _rebuildDraft(data?: PointData) {
@@ -365,8 +268,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     super.destroy();
 
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
-    eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleMouseUp);
     eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
     eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }

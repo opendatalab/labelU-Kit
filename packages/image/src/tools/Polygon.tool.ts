@@ -4,13 +4,13 @@ import Color from 'color';
 
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import { AnnotationPolygon } from '../annotation';
+import { AnnotationPolygon } from '../annotations';
 import type { AxisPoint, LineStyle, PointStyle, PolygonStyle } from '../shapes';
 import { Spline, ClosedSpline, Line, Point, Polygon } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
-import type { PolygonData } from '../annotation/Polygon.annotation';
+import type { PolygonData } from '../annotations/Polygon.annotation';
 import { DraftPolygonCurve, DraftPolygon } from '../drafts';
 
 export interface PolygonToolOptions extends BasicToolParams<PolygonData, PolygonStyle> {
@@ -48,7 +48,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   static convertToCanvasCoordinates(data: PolygonData[]) {
     return data.map((item) => ({
       ...item,
-      pointList: item.pointList.map((point) => ({
+      points: item.points.map((point) => ({
         ...point,
         ...axis!.convertSourceCoordinate(point),
       })),
@@ -73,8 +73,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       outOfImage: true,
       closingPointAmount: 3,
       labels: [],
-      hoveredStyle: {},
-      selectedStyle: {},
       // ----------------
       data: [],
       ...params,
@@ -84,6 +82,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       },
     });
 
+    AnnotationPolygon.buildLabelMapping(params.labels ?? []);
     this._setupShapes();
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
@@ -137,7 +136,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   }
 
   private _addAnnotation(data: PolygonData) {
-    const { drawing } = this;
+    const { drawing, style, hoveredStyle } = this;
 
     drawing!.set(
       data.id,
@@ -145,87 +144,17 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         id: data.id,
         data,
         showOrder: this.showOrder,
-        label: this.getLabelText(data.label),
-        style: this._makeStaticStyle(data.label),
-        hoveredStyle: this._makeHoveredStyle(data.label),
+        style,
+        hoveredStyle,
         onSelect: this.onSelect,
       }),
     );
   }
 
-  private _makeStaticStyle(label?: string) {
-    const { style } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    const labelColor = this.getLabelColor(label);
-
-    return { ...style, stroke: labelColor, fill: Color(labelColor).alpha(0.3).toString() };
-  }
-
-  private _makeHoveredStyle(label?: string) {
-    const { style, hoveredStyle } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    if (hoveredStyle && Object.keys(hoveredStyle).length > 0) {
-      return hoveredStyle;
-    }
-
-    const labelColor = this.getLabelColor(label);
-
-    return {
-      ...style,
-      stroke: labelColor,
-      strokeWidth: style.strokeWidth! + 2,
-      fill: Color(labelColor).alpha(0.6).toString(),
-    };
-  }
-
-  private _makeSelectedStyle(label?: string) {
-    const { style, selectedStyle } = this;
-
-    if (typeof label !== 'string') {
-      throw new Error('Invalid label! Must be string!');
-    }
-
-    if (selectedStyle && Object.keys(selectedStyle).length > 0) {
-      return selectedStyle;
-    }
-
-    const labelColor = this.getLabelColor(label);
-
-    return {
-      ...style,
-      stroke: labelColor,
-      fill: Color(labelColor).alpha(0.6).toString(),
-    };
-  }
-
-  protected handlePointStyle = () => {
-    const { draft } = this;
-
-    if (!draft) {
-      return;
-    }
-
-    draft.group.each((shape) => {
-      if (shape instanceof Point) {
-        shape.updateStyle({
-          stroke: 'transparent',
-        });
-      }
-    });
-  };
-
   private _validate(data: PolygonData) {
     const { config } = this;
 
-    if (data.pointList.length < config.closingPointAmount!) {
+    if (data.points.length < config.closingPointAmount!) {
       Tool.error({
         type: 'closingPointAmount',
         message: `Polygon must have at least ${config.closingPointAmount} points!`,
@@ -246,12 +175,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
               id: data.id,
               data,
               showOrder: false,
-              label: '',
-              style: this._makeSelectedStyle(data.label),
+              style: this.style,
               // 在草稿上添加取消选中的事件监听
               onUnSelect: this.onUnSelect,
-              onBBoxOut: this.handlePointStyle,
-              onBBoxOver: this.handlePointStyle,
             },
             this,
           )
@@ -259,12 +185,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
             id: data.id,
             data,
             showOrder: false,
-            label: '',
-            style: this._makeSelectedStyle(data.label),
+            style: this.style,
             // 在草稿上添加取消选中的事件监听
             onUnSelect: this.onUnSelect,
-            onBBoxOut: this.handlePointStyle,
-            onBBoxOver: this.handlePointStyle,
           });
   }
 
@@ -356,7 +279,10 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         this._creatingCurves.add(
           new ClosedSpline({
             id: uuid(),
-            style: this._makeStaticStyle(activeLabel),
+            style: {
+              ...style,
+              fill: Color(AnnotationPolygon.labelStatic.getLabelColor(activeLabel)).alpha(0.3).toString(),
+            },
             coordinate: [
               {
                 ...startPoint,
@@ -417,7 +343,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       this._creatingCurves.add(
         new Spline({
           id: uuid(),
-          style: { ...style, stroke: this.getLabelColor(activeLabel) },
+          style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },
           coordinate: [
             {
               ...startPoint,
@@ -461,7 +387,11 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       this._creatingShapes?.add(
         new Polygon({
           id: uuid(),
-          style: this._makeStaticStyle(activeLabel),
+          style: {
+            ...style,
+            stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel),
+            fill: Color(AnnotationPolygon.labelStatic.getLabelColor(activeLabel)).alpha(0.3).toString(),
+          },
           coordinate: [
             {
               ...(rbush.nearestPoint?.coordinate[0] ?? startPoint),
@@ -480,7 +410,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     _creatingShapes?.add(
       new Line({
         id: uuid(),
-        style: { ...style, stroke: this.getLabelColor(activeLabel) },
+        style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },
         coordinate: [
           {
             ...(rbush.nearestPoint?.coordinate[0] ?? startPoint),
@@ -663,7 +593,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   private _convertAnnotationItem(data: PolygonData) {
     const _temp = {
       ...data,
-      pointList: data.pointList.map((point) => {
+      points: data.points.map((point) => {
         return {
           ...point,
           ...axis!.convertCanvasCoordinate(point),
@@ -710,7 +640,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     const data: PolygonData = {
       id: uuid(),
       type: 'spline',
-      pointList: points,
+      points: points,
       controlPoints,
       label: this.activeLabel,
       order: monitor!.getNextOrder(),
@@ -723,7 +653,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     Tool.onAdd(
       {
         ...data,
-        pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
+        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
         controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
       },
       e,
@@ -759,7 +689,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     const data: PolygonData = {
       id: uuid(),
       type: 'line',
-      pointList: points,
+      points: points,
       label: this.activeLabel,
       order: monitor!.getNextOrder(),
     };
@@ -771,7 +701,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     Tool.onAdd(
       {
         ...data,
-        pointList: data.pointList.map((point) => axis!.convertCanvasCoordinate(point)),
+        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
       },
       e,
     );
@@ -785,7 +715,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   }
 
   public createAnnotationsFromData(datas: PolygonData[]) {
-    const { drawing } = this;
+    const { drawing, style, hoveredStyle } = this;
 
     if (!datas) {
       return;
@@ -798,9 +728,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           id: data.id,
           data,
           showOrder: this.showOrder,
-          label: this.getLabelText(data.label),
-          style: this._makeStaticStyle(data.label),
-          hoveredStyle: this._makeHoveredStyle(data.label),
+          style,
+          hoveredStyle,
           onSelect: this.onSelect,
         }),
       );

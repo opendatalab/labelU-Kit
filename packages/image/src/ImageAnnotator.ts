@@ -1,6 +1,6 @@
 import { Renderer } from './core/Renderer';
-import type { PointToolOptions, RectToolOptions } from './tools';
-import { PointTool, RectTool } from './tools';
+import type { CuboidToolOptions, PointToolOptions, RectToolOptions } from './tools';
+import { CuboidTool, PointTool, RectTool } from './tools';
 import type { LineToolOptions } from './tools/Line.tool';
 import { LineTool } from './tools/Line.tool';
 import type { CursorParams } from './shapes/Cursor.shape';
@@ -15,6 +15,7 @@ import { createMonitor, eventEmitter } from './singletons';
 import type { PolygonToolOptions } from './tools/Polygon.tool';
 import { PolygonTool } from './tools/Polygon.tool';
 import type { LineStyle, PointStyle } from './shapes';
+import { AnnotationMapping } from './annotations';
 
 export interface ControllerStyle {
   edge?: LineStyle;
@@ -37,6 +38,9 @@ export interface AnnotatorOptions {
   point?: PointToolOptions;
   rect?: RectToolOptions;
   polygon?: PolygonToolOptions;
+
+  cuboid?: CuboidToolOptions;
+
   image: ImageOption;
 
   /**
@@ -208,7 +212,8 @@ export class Annotator {
     }
 
     this.activeToolName = toolName;
-    this._axis!.cursor!.style.stroke = tool.getLabelColor(label);
+    const AnnotationClass = AnnotationMapping[toolName];
+    this._axis!.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(label);
     tool.activate(label);
   }
 
@@ -302,8 +307,10 @@ export class Annotator {
     }
     const currentTool = _tools.get(activeToolName);
 
+    const AnnotationClass = AnnotationMapping[activeToolName];
+
     currentTool!.setLabel(value);
-    this._axis!.cursor!.style.stroke = currentTool!.getLabelColor(value);
+    this._axis!.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(value);
     this._axis?.rerender();
   }
 
@@ -349,6 +356,16 @@ export class Annotator {
           data: PolygonTool.convertToCanvasCoordinates(data as AnnotationToolData<'polygon'>),
         }),
       );
+    } else if (toolName == 'cuboid') {
+      this.use(
+        new CuboidTool({
+          ...this._config.cuboid,
+          showOrder: config.showOrder ?? false,
+          data: CuboidTool.convertToCanvasCoordinates(data as AnnotationToolData<'cuboid'>),
+        }),
+      );
+    } else {
+      throw new Error(`Tool ${toolName} is not supported`);
     }
 
     this.render();

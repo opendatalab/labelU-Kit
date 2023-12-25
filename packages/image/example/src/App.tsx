@@ -35,7 +35,7 @@ export const useEngine = (containerRef: React.RefObject<HTMLDivElement>, options
   return engine;
 };
 
-const tools = [{ name: 'point' }, { name: 'line' }, { name: 'rect' }, { name: 'polygon' }];
+const tools = [{ name: 'point' }, { name: 'line' }, { name: 'rect' }, { name: 'polygon' }, { name: 'cuboid' }];
 
 export default function App() {
   const ref = useRef<HTMLDivElement>(null);
@@ -120,6 +120,22 @@ export default function App() {
         },
       ],
     },
+    cuboid: {
+      labels: [
+        {
+          id: '1',
+          value: 'human',
+          key: '人类',
+          color: '#9500ff',
+        },
+        {
+          id: 'car',
+          value: 'car',
+          key: '车子',
+          color: '#09ef18',
+        },
+      ],
+    },
   });
 
   const [tool, setTool] = useState('point');
@@ -133,7 +149,7 @@ export default function App() {
     engine.loadImage('/model.jpg').then(() => {
       engine.loadData('line', [
         {
-          pointList: [
+          points: [
             {
               x: 346.88414634146346,
               y: 229.8300304878049,
@@ -162,7 +178,7 @@ export default function App() {
           label: 'noneAttribute',
         },
         {
-          pointList: [
+          points: [
             {
               x: 446.88414634146346,
               y: 429.8300304878049,
@@ -234,7 +250,7 @@ export default function App() {
           valid: true,
           type: 'line',
           isVisible: true,
-          pointList: [
+          points: [
             {
               x: 103.4969512195122,
               y: 205.0312499999999,
@@ -258,6 +274,51 @@ export default function App() {
           ],
           order: 12,
           label: 'car',
+        },
+      ]);
+
+      engine.loadData('cuboid', [
+        {
+          label: 'car',
+          direction: 'front',
+          id: 'dmjIbMoD',
+          order: 16,
+          front: {
+            tl: {
+              x: 189.98858647936788,
+              y: 192.48726953467954,
+            },
+            tr: {
+              x: 254.1510096575944,
+              y: 192.48726953467954,
+            },
+            bl: {
+              x: 189.98858647936788,
+              y: 253.65144863915717,
+            },
+            br: {
+              x: 254.1510096575944,
+              y: 253.65144863915717,
+            },
+          },
+          back: {
+            br: {
+              x: 296.7260755048288,
+              y: 217.07287093942054,
+            },
+            tr: {
+              x: 296.7260755048288,
+              y: 155.9086918349429,
+            },
+            tl: {
+              x: 232.56365232660232,
+              y: 155.9086918349429,
+            },
+            bl: {
+              x: 232.56365232660232,
+              y: 217.07287093942054,
+            },
+          },
         },
       ]);
 

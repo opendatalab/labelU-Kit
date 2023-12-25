@@ -8,7 +8,6 @@ import { axis, eventEmitter, monitor } from '../singletons';
 export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   id: string;
   data: Data;
-  label: string;
   style: Style;
   hoveredStyle?: Style | ((style: Style) => Style);
 
@@ -18,9 +17,6 @@ export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
    * @default false
    */
   showOrder: boolean;
-
-  onBBoxOver?: (e: MouseEvent, annotation: any) => void;
-  onBBoxOut?: (e: MouseEvent, annotation: any) => void;
   onSelect?: (e: MouseEvent, annotation: any) => void;
   onUnSelect?: (e: MouseEvent, annotation: any) => void;
   onMove?: (e: MouseEvent, annotation: any) => void;
@@ -36,8 +32,6 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   public style: Style;
 
   public group: Group<IShape, Style>;
-
-  public label: string;
 
   public hoveredStyle?: Style | ((style: Style) => Style);
 
@@ -60,12 +54,9 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   constructor({
     id,
     data,
-    label,
     style,
     hoveredStyle,
     showOrder,
-    onBBoxOver,
-    onBBoxOut,
     onSelect,
     onUnSelect,
     onMove,
@@ -76,12 +67,9 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     this.data = data;
     this.style = style;
     this.hoveredStyle = hoveredStyle;
-    this.label = label || '无标签';
     this.showOrder = showOrder;
 
     this.eventHandlers = {
-      onBBoxOver,
-      onBBoxOut,
       onSelect,
       onUnSelect,
       onMove,
@@ -91,13 +79,8 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
     this.group = new Group(id, data.order);
 
-    // hover事件挂在group上即可满足当前需求
-    this.group.on(EInternalEvent.BBoxOver, this._handleMouseOver);
-    this.group.on(EInternalEvent.BBoxOut, this._handleMouseOut);
-
     eventEmitter.on(EInternalEvent.Select, this._handleSelect);
     eventEmitter.on(EInternalEvent.UnSelect, this._handleUnSelect);
-    eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
 
     // 建立order和id的映射关系
     monitor?.setOrderIndexedAnnotationIds(data.order, id);
@@ -131,53 +114,12 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     }
   };
 
-  private _handleMouseOver = (e: MouseEvent) => {
-    const { onBBoxOver } = this.eventHandlers;
-
-    if (onBBoxOver) {
-      onBBoxOver(e, this);
-    } else {
-      const { group, style, hoveredStyle } = this;
-
-      group.updateStyle({
-        ...style,
-        ...(typeof hoveredStyle === 'function' ? (hoveredStyle as (style: Style) => Style)(style) : hoveredStyle ?? {}),
-      });
-    }
-  };
-
-  private _handleMouseOut = (e: MouseEvent) => {
-    const { onBBoxOut } = this.eventHandlers;
-
-    if (onBBoxOut) {
-      onBBoxOut(e, this);
-    } else {
-      const { group, style } = this;
-
-      group.updateStyle(style);
-    }
-  };
-
   public get bbox() {
     return this.group.bbox;
   }
 
-  public syncCoordToData() {
-    throw Error('Implement me!');
-  }
-
   public render(_ctx: CanvasRenderingContext2D) {
     this.group.render(_ctx);
-  }
-
-  public getLabelText() {
-    const { data, label, showOrder } = this;
-
-    if (showOrder) {
-      return `${data.order} ${label}`;
-    }
-
-    return label;
   }
 
   public destroy() {
@@ -185,6 +127,5 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     this.group.destroy();
     eventEmitter.off(EInternalEvent.Select, this._handleSelect);
     eventEmitter.off(EInternalEvent.UnSelect, this._handleUnSelect);
-    eventEmitter.off(EInternalEvent.NoTarget, this._handleMouseOut);
   }
 }

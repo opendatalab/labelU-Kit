@@ -1,13 +1,15 @@
 import type { BBox } from 'rbush';
+import cloneDeep from 'lodash.clonedeep';
 
-import { eventEmitter } from '../singletons';
+import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
-import type { Annotation } from '../annotation/Annotation';
+import type { Annotation } from '../annotations/Annotation';
 import type { BasicImageAnnotation } from '../interface';
 import { Point } from '../shapes';
 import type { AxisPoint, Shape } from '../shapes';
 import { ControllerPoint } from './ControllerPoint';
 import { ControllerEdge } from './ControllerEdge';
+import { LabelBase } from '../annotations/Label.base';
 
 type Constructor<T extends {}> = new (...args: any[]) => T;
 
@@ -17,6 +19,9 @@ type MouseListenerHandler = (handler: MouseEventHandler) => void;
 
 export interface IDraftObserver {
   isPicked: boolean;
+
+  labelColor: string;
+
   onMove: MouseListenerHandler;
   onMouseDown: MouseListenerHandler;
   onMouseUp: MouseListenerHandler;
@@ -42,11 +47,17 @@ export function DraftObserverMixin<
   return class extends Base {
     public isPicked = false;
 
+    public outOfImage: boolean = true;
+
+    public labelColor = LabelBase.DEFAULT_COLOR;
+
     private _onMoveHandlers: MouseEventHandler[] = [];
 
     private _onMouseDownHandlers: MouseEventHandler[] = [];
 
     private _onMouseUpHandlers: MouseEventHandler[] = [];
+
+    private _preDynamicCoordinates: AxisPoint[][] = [];
 
     constructor(...params: any[]) {
       super(...params);
@@ -69,6 +80,7 @@ export function DraftObserverMixin<
       // 存在草稿说明当前处于编辑状态，只需要判断鼠标是否落在在草稿上即可
       if (this.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
         this.isPicked = true;
+        this._preDynamicCoordinates = this.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
 
         for (const handler of this._onMouseDownHandlers) {
           handler(e);
@@ -108,6 +120,9 @@ export function DraftObserverMixin<
         return;
       }
 
+      // 统一在这里移动草稿
+      this.moveByDistance();
+
       for (const handler of _onMoveHandlers) {
         handler(e);
       }
@@ -121,6 +136,7 @@ export function DraftObserverMixin<
       }
 
       this.isPicked = false;
+      this._preDynamicCoordinates = [];
 
       for (const handler of this._onMouseUpHandlers) {
         handler(e);
@@ -184,6 +200,31 @@ export function DraftObserverMixin<
       }
 
       return false;
+    }
+
+    /**
+     * 根据鼠标移动的距离移动草稿
+     */
+    public moveByDistance() {
+      const { outOfImage, _preDynamicCoordinates } = this;
+
+      const [safeX, safeY] = outOfImage ? [true, true] : axis!.isCoordinatesSafe(_preDynamicCoordinates);
+
+      // 更新草稿坐标
+      this.group.each((shape, index) => {
+        shape.plainCoordinate.forEach((point, i) => {
+          if (safeX) {
+            shape.coordinate[i].x = axis!.getOriginalX(_preDynamicCoordinates[index][i].x + axis!.distance.x);
+          }
+
+          if (safeY) {
+            shape.coordinate[i].y = axis!.getOriginalY(_preDynamicCoordinates[index][i].y + axis!.distance.y);
+          }
+        });
+      });
+
+      // 手动更新组合的包围盒
+      this.group.update();
     }
 
     public render(ctx: CanvasRenderingContext2D) {

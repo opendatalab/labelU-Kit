@@ -3,29 +3,16 @@ import cloneDeep from 'lodash.clonedeep';
 
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
-import type { RectData } from '../annotations';
-import { AnnotationRect } from '../annotations';
-import type { AxisPoint, RectStyle } from '../shapes';
-import { Rect } from '../shapes';
+import type { CuboidData, CuboidStyle } from '../annotations';
+import { AnnotationCuboid } from '../annotations';
+import type { AxisPoint } from '../shapes';
+import { Rect, Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
-import { DraftRect } from '../drafts/Rect.draft';
+import { mapValues } from '../utils';
+import { DraftCuboid } from '../drafts/Cuboid.draft';
 
-export interface RectToolOptions extends BasicToolParams<RectData, RectStyle> {
-  /**
-   * 最小宽度
-   *
-   * @default 1
-   */
-  minWidth?: number;
-
-  /**
-   * 最小高度
-   *
-   * @default 1
-   */
-  minHeight?: number;
-
+export interface CuboidToolOptions extends BasicToolParams<CuboidData, CuboidStyle> {
   /**
    * 图片外标注
    * @default true;
@@ -33,11 +20,12 @@ export interface RectToolOptions extends BasicToolParams<RectData, RectStyle> {
   outOfImage?: boolean;
 }
 
-export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
-  static convertToCanvasCoordinates(data: RectData[]) {
+export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions> {
+  static convertToCanvasCoordinates(data: CuboidData[]) {
     return data.map((item) => ({
       ...item,
-      ...axis!.convertSourceCoordinate(item),
+      front: mapValues(item.front, (point) => axis!.convertSourceCoordinate(point)),
+      back: mapValues(item.back, (point) => axis!.convertSourceCoordinate(point)),
     }));
   }
 
@@ -45,14 +33,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   private _startPoint: AxisPoint | null = null;
 
-  public draft: DraftRect | null = null;
+  public draft: DraftCuboid | null = null;
 
-  constructor(params: RectToolOptions) {
+  constructor(params: CuboidToolOptions) {
     super({
-      name: 'rect',
+      name: 'cuboid',
       outOfImage: true,
-      minHeight: 1,
-      minWidth: 1,
       labels: [],
       // ----------------
       data: [],
@@ -62,8 +48,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
         ...params.style,
       },
     });
-
-    AnnotationRect.buildLabelMapping(params.labels ?? []);
+    AnnotationCuboid.buildLabelMapping(params.labels ?? []);
 
     this._setupShapes();
 
@@ -76,15 +61,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   /**
    * 点击画布事件处理
-   *
-   * @description
-   * 点击标注时：
-   * 1. 销毁被点击的标注的drawing（成品）
-   * 2. 进入pen的编辑模式
-   *  2.1. 创建新的drawing（成品），需要包含点、线
-   *  2.2. 创建选中包围盒
    */
-  protected onSelect = (_e: MouseEvent, annotation: AnnotationRect) => {
+  protected onSelect = (_e: MouseEvent, annotation: AnnotationCuboid) => {
     Tool.emitSelect(this._convertAnnotationItem(annotation.data));
     this?._creatingShape?.destroy();
     this._creatingShape = null;
@@ -118,39 +96,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
-  private _validate(data: RectData) {
-    const { config } = this;
-
-    const realWidth = data.width / axis!.scale;
-    const realHeight = data.height / axis!.scale;
-
-    if (realWidth < config.minWidth!) {
-      Tool.error({
-        type: 'minWidth',
-        message: `The width of the rectangle is too small! Minimum width is ${config.minWidth!}!`,
-      });
-
-      return false;
-    }
-
-    if (realHeight < config.minHeight!) {
-      Tool.error({
-        type: 'minHeight',
-        message: `The height of the rectangle is too small! Minimum height is ${config.minHeight!}!`,
-      });
-
-      return false;
-    }
-
-    return true;
-  }
-
-  private _addAnnotation(data: RectData) {
+  private _addAnnotation(data: CuboidData) {
     const { drawing, style, hoveredStyle } = this;
 
     drawing!.set(
       data.id,
-      new AnnotationRect({
+      new AnnotationCuboid({
         id: data.id,
         data,
         showOrder: this.showOrder,
@@ -161,8 +112,24 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     );
   }
 
-  private _createDraft(data: RectData) {
-    this.draft = new DraftRect(this.config, {
+  protected handlePointStyle = () => {
+    const { draft } = this;
+
+    if (!draft) {
+      return;
+    }
+
+    draft.group.each((shape) => {
+      if (shape instanceof Point) {
+        shape.updateStyle({
+          stroke: 'transparent',
+        });
+      }
+    });
+  };
+
+  private _createDraft(data: CuboidData) {
+    this.draft = new DraftCuboid(this.config, {
       id: data.id,
       data,
       showOrder: false,
@@ -182,43 +149,39 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
-  private _archiveCreatingShapes(e: MouseEvent) {
-    const { _creatingShape, activeLabel } = this;
+  private _archiveCreatingShapes(_e: MouseEvent) {
+    const { _creatingShape } = this;
 
     if (!_creatingShape) {
       return;
     }
 
-    const data = {
-      id: _creatingShape.id,
-      x: _creatingShape.coordinate[0].x,
-      y: _creatingShape.coordinate[0].y,
-      label: activeLabel,
-      width: _creatingShape.width,
-      height: _creatingShape.height,
-      order: monitor!.getNextOrder(),
-    };
+    // const data = {
+    //   id: _creatingShape.id,
+    //   x: _creatingShape.coordinate[0].x,
+    //   y: _creatingShape.coordinate[0].y,
+    //   label: activeLabel,
+    //   width: _creatingShape.width,
+    //   height: _creatingShape.height,
+    //   order: monitor!.getNextOrder(),
+    // };
 
-    if (!this._validate(data)) {
-      return;
-    }
+    // Tool.onAdd(
+    //   {
+    //     ...data,
+    //     ...this._convertAnnotationItem(data),
+    //   },
+    //   e,
+    // );
 
-    Tool.onAdd(
-      {
-        ...data,
-        ...this._convertAnnotationItem(data),
-      },
-      e,
-    );
-
-    this._createDraft(data);
+    // this._createDraft(data);
     _creatingShape.destroy();
     this._creatingShape = null;
     monitor!.setSelectedAnnotationId(_creatingShape.id);
     axis!.rerender();
   }
 
-  private _rebuildDraft(data?: RectData) {
+  private _rebuildDraft(data?: CuboidData) {
     if (!this.draft) {
       return;
     }
@@ -282,7 +245,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
       this._creatingShape = new Rect({
         id: uuid(),
-        style: { ...style, stroke: AnnotationRect.labelStatic.getLabelColor(activeLabel) },
+        style,
         coordinate: cloneDeep(this._startPoint),
         width: 1,
         height: 1,
@@ -316,12 +279,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   };
 
-  private _convertAnnotationItem(data: RectData) {
+  private _convertAnnotationItem(data: CuboidData) {
     return {
       ...data,
-      ...axis!.convertCanvasCoordinate(data),
-      width: data.width / axis!.initialBackgroundScale,
-      height: data.height / axis!.initialBackgroundScale,
+      front: mapValues(data.front, (point) => axis!.convertCanvasCoordinate(point)),
+      back: mapValues(data.back, (point) => axis!.convertCanvasCoordinate(point)),
     };
   }
 
@@ -360,7 +322,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
     return result.map((item) => {
       return this._convertAnnotationItem(item);
-    });
+    }) as unknown as CuboidData[];
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

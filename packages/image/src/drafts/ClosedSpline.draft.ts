@@ -1,12 +1,13 @@
 import cloneDeep from 'lodash.clonedeep';
+import Color from 'color';
 
 import type { LineStyle, Line } from '../shapes/Line.shape';
-import type { PolygonData } from '../annotation';
-import { AnnotationLine, AnnotationPolygon } from '../annotation';
+import type { PolygonData } from '../annotations';
+import { AnnotationLine, AnnotationPolygon } from '../annotations';
 import type { PointStyle, Point, PolygonStyle, AxisPoint } from '../shapes';
 import { Spline, ClosedSpline } from '../shapes';
-import type { AnnotationParams } from '../annotation/Annotation';
-import { Annotation } from '../annotation/Annotation';
+import type { AnnotationParams } from '../annotations/Annotation';
+import { Annotation } from '../annotations/Annotation';
 import type { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import type { PolygonToolOptions } from '../tools';
@@ -33,28 +34,30 @@ export class DraftPolygonCurve extends DraftObserverMixin(
     super(params);
 
     this.config = config;
+    this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
 
     this._setupShapes();
+    this.onMouseUp(this._onMouseUp);
   }
 
   /**
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style } = this;
+    const { data, group, style, labelColor } = this;
 
     group.add(
       // 多边形用于颜色填充
       new ClosedSpline({
         id: data.id,
         controlPoints: data.controlPoints!,
-        coordinate: cloneDeep(data.pointList),
-        style: { ...style, strokeWidth: 0, stroke: 'transparent' },
+        coordinate: cloneDeep(data.points),
+        style: { ...style, strokeWidth: 0, stroke: 'transparent', fill: Color(labelColor).alpha(0.3).toString() },
       }),
     );
 
     const controlPoints = AnnotationLine.chunk(data.controlPoints!, 2);
-    const fullPoints = [...data.pointList, data.pointList[0]];
+    const fullPoints = [...data.points, data.points[0]];
 
     for (let i = 1; i < fullPoints.length; i++) {
       const startPoint = fullPoints[i - 1];
@@ -65,7 +68,10 @@ export class DraftPolygonCurve extends DraftObserverMixin(
         id: fullPoints[i - 1].id,
         coordinate: [{ ...startPoint }, { ...endPoint }],
         controlPoints: [{ ...startControlPoint }, { ...endControlPoint }],
-        style,
+        style: {
+          ...style,
+          stroke: labelColor,
+        },
       });
 
       group.add(curve);
@@ -73,9 +79,9 @@ export class DraftPolygonCurve extends DraftObserverMixin(
 
     // 根据曲线切点转换的控制点
     const slopePoints = AnnotationPolygon.makeControlPointsByPointList(data.controlPoints!);
-    for (let i = 0; i < data.pointList.length; i++) {
+    for (let i = 0; i < data.points.length; i++) {
       // 增加曲率控制点，跟点的关系是 2n
-      const contact = data.pointList[i];
+      const contact = data.points[i];
       const currentControls = slopePoints[i];
 
       const edge: SlopeEdge = new SlopeEdge({
@@ -94,6 +100,11 @@ export class DraftPolygonCurve extends DraftObserverMixin(
       group.add(edge);
     }
   }
+
+  private _onMouseUp = () => {
+    // 手动将坐标同步到数据
+    this.syncCoordToData();
+  };
 
   /**
    * 按下切点
@@ -256,14 +267,14 @@ export class DraftPolygonCurve extends DraftObserverMixin(
 
   public syncCoordToData() {
     const { group, data } = this;
-    const pointSize = data.pointList.length;
+    const pointSize = data.points.length;
     const edges = group.shapes.slice(-pointSize) as unknown as SlopeEdge[];
 
     const controlPoints = [];
 
     for (let i = 0; i < edges.length; i++) {
-      data.pointList[i].x = edges[i].contactPoint!.plainCoordinate[0].x;
-      data.pointList[i].y = edges[i].contactPoint!.plainCoordinate[0].y;
+      data.points[i].x = edges[i].contactPoint!.plainCoordinate[0].x;
+      data.points[i].y = edges[i].contactPoint!.plainCoordinate[0].y;
 
       if (edges[i].endControlOfPrevCurve) {
         controlPoints.push(edges[i].endControlOfPrevCurve!.plainCoordinate[0]);

@@ -1,11 +1,11 @@
 import cloneDeep from 'lodash.clonedeep';
 
 import type { LineStyle, Line } from '../shapes/Line.shape';
-import { AnnotationLine, type LineData } from '../annotation';
+import { AnnotationLine, type LineData } from '../annotations';
 import type { PointStyle, Point } from '../shapes';
 import { Spline } from '../shapes';
-import type { AnnotationParams } from '../annotation/Annotation';
-import { Annotation } from '../annotation/Annotation';
+import type { AnnotationParams } from '../annotations/Annotation';
+import { Annotation } from '../annotations/Annotation';
 import type { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import type { LineToolOptions } from '../tools';
@@ -30,28 +30,33 @@ export class DraftLineCurve extends DraftObserverMixin(
     super(params);
 
     this.config = config;
+    this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
 
     this._setupShapes();
+    this.onMouseUp(this._onMouseUp);
   }
 
   /**
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style } = this;
+    const { data, group, style, labelColor } = this;
 
     const controlPoints = AnnotationLine.chunk(data.controlPoints!, 2);
 
-    for (let i = 1; i < data.pointList.length; i++) {
-      const startPoint = data.pointList[i - 1];
-      const endPoint = data.pointList[i];
+    for (let i = 1; i < data.points.length; i++) {
+      const startPoint = data.points[i - 1];
+      const endPoint = data.points[i];
       const [startControlPoint, endControlPoint] = controlPoints[i - 1];
 
       const curve = new Spline({
-        id: data.pointList[i - 1].id,
+        id: data.points[i - 1].id,
         coordinate: [{ ...startPoint }, { ...endPoint }],
         controlPoints: [{ ...startControlPoint }, { ...endControlPoint }],
-        style,
+        style: {
+          ...style,
+          stroke: labelColor,
+        },
       });
 
       group.add(curve);
@@ -59,9 +64,9 @@ export class DraftLineCurve extends DraftObserverMixin(
 
     // 根据曲线切点转换的控制点
     const slopePoints = AnnotationLine.makeControlPointsByPointList(data.controlPoints!);
-    for (let i = 0; i < data.pointList.length; i++) {
+    for (let i = 0; i < data.points.length; i++) {
       // 增加曲率控制点，跟点的关系是 2n - 2
-      const contact = data.pointList[i];
+      const contact = data.points[i];
       const currentControls = slopePoints[i];
 
       let edge: SlopeEdge;
@@ -70,7 +75,7 @@ export class DraftLineCurve extends DraftObserverMixin(
           startControlOfNextCurve: { ...currentControls[0] },
           contact,
         });
-      } else if (i === data.pointList.length - 1) {
+      } else if (i === data.points.length - 1) {
         edge = new SlopeEdge({
           contact,
           endControlOfPrevCurve: { ...currentControls[0] },
@@ -92,6 +97,11 @@ export class DraftLineCurve extends DraftObserverMixin(
       group.add(edge);
     }
   }
+
+  private _onMouseUp = () => {
+    // 手动将坐标同步到数据
+    this.syncCoordToData();
+  };
 
   /**
    * 按下切点
@@ -228,14 +238,14 @@ export class DraftLineCurve extends DraftObserverMixin(
 
   public syncCoordToData() {
     const { group, data } = this;
-    const pointSize = data.pointList.length;
+    const pointSize = data.points.length;
     const edges = group.shapes.slice(-pointSize) as unknown as SlopeEdge[];
 
     const controlPoints = [];
 
     for (let i = 0; i < edges.length; i++) {
-      data.pointList[i].x = edges[i].contactPoint!.plainCoordinate[0].x;
-      data.pointList[i].y = edges[i].contactPoint!.plainCoordinate[0].y;
+      data.points[i].x = edges[i].contactPoint!.plainCoordinate[0].x;
+      data.points[i].y = edges[i].contactPoint!.plainCoordinate[0].y;
 
       if (edges[i].endControlOfPrevCurve) {
         controlPoints.push(edges[i].endControlOfPrevCurve!.plainCoordinate[0]);

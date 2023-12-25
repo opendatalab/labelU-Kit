@@ -72,10 +72,10 @@ export enum EInternalEvent {
   ShapeOut = '__shape_out__',
 
   /** 经过包围盒 */
-  BBoxOver = '__bbox_over__',
+  MouseOver = '__mouse_over__',
 
   /** 在包围盒外 */
-  BBoxOut = '__bbox_out__',
+  MouseOut = '__mouse_out__',
 
   /** 无图形对象 */
   NoTarget = '__no_target__',

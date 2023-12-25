@@ -1,14 +1,15 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+import Color from 'color';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
-import type { PolygonData, PolygonGroup } from '../annotation';
+import { AnnotationPolygon, type PolygonData, type PolygonGroup } from '../annotations';
 import type { AxisPoint, PointStyle, PolygonStyle, Point } from '../shapes';
 import { Polygon } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
-import type { AnnotationParams } from '../annotation/Annotation';
-import { Annotation } from '../annotation/Annotation';
+import type { AnnotationParams } from '../annotations/Annotation';
+import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import { ControllerEdge } from './ControllerEdge';
@@ -21,8 +22,6 @@ export class DraftPolygon extends DraftObserverMixin(
   Annotation<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle>,
 ) {
   public config: PolygonToolOptions;
-
-  private _isControllerPicked: boolean = false;
 
   private _pointIndex: number | null = null;
 
@@ -63,9 +62,9 @@ export class DraftPolygon extends DraftObserverMixin(
 
     this.config = config;
     this._tool = tool;
+    this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(params.data.label);
+
     this._setupShapes();
-    this.onMouseDown(this._onMouseDown);
-    this.onMove(this._onMouseMove);
     this.onMouseUp(this._onMouseUp);
 
     eventEmitter.on(EInternalEvent.KeyDown, this._onKeyDown);
@@ -76,19 +75,24 @@ export class DraftPolygon extends DraftObserverMixin(
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config } = this;
+    const { data, group, style, config, labelColor } = this;
 
     group.add(
       // 多边形用于颜色填充
       new Polygon({
         id: data.id,
-        coordinate: cloneDeep(data.pointList),
-        style: { ...style, strokeWidth: 0, stroke: 'transparent' },
+        coordinate: cloneDeep(data.points),
+        style: {
+          ...style,
+          strokeWidth: 0,
+          stroke: 'transparent',
+          fill: Color(labelColor).alpha(0.3).toString(),
+        },
       }),
     );
 
     // 多线段用于控制多边形的边
-    const fullPoints = [...data.pointList, data.pointList[0]];
+    const fullPoints = [...data.points, data.points[0]];
 
     for (let i = 1; i < fullPoints.length; i++) {
       const startPoint = fullPoints[i - 1];
@@ -97,7 +101,10 @@ export class DraftPolygon extends DraftObserverMixin(
       const edge = new ControllerEdge({
         id: uuid(),
         coordinate: cloneDeep([startPoint, endPoint]),
-        style,
+        style: {
+          ...style,
+          stroke: labelColor,
+        },
       });
 
       edge.onMouseDown(this._onEdgeDown);
@@ -110,8 +117,8 @@ export class DraftPolygon extends DraftObserverMixin(
     }
 
     // 点要覆盖在线上
-    for (let i = 0; i < data.pointList.length; i++) {
-      const pointItem = data.pointList[i];
+    for (let i = 0; i < data.points.length; i++) {
+      const pointItem = data.points[i];
       const point = new ControllerPoint({
         id: uuid(),
         outOfImage: config.outOfImage,
@@ -167,7 +174,7 @@ export class DraftPolygon extends DraftObserverMixin(
       // NOTE: 生成的多边形坐标最后一个点和第一个点是重复的，需要删除
       firstPolygon![0].pop();
       // 第一个多边形使用当前多边形的id
-      this.data.pointList = firstPolygon![0].map((item: number[]) => {
+      this.data.points = firstPolygon![0].map((item: number[]) => {
         return {
           id: uuid(),
           ...axis!.getOriginalCoord({
@@ -187,7 +194,7 @@ export class DraftPolygon extends DraftObserverMixin(
         return {
           ...cloneDeep(this.data),
           id: uuid(),
-          pointList: items[0].map((item: number[]) => {
+          points: items[0].map((item: number[]) => {
             return {
               id: uuid(),
               ...axis!.getOriginalCoord({
@@ -259,82 +266,8 @@ export class DraftPolygon extends DraftObserverMixin(
     }
   }
 
-  /**
-   * 选中草稿
-   */
-  private _onMouseDown = () => {
-    this._isControllerPicked = false;
-    this.isPicked = true;
-    this._previousDynamicCoordinates = this.getDynamicCoordinates();
-    this._previousPolygonCoordinates = this.getPolygonCoordinates();
-  };
-
-  /**
-   * 移动草稿
-   */
-  private _onMouseMove = () => {
-    const { isPicked, config, _previousDynamicCoordinates, _previousPolygonCoordinates } = this;
-
-    if (!isPicked || !_previousDynamicCoordinates) {
-      return;
-    }
-
-    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates);
-
-    // 更新草稿坐标
-    this.group.each((shape, shapeIndex) => {
-      if (shape instanceof Line) {
-        const startPoint = axis!.getOriginalCoord({
-          x: _previousDynamicCoordinates[shapeIndex][0].x + axis!.distance.x,
-          y: _previousDynamicCoordinates[shapeIndex][0].y + axis!.distance.y,
-        });
-
-        const endPoint = axis!.getOriginalCoord({
-          x: _previousDynamicCoordinates[shapeIndex][1].x + axis!.distance.x,
-          y: _previousDynamicCoordinates[shapeIndex][1].y + axis!.distance.y,
-        });
-
-        if (safeX) {
-          shape.coordinate[0].x = startPoint.x;
-          shape.coordinate[1].x = endPoint.x;
-        }
-
-        if (safeY) {
-          shape.coordinate[0].y = startPoint.y;
-          shape.coordinate[1].y = endPoint.y;
-        }
-      } else if (shape instanceof Polygon) {
-        shape.coordinate.forEach((point, index) => {
-          if (safeX) {
-            point.x = axis!.getOriginalX(_previousPolygonCoordinates[index].x + axis!.distance.x);
-          }
-
-          if (safeY) {
-            point.y = axis!.getOriginalY(_previousPolygonCoordinates[index].y + axis!.distance.y);
-          }
-        });
-      } else {
-        // Point
-        if (safeX) {
-          shape.coordinate[0].x = axis!.getOriginalX(_previousDynamicCoordinates[shapeIndex][0].x + axis!.distance.x);
-        }
-
-        if (safeY) {
-          shape.coordinate[0].y = axis!.getOriginalY(_previousDynamicCoordinates[shapeIndex][0].y + axis!.distance.y);
-        }
-      }
-    });
-
-    // 手动更新组合的包围盒
-    this.group.update();
-    // 手动将坐标同步到数据
-    this.syncCoordToData();
-  };
-
   private _onMouseUp = () => {
-    this.isPicked = false;
-    this._previousDynamicCoordinates = null;
-    this._previousPolygonCoordinates = [];
+    this.syncCoordToData();
   };
 
   /**
@@ -348,7 +281,7 @@ export class DraftPolygon extends DraftObserverMixin(
     if (_pointToBeAdded) {
       const insertIndex = Number(_pointToBeAdded.name);
       // 先往data里增加一个点
-      data.pointList.splice(insertIndex, 0, {
+      data.points.splice(insertIndex, 0, {
         id: _pointToBeAdded.id,
         x: _pointToBeAdded.coordinate[0].x,
         y: _pointToBeAdded.coordinate[0].y,
@@ -364,7 +297,7 @@ export class DraftPolygon extends DraftObserverMixin(
     // 删除端点
     if (monitor?.keyboard.Alt) {
       // 少于两个点或少于配置的最少点数时，不允许删除
-      if (data.pointList.length <= config.closingPointAmount!) {
+      if (data.points.length <= config.closingPointAmount!) {
         Tool.error({
           type: 'closingPointAmount',
           message: `At least ${config.closingPointAmount} points are required`,
@@ -372,8 +305,8 @@ export class DraftPolygon extends DraftObserverMixin(
 
         return;
       }
-      const deleteIndex = group.shapes.indexOf(point) - data.pointList.length - 1;
-      data.pointList.splice(deleteIndex, 1);
+      const deleteIndex = group.shapes.indexOf(point) - data.points.length - 1;
+      data.points.splice(deleteIndex, 1);
       group.clear();
       this._setupShapes();
       axis?.rerender();
@@ -381,7 +314,6 @@ export class DraftPolygon extends DraftObserverMixin(
       return;
     }
 
-    this._isControllerPicked = true;
     this._effectedLines = [undefined, undefined];
     this._pointIndex = this.group.shapes[0].coordinate.findIndex(
       (item) => item.x === point.coordinate[0].x && item.y === point.coordinate[0].y,
@@ -413,9 +345,9 @@ export class DraftPolygon extends DraftObserverMixin(
    * @description 控制点移动时，更新线段的端点
    */
   private _onControllerPointMove = ({ coordinate }: ControllerPoint, e: MouseEvent) => {
-    const { _pointIndex, _isControllerPicked, _effectedLines } = this;
+    const { _pointIndex, _effectedLines } = this;
 
-    if (!_isControllerPicked || _pointIndex === null || !_effectedLines) {
+    if (_pointIndex === null || !_effectedLines) {
       return;
     }
 
@@ -463,7 +395,6 @@ export class DraftPolygon extends DraftObserverMixin(
    * 释放控制点
    */
   private _onControllerPointUp = () => {
-    this._isControllerPicked = false;
     this._pointIndex = null;
   };
 
@@ -620,10 +551,6 @@ export class DraftPolygon extends DraftObserverMixin(
     return cloneDeep(this.group.shapes[0].dynamicCoordinate);
   }
 
-  public get isControllerPicked() {
-    return this._isControllerPicked;
-  }
-
   public destroy() {
     super.destroy();
     eventEmitter.off(EInternalEvent.KeyDown, this._onKeyDown);
@@ -636,8 +563,8 @@ export class DraftPolygon extends DraftObserverMixin(
     const polygonCoordinate = group.shapes[0].dynamicCoordinate;
 
     for (let i = 0; i < polygonCoordinate.length; i++) {
-      data.pointList[i].x = axis!.getOriginalX(polygonCoordinate[i].x);
-      data.pointList[i].y = axis!.getOriginalY(polygonCoordinate[i].y);
+      data.points[i].x = axis!.getOriginalX(polygonCoordinate[i].x);
+      data.points[i].y = axis!.getOriginalY(polygonCoordinate[i].y);
     }
   }
 }

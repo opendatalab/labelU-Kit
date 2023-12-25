@@ -29,6 +29,7 @@ export class Monitor {
 
   public selectedAnnotationId: string | null = null;
 
+  // TODO: 清空标注时这里也要清空
   private _orderIndexedAnnotationIds: string[] = [];
 
   /** 键盘按键记录 */
@@ -170,7 +171,7 @@ export class Monitor {
 
     // 向group发送鼠标悬浮事件
     if (lastGroup) {
-      lastGroup.emit(EInternalEvent.BBoxOver, e);
+      lastGroup.emit(EInternalEvent.MouseOver, e);
 
       lastGroup.reverseEach((shape: any) => {
         if (shape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
@@ -183,7 +184,7 @@ export class Monitor {
 
       if (_hoveredGroup && _hoveredGroup.id !== lastGroup.id) {
         // 向上一次hover的group发送鼠标离开事件，避免多个group同时hover
-        _hoveredGroup.emit(EInternalEvent.BBoxOut, e);
+        _hoveredGroup.emit(EInternalEvent.MouseOut, e);
       }
 
       if (_hoveredShape && _hoveredShape.id !== this._hoveredShape?.id) {
@@ -207,7 +208,7 @@ export class Monitor {
     for (const rbushItem of rbushItems) {
       if (rbushItem._group && lastGroup.id !== rbushItem._group.id) {
         // 向其他group发送鼠标离开事件
-        rbushItem._group.emit(EInternalEvent.BBoxOut, e);
+        rbushItem._group.emit(EInternalEvent.MouseOut, e);
         rbushItem._group.each((shape) => {
           shape.emit(EInternalEvent.ShapeOut, e);
         });
