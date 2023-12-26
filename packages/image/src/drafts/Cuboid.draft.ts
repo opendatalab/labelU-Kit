@@ -13,6 +13,8 @@ import { ControllerPoint } from './ControllerPoint';
 import { DraftObserverMixin } from './DraftObserver';
 import { ControllerEdge } from './ControllerEdge';
 import type { CuboidToolOptions } from '../tools';
+import { controllerBoundRelation, controllerSyncBackRelation, edgeBoundRelation } from './CuboidRelations';
+import { axis } from '../singletons';
 
 type ControllerPosition =
   | 'front-tl'
@@ -38,396 +40,11 @@ type ZPosition = 'front' | 'back';
 
 type LinePosition = keyof CuboidVertex;
 
-// 控制点与控制边、其他控制点、连接线的坐标的影响关系
-const controllerBoundObject = {
-  'front-tr': {
-    edge: [
-      {
-        name: 'front-top',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-          {
-            index: 1,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'front-right',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-bottom',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-left',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['y'],
-          },
-        ],
-      },
-    ],
-    controller: [
-      {
-        name: 'front-tl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'front-br',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-    line: [
-      {
-        name: 'tl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'tr',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'br',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-  },
-  'front-tl': {
-    edge: [
-      {
-        name: 'front-top',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-          {
-            index: 1,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'front-left',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-bottom',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-right',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['y'],
-          },
-        ],
-      },
-    ],
-    controller: [
-      {
-        name: 'front-br',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'front-tr',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-    line: [
-      {
-        name: 'bl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'tl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'br',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-  },
-  'front-bl': {
-    edge: [
-      {
-        name: 'front-bottom',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-          {
-            index: 1,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'front-left',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-top',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-right',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['y'],
-          },
-        ],
-      },
-    ],
-    controller: [
-      {
-        name: 'front-br',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'front-tl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-    line: [
-      {
-        name: 'tl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'bl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'tr',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-  },
-  'front-br': {
-    edge: [
-      {
-        name: 'front-bottom',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-          {
-            index: 1,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'front-right',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-top',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-      {
-        name: 'front-left',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['y'],
-          },
-        ],
-      },
-    ],
-    controller: [
-      {
-        name: 'front-bl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'front-tr',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-    line: [
-      {
-        name: 'bl',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['y'],
-          },
-        ],
-      },
-      {
-        name: 'br',
-        coordinates: [
-          {
-            index: 0,
-            fields: ['x', 'y'],
-          },
-        ],
-      },
-      {
-        name: 'tl',
-        coordinates: [
-          {
-            index: 1,
-            fields: ['x'],
-          },
-        ],
-      },
-    ],
-  },
+type SimpleEdgePosition = 'top' | 'right' | 'bottom' | 'left';
+
+const oppositePositionMapping: Record<ZPosition, ZPosition> = {
+  front: 'back',
+  back: 'front',
 };
 
 /**
@@ -446,9 +63,17 @@ export class DraftCuboid extends DraftObserverMixin(
   /**
    * 透视比例
    */
-  private _ratio: number = 1;
+  private _perspectiveWidthRatio: number = 1;
+
+  private _perspectiveHeightRatio: number = 1;
+
+  private _frontSizeRatio: number = 1;
+
+  private _backSizeRatio: number = 1;
 
   private _previousDynamicCoordinates: AxisPoint[][] | null = null;
+
+  private _oppositeControllerDynamicCoordinates: AxisPoint[] | null = null;
 
   /**
    * 控制点
@@ -532,17 +157,16 @@ export class DraftCuboid extends DraftObserverMixin(
     for (let i = 0; i < edgeCoordinates.length; i++) {
       // 背面底边不可控制
       if (edgeCoordinates[i].name === 'back-bottom') {
-        group.add(
-          new Line({
-            id: uuid(),
-            coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
-            style: {
-              ...style,
-              stroke: labelColor,
-            },
-          }),
-        );
-
+        const line = new Line({
+          id: uuid(),
+          coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
+          style: {
+            ...style,
+            stroke: labelColor,
+          },
+        });
+        group.add(line);
+        this._edgePositionMapping.set(edgeCoordinates[i].name as EdgePosition, line as ControllerEdge);
         continue;
       }
       const edge = new ControllerEdge({
@@ -676,6 +300,52 @@ export class DraftCuboid extends DraftObserverMixin(
     };
   }
 
+  private _setRatio() {
+    const { data } = this;
+
+    const frontWidth = data.front.tr.x - data.front.tl.x;
+    const frontHeight = data.front.bl.y - data.front.tl.y;
+    const backWidth = data.back.tr.x - data.back.tl.x;
+    const backHeight = data.back.bl.y - data.back.tl.y;
+
+    this._perspectiveWidthRatio = frontWidth / backWidth;
+    this._perspectiveHeightRatio = frontHeight / backHeight;
+    this._frontSizeRatio = frontWidth / frontHeight;
+    this._backSizeRatio = backWidth / backHeight;
+  }
+
+  private _getFrontSize() {
+    const { _controllerPositionMapping } = this;
+
+    const frontTopLeftPoint = _controllerPositionMapping.get('front-tl')!;
+    const frontTopRightPoint = _controllerPositionMapping.get('front-tr')!;
+    const frontBottomLeftPoint = _controllerPositionMapping.get('front-bl')!;
+
+    return {
+      width: frontTopRightPoint.dynamicCoordinate[0].x - frontTopLeftPoint.dynamicCoordinate[0].x,
+      height: frontBottomLeftPoint.dynamicCoordinate[0].y - frontTopLeftPoint.dynamicCoordinate[0].y,
+    };
+  }
+
+  private _getBackSize() {
+    const { _controllerPositionMapping } = this;
+
+    const backTopLeftPoint = _controllerPositionMapping.get('back-tl')!;
+    const backTopRightPoint = _controllerPositionMapping.get('back-tr')!;
+    const backBottomLeftPoint = _controllerPositionMapping.get('back-bl')!;
+
+    return {
+      width: backTopRightPoint.dynamicCoordinate[0].x - backTopLeftPoint.dynamicCoordinate[0].x,
+      height: backBottomLeftPoint.dynamicCoordinate[0].y - backTopLeftPoint.dynamicCoordinate[0].y,
+    };
+  }
+
+  private _refresh() {
+    this.group.clear();
+    this._setupShapes();
+    axis?.rerender();
+  }
+
   // ========================== 选中的标注草稿 ==========================
 
   private _onMouseUp = () => {
@@ -689,8 +359,15 @@ export class DraftCuboid extends DraftObserverMixin(
    * @param point
    * @description 按下控制点时，记录受影响的线段
    */
-  private _onControllerPointDown = () => {
-    // this._updateControllerAndEdgeAndPreBBox();
+  private _onControllerPointDown = (controllerPoint: ControllerPoint) => {
+    const { _controllerPositionMapping } = this;
+    const [zPosition, position] = controllerPoint.name!.split('-') as [ZPosition, LinePosition];
+
+    this._setRatio();
+    this._oppositeControllerDynamicCoordinates = cloneDeep(
+      _controllerPositionMapping.get(`${oppositePositionMapping[zPosition]}-${position}`)!.dynamicCoordinate,
+    );
+    this._previousDynamicCoordinates = this.getDynamicCoordinates();
   };
 
   /**
@@ -702,44 +379,51 @@ export class DraftCuboid extends DraftObserverMixin(
    * 2. 视觉后方的控制点移动时，前方的控制点不需要跟着移动，但是透视比例需要更新；
    * 3. 无论前后，对应的面的形状要符合透视比例。
    */
-  private _onControllerPointMove = (controllerPoint: ControllerPoint) => {
-    const { data, _controllerPositionMapping, _edgePositionMapping, _realFrontPolygon, _connectedLineMapping } = this;
+  private _onControllerPointMove = (controllerPoint: ControllerPoint, e: MouseEvent) => {
+    const {
+      config,
+      _controllerPositionMapping,
+      _edgePositionMapping,
+      _previousDynamicCoordinates,
+      _realFrontPolygon,
+      _connectedLineMapping,
+    } = this;
 
     if (!_realFrontPolygon) {
       return;
     }
 
+    let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates!);
+
     const [zPosition, position] = controllerPoint.name!.split('-') as [ZPosition, LinePosition];
-    // const frontTopEdge = _edgePositionMapping.get(`front-top`)!;
-    // const frontRightEdge = _edgePositionMapping.get(`front-right`)!;
-    // const frontBottomEdge = _edgePositionMapping.get(`front-bottom`)!;
-    // const frontLeftEdge = _edgePositionMapping.get(`front-left`)!;
-    // const backTopEdge = _edgePositionMapping.get(`back-top`)!;
-    // const backRightEdge = _edgePositionMapping.get(`back-right`)!;
-    // const backBottomEdge = _edgePositionMapping.get(`back-bottom`)!;
-    // const backLeftEdge = _edgePositionMapping.get(`back-left`)!;
-    // const tlLine = _connectedLineMapping.get('tl')!;
-    // const trLine = _connectedLineMapping.get('tr')!;
-    // const brLine = _connectedLineMapping.get('br')!;
-    // const blLine = _connectedLineMapping.get('bl')!;
-    // const frontTopLeftControl = _controllerPositionMapping.get(`front-tl`)!;
-    // const frontTopRightControl = _controllerPositionMapping.get(`front-tr`)!;
-    // const frontBottomRightControl = _controllerPositionMapping.get(`front-br`)!;
-    // const frontBottomLeftControl = _controllerPositionMapping.get(`front-bl`)!;
-    // const backTopLeftControl = _controllerPositionMapping.get(`back-tl`)!;
-    // const backTopRightControl = _controllerPositionMapping.get(`back-tr`)!;
-    // const backBottomRightControl = _controllerPositionMapping.get(`back-br`)!;
-    // const backBottomLeftControl = _controllerPositionMapping.get(`back-bl`)!;
 
-    const x = controllerPoint.plainCoordinate[0].x;
-    const y = controllerPoint.plainCoordinate[0].y;
-
-    console.log(zPosition, position);
-
-    // 前面的右上 ↗ 控制点
+    // 控制前面
     if (zPosition === 'front') {
-      const boundObject = controllerBoundObject[`${zPosition}-${position}`];
-      for (const shapeType in boundObject) {
+      const controllerRelation = controllerBoundRelation[`${zPosition}-${position}`];
+
+      // TODO: 如果变换后更新了点的方位，可以不设置镜像变换的限制
+      if (safeX) {
+        if (position === 'tr' || position === 'br') {
+          safeX = e.offsetX > _controllerPositionMapping.get('front-tl')!.dynamicCoordinate[0].x;
+        }
+
+        if (position === 'tl' || position === 'bl') {
+          safeX = e.offsetX < _controllerPositionMapping.get('front-tr')!.dynamicCoordinate[0].x;
+        }
+      }
+
+      if (safeY) {
+        if (position === 'tr' || position === 'tl') {
+          safeY = e.offsetY < _controllerPositionMapping.get('front-bl')!.dynamicCoordinate[0].y;
+        }
+
+        if (position === 'br' || position === 'bl') {
+          safeY = e.offsetY > _controllerPositionMapping.get('front-tl')!.dynamicCoordinate[0].y;
+        }
+      }
+
+      // 由控制点更新受影响的对象
+      for (const shapeType in controllerRelation) {
         let mapping: Map<string, ControllerPoint | ControllerEdge | Line>;
         if (shapeType === 'controller') {
           mapping = _controllerPositionMapping;
@@ -749,27 +433,79 @@ export class DraftCuboid extends DraftObserverMixin(
           mapping = _connectedLineMapping;
         }
 
-        boundObject[shapeType as 'edge' | 'controller' | 'line'].forEach(({ name, coordinates }) => {
+        controllerRelation[shapeType as 'edge' | 'controller' | 'line'].forEach(({ name, coordinates }) => {
           const shape = mapping.get(name as ControllerPosition | EdgePosition | LinePosition)!;
 
           coordinates.forEach(({ index, fields }) => {
             fields.forEach((field) => {
-              shape.coordinate[index][field as 'x' | 'y'] = controllerPoint.plainCoordinate[0][field as 'x' | 'y'];
+              if (safeX && field === 'x') {
+                shape.coordinate[index].x = controllerPoint.plainCoordinate[0].x;
+              }
+
+              if (safeY && field === 'y') {
+                shape.coordinate[index].y = controllerPoint.plainCoordinate[0].y;
+              }
             });
           });
         });
       }
 
-      if (position === 'tr') {
-        if (data.direction === 'front') {
-          _realFrontPolygon.coordinate[0].y = y;
-          _realFrontPolygon.coordinate[1].x = x;
-          _realFrontPolygon.coordinate[1].y = y;
-          _realFrontPolygon.coordinate[2].x = x;
+      // 按透视比例更新后面的图形
+      const syncBackRelation = controllerSyncBackRelation[`${zPosition}-${position}`];
+      const frontDistance = axis!.distance;
+      const backDistance = {
+        x: frontDistance.x / this._perspectiveWidthRatio,
+        y: frontDistance.y / this._perspectiveHeightRatio,
+      };
+      const backMirrorControllerCoordinate = this._oppositeControllerDynamicCoordinates!.map((point) => ({
+        x: point.x + backDistance.x,
+        y: point.y + backDistance.y,
+      }));
+
+      for (const shapeType in syncBackRelation) {
+        let mapping: Map<string, ControllerPoint | ControllerEdge | Line>;
+        if (shapeType === 'controller') {
+          mapping = _controllerPositionMapping;
+        } else if (shapeType === 'edge') {
+          mapping = _edgePositionMapping;
+        } else {
+          mapping = _connectedLineMapping;
         }
-      } else if (position === 'tl') {
+
+        syncBackRelation[shapeType as 'edge' | 'controller' | 'line'].forEach(({ name, coordinates }) => {
+          const shape = mapping.get(name as ControllerPosition | EdgePosition | LinePosition)!;
+
+          coordinates.forEach(({ index, fields }) => {
+            fields.forEach((field) => {
+              if (safeX && field === 'x') {
+                shape.coordinate[index].x = axis!.getOriginalX(backMirrorControllerCoordinate[0].x);
+              }
+
+              if (safeY && field === 'y') {
+                shape.coordinate[index].y = axis!.getOriginalY(backMirrorControllerCoordinate[0].y);
+              }
+            });
+          });
+        });
       }
+
+      // 更新到数据，便于从数据生成正面的多边形坐标
+      if (safeX && safeY) {
+        this.syncCoordToData();
+      }
+
+      const realPolygonCoordinate = AnnotationCuboid.generateFrontCoordinate(this.data);
+      this._realFrontPolygon?.plainCoordinate.forEach((point, index) => {
+        if (safeX) {
+          this._realFrontPolygon!.coordinate[index].x = realPolygonCoordinate[index].x;
+        }
+
+        if (safeY) {
+          this._realFrontPolygon!.coordinate[index].y = realPolygonCoordinate[index].y;
+        }
+      });
     } else {
+      // 控制后面
     }
 
     // 手动更新组合的包围盒
@@ -780,7 +516,8 @@ export class DraftCuboid extends DraftObserverMixin(
    * 释放控制点
    */
   private _onControllerPointUp = () => {
-    this.syncCoordToData();
+    this._oppositeControllerDynamicCoordinates = null;
+    this._previousDynamicCoordinates = null;
   };
 
   // ========================== 控制边 ==========================
@@ -792,7 +529,52 @@ export class DraftCuboid extends DraftObserverMixin(
   /**
    * 控制边的移动
    */
-  private _onEdgeMove = (_e: MouseEvent, _edge: ControllerEdge) => {
+  private _onEdgeMove = (_e: MouseEvent, edge: ControllerEdge) => {
+    const { _controllerPositionMapping, _edgePositionMapping, _connectedLineMapping, config } = this;
+
+    const x = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
+    const y = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
+
+    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+
+    const [zPosition, position] = edge.name!.split('-') as [ZPosition, SimpleEdgePosition];
+
+    if (safeX && (position === 'left' || position === 'right')) {
+      edge.coordinate[0].x = x;
+      edge.coordinate[1].x = x;
+    }
+
+    if (safeY && (position === 'top' || position === 'bottom')) {
+      edge.coordinate[0].y = y;
+      edge.coordinate[1].y = y;
+    }
+
+    if (zPosition === 'front') {
+      // 由控制边更新受影响的对象
+      const edgeRelation = edgeBoundRelation[`${zPosition}-${position}`];
+
+      for (const shapeType in edgeRelation) {
+        let mapping: Map<string, ControllerPoint | ControllerEdge | Line>;
+        if (shapeType === 'controller') {
+          mapping = _controllerPositionMapping;
+        } else if (shapeType === 'edge') {
+          mapping = _edgePositionMapping;
+        } else {
+          mapping = _connectedLineMapping;
+        }
+
+        edgeRelation[shapeType as 'edge' | 'controller' | 'line'].forEach(({ name, coordinates }) => {
+          const shape = mapping.get(name as ControllerPosition | EdgePosition | LinePosition)!;
+
+          coordinates.forEach(({ index, fields, edgeCoordIndex }) => {
+            fields.forEach((field) => {
+              shape.coordinate[index][field as 'x' | 'y'] = edge.plainCoordinate[edgeCoordIndex][field as 'x' | 'y'];
+            });
+          });
+        });
+      }
+    }
+
     // const { config, _controllerPositionMapping, _edgePositionMapping, _unscaledPreBBox } = this;
 
     this.group.update();
