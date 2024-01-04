@@ -3,15 +3,15 @@ import * as storage from '@/utils/storage';
 // ==========================【埋点】=========================
 const infos = [
   {
-    token: 'a1ddb69d6519b61a',
+    token: 'nzi7p0p8z685x0b1',
     host: 'localhost',
     api: 'https://analyze-dev.shlab.tech/api/v1/log/create',
   },
   {
-    env: 'iceberg',
-    token: '5ea1ddb69d6519b6',
+    // TODO：测试环境的token，测试完后需要替换为正式环境的token
+    token: 'nzi7p0p8z685x0b1',
     host: 'labelu.shlab.tech',
-    api: 'https://analyze.shlab.tech/api/v1/log/create',
+    api: 'https://analyze-dev.shlab.tech/api/v1/log/create',
   },
 ];
 
