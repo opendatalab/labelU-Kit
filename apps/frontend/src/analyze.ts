@@ -1,23 +1,11 @@
 import * as storage from '@/utils/storage';
 
 // ==========================【埋点】=========================
-const infos = [
-  {
-    token: 'nzi7p0p8z685x0b1',
-    host: 'localhost',
-    api: 'https://analyze-dev.shlab.tech/api/v1/log/create',
-  },
-  {
-    token: '5ea1ddb69d6519b6',
-    host: 'labelu.shlab.tech',
-    api: 'https://analyze-dev.shlab.tech/api/v1/log/create',
-  },
-];
-
-const correctInfo =
-  infos.find((info) => {
-    return window.location.host.includes(info.host);
-  }) || infos[0];
+const correctInfo = {
+  token: '5ea1ddb69d6519b6',
+  host: 'labelu.shlab.tech',
+  api: 'https://analyze.shlab.tech/api/v1/log/create',
+};
 
 const userid = storage.get('userid');
 const username = storage.get('username');
