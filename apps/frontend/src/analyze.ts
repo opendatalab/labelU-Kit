@@ -8,8 +8,7 @@ const infos = [
     api: 'https://analyze-dev.shlab.tech/api/v1/log/create',
   },
   {
-    // TODO：测试环境的token，测试完后需要替换为正式环境的token
-    token: 'nzi7p0p8z685x0b1',
+    token: '5ea1ddb69d6519b6',
     host: 'labelu.shlab.tech',
     api: 'https://analyze-dev.shlab.tech/api/v1/log/create',
   },
