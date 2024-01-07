@@ -9,7 +9,7 @@ import type { AxisPoint } from '../shapes';
 import { Rect, Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
-import { mapValues } from '../utils';
+import mapValues from '../utils/mapValues';
 import { DraftCuboid } from '../drafts/Cuboid.draft';
 
 export interface CuboidToolOptions extends BasicToolParams<CuboidData, CuboidStyle> {

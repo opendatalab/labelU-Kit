@@ -1,4 +1,4 @@
-export function mapValues<T extends Record<string, any>, U>(
+export default function mapValues<T extends Record<string, any>, U>(
   obj: T,
   fn: (value: T[keyof T]) => U,
 ): { [K in keyof T]: U } {
