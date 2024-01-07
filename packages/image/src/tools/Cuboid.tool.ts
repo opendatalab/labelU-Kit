@@ -5,8 +5,8 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { CuboidData, CuboidStyle } from '../annotations';
 import { AnnotationCuboid } from '../annotations';
-import type { AxisPoint } from '../shapes';
-import { Rect, Point } from '../shapes';
+import type { AxisPoint, LineStyle, RectStyle } from '../shapes';
+import { Line, Group, Rect, Point } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import mapValues from '../utils/mapValues';
@@ -29,7 +29,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     }));
   }
 
-  private _creatingShape: Rect | null = null;
+  private _creatingShape: Group<Rect | Line, RectStyle | LineStyle> | null = null;
 
   private _startPoint: AxisPoint | null = null;
 
@@ -150,31 +150,67 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
   }
 
   private _archiveCreatingShapes(_e: MouseEvent) {
-    const { _creatingShape } = this;
+    const { _creatingShape, activeLabel } = this;
 
     if (!_creatingShape) {
       return;
     }
 
-    // const data = {
-    //   id: _creatingShape.id,
-    //   x: _creatingShape.coordinate[0].x,
-    //   y: _creatingShape.coordinate[0].y,
-    //   label: activeLabel,
-    //   width: _creatingShape.width,
-    //   height: _creatingShape.height,
-    //   order: monitor!.getNextOrder(),
-    // };
+    const frontRect = _creatingShape.shapes[0] as Rect;
+    const backRect = _creatingShape.shapes[5] as Rect;
 
-    // Tool.onAdd(
-    //   {
-    //     ...data,
-    //     ...this._convertAnnotationItem(data),
-    //   },
-    //   e,
-    // );
+    const data: CuboidData = {
+      id: _creatingShape.id,
+      direction: 'front',
+      front: {
+        tl: {
+          x: frontRect.coordinate[0].x,
+          y: frontRect.coordinate[0].y,
+        },
+        tr: {
+          x: frontRect.coordinate[0].x + frontRect.width,
+          y: frontRect.coordinate[0].y,
+        },
+        br: {
+          x: frontRect.coordinate[0].x + frontRect.width,
+          y: frontRect.coordinate[0].y + frontRect.height,
+        },
+        bl: {
+          x: frontRect.coordinate[0].x,
+          y: frontRect.coordinate[0].y + frontRect.height,
+        },
+      },
+      back: {
+        tl: {
+          x: backRect.coordinate[0].x,
+          y: backRect.coordinate[0].y,
+        },
+        tr: {
+          x: backRect.coordinate[0].x + backRect.width,
+          y: backRect.coordinate[0].y,
+        },
+        br: {
+          x: backRect.coordinate[0].x + backRect.width,
+          y: backRect.coordinate[0].y + backRect.height,
+        },
+        bl: {
+          x: backRect.coordinate[0].x,
+          y: backRect.coordinate[0].y + backRect.height,
+        },
+      },
+      label: activeLabel,
+      order: monitor!.getNextOrder(),
+    };
 
-    // this._createDraft(data);
+    Tool.onAdd(
+      {
+        ...data,
+        ...this._convertAnnotationItem(data),
+      },
+      _e,
+    );
+
+    this._createDraft(data);
     _creatingShape.destroy();
     this._creatingShape = null;
     monitor!.setSelectedAnnotationId(_creatingShape.id);
@@ -233,23 +269,95 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     // 先归档上一次的草稿
     this._archiveDraft();
 
-    if (_creatingShape) {
-      this._archiveCreatingShapes(e);
-    } else {
-      // 记录起始点坐标
-      this._startPoint = axis!.getOriginalCoord({
-        // 超出安全区域的点直接落在安全区域边缘
-        x: config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX),
-        y: config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY),
-      });
+    // 记录起始点坐标
+    this._startPoint = axis!.getOriginalCoord({
+      // 超出安全区域的点直接落在安全区域边缘
+      x: config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX),
+      y: config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY),
+    });
 
-      this._creatingShape = new Rect({
-        id: uuid(),
-        style,
-        coordinate: cloneDeep(this._startPoint),
-        width: 1,
-        height: 1,
-      });
+    if (!_creatingShape) {
+      this._creatingShape = new Group(uuid(), monitor!.getNextOrder());
+
+      this._creatingShape.add(
+        new Rect({
+          id: uuid(),
+          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          coordinate: cloneDeep(this._startPoint),
+          width: 1,
+          height: 1,
+        }),
+      );
+    } else if (_creatingShape.shapes.length === 1) {
+      const frontRect = _creatingShape.shapes[0] as Rect;
+
+      _creatingShape.add(
+        new Line({
+          id: uuid(),
+          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          coordinate: [
+            {
+              x: frontRect.coordinate[0].x,
+              y: frontRect.coordinate[0].y,
+            },
+            {
+              x: frontRect.coordinate[0].x,
+              y: frontRect.coordinate[0].y,
+            },
+          ],
+        }),
+        new Line({
+          id: uuid(),
+          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          coordinate: [
+            {
+              x: frontRect.coordinate[0].x + frontRect.width,
+              y: frontRect.coordinate[0].y,
+            },
+            {
+              x: frontRect.coordinate[0].x + frontRect.width,
+              y: frontRect.coordinate[0].y,
+            },
+          ],
+        }),
+        new Line({
+          id: uuid(),
+          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          coordinate: [
+            {
+              x: frontRect.coordinate[0].x + frontRect.width,
+              y: frontRect.coordinate[0].y + frontRect.height,
+            },
+            {
+              x: frontRect.coordinate[0].x + frontRect.width,
+              y: frontRect.coordinate[0].y + frontRect.height,
+            },
+          ],
+        }),
+        new Line({
+          id: uuid(),
+          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          coordinate: [
+            {
+              x: frontRect.coordinate[0].x,
+              y: frontRect.coordinate[0].y + frontRect.height,
+            },
+            {
+              x: frontRect.coordinate[0].x,
+              y: frontRect.coordinate[0].y + frontRect.height,
+            },
+          ],
+        }),
+        new Rect({
+          id: uuid(),
+          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          coordinate: cloneDeep(frontRect.plainCoordinate)[0],
+          width: frontRect.width,
+          height: frontRect.height,
+        }),
+      );
+    } else {
+      this._archiveCreatingShapes(e);
     }
   };
 
@@ -259,24 +367,59 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
     const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
-    if (_creatingShape && _startPoint) {
+    if (!_creatingShape || !_startPoint) {
+      return;
+    }
+
+    const frontRect = _creatingShape.shapes[0] as Rect;
+
+    if (_creatingShape.shapes.length === 1) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
-        _creatingShape.coordinate[0].x = x;
+        frontRect.coordinate[0].x = x;
       } else {
-        _creatingShape.coordinate[0].x = _startPoint.x;
+        frontRect.coordinate[0].x = _startPoint.x;
       }
 
       if (e.offsetY < axis!.getScaledY(_startPoint.y)) {
-        _creatingShape.coordinate[0].y = y;
+        frontRect.coordinate[0].y = y;
       } else {
-        _creatingShape.coordinate[0].y = _startPoint.y;
+        frontRect.coordinate[0].y = _startPoint.y;
       }
 
-      _creatingShape.width = Math.abs(x - _startPoint.x);
-      _creatingShape.height = Math.abs(y - _startPoint.y);
+      frontRect.width = Math.abs(x - _startPoint.x);
+      frontRect.height = Math.abs(y - _startPoint.y);
+    } else if (_creatingShape.shapes.length > 1) {
+      const backRect = _creatingShape.shapes[5] as Rect;
 
-      _creatingShape.update();
+      if (y > frontRect.plainCoordinate[0].y + frontRect.height) {
+        return;
+      }
+
+      const tl = {
+        x: x - frontRect.width,
+        y: y - frontRect.height,
+      };
+      const tr = {
+        x,
+        y: y - frontRect.height,
+      };
+      const br = {
+        x,
+        y,
+      };
+      const bl = {
+        x: x - frontRect.width,
+        y: y,
+      };
+
+      backRect.coordinate[0] = tl;
+      _creatingShape.shapes[1].coordinate[1] = tl;
+      _creatingShape.shapes[2].coordinate[1] = tr;
+      _creatingShape.shapes[3].coordinate[1] = br;
+      _creatingShape.shapes[4].coordinate[1] = bl;
     }
+
+    _creatingShape.update();
   };
 
   private _convertAnnotationItem(data: CuboidData) {

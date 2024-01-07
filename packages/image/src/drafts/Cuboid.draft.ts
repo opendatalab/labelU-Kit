@@ -923,8 +923,6 @@ export class DraftCuboid extends DraftObserverMixin(
           edgeBackRight.coordinate[1].y = y;
         }
 
-        console.log('yRatio', yRatio);
-
         // 由透视规则更新后方左侧图形
         const width = Math.abs(controlFrontTr.dynamicCoordinate[0].x - controlFrontTl.dynamicCoordinate[0].x);
         const height = Math.abs(controlFrontBr.dynamicCoordinate[0].y - controlFrontTr.dynamicCoordinate[0].y);
