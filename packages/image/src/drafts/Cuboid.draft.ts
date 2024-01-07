@@ -266,8 +266,33 @@ export class DraftCuboid extends DraftObserverMixin(
     this._edgePositionMapping.clear();
     this._realFrontPolygon = null;
     this.group.clear();
+    this._correctData();
     this._setupShapes();
     axis?.rerender();
+  }
+
+  private _correctData() {
+    const { data } = this;
+
+    const { front, back } = data;
+
+    // 修正前面的坐标
+    if (front.tl.x > front.tr.x) {
+      const temp = front.tl.x;
+      front.tl.x = front.tr.x;
+      front.tr.x = temp;
+      front.bl.x = front.tl.x;
+      front.br.x = front.tr.x;
+    }
+
+    // 修正后面的坐标
+    if (back.tl.x > back.tr.x) {
+      const temp = back.tl.x;
+      back.tl.x = back.tr.x;
+      back.tr.x = temp;
+      back.bl.x = back.tl.x;
+      back.br.x = back.tr.x;
+    }
   }
 
   // ========================== 选中的标注草稿 ==========================
