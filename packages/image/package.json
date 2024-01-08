@@ -7,8 +7,13 @@
     "email": "grinson50@gmail.com"
   },
   "license": "Apache-2.0",
-  "types": "dist/types/index.d.ts",
   "typings": "dist/types/index.d.ts",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": {
@@ -22,12 +27,6 @@
     }
   },
   "homepage": "",
-  "main": "dist/index.js",
-  "module": "es/index.js",
-  "files": [
-    "lib",
-    "es"
-  ],
   "publishConfig": {
     "access": "public"
   },
@@ -37,8 +36,8 @@
   },
   "scripts": {
     "dev": "rollup -c rollup.config.js -w ",
-    "build": "rollup -c rollup.config.js && npm run build:type",
-    "build:type": "tsc --emitDeclarationOnly --resolveJsonModule",
+    "build": "vite build && npm run build:types",
+    "build:types": "tsc -d --emitDeclarationOnly",
     "clean": "rimraf ./node_modules",
     "prepublishOnly": "npm run build"
   },
@@ -58,12 +57,16 @@
     "@types/color": "^3.0.6",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.mapvalues": "^4.6.9",
+    "@types/node": "^12.20.55",
     "@types/rbush": "^3.0.3",
     "@types/uuid": "^9.0.0",
     "esbuild": "^0.11.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.43.1",
     "rollup-plugin-esbuild": "^3.0.2",
-    "typescript": "4.8.4"
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "typescript": "4.8.4",
+    "vite": "^4.1.1",
+    "vite-tsconfig-paths": "^3.5.0"
   }
 }

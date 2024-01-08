@@ -97,11 +97,6 @@ export class Annotator {
     this._monitor = createMonitor(this.renderer!.canvas);
 
     eventEmitter.on(EInternalEvent.ToolChange, this._handleToolChange);
-
-    // debug
-    // @ts-ignore
-    window.monitor = this._monitor;
-    window.annotator = this;
   }
 
   private _initialContainer() {

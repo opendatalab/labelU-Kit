@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import type { BBox } from 'rbush';
 
-import type { RBushItem } from '../singletons/rbush';
+import type { RBushItem } from '../core/CustomRBush';
 import { rbush, eventEmitter, axis } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { AxisPoint } from './Point.shape';
