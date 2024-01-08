@@ -1,4 +1,3 @@
-
 import esbuild from 'rollup-plugin-esbuild';
 import json from '@rollup/plugin-json';
 
@@ -19,7 +18,7 @@ export default {
       dir: CJS_OUTPUT_DIR,
       preserveModules: true,
       preserveModulesRoot: 'src',
-    }
+    },
   ],
   plugins: [
     json(),
@@ -27,5 +26,6 @@ export default {
       include: /\.[jt]s?x?$/,
       exclude: /node_modules/,
       target: 'es2015', // default, or 'es20XX', 'esnext'
-    })]
-}
+    }),
+  ],
+};

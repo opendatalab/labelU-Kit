@@ -2,17 +2,18 @@ import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
 import Color from 'color';
 
-import { AnnotationCuboid, type CuboidData, type CuboidVertex } from '../annotations';
-import type { AxisPoint, LineCoordinate, PointStyle, PolygonStyle, Point } from '../shapes';
-import { Line, Polygon } from '../shapes';
-// import { axis } from '../singletons';
-import type { AnnotationParams } from '../annotations/Annotation';
-import { Annotation } from '../annotations/Annotation';
-import { ControllerPoint } from './ControllerPoint';
-import { DraftObserverMixin } from './DraftObserver';
-import { ControllerEdge } from './ControllerEdge';
-import type { CuboidToolOptions } from '../tools';
-import { axis } from '../singletons';
+import { AnnotationCuboid, type CuboidData, type CuboidVertex } from '../../annotations';
+import type { AxisPoint, LineCoordinate, PointStyle, PolygonStyle, Point } from '../../shapes';
+import { Line, Polygon } from '../../shapes';
+import type { AnnotationParams } from '../../annotations/Annotation';
+import { Annotation } from '../../annotations/Annotation';
+import { ControllerPoint } from '../ControllerPoint';
+import { DraftObserverMixin } from '../DraftObserver';
+import { ControllerEdge } from '../ControllerEdge';
+import type { CuboidToolOptions } from '../../tools';
+import { axis } from '../../singletons';
+import { DomPortal } from '../../core/DomPortal';
+import domString from './domString';
 
 type ControllerPosition =
   | 'front-tl'
@@ -77,6 +78,10 @@ export class DraftCuboid extends DraftObserverMixin(
    */
   private _preBackHeight: number = 0;
 
+  private _dom: DomPortal | null = null;
+
+  private _timer: ReturnType<typeof setTimeout> | null = null;
+
   constructor(config: CuboidToolOptions, params: AnnotationParams<CuboidData, PolygonStyle>) {
     super(params);
 
@@ -95,8 +100,8 @@ export class DraftCuboid extends DraftObserverMixin(
     this._setupLines();
 
     // 先渲染背面，正面要盖在背面上
-    this._setupRects('back');
-    this._setupRects('front');
+    this._setupEdges('back');
+    this._setupEdges('front');
 
     // 给真正的正面添加背景色
     const realFrontCoordinates = AnnotationCuboid.generateFrontCoordinate(this.data);
@@ -114,12 +119,13 @@ export class DraftCuboid extends DraftObserverMixin(
     this.group.add(realFront);
     this._setupControllerPoints('back');
     this._setupControllerPoints('front');
+    this._setupDom();
   }
 
   /**
    * 构建前后由控制边组成的多边形
    */
-  private _setupRects(position: 'front' | 'back') {
+  private _setupEdges(position: 'front' | 'back') {
     const { data, group, style, labelColor } = this;
 
     const { tl, tr, br, bl } = data[position];
@@ -259,6 +265,91 @@ export class DraftCuboid extends DraftObserverMixin(
       group.add(line);
     }
   }
+
+  private _setupDom() {
+    const { _controllerPositionMapping } = this;
+
+    if (this._dom) {
+      this._dom.destroy();
+    }
+
+    const controlFrontTl = _controllerPositionMapping.get('front-tl');
+
+    const elem = document.createElement('div');
+
+    // 当this._dom被销毁后，这里的事件也会被销毁
+    elem.addEventListener('mouseover', this._handleMouseOver);
+    elem.addEventListener('mouseleave', this._handleMouseLeave);
+    elem.addEventListener('click', this._handleSwitchDirection);
+
+    elem.innerHTML = domString;
+
+    this._dom = new DomPortal({
+      x: controlFrontTl!.dynamicCoordinate[0].x,
+      y: controlFrontTl!.dynamicCoordinate[0].y,
+      offset: {
+        x: -36,
+        y: 0,
+      },
+      element: elem,
+      bindShape: controlFrontTl!,
+    });
+  }
+
+  private _handleMouseOver = (e: MouseEvent) => {
+    const otherPerspective = document.getElementById('labelu_cuboid_other_perspective');
+    const moreWrapper = document.getElementById('labelu_cuboid_more');
+    const target = e.target as HTMLElement;
+
+    if (target && otherPerspective && moreWrapper?.contains(target)) {
+      otherPerspective.style.display = 'flex';
+
+      if (this._timer) {
+        clearTimeout(this._timer);
+      }
+    }
+  };
+
+  private _handleMouseLeave = () => {
+    const otherPerspective = document.getElementById('labelu_cuboid_other_perspective');
+
+    if (otherPerspective) {
+      this._timer = setTimeout(function () {
+        otherPerspective.style.display = 'none';
+      }, 500);
+    }
+  };
+
+  /**
+   * 切换正面方向
+   */
+  private _handleSwitchDirection = (e: MouseEvent) => {
+    const { data } = this;
+
+    const frontBackSwitcher = document.getElementById('labelu_cuboid_switch_front_back');
+    const leftSwitcher = document.getElementById('labelu_cuboid_left');
+    const rightSwitcher = document.getElementById('labelu_cuboid_right');
+    const topSwitcher = document.getElementById('labelu_cuboid_top');
+    const target = e.target as HTMLElement;
+
+    if (frontBackSwitcher?.contains(target)) {
+      data.direction = data.direction === 'front' ? 'back' : 'front';
+    }
+
+    if (leftSwitcher?.contains(target)) {
+      data.direction = 'left';
+    }
+
+    if (rightSwitcher?.contains(target)) {
+      data.direction = 'right';
+    }
+
+    if (topSwitcher?.contains(target)) {
+      data.direction = 'top';
+    }
+
+    this._refresh();
+  };
 
   private _refresh() {
     this._connectedLineMapping.clear();
@@ -641,7 +732,7 @@ export class DraftCuboid extends DraftObserverMixin(
           edgeFrontBottom.coordinate[0].y = y;
           edgeFrontBottom.coordinate[1].y = y;
           edgeFrontLeft.coordinate[0].y = y;
-          edgeFrontRight.coordinate[0].y = y;
+          edgeFrontRight.coordinate[1].y = y;
         }
 
         const width = Math.abs(controllerPoint.dynamicCoordinate[0].x - controlFrontTl.dynamicCoordinate[0].x);
@@ -1416,5 +1507,10 @@ export class DraftCuboid extends DraftObserverMixin(
     }
 
     return false;
+  }
+
+  public destroy(): void {
+    super.destroy();
+    this._dom?.destroy();
   }
 }
