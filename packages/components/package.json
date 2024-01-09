@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@labelu/annotation": "1.0.3-alpha.2",
-    "@labelu/utils": "1.0.2",
+    "@labelu/utils": "1.0.1",
     "ahooks": "^3.4.0",
     "classnames": "^2.3.0",
     "copyfiles": "^2.4.1",

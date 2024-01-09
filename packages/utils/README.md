@@ -1,6 +1,6 @@
 # `@labelu/utils`
 
-> TODO: description
+> deprecated
 
 ## Usage
 
