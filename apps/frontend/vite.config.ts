@@ -7,7 +7,7 @@ import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
-const isOnline = !!process.env.VITE_IS_ONLINE;
+const isOnline = true;
 console.log('isOnline', isOnline);
 
 // https://vitejs.dev/config/
