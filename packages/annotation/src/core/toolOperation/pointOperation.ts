@@ -652,7 +652,7 @@ export default class PointOperation extends BasicToolOperation {
       thickness: 1,
       color: toolData.stroke,
       // Fix: https://project.feishu.cn/bigdata_03/issue/detail/4174573?parentUrl=%2Fbigdata_03%2FissueView%2FXARIG5p4g
-      fill: selected || hovered ? '#fff' : 'transparent',
+      fill: selected || hovered ? '#fff' : toolColor,
     });
 
     let showText = '';
