@@ -5,7 +5,7 @@
     "packages/*",
     "apps/frontend"
   ],
-  "version": "3.2.1-alpha.7",
+  "version": "3.2.1-alpha.8",
   "scripts": {
     "prepare": "husky install",
     "build": "pnpm --filter @labelu/utils --filter @labelu/formatter --filter @labelu/annotation --filter @labelu/components --filter @labelu/interface --filter @labelu/components-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
