@@ -42,18 +42,15 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@labelu/interface": "workspace:1.2.1",
     "color": "^4.2.3",
     "eventemitter3": "^5.0.0",
     "lodash.clonedeep": "^4.5.0",
-    "lodash.debounce": "^4.0.8",
-    "lodash.mapvalues": "^4.6.0",
-    "lodash.throttle": "^4.1.1",
     "polygon-clipping": "^0.15.7",
     "rbush": "^3.0.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@labelu/interface": "workspace:1.2.1",
     "@types/color": "^3.0.6",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.mapvalues": "^4.6.9",

@@ -1,4 +1,4 @@
-import { type ILabel } from '@labelu/interface';
+import type { AttributeOption, ILabel } from '@labelu/interface';
 
 /**
  * Label 基类
@@ -20,7 +20,7 @@ export class LabelBase {
     this._createLabelMapping(labels);
   }
 
-  _createLabelMapping(labels: ILabel[] | undefined) {
+  private _createLabelMapping(labels: ILabel[] | undefined) {
     if (!labels) {
       return;
     }
@@ -38,11 +38,71 @@ export class LabelBase {
     return this.labelMapping.get(value);
   }
 
-  public getLabelText(value: string | undefined) {
-    if (typeof value !== 'string') {
-      throw Error('value is not a string', value);
+  public getAttributeKeyText(labelValue?: string, value?: string): string {
+    if (!value) {
+      return '';
     }
 
+    const label = this.getLabelByValue(labelValue);
+
+    return label?.attributes?.find((attr) => attr.value === value)?.key || '';
+  }
+
+  public getAttributeValueText(
+    labelValue: string | undefined,
+    attributeKeyValue: string,
+    attributeValue?: string | string[],
+  ) {
+    if (!attributeValue) {
+      return '';
+    }
+
+    const label = this.getLabelByValue(labelValue);
+    const correctAttribute = label?.attributes?.find((attribute) => attribute.value === attributeKeyValue);
+
+    if (!correctAttribute) {
+      return attributeValue;
+    }
+
+    if (correctAttribute.type !== 'array' && correctAttribute.type !== 'enum') {
+      return attributeValue;
+    }
+
+    const optionMapping: Record<string, AttributeOption> = {};
+
+    for (const option of correctAttribute.options ?? []) {
+      optionMapping[option.value] = option;
+    }
+
+    if (correctAttribute.type === 'array') {
+      return (attributeValue as string[]).map((v) => optionMapping[v]?.key).join(',');
+    }
+
+    if (correctAttribute.type === 'enum') {
+      return optionMapping[attributeValue as string]?.key;
+    }
+
+    return attributeValue;
+  }
+
+  public getAttributeTexts(labelValue?: string, attribute?: Record<string, string | string[]>): string {
+    const texts: string[] = [];
+    Object.entries(attribute || {}).forEach(([key, attr]) => {
+      const keyText = this.getAttributeKeyText(labelValue, key);
+      const value = this.getAttributeValueText(labelValue, key, attr);
+      texts.push(`${keyText}: ${value}`);
+    });
+    return texts.join('\n');
+  }
+
+  public getLabelTextWithAttributes(value?: string, attribute?: Record<string, string | string[]>): string {
+    return `${this.getLabelText(value)}\n${this.getAttributeTexts(value, attribute)}`;
+  }
+
+  public getLabelText(value?: string): string {
+    if (typeof value !== 'string') {
+      throw new Error('Value is not a string');
+    }
     return this.getLabelByValue(value)?.key ?? LabelBase.DEFAULT_LABEL_TEXT;
   }
 

@@ -14,6 +14,7 @@ import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
 import { DraftLine, DraftLineCurve } from '../drafts';
 import { Spline } from '../shapes/Spline.shape';
+import { ToolWrapper } from './Tool.decorator';
 
 export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   /**
@@ -45,6 +46,8 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
   minPointAmount?: number;
 }
 
+// @ts-ignore
+@ToolWrapper
 export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   static convertToCanvasCoordinates(data: LineData[]) {
     return data.map((item) => ({
@@ -86,36 +89,23 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     AnnotationLine.buildLabelMapping(params.labels ?? []);
 
-    this._setupShapes();
+    this.setupShapes();
 
-    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
-    eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
-    eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
-    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
   }
 
   /**
    * 点击画布事件处理
-   *
-   * @description
-   * 点击标注时：
-   * 1. 销毁被点击的标注的drawing（成品）
-   * 2. 进入pen的编辑模式
-   *  2.1. 创建新的drawing（成品），需要包含点、线
-   *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
-    Tool.emitSelect(this._convertAnnotationItem(annotation.data));
+    Tool.emitSelect(this.convertAnnotationItem(annotation.data));
     this?._creatingLines?.destroy();
     this._creatingLines = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this._archiveDraft();
+    this.archiveDraft();
     this._createDraft(annotation.data);
-    // 2. 销毁成品
     this.removeFromDrawing(annotation.id);
     // 重新渲染
     axis!.rerender();
@@ -123,15 +113,15 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   protected onUnSelect = (_e: MouseEvent) => {
     if (this.draft) {
-      Tool.emitUnSelect(this._convertAnnotationItem(this.draft.data));
+      Tool.emitUnSelect(this.convertAnnotationItem(this.draft.data));
     }
 
-    this._archiveDraft();
+    this.archiveDraft();
     // 重新渲染
     axis!.rerender();
   };
 
-  private _setupShapes() {
+  protected setupShapes() {
     const { _data = [] } = this;
 
     for (const annotation of _data) {
@@ -196,11 +186,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  private _archiveDraft() {
+  protected archiveDraft() {
     const { draft } = this;
 
     if (draft) {
       this._addAnnotation(draft.data);
+      this.recoverData();
       draft.destroy();
       this.draft = null;
     }
@@ -217,7 +208,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  private _rebuildDraft(data?: LineData) {
+  protected rebuildDraft(data?: LineData) {
     if (!this.draft) {
       return;
     }
@@ -229,7 +220,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this._createDraft(dataClone);
   }
 
-  private _handleLeftMouseDown = (e: MouseEvent) => {
+  protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
     const { activeLabel, style, _creatingLines, draft, config } = this;
 
@@ -249,7 +240,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     });
 
     // 先归档选中的草稿
-    this._archiveDraft();
+    this.archiveDraft();
 
     if (config.lineType === 'spline') {
       if (!this._creatingCurves) {
@@ -333,7 +324,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     );
   };
 
-  private _handleMouseMove = (e: MouseEvent) => {
+  protected handleMouseMove = (e: MouseEvent) => {
     const { _creatingLines, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config } = this;
 
     const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
@@ -435,7 +426,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this._archiveCreatingShapes(e);
   };
 
-  private _handleEscape = () => {
+  protected handleEscape = () => {
     this._archiveCreatingShapes(
       new MouseEvent('escape', {
         bubbles: true,
@@ -446,7 +437,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     );
   };
 
-  private _handleDelete = () => {
+  protected handleDelete = () => {
     const { _creatingLines, _creatingCurves, draft } = this;
 
     // 如果正在创建，则取消创建
@@ -461,11 +452,11 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       const data = cloneDeep(draft.data);
       this.deleteDraft();
       axis?.rerender();
-      Tool.onDelete(this._convertAnnotationItem(data));
+      Tool.onDelete(this.convertAnnotationItem(data));
     }
   };
 
-  private _convertAnnotationItem(data: LineData) {
+  protected convertAnnotationItem(data: LineData) {
     const _temp = {
       ...data,
       points: data.points.map((point) => {
@@ -607,36 +598,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     monitor!.setSelectedAnnotationId(data.id);
   }
 
-  public deactivate(): void {
-    super.deactivate();
-    this._archiveDraft();
-    axis!.rerender();
-  }
-
-  public toggleOrderVisible(visible: boolean): void {
-    this.showOrder = visible;
-
-    this.clearDrawing();
-    this._setupShapes();
-  }
-
-  public setLabel(value: string): void {
-    const { draft, activeLabel } = this;
-
-    if (!draft || !activeLabel || activeLabel === value) {
-      return;
-    }
-
-    this.activate(value);
-
-    const data = cloneDeep(draft.data);
-
-    this._rebuildDraft({
-      ...data,
-      label: value,
-    });
-  }
-
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 
@@ -649,23 +610,10 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  public get data() {
-    const result = super.data;
-
-    return result.map((item) => {
-      return this._convertAnnotationItem(item);
-    });
-  }
-
   public destroy(): void {
     super.destroy();
 
-    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
-    eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
-    eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
-    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }
 }

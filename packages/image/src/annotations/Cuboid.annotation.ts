@@ -191,6 +191,9 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
       }),
     );
 
+    const attributesText = AnnotationCuboid.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+
+    // label
     group.add(
       new ShapeText({
         id: uuid(),
@@ -198,7 +201,7 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
           x: front.bl.x,
           y: front.bl.y,
         },
-        text: `${data.order} ${AnnotationCuboid.labelStatic.getLabelText(data.label)}`,
+        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
           fill: labelColor,
         },

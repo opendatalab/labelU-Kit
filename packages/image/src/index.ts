@@ -1,2 +1,2 @@
-export * from './core/Renderer';
-export * from './ImageAnnotator';
+export * from './interface';
+export * from './Annotator';

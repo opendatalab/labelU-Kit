@@ -136,6 +136,8 @@ export class Monitor {
     } else if (e.button === 2) {
       eventEmitter.emit(EInternalEvent.RightMouseUp, e);
     }
+
+    eventEmitter.emit('mouseup', e);
   };
 
   private _handleWheel = (e: WheelEvent) => {

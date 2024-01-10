@@ -82,11 +82,13 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
       throw Error('Invalid type, only "line" and "spline" are supported');
     }
 
+    const attributesText = AnnotationPolygon.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+
     group.add(
       new ShapeText({
         id: uuid(),
         coordinate: data.points[0],
-        text: `${data.order} ${AnnotationPolygon.labelStatic.getLabelText(data.label)}`,
+        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
           fill: labelColor,
         },

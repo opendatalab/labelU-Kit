@@ -140,7 +140,7 @@ export class DraftPolygon extends DraftObserverMixin(
    * @description
    * 1. 按下 alt + x，减去跟其他多边形重合的部分
    */
-  _onKeyDown = (e: KeyboardEvent) => {
+  private _onKeyDown = (e: KeyboardEvent) => {
     if (e.code === 'KeyX' && e.altKey) {
       e.preventDefault();
       this._cutPolygon();

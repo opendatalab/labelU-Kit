@@ -11,8 +11,11 @@ export type EventName =
   | 'unselect'
   | 'add'
   | 'delete'
+  | 'labelChange'
+  | 'attributesChange'
   | 'toolChange'
   | 'click'
+  | 'mouseup'
   | 'dblclick'
   | 'error'
   | 'contextmenu';

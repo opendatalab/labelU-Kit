@@ -6,11 +6,12 @@ import { Tool } from './Tool';
 import type { CuboidData, CuboidStyle } from '../annotations';
 import { AnnotationCuboid } from '../annotations';
 import type { AxisPoint, LineStyle, RectStyle } from '../shapes';
-import { Line, Group, Rect, Point } from '../shapes';
+import { Line, Group, Rect } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import mapValues from '../utils/mapValues';
 import { DraftCuboid } from '../drafts/Cuboid.draft';
+import { ToolWrapper } from './Tool.decorator';
 
 export interface CuboidToolOptions extends BasicToolParams<CuboidData, CuboidStyle> {
   /**
@@ -20,6 +21,8 @@ export interface CuboidToolOptions extends BasicToolParams<CuboidData, CuboidSty
   outOfImage?: boolean;
 }
 
+// @ts-ignore
+@ToolWrapper
 export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions> {
   static convertToCanvasCoordinates(data: CuboidData[]) {
     return data.map((item) => ({
@@ -50,25 +53,19 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     });
     AnnotationCuboid.buildLabelMapping(params.labels ?? []);
 
-    this._setupShapes();
-
-    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
-    eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
-    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
+    this.setupShapes();
   }
 
   /**
    * 点击画布事件处理
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationCuboid) => {
-    Tool.emitSelect(this._convertAnnotationItem(annotation.data));
+    Tool.emitSelect(this.convertAnnotationItem(annotation.data));
     this?._creatingShape?.destroy();
     this._creatingShape = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this._archiveDraft();
+    this.archiveDraft();
     this._createDraft(annotation.data);
     // 2. 销毁成品
     this.removeFromDrawing(annotation.id);
@@ -78,17 +75,17 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
 
   protected onUnSelect = (_e: MouseEvent) => {
     if (this.draft) {
-      Tool.emitUnSelect(this._convertAnnotationItem(this.draft.data));
+      Tool.emitUnSelect(this.convertAnnotationItem(this.draft.data));
     }
 
-    this._archiveDraft();
+    this.archiveDraft();
     this?._creatingShape?.destroy();
     this._creatingShape = null;
     // 重新渲染
     axis!.rerender();
   };
 
-  private _setupShapes() {
+  protected setupShapes() {
     const { _data = [] } = this;
 
     for (const annotation of _data) {
@@ -112,22 +109,6 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     );
   }
 
-  protected handlePointStyle = () => {
-    const { draft } = this;
-
-    if (!draft) {
-      return;
-    }
-
-    draft.group.each((shape) => {
-      if (shape instanceof Point) {
-        shape.updateStyle({
-          stroke: 'transparent',
-        });
-      }
-    });
-  };
-
   private _createDraft(data: CuboidData) {
     this.draft = new DraftCuboid(this.config, {
       id: data.id,
@@ -139,14 +120,27 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     });
   }
 
-  private _archiveDraft() {
+  protected archiveDraft() {
     const { draft } = this;
 
     if (draft) {
       this._addAnnotation(draft.data);
+      this.recoverData();
       draft.destroy();
       this.draft = null;
     }
+  }
+
+  protected rebuildDraft(data?: CuboidData) {
+    if (!this.draft) {
+      return;
+    }
+
+    const dataClone = cloneDeep(data ?? this.draft.data);
+
+    this.draft.destroy();
+    this.draft = null;
+    this._createDraft(dataClone);
   }
 
   private _archiveCreatingShapes(_e: MouseEvent) {
@@ -205,7 +199,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     Tool.onAdd(
       {
         ...data,
-        ...this._convertAnnotationItem(data),
+        ...this.convertAnnotationItem(data),
       },
       _e,
     );
@@ -217,29 +211,17 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     axis!.rerender();
   }
 
-  private _rebuildDraft(data?: CuboidData) {
-    if (!this.draft) {
-      return;
-    }
-
-    const dataClone = cloneDeep(data ?? this.draft.data);
-
-    this.draft.destroy();
-    this.draft = null;
-    this._createDraft(dataClone);
-  }
-
   // ================== 键盘事件 ==================
   /**
    * Esc键取消绘制
    */
-  private _handleEscape = () => {
+  protected handleEscape = () => {
     this._creatingShape?.destroy();
     this._creatingShape = null;
     axis?.rerender();
   };
 
-  private _handleDelete = () => {
+  protected handleDelete = () => {
     const { _creatingShape, draft } = this;
 
     // 如果正在创建，则取消创建
@@ -252,11 +234,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       const data = cloneDeep(draft.data);
       this.deleteDraft();
       axis?.rerender();
-      Tool.onDelete(this._convertAnnotationItem(data));
+      Tool.onDelete(this.convertAnnotationItem(data));
     }
   };
 
-  private _handleMouseDown = (e: MouseEvent) => {
+  protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
     const { activeLabel, style, draft, config, _creatingShape } = this;
 
@@ -267,7 +249,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     }
 
     // 先归档上一次的草稿
-    this._archiveDraft();
+    this.archiveDraft();
 
     // 记录起始点坐标
     this._startPoint = axis!.getOriginalCoord({
@@ -361,7 +343,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     }
   };
 
-  private _handleMouseMove = (e: MouseEvent) => {
+  protected handleMouseMove = (e: MouseEvent) => {
     const { _creatingShape, _startPoint, config } = this;
 
     const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
@@ -422,50 +404,12 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     _creatingShape.update();
   };
 
-  private _convertAnnotationItem(data: CuboidData) {
+  protected convertAnnotationItem(data: CuboidData) {
     return {
       ...data,
       front: mapValues(data.front, (point) => axis!.convertCanvasCoordinate(point)),
       back: mapValues(data.back, (point) => axis!.convertCanvasCoordinate(point)),
     };
-  }
-
-  public deactivate(): void {
-    super.deactivate();
-    this._archiveDraft();
-    axis!.rerender();
-  }
-
-  public toggleOrderVisible(visible: boolean): void {
-    this.showOrder = visible;
-
-    this.clearDrawing();
-    this._setupShapes();
-  }
-
-  public setLabel(value: string): void {
-    const { draft, activeLabel } = this;
-
-    if (!draft || !activeLabel || activeLabel === value) {
-      return;
-    }
-
-    this.activate(value);
-
-    const data = cloneDeep(draft.data);
-
-    this._rebuildDraft({
-      ...data,
-      label: value,
-    });
-  }
-
-  public get data() {
-    const result = super.data;
-
-    return result.map((item) => {
-      return this._convertAnnotationItem(item);
-    }) as unknown as CuboidData[];
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
@@ -474,15 +418,5 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     if (this._creatingShape) {
       this._creatingShape.render(ctx);
     }
-  }
-
-  public destroy(): void {
-    super.destroy();
-
-    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
-    eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
-    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }
 }

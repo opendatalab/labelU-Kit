@@ -1,4 +1,5 @@
 import { type Attribute, type ILabel } from '@labelu/interface';
+import cloneDeep from 'lodash.clonedeep';
 
 import type { Annotation } from '../annotations/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
@@ -65,6 +66,66 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   public showOrder: boolean;
 
   protected _data: Data[];
+
+  /**
+   * 按下鼠标的调用，在各自的工具中实现
+   */
+  protected handleMouseDown = (_e: MouseEvent) => {
+    // do nothing
+    console.warn('handleMouseDown is not implemented!');
+  };
+
+  /**
+   * 鼠标移动的调用，在各自的工具中实现
+   */
+  protected handleMouseMove = (_e: MouseEvent) => {
+    // do nothing
+  };
+
+  /**
+   * 按下esc键盘的调用，在各自的工具中实现
+   */
+  protected handleEscape = (_e: MouseEvent) => {
+    // do nothing
+  };
+
+  /**
+   * 按下Del键盘的调用，在各自的工具中实现
+   */
+  protected handleDelete = (_e: MouseEvent) => {
+    // do nothing
+  };
+
+  protected convertAnnotationItem(_item: Data) {
+    // do nothing
+  }
+
+  protected setupShapes() {
+    // do nothing
+    console.warn('setupShapes is not implemented!');
+  }
+
+  protected archiveDraft() {
+    // do nothing
+    console.warn('archiveDraft is not implemented!');
+  }
+
+  protected rebuildDraft(_data: Data) {
+    // do nothing
+    console.warn('rebuildDraft is not implemented!');
+  }
+
+  public deleteAnnotation(_id: string): void {
+    console.warn('deleteAnnotation is not implemented!');
+  }
+
+  public toggleOrderVisible(_visible: boolean): void {
+    console.warn('toggleOrderVisible is not implemented!');
+  }
+
+  public setLabel(_label: string): void {
+    console.warn('setLabel is not implemented!');
+  }
 
   constructor({ name, data, style, hoveredStyle, selectedStyle, showOrder, ...config }: Config & ExtraParams) {
     // 创建标签映射
@@ -137,7 +198,16 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   protected removeFromDrawing(id: string) {
     this.drawing?.get(id)?.destroy();
     this.drawing?.delete(id);
+    // 取消选中标注时，需要将数据加回来
     this._removeDataItem(id);
+  }
+
+  protected recoverData() {
+    const { draft } = this;
+
+    if (draft) {
+      this._data.push(cloneDeep(draft.data));
+    }
   }
 
   protected clearDrawing() {

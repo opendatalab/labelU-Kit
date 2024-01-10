@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
 
 import { EInternalEvent } from '../enums';
-import type { AxisPoint, PointStyle } from '../shapes/Point.shape';
+import type { PointStyle } from '../shapes/Point.shape';
 import { Point } from '../shapes/Point.shape';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
@@ -10,6 +10,7 @@ import type { PointData } from '../annotations/Point.annotation';
 import { AnnotationPoint } from '../annotations/Point.annotation';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { DraftPoint } from '../drafts';
+import { ToolWrapper } from './Tool.decorator';
 
 /**
  * 点标注工具配置
@@ -36,6 +37,8 @@ export interface PointToolOptions extends BasicToolParams<PointData, PointStyle>
   outOfImage?: boolean;
 }
 
+// @ts-ignore
+@ToolWrapper
 export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   static convertToCanvasCoordinates(data: PointData[]) {
     return data.map((item) => ({
@@ -43,8 +46,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       ...axis!.convertSourceCoordinate(item),
     }));
   }
-
-  private _pickedCoordinate: AxisPoint | null = null;
 
   public draft: DraftPoint | null = null;
 
@@ -66,15 +67,11 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     AnnotationPoint.buildLabelMapping(params.labels ?? []);
 
-    this._setupShapes();
-
-    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
+    this.setupShapes();
   }
 
-  private _setupShapes(data: PointData[] = this._data) {
-    for (const item of data) {
+  protected setupShapes() {
+    for (const item of this._data) {
       this._addAnnotation(item);
     }
   }
@@ -123,7 +120,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     );
   }
 
-  private _handleDelete = () => {
+  protected handleDelete = () => {
     const { draft } = this;
 
     // 如果正在创建，则取消创建
@@ -144,7 +141,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this._archive();
+    this.archiveDraft();
     this._createDraft(annotation.data);
     this.removeFromDrawing(annotation.id);
     // 重新渲染
@@ -159,22 +156,23 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       });
     }
 
-    this._archive();
+    this.archiveDraft();
     // 重新渲染
     axis!.rerender();
   };
 
-  private _archive() {
+  protected archiveDraft() {
     const { draft } = this;
 
     if (draft) {
       this._addAnnotation(draft.data);
+      this.recoverData();
       draft.destroy();
       this.draft = null;
     }
   }
 
-  private _handleMouseDown = (e: MouseEvent) => {
+  protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
 
     const { activeLabel, config, draft } = this;
@@ -187,7 +185,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       return;
     }
 
-    this._archive();
+    this.archiveDraft();
 
     if (!this._validate()) {
       return;
@@ -210,7 +208,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     axis?.rerender();
   };
 
-  private _rebuildDraft(data?: PointData) {
+  protected rebuildDraft(data?: PointData) {
     if (!this.draft) {
       return;
     }
@@ -222,57 +220,10 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this._createDraft(dataClone);
   }
 
-  public deactivate(): void {
-    super.deactivate();
-    this._archive();
-    axis!.rerender();
-  }
-
-  public setLabel(value: string): void {
-    const { draft, activeLabel } = this;
-
-    if (!draft || !activeLabel || activeLabel === value) {
-      return;
-    }
-
-    this.activate(value);
-
-    const data = cloneDeep(draft.data);
-
-    this._rebuildDraft({
+  protected convertAnnotationItem(data: PointData) {
+    return {
       ...data,
-      label: value,
-    });
-  }
-
-  public toggleOrderVisible(visible: boolean): void {
-    this.showOrder = visible;
-
-    this.clearDrawing();
-    this._setupShapes();
-    this._rebuildDraft();
-  }
-
-  public get data() {
-    const result = super.data;
-
-    return result.map((item) => {
-      return {
-        ...item,
-        ...axis!.convertCanvasCoordinate(item),
-      };
-    });
-  }
-
-  public destroy(): void {
-    super.destroy();
-
-    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
-  }
-
-  public render(ctx: CanvasRenderingContext2D): void {
-    super.render(ctx);
+      ...axis!.convertCanvasCoordinate(data),
+    };
   }
 }

@@ -133,6 +133,30 @@ export default function App() {
           value: 'car',
           key: '车子',
           color: '#09ef18',
+          attributes: [
+            {
+              key: '行走姿势',
+              value: 'pose',
+              type: 'string',
+              maxLength: 1000,
+              required: true,
+              stringType: 'text' as const,
+              defaultValue: '',
+              regexp: '',
+            },
+            {
+              key: '人种',
+              value: 'race',
+              type: 'enum',
+              required: true,
+              options: [
+                {
+                  key: '黑人',
+                  value: 'black',
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -318,6 +342,10 @@ export default function App() {
               x: 232.56365232660232 + 700,
               y: 217.07287093942054 + 700,
             },
+          },
+          attributes: {
+            pose: '直立行走',
+            race: 'black',
           },
         },
       ]);

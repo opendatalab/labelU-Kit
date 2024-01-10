@@ -50,6 +50,8 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
       }),
     );
 
+    const attributesText = AnnotationPoint.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+
     group.add(
       new ShapeText({
         id: uuid(),
@@ -57,7 +59,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
           x: data.x,
           y: data.y,
         },
-        text: `${data.order} ${AnnotationPoint.labelStatic.getLabelText(data.label)}`,
+        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
           fill: labelColor,
         },

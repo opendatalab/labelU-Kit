@@ -119,19 +119,27 @@ export class ShapeText extends Shape<TextStyle> {
     let textY = y + MARGIN + fontSize;
 
     for (let n = 0; n < text.length; n++) {
-      testLine = line + text[n];
-      if (ctx.measureText(testLine).width > MAX_WIDTH) {
+      // 换行
+      if (text[n] === '\n') {
         ctx.fillText(line, textX, textY);
-        ctx.strokeText(line, textX, textY); // 描边
-        line = text[n];
+        ctx.strokeText(line, textX, textY);
+        line = '';
         textY += LINE_HEIGHT;
       } else {
-        line = testLine;
+        testLine = line + text[n];
+        if (ctx.measureText(testLine).width > MAX_WIDTH) {
+          ctx.fillText(line, textX, textY);
+          ctx.strokeText(line, textX, textY);
+          line = text[n];
+          textY += LINE_HEIGHT;
+        } else {
+          line = testLine;
+        }
       }
     }
 
     ctx.fillText(line, textX, textY);
-    ctx.strokeText(line, textX, textY); // 描边
+    ctx.strokeText(line, textX, textY);
 
     // 恢复透明度
     ctx.globalAlpha = 1;

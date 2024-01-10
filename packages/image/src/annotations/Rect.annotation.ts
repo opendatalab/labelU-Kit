@@ -58,6 +58,8 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
       }),
     );
 
+    const attributesText = AnnotationRect.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+
     group.add(
       new ShapeText({
         id: uuid(),
@@ -65,7 +67,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
           x: data.x,
           y: data.y + data.height,
         },
-        text: `${data.order} ${AnnotationRect.labelStatic.getLabelText(data.label)}`,
+        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
           fill: labelColor,
         },

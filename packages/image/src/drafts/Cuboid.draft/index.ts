@@ -1097,9 +1097,6 @@ export class DraftCuboid extends DraftObserverMixin(
         this._realFrontPolygon!.coordinate[index].y = realPolygonCoordinate[index].y;
       }
     });
-
-    // 手动更新组合的包围盒
-    this.group.update();
   };
 
   /**
@@ -1108,6 +1105,8 @@ export class DraftCuboid extends DraftObserverMixin(
   private _onControllerPointUp = () => {
     this._prevControllerDynamicCoordinates.clear();
     this._previousDynamicCoordinates = null;
+    // 手动更新组合的包围盒
+    this.group.update();
     // 控制点松开后会触发事件，在事件执行完后再刷新图形
     setTimeout(() => {
       this._refresh();
@@ -1165,7 +1164,8 @@ export class DraftCuboid extends DraftObserverMixin(
     const x = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
     const y = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
 
-    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+    // eslint-disable-next-line prefer-const
+    let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
 
     const [zPosition, position] = edge.name!.split('-') as [ZPosition, SimpleEdgePosition];
 
@@ -1187,6 +1187,10 @@ export class DraftCuboid extends DraftObserverMixin(
           1,
           Math.abs(edge.dynamicCoordinate[0].y - edgeFrontBottom.dynamicCoordinate[0].y) / _preBackHeight,
         );
+
+        if (safeY) {
+          safeY = edge.coordinate[0].y < controlFrontBr.plainCoordinate[0].y;
+        }
 
         const width = Math.abs(edge.dynamicCoordinate[0].x - edge.dynamicCoordinate[1].x);
         const height = Math.abs(edgeFrontBottom.dynamicCoordinate[0].y - edge.dynamicCoordinate[0].y);
@@ -1282,6 +1286,10 @@ export class DraftCuboid extends DraftObserverMixin(
           1,
           Math.abs(edge.dynamicCoordinate[0].y - edgeFrontTop.dynamicCoordinate[0].y) / _preBackHeight,
         );
+
+        if (safeY) {
+          safeY = edge.coordinate[0].y > controlBackBr.plainCoordinate[0].y;
+        }
 
         const width = Math.abs(edge.dynamicCoordinate[0].x - edge.dynamicCoordinate[1].x);
         const height = Math.abs(edgeFrontTop.dynamicCoordinate[0].y - edge.dynamicCoordinate[0].y);
@@ -1455,7 +1463,14 @@ export class DraftCuboid extends DraftObserverMixin(
   };
 
   private _onEdgeUp = () => {
-    this.syncCoordToData();
+    this._prevControllerDynamicCoordinates.clear();
+    this._previousDynamicCoordinates = null;
+    // 手动更新组合的包围盒
+    this.group.update();
+    // 控制点松开后会触发事件，在事件执行完后再刷新图形
+    setTimeout(() => {
+      this._refresh();
+    });
   };
 
   protected getDynamicCoordinates() {

@@ -14,13 +14,7 @@ import { createAxis } from './singletons/axis';
 import { createMonitor, eventEmitter } from './singletons';
 import type { PolygonToolOptions } from './tools/Polygon.tool';
 import { PolygonTool } from './tools/Polygon.tool';
-import type { LineStyle, PointStyle } from './shapes';
 import { AnnotationMapping } from './annotations';
-
-export interface ControllerStyle {
-  edge?: LineStyle;
-  point?: PointStyle;
-}
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -41,7 +35,10 @@ export interface AnnotatorOptions {
 
   cuboid?: CuboidToolOptions;
 
-  image: ImageOption;
+  image: {
+    url: string;
+    rotate: number;
+  };
 
   /**
    * 是否显示标注顺序
@@ -97,6 +94,8 @@ export class Annotator {
     this._monitor = createMonitor(this.renderer!.canvas);
 
     eventEmitter.on(EInternalEvent.ToolChange, this._handleToolChange);
+
+    // window.annotator = this;
   }
 
   private _initialContainer() {
@@ -307,6 +306,42 @@ export class Annotator {
     currentTool!.setLabel(value);
     this._axis!.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(value);
     this._axis?.rerender();
+  }
+
+  /**
+   * 指定标注id从外部删除标注
+   *
+   * @param toolName 工具名称
+   * @param id 标注id
+   */
+  public removeAnnotationById(toolName: ToolName, id: string) {
+    const { _tools } = this;
+
+    const tool = _tools.get(toolName);
+
+    if (!tool) {
+      return;
+    }
+
+    tool.deleteAnnotation(id);
+  }
+
+  /**
+   * 指定标注id从外部选中标注
+   */
+  public selectAnnotationById(id: string) {
+    if (!id) {
+      return;
+    }
+
+    if (!this.monitor) {
+      console.warn('Annotator is not initialized');
+
+      return;
+    }
+
+    this.monitor.selectedAnnotationId = id;
+    this._event.emit(EInternalEvent.Select, new MouseEvent(''), id);
   }
 
   /**

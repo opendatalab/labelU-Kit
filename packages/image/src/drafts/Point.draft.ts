@@ -1,9 +1,7 @@
-import { v4 as uuid } from 'uuid';
-
 import type { AnnotationParams, PointData } from '../annotations';
 import { Annotation, AnnotationPoint } from '../annotations';
-import type { AxisPoint, PointStyle } from '../shapes';
-import { Point, ShapeText } from '../shapes';
+import type { AxisPoint, PointStyle, ShapeText } from '../shapes';
+import { Point } from '../shapes';
 import { DraftObserverMixin } from './DraftObserver';
 import type { PointToolOptions } from '../tools';
 
@@ -34,20 +32,6 @@ export class DraftPoint extends DraftObserverMixin(Annotation<PointData, Point |
           y: data.y,
         },
         style: { ...style, fill: '#fff', strokeWidth: 4, stroke: labelColor },
-      }),
-    );
-
-    group.add(
-      new ShapeText({
-        id: uuid(),
-        coordinate: {
-          x: data.x,
-          y: data.y,
-        },
-        text: `${data.order} ${AnnotationPoint.labelStatic.getLabelText(data.label)}`,
-        style: {
-          fill: labelColor,
-        },
       }),
     );
   }

@@ -118,11 +118,13 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
       throw new Error('Invalid line type!');
     }
 
+    const attributesText = AnnotationLine.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+
     group.add(
       new ShapeText({
         id: uuid(),
         coordinate: data.points[0],
-        text: `${data.order} ${AnnotationLine.labelStatic.getLabelText(data.label)}`,
+        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
           fill: labelColor,
         },

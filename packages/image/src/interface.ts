@@ -50,6 +50,8 @@ export interface BasicImageAnnotation {
 
 export type ToolOptions = LineToolOptions | PointToolOptions | RectToolOptions | PolygonToolOptions | CuboidToolOptions;
 
+export type { LineData };
+
 export type AnnotationData = LineData | PointData | RectData | PolygonData | CuboidData;
 
 export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool | CuboidTool;

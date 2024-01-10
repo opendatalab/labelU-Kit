@@ -10,6 +10,7 @@ import { Rect } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { DraftRect } from '../drafts/Rect.draft';
+import { ToolWrapper } from './Tool.decorator';
 
 export interface RectToolOptions extends BasicToolParams<RectData, RectStyle> {
   /**
@@ -33,6 +34,8 @@ export interface RectToolOptions extends BasicToolParams<RectData, RectStyle> {
   outOfImage?: boolean;
 }
 
+// @ts-ignore
+@ToolWrapper
 export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   static convertToCanvasCoordinates(data: RectData[]) {
     return data.map((item) => ({
@@ -65,13 +68,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
     AnnotationRect.buildLabelMapping(params.labels ?? []);
 
-    this._setupShapes();
-
-    eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
-    eventEmitter.on(EInternalEvent.Escape, this._handleEscape);
-    eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
+    this.setupShapes();
   }
 
   /**
@@ -85,12 +82,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    *  2.2. 创建选中包围盒
    */
   protected onSelect = (_e: MouseEvent, annotation: AnnotationRect) => {
-    Tool.emitSelect(this._convertAnnotationItem(annotation.data));
+    Tool.emitSelect(this.convertAnnotationItem(annotation.data));
     this?._creatingShape?.destroy();
     this._creatingShape = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this._archiveDraft();
+    this.archiveDraft();
     this._createDraft(annotation.data);
     // 2. 销毁成品
     this.removeFromDrawing(annotation.id);
@@ -100,17 +97,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   protected onUnSelect = (_e: MouseEvent) => {
     if (this.draft) {
-      Tool.emitUnSelect(this._convertAnnotationItem(this.draft.data));
+      Tool.emitUnSelect(this.convertAnnotationItem(this.draft.data));
     }
 
-    this._archiveDraft();
+    this.archiveDraft();
     this?._creatingShape?.destroy();
     this._creatingShape = null;
     // 重新渲染
     axis!.rerender();
   };
 
-  private _setupShapes() {
+  protected setupShapes() {
     const { _data = [] } = this;
 
     for (const annotation of _data) {
@@ -172,11 +169,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     });
   }
 
-  private _archiveDraft() {
+  protected archiveDraft() {
     const { draft } = this;
 
     if (draft) {
       this._addAnnotation(draft.data);
+      this.recoverData();
       draft.destroy();
       this.draft = null;
     }
@@ -206,7 +204,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     Tool.onAdd(
       {
         ...data,
-        ...this._convertAnnotationItem(data),
+        ...this.convertAnnotationItem(data),
       },
       e,
     );
@@ -218,7 +216,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     axis!.rerender();
   }
 
-  private _rebuildDraft(data?: RectData) {
+  protected rebuildDraft(data?: RectData) {
     if (!this.draft) {
       return;
     }
@@ -234,13 +232,13 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   /**
    * Esc键取消绘制
    */
-  private _handleEscape = () => {
+  protected handleEscape = () => {
     this._creatingShape?.destroy();
     this._creatingShape = null;
     axis?.rerender();
   };
 
-  private _handleDelete = () => {
+  protected handleDelete = () => {
     const { _creatingShape, draft } = this;
 
     // 如果正在创建，则取消创建
@@ -253,11 +251,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       const data = cloneDeep(draft.data);
       this.deleteDraft();
       axis?.rerender();
-      Tool.onDelete(this._convertAnnotationItem(data));
+      Tool.onDelete(this.convertAnnotationItem(data));
     }
   };
 
-  private _handleMouseDown = (e: MouseEvent) => {
+  protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
     const { activeLabel, style, draft, config, _creatingShape } = this;
 
@@ -268,7 +266,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
 
     // 先归档上一次的草稿
-    this._archiveDraft();
+    this.archiveDraft();
 
     if (_creatingShape) {
       this._archiveCreatingShapes(e);
@@ -290,7 +288,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   };
 
-  private _handleMouseMove = (e: MouseEvent) => {
+  protected handleMouseMove = (e: MouseEvent) => {
     const { _creatingShape, _startPoint, config } = this;
 
     const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
@@ -316,7 +314,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   };
 
-  private _convertAnnotationItem(data: RectData) {
+  protected convertAnnotationItem(data: RectData) {
     return {
       ...data,
       ...axis!.convertCanvasCoordinate(data),
@@ -325,59 +323,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     };
   }
 
-  public deactivate(): void {
-    super.deactivate();
-    this._archiveDraft();
-    axis!.rerender();
-  }
-
-  public toggleOrderVisible(visible: boolean): void {
-    this.showOrder = visible;
-
-    this.clearDrawing();
-    this._setupShapes();
-  }
-
-  public setLabel(value: string): void {
-    const { draft, activeLabel } = this;
-
-    if (!draft || !activeLabel || activeLabel === value) {
-      return;
-    }
-
-    this.activate(value);
-
-    const data = cloneDeep(draft.data);
-
-    this._rebuildDraft({
-      ...data,
-      label: value,
-    });
-  }
-
-  public get data() {
-    const result = super.data;
-
-    return result.map((item) => {
-      return this._convertAnnotationItem(item);
-    });
-  }
-
   public render(ctx: CanvasRenderingContext2D): void {
     super.render(ctx);
 
     if (this._creatingShape) {
       this._creatingShape.render(ctx);
     }
-  }
-
-  public destroy(): void {
-    super.destroy();
-
-    eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
-    eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
-    eventEmitter.off(EInternalEvent.Escape, this._handleEscape);
-    eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
-    eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
   }
 }
