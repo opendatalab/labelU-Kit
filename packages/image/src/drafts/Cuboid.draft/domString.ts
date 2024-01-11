@@ -7,6 +7,8 @@ export default `
   border-radius: 2px;
   background-color: #FFFFFF;
   padding: 8px 0;
+  box-shadow: rgba(0, 0, 0, 0.17) 0px 1px 2px 0px;
+  border: 1px solid rgb(229, 229, 229);
 }
 
 #labelu_cuboid_more_icon {

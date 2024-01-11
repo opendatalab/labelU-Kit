@@ -196,6 +196,12 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       order: monitor!.getNextOrder(),
     };
 
+    this._createDraft(data);
+    _creatingShape.destroy();
+    this._creatingShape = null;
+    monitor!.setSelectedAnnotationId(_creatingShape.id);
+    axis!.rerender();
+
     Tool.onAdd(
       {
         ...data,
@@ -203,12 +209,6 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       },
       _e,
     );
-
-    this._createDraft(data);
-    _creatingShape.destroy();
-    this._creatingShape = null;
-    monitor!.setSelectedAnnotationId(_creatingShape.id);
-    axis!.rerender();
   }
 
   // ================== 键盘事件 ==================

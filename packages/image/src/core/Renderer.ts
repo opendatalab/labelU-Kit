@@ -50,4 +50,9 @@ export class Renderer extends EventEmitter {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
   }
+
+  public destroy() {
+    this.clear();
+    this.canvas.remove();
+  }
 }

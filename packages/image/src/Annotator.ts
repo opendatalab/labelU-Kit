@@ -7,10 +7,10 @@ import type { CursorParams } from './shapes/Cursor.shape';
 import type { ImageOption } from './core/BackgroundRenderer';
 import { BackgroundRenderer } from './core/BackgroundRenderer';
 import type { Axis } from './core/Axis';
-import type { AnnotationTool, AnnotationToolData, ToolName } from './interface';
+import type { AnnotationData, AnnotationTool, AnnotationToolData, ToolName } from './interface';
 import { EInternalEvent } from './enums';
 import type { Monitor } from './core/Monitor';
-import { createAxis } from './singletons/axis';
+import { axis, createAxis } from './singletons/axis';
 import { createMonitor, eventEmitter } from './singletons';
 import type { PolygonToolOptions } from './tools/Polygon.tool';
 import { PolygonTool } from './tools/Polygon.tool';
@@ -92,10 +92,12 @@ export class Annotator {
     this._initialContainer();
     this._initialAxis();
     this._monitor = createMonitor(this.renderer!.canvas);
+    this._initialTools();
 
     eventEmitter.on(EInternalEvent.ToolChange, this._handleToolChange);
 
-    // window.annotator = this;
+    // @ts-ignore
+    window.annotator = this;
   }
 
   private _initialContainer() {
@@ -135,6 +137,30 @@ export class Annotator {
       cursor: this._config.cursor,
     });
     eventEmitter.on(EInternalEvent.Render, this.render);
+  }
+
+  private _initialTools() {
+    const { _config } = this;
+
+    if (_config.line) {
+      this.use(new LineTool({ ..._config.line, showOrder: _config.showOrder ?? true }));
+    }
+
+    if (_config.point) {
+      this.use(new PointTool({ ..._config.point, showOrder: _config.showOrder ?? true }));
+    }
+
+    if (_config.rect) {
+      this.use(new RectTool({ ..._config.rect, showOrder: _config.showOrder ?? true }));
+    }
+
+    if (_config.polygon) {
+      this.use(new PolygonTool({ ..._config.polygon, showOrder: _config.showOrder ?? true }));
+    }
+
+    if (_config.cuboid) {
+      this.use(new CuboidTool({ ..._config.cuboid, showOrder: _config.showOrder ?? true }));
+    }
   }
 
   private _handleToolChange = (toolName: ToolName, label: string) => {
@@ -188,7 +214,7 @@ export class Annotator {
    * @param toolName 工具名称
    * @param label 标注类别，如果是字符串，则表示标注类别value（唯一标示）；如果是对象，则表示标注类别
    */
-  public switch(toolName: ToolName, label: string) {
+  public switch(toolName: ToolName, label?: string) {
     if (typeof toolName !== 'string') {
       throw new Error('toolName must be string, such as "line" or "point"');
     }
@@ -205,10 +231,18 @@ export class Annotator {
       this._tools.get(activeToolName)!.deactivate();
     }
 
+    let pickedLabel = label;
+
+    if (!label) {
+      pickedLabel = tool.labelMapping.keys().next().value;
+    }
+
     this.activeToolName = toolName;
     const AnnotationClass = AnnotationMapping[toolName];
-    this._axis!.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(label);
-    tool.activate(label);
+    this._axis!.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(pickedLabel);
+    tool.activate(pickedLabel);
+    this.emit('toolChange', toolName, pickedLabel);
+    this.emit('labelChange', pickedLabel);
   }
 
   public render = () => {
@@ -232,8 +266,15 @@ export class Annotator {
     });
   };
 
-  public loadImage(url: string, options: ImageOption) {
-    return this.backgroundRenderer!.loadImage(url, options);
+  public loadImage(url: string, options?: Omit<ImageOption, 'container' | 'width' | 'height' | 'url'>) {
+    const { _config } = this;
+
+    return this.backgroundRenderer!.loadImage(url, {
+      ...options,
+      width: _config.width,
+      height: _config.height,
+      container: _config.container,
+    });
   }
 
   public set showOrder(value: boolean) {
@@ -285,6 +326,17 @@ export class Annotator {
     };
   }
 
+  /**
+   * 清除所有标注
+   */
+  public clearData() {
+    this._tools.forEach((tool) => {
+      tool.clear();
+    });
+
+    axis!.rerender();
+  }
+
   public get showOrder() {
     return this.config.showOrder as boolean;
   }
@@ -308,6 +360,26 @@ export class Annotator {
     this._axis?.rerender();
   }
 
+  public get activeTool() {
+    if (!this.activeToolName) {
+      return;
+    }
+
+    return this._tools.get(this.activeToolName);
+  }
+
+  public setAttributes(attributes: Record<string, string | string[]>) {
+    const { activeToolName, _tools } = this;
+
+    if (!activeToolName) {
+      return;
+    }
+
+    const currentTool = _tools.get(activeToolName);
+
+    currentTool!.setAttributes(attributes);
+  }
+
   /**
    * 指定标注id从外部删除标注
    *
@@ -329,8 +401,12 @@ export class Annotator {
   /**
    * 指定标注id从外部选中标注
    */
-  public selectAnnotationById(id: string) {
+  public selectAnnotationById(id: string | undefined) {
     if (!id) {
+      if (this.monitor?.selectedAnnotationId) {
+        this._event.emit(EInternalEvent.UnSelect, new MouseEvent(''), this.monitor.selectedAnnotationId);
+      }
+
       return;
     }
 
@@ -345,71 +421,133 @@ export class Annotator {
   }
 
   /**
+   * 获取当前选中的标注
+   */
+  public getSelectedAnnotation(): AnnotationData | undefined {
+    const { _tools, monitor, activeToolName } = this;
+    const selectedAnnotationId = monitor?.selectedAnnotationId;
+
+    if (!selectedAnnotationId || !activeToolName) {
+      return;
+    }
+
+    const currentToolData = _tools.get(activeToolName)?.data;
+
+    if (!currentToolData) {
+      return;
+    }
+
+    return (currentToolData as AnnotationData[]).find((item) => item.id === selectedAnnotationId);
+  }
+
+  /**
    * 加载标注数据
    */
-  public loadData<T extends ToolName>(toolName: T, data: AnnotationToolData<T>) {
+  public loadData<T extends ToolName>(toolName: T, data: AnnotationData[]) {
     if (!data) {
       return;
     }
 
-    const { config } = this;
+    const { config, _tools } = this;
+    const tool = _tools.get(toolName);
 
     if (toolName == 'line') {
-      this.use(
-        new LineTool({
-          ...this._config.line,
-          showOrder: config.showOrder ?? false,
-          data: LineTool.convertToCanvasCoordinates(data as AnnotationToolData<'line'>),
-        }),
-      );
+      const convertedData = LineTool.convertToCanvasCoordinates(data as unknown as AnnotationToolData<'line'>);
+
+      if (tool) {
+        // @ts-ignore
+        tool.load(convertedData);
+      } else {
+        this.use(
+          new LineTool({
+            ...this._config.line,
+            showOrder: config.showOrder ?? false,
+            data: convertedData,
+          }),
+        );
+      }
     } else if (toolName == 'point') {
-      this.use(
-        new PointTool({
-          ...this._config.point,
-          showOrder: config.showOrder ?? false,
-          data: PointTool.convertToCanvasCoordinates(data as AnnotationToolData<'point'>),
-        }),
-      );
+      const convertedData = PointTool.convertToCanvasCoordinates(data as unknown as AnnotationToolData<'point'>);
+
+      if (tool) {
+        // @ts-ignore
+        tool.load(convertedData);
+      } else {
+        this.use(
+          new PointTool({
+            ...this._config.point,
+            showOrder: config.showOrder ?? false,
+            data: convertedData,
+          }),
+        );
+      }
     } else if (toolName == 'rect') {
-      this.use(
-        new RectTool({
-          ...this._config.rect,
-          showOrder: config.showOrder ?? false,
-          data: RectTool.convertToCanvasCoordinates(data as AnnotationToolData<'rect'>),
-        }),
-      );
+      const convertedData = RectTool.convertToCanvasCoordinates(data as unknown as AnnotationToolData<'rect'>);
+
+      if (tool) {
+        // @ts-ignore
+        tool.load(convertedData);
+      } else {
+        this.use(
+          new RectTool({
+            ...this._config.rect,
+            showOrder: config.showOrder ?? false,
+            data: convertedData,
+          }),
+        );
+      }
     } else if (toolName == 'polygon') {
-      this.use(
-        new PolygonTool({
-          ...this._config.polygon,
-          showOrder: config.showOrder ?? false,
-          data: PolygonTool.convertToCanvasCoordinates(data as AnnotationToolData<'polygon'>),
-        }),
-      );
+      const convertedData = PolygonTool.convertToCanvasCoordinates(data as unknown as AnnotationToolData<'polygon'>);
+
+      if (tool) {
+        // @ts-ignore
+        tool.load(convertedData);
+      } else {
+        this.use(
+          new PolygonTool({
+            ...this._config.rect,
+            showOrder: config.showOrder ?? false,
+            data: convertedData,
+          }),
+        );
+      }
     } else if (toolName == 'cuboid') {
-      this.use(
-        new CuboidTool({
-          ...this._config.cuboid,
-          showOrder: config.showOrder ?? false,
-          data: CuboidTool.convertToCanvasCoordinates(data as AnnotationToolData<'cuboid'>),
-        }),
-      );
+      const convertedData = CuboidTool.convertToCanvasCoordinates(data as unknown as AnnotationToolData<'cuboid'>);
+
+      if (tool) {
+        // @ts-ignore
+        tool.load(convertedData);
+      } else {
+        this.use(
+          new CuboidTool({
+            ...this._config.cuboid,
+            showOrder: config.showOrder ?? false,
+            data: convertedData,
+          }),
+        );
+      }
     } else {
-      throw new Error(`Tool ${toolName} is not supported`);
+      console.warn(`Tool ${toolName} is not supported`);
     }
 
     this.render();
+    this.emit('load', toolName, data);
   }
 
   public destroy() {
-    this._event!.removeAllListeners();
     this._tools.forEach((tool) => {
+      tool.clear();
       tool.destroy();
     });
+    this._event!.removeAllListeners();
     this._tools.clear();
     this._axis?.destroy();
     this._axis = null;
+    this.renderer?.destroy();
     this.renderer = null;
+    this.backgroundRenderer?.destroy();
+    this.backgroundRenderer = null;
+    this._config = null as any;
   }
 
   public on = eventEmitter.on.bind(eventEmitter);

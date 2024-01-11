@@ -42,6 +42,15 @@ export function ToolWrapper<
       eventEmitter.on(EInternalEvent.BackSpace, this.handleDelete);
     }
 
+    /**
+     * 追加数据
+     */
+    public load(data: Data[]) {
+      this._data.push(...data);
+      this.clearDrawing();
+      this.setupShapes();
+    }
+
     public deleteAnnotation(id: string) {
       const { draft } = this;
 
@@ -63,20 +72,24 @@ export function ToolWrapper<
     public setLabel(value: string): void {
       const { draft, activeLabel } = this;
 
-      if (!draft || !activeLabel || activeLabel === value) {
+      if (activeLabel && activeLabel === value) {
         return;
       }
 
       this.activate(value);
 
-      const data = cloneDeep(draft.data);
+      if (draft) {
+        const data = cloneDeep(draft.data);
 
-      eventEmitter.emit('labelChange', this.convertAnnotationItem(data));
+        this.rebuildDraft({
+          ...data,
+          label: value,
+        });
 
-      this.rebuildDraft({
-        ...data,
-        label: value,
-      });
+        eventEmitter.emit('labelChange', value);
+      } else {
+        eventEmitter.emit('labelChange');
+      }
     }
 
     /**
@@ -117,6 +130,14 @@ export function ToolWrapper<
       super.deactivate();
       this.archiveDraft();
       axis!.rerender();
+    }
+
+    public clear() {
+      this.clearDrawing();
+
+      if (this.draft) {
+        this.deleteDraft();
+      }
     }
 
     public get data() {

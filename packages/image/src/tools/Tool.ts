@@ -127,6 +127,20 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('setLabel is not implemented!');
   }
 
+  public setAttributes(_attributes: Record<string, string | string[]>) {
+    console.warn('setAttributes is not implemented!');
+  }
+
+  public load(_data: Data[]) {
+    // do nothing
+    console.warn('load is not implemented!');
+  }
+
+  public clear() {
+    // do nothing
+    console.warn('clear is not implemented!');
+  }
+
   constructor({ name, data, style, hoveredStyle, selectedStyle, showOrder, ...config }: Config & ExtraParams) {
     // 创建标签映射
     this._createLabelMapping(config.labels);

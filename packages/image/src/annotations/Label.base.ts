@@ -79,7 +79,7 @@ export class LabelBase {
     }
 
     if (correctAttribute.type === 'enum') {
-      return optionMapping[attributeValue as string]?.key;
+      return optionMapping[attributeValue as string]?.key ?? attributeValue;
     }
 
     return attributeValue;

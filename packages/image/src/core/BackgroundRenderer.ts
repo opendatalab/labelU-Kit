@@ -232,6 +232,11 @@ export class BackgroundRenderer extends Renderer {
     return this._rotate;
   }
 
+  public destroy() {
+    this.clear();
+    this.canvas.remove();
+  }
+
   render() {
     const { ctx, _initialCoordinate, _renderWidth, _renderHeight } = this;
 

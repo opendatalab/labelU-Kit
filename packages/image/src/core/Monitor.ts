@@ -235,12 +235,14 @@ export class Monitor {
 
     if (_hoveredGroup) {
       if (selectedAnnotationId && _hoveredGroup.id !== selectedAnnotationId) {
+        this.selectedAnnotationId = null;
         eventEmitter.emit(EInternalEvent.UnSelect, e, selectedAnnotationId);
       }
 
       eventEmitter.emit(EInternalEvent.Select, e, _hoveredGroup.id);
       this.selectedAnnotationId = _hoveredGroup.id;
     } else if (selectedAnnotationId) {
+      this.selectedAnnotationId = null;
       eventEmitter.emit(EInternalEvent.UnSelect, e, selectedAnnotationId);
     }
   };

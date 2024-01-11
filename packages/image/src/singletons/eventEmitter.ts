@@ -11,6 +11,7 @@ export type EventName =
   | 'unselect'
   | 'add'
   | 'delete'
+  | 'load'
   | 'labelChange'
   | 'attributesChange'
   | 'toolChange'
