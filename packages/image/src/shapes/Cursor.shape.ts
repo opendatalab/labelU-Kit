@@ -75,9 +75,9 @@ export class Cursor {
     ctx.beginPath();
     ctx.globalAlpha = 0.8;
     ctx.moveTo(finalX, 0);
-    ctx.lineTo(finalX, canvas.height);
+    ctx.lineTo(finalX, canvas.height * 10);
     ctx.moveTo(0, finalY);
-    ctx.lineTo(canvas.width, finalY);
+    ctx.lineTo(canvas.width * 10, finalY);
     ctx.stroke();
     ctx.translate(finalX, finalY);
     // 中心点白色

@@ -48,10 +48,13 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
 
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
+  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+
   constructor(params: AnnotationParams<CuboidData, CuboidStyle>) {
     super(params);
 
     this.labelColor = AnnotationCuboid.labelStatic.getLabelColor(params.data.label);
+    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
@@ -109,11 +112,11 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
       group.each((shape) => {
         if (shape === this._realFront) {
           shape.updateStyle({
-            fill: Color(labelColor).alpha(0.8).string(),
+            fill: Color(labelColor).alpha(Annotation.fillOpacity).string(),
           });
         } else {
           shape.updateStyle({
-            strokeWidth: style.strokeWidth! + 2,
+            strokeWidth: Annotation.strokeWidth + 2,
           });
         }
       });
@@ -121,16 +124,16 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
   };
 
   private _handleMouseOut = () => {
-    const { group, style, labelColor } = this;
+    const { group, labelColor } = this;
 
     group.each((shape) => {
       if (shape === this._realFront) {
         shape.updateStyle({
-          fill: Color(labelColor).alpha(0.5).string(),
+          fill: Color(labelColor).alpha(Annotation.fillOpacity).string(),
         });
       } else {
         shape.updateStyle({
-          strokeWidth: style.strokeWidth,
+          strokeWidth: Annotation.strokeWidth,
         });
       }
     });
@@ -140,7 +143,7 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
    * 一个静止的立体框由6个边框四边形 + 1个背景色四边形组成
    */
   private _setupShapes() {
-    const { data, group, style, labelColor } = this;
+    const { data, group, style, labelColor, _strokeColor } = this;
     const { front, back } = data;
 
     const frontCoordinate = AnnotationCuboid.generateFrontCoordinate(data);
@@ -148,7 +151,12 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
     const realFront = new Polygon({
       id: uuid(),
       coordinate: frontCoordinate,
-      style: { ...style, stroke: 'transparent', strokeWidth: 0, fill: Color(labelColor).alpha(0.5).string() },
+      style: {
+        ...style,
+        stroke: 'transparent',
+        strokeWidth: 0,
+        fill: Color(labelColor).alpha(Annotation.fillOpacity).string(),
+      },
     });
 
     this._realFront = realFront;
@@ -160,34 +168,34 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
       new Polygon({
         id: uuid(),
         coordinate: [front.tl, front.tr, front.br, front.bl],
-        style: { ...style, stroke: labelColor },
+        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
       // 后面的矩形（非真实的前面）
       new Polygon({
         id: uuid(),
         coordinate: [back.tl, back.tr, back.br, back.bl],
-        style: { ...style, stroke: labelColor },
+        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
       // 平行四边形
       new Polygon({
         id: uuid(),
         coordinate: [front.tl, front.tr, back.tr, back.tl],
-        style: { ...style, stroke: labelColor, fill: 'transparent' },
+        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
         id: uuid(),
         coordinate: [front.tr, front.br, back.br, back.tr],
-        style: { ...style, stroke: labelColor, fill: 'transparent' },
+        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
         id: uuid(),
         coordinate: [front.br, front.bl, back.bl, back.br],
-        style: { ...style, stroke: labelColor, fill: 'transparent' },
+        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
         id: uuid(),
         coordinate: [front.bl, front.tl, back.tl, back.bl],
-        style: { ...style, stroke: labelColor, fill: 'transparent' },
+        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
     );
 

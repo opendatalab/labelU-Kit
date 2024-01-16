@@ -101,7 +101,7 @@ export class Axis {
     this._cursor = new Cursor({ x: 0, y: 0, ...cursor });
     this._renderer = renderer;
     // NOTE: debug
-    // this._renderRBushTree();
+    this._renderRBushTree();
   }
 
   private _bindEvents() {
@@ -336,7 +336,7 @@ export class Axis {
     // 光标需要在最上层
     Promise.resolve().then(() => _cursor!.render(_renderer!.ctx));
     // debug
-    // this._renderRBushTree();
+    this._renderRBushTree();
   }
 
   /**

@@ -4,7 +4,7 @@ import cloneDeep from 'lodash.clonedeep';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { CuboidData, CuboidStyle } from '../annotations';
-import { AnnotationCuboid } from '../annotations';
+import { Annotation, AnnotationCuboid } from '../annotations';
 import type { AxisPoint, LineStyle, RectStyle } from '../shapes';
 import { Line, Group, Rect } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
@@ -59,7 +59,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
   /**
    * 点击画布事件处理
    */
-  protected onSelect = (_e: MouseEvent, annotation: AnnotationCuboid) => {
+  protected onSelect = (annotation: AnnotationCuboid) => (_e: MouseEvent) => {
     Tool.emitSelect(this.convertAnnotationItem(annotation.data));
     this?._creatingShape?.destroy();
     this._creatingShape = null;
@@ -96,17 +96,17 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
   private _addAnnotation(data: CuboidData) {
     const { drawing, style, hoveredStyle } = this;
 
-    drawing!.set(
-      data.id,
-      new AnnotationCuboid({
-        id: data.id,
-        data,
-        showOrder: this.showOrder,
-        style,
-        hoveredStyle,
-        onSelect: this.onSelect,
-      }),
-    );
+    const annotation = new AnnotationCuboid({
+      id: data.id,
+      data,
+      showOrder: this.showOrder,
+      style,
+      hoveredStyle,
+    });
+
+    annotation.group.on(EInternalEvent.Select, this.onSelect(annotation));
+
+    drawing!.set(data.id, annotation);
   }
 
   private _createDraft(data: CuboidData) {
@@ -115,9 +115,10 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       data,
       showOrder: false,
       style: this.style,
-      // 在草稿上添加取消选中的事件监听
-      onUnSelect: this.onUnSelect,
     });
+
+    // 在草稿上添加取消选中的事件监听
+    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
   }
 
   protected archiveDraft() {
@@ -202,6 +203,8 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     monitor!.setSelectedAnnotationId(_creatingShape.id);
     axis!.rerender();
 
+    this.addToData(data);
+
     Tool.onAdd(
       {
         ...data,
@@ -233,6 +236,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
       this.deleteDraft();
+      this.removeFromDrawing(data.id);
       axis?.rerender();
       Tool.onDelete(this.convertAnnotationItem(data));
     }
@@ -264,7 +268,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       this._creatingShape.add(
         new Rect({
           id: uuid(),
-          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          style: {
+            ...style,
+            stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
+            strokeWidth: Annotation.strokeWidth,
+          },
           coordinate: cloneDeep(this._startPoint),
           width: 1,
           height: 1,
@@ -276,7 +284,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       _creatingShape.add(
         new Line({
           id: uuid(),
-          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          style: {
+            ...style,
+            stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
+            strokeWidth: Annotation.strokeWidth,
+          },
           coordinate: [
             {
               x: frontRect.coordinate[0].x,
@@ -290,7 +302,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
         }),
         new Line({
           id: uuid(),
-          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          style: {
+            ...style,
+            stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
+            strokeWidth: Annotation.strokeWidth,
+          },
           coordinate: [
             {
               x: frontRect.coordinate[0].x + frontRect.width,
@@ -304,7 +320,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
         }),
         new Line({
           id: uuid(),
-          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          style: {
+            ...style,
+            stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
+            strokeWidth: Annotation.strokeWidth,
+          },
           coordinate: [
             {
               x: frontRect.coordinate[0].x + frontRect.width,
@@ -318,7 +338,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
         }),
         new Line({
           id: uuid(),
-          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          style: {
+            ...style,
+            stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
+            strokeWidth: Annotation.strokeWidth,
+          },
           coordinate: [
             {
               x: frontRect.coordinate[0].x,
@@ -332,7 +356,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
         }),
         new Rect({
           id: uuid(),
-          style: { ...style, stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel) },
+          style: {
+            ...style,
+            stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
+            strokeWidth: Annotation.strokeWidth,
+          },
           coordinate: cloneDeep(frontRect.plainCoordinate)[0],
           width: frontRect.width,
           height: frontRect.height,

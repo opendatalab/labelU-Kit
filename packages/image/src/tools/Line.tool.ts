@@ -69,7 +69,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   public draft: DraftLine | DraftLineCurve | null = null;
 
-  constructor(params: LineToolOptions) {
+  constructor({ style, data, ...params }: LineToolOptions) {
     super({
       name: 'line',
       lineType: 'line',
@@ -79,12 +79,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       labels: [],
       selectedStyle: {},
       // ----------------
-      data: [],
-      ...params,
+      data: LineTool.convertToCanvasCoordinates(data ?? []),
       style: {
         ...Line.DEFAULT_STYLE,
-        ...params.style,
+        ...style,
       },
+      ...params,
     });
 
     AnnotationLine.buildLabelMapping(params.labels ?? []);
@@ -95,10 +95,18 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 
+  protected setupShapes() {
+    const { _data = [] } = this;
+
+    for (const annotation of _data) {
+      this._addAnnotation(annotation);
+    }
+  }
+
   /**
    * 点击画布事件处理
    */
-  protected onSelect = (_e: MouseEvent, annotation: AnnotationLine) => {
+  protected onSelect = (annotation: AnnotationLine) => (_e: MouseEvent) => {
     Tool.emitSelect(this.convertAnnotationItem(annotation.data));
     this?._creatingLines?.destroy();
     this._creatingLines = null;
@@ -121,14 +129,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     axis!.rerender();
   };
 
-  protected setupShapes() {
-    const { _data = [] } = this;
-
-    for (const annotation of _data) {
-      this._addAnnotation(annotation);
-    }
-  }
-
   private _validate(data: LineData) {
     const { config } = this;
 
@@ -147,17 +147,17 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   private _addAnnotation(data: LineData) {
     const { drawing, style, hoveredStyle } = this;
 
-    drawing!.set(
-      data.id,
-      new AnnotationLine({
-        id: data.id,
-        data,
-        style,
-        hoveredStyle,
-        showOrder: this.showOrder,
-        onSelect: this.onSelect,
-      }),
-    );
+    const annotation = new AnnotationLine({
+      id: data.id,
+      data,
+      style,
+      hoveredStyle,
+      showOrder: this.showOrder,
+    });
+
+    annotation.group.on(EInternalEvent.Select, this.onSelect(annotation));
+
+    drawing!.set(data.id, annotation);
   }
 
   private _createDraft(data: LineData) {
@@ -168,8 +168,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         id: data.id,
         data,
         style,
-        // 在草稿上添加取消选中的事件监听
-        onUnSelect: this.onUnSelect,
         showOrder: this.showOrder,
       });
     } else if (data.type === 'spline') {
@@ -178,12 +176,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         data,
         showOrder: this.showOrder,
         style,
-        // 在草稿上添加取消选中的事件监听
-        onUnSelect: this.onUnSelect,
       });
     } else {
       throw new Error('Invalid line type!');
     }
+
+    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
   }
 
   protected archiveDraft() {
@@ -446,12 +444,11 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       _creatingCurves?.destroy();
       this._creatingLines = null;
       this._creatingCurves = null;
-      axis?.rerender();
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
       this.deleteDraft();
-      axis?.rerender();
+      this.removeFromDrawing(data.id);
       Tool.onDelete(this.convertAnnotationItem(data));
     }
   };
@@ -527,12 +524,13 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     Tool.onAdd({ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }, e);
 
+    this.addToData(data);
     this._addAnnotation(data);
 
     _creatingLines.destroy();
     this._creatingLines = null;
     axis!.rerender();
-    this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationLine);
+    this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
   }
 
@@ -588,13 +586,14 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       },
       e,
     );
+    this.addToData(data);
 
     this._addAnnotation(data);
 
     _creatingCurves.destroy();
     this._creatingCurves = null;
     axis!.rerender();
-    this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationLine);
+    this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
   }
 

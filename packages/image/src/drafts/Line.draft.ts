@@ -1,37 +1,40 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+import Color from 'color';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import { AnnotationLine, type LineData } from '../annotations';
-import type { AxisPoint, PointStyle, Point } from '../shapes';
+import type { PointStyle, Point } from '../shapes';
 import { Rect } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
 import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
-import { DraftObserverMixin } from './DraftObserver';
+import { Draft } from './Draft';
 import type { LineToolOptions } from '../tools';
 import { EInternalEvent } from '../enums';
 import { getLatestPointOnLine } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
+import { LabelBase } from '../annotations/Label.base';
 
-export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Point, LineStyle | PointStyle>) {
+export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointStyle> {
   public config: LineToolOptions;
 
   private _selectionShape: Rect | null = null;
 
   private _effectedLines: [Line | undefined, Line | undefined] | null = null;
 
-  private _previousDynamicCoordinates: AxisPoint[][] | null = null;
-
   private _pointToBeAdded: ControllerPoint | null = null;
+
+  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(config: LineToolOptions, params: AnnotationParams<LineData, LineStyle>) {
     super(params);
 
     this.config = config;
     this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
+    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMove(this._onMouseMove);
@@ -45,7 +48,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config, labelColor } = this;
+    const { data, group, style, config, _strokeColor } = this;
 
     for (let i = 1; i < data.points.length; i++) {
       const startPoint = data.points[i - 1];
@@ -56,7 +59,8 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
         coordinate: [{ ...startPoint }, { ...endPoint }],
         style: {
           ...style,
-          stroke: labelColor,
+          stroke: _strokeColor,
+          strokeWidth: Annotation.strokeWidth,
         },
       });
 
@@ -100,7 +104,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
   }
 
   private _onLineOver = (_e: MouseEvent, line: Line) => {
-    const { style, config, group, _pointToBeAdded } = this;
+    const { config, group, _pointToBeAdded } = this;
 
     // 只有按下 alt 键时，才能在线段上增加控制点
     if (!monitor?.keyboard.Alt) {
@@ -108,7 +112,7 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
     }
 
     line.updateStyle({
-      strokeWidth: style.strokeWidth! + 2,
+      strokeWidth: Annotation.strokeWidth + 2,
     });
 
     const latestPointOnLine = getLatestPointOnLine(
@@ -145,9 +149,9 @@ export class DraftLine extends DraftObserverMixin(Annotation<LineData, Line | Po
   };
 
   private _onLineOut = (_e: MouseEvent, line: Line) => {
-    const { style, data } = this;
+    const { style, _strokeColor } = this;
 
-    line.updateStyle({ ...style, stroke: AnnotationLine.labelStatic.getLabelColor(data.label) });
+    line.updateStyle({ ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth });
   };
 
   /**

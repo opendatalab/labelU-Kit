@@ -5,9 +5,8 @@ import { AnnotationLine, type LineData } from '../annotations';
 import type { PointStyle, Point } from '../shapes';
 import { Spline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
-import { Annotation } from '../annotations/Annotation';
 import type { ControllerPoint } from './ControllerPoint';
-import { DraftObserverMixin } from './DraftObserver';
+import { Draft } from './Draft';
 import type { LineToolOptions } from '../tools';
 import { SlopeEdge } from './SlopeEdge';
 import { EInternalEvent } from '../enums';
@@ -17,9 +16,7 @@ interface EffectedCurve {
   curve: Spline;
 }
 
-export class DraftLineCurve extends DraftObserverMixin(
-  Annotation<LineData, Line | Point | any, LineStyle | PointStyle>,
-) {
+export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyle | PointStyle> {
   public config: LineToolOptions;
 
   private _isControllerPicked: boolean = false;

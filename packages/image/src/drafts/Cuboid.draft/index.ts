@@ -8,12 +8,13 @@ import { Line, Polygon } from '../../shapes';
 import type { AnnotationParams } from '../../annotations/Annotation';
 import { Annotation } from '../../annotations/Annotation';
 import { ControllerPoint } from '../ControllerPoint';
-import { DraftObserverMixin } from '../DraftObserver';
+import { Draft } from '../Draft';
 import { ControllerEdge } from '../ControllerEdge';
 import type { CuboidToolOptions } from '../../tools';
 import { axis } from '../../singletons';
 import { DomPortal } from '../../core/DomPortal';
 import domString from './domString';
+import { LabelBase } from '../../annotations/Label.base';
 
 type ControllerPosition =
   | 'front-tl'
@@ -45,9 +46,7 @@ type SimpleEdgePosition = 'top' | 'right' | 'bottom' | 'left';
  * 立体框草稿
  * @description 一个立体框草稿由前后 1 个多边形做正面的背景色填充 + 8个控制点 + 4条线段 + 8个控制边组成
  */
-export class DraftCuboid extends DraftObserverMixin(
-  Annotation<CuboidData, ControllerEdge | Point | Line | Polygon, PolygonStyle | PointStyle>,
-) {
+export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line | Polygon, PolygonStyle | PointStyle> {
   public config: CuboidToolOptions;
 
   private _previousDynamicCoordinates: AxisPoint[][] | null = null;
@@ -82,11 +81,14 @@ export class DraftCuboid extends DraftObserverMixin(
 
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
+  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+
   constructor(config: CuboidToolOptions, params: AnnotationParams<CuboidData, PolygonStyle>) {
     super(params);
 
     this.config = config;
     this.labelColor = AnnotationCuboid.labelStatic.getLabelColor(this.data.label);
+    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -109,7 +111,7 @@ export class DraftCuboid extends DraftObserverMixin(
       id: uuid(),
       coordinate: realFrontCoordinates,
       style: {
-        fill: Color(this.labelColor).alpha(0.5).string(),
+        fill: Color(this.labelColor).alpha(Annotation.fillOpacity).string(),
         strokeWidth: 0,
         stroke: 'transparent',
         opacity: 0.5,
@@ -126,7 +128,7 @@ export class DraftCuboid extends DraftObserverMixin(
    * 构建前后由控制边组成的多边形
    */
   private _setupEdges(position: 'front' | 'back') {
-    const { data, group, style, labelColor } = this;
+    const { data, group, style, _strokeColor } = this;
 
     const { tl, tr, br, bl } = data[position];
     const edgeCoordinates = [
@@ -156,7 +158,8 @@ export class DraftCuboid extends DraftObserverMixin(
           coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
           style: {
             ...style,
-            stroke: labelColor,
+            stroke: _strokeColor,
+            strokeWidth: Annotation.strokeWidth,
           },
         });
 
@@ -169,7 +172,8 @@ export class DraftCuboid extends DraftObserverMixin(
           coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
           style: {
             ...style,
-            stroke: labelColor,
+            stroke: _strokeColor,
+            strokeWidth: Annotation.strokeWidth,
           },
         });
 
@@ -228,7 +232,7 @@ export class DraftCuboid extends DraftObserverMixin(
   }
 
   private _setupLines() {
-    const { data, group, style, labelColor } = this;
+    const { data, group, style, _strokeColor } = this;
 
     const { front, back } = data;
     const lineCoordinates = [
@@ -256,7 +260,8 @@ export class DraftCuboid extends DraftObserverMixin(
         coordinate: cloneDeep(lineCoordinates[i].coordinate) as LineCoordinate,
         style: {
           ...style,
-          stroke: labelColor,
+          stroke: _strokeColor,
+          strokeWidth: Annotation.strokeWidth,
         },
       });
 

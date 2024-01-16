@@ -5,6 +5,7 @@ import type { Annotation } from '../annotations/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
 import type { Shape } from '../shapes';
 import { eventEmitter } from '../singletons';
+import type { Draft } from '../drafts/Draft';
 
 export interface BasicToolParams<Data, Style> {
   /** 标签配置 */
@@ -26,6 +27,27 @@ export interface BasicToolParams<Data, Style> {
    * @default false
    */
   showOrder: boolean;
+
+  /**
+   * 标注线宽
+   *
+   * @default 2
+   */
+  strokeWidth?: number;
+
+  /**
+   * 标注填充不透明度
+   *
+   * @default 0.7
+   */
+  fillOpacity?: number;
+
+  /**
+   * 标注线不透明度
+   *
+   * @default 1
+   */
+  strokeOpacity?: number;
 }
 
 type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Shape<Style>, Style>;
@@ -61,7 +83,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
    *
    * @description 绘制过程中的标注不一定在这个字段下，可能视情况而定
    */
-  public draft: IAnnotation<Data, Style> | null = null;
+  public draft: Draft<Data, any, any> | null = null;
 
   public showOrder: boolean;
 
@@ -92,7 +114,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   /**
    * 按下Del键盘的调用，在各自的工具中实现
    */
-  protected handleDelete = (_e: MouseEvent) => {
+  protected handleDelete = (_e: KeyboardEvent) => {
     // do nothing
   };
 
@@ -136,6 +158,11 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('load is not implemented!');
   }
 
+  public refresh() {
+    // do nothing
+    console.warn('refresh is not implemented!');
+  }
+
   public clear() {
     // do nothing
     console.warn('clear is not implemented!');
@@ -166,14 +193,12 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this._data = data || [];
   }
 
-  public render(ctx: CanvasRenderingContext2D) {
-    const { drawing, draft } = this;
+  protected addToData(data: Data) {
+    this._data.push(data);
+  }
 
-    if (drawing) {
-      drawing.forEach((annotation) => {
-        annotation.render(ctx);
-      });
-    }
+  public render(ctx: CanvasRenderingContext2D) {
+    const { draft } = this;
 
     if (draft) {
       draft.render(ctx);
@@ -210,7 +235,8 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   }
 
   protected removeFromDrawing(id: string) {
-    this.drawing?.get(id)?.destroy();
+    const annotation = this.drawing?.get(id);
+    annotation?.destroy();
     this.drawing?.delete(id);
     // 取消选中标注时，需要将数据加回来
     this._removeDataItem(id);

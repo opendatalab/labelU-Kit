@@ -35,11 +35,11 @@ export class Ticker {
   }
 
   private tick() {
-    const now = Date.now();
-    const elapsed = now - this._lastTick;
+    // const now = Date.now();
+    // const elapsed = now - this._lastTick;
 
-    if (elapsed > this._interval && this._shouldUpdate) {
-      this._lastTick = now - (elapsed % this._interval);
+    if (this._shouldUpdate) {
+      // this._lastTick = now - (elapsed % this._interval);
       this._tickHandler();
       this._shouldUpdate = false;
     }

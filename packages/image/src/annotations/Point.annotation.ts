@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import type { ILabel } from '@labelu/interface';
+import Color from 'color';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -19,10 +20,13 @@ export type PointGroup = Group<Point | ShapeText, PointStyle>;
 export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, PointStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
+  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+
   constructor(params: AnnotationParams<PointData, PointStyle>) {
     super(params);
 
     this.labelColor = AnnotationPoint.labelStatic.getLabelColor(params.data.label);
+    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
@@ -37,7 +41,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
   static labelStatic: LabelBase;
 
   private _setupShapes() {
-    const { data, style, group, labelColor } = this;
+    const { data, style, group, labelColor, _strokeColor } = this;
 
     group.add(
       new Point({
@@ -46,7 +50,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
           x: data.x,
           y: data.y,
         },
-        style: { ...style, fill: labelColor },
+        style: { ...style, fill: labelColor, strokeWidth: Annotation.strokeWidth, stroke: _strokeColor },
       }),
     );
 
@@ -74,18 +78,19 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
     } else {
       group.updateStyle({
-        fill: '#fff',
-        stroke: '#000',
-        strokeWidth: 2,
+        stroke: '#fff',
+        strokeWidth: Annotation.strokeWidth + 2,
       });
     }
   };
 
   private _handleMouseOut = () => {
-    const { group, labelColor } = this;
+    const { group, labelColor, _strokeColor } = this;
 
     group.updateStyle({
       fill: labelColor,
+      stroke: _strokeColor,
+      strokeWidth: Annotation.strokeWidth,
     });
   };
 

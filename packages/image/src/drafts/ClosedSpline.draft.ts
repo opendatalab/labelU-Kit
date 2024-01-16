@@ -7,9 +7,8 @@ import { AnnotationLine, AnnotationPolygon } from '../annotations';
 import type { PointStyle, Point, PolygonStyle, AxisPoint } from '../shapes';
 import { Spline, ClosedSpline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
-import { Annotation } from '../annotations/Annotation';
 import type { ControllerPoint } from './ControllerPoint';
-import { DraftObserverMixin } from './DraftObserver';
+import { Draft } from './Draft';
 import type { PolygonToolOptions } from '../tools';
 import { SlopeEdge } from './SlopeEdge';
 import { EInternalEvent } from '../enums';
@@ -19,9 +18,7 @@ interface EffectedCurve {
   curve: Spline;
 }
 
-export class DraftPolygonCurve extends DraftObserverMixin(
-  Annotation<PolygonData, Line | Point | any, LineStyle | PointStyle>,
-) {
+export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, LineStyle | PointStyle> {
   public config: PolygonToolOptions;
 
   private _isControllerPicked: boolean = false;

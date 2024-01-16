@@ -5,29 +5,24 @@ import Color from 'color';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import { AnnotationPolygon, type PolygonData, type PolygonGroup } from '../annotations';
-import type { AxisPoint, PointStyle, PolygonStyle, Point } from '../shapes';
+import type { PointStyle, PolygonStyle, Point } from '../shapes';
 import { Polygon } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
 import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
-import { DraftObserverMixin } from './DraftObserver';
+import { Draft } from './Draft';
 import { ControllerEdge } from './ControllerEdge';
 import type { PolygonTool, PolygonToolOptions } from '../tools';
 import { EInternalEvent } from '../enums';
 import { generatePolygonsFromDifference, getLatestPointOnLine, isBBoxIntersect } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
+import { LabelBase } from '../annotations/Label.base';
 
-export class DraftPolygon extends DraftObserverMixin(
-  Annotation<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle>,
-) {
+export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle> {
   public config: PolygonToolOptions;
 
   private _pointIndex: number | null = null;
-
-  private _previousDynamicCoordinates: AxisPoint[][] | null = null;
-
-  private _previousPolygonCoordinates: AxisPoint[] = [];
 
   private _effectedLines: [Line | undefined, Line | undefined] | null = null;
 
@@ -57,12 +52,15 @@ export class DraftPolygon extends DraftObserverMixin(
    */
   private _tool: PolygonTool;
 
+  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+
   constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>, tool: PolygonTool) {
     super(params);
 
     this.config = config;
     this._tool = tool;
     this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(params.data.label);
+    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -75,7 +73,7 @@ export class DraftPolygon extends DraftObserverMixin(
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config, labelColor } = this;
+    const { data, group, style, config, labelColor, _strokeColor } = this;
 
     group.add(
       // 多边形用于颜色填充
@@ -86,7 +84,8 @@ export class DraftPolygon extends DraftObserverMixin(
           ...style,
           strokeWidth: 0,
           stroke: 'transparent',
-          fill: Color(labelColor).alpha(0.3).toString(),
+          fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
+          opacity: 0.5,
         },
       }),
     );
@@ -103,7 +102,8 @@ export class DraftPolygon extends DraftObserverMixin(
         coordinate: cloneDeep([startPoint, endPoint]),
         style: {
           ...style,
-          stroke: labelColor,
+          stroke: _strokeColor,
+          strokeWidth: Annotation.strokeWidth,
         },
       });
 

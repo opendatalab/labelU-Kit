@@ -37,13 +37,27 @@ export interface ImageOption extends RendererOptions {
 }
 
 export class BackgroundRenderer extends Renderer {
+  static DEFAULT_OPTIONS: ImageOption = {
+    container: document.body,
+    rotate: 0,
+    contrast: 0,
+    saturation: 0,
+    brightness: 0,
+    width: 0,
+    height: 0,
+  };
+
   private _image: HTMLImageElement | null = null;
 
   private _initialScale = 1;
 
-  private _renderWidth: number = 0;
+  private _unRotatedWidth: number = 0;
 
-  private _renderHeight: number = 0;
+  private _unRotatedHeight: number = 0;
+
+  private _rotatedWidth: number = 0;
+
+  private _rotatedHeight: number = 0;
 
   private _initialCoordinate: AxisPoint = {
     x: 0,
@@ -54,69 +68,21 @@ export class BackgroundRenderer extends Renderer {
 
   private _imageUrl: string | null = null;
 
-  public options: ImageOption = {
-    rotate: 0,
-    contrast: 0,
-    saturation: 0,
-    brightness: 0,
-    width: 0,
-    height: 0,
-  } as ImageOption;
+  public options: ImageOption = BackgroundRenderer.DEFAULT_OPTIONS;
 
   constructor(options: ImageOption) {
-    super(options);
-
-    this.options = {
-      ...this.options,
+    super({
+      ...BackgroundRenderer.DEFAULT_OPTIONS,
       ...options,
-    };
+    });
     this._rotate = options.rotate || 0;
   }
-
-  /**
-   * 创建旋转后的图片
-   *
-   * @param url 图片URL
-   * @param deg 旋转角度
-   * @returns Promise<HTMLImageElement>
-   */
-  static createRotatedImage(url: string, deg: number = 0) {
+  static createImage(url: string) {
     return new Promise<HTMLImageElement>((resolve, reject) => {
       const image = new Image();
       image.src = url;
       image.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-          reject(new Error('canvas context is null'));
-          return;
-        }
-
-        const { width, height } = image;
-
-        // 计算旋转后的图像尺寸
-        const angleInRadians = (deg * Math.PI) / 180;
-        const rotatedWidth = Math.abs(width * Math.cos(angleInRadians)) + Math.abs(height * Math.sin(angleInRadians));
-        const rotatedHeight = Math.abs(height * Math.cos(angleInRadians)) + Math.abs(width * Math.sin(angleInRadians));
-
-        canvas.width = rotatedWidth;
-        canvas.height = rotatedHeight;
-
-        ctx.translate(rotatedWidth / 2, rotatedHeight / 2); // 将旋转中心移动到画布中心
-        ctx.rotate(angleInRadians);
-        ctx.drawImage(image, -width / 2, -height / 2, width, height); // 图像的中心与画布的中心重合
-
-        const rotatedImage = new Image();
-        rotatedImage.src = canvas.toDataURL();
-
-        rotatedImage.onload = () => {
-          resolve(rotatedImage);
-        };
-
-        rotatedImage.onerror = (err) => {
-          reject(err);
-        };
+        resolve(image);
       };
 
       image.onerror = (err) => {
@@ -125,14 +91,94 @@ export class BackgroundRenderer extends Renderer {
     });
   }
 
+  private _setImageOffset() {
+    const { _image, _rotate } = this;
+    const { width, height } = this.options;
+
+    const containerSizeRatio = width / height;
+
+    if (!_image) {
+      return;
+    }
+
+    const imageWidth = _image.width;
+    const imageHeight = _image.height;
+
+    let rotatedImageWidth = imageWidth;
+    let rotatedImageHeight = imageHeight;
+
+    const multiple = Math.abs(_rotate) % 180;
+
+    switch (multiple) {
+      case 90:
+        rotatedImageWidth = imageHeight;
+        rotatedImageHeight = imageWidth;
+        break;
+
+      case 0:
+      default:
+        rotatedImageWidth = imageWidth;
+        rotatedImageHeight = imageHeight;
+        break;
+    }
+
+    const imageRatio = rotatedImageWidth / rotatedImageHeight;
+    let unRotatedWidth = imageWidth;
+    let unRotatedHeight = imageHeight;
+    let rotatedWidth = rotatedImageWidth;
+    let rotatedHeight = rotatedImageHeight;
+
+    // 根据最小比例进行缩放以避免图片被裁剪或遮挡
+    if (imageRatio > containerSizeRatio) {
+      rotatedWidth = width;
+      rotatedHeight = (rotatedImageHeight * width) / rotatedImageWidth;
+    } else {
+      rotatedHeight = height;
+      rotatedWidth = (rotatedImageWidth * height) / rotatedImageHeight;
+    }
+
+    switch (multiple) {
+      case 90:
+        unRotatedWidth = rotatedHeight;
+        unRotatedHeight = rotatedWidth;
+        break;
+
+      case 0:
+      default:
+        unRotatedWidth = rotatedWidth;
+        unRotatedHeight = rotatedHeight;
+        break;
+    }
+
+    const offsetX = (width - rotatedWidth) / 2;
+    const offsetY = (height - rotatedHeight) / 2;
+
+    this._unRotatedWidth = unRotatedWidth;
+    this._unRotatedHeight = unRotatedHeight;
+    this._rotatedWidth = rotatedWidth;
+    this._rotatedHeight = rotatedHeight;
+
+    this._initialCoordinate = {
+      x: offsetX,
+      y: offsetY,
+    };
+
+    axis!.initialBackgroundOffset = {
+      x: offsetX,
+      y: offsetY,
+    };
+
+    this._initialScale = unRotatedWidth / imageWidth;
+
+    axis!.initialBackgroundScale = this._initialScale;
+  }
+
   /**
    * 渲染图片，只渲染一张图片（多次调用会清除先前的渲染）
    * @param url 图片URL
    * @returns this
    */
   public loadImage(url: string, options: Omit<ImageOption, 'url'> | undefined): Promise<this> {
-    const { ctx } = this;
-
     if (!url) {
       throw new Error('image url is required');
     }
@@ -140,52 +186,18 @@ export class BackgroundRenderer extends Renderer {
     this._imageUrl = url;
 
     if (options) {
-      this.options = {
-        ...this.options,
-        ...options,
-      };
+      Object.assign(this.options, options);
     }
 
-    if (!ctx) {
-      Promise.reject(new Error('canvas context is null'));
+    if (!this.ctx) {
+      return Promise.reject(new Error('canvas context is null'));
     }
 
-    return BackgroundRenderer.createRotatedImage(url, this._rotate).then((_image) => {
+    return BackgroundRenderer.createImage(this._imageUrl).then((_image) => {
       this._image = _image;
 
-      const { width, height } = this.options;
+      this._setImageOffset();
 
-      const imageWidth = _image.width;
-      const imageHeight = _image.height;
-
-      // 按比例渲染图片
-      let renderHeight = imageHeight * (width / imageWidth);
-      let renderWidth = width;
-      let offsetX = 0;
-      let offsetY = (height - renderHeight) / 2;
-
-      if (imageHeight > imageWidth) {
-        renderHeight = height;
-        renderWidth = imageWidth * (height / imageHeight);
-        offsetX = (width - renderWidth) / 2;
-        offsetY = 0;
-      }
-
-      this._renderWidth = renderWidth;
-      this._renderHeight = renderHeight;
-      // 初始缩放比例根据图片宽度计算
-      this._initialCoordinate = {
-        x: offsetX,
-        y: offsetY,
-      };
-      this._initialScale = renderWidth / imageWidth;
-
-      axis!.initialBackgroundOffset = {
-        x: offsetX,
-        y: offsetY,
-      };
-
-      axis!.initialBackgroundScale = this._initialScale;
       this.render();
 
       return this;
@@ -198,7 +210,9 @@ export class BackgroundRenderer extends Renderer {
    */
   public rotate(deg: number) {
     this._rotate = deg;
-    this.loadImage(this._imageUrl!, { ...this.options, rotate: deg });
+    this.options.rotate = deg;
+    this._setImageOffset();
+    this.render();
   }
 
   /**
@@ -211,15 +225,17 @@ export class BackgroundRenderer extends Renderer {
       throw new Error(`invalid image property ${key}. Valid properties are ${ImageProperties.join(', ')}`);
     }
 
-    const { ctx } = this;
-
-    if (!ctx) {
+    if (!this.ctx) {
       return;
     }
 
-    this.options[key] = value;
-    const { contrast, saturation, brightness } = this.options;
-    ctx.filter = `brightness(${brightness! + 100}%) contrast(${contrast! + 100}%) saturate(${saturation! + 100}%)`;
+    Object.assign(this.options, { [key]: value });
+
+    const { ctx, options } = this;
+    ctx.filter = `brightness(${options.brightness! + 100}%) contrast(${options.contrast! + 100}%) saturate(${
+      options.saturation! + 100
+    }%)`;
+
     this.clear();
     this.render();
   }
@@ -237,8 +253,22 @@ export class BackgroundRenderer extends Renderer {
     this.canvas.remove();
   }
 
-  render() {
-    const { ctx, _initialCoordinate, _renderWidth, _renderHeight } = this;
+  public clear() {
+    if (!this.ctx) {
+      return;
+    }
+
+    const { canvas } = this;
+
+    // 清除画布，包括旋转后的画布
+    this.ctx.save();
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, canvas.width * 10, canvas.height * 10);
+    this.ctx.restore();
+  }
+
+  public render() {
+    const { ctx, canvas, _initialCoordinate, _rotatedWidth, _rotatedHeight, _unRotatedWidth, _unRotatedHeight } = this;
 
     if (!ctx) {
       return;
@@ -255,8 +285,8 @@ export class BackgroundRenderer extends Renderer {
     const bbox = {
       minX: coord.x,
       minY: coord.y,
-      maxX: coord.x + _renderWidth * scale,
-      maxY: coord.y + _renderHeight * scale,
+      maxX: coord.x + _rotatedWidth * scale,
+      maxY: coord.y + _rotatedHeight * scale,
     };
 
     // 更新图片区域
@@ -264,7 +294,27 @@ export class BackgroundRenderer extends Renderer {
 
     ctx.save();
 
-    ctx.drawImage(this._image, coord.x, coord.y, _renderWidth * scale, _renderHeight * scale);
+    ctx.fillStyle = '#333';
+    // 整个画布填充背景色
+    // 避免网页缩放后清空画布不完全
+    ctx.fillRect(0, 0, canvas.width * 10, canvas.height * 10);
+
+    // 将坐标原点移到图片中心
+    ctx.translate(coord.x + (_rotatedWidth * scale) / 2, coord.y + (_rotatedHeight * scale) / 2);
+    // 执行旋转操作
+    const angleInRadians = (this._rotate * Math.PI) / 180;
+
+    ctx.rotate(angleInRadians);
+
+    // 将坐标原点移回画布左上角，并画出图像
+    ctx.drawImage(
+      this._image,
+      (-_unRotatedWidth * scale) / 2,
+      (-_unRotatedHeight * scale) / 2,
+      _unRotatedWidth * scale,
+      _unRotatedHeight * scale,
+    );
+
     ctx.restore();
 
     return this;

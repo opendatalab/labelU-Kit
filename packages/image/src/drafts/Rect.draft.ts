@@ -11,34 +11,34 @@ import { axis } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
 import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
-import { DraftObserverMixin } from './DraftObserver';
+import { Draft } from './Draft';
 import { ControllerEdge } from './ControllerEdge';
 import type { RectToolOptions } from '../tools';
+import { LabelBase } from '../annotations/Label.base';
 
 type ControllerPosition = 'nw' | 'ne' | 'se' | 'sw';
 
 type EdgePosition = 'top' | 'right' | 'bottom' | 'left';
 
-export class DraftRect extends DraftObserverMixin(
-  Annotation<RectData, ControllerEdge | Point | Rect, RectStyle | PointStyle>,
-) {
+export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, RectStyle | PointStyle> {
   public config: RectToolOptions;
 
   private _preBBox: BBox | null = null;
 
   private _unscaledPreBBox: BBox | null = null;
 
-  private _previousDynamicCoordinates: AxisPoint[][] | null = null;
-
   private _controllerPositionMapping: Map<ControllerPosition, ControllerPoint> = new Map();
 
   private _edgePositionMapping: Map<EdgePosition, ControllerEdge> = new Map();
+
+  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(config: RectToolOptions, params: AnnotationParams<RectData, RectStyle>) {
     super(params);
 
     this.config = config;
     this.labelColor = AnnotationRect.labelStatic.getLabelColor(params.data.label);
+    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -48,7 +48,7 @@ export class DraftRect extends DraftObserverMixin(
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config, labelColor } = this;
+    const { data, group, style, config, labelColor, _strokeColor } = this;
     const nwCoord = { x: data.x, y: data.y };
     const neCoord = { x: data.x + data.width, y: data.y };
     const seCoord = { x: data.x + data.width, y: data.y + data.height };
@@ -87,7 +87,12 @@ export class DraftRect extends DraftObserverMixin(
         width: data.width,
         height: data.height,
         // 只填充颜色，不描边
-        style: { ...style, strokeWidth: 0, stroke: 'transparent', fill: Color(labelColor).alpha(0.5).string() },
+        style: {
+          ...style,
+          strokeWidth: 0,
+          stroke: 'transparent',
+          fill: Color(labelColor).alpha(0.5).string(),
+        },
       }),
     );
 
@@ -98,7 +103,8 @@ export class DraftRect extends DraftObserverMixin(
         coordinate: lineCoordinates[i].coordinate,
         style: {
           ...style,
-          stroke: labelColor,
+          stroke: _strokeColor,
+          strokeWidth: Annotation.strokeWidth,
         },
       });
 

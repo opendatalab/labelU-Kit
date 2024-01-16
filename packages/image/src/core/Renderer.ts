@@ -47,8 +47,20 @@ export class Renderer extends EventEmitter {
     if (x1 && y1 && x2 && y2) {
       ctx.clearRect(x1, y1, x2, y2);
     } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // 避免网页缩放后清空画布不完全
+      ctx.clearRect(0, 0, canvas.width * 10, canvas.height * 10);
     }
+  }
+
+  public resize(width: number, height: number) {
+    const { canvas } = this;
+
+    canvas.width = width * this.ratio;
+    canvas.height = height * this.ratio;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    this.ctx?.scale(this.ratio, this.ratio);
   }
 
   public destroy() {

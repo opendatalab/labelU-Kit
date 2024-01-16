@@ -11,10 +11,10 @@ import type { AnnotationData, AnnotationTool, AnnotationToolData, ToolName } fro
 import { EInternalEvent } from './enums';
 import type { Monitor } from './core/Monitor';
 import { axis, createAxis } from './singletons/axis';
-import { createMonitor, eventEmitter } from './singletons';
+import { createMonitor, eventEmitter, rbush } from './singletons';
 import type { PolygonToolOptions } from './tools/Polygon.tool';
 import { PolygonTool } from './tools/Polygon.tool';
-import { AnnotationMapping } from './annotations';
+import { Annotation, AnnotationMapping } from './annotations';
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -46,6 +46,27 @@ export interface AnnotatorOptions {
    * @default false
    */
   showOrder?: boolean;
+
+  /**
+   * 标注线宽
+   *
+   * @default 2
+   */
+  strokeWidth?: number;
+
+  /**
+   * 标注填充不透明度
+   *
+   * @default 0.7
+   */
+  fillOpacity?: number;
+
+  /**
+   * 标注线不透明度
+   *
+   * @default 1
+   */
+  strokeOpacity?: number;
 }
 
 export class Annotator {
@@ -54,6 +75,8 @@ export class Annotator {
   public backgroundRenderer: BackgroundRenderer | null = null;
 
   public activeToolName: ToolName | null = null;
+
+  public container: HTMLDivElement | null = null;
 
   private _monitor: Monitor | null = null;
 
@@ -76,6 +99,8 @@ export class Annotator {
     if (!container) {
       throw new Error('container is required');
     }
+
+    this.container = container;
 
     this._config = params;
 
@@ -101,12 +126,13 @@ export class Annotator {
   }
 
   private _initialContainer() {
-    const { container, width, height } = this._config;
+    const { container, width, height, image } = this._config;
 
     container.style.width = `${width}px`;
     container.style.height = `${height}px`;
     container.style.position = 'relative';
     container.style.cursor = 'none';
+    container.style.overflow = 'hidden';
 
     this.renderer = new Renderer({ container, width, height });
     this.renderer.canvas.style.position = 'absolute';
@@ -117,7 +143,7 @@ export class Annotator {
     this.renderer.canvas.style.top = '0';
     this.renderer.canvas.style.zIndex = '2';
 
-    this.backgroundRenderer = new BackgroundRenderer({ container, width, height });
+    this.backgroundRenderer = new BackgroundRenderer({ container, width, height, rotate: image?.rotate });
     this.backgroundRenderer.canvas.style.position = 'absolute';
     this.backgroundRenderer.canvas.style.width = `${width}px`;
     this.backgroundRenderer.canvas.style.height = `${height}px`;
@@ -142,6 +168,16 @@ export class Annotator {
   private _initialTools() {
     const { _config } = this;
 
+    if (_config.strokeWidth) {
+      Annotation.strokeWidth = _config.strokeWidth;
+    }
+    if (_config.strokeOpacity) {
+      Annotation.strokeOpacity = _config.strokeOpacity;
+    }
+    if (_config.fillOpacity) {
+      Annotation.fillOpacity = _config.fillOpacity;
+    }
+
     if (_config.line) {
       this.use(new LineTool({ ..._config.line, showOrder: _config.showOrder ?? true }));
     }
@@ -164,7 +200,6 @@ export class Annotator {
   }
 
   private _handleToolChange = (toolName: ToolName, label: string) => {
-    this.emit('toolChange', toolName, label);
     this.switch(toolName, label);
   };
 
@@ -189,6 +224,46 @@ export class Annotator {
 
     backgroundRenderer.clear();
     backgroundRenderer.rotate(angle);
+  }
+
+  public resize(
+    sizeOrWidth:
+      | ((width: number, height: number) => { width: number; height: number })
+      | { width: number; height: number }
+      | number,
+    height?: number,
+  ) {
+    const { backgroundRenderer, renderer, container } = this;
+
+    if (!backgroundRenderer) {
+      throw new Error('backgroundRenderer is not initialized');
+    }
+
+    if (!renderer) {
+      throw new Error('renderer is not initialized');
+    }
+
+    if (!container) {
+      throw new Error('container is not initialized');
+    }
+
+    let newSize;
+    if (typeof sizeOrWidth === 'function') {
+      newSize = sizeOrWidth(container.clientWidth, container.clientHeight);
+    } else if (typeof sizeOrWidth === 'number' && typeof height === 'number') {
+      newSize = { width: sizeOrWidth, height: height };
+    } else if (typeof sizeOrWidth === 'object') {
+      newSize = sizeOrWidth;
+    } else {
+      throw new Error('Invalid arguments');
+    }
+
+    container.style.width = `${newSize.width}px`;
+    container.style.height = `${newSize.height}px`;
+    renderer.resize(newSize.width, newSize.height);
+    backgroundRenderer.resize(newSize.width, newSize.height);
+
+    this.render();
   }
 
   public use(instance: AnnotationTool) {
@@ -216,7 +291,9 @@ export class Annotator {
    */
   public switch(toolName: ToolName, label?: string) {
     if (typeof toolName !== 'string') {
-      throw new Error('toolName must be string, such as "line" or "point"');
+      console.error('toolName must be string, such as "line" or "point"');
+
+      return;
     }
 
     const { activeToolName } = this;
@@ -224,7 +301,9 @@ export class Annotator {
 
     if (!tool) {
       // TODO：导向到文档
-      throw new Error(`Tool ${toolName} is not used!`);
+      console.warn(`Tool ${toolName} is not used!`);
+
+      return;
     }
 
     if (activeToolName && activeToolName !== toolName) {
@@ -237,11 +316,14 @@ export class Annotator {
       pickedLabel = tool.labelMapping.keys().next().value;
     }
 
-    this.activeToolName = toolName;
+    if (activeToolName !== toolName) {
+      this.activeToolName = toolName;
+      this.emit('toolChange', toolName, pickedLabel);
+    }
+
     const AnnotationClass = AnnotationMapping[toolName];
     this._axis!.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(pickedLabel);
     tool.activate(pickedLabel);
-    this.emit('toolChange', toolName, pickedLabel);
     this.emit('labelChange', pickedLabel);
   }
 
@@ -260,9 +342,21 @@ export class Annotator {
     // 渲染背景
     backgroundRenderer!.render();
 
+    const annotations: any[] = [];
     // 渲染工具
     _tools.forEach((tool) => {
       tool.render(renderer!.ctx!);
+
+      if (tool.drawing) {
+        annotations.push(...Array.from(tool.drawing.values() as any));
+      }
+    });
+
+    // 按绘制顺序渲染
+    annotations.sort((a, b) => a.data.order - b.data.order);
+
+    annotations.forEach((annotation) => {
+      annotation.render(renderer!.ctx!);
     });
   };
 
@@ -274,6 +368,7 @@ export class Annotator {
       width: _config.width,
       height: _config.height,
       container: _config.container,
+      rotate: _config.image.rotate,
     });
   }
 
@@ -284,6 +379,38 @@ export class Annotator {
       tool.toggleOrderVisible(value);
     }
 
+    this._axis?.rerender();
+  }
+
+  public set strokeWidth(value: number) {
+    Annotation.strokeWidth = value;
+
+    const { _tools } = this;
+
+    _tools.forEach((tool) => {
+      tool.refresh();
+    });
+
+    this._axis?.rerender();
+  }
+
+  public set strokeOpacity(value: number) {
+    Annotation.strokeOpacity = value;
+    const { _tools } = this;
+
+    _tools.forEach((tool) => {
+      tool.refresh();
+    });
+    this._axis?.rerender();
+  }
+
+  public set fillOpacity(value: number) {
+    Annotation.fillOpacity = value;
+    const { _tools } = this;
+
+    _tools.forEach((tool) => {
+      tool.refresh();
+    });
     this._axis?.rerender();
   }
 
@@ -401,11 +528,11 @@ export class Annotator {
   /**
    * 指定标注id从外部选中标注
    */
-  public selectAnnotationById(id: string | undefined) {
-    if (!id) {
-      if (this.monitor?.selectedAnnotationId) {
-        this._event.emit(EInternalEvent.UnSelect, new MouseEvent(''), this.monitor.selectedAnnotationId);
-      }
+  public selectAnnotation(toolName: ToolName | undefined, id: string | undefined) {
+    const selectTool = toolName || this.activeTool?.name;
+
+    if (!selectTool) {
+      console.warn('Tool is not initialized');
 
       return;
     }
@@ -416,8 +543,24 @@ export class Annotator {
       return;
     }
 
+    if (this.monitor.selectedAnnotationId === id) {
+      return;
+    }
+
+    this.switch(selectTool);
+
+    if (!id) {
+      if (this.monitor?.selectedAnnotationId) {
+        this.activeTool?.drawing
+          ?.get(this.monitor.selectedAnnotationId)
+          ?.group.emit(EInternalEvent.UnSelect, new MouseEvent(''));
+      }
+
+      return;
+    }
+
     this.monitor.selectedAnnotationId = id;
-    this._event.emit(EInternalEvent.Select, new MouseEvent(''), id);
+    this.activeTool?.drawing?.get(id)?.group.emit(EInternalEvent.Select, new MouseEvent(''));
   }
 
   /**
@@ -448,8 +591,12 @@ export class Annotator {
       return;
     }
 
-    const { config, _tools } = this;
+    const { _config, _tools } = this;
     const tool = _tools.get(toolName);
+
+    if (!_config) {
+      return;
+    }
 
     if (toolName == 'line') {
       const convertedData = LineTool.convertToCanvasCoordinates(data as unknown as AnnotationToolData<'line'>);
@@ -461,7 +608,7 @@ export class Annotator {
         this.use(
           new LineTool({
             ...this._config.line,
-            showOrder: config.showOrder ?? false,
+            showOrder: _config.showOrder ?? false,
             data: convertedData,
           }),
         );
@@ -476,7 +623,7 @@ export class Annotator {
         this.use(
           new PointTool({
             ...this._config.point,
-            showOrder: config.showOrder ?? false,
+            showOrder: _config.showOrder ?? false,
             data: convertedData,
           }),
         );
@@ -491,7 +638,7 @@ export class Annotator {
         this.use(
           new RectTool({
             ...this._config.rect,
-            showOrder: config.showOrder ?? false,
+            showOrder: _config.showOrder ?? false,
             data: convertedData,
           }),
         );
@@ -506,7 +653,7 @@ export class Annotator {
         this.use(
           new PolygonTool({
             ...this._config.rect,
-            showOrder: config.showOrder ?? false,
+            showOrder: _config.showOrder ?? false,
             data: convertedData,
           }),
         );
@@ -521,7 +668,7 @@ export class Annotator {
         this.use(
           new CuboidTool({
             ...this._config.cuboid,
-            showOrder: config.showOrder ?? false,
+            showOrder: _config.showOrder ?? false,
             data: convertedData,
           }),
         );
@@ -542,12 +689,15 @@ export class Annotator {
     this._event!.removeAllListeners();
     this._tools.clear();
     this._axis?.destroy();
+    this._monitor?.destroy();
+    this._monitor = null;
     this._axis = null;
     this.renderer?.destroy();
     this.renderer = null;
     this.backgroundRenderer?.destroy();
     this.backgroundRenderer = null;
     this._config = null as any;
+    rbush.clear();
   }
 
   public on = eventEmitter.on.bind(eventEmitter);

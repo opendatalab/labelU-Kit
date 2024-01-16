@@ -41,6 +41,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     return data.map((item) => ({
       ...item,
       ...axis!.convertSourceCoordinate(item),
+      width: item.width * axis!.initialBackgroundScale,
+      height: item.height * axis!.initialBackgroundScale,
     }));
   }
 
@@ -81,7 +83,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    *  2.1. 创建新的drawing（成品），需要包含点、线
    *  2.2. 创建选中包围盒
    */
-  protected onSelect = (_e: MouseEvent, annotation: AnnotationRect) => {
+  protected onSelect = (annotation: AnnotationRect) => (_e: MouseEvent) => {
     Tool.emitSelect(this.convertAnnotationItem(annotation.data));
     this?._creatingShape?.destroy();
     this._creatingShape = null;
@@ -145,17 +147,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   private _addAnnotation(data: RectData) {
     const { drawing, style, hoveredStyle } = this;
 
-    drawing!.set(
-      data.id,
-      new AnnotationRect({
-        id: data.id,
-        data,
-        showOrder: this.showOrder,
-        style,
-        hoveredStyle,
-        onSelect: this.onSelect,
-      }),
-    );
+    const annotation = new AnnotationRect({
+      id: data.id,
+      data,
+      showOrder: this.showOrder,
+      style,
+      hoveredStyle,
+    });
+
+    annotation.group.on(EInternalEvent.Select, this.onSelect(annotation));
+
+    drawing!.set(data.id, annotation);
   }
 
   private _createDraft(data: RectData) {
@@ -164,9 +166,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       data,
       showOrder: false,
       style: this.style,
-      // 在草稿上添加取消选中的事件监听
-      onUnSelect: this.onUnSelect,
     });
+
+    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
   }
 
   protected archiveDraft() {
@@ -208,6 +210,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       },
       e,
     );
+    this.addToData(data);
 
     this._createDraft(data);
     _creatingShape.destroy();
@@ -245,12 +248,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     if (_creatingShape) {
       _creatingShape.destroy();
       this._creatingShape = null;
-      axis?.rerender();
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
       this.deleteDraft();
-      axis?.rerender();
+      this.removeFromDrawing(data.id);
       Tool.onDelete(this.convertAnnotationItem(data));
     }
   };

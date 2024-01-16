@@ -244,6 +244,7 @@ export class Shape<Style> {
   public destroy() {
     rbush.remove(this._cachedRBush!);
     this._event.removeAllListeners();
+    this._cachedRBush = null;
     eventEmitter.off(EInternalEvent.AxisChange, this.update);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this.update);
   }

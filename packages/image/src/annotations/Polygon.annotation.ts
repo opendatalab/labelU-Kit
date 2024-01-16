@@ -29,10 +29,13 @@ export type PolygonGroup = Group<Polygon | ShapeText, PolygonStyle>;
 export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
+  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+
   constructor(params: AnnotationParams<PolygonData, PolygonStyle>) {
     super(params);
 
     this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(params.data.label);
+    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
@@ -59,14 +62,19 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   static labelStatic: LabelBase;
 
   private _setupShapes() {
-    const { data, group, style, labelColor } = this;
+    const { data, group, style, labelColor, _strokeColor } = this;
 
     if (data.type == 'line') {
       group.add(
         new Polygon({
           id: data.id,
           coordinate: cloneDeep(data.points),
-          style: { ...style, stroke: labelColor, fill: Color(labelColor).alpha(0.3).toString() },
+          style: {
+            ...style,
+            stroke: _strokeColor,
+            fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
+            strokeWidth: Annotation.strokeWidth,
+          },
         }),
       );
     } else if (data.type === 'spline') {
@@ -75,7 +83,12 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
           id: data.id,
           coordinate: cloneDeep(data.points),
           controlPoints: data.controlPoints!,
-          style: { ...style, stroke: labelColor, fill: Color(labelColor).alpha(0.3).toString() },
+          style: {
+            ...style,
+            stroke: _strokeColor,
+            fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
+            strokeWidth: Annotation.strokeWidth,
+          },
         }),
       );
     } else {
@@ -97,7 +110,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   }
 
   private _handleMouseOver = () => {
-    const { group, style, labelColor, hoveredStyle } = this;
+    const { group, style, labelColor, hoveredStyle, _strokeColor } = this;
 
     if (hoveredStyle) {
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
@@ -105,9 +118,9 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
       group.each((shape) => {
         if (!(shape instanceof ShapeText)) {
           shape.updateStyle({
-            stroke: labelColor,
-            strokeWidth: style.strokeWidth! + 2,
-            fill: Color(labelColor).alpha(0.6).toString(),
+            stroke: _strokeColor,
+            strokeWidth: Annotation.strokeWidth + 2,
+            fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
           });
         }
       });
@@ -115,14 +128,14 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   };
 
   private _handleMouseOut = () => {
-    const { group, style, labelColor } = this;
+    const { group, labelColor, _strokeColor } = this;
 
     group.each((shape) => {
       if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
-          stroke: labelColor,
-          fill: Color(labelColor).alpha(0.3).toString(),
-          strokeWidth: style.strokeWidth,
+          stroke: _strokeColor,
+          fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
+          strokeWidth: Annotation.strokeWidth,
         });
       }
     });

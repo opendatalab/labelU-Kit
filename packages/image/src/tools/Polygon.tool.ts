@@ -94,7 +94,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   /**
    * 点击画布事件处理
    */
-  protected onSelect = (_e: MouseEvent, annotation: AnnotationPolygon) => {
+  protected onSelect = (annotation: AnnotationPolygon) => (_e: MouseEvent) => {
     Tool.emitSelect(this.convertAnnotationItem(annotation.data));
 
     this?._creatingShapes?.destroy();
@@ -135,17 +135,17 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   private _addAnnotation(data: PolygonData) {
     const { drawing, style, hoveredStyle } = this;
 
-    drawing!.set(
-      data.id,
-      new AnnotationPolygon({
-        id: data.id,
-        data,
-        showOrder: this.showOrder,
-        style,
-        hoveredStyle,
-        onSelect: this.onSelect,
-      }),
-    );
+    const annotation = new AnnotationPolygon({
+      id: data.id,
+      data,
+      showOrder: this.showOrder,
+      style,
+      hoveredStyle,
+    });
+
+    annotation.group.on(EInternalEvent.Select, this.onSelect(annotation));
+
+    drawing!.set(data.id, annotation);
   }
 
   private _validate(data: PolygonData) {
@@ -173,8 +173,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
               data,
               showOrder: false,
               style: this.style,
-              // 在草稿上添加取消选中的事件监听
-              onUnSelect: this.onUnSelect,
             },
             this,
           )
@@ -183,9 +181,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
             data,
             showOrder: false,
             style: this.style,
-            // 在草稿上添加取消选中的事件监听
-            onUnSelect: this.onUnSelect,
           });
+
+    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
   }
 
   protected archiveDraft() {
@@ -242,12 +240,11 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       _creatingCurves?.destroy();
       this._creatingShapes = null;
       this._creatingCurves = null;
-      axis?.rerender();
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
       this.deleteDraft();
-      axis?.rerender();
+      this.removeFromDrawing(data.id);
       Tool.onDelete(this.convertAnnotationItem(data));
     }
   };
@@ -656,12 +653,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       },
       e,
     );
+    this.addToData(data);
 
     this._addAnnotation(data);
     _creatingCurves.destroy();
     this._creatingCurves = null;
     axis!.rerender();
-    this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationPolygon);
+    this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
   }
 
@@ -703,12 +701,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       },
       e,
     );
+    this.addToData(data);
 
     this._addAnnotation(data);
     _creatingShapes.destroy();
     this._creatingShapes = null;
     axis!.rerender();
-    this.onSelect(new MouseEvent(''), this.drawing!.get(data.id) as AnnotationPolygon);
+    this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
   }
 
@@ -720,17 +719,17 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     }
 
     datas.forEach((data) => {
-      drawing!.set(
-        data.id,
-        new AnnotationPolygon({
-          id: data.id,
-          data,
-          showOrder: this.showOrder,
-          style,
-          hoveredStyle,
-          onSelect: this.onSelect,
-        }),
-      );
+      const annotation = new AnnotationPolygon({
+        id: data.id,
+        data,
+        showOrder: this.showOrder,
+        style,
+        hoveredStyle,
+      });
+
+      annotation.group.on(EInternalEvent.Select, this.onSelect(annotation));
+
+      drawing!.set(data.id, annotation);
     });
   }
 

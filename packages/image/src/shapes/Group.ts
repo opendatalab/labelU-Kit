@@ -225,6 +225,7 @@ export class Group<T extends Shape<Style>, Style> {
       shape.destroy();
     });
     rbush.remove(this._cachedRBush!);
+    this._cachedRBush = null;
     this._shapeMapping.clear();
     this._event.removeAllListeners();
     eventEmitter.off(EInternalEvent.PanEnd, this._onAxisChange);

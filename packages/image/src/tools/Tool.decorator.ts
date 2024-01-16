@@ -31,24 +31,31 @@ export function ToolWrapper<
   Options extends BasicToolParams<Data, Style>,
   Style extends Record<string, any>,
 >(constructor: T): PublicConstructor<ToolWrapperConstructor> {
-  return class Wrapped extends constructor {
+  return class WrappedTool extends constructor {
     constructor(...params: any[]) {
       super(...params);
 
       eventEmitter.on(EInternalEvent.LeftMouseDown, this.handleMouseDown);
       eventEmitter.on(EInternalEvent.MouseMove, this.handleMouseMove);
       eventEmitter.on(EInternalEvent.Escape, this.handleEscape);
-      eventEmitter.on(EInternalEvent.Delete, this.handleDelete);
-      eventEmitter.on(EInternalEvent.BackSpace, this.handleDelete);
+      eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
+      eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
     }
+
+    private _handleDelete = (e: KeyboardEvent) => {
+      if (this.handleDelete) {
+        this.handleDelete(e);
+      }
+
+      axis?.rerender();
+    };
 
     /**
      * 追加数据
      */
     public load(data: Data[]) {
       this._data.push(...data);
-      this.clearDrawing();
-      this.setupShapes();
+      this.refresh();
     }
 
     public deleteAnnotation(id: string) {
@@ -122,6 +129,10 @@ export function ToolWrapper<
     public toggleOrderVisible(visible: boolean): void {
       this.showOrder = visible;
 
+      this.refresh();
+    }
+
+    public refresh() {
       this.clearDrawing();
       this.setupShapes();
     }
@@ -154,8 +165,8 @@ export function ToolWrapper<
       eventEmitter.off(EInternalEvent.LeftMouseDown, this.handleMouseDown);
       eventEmitter.off(EInternalEvent.MouseMove, this.handleMouseMove);
       eventEmitter.off(EInternalEvent.Escape, this.handleEscape);
-      eventEmitter.off(EInternalEvent.Delete, this.handleDelete);
-      eventEmitter.off(EInternalEvent.BackSpace, this.handleDelete);
+      eventEmitter.off(EInternalEvent.Delete, this._handleDelete);
+      eventEmitter.off(EInternalEvent.BackSpace, this._handleDelete);
     }
   };
 }

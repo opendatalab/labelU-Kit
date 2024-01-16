@@ -99,25 +99,25 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       data,
       showOrder: this.showOrder,
       style,
-      onUnSelect: this.onUnSelect,
     });
+    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
     monitor!.setSelectedAnnotationId(this.draft.id);
   }
 
   private _addAnnotation(data: PointData) {
     const { style, hoveredStyle } = this;
 
-    this.drawing!.set(
-      data.id,
-      new AnnotationPoint({
-        id: data.id,
-        data,
-        showOrder: this.showOrder,
-        style,
-        hoveredStyle,
-        onSelect: this.onSelect,
-      }),
-    );
+    const annotation = new AnnotationPoint({
+      id: data.id,
+      data,
+      showOrder: this.showOrder,
+      style,
+      hoveredStyle,
+    });
+
+    annotation.group.on(EInternalEvent.Select, this.onSelect(annotation));
+
+    this.drawing!.set(data.id, annotation);
   }
 
   protected handleDelete = () => {
@@ -128,12 +128,12 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
       this.deleteDraft();
-      axis?.rerender();
+      this.removeFromDrawing(data.id);
       Tool.onDelete({ ...data, ...axis!.convertCanvasCoordinate(data) });
     }
   };
 
-  protected onSelect = (_e: MouseEvent, annotation: AnnotationPoint) => {
+  protected onSelect = (annotation: AnnotationPoint) => (_e: MouseEvent) => {
     Tool.emitSelect({
       ...annotation.data,
       ...axis!.convertCanvasCoordinate(annotation.data),
@@ -201,7 +201,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     };
 
     Tool.onAdd({ ...data, ...axis!.convertCanvasCoordinate(data) }, e);
-
+    this.addToData(data);
     // 创建草稿
     this._createDraft(data);
 
