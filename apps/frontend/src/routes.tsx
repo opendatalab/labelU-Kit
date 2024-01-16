@@ -8,6 +8,7 @@ import TaskEdit from '@/pages/tasks.[id].edit';
 import TaskAnnotation from '@/pages/tasks.[id].samples.[id]';
 import Samples from '@/pages/tasks.[id]';
 import TaskSamplesFinished from '@/pages/tasks.[id].samples.finished';
+import ImageTaskDemo from '@/pages/task-image-demo';
 import Page404 from '@/pages/404';
 import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
@@ -64,6 +65,15 @@ const routes: RouteObject[] = [
           {
             index: true,
             element: <Tasks />,
+          },
+          {
+            path: 'task-image-demo',
+            element: <ImageTaskDemo />,
+            handle: {
+              crumb: () => {
+                return '图片标注Demo体验';
+              },
+            },
           },
           {
             path: ':taskId',

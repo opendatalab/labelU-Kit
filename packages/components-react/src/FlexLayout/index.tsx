@@ -11,9 +11,20 @@ export interface BasicFlexBox extends React.DetailedHTMLProps<React.HTMLAttribut
 
   gap?: React.CSSProperties['gap'];
   ref?: React.Ref<HTMLDivElement>;
+
+  shrink?: number;
 }
 
 const common = css<BasicFlexBox>`
+  ${({ shrink }) => {
+    if (!shrink) {
+      return 'shrink: 0;';
+    }
+
+    return css`
+      flex-shrink: ${shrink};
+    `;
+  }}
   ${({ flex }) => {
     if (!flex) {
       return '';
@@ -34,24 +45,16 @@ const common = css<BasicFlexBox>`
     }
   }}
 
-  ${({ full, flex }) => {
+  ${({ full }) => {
     if (!full) {
       return '';
     }
 
-    switch (flex) {
-      case 'column':
-        return css`
-          height: 100%;
-          flex-grow: 1;
-        `;
-      case 'row':
-      default:
-        return css`
-          flex-grow: 1;
-          width: 100%;
-        `;
-    }
+    return css`
+      flex-grow: 1;
+      width: 100%;
+      height: 100%;
+    `;
   }}
 
   ${({ gap }) =>
@@ -89,8 +92,6 @@ const common = css<BasicFlexBox>`
 // ========================================= header =========================================
 
 const ItemWrapper = styled.div<BasicFlexBox>`
-  flex-shrink: 0;
-
   ${common}
 `;
 

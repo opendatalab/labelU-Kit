@@ -1,5 +1,5 @@
 import { Button, Divider, Dropdown, Tag } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
 import Icon, { BellOutlined, PoweroffOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
 
@@ -9,10 +9,14 @@ import { goLogin } from '@/utils/sso';
 
 import Breadcrumb from '../Breadcrumb';
 import { LabeluLogo, NavigationWrapper } from './style';
+import TaskTip from './TaskTip';
+import ImageDemoGuide from './ImageDemoGuide';
 
 const Homepage = () => {
   const username = localStorage.getItem('username');
   const navigate = useNavigate();
+  const isSampleDetail = useMatch('/tasks/:taskId/samples/:sampleId');
+  const isImageDemo = useMatch('/tasks/task-image-demo');
 
   const logout = async (e: any) => {
     e.stopPropagation();
@@ -47,6 +51,8 @@ const Homepage = () => {
         <Breadcrumb hideHome={window.IS_ONLINE} />
       </FlexLayout.Item>
       <FlexLayout.Item flex gap="1rem">
+        <TaskTip visible={Boolean(isSampleDetail)} />
+        <ImageDemoGuide visible={Boolean(isImageDemo)} />
         {window.IS_ONLINE && (
           <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/#/guide/install">
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>

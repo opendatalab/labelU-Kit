@@ -193,6 +193,8 @@ const AnnotationPage = () => {
     );
   }
 
+  console.log(editingSample);
+
   return (
     <AnnotationContext.Provider value={annotationContextValue}>
       {isLoading && (
