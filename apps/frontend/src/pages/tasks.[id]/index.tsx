@@ -243,7 +243,7 @@ const Samples = () => {
   return (
     <FlexLayout flex="column" full gap="2rem">
       <HeaderWrapper flex items="center">
-        <FlexLayout.Content full>
+        <FlexLayout.Content flex="column">
           <BlockContainer>
             {isTaskReadyToAnnotate ? <Statistical /> : <GoToEditTask taskStatus={taskStatus} />}
           </BlockContainer>
