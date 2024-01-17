@@ -343,24 +343,19 @@ export class Axis {
    * Debug使用，渲染R-Tree
    */
   private _renderRBushTree() {
-    const { ctx } = this._renderer!;
+    // const { ctx } = this._renderer!;
 
-    ctx!.save();
-    ctx!.strokeStyle = '#666';
-    ctx!.globalAlpha = 1;
-    ctx!.lineDashOffset = 2;
-    ctx!.setLineDash([2, 2]);
-    ctx!.lineWidth = 1;
+    // ctx!.save();
+    // ctx!.strokeStyle = '#666';
+    // ctx!.globalAlpha = 1;
+    // ctx!.lineDashOffset = 2;
+    // ctx!.setLineDash([2, 2]);
+    // ctx!.lineWidth = 1;
 
-    console.info(rbush.all().length);
-    rbush.all().forEach((item) => {
-      const { minX, minY, maxX, maxY } = item;
+    console.info('rbush size ==>>', rbush.all().length);
 
-      ctx!.strokeRect(minX, minY, maxX - minX, maxY - minY);
-    });
-
-    ctx!.globalAlpha = 1;
-    ctx!.restore();
+    // ctx!.globalAlpha = 1;
+    // ctx!.restore();
   }
 
   /**
@@ -465,6 +460,80 @@ export class Axis {
 
   public get scale() {
     return this._scale;
+  }
+
+  public restScale(value: number) {
+    if (typeof value !== 'number') {
+      console.error('Invalid scale');
+
+      return;
+    }
+
+    const { renderer, _scale } = this;
+    const canvas = renderer!.canvas;
+    const domWidth = canvas.width / renderer!.ratio;
+    const domHeight = canvas.height / renderer!.ratio;
+
+    this._scale = value;
+    // 设置画布偏移量，使得缩放中心点不变
+    this._scaleCenter = {
+      x: domWidth / 2,
+      y: domHeight / 2,
+    };
+    const newX = this._scaleCenter.x - (this._scaleCenter.x - this._x) * (value / _scale);
+    const newY = this._scaleCenter.y - (this._scaleCenter.y - this._y) * (value / _scale);
+    this._x = newX;
+    this._y = newY;
+
+    eventEmitter.emit(EInternalEvent.Zoom);
+    eventEmitter.emit(EInternalEvent.AxisChange);
+    this.rerender();
+  }
+
+  /**
+   * 将画布居中显示
+   */
+  public center() {
+    const { renderer, safeZone } = this;
+
+    if (!renderer) {
+      return;
+    }
+
+    const { canvas } = renderer!;
+    const safeWidth = safeZone.maxX - safeZone.minX;
+    // const safeHeight = safeZone.maxY - safeZone.minY;
+
+    const domWidth = canvas.width / renderer!.ratio;
+    const domHeight = canvas.height / renderer!.ratio;
+
+    // const currentWidth = domWidth * this._scale;
+    const currentHeight = domHeight * this._scale;
+
+    this._x = (domWidth - safeWidth) / 2;
+    this._y = (domHeight - currentHeight) / 2;
+
+    eventEmitter.emit(EInternalEvent.AxisChange);
+    this.rerender();
+  }
+
+  /**
+   * 设置偏移量
+   *
+   * @param x x轴偏移量
+   * @param y y轴偏移量
+   */
+  public setOffset(x: number | undefined, y: number | undefined) {
+    if (x) {
+      this._x = x;
+    }
+
+    if (y) {
+      this._y = y;
+    }
+
+    eventEmitter.emit(EInternalEvent.AxisChange);
+    this.rerender();
   }
 
   public get offset() {

@@ -187,13 +187,14 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       this.group.clear();
       this._setupShapes();
       // 创建新的多边形标注
-      const newAnnotationsData = polygons.map((items) => {
+      const newAnnotationsData = polygons.map((items, index) => {
         // NOTE: 生成的多边形坐标最后一个点和第一个点是重复的，需要删除
         items[0].pop();
 
         return {
           ...cloneDeep(this.data),
           id: uuid(),
+          order: monitor!.getMaxOrder() + index + 1,
           points: items[0].map((item: number[]) => {
             return {
               id: uuid(),

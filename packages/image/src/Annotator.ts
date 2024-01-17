@@ -134,23 +134,8 @@ export class Annotator {
     container.style.cursor = 'none';
     container.style.overflow = 'hidden';
 
-    this.renderer = new Renderer({ container, width, height });
-    this.renderer.canvas.style.position = 'absolute';
-    this.renderer.canvas.style.width = `${width}px`;
-    this.renderer.canvas.style.height = `${height}px`;
-    this.renderer.canvas.style.left = '0';
-    this.renderer.canvas.style.cursor = 'none';
-    this.renderer.canvas.style.top = '0';
-    this.renderer.canvas.style.zIndex = '2';
-
-    this.backgroundRenderer = new BackgroundRenderer({ container, width, height, rotate: image?.rotate });
-    this.backgroundRenderer.canvas.style.position = 'absolute';
-    this.backgroundRenderer.canvas.style.width = `${width}px`;
-    this.backgroundRenderer.canvas.style.height = `${height}px`;
-    this.backgroundRenderer.canvas.style.cursor = 'none';
-    this.backgroundRenderer.canvas.style.left = '0';
-    this.backgroundRenderer.canvas.style.top = '0';
-    this.backgroundRenderer.canvas.style.zIndex = '1';
+    this.renderer = new Renderer({ container, width, height, zIndex: 2 });
+    this.backgroundRenderer = new BackgroundRenderer({ container, width, height, rotate: image?.rotate, zIndex: 1 });
   }
 
   private _initialAxis() {
@@ -213,17 +198,22 @@ export class Annotator {
     const data = this.getFlatData();
 
     if (data.length > 0) {
-      this.emit('error', '有标注数据时不可旋转');
+      this.emit('error', {
+        type: 'rotate',
+        message: `Can't rotate when there are annotations`,
+      });
 
       return;
     }
 
     if (!backgroundRenderer) {
-      throw new Error('backgroundRenderer is not initialized');
+      console.error('backgroundRenderer is not initialized');
+
+      return;
     }
 
     backgroundRenderer.clear();
-    backgroundRenderer.rotate(angle);
+    backgroundRenderer.rotate = angle;
   }
 
   public resize(
@@ -264,6 +254,52 @@ export class Annotator {
     backgroundRenderer.resize(newSize.width, newSize.height);
 
     this.render();
+  }
+
+  /**
+   * 原图比例1:1显示
+   */
+  public resetScale() {
+    if (!axis) {
+      throw new Error('axis is not initialized');
+    }
+
+    axis.restScale(1 / axis!.initialBackgroundScale);
+    axis.center();
+  }
+
+  /**
+   * 居中显示
+   */
+  public center() {
+    if (!axis) {
+      throw new Error('axis is not initialized');
+    }
+
+    axis.center();
+  }
+
+  /**
+   * 从外部设置偏移量
+   */
+  public setOffset(x: number | undefined, y: number | undefined) {
+    if (!axis) {
+      throw new Error('axis is not initialized');
+    }
+
+    axis.setOffset(x, y);
+  }
+
+  /**
+   * 适应容器显示
+   */
+  public fit() {
+    if (!axis) {
+      throw new Error('axis is not initialized');
+    }
+
+    axis.restScale(1);
+    axis.center();
   }
 
   public use(instance: AnnotationTool) {

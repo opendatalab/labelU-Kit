@@ -4,10 +4,11 @@ export interface RendererOptions {
   container: HTMLElement;
   width: number;
   height: number;
+  zIndex: number;
 }
 
 export class Renderer extends EventEmitter {
-  protected ratio: number = 1;
+  public ratio: number = 1;
 
   public options: RendererOptions;
 
@@ -28,8 +29,19 @@ export class Renderer extends EventEmitter {
     if (container) {
       container.appendChild(this.canvas);
 
-      this.canvas.width = (options.width || container.clientWidth) * this.ratio;
-      this.canvas.height = (options.height || container.clientHeight) * this.ratio;
+      const width = options.width || container.clientWidth;
+      const height = options.height || container.clientHeight;
+
+      this.canvas.style.position = 'absolute';
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
+      this.canvas.style.left = '0';
+      this.canvas.style.cursor = 'none';
+      this.canvas.style.top = '0';
+      this.canvas.style.zIndex = '' + options.zIndex;
+
+      this.canvas.width = width * this.ratio;
+      this.canvas.height = height * this.ratio;
 
       // 解决canvas绘制模糊问题
       this.ctx?.translate(0.5, 0.5);
