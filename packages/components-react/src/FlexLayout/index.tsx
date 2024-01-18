@@ -17,7 +17,8 @@ export interface BasicFlexBox extends React.DetailedHTMLProps<React.HTMLAttribut
 
 const common = css<BasicFlexBox>`
   ${({ shrink }) => {
-    if (!shrink) {
+    if (typeof shrink === 'undefined') {
+      // 默认不可收缩
       return 'shrink: 0;';
     }
 
