@@ -18,6 +18,10 @@ const ContentWrapper = styled.div`
   .ant-tabs-nav::before {
     display: none;
   }
+
+  .ant-btn {
+    border-radius: 3px;
+  }
 `;
 
 const StartWrapper = styled.div`

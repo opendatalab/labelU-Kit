@@ -179,12 +179,23 @@ const Content = styled.div`
   .ant-btn {
     border-radius: 3px;
   }
+
+  &.incomplete {
+    gap: 0;
+    p {
+      margin-bottom: 4rem;
+    }
+  }
 `;
 
 const GlobalStyle = createGlobalStyle`
   .labelu-image-demo-complete-modal {
     .ant-modal-content {
       background: linear-gradient(to bottom right, #EFE0FF 0%, #fff 50%, #E7F2FF 100%);
+    }
+
+    .ant-modal-confirm-paragraph {
+      max-width: 100%;
     }
   }
 `;
@@ -204,8 +215,9 @@ const CompleteContent = () => {
 
 const InCompleteContent = ({ onClose }: { onClose: () => void }) => {
   return (
-    <Content>
+    <Content className="incomplete">
       <h2>您尚未完成任务</h2>
+      <p>请您至少完成四项任务要求中的任意三项</p>
       <FlexLayout flex="row" gap="1rem">
         <Button size="large" onClick={onClose}>
           继续标注
