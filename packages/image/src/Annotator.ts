@@ -402,7 +402,7 @@ export class Annotator {
       width: _config.width,
       height: _config.height,
       container: _config.container,
-      rotate: _config.image.rotate,
+      rotate: _config?.image?.rotate ?? 0,
     });
   }
 
@@ -413,7 +413,7 @@ export class Annotator {
       tool.toggleOrderVisible(value);
     }
 
-    this._axis?.rerender();
+    this.render();
   }
 
   public set strokeWidth(value: number) {
@@ -425,7 +425,7 @@ export class Annotator {
       tool.refresh();
     });
 
-    this._axis?.rerender();
+    this.render();
   }
 
   public set strokeOpacity(value: number) {
@@ -435,7 +435,7 @@ export class Annotator {
     _tools.forEach((tool) => {
       tool.refresh();
     });
-    this._axis?.rerender();
+    this.render();
   }
 
   public set fillOpacity(value: number) {
@@ -445,7 +445,7 @@ export class Annotator {
     _tools.forEach((tool) => {
       tool.refresh();
     });
-    this._axis?.rerender();
+    this.render();
   }
 
   public getFlatData() {
@@ -529,7 +529,7 @@ export class Annotator {
 
     currentTool!.setLabel(value);
     this._axis!.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(value);
-    this._axis?.rerender();
+    this.render();
   }
 
   public get activeTool() {
