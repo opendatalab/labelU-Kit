@@ -1,7 +1,7 @@
 import { BulbOutlined } from '@ant-design/icons';
 import type { TabsProps } from 'antd';
 import { Button, Modal, Popover, Tabs } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 const ContentWrapper = styled.div`
@@ -180,36 +180,32 @@ const Content = ({ popover, onClose }: { popover?: boolean; onClose?: () => void
 
 export default function ImageDemoGuide({ visible }: { visible?: boolean }) {
   const [open, setOpen] = useState(false);
-  const modalRef = useRef<any>();
+  const [modalOpen, setModalOpen] = useState(false);
+  const buttonRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
-    if (visible) {
-      modalRef.current = Modal.info({
-        centered: true,
-        content: <Content onClose={() => modalRef.current.destroy()} />,
-        icon: null,
-        width: 600,
-        closable: true,
-        className: 'labelu-image-demo-guide-modal',
-        title: null,
-        footer: null,
+  useLayoutEffect(() => {
+    if (visible && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const mouseEvent = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        screenX: buttonRect.left,
+        screenY: buttonRect.top,
+        clientX: buttonRect.left,
+        clientY: buttonRect.top,
       });
+      buttonRef.current.dispatchEvent(mouseEvent);
     }
   }, [visible]);
 
   const handleOpenGuide = () => {
-    modalRef.current = Modal.info({
-      centered: true,
-      content: <Content onClose={() => modalRef.current.destroy()} />,
-      icon: null,
-      width: 600,
-      closable: true,
-      className: 'labelu-image-demo-guide-modal',
-      title: null,
-      footer: null,
-    });
-
+    setModalOpen(true);
     setOpen(false);
+  };
+
+  const handleCloseGuide = () => {
+    setModalOpen(false);
   };
 
   if (!visible) {
@@ -227,10 +223,28 @@ export default function ImageDemoGuide({ visible }: { visible?: boolean }) {
         arrow={false}
         onOpenChange={setOpen}
       >
-        <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<BulbOutlined />} onClick={handleOpenGuide}>
+        <Button
+          type="link"
+          style={{ color: 'rgba(0, 0, 0, 0.85)' }}
+          icon={<BulbOutlined />}
+          ref={buttonRef}
+          onClick={handleOpenGuide}
+        >
           任务描述
         </Button>
       </Popover>
+      <Modal
+        open={modalOpen}
+        footer={null}
+        title={null}
+        centered
+        width={600}
+        destroyOnClose
+        className="labelu-image-demo-guide-modal"
+        onCancel={handleCloseGuide}
+      >
+        <Content />
+      </Modal>
     </>
   );
 }

@@ -28,7 +28,6 @@ const config = {
           {
             key: '图片的种类是？',
             value: 'tag-label-1',
-            required: true,
             type: 'enum',
             options: [
               {
@@ -56,7 +55,6 @@ const config = {
           {
             key: '请描述图片中都有哪些物象？',
             value: 'text-label-1',
-            required: true,
             type: 'string',
             maxLength: 1000,
             stringType: 'text',
