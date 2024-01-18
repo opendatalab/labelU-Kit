@@ -1,3 +1,4 @@
+import { DEFAULT_LABEL_COLOR } from '../constant';
 import { axis } from '../singletons';
 import type { AxisPoint } from './Point.shape';
 import { Shape } from './Shape';
@@ -6,7 +7,7 @@ export interface RectStyle {
   /**
    * 边框颜色
    *
-   * @default #000
+   * @default #999
    */
   stroke?: string;
 
@@ -45,7 +46,7 @@ export interface RectParams {
  */
 export class Rect extends Shape<RectStyle> {
   static DEFAULT_STYLE: Required<RectStyle> = {
-    stroke: '#000',
+    stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: 2,
     fill: 'transparent',
     opacity: 1,

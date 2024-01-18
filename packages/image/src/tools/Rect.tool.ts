@@ -77,34 +77,23 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    * 点击画布事件处理
    *
    * @description
-   * 点击标注时：
-   * 1. 销毁被点击的标注的drawing（成品）
-   * 2. 进入pen的编辑模式
-   *  2.1. 创建新的drawing（成品），需要包含点、线
-   *  2.2. 创建选中包围盒
+   * 1. 归档上一次的草稿
+   * 2. 触发选中事件
+   * 3. 触发工具切换事件
+   * 4. 创建草稿
+   * 5. 销毁drawing的静态图形
+   * 6. 重新渲染
    */
   protected onSelect = (annotation: AnnotationRect) => (_e: MouseEvent) => {
-    Tool.emitSelect(this.convertAnnotationItem(annotation.data));
+    this.archiveDraft();
+    Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
     this?._creatingShape?.destroy();
     this._creatingShape = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this.archiveDraft();
     this._createDraft(annotation.data);
     // 2. 销毁成品
     this.removeFromDrawing(annotation.id);
-    // 重新渲染
-    axis!.rerender();
-  };
-
-  protected onUnSelect = (_e: MouseEvent) => {
-    if (this.draft) {
-      Tool.emitUnSelect(this.convertAnnotationItem(this.draft.data));
-    }
-
-    this.archiveDraft();
-    this?._creatingShape?.destroy();
-    this._creatingShape = null;
     // 重新渲染
     axis!.rerender();
   };
@@ -168,13 +157,17 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       style: this.style,
     });
 
-    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
+    this.draft.group.on(EInternalEvent.UnSelect, () => {
+      this.archiveDraft();
+      axis?.rerender();
+    });
   }
 
   protected archiveDraft() {
     const { draft } = this;
 
     if (draft) {
+      Tool.emitUnSelect(this.convertAnnotationItem(draft.data));
       this._addAnnotation(draft.data);
       this.recoverData();
       draft.destroy();
@@ -326,8 +319,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
-    super.render(ctx);
-
     if (this._creatingShape) {
       this._creatingShape.render(ctx);
     }

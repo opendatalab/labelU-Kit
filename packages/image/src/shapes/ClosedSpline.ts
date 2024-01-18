@@ -1,7 +1,10 @@
+import Color from 'color';
+
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import { axis } from '../singletons';
 import type { PolygonParams, PolygonStyle } from './Polygon.shape';
+import { DEFAULT_LABEL_COLOR } from '../constant';
 
 export interface ClosedSplineParams extends PolygonParams {
   controlPoints: AxisPoint[];
@@ -9,10 +12,10 @@ export interface ClosedSplineParams extends PolygonParams {
 
 export class ClosedSpline extends Shape<PolygonStyle> {
   static DEFAULT_STYLE: Required<PolygonStyle> = {
-    stroke: '#000',
+    stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: 2,
     opacity: 1,
-    fill: 'rgba(0, 0, 0, 0.5)',
+    fill: Color(DEFAULT_LABEL_COLOR).alpha(0.5).toString(),
   };
 
   private _controlPoints: AxisPoint[];

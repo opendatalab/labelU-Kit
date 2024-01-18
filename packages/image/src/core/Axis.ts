@@ -343,19 +343,25 @@ export class Axis {
    * Debug使用，渲染R-Tree
    */
   private _renderRBushTree() {
-    // const { ctx } = this._renderer!;
+    const { ctx } = this._renderer!;
 
-    // ctx!.save();
-    // ctx!.strokeStyle = '#666';
-    // ctx!.globalAlpha = 1;
-    // ctx!.lineDashOffset = 2;
-    // ctx!.setLineDash([2, 2]);
-    // ctx!.lineWidth = 1;
+    ctx!.save();
+    ctx!.strokeStyle = '#666';
+    ctx!.globalAlpha = 1;
+    ctx!.lineDashOffset = 2;
+    ctx!.setLineDash([2, 2]);
+    ctx!.lineWidth = 1;
 
     console.info('rbush size ==>>', rbush.all().length);
 
-    // ctx!.globalAlpha = 1;
-    // ctx!.restore();
+    rbush.all().forEach((item) => {
+      const { minX, minY, maxX, maxY } = item;
+
+      ctx!.strokeRect(minX, minY, maxX - minX, maxY - minY);
+    });
+
+    ctx!.globalAlpha = 1;
+    ctx!.restore();
   }
 
   /**
@@ -501,38 +507,23 @@ export class Axis {
     }
 
     const { canvas } = renderer!;
-    const safeWidth = safeZone.maxX - safeZone.minX;
-    // const safeHeight = safeZone.maxY - safeZone.minY;
 
     const domWidth = canvas.width / renderer!.ratio;
     const domHeight = canvas.height / renderer!.ratio;
+    const imageCenterX = safeZone.minX + (safeZone.maxX - safeZone.minX) / 2;
+    const imageCenterY = safeZone.minY + (safeZone.maxY - safeZone.minY) / 2;
+    const canvasCenterX = domWidth / 2;
+    const canvasCenterY = domHeight / 2;
 
-    // const currentWidth = domWidth * this._scale;
-    const currentHeight = domHeight * this._scale;
+    const offsetX = imageCenterX - canvasCenterX;
+    const offsetY = imageCenterY - canvasCenterY;
 
-    this._x = (domWidth - safeWidth) / 2;
-    this._y = (domHeight - currentHeight) / 2;
-
-    eventEmitter.emit(EInternalEvent.AxisChange);
-    this.rerender();
-  }
-
-  /**
-   * 设置偏移量
-   *
-   * @param x x轴偏移量
-   * @param y y轴偏移量
-   */
-  public setOffset(x: number | undefined, y: number | undefined) {
-    if (x) {
-      this._x = x;
-    }
-
-    if (y) {
-      this._y = y;
-    }
+    this._x = this._x - offsetX;
+    this._y = this._y - offsetY;
 
     eventEmitter.emit(EInternalEvent.AxisChange);
+    // bbox需要zoom来触发更新
+    eventEmitter.emit(EInternalEvent.Zoom);
     this.rerender();
   }
 

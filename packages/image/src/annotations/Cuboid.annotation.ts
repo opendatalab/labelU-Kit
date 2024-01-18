@@ -104,7 +104,14 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
   }
 
   private _handleMouseOver = () => {
-    const { group, style, labelColor, hoveredStyle } = this;
+    const { data, group, style, labelColor, hoveredStyle, _strokeColor } = this;
+
+    const { visible = true } = data;
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     if (hoveredStyle) {
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
@@ -112,10 +119,13 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
       group.each((shape) => {
         if (shape === this._realFront) {
           shape.updateStyle({
+            ...commonStyle,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).string(),
           });
-        } else {
+        } else if (!(shape instanceof ShapeText)) {
           shape.updateStyle({
+            ...commonStyle,
+            stroke: _strokeColor,
             strokeWidth: Annotation.strokeWidth + 2,
           });
         }
@@ -124,15 +134,25 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
   };
 
   private _handleMouseOut = () => {
-    const { group, labelColor } = this;
+    const { style, data, group, labelColor, _strokeColor } = this;
+
+    const { visible = true } = data;
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     group.each((shape) => {
       if (shape === this._realFront) {
         shape.updateStyle({
+          ...commonStyle,
           fill: Color(labelColor).alpha(Annotation.fillOpacity).string(),
         });
-      } else {
+      } else if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
+          ...commonStyle,
+          stroke: _strokeColor,
           strokeWidth: Annotation.strokeWidth,
         });
       }
@@ -144,15 +164,20 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
    */
   private _setupShapes() {
     const { data, group, style, labelColor, _strokeColor } = this;
-    const { front, back } = data;
+    const { front, back, visible = true } = data;
 
     const frontCoordinate = AnnotationCuboid.generateFrontCoordinate(data);
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     const realFront = new Polygon({
       id: uuid(),
       coordinate: frontCoordinate,
       style: {
-        ...style,
+        ...commonStyle,
         stroke: 'transparent',
         strokeWidth: 0,
         fill: Color(labelColor).alpha(Annotation.fillOpacity).string(),
@@ -168,34 +193,34 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
       new Polygon({
         id: uuid(),
         coordinate: [front.tl, front.tr, front.br, front.bl],
-        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
       // 后面的矩形（非真实的前面）
       new Polygon({
         id: uuid(),
         coordinate: [back.tl, back.tr, back.br, back.bl],
-        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
       // 平行四边形
       new Polygon({
         id: uuid(),
         coordinate: [front.tl, front.tr, back.tr, back.tl],
-        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
+        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
         id: uuid(),
         coordinate: [front.tr, front.br, back.br, back.tr],
-        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
+        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
         id: uuid(),
         coordinate: [front.br, front.bl, back.bl, back.br],
-        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
+        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
         id: uuid(),
         coordinate: [front.bl, front.tl, back.tl, back.bl],
-        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
+        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
     );
 
@@ -211,6 +236,7 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
         },
         text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
+          opacity: visible ? 1 : 0,
           fill: labelColor,
         },
       }),

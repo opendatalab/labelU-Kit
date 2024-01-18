@@ -48,6 +48,12 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
   private _setupShapes() {
     const { data, group, style, labelColor, _strokeColor } = this;
 
+    const { visible = true } = data;
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
+
     group.add(
       new Rect({
         id: data.id,
@@ -57,7 +63,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
         },
         width: data.width,
         height: data.height,
-        style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
     );
 
@@ -72,6 +78,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
         },
         text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
+          opacity: visible ? 1 : 0,
           fill: labelColor,
         },
       }),
@@ -79,7 +86,13 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
   }
 
   private _handleMouseOver = () => {
-    const { group, style, labelColor, hoveredStyle, _strokeColor } = this;
+    const { data, group, style, labelColor, hoveredStyle, _strokeColor } = this;
+
+    const { visible = true } = data;
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     if (hoveredStyle) {
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
@@ -87,6 +100,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
       group.each((shape) => {
         if (!(shape instanceof ShapeText)) {
           shape.updateStyle({
+            ...commonStyle,
             stroke: _strokeColor,
             strokeWidth: Annotation.strokeWidth + 2,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
@@ -97,12 +111,18 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
   };
 
   private _handleMouseOut = () => {
-    const { group, style, _strokeColor } = this;
+    const { data, style, group, _strokeColor } = this;
+
+    const { visible = true } = data;
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     group.each((shape) => {
       if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
-          ...style,
+          ...commonStyle,
           stroke: _strokeColor,
           strokeWidth: Annotation.strokeWidth,
         });

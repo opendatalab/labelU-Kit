@@ -53,7 +53,7 @@ export class Draft<
     this.hoveredStyle = hoveredStyle;
     this.showOrder = showOrder;
 
-    this.group = new Group(id, data.order);
+    this.group = new Group(id, data.order, true);
 
     // 应该让草稿内的图形对象先于草稿对象监听鼠标事件
     // TODO：模仿DOM的事件设计冒泡机制，处理重叠的图形鼠标事件
@@ -231,9 +231,7 @@ export class Draft<
 
   public render(ctx: CanvasRenderingContext2D) {
     // 选中的标注需要在最上层
-    Promise.resolve().then(() => {
-      this.group.render(ctx);
-    });
+    this.group.render(ctx);
   }
 
   public clearHandlers() {
@@ -254,6 +252,6 @@ export class Draft<
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
-    eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+    eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
   }
 }

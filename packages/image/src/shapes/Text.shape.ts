@@ -1,5 +1,6 @@
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
+import { DEFAULT_LABEL_COLOR } from '../constant';
 
 export interface TextStyle {
   /**
@@ -54,7 +55,7 @@ export class ShapeText extends Shape<TextStyle> {
     fontFamily: 'Arial',
     stroke: 'transparent',
     strokeWidth: 0,
-    fill: '#000',
+    fill: DEFAULT_LABEL_COLOR,
     opacity: 1,
   };
 

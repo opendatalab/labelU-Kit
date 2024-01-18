@@ -155,6 +155,7 @@ export class Monitor {
     const { _hoveredGroup, _hoveredShape } = this;
     const rbushItems = rbush.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
     const orderIndexedGroup: GroupInAnnotation[] = [];
+    let topGroup: GroupInAnnotation | null = null;
 
     for (const rbushItem of rbushItems) {
       if (rbushItem._group) {
@@ -163,13 +164,18 @@ export class Monitor {
           y: e.offsetY,
         });
 
-        if (isUnderCursor) {
+        // 隐藏的标注不触发事件
+        if (isUnderCursor && rbushItem._group.shapes[0].style.opacity !== 0) {
           orderIndexedGroup[rbushItem._group.order] = rbushItem._group;
+
+          if (rbushItem._group.isTop) {
+            topGroup = rbushItem._group;
+          }
         }
       }
     }
     // 最后一个表示order最大的group
-    const lastGroup = orderIndexedGroup[orderIndexedGroup.length - 1];
+    const lastGroup = topGroup || orderIndexedGroup[orderIndexedGroup.length - 1];
 
     // 向group发送鼠标悬浮事件
     if (lastGroup) {

@@ -95,31 +95,18 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
    * 点击画布事件处理
    */
   protected onSelect = (annotation: AnnotationPolygon) => (_e: MouseEvent) => {
-    Tool.emitSelect(this.convertAnnotationItem(annotation.data));
+    this.archiveDraft();
+
+    Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
 
     this?._creatingShapes?.destroy();
     this._creatingShapes = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this.archiveDraft();
     this._createDraft(annotation.data);
     // 2. 销毁成品
     this.removeFromDrawing(annotation.id);
 
-    // 重新渲染
-    axis!.rerender();
-  };
-
-  protected onUnSelect = (_e: MouseEvent) => {
-    if (this.draft) {
-      Tool.emitUnSelect(this.convertAnnotationItem(this.draft.data));
-    }
-
-    this.archiveDraft();
-    this?._creatingShapes?.destroy();
-    this._creatingShapes = null;
-    this._creatingCurves?.destroy();
-    this._creatingCurves = null;
     // 重新渲染
     axis!.rerender();
   };
@@ -183,13 +170,17 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
             style: this.style,
           });
 
-    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
+    this.draft.group.on(EInternalEvent.UnSelect, () => {
+      this.archiveDraft();
+      axis?.rerender();
+    });
   }
 
   protected archiveDraft() {
     const { draft } = this;
 
     if (draft) {
+      Tool.emitUnSelect(this.convertAnnotationItem(draft.data));
       this._addAnnotation(draft.data);
       this.recoverData();
       draft.destroy();
@@ -734,8 +725,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
-    super.render(ctx);
-
     if (this._creatingCurves) {
       this._creatingCurves.render(ctx);
     }

@@ -1,6 +1,7 @@
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import { getDistanceToLine } from './math.util';
+import { DEFAULT_LABEL_COLOR } from '../constant';
 
 export interface LineStyle {
   stroke?: string;
@@ -30,7 +31,7 @@ export class Line extends Shape<LineStyle> {
   static DISTANCE_THRESHOLD = 2 as const;
 
   static DEFAULT_STYLE: Required<LineStyle> = {
-    stroke: '#000',
+    stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: 2,
     opacity: 1,
   };

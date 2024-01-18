@@ -62,7 +62,12 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   static labelStatic: LabelBase;
 
   private _setupShapes() {
-    const { data, group, style, labelColor, _strokeColor } = this;
+    const { data, group, labelColor, _strokeColor, style } = this;
+    const { visible = true } = data;
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     if (data.type == 'line') {
       group.add(
@@ -70,7 +75,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
           id: data.id,
           coordinate: cloneDeep(data.points),
           style: {
-            ...style,
+            ...commonStyle,
             stroke: _strokeColor,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
             strokeWidth: Annotation.strokeWidth,
@@ -84,7 +89,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
           coordinate: cloneDeep(data.points),
           controlPoints: data.controlPoints!,
           style: {
-            ...style,
+            ...commonStyle,
             stroke: _strokeColor,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
             strokeWidth: Annotation.strokeWidth,
@@ -103,6 +108,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
         coordinate: data.points[0],
         text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
+          opacity: visible ? 1 : 0,
           fill: labelColor,
         },
       }),
@@ -110,7 +116,13 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   }
 
   private _handleMouseOver = () => {
-    const { group, style, labelColor, hoveredStyle, _strokeColor } = this;
+    const { data, group, style, labelColor, hoveredStyle, _strokeColor } = this;
+
+    const { visible = true } = data;
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     if (hoveredStyle) {
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
@@ -118,6 +130,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
       group.each((shape) => {
         if (!(shape instanceof ShapeText)) {
           shape.updateStyle({
+            ...commonStyle,
             stroke: _strokeColor,
             strokeWidth: Annotation.strokeWidth + 2,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
@@ -128,11 +141,18 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   };
 
   private _handleMouseOut = () => {
-    const { group, labelColor, _strokeColor } = this;
+    const { data, style, group, labelColor, _strokeColor } = this;
+
+    const { visible = true } = data;
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     group.each((shape) => {
       if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
+          ...commonStyle,
           stroke: _strokeColor,
           fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
           strokeWidth: Annotation.strokeWidth,

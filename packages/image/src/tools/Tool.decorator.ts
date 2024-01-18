@@ -132,6 +132,27 @@ export function ToolWrapper<
       this.refresh();
     }
 
+    /**
+     * 切换标注的可见性
+     */
+    public toggleAnnotationsVisibility(ids: string[], visible: boolean): void {
+      this.drawing?.forEach((item) => {
+        if (ids.includes(item.id)) {
+          item.data.visible = visible;
+          item.group.updateStyle({
+            opacity: visible ? 1 : 0,
+          } as any);
+        }
+      });
+
+      if (this.draft && ids.includes(this.draft.id)) {
+        this.draft.data.visible = visible;
+        this.draft.group.updateStyle({
+          opacity: visible ? 1 : 0,
+        } as any);
+      }
+    }
+
     public refresh() {
       this.clearDrawing();
       this.setupShapes();

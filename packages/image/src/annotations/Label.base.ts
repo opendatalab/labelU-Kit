@@ -1,14 +1,16 @@
 import type { AttributeOption, ILabel } from '@labelu/interface';
 
+import { DEFAULT_LABEL_COLOR, DEFAULT_LABEL_TEXT, DEFAULT_LABEL_VALUE } from '../constant';
+
 /**
  * Label 基类
  */
 export class LabelBase {
-  static DEFAULT_COLOR = '#000';
+  static DEFAULT_COLOR = DEFAULT_LABEL_COLOR;
 
-  static DEFAULT_LABEL_TEXT = '无标签';
+  static DEFAULT_LABEL_TEXT = DEFAULT_LABEL_TEXT;
 
-  static DEFAULT_LABEL_VALUE = 'noneAttribute';
+  static DEFAULT_LABEL_VALUE = DEFAULT_LABEL_VALUE;
 
   public labelMapping: Map<string, ILabel> = new Map();
 

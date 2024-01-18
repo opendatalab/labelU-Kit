@@ -41,6 +41,13 @@ export interface BasicImageAnnotation {
    */
   valid?: boolean;
 
+  /**
+   * 是否可见
+   *
+   * @default true
+   */
+  visible?: boolean;
+
   /** 标签分类 */
   label?: string;
 

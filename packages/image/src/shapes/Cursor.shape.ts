@@ -1,3 +1,5 @@
+import { DEFAULT_LABEL_COLOR } from '../constant';
+
 export interface CursorStyle {
   /** 线条颜色 */
   stroke?: string;
@@ -23,7 +25,7 @@ const dpr = window.devicePixelRatio || 1;
 
 export class Cursor {
   public style: Required<CursorStyle> = {
-    stroke: '#000',
+    stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: dpr,
     fill: '#fff',
   };

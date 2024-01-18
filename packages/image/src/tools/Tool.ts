@@ -153,6 +153,10 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('setAttributes is not implemented!');
   }
 
+  public toggleAnnotationsVisibility(_ids: string[], _visible: boolean): void {
+    console.warn('toggleAnnotationsVisibility is not implemented!');
+  }
+
   public load(_data: Data[]) {
     // do nothing
     console.warn('load is not implemented!');
@@ -197,12 +201,8 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this._data.push(data);
   }
 
-  public render(ctx: CanvasRenderingContext2D) {
-    const { draft } = this;
-
-    if (draft) {
-      draft.render(ctx);
-    }
+  public render(_ctx: CanvasRenderingContext2D) {
+    // doNothing
   }
 
   public activate(label?: string) {
@@ -279,8 +279,8 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     eventEmitter.emit('add', data, e);
   }
 
-  static emitSelect<T>(data: T) {
-    eventEmitter.emit('select', data);
+  static emitSelect<T>(data: T, toolName: ToolName) {
+    eventEmitter.emit('select', data, toolName);
   }
 
   static emitUnSelect<T>(data: T) {

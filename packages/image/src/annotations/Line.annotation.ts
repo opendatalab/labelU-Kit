@@ -87,7 +87,14 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
   private _setupShapes() {
     const { data, group, style, labelColor, _strokeColor } = this;
 
-    if (data.type === 'line') {
+    const { type, visible = true } = data;
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
+
+    if (type === 'line') {
       for (let i = 1; i < data.points.length; i++) {
         const startPoint = data.points[i - 1];
         const endPoint = data.points[i];
@@ -95,12 +102,12 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
         const line = new Line({
           id: data.points[i - 1].id,
           coordinate: [startPoint, endPoint],
-          style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+          style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
         });
 
         group.add(line);
       }
-    } else if (data.type === 'spline') {
+    } else if (type === 'spline') {
       // 将控制点分组
       const controlPoints = AnnotationLine.chunk(data.controlPoints!, 2);
 
@@ -113,7 +120,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
           id: data.points[i - 1].id,
           coordinate: [startPoint, endPoint],
           controlPoints: [{ ...startControl }, { ...endControl }],
-          style: { ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+          style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
         });
 
         group.add(curve);
@@ -130,6 +137,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
         coordinate: data.points[0],
         text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
+          opacity: visible ? 1 : 0,
           fill: labelColor,
         },
       }),
@@ -137,22 +145,48 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
   }
 
   private _handleMouseOver = () => {
-    const { group, style, hoveredStyle } = this;
+    const { data, group, style, hoveredStyle, _strokeColor } = this;
+
+    const { visible = true } = data;
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
 
     if (hoveredStyle) {
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
     } else {
-      group.updateStyle({
-        strokeWidth: Annotation.strokeWidth + 2,
+      group.each((shape) => {
+        if (!(shape instanceof ShapeText)) {
+          shape.updateStyle({
+            ...commonStyle,
+            stroke: _strokeColor,
+            strokeWidth: Annotation.strokeWidth + 2,
+          });
+        }
       });
     }
   };
 
   private _handleMouseOut = () => {
-    const { group } = this;
+    const { data, style, group, _strokeColor } = this;
 
-    group.updateStyle({
-      strokeWidth: Annotation.strokeWidth,
+    const { visible = true } = data;
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
+
+    group.each((shape) => {
+      if (!(shape instanceof ShapeText)) {
+        shape.updateStyle({
+          ...commonStyle,
+          stroke: _strokeColor,
+          strokeWidth: Annotation.strokeWidth,
+        });
+      }
     });
   };
 

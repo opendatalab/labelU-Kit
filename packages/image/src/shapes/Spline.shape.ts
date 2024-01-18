@@ -2,6 +2,7 @@ import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import type { LineParams, LineStyle } from './Line.shape';
 import { axis } from '../singletons';
+import { DEFAULT_LABEL_COLOR } from '../constant';
 
 export interface CurveParams extends LineParams {
   controlPoints: [AxisPoint, AxisPoint];
@@ -9,7 +10,7 @@ export interface CurveParams extends LineParams {
 
 export class Spline extends Shape<LineStyle> {
   static DEFAULT_STYLE: Required<LineStyle> = {
-    stroke: '#000',
+    stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: 2,
     opacity: 1,
   };

@@ -280,17 +280,6 @@ export class Annotator {
   }
 
   /**
-   * 从外部设置偏移量
-   */
-  public setOffset(x: number | undefined, y: number | undefined) {
-    if (!axis) {
-      throw new Error('axis is not initialized');
-    }
-
-    axis.setOffset(x, y);
-  }
-
-  /**
    * 适应容器显示
    */
   public fit() {
@@ -379,12 +368,19 @@ export class Annotator {
     backgroundRenderer!.render();
 
     const annotations: any[] = [];
+
+    // TODO: 更新any
+    let draft: any;
     // 渲染工具
     _tools.forEach((tool) => {
       tool.render(renderer!.ctx!);
 
       if (tool.drawing) {
         annotations.push(...Array.from(tool.drawing.values() as any));
+      }
+
+      if (tool.draft) {
+        draft = tool.draft;
       }
     });
 
@@ -394,9 +390,11 @@ export class Annotator {
     annotations.forEach((annotation) => {
       annotation.render(renderer!.ctx!);
     });
+    // 草稿在最上层
+    draft?.render(renderer!.ctx!);
   };
 
-  public loadImage(url: string, options?: Omit<ImageOption, 'container' | 'width' | 'height' | 'url'>) {
+  public loadImage(url: string, options?: Omit<ImageOption, 'container' | 'width' | 'height' | 'url' | 'zIndex'>) {
     const { _config } = this;
 
     return this.backgroundRenderer!.loadImage(url, {
@@ -460,11 +458,22 @@ export class Annotator {
     return result;
   }
 
-  public getDataByTool() {
+  /**
+   * 获取标注数据
+   *
+   * @param iterator 遍历函数
+   */
+  public getDataByTool(iterator?: (data: AnnotationData, tool: ToolName, index: number) => any) {
     const result: Record<string, any> = {};
 
     Array.from(this._tools.values()).forEach((tool) => {
-      result[tool.name] = tool.data;
+      if (typeof iterator === 'function') {
+        result[tool.name] = tool.data.map((item, index) => {
+          return iterator(item, tool.name, index);
+        });
+      } else {
+        result[tool.name] = tool.data;
+      }
     });
 
     return result;
@@ -597,6 +606,19 @@ export class Annotator {
 
     this.monitor.selectedAnnotationId = id;
     this.activeTool?.drawing?.get(id)?.group.emit(EInternalEvent.Select, new MouseEvent(''));
+    axis?.rerender();
+  }
+
+  public toggleAnnotationsVisibility(toolName: ToolName, annotationIds: string[], visible: boolean) {
+    const tool = this._tools.get(toolName);
+
+    if (!tool) {
+      console.warn(`Tool ${toolName} is not used!`);
+      return;
+    }
+
+    tool.toggleAnnotationsVisibility(annotationIds, visible);
+    axis?.rerender();
   }
 
   /**

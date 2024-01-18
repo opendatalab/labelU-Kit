@@ -100,7 +100,10 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       showOrder: this.showOrder,
       style,
     });
-    this.draft.group.on(EInternalEvent.UnSelect, this.onUnSelect);
+    this.draft.group.on(EInternalEvent.UnSelect, () => {
+      this.archiveDraft();
+      axis?.rerender();
+    });
     monitor!.setSelectedAnnotationId(this.draft.id);
   }
 
@@ -134,29 +137,19 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   };
 
   protected onSelect = (annotation: AnnotationPoint) => (_e: MouseEvent) => {
-    Tool.emitSelect({
-      ...annotation.data,
-      ...axis!.convertCanvasCoordinate(annotation.data),
-    });
+    this.archiveDraft();
+    Tool.emitSelect(
+      {
+        ...annotation.data,
+        ...axis!.convertCanvasCoordinate(annotation.data),
+      },
+      this.name,
+    );
 
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
-    this.archiveDraft();
     this._createDraft(annotation.data);
     this.removeFromDrawing(annotation.id);
-    // 重新渲染
-    axis!.rerender();
-  };
-
-  protected onUnSelect = (_e: MouseEvent) => {
-    if (this.draft) {
-      Tool.emitUnSelect({
-        ...this.draft.data,
-        ...axis!.convertCanvasCoordinate(this.draft.data),
-      });
-    }
-
-    this.archiveDraft();
     // 重新渲染
     axis!.rerender();
   };
@@ -165,6 +158,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     const { draft } = this;
 
     if (draft) {
+      Tool.emitUnSelect(this.convertAnnotationItem(draft.data));
       this._addAnnotation(draft.data);
       this.recoverData();
       draft.destroy();

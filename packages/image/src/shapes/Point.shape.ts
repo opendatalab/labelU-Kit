@@ -1,3 +1,4 @@
+import { DEFAULT_LABEL_COLOR } from '../constant';
 import { Shape } from './Shape';
 
 export interface AxisPoint {
@@ -9,7 +10,7 @@ export interface PointStyle {
   /**
    * 点边框颜色
    *
-   * @default #000
+   * @default #999
    */
   stroke?: string;
 
@@ -23,7 +24,7 @@ export interface PointStyle {
   /**
    * 点填充颜色
    *
-   * @default #000
+   * @default #999
    */
   fill?: string;
 
@@ -75,7 +76,7 @@ export class Point extends Shape<PointStyle> {
   static DEFAULT_STYLE: Required<PointStyle> = {
     stroke: 'transparent',
     strokeWidth: 0,
-    fill: '#000',
+    fill: DEFAULT_LABEL_COLOR,
     radius: 3,
     opacity: 1,
     startAngle: 0,

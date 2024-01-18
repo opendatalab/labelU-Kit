@@ -34,10 +34,16 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _event = new EventEmitter();
 
-  constructor(id: string, order: number) {
+  /**
+   * 当鼠标经过时，draft应该置顶
+   */
+  public isTop: boolean = false;
+
+  constructor(id: string, order: number, isTop?: boolean) {
     this.id = id;
     this.order = order;
     this._bindEvents();
+    this.isTop = isTop || false;
   }
 
   private _bindEvents() {
@@ -117,9 +123,9 @@ export class Group<T extends Shape<Style>, Style> {
       const item = shapes[i];
 
       // 文本不更新样式
-      if (item instanceof ShapeText) {
-        continue;
-      }
+      // if (item instanceof ShapeText) {
+      //   continue;
+      // }
 
       item.updateStyle(style);
     }

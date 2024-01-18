@@ -43,6 +43,13 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
   private _setupShapes() {
     const { data, style, group, labelColor, _strokeColor } = this;
 
+    const { visible = true } = data;
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
+
     group.add(
       new Point({
         id: data.id,
@@ -50,7 +57,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
           x: data.x,
           y: data.y,
         },
-        style: { ...style, fill: labelColor, strokeWidth: Annotation.strokeWidth, stroke: _strokeColor },
+        style: { ...commonStyle, fill: labelColor, strokeWidth: Annotation.strokeWidth, stroke: _strokeColor },
       }),
     );
 
@@ -65,6 +72,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
         },
         text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {
+          opacity: visible ? 1 : 0,
           fill: labelColor,
         },
       }),
@@ -77,9 +85,13 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
     if (hoveredStyle) {
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
     } else {
-      group.updateStyle({
-        stroke: '#fff',
-        strokeWidth: Annotation.strokeWidth + 2,
+      group.each((shape) => {
+        if (!(shape instanceof ShapeText)) {
+          shape.updateStyle({
+            stroke: '#fff',
+            strokeWidth: Annotation.strokeWidth + 2,
+          });
+        }
       });
     }
   };
@@ -87,10 +99,14 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
   private _handleMouseOut = () => {
     const { group, labelColor, _strokeColor } = this;
 
-    group.updateStyle({
-      fill: labelColor,
-      stroke: _strokeColor,
-      strokeWidth: Annotation.strokeWidth,
+    group.each((shape) => {
+      if (!(shape instanceof ShapeText)) {
+        shape.updateStyle({
+          fill: labelColor,
+          stroke: _strokeColor,
+          strokeWidth: Annotation.strokeWidth,
+        });
+      }
     });
   };
 

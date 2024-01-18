@@ -294,7 +294,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
       y: controlFrontTl!.dynamicCoordinate[0].y,
       offset: {
         x: -36,
-        y: 0,
+        y: 10,
       },
       element: elem,
       bindShape: controlFrontTl!,

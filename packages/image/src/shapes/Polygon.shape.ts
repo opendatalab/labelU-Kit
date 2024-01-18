@@ -2,6 +2,7 @@ import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import { isPointInPolygon } from './math.util';
 import type { LineStyle } from './Line.shape';
+import { DEFAULT_LABEL_COLOR } from '../constant';
 
 export interface PolygonStyle extends LineStyle {
   fill?: string;
@@ -25,7 +26,7 @@ export class Polygon extends Shape<PolygonStyle> {
   static DISTANCE_THRESHOLD = 10 as const;
 
   static DEFAULT_STYLE: Required<PolygonStyle> = {
-    stroke: '#000',
+    stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: 2,
     opacity: 1,
     fill: 'transparent',
