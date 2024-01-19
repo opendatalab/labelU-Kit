@@ -243,7 +243,7 @@ export default function ImageDemoGuide({ visible }: { visible?: boolean }) {
         className="labelu-image-demo-guide-modal"
         onCancel={handleCloseGuide}
       >
-        <Content />
+        <Content onClose={handleCloseGuide} />
       </Modal>
     </>
   );
