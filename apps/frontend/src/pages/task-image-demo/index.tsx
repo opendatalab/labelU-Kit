@@ -217,14 +217,12 @@ const InCompleteContent = ({ onClose }: { onClose: () => void }) => {
       <h2>您尚未完成任务</h2>
       <p>请您至少完成四项任务要求中的任意三项</p>
       <FlexLayout flex="row" gap="1rem">
-        <Button size="large" onClick={onClose}>
+        <a href="/tasks">
+          <Button size="large">返回主页</Button>
+        </a>
+        <Button type="primary" size="large" onClick={onClose}>
           继续标注
         </Button>
-        <a href="/tasks">
-          <Button size="large" type="primary">
-            返回主页
-          </Button>
-        </a>
       </FlexLayout>
     </Content>
   );
