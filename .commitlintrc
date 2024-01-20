@@ -35,7 +35,7 @@
       "always",
       [
         "workspace",
-        "docs",
+        "website",
         "frontend",
         "components",
         "image",
@@ -47,7 +47,8 @@
         "audio-react",
         "interface",
         "video-annotator-react",
-        "audio-annotator-react"
+        "audio-annotator-react",
+        "image-annotator-react"
       ]
     ],
     "scope-empty": [
