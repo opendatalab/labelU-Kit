@@ -20,6 +20,7 @@ export function getUAA(url: string): string {
 
 /** 前往sso登录页 */
 export function goLogin() {
+  debugger;
   window.location.href = getUAA(sso?.login || '');
 }
 

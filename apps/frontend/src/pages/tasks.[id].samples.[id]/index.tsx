@@ -1,14 +1,13 @@
-import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
+import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
 import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
-import { Empty, Spin } from 'antd';
-import AnnotationOperation from '@labelu/components';
-import type { AnnotatorProps } from '@labelu/video-annotator-react';
+import { Empty, Spin, message } from 'antd';
 import { Annotator } from '@labelu/video-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
-import '@labelu/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
+import type { AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
+import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
 
@@ -19,6 +18,8 @@ import { getSamples } from '@/api/services/samples';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import { convertVideoSample } from '@/utils/convertVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
+import { convertImageConfig } from '@/utils/convertImageConfig';
+import { convertImageSample } from '@/utils/convertImageSample';
 
 import commonController from '../../utils/common';
 import SlideLoader, { slideRef } from './components/slideLoader';
@@ -26,7 +27,7 @@ import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
 
-export const annotationRef = createRef();
+export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
 export const videoAnnotationRef = createRef();
 export const audioAnnotationRef = createRef();
 
@@ -40,6 +41,39 @@ const AnnotationPage = () => {
   const isMutating = useIsMutating();
 
   const sampleId = routeParams.sampleId;
+
+  useEffect(() => {
+    const engine = imageAnnotationRef.current?.getEngine();
+
+    // TODO： labelu/image中的错误定义
+    const handleError = (err: any) => {
+      if (err.type === 'rotate') {
+        message.error('有标注数据时不可旋转图片');
+      }
+
+      if (err.type === 'minPointAmount') {
+        message.error('最少点数不满足');
+      }
+
+      if (err.type === 'maxPointAmount') {
+        message.error('点个数超过配置个数');
+      }
+
+      if (err.type === 'minWidth') {
+        message.error('拉框宽度不满足要求');
+      }
+
+      if (err.type === 'minHeight') {
+        message.error('拉框高度不满足要求');
+      }
+    };
+
+    engine?.on('error', handleError);
+
+    return () => {
+      engine?.off('error', handleError);
+    };
+  });
 
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -101,12 +135,12 @@ const AnnotationPage = () => {
       return convertVideoConfig(taskConfig);
     }
 
-    return {} as AnnotatorProps['config'];
+    return convertImageConfig(taskConfig);
   }, [task?.media_type, taskConfig]);
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return transformed[0];
+      return convertImageSample(sample?.data?.data, routeParams.sampleId, editorConfig);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
       if (!transformed?.[0]) {
         return null;
@@ -138,15 +172,13 @@ const AnnotationPage = () => {
 
   if (task?.media_type === MediaType.IMAGE) {
     content = (
-      <AnnotationOperation
-        leftSiderContent={leftSiderContent}
-        topActionContent={topActionContent}
-        loading={loading}
-        ref={annotationRef}
-        isPreview={false}
-        sample={editingSample}
-        config={configFromParent || taskConfig}
-        isShowOrder={false}
+      <ImageAnnotator
+        renderSidebar={renderSidebar}
+        toolbarRight={topActionContent}
+        ref={imageAnnotationRef}
+        offsetTop={156}
+        editingSample={editingSample}
+        config={configFromParent || editorConfig}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {

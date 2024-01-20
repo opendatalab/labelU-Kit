@@ -4,11 +4,11 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelu/annotation": "1.0.1",
     "@labelu/audio-annotator-react": "1.2.1",
-    "@labelu/components": "1.0.1",
     "@labelu/components-react": "1.2.1",
+    "@labelu/image": "workspace:*",
     "@labelu/formatter": "1.0.2",
+    "@labelu/image-annotator-react": "workspace:*",
     "@labelu/interface": "1.2.1",
     "@labelu/video-annotator-react": "1.2.1",
     "@labelu/video-react": "1.2.1",
@@ -109,6 +109,6 @@
     "vite-plugin-imp": "^2.3.1",
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-svgr": "^2.4.0",
-    "vite-plugin-ts-mono-alias": "^1.1.7"
+    "vite-plugin-ts-mono-alias": "^1.1.8"
   }
 }
