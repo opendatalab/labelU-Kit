@@ -17,6 +17,7 @@ import type {
   MediaAnnotationWithTextAndTag,
 } from '@labelu/interface';
 import type { MediaAnnotatorRef } from '@labelu/components-react';
+import { useRedoUndo } from '@labelu/components-react';
 import '@labelu/components-react/dist/style.css';
 
 import type { AnnotatorContextType, AudioAnnotatorConfig, MediaSample } from './context';
@@ -162,20 +163,21 @@ function ForwardAnnotator(
   );
 
   // ================== sample state ==================
-  const [currentSample, setCurrentSample] = useState<MediaSample | undefined>(editingSample);
-  // ================== redo undo ==================
-  const pastRef = useRef<MediaSample[]>([]);
-  const futureRef = useRef<MediaSample[]>([]);
+  const [currentSample, setCurrentSample, redo, undo, pastRef, futureRef, reset] = useRedoUndo<MediaSample>(
+    editingSample!,
+    {
+      maxHistory: maxHistoryCount,
+    },
+  );
 
   // 重置历史记录
   useEffect(() => {
-    pastRef.current = [];
-    futureRef.current = [];
-  }, [editingSample]);
+    reset();
+  }, [reset, editingSample]);
 
   const updateCurrentSample = useCallback(
     (_newSample: React.SetStateAction<MediaSample | undefined>) => {
-      setCurrentSample((pre) => {
+      setCurrentSample(((pre) => {
         const newSample = typeof _newSample === 'function' ? _newSample(pre) : _newSample;
 
         if (pre) {
@@ -183,50 +185,23 @@ function ForwardAnnotator(
         }
 
         return newSample;
-      });
+      }) as React.SetStateAction<MediaSample>);
 
       futureRef.current = [];
     },
-    [maxHistoryCount],
+    [futureRef, maxHistoryCount, pastRef, setCurrentSample],
   );
-
-  const undo = useCallback(() => {
-    if (pastRef.current.length === 0) {
-      return;
-    }
-
-    const newPresent = pastRef.current[pastRef.current.length - 1];
-    const newPast = pastRef.current.slice(0, pastRef.current.length - 1);
-
-    pastRef.current = newPast;
-    setCurrentSample(newPresent);
-    setSelectedAnnotation(undefined);
-    if (currentSample) {
-      futureRef.current = [currentSample, ...futureRef.current];
-    }
-  }, [currentSample]);
-
-  const redo = useCallback(() => {
-    if (futureRef.current.length === 0) {
-      return;
-    }
-
-    const newPresent = futureRef.current[0];
-    const newFuture = futureRef.current.slice(1);
-    pastRef.current = [...pastRef.current!, currentSample!];
-
-    setCurrentSample(newPresent);
-    futureRef.current = newFuture;
-  }, [currentSample]);
 
   // ================== sample ==================
 
-  const handleSelectSample = useCallback((sample: MediaSample) => {
-    setCurrentSample(sample);
-    setSelectedAnnotation(undefined);
-    pastRef.current = [];
-    futureRef.current = [];
-  }, []);
+  const handleSelectSample = useCallback(
+    (sample: MediaSample) => {
+      setCurrentSample(sample);
+      setSelectedAnnotation(undefined);
+      reset();
+    },
+    [reset, setCurrentSample],
+  );
 
   useEffect(() => {
     updateCurrentSample(editingSample || samples?.[0]);
@@ -586,7 +561,6 @@ function ForwardAnnotator(
       pause: () => playerRef.current?.pause(),
     };
   }, [
-    containerRef,
     currentTool,
     samples,
     config,
@@ -610,6 +584,8 @@ function ForwardAnnotator(
     onLabelChange,
     undo,
     redo,
+    pastRef,
+    futureRef,
   ]);
 
   const attributeSide = useMemo(() => {

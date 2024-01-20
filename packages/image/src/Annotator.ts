@@ -1,3 +1,5 @@
+import Color from 'color';
+
 import { Renderer } from './core/Renderer';
 import type { CuboidToolOptions, PointToolOptions, RectToolOptions } from './tools';
 import { CuboidTool, PointTool, RectTool } from './tools';
@@ -15,6 +17,7 @@ import { createMonitor, eventEmitter, rbush } from './singletons';
 import type { PolygonToolOptions } from './tools/Polygon.tool';
 import { PolygonTool } from './tools/Polygon.tool';
 import { Annotation, AnnotationMapping } from './annotations';
+import { Line, ShapeText } from './shapes';
 
 export interface AnnotatorOptions {
   container: HTMLDivElement;
@@ -422,7 +425,25 @@ export class Annotator {
     const { _tools } = this;
 
     _tools.forEach((tool) => {
-      tool.refresh();
+      tool.drawing?.forEach((annotation) => {
+        annotation.group.each((shape) => {
+          if (!(shape instanceof ShapeText)) {
+            shape.updateStyle({
+              strokeWidth: value,
+            });
+          }
+        });
+      });
+
+      if (tool.draft) {
+        tool.draft.group.each((shape) => {
+          if (!(shape instanceof ShapeText)) {
+            shape.updateStyle({
+              strokeWidth: value,
+            });
+          }
+        });
+      }
     });
 
     this.render();
@@ -430,11 +451,36 @@ export class Annotator {
 
   public set strokeOpacity(value: number) {
     Annotation.strokeOpacity = value;
+
     const { _tools } = this;
 
     _tools.forEach((tool) => {
-      tool.refresh();
+      tool.drawing?.forEach((annotation) => {
+        const labelColor = annotation.labelColor;
+        const strokeColor = Color(labelColor).alpha(value).toString();
+
+        annotation.strokeColor = strokeColor;
+
+        annotation.group.each((shape) => {
+          if (!(shape instanceof ShapeText)) {
+            shape.updateStyle({
+              stroke: strokeColor,
+            });
+          }
+        });
+      });
+
+      if (tool.draft) {
+        tool.draft.group.each((shape) => {
+          if (!(shape instanceof ShapeText) && !(shape instanceof Line)) {
+            shape.updateStyle({
+              stroke: Color(tool.draft!.labelColor).alpha(value).toString(),
+            });
+          }
+        });
+      }
     });
+
     this.render();
   }
 
@@ -443,8 +489,28 @@ export class Annotator {
     const { _tools } = this;
 
     _tools.forEach((tool) => {
-      tool.refresh();
+      tool.drawing?.forEach((annotation) => {
+        const labelColor = annotation.labelColor;
+        annotation.group.each((shape) => {
+          if (!(shape instanceof ShapeText) && !(shape instanceof Line)) {
+            (shape as any).updateStyle({
+              fill: Color(labelColor).alpha(value).toString(),
+            });
+          }
+        });
+      });
+
+      if (tool.draft) {
+        tool.draft.group.each((shape) => {
+          if (!(shape instanceof ShapeText) && !(shape instanceof Line)) {
+            (shape as any).updateStyle({
+              fill: Color(tool.draft!.labelColor).alpha(value).toString(),
+            });
+          }
+        });
+      }
     });
+
     this.render();
   }
 
@@ -506,7 +572,7 @@ export class Annotator {
       tool.clear();
     });
 
-    axis!.rerender();
+    this.render();
   }
 
   public get showOrder() {
@@ -606,7 +672,8 @@ export class Annotator {
 
     this.monitor.selectedAnnotationId = id;
     this.activeTool?.drawing?.get(id)?.group.emit(EInternalEvent.Select, new MouseEvent(''));
-    axis?.rerender();
+
+    this.render();
   }
 
   public toggleAnnotationsVisibility(toolName: ToolName, annotationIds: string[], visible: boolean) {
@@ -618,7 +685,7 @@ export class Annotator {
     }
 
     tool.toggleAnnotationsVisibility(annotationIds, visible);
-    axis?.rerender();
+    this.render();
   }
 
   /**

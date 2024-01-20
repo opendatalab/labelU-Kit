@@ -29,13 +29,13 @@ export type PolygonGroup = Group<Polygon | ShapeText, PolygonStyle>;
 export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+  public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(params: AnnotationParams<PolygonData, PolygonStyle>) {
     super(params);
 
     this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(params.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
@@ -62,7 +62,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   static labelStatic: LabelBase;
 
   private _setupShapes() {
-    const { data, group, labelColor, _strokeColor, style } = this;
+    const { data, group, labelColor, strokeColor, style } = this;
     const { visible = true } = data;
     const commonStyle = {
       ...style,
@@ -76,7 +76,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
           coordinate: cloneDeep(data.points),
           style: {
             ...commonStyle,
-            stroke: _strokeColor,
+            stroke: strokeColor,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
             strokeWidth: Annotation.strokeWidth,
           },
@@ -90,7 +90,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
           controlPoints: data.controlPoints!,
           style: {
             ...commonStyle,
-            stroke: _strokeColor,
+            stroke: strokeColor,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
             strokeWidth: Annotation.strokeWidth,
           },
@@ -116,7 +116,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   }
 
   private _handleMouseOver = () => {
-    const { data, group, style, labelColor, hoveredStyle, _strokeColor } = this;
+    const { data, group, style, labelColor, hoveredStyle, strokeColor } = this;
 
     const { visible = true } = data;
     const commonStyle = {
@@ -131,7 +131,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
         if (!(shape instanceof ShapeText)) {
           shape.updateStyle({
             ...commonStyle,
-            stroke: _strokeColor,
+            stroke: strokeColor,
             strokeWidth: Annotation.strokeWidth + 2,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
           });
@@ -141,7 +141,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
   };
 
   private _handleMouseOut = () => {
-    const { data, style, group, labelColor, _strokeColor } = this;
+    const { data, style, group, labelColor, strokeColor } = this;
 
     const { visible = true } = data;
     const commonStyle = {
@@ -153,7 +153,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
       if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
           ...commonStyle,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
           strokeWidth: Annotation.strokeWidth,
         });

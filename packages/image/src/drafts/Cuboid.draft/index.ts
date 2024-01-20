@@ -81,14 +81,14 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
 
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+  public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(config: CuboidToolOptions, params: AnnotationParams<CuboidData, PolygonStyle>) {
     super(params);
 
     this.config = config;
     this.labelColor = AnnotationCuboid.labelStatic.getLabelColor(this.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -128,7 +128,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
    * 构建前后由控制边组成的多边形
    */
   private _setupEdges(position: 'front' | 'back') {
-    const { data, group, style, _strokeColor } = this;
+    const { data, group, style, strokeColor } = this;
 
     const { tl, tr, br, bl } = data[position];
     const edgeCoordinates = [
@@ -158,7 +158,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
           coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
           style: {
             ...style,
-            stroke: _strokeColor,
+            stroke: strokeColor,
             strokeWidth: Annotation.strokeWidth,
           },
         });
@@ -172,7 +172,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
           coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
           style: {
             ...style,
-            stroke: _strokeColor,
+            stroke: strokeColor,
             strokeWidth: Annotation.strokeWidth,
           },
         });
@@ -232,7 +232,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
   }
 
   private _setupLines() {
-    const { data, group, style, _strokeColor } = this;
+    const { data, group, style, strokeColor } = this;
 
     const { front, back } = data;
     const lineCoordinates = [
@@ -260,7 +260,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
         coordinate: cloneDeep(lineCoordinates[i].coordinate) as LineCoordinate,
         style: {
           ...style,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           strokeWidth: Annotation.strokeWidth,
         },
       });

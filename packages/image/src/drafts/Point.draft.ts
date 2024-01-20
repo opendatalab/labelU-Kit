@@ -6,19 +6,16 @@ import type { AxisPoint, PointStyle, ShapeText } from '../shapes';
 import { Point } from '../shapes';
 import { Draft } from './Draft';
 import type { PointToolOptions } from '../tools';
-import { LabelBase } from '../annotations/Label.base';
 
 export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> {
   public config: PointToolOptions;
-
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(config: PointToolOptions, params: AnnotationParams<PointData, PointStyle>) {
     super(params);
 
     this.config = config;
     this.labelColor = AnnotationPoint.labelStatic.getLabelColor(this.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
 
@@ -26,7 +23,7 @@ export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> 
   }
 
   private _setupShapes() {
-    const { data, style, group, _strokeColor } = this;
+    const { data, style, group, strokeColor } = this;
 
     group.add(
       new Point({
@@ -35,7 +32,7 @@ export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> 
           x: data.x,
           y: data.y,
         },
-        style: { ...style, fill: '#fff', strokeWidth: Annotation.strokeWidth, stroke: _strokeColor },
+        style: { ...style, fill: '#fff', strokeWidth: Annotation.strokeWidth, stroke: strokeColor },
       }),
     );
   }

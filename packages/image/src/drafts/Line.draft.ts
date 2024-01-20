@@ -16,7 +16,6 @@ import type { LineToolOptions } from '../tools';
 import { EInternalEvent } from '../enums';
 import { getLatestPointOnLine } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
-import { LabelBase } from '../annotations/Label.base';
 
 export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointStyle> {
   public config: LineToolOptions;
@@ -27,14 +26,12 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
 
   private _pointToBeAdded: ControllerPoint | null = null;
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
-
   constructor(config: LineToolOptions, params: AnnotationParams<LineData, LineStyle>) {
     super(params);
 
     this.config = config;
     this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMove(this._onMouseMove);
@@ -48,7 +45,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config, _strokeColor } = this;
+    const { data, group, style, config, strokeColor } = this;
 
     for (let i = 1; i < data.points.length; i++) {
       const startPoint = data.points[i - 1];
@@ -59,7 +56,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
         coordinate: [{ ...startPoint }, { ...endPoint }],
         style: {
           ...style,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           strokeWidth: Annotation.strokeWidth,
         },
       });
@@ -149,9 +146,9 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
   };
 
   private _onLineOut = (_e: MouseEvent, line: Line) => {
-    const { style, _strokeColor } = this;
+    const { style, strokeColor } = this;
 
-    line.updateStyle({ ...style, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth });
+    line.updateStyle({ ...style, stroke: strokeColor, strokeWidth: Annotation.strokeWidth });
   };
 
   /**

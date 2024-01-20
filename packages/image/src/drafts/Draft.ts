@@ -24,6 +24,8 @@ export class Draft<
 
   public labelColor = LabelBase.DEFAULT_COLOR;
 
+  public strokeColor = LabelBase.DEFAULT_COLOR;
+
   public id: string;
 
   public data: Data;

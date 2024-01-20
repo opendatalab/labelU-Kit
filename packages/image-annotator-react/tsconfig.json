@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.lib.json",
+  "compilerOptions": {
+    "isolatedModules": false,
+    "sourceMap": false,
+    "outDir": "dist",
+    "declarationDir": "dist",
+    "allowJs": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+  },
+  "include": [
+    "./src"
+  ],
+
+  "exclude": ["./src/example"]
+}

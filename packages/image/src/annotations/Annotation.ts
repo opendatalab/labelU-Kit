@@ -2,6 +2,7 @@ import type { BasicImageAnnotation } from '../interface';
 import { Group } from '../shapes/Group';
 import { type Shape } from '../shapes';
 import { monitor } from '../singletons';
+import { DEFAULT_LABEL_COLOR } from '../constant';
 
 // TODO: 去除本类的any
 export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
@@ -33,6 +34,10 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   public hoveredStyle?: Style | ((style: Style) => Style);
 
   public showOrder: boolean = false;
+
+  public labelColor: string = DEFAULT_LABEL_COLOR;
+
+  public strokeColor: string = DEFAULT_LABEL_COLOR;
 
   static strokeOpacity = 0.9;
 

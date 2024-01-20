@@ -4,7 +4,7 @@ import cloneDeep from 'lodash.clonedeep';
 import type { Annotation } from '../annotations/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
 import type { Shape } from '../shapes';
-import { eventEmitter } from '../singletons';
+import { eventEmitter, monitor } from '../singletons';
 import type { Draft } from '../drafts/Draft';
 
 export interface BasicToolParams<Data, Style> {
@@ -202,7 +202,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   }
 
   public render(_ctx: CanvasRenderingContext2D) {
-    // doNothing
+    // do nothing
   }
 
   public activate(label?: string) {
@@ -284,6 +284,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   }
 
   static emitUnSelect<T>(data: T) {
+    monitor!.selectedAnnotationId = null;
     eventEmitter.emit('unselect', data);
   }
 

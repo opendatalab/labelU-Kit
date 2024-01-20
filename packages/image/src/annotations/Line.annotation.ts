@@ -33,12 +33,12 @@ export interface LineData extends BasicImageAnnotation {
 export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineStyle | TextStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+  public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(params: AnnotationParams<LineData, LineStyle>) {
     super(params);
     this.labelColor = AnnotationLine.labelStatic.getLabelColor(params.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
     this._setupShapes();
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
     this.group.on(EInternalEvent.MouseOut, this._handleMouseOut);
@@ -85,7 +85,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
   }
 
   private _setupShapes() {
-    const { data, group, style, labelColor, _strokeColor } = this;
+    const { data, group, style, labelColor, strokeColor } = this;
 
     const { type, visible = true } = data;
 
@@ -102,7 +102,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
         const line = new Line({
           id: data.points[i - 1].id,
           coordinate: [startPoint, endPoint],
-          style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+          style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth },
         });
 
         group.add(line);
@@ -120,7 +120,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
           id: data.points[i - 1].id,
           coordinate: [startPoint, endPoint],
           controlPoints: [{ ...startControl }, { ...endControl }],
-          style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+          style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth },
         });
 
         group.add(curve);
@@ -145,7 +145,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
   }
 
   private _handleMouseOver = () => {
-    const { data, group, style, hoveredStyle, _strokeColor } = this;
+    const { data, group, style, hoveredStyle, strokeColor } = this;
 
     const { visible = true } = data;
 
@@ -161,7 +161,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
         if (!(shape instanceof ShapeText)) {
           shape.updateStyle({
             ...commonStyle,
-            stroke: _strokeColor,
+            stroke: strokeColor,
             strokeWidth: Annotation.strokeWidth + 2,
           });
         }
@@ -170,7 +170,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
   };
 
   private _handleMouseOut = () => {
-    const { data, style, group, _strokeColor } = this;
+    const { data, style, group, strokeColor } = this;
 
     const { visible = true } = data;
 
@@ -183,7 +183,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
       if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
           ...commonStyle,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           strokeWidth: Annotation.strokeWidth,
         });
       }

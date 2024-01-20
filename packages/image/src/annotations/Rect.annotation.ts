@@ -25,13 +25,13 @@ export type RectGroup = Group<Rect | ShapeText, RectStyle>;
 export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+  public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(params: AnnotationParams<RectData, RectStyle>) {
     super(params);
 
     this.labelColor = AnnotationRect.labelStatic.getLabelColor(params.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
@@ -46,7 +46,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
   static labelStatic: LabelBase;
 
   private _setupShapes() {
-    const { data, group, style, labelColor, _strokeColor } = this;
+    const { data, group, style, labelColor, strokeColor } = this;
 
     const { visible = true } = data;
     const commonStyle = {
@@ -63,7 +63,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
         },
         width: data.width,
         height: data.height,
-        style: { ...commonStyle, stroke: _strokeColor, strokeWidth: Annotation.strokeWidth },
+        style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
     );
 
@@ -86,7 +86,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
   }
 
   private _handleMouseOver = () => {
-    const { data, group, style, labelColor, hoveredStyle, _strokeColor } = this;
+    const { data, group, style, labelColor, hoveredStyle, strokeColor } = this;
 
     const { visible = true } = data;
     const commonStyle = {
@@ -101,7 +101,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
         if (!(shape instanceof ShapeText)) {
           shape.updateStyle({
             ...commonStyle,
-            stroke: _strokeColor,
+            stroke: strokeColor,
             strokeWidth: Annotation.strokeWidth + 2,
             fill: Color(labelColor).alpha(Annotation.fillOpacity).toString(),
           });
@@ -111,7 +111,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
   };
 
   private _handleMouseOut = () => {
-    const { data, style, group, _strokeColor } = this;
+    const { data, style, group, strokeColor } = this;
 
     const { visible = true } = data;
     const commonStyle = {
@@ -123,7 +123,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
       if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
           ...commonStyle,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           strokeWidth: Annotation.strokeWidth,
         });
       }

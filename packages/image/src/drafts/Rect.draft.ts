@@ -14,7 +14,6 @@ import { ControllerPoint } from './ControllerPoint';
 import { Draft } from './Draft';
 import { ControllerEdge } from './ControllerEdge';
 import type { RectToolOptions } from '../tools';
-import { LabelBase } from '../annotations/Label.base';
 
 type ControllerPosition = 'nw' | 'ne' | 'se' | 'sw';
 
@@ -31,14 +30,12 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
   private _edgePositionMapping: Map<EdgePosition, ControllerEdge> = new Map();
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
-
   constructor(config: RectToolOptions, params: AnnotationParams<RectData, RectStyle>) {
     super(params);
 
     this.config = config;
     this.labelColor = AnnotationRect.labelStatic.getLabelColor(params.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -48,7 +45,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config, labelColor, _strokeColor } = this;
+    const { data, group, style, config, labelColor, strokeColor } = this;
     const nwCoord = { x: data.x, y: data.y };
     const neCoord = { x: data.x + data.width, y: data.y };
     const seCoord = { x: data.x + data.width, y: data.y + data.height };
@@ -103,7 +100,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
         coordinate: lineCoordinates[i].coordinate,
         style: {
           ...style,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           strokeWidth: Annotation.strokeWidth,
         },
       });

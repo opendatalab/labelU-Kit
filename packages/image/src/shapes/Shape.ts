@@ -13,6 +13,12 @@ type CoordinateChangeHandler = () => void;
  * 画布上的图形对象（基类）
  */
 export class Shape<Style> {
+  static strokeOpacity = 0.9;
+
+  static fillOpacity = 0.7;
+
+  static strokeWidth = 2;
+
   private _event = new EventEmitter();
 
   private _cachedRBush: RBushItem | null = null;

@@ -20,13 +20,13 @@ export type PointGroup = Group<Point | ShapeText, PointStyle>;
 export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, PointStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
+  public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(params: AnnotationParams<PointData, PointStyle>) {
     super(params);
 
     this.labelColor = AnnotationPoint.labelStatic.getLabelColor(params.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
@@ -41,7 +41,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
   static labelStatic: LabelBase;
 
   private _setupShapes() {
-    const { data, style, group, labelColor, _strokeColor } = this;
+    const { data, style, group, labelColor, strokeColor } = this;
 
     const { visible = true } = data;
 
@@ -57,7 +57,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
           x: data.x,
           y: data.y,
         },
-        style: { ...commonStyle, fill: labelColor, strokeWidth: Annotation.strokeWidth, stroke: _strokeColor },
+        style: { ...commonStyle, fill: labelColor, strokeWidth: Annotation.strokeWidth, stroke: strokeColor },
       }),
     );
 
@@ -97,13 +97,13 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
   };
 
   private _handleMouseOut = () => {
-    const { group, labelColor, _strokeColor } = this;
+    const { group, labelColor, strokeColor } = this;
 
     group.each((shape) => {
       if (!(shape instanceof ShapeText)) {
         shape.updateStyle({
           fill: labelColor,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           strokeWidth: Annotation.strokeWidth,
         });
       }

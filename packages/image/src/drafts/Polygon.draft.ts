@@ -17,7 +17,6 @@ import type { PolygonTool, PolygonToolOptions } from '../tools';
 import { EInternalEvent } from '../enums';
 import { generatePolygonsFromDifference, getLatestPointOnLine, isBBoxIntersect } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
-import { LabelBase } from '../annotations/Label.base';
 
 export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle> {
   public config: PolygonToolOptions;
@@ -52,15 +51,13 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
    */
   private _tool: PolygonTool;
 
-  private _strokeColor: string = LabelBase.DEFAULT_COLOR;
-
   constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>, tool: PolygonTool) {
     super(params);
 
     this.config = config;
     this._tool = tool;
     this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(params.data.label);
-    this._strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -73,7 +70,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, config, labelColor, _strokeColor } = this;
+    const { data, group, style, config, labelColor, strokeColor } = this;
 
     group.add(
       // 多边形用于颜色填充
@@ -102,7 +99,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
         coordinate: cloneDeep([startPoint, endPoint]),
         style: {
           ...style,
-          stroke: _strokeColor,
+          stroke: strokeColor,
           strokeWidth: Annotation.strokeWidth,
         },
       });
