@@ -18,11 +18,11 @@
     ".": {
       "import": {
         "types": "./dist/types/index.d.ts",
-        "default": "./es/index.js"
+        "default": "./dist/index.mjs"
       },
       "require": {
         "types": "./dist/types/index.d.ts",
-        "default": "./dist/index.js"
+        "default": "./dist/index.umd.js"
       }
     }
   },

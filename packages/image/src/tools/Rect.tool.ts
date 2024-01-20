@@ -196,13 +196,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       return;
     }
 
-    Tool.onAdd(
-      {
-        ...data,
-        ...this.convertAnnotationItem(data),
-      },
-      e,
-    );
     this.addToData(data);
 
     this._createDraft(data);
@@ -210,6 +203,14 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this._creatingShape = null;
     monitor!.setSelectedAnnotationId(_creatingShape.id);
     axis!.rerender();
+
+    Tool.onAdd(
+      {
+        ...data,
+        ...this.convertAnnotationItem(data),
+      },
+      e,
+    );
   }
 
   protected rebuildDraft(data?: RectData) {

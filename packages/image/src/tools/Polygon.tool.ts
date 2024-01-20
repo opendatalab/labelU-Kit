@@ -37,11 +37,18 @@ export interface PolygonToolOptions extends BasicToolParams<PolygonData, Polygon
   outOfImage?: boolean;
 
   /**
-   * 闭合点个数
+   * 最少闭合点个数
    * @description 至少三个点
    * @default 3
    */
-  closingPointAmount?: number;
+  minPointAmount?: number;
+
+  /**
+   * 最多闭合点个数
+   * @description 无限制
+   * @default undefined
+   */
+  maxPointAmount?: number;
 }
 
 // @ts-ignore
@@ -73,7 +80,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       lineType: 'line',
       edgeAdsorptive: true,
       outOfImage: true,
-      closingPointAmount: 3,
+      minPointAmount: 3,
       labels: [],
       // ----------------
       data: [],
@@ -138,10 +145,19 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   private _validate(data: PolygonData) {
     const { config } = this;
 
-    if (data.points.length < config.closingPointAmount!) {
+    if (data.points.length < config.minPointAmount!) {
       Tool.error({
-        type: 'closingPointAmount',
-        message: `Polygon must have at least ${config.closingPointAmount} points!`,
+        type: 'minPointAmount',
+        message: `Polygon must have at least ${config.minPointAmount} points!`,
+      });
+
+      return false;
+    }
+
+    if (config.maxPointAmount && data.points.length > config.maxPointAmount) {
+      Tool.error({
+        type: 'maxPointAmount',
+        message: `Polygon must have at most ${config.maxPointAmount} points!`,
       });
 
       return false;
@@ -636,14 +652,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
-    Tool.onAdd(
-      {
-        ...data,
-        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
-        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
-      },
-      e,
-    );
     this.addToData(data);
 
     this._addAnnotation(data);
@@ -652,6 +660,14 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     axis!.rerender();
     this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
+    Tool.onAdd(
+      {
+        ...data,
+        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
+        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
+      },
+      e,
+    );
   }
 
   private _archivePolygons(e: MouseEvent) {
@@ -725,13 +741,15 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
-    if (this._creatingCurves) {
-      this._creatingCurves.render(ctx);
-    }
+    Promise.resolve().then(() => {
+      if (this._creatingCurves) {
+        this._creatingCurves.render(ctx);
+      }
 
-    if (this._creatingShapes) {
-      this._creatingShapes.render(ctx);
-    }
+      if (this._creatingShapes) {
+        this._creatingShapes.render(ctx);
+      }
+    });
   }
 
   public destroy(): void {

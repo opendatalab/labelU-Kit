@@ -194,10 +194,11 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       y: axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY)),
     };
 
-    Tool.onAdd({ ...data, ...axis!.convertCanvasCoordinate(data) }, e);
     this.addToData(data);
     // 创建草稿
     this._createDraft(data);
+
+    Tool.onAdd({ ...data, ...axis!.convertCanvasCoordinate(data) }, e);
 
     axis?.rerender();
   };

@@ -1,4 +1,5 @@
 import Color from 'color';
+import cloneDeep from 'lodash.clonedeep';
 
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
@@ -79,6 +80,19 @@ export class ClosedSpline extends Shape<PolygonStyle> {
         maxY,
       };
     });
+  }
+
+  public serialize() {
+    const { id, style, plainControlPoints, plainCoordinate, dynamicControlPoints, dynamicCoordinate } = this;
+
+    return {
+      id,
+      coordinate: cloneDeep(plainCoordinate),
+      controlPoints: cloneDeep(plainControlPoints),
+      dynamicCoordinate,
+      dynamicControlPoints,
+      style,
+    };
   }
 
   public set controlPoints(coordinate: AxisPoint[]) {

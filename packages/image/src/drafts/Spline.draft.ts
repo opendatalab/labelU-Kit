@@ -1,7 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
+import Color from 'color';
 
 import type { LineStyle, Line } from '../shapes/Line.shape';
-import { AnnotationLine, type LineData } from '../annotations';
+import { Annotation, AnnotationLine, type LineData } from '../annotations';
 import type { PointStyle, Point } from '../shapes';
 import { Spline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -28,6 +29,7 @@ export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyl
 
     this.config = config;
     this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -37,7 +39,7 @@ export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyl
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, labelColor } = this;
+    const { data, group, style, strokeColor } = this;
 
     const controlPoints = AnnotationLine.chunk(data.controlPoints!, 2);
 
@@ -52,7 +54,7 @@ export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyl
         controlPoints: [{ ...startControlPoint }, { ...endControlPoint }],
         style: {
           ...style,
-          stroke: labelColor,
+          stroke: strokeColor,
         },
       });
 

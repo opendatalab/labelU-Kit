@@ -208,7 +208,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
    * @description 控制点移动时，更新线段的端点
    */
   private _onControllerPointMove = (controllerPoint: ControllerPoint) => {
-    const { _controllerPositionMapping, _edgePositionMapping, _unscaledPreBBox, group } = this;
+    const { _controllerPositionMapping, _edgePositionMapping, _unscaledPreBBox, group, config } = this;
 
     if (!_unscaledPreBBox) {
       return;
@@ -228,65 +228,97 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
     const rect = group.shapes[0] as Rect;
     const { x, y } = controllerPoint.coordinate[0];
 
+    const { minWidth = 1, minHeight = 1 } = config;
+
+    let safeX = x;
+    let safeY = y;
+
     // 更新端点坐标
     if (selectedPointName === 'nw') {
-      const width = Math.abs(x - _unscaledPreBBox.maxX);
-      const height = Math.abs(y - _unscaledPreBBox.maxY);
+      if (x < _unscaledPreBBox.maxX) {
+        safeX = Math.min(_unscaledPreBBox.maxX - minWidth, x);
+      } else {
+        safeX = Math.max(_unscaledPreBBox.maxX + minWidth, x);
+      }
 
-      // TODO: 修改宽高时，可以加上尺寸限制
+      if (y < _unscaledPreBBox.maxY) {
+        safeY = Math.min(_unscaledPreBBox.maxY - minHeight, y);
+      } else {
+        safeY = Math.max(_unscaledPreBBox.maxY + minHeight, y);
+      }
+
+      const width = Math.abs(safeX - _unscaledPreBBox.maxX);
+      const height = Math.abs(safeY - _unscaledPreBBox.maxY);
+
+      if (width < minWidth) {
+        return;
+      }
+
       rect.width = width;
       rect.height = height;
 
-      swPoint.coordinate[0].x = x;
-      nePoint.coordinate[0].y = y;
+      swPoint.coordinate[0].x = safeX;
+      nePoint.coordinate[0].y = safeY;
 
       // 更新Top线段坐标
-      topEdge.coordinate[0].x = x;
-      topEdge.coordinate[0].y = y;
+      topEdge.coordinate[0].x = safeX;
+      topEdge.coordinate[0].y = safeY;
       topEdge.coordinate[1].x = _unscaledPreBBox.maxX;
-      topEdge.coordinate[1].y = y;
+      topEdge.coordinate[1].y = safeY;
       // 更新Left线段坐标
-      leftEdge.coordinate[1].x = x;
-      leftEdge.coordinate[1].y = y;
-      leftEdge.coordinate[0].x = x;
+      leftEdge.coordinate[1].x = safeX;
+      leftEdge.coordinate[1].y = safeY;
+      leftEdge.coordinate[0].x = safeX;
       // 更新Bottom线段坐标
-      bottomEdge.coordinate[1].x = x;
+      bottomEdge.coordinate[1].x = safeX;
       // 更新Right线段坐标
-      rightEdge.coordinate[0].y = y;
+      rightEdge.coordinate[0].y = safeY;
 
       if (x > _unscaledPreBBox.maxX) {
         rect.coordinate[0].x = _unscaledPreBBox.maxX;
       } else {
-        rect.coordinate[0].x = x;
+        rect.coordinate[0].x = safeX;
       }
 
       if (y > _unscaledPreBBox.maxY) {
         rect.coordinate[0].y = _unscaledPreBBox.maxY;
       } else {
-        rect.coordinate[0].y = y;
+        rect.coordinate[0].y = safeY;
       }
     } else if (selectedPointName === 'ne') {
-      sePoint.coordinate[0].x = x;
-      nwPoint.coordinate[0].y = y;
+      if (x > _unscaledPreBBox.minX) {
+        safeX = Math.max(_unscaledPreBBox.minX + minWidth, x);
+      } else {
+        safeX = Math.min(_unscaledPreBBox.minX - minWidth, x);
+      }
+
+      if (y < _unscaledPreBBox.maxY) {
+        safeY = Math.min(_unscaledPreBBox.maxY - minHeight, y);
+      } else {
+        safeY = Math.max(_unscaledPreBBox.maxY + minHeight, y);
+      }
+
+      rect.width = Math.abs(safeX - _unscaledPreBBox.minX);
+      rect.height = Math.abs(safeY - _unscaledPreBBox.maxY);
+
+      sePoint.coordinate[0].x = safeX;
+      nwPoint.coordinate[0].y = safeY;
 
       // 更新Top线段坐标
-      topEdge.coordinate[1].x = x;
-      topEdge.coordinate[1].y = y;
-      topEdge.coordinate[0].y = y;
+      topEdge.coordinate[1].x = safeX;
+      topEdge.coordinate[1].y = safeY;
+      topEdge.coordinate[0].y = safeY;
       // 更新Right线段坐标
-      rightEdge.coordinate[0].x = x;
-      rightEdge.coordinate[0].y = y;
-      rightEdge.coordinate[1].x = x;
+      rightEdge.coordinate[0].x = safeX;
+      rightEdge.coordinate[0].y = safeY;
+      rightEdge.coordinate[1].x = safeX;
       // 更新Bottom线段坐标
-      bottomEdge.coordinate[0].x = x;
+      bottomEdge.coordinate[0].x = safeX;
       // 更新Left线段坐标
-      leftEdge.coordinate[1].y = y;
-
-      rect.width = Math.abs(x - _unscaledPreBBox.minX);
-      rect.height = Math.abs(y - _unscaledPreBBox.maxY);
+      leftEdge.coordinate[1].y = safeY;
 
       if (x < _unscaledPreBBox.minX) {
-        rect.coordinate[0].x = x;
+        rect.coordinate[0].x = safeX;
       } else {
         rect.coordinate[0].x = _unscaledPreBBox.minX;
       }
@@ -294,67 +326,91 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
       if (y > _unscaledPreBBox.maxY) {
         rect.coordinate[0].y = _unscaledPreBBox.maxY;
       } else {
-        rect.coordinate[0].y = y;
+        rect.coordinate[0].y = safeY;
       }
     } else if (selectedPointName === 'se') {
-      nePoint.coordinate[0].x = x;
-      swPoint.coordinate[0].y = y;
+      if (x > _unscaledPreBBox.minX) {
+        safeX = Math.max(_unscaledPreBBox.minX + minWidth, x);
+      } else {
+        safeX = Math.min(_unscaledPreBBox.minX - minWidth, x);
+      }
+
+      if (y > _unscaledPreBBox.minY) {
+        safeY = Math.max(_unscaledPreBBox.minY + minHeight, y);
+      } else {
+        safeY = Math.min(_unscaledPreBBox.minY - minHeight, y);
+      }
+
+      rect.width = Math.abs(safeX - _unscaledPreBBox.minX);
+      rect.height = Math.abs(safeY - _unscaledPreBBox.minY);
+
+      nePoint.coordinate[0].x = safeX;
+      swPoint.coordinate[0].y = safeY;
 
       // 更新Right线段坐标
-      rightEdge.coordinate[1].x = x;
-      rightEdge.coordinate[1].y = y;
-      rightEdge.coordinate[0].x = x;
+      rightEdge.coordinate[1].x = safeX;
+      rightEdge.coordinate[1].y = safeY;
+      rightEdge.coordinate[0].x = safeX;
       // 更新Bottom线段坐标
-      bottomEdge.coordinate[0].x = x;
-      bottomEdge.coordinate[0].y = y;
-      bottomEdge.coordinate[1].y = y;
+      bottomEdge.coordinate[0].x = safeX;
+      bottomEdge.coordinate[0].y = safeY;
+      bottomEdge.coordinate[1].y = safeY;
       // 更新Left线段坐标
-      leftEdge.coordinate[0].y = y;
+      leftEdge.coordinate[0].y = safeY;
       // 更新Top线段坐标
-      topEdge.coordinate[1].x = x;
-
-      rect.width = Math.abs(x - _unscaledPreBBox.minX);
-      rect.height = Math.abs(y - _unscaledPreBBox.minY);
+      topEdge.coordinate[1].x = safeX;
 
       if (x < _unscaledPreBBox.minX) {
-        rect.coordinate[0].x = x;
+        rect.coordinate[0].x = safeX;
       } else {
         rect.coordinate[0].x = _unscaledPreBBox.minX;
       }
 
       if (y < _unscaledPreBBox.minY) {
-        rect.coordinate[0].y = y;
+        rect.coordinate[0].y = safeY;
       } else {
         rect.coordinate[0].y = _unscaledPreBBox.minY;
       }
     } else if (selectedPointName === 'sw') {
-      nwPoint.coordinate[0].x = x;
-      sePoint.coordinate[0].y = y;
+      if (x < _unscaledPreBBox.maxX) {
+        safeX = Math.min(_unscaledPreBBox.maxX - minWidth, x);
+      } else {
+        safeX = Math.max(_unscaledPreBBox.maxX + minWidth, x);
+      }
+
+      if (y > _unscaledPreBBox.minY) {
+        safeY = Math.max(_unscaledPreBBox.minY + minHeight, y);
+      } else {
+        safeY = Math.min(_unscaledPreBBox.minY - minHeight, y);
+      }
+
+      rect.width = Math.abs(safeX - _unscaledPreBBox.maxX);
+      rect.height = Math.abs(safeY - _unscaledPreBBox.minY);
+
+      nwPoint.coordinate[0].x = safeX;
+      sePoint.coordinate[0].y = safeY;
 
       // 更新Left线段坐标
-      leftEdge.coordinate[0].x = x;
-      leftEdge.coordinate[0].y = y;
-      leftEdge.coordinate[1].x = x;
+      leftEdge.coordinate[0].x = safeX;
+      leftEdge.coordinate[0].y = safeY;
+      leftEdge.coordinate[1].x = safeX;
       // 更新Bottom线段坐标
-      bottomEdge.coordinate[1].x = x;
-      bottomEdge.coordinate[1].y = y;
-      bottomEdge.coordinate[0].y = y;
+      bottomEdge.coordinate[1].x = safeX;
+      bottomEdge.coordinate[1].y = safeY;
+      bottomEdge.coordinate[0].y = safeY;
       // 更新Top线段坐标
-      topEdge.coordinate[0].x = x;
+      topEdge.coordinate[0].x = safeX;
       // 更新Right线段坐标
-      rightEdge.coordinate[1].y = y;
-
-      rect.width = Math.abs(x - _unscaledPreBBox.maxX);
-      rect.height = Math.abs(y - _unscaledPreBBox.minY);
+      rightEdge.coordinate[1].y = safeY;
 
       if (x > _unscaledPreBBox.maxX) {
         rect.coordinate[0].x = _unscaledPreBBox.maxX;
       } else {
-        rect.coordinate[0].x = x;
+        rect.coordinate[0].x = safeX;
       }
 
       if (y < _unscaledPreBBox.minY) {
-        rect.coordinate[0].y = y;
+        rect.coordinate[0].y = safeY;
       } else {
         rect.coordinate[0].y = _unscaledPreBBox.minY;
       }
@@ -393,10 +449,27 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
     const leftEdge = _edgePositionMapping.get('left')!;
     const rect = this.group.shapes[0] as Rect;
 
+    const { minWidth = 1, minHeight = 1 } = config;
     const x = axis!.getOriginalX(edge.previousDynamicCoordinate![0].x + axis!.distance.x);
     const y = axis!.getOriginalY(edge.previousDynamicCoordinate![0].y + axis!.distance.y);
 
-    const [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+    let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
+
+    if (edge.name === 'left') {
+      safeX = Math.abs(x - _unscaledPreBBox!.maxX) >= minWidth;
+    }
+
+    if (edge.name === 'right') {
+      safeX = Math.abs(x - _unscaledPreBBox!.minX) >= minWidth;
+    }
+
+    if (edge.name === 'top') {
+      safeY = Math.abs(y - _unscaledPreBBox!.maxY) >= minHeight;
+    }
+
+    if (edge.name === 'bottom') {
+      safeY = Math.abs(y - _unscaledPreBBox!.minY) >= minHeight;
+    }
 
     if (safeX && (edge.name === 'left' || edge.name === 'right')) {
       edge.coordinate[0].x = x;

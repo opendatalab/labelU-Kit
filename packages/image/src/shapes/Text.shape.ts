@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash.clonedeep';
+
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import { DEFAULT_LABEL_COLOR } from '../constant';
@@ -83,6 +85,18 @@ export class ShapeText extends Shape<TextStyle> {
         maxY: y + height,
       };
     });
+  }
+
+  public serialize() {
+    const { id, style, plainCoordinate, text, dynamicCoordinate } = this;
+
+    return {
+      id,
+      coordinate: cloneDeep(plainCoordinate),
+      dynamicCoordinate: cloneDeep(dynamicCoordinate),
+      style,
+      text,
+    };
   }
 
   public isUnderCursor(mouseCoord: AxisPoint) {

@@ -34,6 +34,11 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
 
   private _contactCoord: AxisPoint;
 
+  /**
+   * NOTE: 给monitor鼠标经过的判断标识，目前只有曲线的控制器是组合Group
+   */
+  public IS_CONTROL = true;
+
   private _contactPoint: ControllerPoint | null = null;
 
   constructor({
@@ -41,7 +46,7 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
     startControlOfNextCurve: nextCurveStartControl,
     contact,
   }: SlopeEdgeParams) {
-    super(uuid(), monitor!.getMaxOrder()! + 1);
+    super(uuid(), monitor!.getNextOrder());
 
     this._endControlCoordOfPrevCurve = prevCurveEndControl;
     this._startControlCoordOfNextCurve = nextCurveStartControl;

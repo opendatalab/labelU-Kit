@@ -6,11 +6,13 @@ export type EventName =
   | EInternalEvent
   | 'hover'
   | 'move'
+  | 'moveEnd'
   | 'zoom'
   | 'select'
   | 'unselect'
   | 'add'
   | 'delete'
+  | 'clear'
   | 'load'
   | 'labelChange'
   | 'attributesChange'

@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash.clonedeep';
+
 import { DEFAULT_LABEL_COLOR } from '../constant';
 import { Shape } from './Shape';
 
@@ -107,6 +109,18 @@ export class Point extends Shape<PointStyle> {
         maxY: y + this.style.radius + strokeWidth / 2,
       };
     });
+  }
+
+  public serialize() {
+    const { id, name, style, plainCoordinate, dynamicCoordinate } = this;
+
+    return {
+      id,
+      name,
+      style,
+      coordinate: cloneDeep(plainCoordinate),
+      dynamicCoordinate: cloneDeep(dynamicCoordinate),
+    };
   }
 
   /**

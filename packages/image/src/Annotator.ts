@@ -70,6 +70,13 @@ export interface AnnotatorOptions {
    * @default 1
    */
   strokeOpacity?: number;
+
+  /**
+   * 背景颜色
+   *
+   * @default '#999'
+   */
+  backgroundColor?: string;
 }
 
 export class Annotator {
@@ -129,7 +136,7 @@ export class Annotator {
   }
 
   private _initialContainer() {
-    const { container, width, height, image } = this._config;
+    const { container, width, height, image, backgroundColor } = this._config;
 
     container.style.width = `${width}px`;
     container.style.height = `${height}px`;
@@ -138,7 +145,14 @@ export class Annotator {
     container.style.overflow = 'hidden';
 
     this.renderer = new Renderer({ container, width, height, zIndex: 2 });
-    this.backgroundRenderer = new BackgroundRenderer({ container, width, height, rotate: image?.rotate, zIndex: 1 });
+    this.backgroundRenderer = new BackgroundRenderer({
+      container,
+      width,
+      height,
+      rotate: image?.rotate,
+      zIndex: 1,
+      backgroundColor,
+    });
   }
 
   private _initialAxis() {
@@ -309,6 +323,10 @@ export class Annotator {
     return Array.from(this._tools.values());
   }
 
+  public get toolMap() {
+    return this._tools;
+  }
+
   /**
    * 使工具进入绘制状态
    *
@@ -412,6 +430,8 @@ export class Annotator {
   public set showOrder(value: boolean) {
     this.config.showOrder = Boolean(value);
 
+    rbush.clear();
+
     for (const tool of this._tools.values()) {
       tool.toggleOrderVisible(value);
     }
@@ -419,6 +439,7 @@ export class Annotator {
     this.render();
   }
 
+  // TODO: 挪到Annotation里
   public set strokeWidth(value: number) {
     Annotation.strokeWidth = value;
 
@@ -449,6 +470,7 @@ export class Annotator {
     this.render();
   }
 
+  // TODO: 挪到Annotation里
   public set strokeOpacity(value: number) {
     Annotation.strokeOpacity = value;
 
@@ -484,6 +506,7 @@ export class Annotator {
     this.render();
   }
 
+  // TODO: 挪到Annotation里
   public set fillOpacity(value: number) {
     Annotation.fillOpacity = value;
     const { _tools } = this;
@@ -573,6 +596,8 @@ export class Annotator {
     });
 
     this.render();
+    this.emit('clear');
+    rbush.clear();
   }
 
   public get showOrder() {
@@ -658,16 +683,19 @@ export class Annotator {
       return;
     }
 
-    this.switch(selectTool);
-
     if (!id) {
       if (this.monitor?.selectedAnnotationId) {
         this.activeTool?.drawing
           ?.get(this.monitor.selectedAnnotationId)
           ?.group.emit(EInternalEvent.UnSelect, new MouseEvent(''));
       }
-
+      this.switch(selectTool);
       return;
+    } else {
+      // @ts-ignore
+      const annotationLabel = this._tools.get(selectTool)?.data.find((item) => item.id === id)?.label;
+
+      this.switch(selectTool, annotationLabel);
     }
 
     this.monitor.selectedAnnotationId = id;
@@ -800,6 +828,8 @@ export class Annotator {
       }
     } else {
       console.warn(`Tool ${toolName} is not supported`);
+
+      return;
     }
 
     this.render();

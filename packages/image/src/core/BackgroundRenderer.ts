@@ -38,7 +38,7 @@ export interface ImageOption extends RendererOptions {
   /**
    * 背景颜色
    *
-   * @default '#333'
+   * @default '#999'
    */
   backgroundColor?: string;
 }
@@ -76,7 +76,7 @@ export class BackgroundRenderer extends Renderer {
 
   private _imageUrl: string | null = null;
 
-  private _backgroundColor: string = '#333';
+  private _backgroundColor: string = '#999';
 
   public options: ImageOption = BackgroundRenderer.DEFAULT_OPTIONS;
 

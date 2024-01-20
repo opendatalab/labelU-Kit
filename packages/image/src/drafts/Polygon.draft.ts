@@ -295,10 +295,10 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
     // 删除端点
     if (monitor?.keyboard.Alt) {
       // 少于两个点或少于配置的最少点数时，不允许删除
-      if (data.points.length <= config.closingPointAmount!) {
+      if (data.points.length <= config.minPointAmount!) {
         Tool.error({
-          type: 'closingPointAmount',
-          message: `At least ${config.closingPointAmount} points are required`,
+          type: 'minPointAmount',
+          message: `At least ${config.minPointAmount} points are required`,
         });
 
         return;

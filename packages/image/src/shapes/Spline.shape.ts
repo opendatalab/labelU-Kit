@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash.clonedeep';
+
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import type { LineParams, LineStyle } from './Line.shape';
@@ -50,6 +52,19 @@ export class Spline extends Shape<LineStyle> {
         maxY: Math.max(start.y, end.y, controlStart.y, controlEnd.y),
       };
     });
+  }
+
+  public serialize() {
+    const { id, style, plainCoordinate, plainControlPoints, dynamicControlPoints, dynamicCoordinate } = this;
+
+    return {
+      id,
+      coordinate: cloneDeep(plainCoordinate),
+      dynamicCoordinate: cloneDeep(dynamicCoordinate),
+      controlPoints: cloneDeep(plainControlPoints),
+      dynamicControlPoints: cloneDeep(dynamicControlPoints),
+      style,
+    };
   }
 
   public set controlPoints(coordinate: [AxisPoint, AxisPoint]) {

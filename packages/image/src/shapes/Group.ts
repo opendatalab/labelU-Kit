@@ -227,11 +227,11 @@ export class Group<T extends Shape<Style>, Style> {
   }
 
   public destroy() {
+    rbush.remove(this._cachedRBush!);
+    this._cachedRBush = null;
     this.shapes.forEach((shape) => {
       shape.destroy();
     });
-    rbush.remove(this._cachedRBush!);
-    this._cachedRBush = null;
     this._shapeMapping.clear();
     this._event.removeAllListeners();
     eventEmitter.off(EInternalEvent.PanEnd, this._onAxisChange);
@@ -255,6 +255,18 @@ export class Group<T extends Shape<Style>, Style> {
 
   public get(id: string) {
     return this._shapeMapping.get(id);
+  }
+
+  public serialize() {
+    const shapes = this.shapes.map((shape) => {
+      return shape.serialize();
+    });
+
+    return {
+      id: this.id,
+      order: this.order,
+      shapes,
+    };
   }
 
   // ================= 增加event代理 =================

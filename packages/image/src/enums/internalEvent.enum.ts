@@ -105,4 +105,6 @@ export enum EInternalEvent {
   ContactDown = '__contact_down__',
   ContactMove = '__contact_move__',
   ContactUp = '__contact_up__',
+
+  BBoxUpdate = '__bbox_update__',
 }

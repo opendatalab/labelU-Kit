@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash.clonedeep';
+
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import { isPointInPolygon } from './math.util';
@@ -71,6 +73,17 @@ export class Polygon extends Shape<PolygonStyle> {
         maxY: maxY + extra,
       };
     });
+  }
+
+  public serialize() {
+    const { id, style, plainCoordinate, dynamicCoordinate } = this;
+
+    return {
+      id,
+      coordinate: cloneDeep(plainCoordinate),
+      dynamicCoordinate: cloneDeep(dynamicCoordinate),
+      style,
+    };
   }
 
   /**

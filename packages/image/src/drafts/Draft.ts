@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash.clonedeep';
 import EventEmitter from 'eventemitter3';
 
 import { axis, eventEmitter } from '../singletons';
@@ -6,7 +5,7 @@ import { EInternalEvent } from '../enums';
 import type { AnnotationParams } from '../annotations/Annotation';
 import type { BasicImageAnnotation } from '../interface';
 import type { AxisPoint, Shape } from '../shapes';
-import { Point, Group } from '../shapes';
+import { Point, Group, Spline } from '../shapes';
 import { ControllerPoint } from './ControllerPoint';
 import { ControllerEdge } from './ControllerEdge';
 import { LabelBase } from '../annotations/Label.base';
@@ -20,7 +19,7 @@ export class Draft<
 > extends EventEmitter {
   public isPicked = false;
 
-  public outOfImage: boolean = true;
+  public config: any;
 
   public labelColor = LabelBase.DEFAULT_COLOR;
 
@@ -44,7 +43,13 @@ export class Draft<
 
   private _onMouseUpHandlers: MouseEventHandler[] = [];
 
-  private _preDynamicCoordinates: AxisPoint[][] = [];
+  private _serializeData: {
+    id: string;
+    order: number;
+    shapes: {
+      id: string;
+    }[];
+  } | null = null;
 
   constructor({ id, data, style, hoveredStyle, showOrder }: AnnotationParams<Data, Style>) {
     super();
@@ -76,7 +81,7 @@ export class Draft<
     // 存在草稿说明当前处于编辑状态，只需要判断鼠标是否落在在草稿上即可
     if (this.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
       this.isPicked = true;
-      this._preDynamicCoordinates = this.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
+      this._serializeData = this.group.serialize();
 
       for (const handler of this._onMouseDownHandlers) {
         handler(e);
@@ -97,14 +102,19 @@ export class Draft<
   }
 
   private _getControls() {
-    const { group } = this;
     const controls: (ControllerPoint | ControllerEdge)[] = [];
 
-    for (const shape of group.shapes) {
-      if (shape instanceof ControllerPoint || shape instanceof ControllerEdge) {
-        controls.push(shape);
+    const digDeep = (group: Group<Shape<Style>, Style>) => {
+      for (const shape of group.shapes) {
+        if (shape instanceof Group) {
+          digDeep(shape as Group<Shape<Style>, Style>);
+        } else if (shape instanceof ControllerPoint || shape instanceof ControllerEdge) {
+          controls.push(shape);
+        }
       }
-    }
+    };
+
+    digDeep(this.group);
 
     return controls;
   }
@@ -140,12 +150,26 @@ export class Draft<
     }
 
     this.isPicked = false;
-    this._preDynamicCoordinates = [];
+    this._serializeData = null;
 
     for (const handler of this._onMouseUpHandlers) {
       handler(e);
     }
+
+    eventEmitter.emit('moveEnd');
   };
+
+  private _digCoordinates(): AxisPoint[] | AxisPoint[][] {
+    const loop = (shape: any): AxisPoint | AxisPoint[] => {
+      if (shape.shapes) {
+        return (shape as Group<Shape<Style>, Style>).shapes.map(loop) as AxisPoint[];
+      } else {
+        return shape.dynamicCoordinate;
+      }
+    };
+
+    return (this._serializeData?.shapes?.map(loop) as AxisPoint[] | AxisPoint[][]) ?? [];
+  }
 
   public onMove(handler: MouseEventHandler) {
     this._onMoveHandlers.push(handler);
@@ -210,21 +234,48 @@ export class Draft<
    * 根据鼠标移动的距离移动草稿
    */
   public moveByDistance() {
-    const { outOfImage, _preDynamicCoordinates } = this;
+    const { config, _serializeData } = this;
 
-    const [safeX, safeY] = outOfImage ? [true, true] : axis!.isCoordinatesSafe(_preDynamicCoordinates);
+    const [safeX, safeY] = config?.outOfImage ? [true, true] : axis!.isCoordinatesSafe(this._digCoordinates());
+
+    // TODO: 消灭any
+    const loop = (shape: Shape<Style>, index: number, serialized: any) => {
+      if (shape instanceof Group) {
+        (shape as Group<Shape<Style>, Style>).each((item, idx) => {
+          loop(item, idx, serialized[index].shapes);
+        });
+      } else {
+        shape.plainCoordinate.forEach((point, i) => {
+          if (safeX) {
+            shape.coordinate[i].x = axis!.getOriginalX(serialized[index].dynamicCoordinate[i].x + axis!.distance.x);
+          }
+
+          if (safeY) {
+            shape.coordinate[i].y = axis!.getOriginalY(serialized[index].dynamicCoordinate[i].y + axis!.distance.y);
+          }
+        });
+
+        if (shape instanceof Spline) {
+          shape.plainControlPoints.forEach((point, i) => {
+            if (safeX) {
+              shape.controlPoints[i].x = axis!.getOriginalX(
+                serialized[index].dynamicControlPoints[i].x + axis!.distance.x,
+              );
+            }
+
+            if (safeY) {
+              shape.controlPoints[i].y = axis!.getOriginalY(
+                serialized[index].dynamicControlPoints[i].y + axis!.distance.y,
+              );
+            }
+          });
+        }
+      }
+    };
 
     // 更新草稿坐标
     this.group.each((shape, index) => {
-      shape.plainCoordinate.forEach((point, i) => {
-        if (safeX) {
-          shape.coordinate[i].x = axis!.getOriginalX(_preDynamicCoordinates[index][i].x + axis!.distance.x);
-        }
-
-        if (safeY) {
-          shape.coordinate[i].y = axis!.getOriginalY(_preDynamicCoordinates[index][i].y + axis!.distance.y);
-        }
-      });
+      loop(shape, index, _serializeData?.shapes);
     });
 
     // 手动更新组合的包围盒

@@ -26,28 +26,7 @@ export interface BasicToolParams<Data, Style> {
    *
    * @default false
    */
-  showOrder: boolean;
-
-  /**
-   * 标注线宽
-   *
-   * @default 2
-   */
-  strokeWidth?: number;
-
-  /**
-   * 标注填充不透明度
-   *
-   * @default 0.7
-   */
-  fillOpacity?: number;
-
-  /**
-   * 标注线不透明度
-   *
-   * @default 1
-   */
-  strokeOpacity?: number;
+  showOrder?: boolean;
 }
 
 type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Shape<Style>, Style>;

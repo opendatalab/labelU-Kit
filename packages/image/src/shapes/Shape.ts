@@ -13,12 +13,6 @@ type CoordinateChangeHandler = () => void;
  * 画布上的图形对象（基类）
  */
 export class Shape<Style> {
-  static strokeOpacity = 0.9;
-
-  static fillOpacity = 0.7;
-
-  static strokeWidth = 2;
-
   private _event = new EventEmitter();
 
   private _cachedRBush: RBushItem | null = null;
@@ -77,6 +71,12 @@ export class Shape<Style> {
     this.onCoordinateChange(this._updateBBox.bind(this));
     this.onCoordinateChange(this._updateRBush.bind(this));
     this.update();
+  }
+
+  public serialize() {
+    return {
+      id: this.id,
+    };
   }
 
   /**
@@ -248,6 +248,8 @@ export class Shape<Style> {
   }
 
   public destroy() {
+    // FIXME: rbush的更新监听需要在销毁时清除
+    this._onCoordinateChangeHandlers = [];
     rbush.remove(this._cachedRBush!);
     this._event.removeAllListeners();
     this._cachedRBush = null;

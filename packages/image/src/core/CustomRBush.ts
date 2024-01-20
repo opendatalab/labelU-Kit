@@ -20,10 +20,41 @@ export interface RBushItem extends BBox {
 export class CustomRBush extends RBush<RBushItem> {
   private _nearestPoint: Point | null = null;
 
+  private _mapping: Map<string, RBushItem> = new Map();
+
   constructor() {
     super();
 
+    // @ts-ignore
+    window.rbush = this;
+
     eventEmitter.on(EInternalEvent.Render, this._onRender);
+  }
+
+  public insert(item: RBushItem): RBush<RBushItem> {
+    if (this._mapping.has(item.id)) {
+      this.remove(item);
+    }
+
+    this._mapping.set(item.id, item);
+
+    super.insert(item);
+
+    return this;
+  }
+
+  public remove(item: RBushItem, _equals?: ((a: RBushItem, b: RBushItem) => boolean) | undefined): RBush<RBushItem> {
+    const { _group, _shape } = item;
+
+    this._mapping.delete(item.id);
+
+    if (_group && _shape) {
+      _group.remove(_shape);
+    }
+
+    super.remove(item);
+
+    return this;
   }
 
   private _onRender = () => {
@@ -131,6 +162,10 @@ export class CustomRBush extends RBush<RBushItem> {
 
   public get nearestPoint() {
     return this._nearestPoint;
+  }
+
+  public set nearestPoint(value: Point | null) {
+    this._nearestPoint = value;
   }
 
   public destroy() {

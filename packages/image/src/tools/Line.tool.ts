@@ -44,6 +44,12 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
    * @default 2
    */
   minPointAmount?: number;
+
+  /**
+   * 最大点数
+   * @default undefined
+   */
+  maxPointAmount?: number;
 }
 
 // @ts-ignore
@@ -572,14 +578,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.onAdd(
-      {
-        ...data,
-        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
-        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
-      },
-      e,
-    );
     this.addToData(data);
 
     this._addAnnotation(data);
@@ -589,6 +587,15 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     axis!.rerender();
     this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
+
+    Tool.onAdd(
+      {
+        ...data,
+        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
+        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
+      },
+      e,
+    );
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

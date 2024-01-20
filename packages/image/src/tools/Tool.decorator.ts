@@ -166,6 +166,7 @@ export function ToolWrapper<
 
     public clear() {
       this.clearDrawing();
+      this._data = [];
 
       if (this.draft) {
         this.deleteDraft();

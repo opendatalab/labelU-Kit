@@ -3,7 +3,7 @@ import Color from 'color';
 
 import type { LineStyle, Line } from '../shapes/Line.shape';
 import type { PolygonData } from '../annotations';
-import { AnnotationLine, AnnotationPolygon } from '../annotations';
+import { Annotation, AnnotationLine, AnnotationPolygon } from '../annotations';
 import type { PointStyle, Point, PolygonStyle, AxisPoint } from '../shapes';
 import { Spline, ClosedSpline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -32,6 +32,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
 
     this.config = config;
     this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
@@ -41,7 +42,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
    * 设置图形
    */
   private _setupShapes() {
-    const { data, group, style, labelColor } = this;
+    const { data, group, style, labelColor, strokeColor } = this;
 
     group.add(
       // 多边形用于颜色填充
@@ -67,7 +68,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
         controlPoints: [{ ...startControlPoint }, { ...endControlPoint }],
         style: {
           ...style,
-          stroke: labelColor,
+          stroke: strokeColor,
         },
       });
 

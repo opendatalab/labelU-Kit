@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash.clonedeep';
+
 import { Shape } from './Shape';
 import type { AxisPoint } from './Point.shape';
 import { getDistanceToLine } from './math.util';
@@ -25,8 +27,6 @@ export interface LineParams {
 export class Line extends Shape<LineStyle> {
   /**
    * Rbush 碰撞检测阈值
-   *
-   * TODO: 阈值是否可配置
    */
   static DISTANCE_THRESHOLD = 2 as const;
 
@@ -44,6 +44,17 @@ export class Line extends Shape<LineStyle> {
     if (style) {
       this.style = { ...this.style, ...style };
     }
+  }
+
+  public serialize() {
+    const { id, style, plainCoordinate, dynamicCoordinate } = this;
+
+    return {
+      id,
+      coordinate: cloneDeep(plainCoordinate),
+      dynamicCoordinate: cloneDeep(dynamicCoordinate),
+      style,
+    };
   }
 
   /**

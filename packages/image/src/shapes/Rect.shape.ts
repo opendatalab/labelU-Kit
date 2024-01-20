@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash.clonedeep';
+
 import { DEFAULT_LABEL_COLOR } from '../constant';
 import { axis } from '../singletons';
 import type { AxisPoint } from './Point.shape';
@@ -89,6 +91,21 @@ export class Rect extends Shape<RectStyle> {
         maxY,
       };
     });
+  }
+
+  public serialize() {
+    const { id, style, plainCoordinate, dynamicCoordinate, _width, _height } = this;
+
+    return {
+      id,
+      coordinate: cloneDeep(plainCoordinate),
+      dynamicCoordinate: cloneDeep(dynamicCoordinate),
+      width: _width,
+      height: _height,
+      dynamicWidth: this._scaledWidth,
+      dynamicHeight: this._scaledHeight,
+      style,
+    };
   }
 
   public set width(width: number) {
