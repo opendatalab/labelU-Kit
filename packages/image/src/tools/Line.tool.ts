@@ -522,7 +522,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.onAdd({ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }, e);
+    Tool.onAdd([{ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }], e);
 
     this.addToData(data);
     this._addAnnotation(data);
@@ -589,11 +589,13 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     monitor!.setSelectedAnnotationId(data.id);
 
     Tool.onAdd(
-      {
-        ...data,
-        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
-        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
-      },
+      [
+        {
+          ...data,
+          points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
+          controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
+        },
+      ],
       e,
     );
   }

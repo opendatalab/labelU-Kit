@@ -28,7 +28,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
   private _pointIndex: number | null = null;
 
   constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>) {
-    super(params);
+    super({ ...params, name: 'polygon' });
 
     this.config = config;
     this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);

@@ -52,7 +52,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
   private _tool: PolygonTool;
 
   constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>, tool: PolygonTool) {
-    super(params);
+    super({ ...params, name: 'polygon' });
 
     this.config = config;
     this._tool = tool;
@@ -204,6 +204,12 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
         };
       });
       this._tool.createAnnotationsFromData(newAnnotationsData);
+      Tool.onAdd(
+        newAnnotationsData.map((item) => ({
+          ...item,
+          points: item.points.map((point) => axis!.convertCanvasCoordinate(point)),
+        })),
+      );
       axis?.rerender();
     }
   }
@@ -277,6 +283,17 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
     const { data, _pointToBeAdded, group, config } = this;
     // 插入控制点
     if (_pointToBeAdded) {
+      // 校验点的个数
+      if (group.shapes[0].coordinate.length + 1 > config.maxPointAmount!) {
+        Tool.error({
+          type: 'maxPointAmount',
+          message: `At most ${config.maxPointAmount} points are allowed`,
+          value: config.maxPointAmount,
+        });
+
+        return;
+      }
+
       const insertIndex = Number(_pointToBeAdded.name);
       // 先往data里增加一个点
       data.points.splice(insertIndex, 0, {
@@ -299,6 +316,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
         Tool.error({
           type: 'minPointAmount',
           message: `At least ${config.minPointAmount} points are required`,
+          value: config.minPointAmount,
         });
 
         return;
@@ -343,7 +361,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
    * @description 控制点移动时，更新线段的端点
    */
   private _onControllerPointMove = ({ coordinate }: ControllerPoint, e: MouseEvent) => {
-    const { _pointIndex, _effectedLines } = this;
+    const { _pointIndex, _effectedLines, config } = this;
 
     if (_pointIndex === null || !_effectedLines) {
       return;
@@ -352,14 +370,16 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
     let x = coordinate[0].x;
     let y = coordinate[0].y;
 
-    const latestPoint = rbush.scanPolygonsAndSetNearestPoint(
-      {
-        x: e.offsetX,
-        y: e.offsetY,
-      },
-      10,
-      [this.group.id],
-    );
+    const latestPoint =
+      config.edgeAdsorptive &&
+      rbush.scanPolygonsAndSetNearestPoint(
+        {
+          x: e.offsetX,
+          y: e.offsetY,
+        },
+        10,
+        [this.group.id],
+      );
 
     if (latestPoint) {
       x = latestPoint.x;

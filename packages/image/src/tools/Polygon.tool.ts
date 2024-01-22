@@ -142,22 +142,24 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     drawing!.set(data.id, annotation);
   }
 
-  private _validate(data: PolygonData) {
+  private _validate(points: AxisPoint[]) {
     const { config } = this;
 
-    if (data.points.length < config.minPointAmount!) {
+    if (points.length < config.minPointAmount!) {
       Tool.error({
         type: 'minPointAmount',
         message: `Polygon must have at least ${config.minPointAmount} points!`,
+        value: config.minPointAmount,
       });
 
       return false;
     }
 
-    if (config.maxPointAmount && data.points.length > config.maxPointAmount) {
+    if (config.maxPointAmount && points.length > config.maxPointAmount) {
       Tool.error({
         type: 'maxPointAmount',
         message: `Polygon must have at most ${config.maxPointAmount} points!`,
+        value: config.maxPointAmount,
       });
 
       return false;
@@ -310,6 +312,14 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           }),
         );
       } else {
+        if (this._creatingCurves.shapes[0].coordinate.length + 1 > config.maxPointAmount!) {
+          Tool.error({
+            type: 'maxPointAmount',
+            message: `Polygon must have at most ${config.maxPointAmount} points!`,
+            value: config.maxPointAmount,
+          });
+          return;
+        }
         // 往曲线中增加一个点
         const currentCreatingPolygonCurve = this._creatingCurves.shapes[0] as ClosedSpline;
         currentCreatingPolygonCurve.coordinate = [
@@ -391,7 +401,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           id: uuid(),
           style: {
             ...style,
-            stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel),
+            // 填充的多边形不需要边框
+            strokeWidth: 0,
+            stroke: 'transparent',
             fill: Color(AnnotationPolygon.labelStatic.getLabelColor(activeLabel)).alpha(0.3).toString(),
           },
           coordinate: [
@@ -405,6 +417,15 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     // 多边形增加一个点
     const { _creatingShapes } = this;
+
+    if (this._creatingShapes.shapes[0].coordinate.length + 1 > config.maxPointAmount!) {
+      Tool.error({
+        type: 'maxPointAmount',
+        message: `Polygon must have at most ${config.maxPointAmount} points!`,
+        value: config.maxPointAmount,
+      });
+      return;
+    }
 
     _creatingShapes.shapes[0].coordinate = [..._creatingShapes.shapes[0].plainCoordinate, cloneDeep(startPoint)];
 
@@ -648,7 +669,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       order: monitor!.getNextOrder(),
     };
 
-    if (!this._validate(data)) {
+    if (!this._validate(data.points)) {
       return;
     }
 
@@ -661,11 +682,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
     Tool.onAdd(
-      {
-        ...data,
-        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
-        controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
-      },
+      [
+        {
+          ...data,
+          points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
+          controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
+        },
+      ],
       e,
     );
   }
@@ -697,15 +720,17 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       order: monitor!.getNextOrder(),
     };
 
-    if (!this._validate(data)) {
+    if (!this._validate(data.points)) {
       return;
     }
 
     Tool.onAdd(
-      {
-        ...data,
-        points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
-      },
+      [
+        {
+          ...data,
+          points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
+        },
+      ],
       e,
     );
     this.addToData(data);

@@ -11,7 +11,7 @@ export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> 
   public config: PointToolOptions;
 
   constructor(config: PointToolOptions, params: AnnotationParams<PointData, PointStyle>) {
-    super(params);
+    super({ ...params, name: 'point' });
 
     this.config = config;
     this.labelColor = AnnotationPoint.labelStatic.getLabelColor(this.data.label);

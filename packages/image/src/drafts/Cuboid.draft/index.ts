@@ -84,7 +84,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(config: CuboidToolOptions, params: AnnotationParams<CuboidData, PolygonStyle>) {
-    super(params);
+    super({ ...params, name: 'cuboid' });
 
     this.config = config;
     this.labelColor = AnnotationCuboid.labelStatic.getLabelColor(this.data.label);

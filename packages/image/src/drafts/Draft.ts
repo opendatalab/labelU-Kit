@@ -3,7 +3,7 @@ import EventEmitter from 'eventemitter3';
 import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { AnnotationParams } from '../annotations/Annotation';
-import type { BasicImageAnnotation } from '../interface';
+import type { BasicImageAnnotation, ToolName } from '../interface';
 import type { AxisPoint, Shape } from '../shapes';
 import { Point, Group, Spline } from '../shapes';
 import { ControllerPoint } from './ControllerPoint';
@@ -24,6 +24,8 @@ export class Draft<
   public labelColor = LabelBase.DEFAULT_COLOR;
 
   public strokeColor = LabelBase.DEFAULT_COLOR;
+
+  public name: ToolName;
 
   public id: string;
 
@@ -51,9 +53,10 @@ export class Draft<
     }[];
   } | null = null;
 
-  constructor({ id, data, style, hoveredStyle, showOrder }: AnnotationParams<Data, Style>) {
+  constructor({ id, data, style, hoveredStyle, showOrder, name }: AnnotationParams<Data, Style> & { name: ToolName }) {
     super();
 
+    this.name = name;
     this.id = id;
     this.data = data;
     this.style = style;
@@ -216,18 +219,17 @@ export class Draft<
   }
 
   public isUnderCursor(mouseCoord: AxisPoint) {
-    const bbox = this.getBBoxWithoutControllerPoint();
+    // 线条应该判定bbox在鼠标下
 
-    if (
-      mouseCoord.x >= bbox.minX &&
-      mouseCoord.x <= bbox.maxX &&
-      mouseCoord.y >= bbox.minY &&
-      mouseCoord.y <= bbox.maxY
-    ) {
-      return true;
+    if (this.name === 'line') {
+      const bbox = this.getBBoxWithoutControllerPoint();
+
+      return (
+        mouseCoord.x >= bbox.minX && mouseCoord.x <= bbox.maxX && mouseCoord.y >= bbox.minY && mouseCoord.y <= bbox.maxY
+      );
     }
 
-    return false;
+    return Boolean(this.group.isShapesUnderCursor(mouseCoord));
   }
 
   /**

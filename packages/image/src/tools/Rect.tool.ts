@@ -205,10 +205,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     axis!.rerender();
 
     Tool.onAdd(
-      {
-        ...data,
-        ...this.convertAnnotationItem(data),
-      },
+      [
+        {
+          ...data,
+          ...this.convertAnnotationItem(data),
+        },
+      ],
       e,
     );
   }

@@ -31,7 +31,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
   private _edgePositionMapping: Map<EdgePosition, ControllerEdge> = new Map();
 
   constructor(config: RectToolOptions, params: AnnotationParams<RectData, RectStyle>) {
-    super(params);
+    super({ ...params, name: 'rect' });
 
     this.config = config;
     this.labelColor = AnnotationRect.labelStatic.getLabelColor(params.data.label);

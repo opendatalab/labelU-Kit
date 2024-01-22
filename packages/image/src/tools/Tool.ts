@@ -250,12 +250,12 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this._data.splice(index, 1);
   }
 
-  static error(message: { type: string; message: string }) {
+  static error(message: { type: string; message: string; value?: any }) {
     eventEmitter.emit('error', message);
   }
 
-  static onAdd<T>(data: T, e: MouseEvent) {
-    eventEmitter.emit('add', data, e);
+  static onAdd<T>(datas: T[], e?: MouseEvent) {
+    eventEmitter.emit('add', datas, e);
   }
 
   static emitSelect<T>(data: T, toolName: ToolName) {

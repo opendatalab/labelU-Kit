@@ -27,7 +27,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
   private _pointToBeAdded: ControllerPoint | null = null;
 
   constructor(config: LineToolOptions, params: AnnotationParams<LineData, LineStyle>) {
-    super(params);
+    super({ ...params, name: 'line' });
 
     this.config = config;
     this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);

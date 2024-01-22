@@ -109,7 +109,6 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     this.draft.group.on(EInternalEvent.UnSelect, () => {
       this.archiveDraft();
       axis!.rerender();
-      console.log('archive');
     });
   }
 
@@ -199,10 +198,12 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     this.addToData(data);
 
     Tool.onAdd(
-      {
-        ...data,
-        ...this.convertAnnotationItem(data),
-      },
+      [
+        {
+          ...data,
+          ...this.convertAnnotationItem(data),
+        },
+      ],
       _e,
     );
   }
