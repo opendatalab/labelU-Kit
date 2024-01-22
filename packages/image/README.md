@@ -4,6 +4,8 @@
 
 Image annotation engine for LabelU
 
+Try it out at [opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/image)
+
 ## Usage
 
 ```bash
