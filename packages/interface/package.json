@@ -23,7 +23,6 @@
     "email": "shenguanlin@pjlab.org.cn"
   },
   "devDependencies": {
-    "@labelu/image": "workspace:^1.0.1",
     "typescript": "4.8.4"
   }
 }
