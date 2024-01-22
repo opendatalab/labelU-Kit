@@ -7,7 +7,7 @@ import svgr from 'vite-plugin-svgr';
 import tsMonoAlias from 'vite-plugin-ts-mono-alias';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
-const isOnline = true;
+const isOnline = !!process.env.VITE_IS_ONLINE;
 console.log('isOnline', isOnline);
 
 // https://vitejs.dev/config/
@@ -33,11 +33,7 @@ export default defineConfig({
     react(),
     svgr(),
     ViteEjsPlugin(),
-    !process.env.DIST &&
-      process.env.NODE_ENV !== 'production' &&
-      tsMonoAlias({
-        exact: true,
-      }),
+    !process.env.DIST && process.env.NODE_ENV !== 'production' && tsMonoAlias(),
   ].filter(Boolean),
   resolve: {
     alias: {

@@ -13,4 +13,5 @@ export * from './Kbd';
 export * from './FlexLayout';
 export * from './MediaAnnotator';
 export * from './PlayerController';
+export * from './hooks';
 export * from './utils';

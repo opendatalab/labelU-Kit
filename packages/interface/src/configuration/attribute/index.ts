@@ -30,6 +30,8 @@ export interface Attribute extends AttributeItem {
   attributes?: InnerAttribute[];
 }
 
+export type ILabel = Attribute;
+
 /**
  * 文本类型控件的定义
  */

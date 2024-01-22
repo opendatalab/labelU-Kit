@@ -43,6 +43,7 @@
     "rc-tree": "^5.7.10",
     "react-draggable": "^4.4.5",
     "react-hotkeys-hook": "^4.4.1",
+    "resize-observer-polyfill": "^1.5.1",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
