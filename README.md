@@ -24,10 +24,10 @@
 
 | 名称 | 版本 | 描述 |
 | --- | --- | --- |
-| [@labelu/annotation](./packages/annotation) | [![npm](https://img.shields.io/npm/v/%40labelu/annotation.svg)](https://www.npmjs.com/package/@labelu/annotation) | 标注引擎（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |
-| [@labelu/components](./packages/components) | [![npm](https://img.shields.io/npm/v/%40labelu/components.svg)](https://www.npmjs.com/package/@labelu/components) | 标注组件库（fork 自 [labelbee](https://github.com/open-mmlab/labelbee)） |
+| [@labelu/image](./packages/image) | [![npm](https://img.shields.io/npm/v/%40labelu/image.svg)](https://www.npmjs.com/package/@labelu/image) | 图片标注引擎 |
 | [@labelu/interface](./packages/interface) | [![npm](https://img.shields.io/npm/v/%40labelu/interface.svg)](https://www.npmjs.com/package/@labelu/interface) | 基础类型定义 |
 | [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | 基础 React 组件 |
+| [@labelu/image-annotator-react](./packages/image-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/image-annotator-react.svg)](https://www.npmjs.com/package/@labelu/image-annotator-react) | 图片 React 标注套件 |
 | [@labelu/audio-react](./packages/audio-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-react.svg)](https://www.npmjs.com/package/@labelu/audio-react) | 基础音频标注 React 组件 |
 | [@labelu/audio-annotator-react](./packages/audio-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react) | 音频 React 标注套件 |
 | [@labelu/video-react](./packages/video-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-react.svg)](https://www.npmjs.com/package/@labelu/video-react) | 基础视频标注 React 组件 |
@@ -35,4 +35,4 @@
 
 ## 许可证
 
-此项目是根据 Apache 2.0 许可证发布的
+此项目根据 Apache 2.0 许可证发布

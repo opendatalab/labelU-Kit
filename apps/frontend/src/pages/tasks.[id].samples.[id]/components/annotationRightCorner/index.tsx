@@ -9,7 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import { FlexLayout } from '@labelu/components-react';
 
 import commonController from '@/utils/common';
-import { annotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
+import { imageAnnotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
@@ -161,13 +161,46 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
       return;
     }
 
-    let result = {};
+    const result = {};
     let innerSample;
 
     if (task.media_type === MediaType.IMAGE) {
       // @ts-ignore
-      result = await annotationRef.current?.getResult();
-      innerSample = await annotationRef?.current?.getSample();
+      const imageResult = (await imageAnnotationRef.current?.getAnnotations()) ?? {};
+      const tagOrTextResult = (await imageAnnotationRef.current?.getGlobalAnnotations()) ?? {};
+
+      innerSample = await imageAnnotationRef?.current?.getSample();
+
+      Object.keys(imageResult).forEach((item) => {
+        if (imageResult?.[item]?.length) {
+          result[item + 'Tool'] = {
+            toolName: item + 'Tool',
+            result: imageResult[item].map((annotation: any) => {
+              const resultItem = {
+                ...omit(['tool', 'visible', 'label'])(annotation),
+                attribute: annotation.label,
+              };
+
+              if (item === 'line' || item === 'polygon') {
+                return {
+                  ...omit(['points'])(resultItem),
+                  pointList: annotation.points,
+                };
+              }
+              return resultItem;
+            }),
+          };
+        }
+      });
+
+      Object.keys(tagOrTextResult).forEach((item) => {
+        if (tagOrTextResult?.[item]?.length) {
+          result[item + 'Tool'] = {
+            toolName: item + 'Tool',
+            result: tagOrTextResult[item],
+          };
+        }
+      });
     } else if (task.media_type === MediaType.VIDEO) {
       const videoAnnotations = await videoAnnotationRef.current?.getAnnotations();
 

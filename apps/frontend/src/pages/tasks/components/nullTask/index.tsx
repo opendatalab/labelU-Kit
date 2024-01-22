@@ -26,7 +26,7 @@ const NullTask = () => {
 
   return (
     <FlexLayout flex="column" full items="center" justify="center">
-      <Wrapper onClick={createTask} gap="1rem">
+      <Wrapper data-wiz="task-create" onClick={createTask} gap="1rem">
         <CreateTaskIcon />
         <Button type="primary">新建任务</Button>
       </Wrapper>

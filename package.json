@@ -3,13 +3,13 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/frontend"
+    "apps/*"
   ],
-  "version": "3.2.1",
+  "version": "3.3.0-alpha.1",
   "scripts": {
     "prepare": "husky install",
-    "build": "pnpm --filter @labelu/utils --filter @labelu/formatter --filter @labelu/annotation --filter @labelu/components --filter @labelu/interface --filter @labelu/components-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
-    "clean": "pnpm --filter @labelu/utils --filter @labelu/formatter --filter @labelu/annotation --filter @labelu/components --filter @labelu/interface --filter @labelu/components-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react clean",
+    "build": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
+    "clean": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react clean",
     "build:frontend": "pnpm --filter @labelu/frontend build",
     "release:frontend": "cd apps/frontend && npm run release",
     "lint:frontend": "eslint ./apps/frontend --ext .js,.jsx,.ts,.tsx --fix",
@@ -21,23 +21,22 @@
     "release-dry": "multi-semantic-release --dry-run --ignore-private-packages --no-ci",
     "release": "multi-semantic-release --ignore-private-packages"
   },
-  "author": "wuhui",
+  "author": "gary-shen",
   "contributors": [
-    "lijingchi",
-    "tanjunbao",
-    "chenlu",
-    "lihuaqi",
-    "luoluo"
+    "GaryShen <grinson50@gmail.com>"
   ],
   "keywords": [
     "annotation",
+    "image annotation",
+    "video annotation",
+    "audio annotation",
     "canvas",
     "react"
   ],
   "homepage": "https://github.com/opendatalab/labelU-Kit.git",
   "bugs": {
     "url": "https://github.com/opendatalab/labelU-Kit.git",
-    "email": "751569801@qq.com"
+    "email": "shenguanlin@pjlab.org.cn"
   },
   "main": "index.js",
   "license": "Apache-2.0",
