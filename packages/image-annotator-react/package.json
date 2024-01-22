@@ -29,7 +29,7 @@
     "react"
   ],
   "dependencies": {
-    "@labelu/components-react": "1.2.1",
+    "@labelu/components-react": "workspace:*",
     "@labelu/image": "workspace:*",
     "@labelu/interface": "1.2.1",
     "polished": "^4.2.2",
