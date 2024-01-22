@@ -1,6 +1,7 @@
 {
   "name": "labelu-kit-website",
   "version": "1.0.0",
+  "private": true,
   "description": "labelu annotation tools",
   "scripts": {
     "analyze": "cross-env ANALYZE=true vite build",
