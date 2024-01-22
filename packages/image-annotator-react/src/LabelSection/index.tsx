@@ -10,7 +10,7 @@ import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
 import { useTool } from '@/context/tool.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
 
-export const dragModalRef = createRef<DraggableModalRef | null>();
+export const dragModalRef = createRef<DraggableModalRef>();
 
 export interface AttributeModalOpenParams {
   labelValue: string | undefined;
