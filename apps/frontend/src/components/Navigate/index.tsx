@@ -48,7 +48,7 @@ const Homepage = () => {
       </FlexLayout.Item>
       <FlexLayout.Item flex gap="1rem">
         {window.IS_ONLINE && (
-          <a href="https://github.com/opendatalab/labelU#getting-started">
+          <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/#/guide/install">
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>
               本地部署
             </Button>
@@ -56,8 +56,9 @@ const Homepage = () => {
         )}
         <Button
           type="link"
+          data-wiz="documentation"
           icon={<BellOutlined />}
-          href="https://github.com/opendatalab/labelU/blob/main/docs/GUIDE.md"
+          href="https://opendatalab.github.io/labelU/#/"
           style={{ color: 'rgba(0, 0, 0, 0.85)' }}
           target="_blank"
           rel="noreferrer"

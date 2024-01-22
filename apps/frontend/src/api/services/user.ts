@@ -1,3 +1,5 @@
+import * as storage from '@/utils/storage';
+
 import request from '../request';
 import type {
   LoginCommand,
@@ -11,8 +13,8 @@ import type {
 export async function login(params: LoginCommand): Promise<OkRespLoginResponse> {
   const result = await request.post('/v1/users/login', params);
 
-  localStorage.setItem('token', result.data.token);
-  localStorage.setItem('username', (params as LoginCommand).username!);
+  storage.set('token', result.data.token);
+  storage.set('username', (params as LoginCommand).username!);
 
   return result;
 }
@@ -20,7 +22,7 @@ export async function login(params: LoginCommand): Promise<OkRespLoginResponse> 
 export async function ssoLogin(code: string) {
   const result = await request.post(`/v1/users/token?code=${code}`);
 
-  localStorage.setItem('token', result.data.token);
+  storage.set('token', result.data.token);
 
   return result;
 }
@@ -32,6 +34,7 @@ export async function getUserInfo(): Promise<OkRespUserInfo> {
 export async function logout(): Promise<OkRespLogoutResponse> {
   localStorage.removeItem('token');
   localStorage.removeItem('username');
+  localStorage.removeItem('userid');
 
   return await request.post('/v1/users/logout');
 }

@@ -28,6 +28,7 @@ export async function rootLoader({ request }: LoaderFunctionArgs) {
         const { data } = await getUserInfo();
 
         storage.set('username', data.username);
+        storage.set('userid', '' + data.id);
 
         return data;
       }

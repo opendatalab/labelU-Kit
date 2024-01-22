@@ -22,7 +22,7 @@ import { convertImageConfig } from '@/utils/convertImageConfig';
 import { convertImageSample } from '@/utils/convertImageSample';
 
 import commonController from '../../utils/common';
-import SlideLoader, { slideRef } from './components/slideLoader';
+import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
@@ -96,9 +96,13 @@ const AnnotationPage = () => {
 
     return data;
   }, [routeParams.taskId]);
-  const [samples = [] as SampleResponse[], loading, setSamples] = useScrollFetch(fetchSamples, slideRef.current!, {
-    isEnd: () => totalCount === samples.length,
-  });
+  const [samples = [] as SampleResponse[], loading, setSamples] = useScrollFetch(
+    fetchSamples,
+    () => document.querySelector('.lab-layout__left_sider'),
+    {
+      isEnd: () => totalCount === samples.length,
+    },
+  );
 
   const transformed = useMemo(() => {
     if (!sample?.data) {

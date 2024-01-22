@@ -22,11 +22,11 @@ on:
       branch:
         description: 'Frontend branch'
         required: false
-        default: 'release'
+        default: 'online'
         type: choice
         options:
           - release
-          - alpha
+          - online
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
