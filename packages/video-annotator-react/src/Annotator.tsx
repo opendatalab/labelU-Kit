@@ -171,20 +171,10 @@ function ForwardAnnotator(
   }, [editingSample, reset]);
 
   const updateCurrentSample = useCallback(
-    (_newSample: React.SetStateAction<MediaSample | undefined>, skipHistory: boolean = false) => {
-      setCurrentSample(((pre) => {
-        const newSample = typeof _newSample === 'function' ? _newSample(pre) : _newSample;
-
-        if (skipHistory && pre) {
-          pastRef.current = [...pastRef.current, pre].slice(-maxHistoryCount);
-        }
-
-        return newSample;
-      }) as React.SetStateAction<MediaSample>);
-
-      futureRef.current = [];
+    (_newSample: React.SetStateAction<MediaSample | undefined>) => {
+      setCurrentSample(_newSample);
     },
-    [futureRef, maxHistoryCount, pastRef, setCurrentSample],
+    [setCurrentSample],
   );
 
   // player
