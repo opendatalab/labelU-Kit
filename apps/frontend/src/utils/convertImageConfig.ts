@@ -25,9 +25,7 @@ export function convertImageConfig(taskConfig?: ToolsConfigState) {
       };
 
       if (toolName === 'line') {
-        if (item.config.edgeAdsorption) {
-          editorConfig.line!.edgeAdsorptive = item.config.edgeAdsorption;
-        }
+        editorConfig.line!.edgeAdsorptive = Boolean(item.config.edgeAdsorption);
         editorConfig.line!.lineType = item.config.lineType === 0 ? 'line' : 'spline';
         editorConfig.line!.minPointAmount = item.config.lowerLimitPointNum;
         editorConfig.line!.maxPointAmount = item.config.upperLimitPointNum;
@@ -43,9 +41,7 @@ export function convertImageConfig(taskConfig?: ToolsConfigState) {
       }
 
       if (toolName === 'polygon') {
-        if (item.config.edgeAdsorption) {
-          editorConfig.polygon!.edgeAdsorptive = item.config.edgeAdsorption;
-        }
+        editorConfig.polygon!.edgeAdsorptive = Boolean(item.config.edgeAdsorption);
         editorConfig.polygon!.lineType = item.config.lineType === 0 ? 'line' : 'spline';
 
         editorConfig.polygon!.minPointAmount = item.config.lowerLimitPointNum;

@@ -38,6 +38,7 @@
   "scripts": {
     "postinstall": "node ./scripts/generate_css_variables_from_antd_theme_token.js",
     "start": "vite --port 3004",
+    "preview": "vite preview --port 3007",
     "build": "cross-env CI=false vite build",
     "package:dist": "cross-env DIST=true vite",
     "release": "semantic-release",

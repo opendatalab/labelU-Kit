@@ -4,7 +4,6 @@ import type { ImageSample } from '@labelu/image-annotator-react/dist/context/sam
 import { omit } from 'lodash/fp';
 
 import type { SampleData } from '@/api/types';
-import { MediaType } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
@@ -13,7 +12,6 @@ export function convertImageSample(
   sample: SampleData | undefined,
   sampleId: string | number | undefined,
   config: ImageAnnotatorProps['config'],
-  mediaType?: MediaType,
 ): ImageSample | undefined {
   if (!sample || !sampleId) {
     return;
@@ -44,9 +42,13 @@ export function convertImageSample(
 
   return {
     id,
-    url: mediaType === MediaType.VIDEO ? url.replace('attachment', 'partial') : url,
+    url,
     data: _.chain(pool)
       .map(([type, key]) => {
+        if (!resultParsed[key]) {
+          return;
+        }
+
         const items = _.get(resultParsed, [key, 'result'], []);
         if (!items.length && (type === 'tag' || type === 'text')) {
           // 生成全局工具的默认值
@@ -73,6 +75,7 @@ export function convertImageSample(
           }),
         ];
       })
+      .compact()
       .fromPairs()
       .value(),
   };

@@ -47,16 +47,18 @@ const AnnotationPage = () => {
 
     // TODO： labelu/image中的错误定义
     const handleError = (err: any) => {
+      const value = err.value;
+
       if (err.type === 'rotate') {
         message.error('有标注数据时不可旋转图片');
       }
 
       if (err.type === 'minPointAmount') {
-        message.error('最少点数不满足');
+        message.error(`最少点数不能小于${value}个`);
       }
 
       if (err.type === 'maxPointAmount') {
-        message.error('点个数超过配置个数');
+        message.error(`点数最多不能大于${value}个`);
       }
 
       if (err.type === 'minWidth') {
