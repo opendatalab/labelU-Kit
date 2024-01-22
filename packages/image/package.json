@@ -1,6 +1,6 @@
 {
   "name": "@labelu/image",
-  "version": "1.0.1",
+  "version": "1.0.0-alpha.1",
   "description": "Image annotation tool for labelU",
   "author": {
     "name": "GaryShen",
@@ -50,7 +50,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@labelu/interface": "workspace:1.2.1",
+    "@labelu/interface": "1.3.0-alpha.1",
     "@types/color": "^3.0.6",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.mapvalues": "^4.6.9",
