@@ -1,6 +1,6 @@
 {
   "name": "@labelu/image-annotator-react",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "image annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -29,9 +29,9 @@
     "react"
   ],
   "dependencies": {
-    "@labelu/components-react": "workspace:*",
-    "@labelu/image": "workspace:*",
-    "@labelu/interface": "1.2.1",
+    "@labelu/components-react": "1.3.0-alpha.1",
+    "@labelu/image": "1.0.0-alpha.1",
+    "@labelu/interface": "1.3.0-alpha.1",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "resize-observer-polyfill": "^1.5.1",
