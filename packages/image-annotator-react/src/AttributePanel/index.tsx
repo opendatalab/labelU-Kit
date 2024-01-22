@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText, uid } from '@labelu/components-react';
 import type {
@@ -105,7 +105,7 @@ export function AttributePanel() {
   const {
     sortedImageAnnotations,
     annotationsWithGlobal,
-    imageAnnotationsMapping,
+    allAnnotationsMapping,
     selectedAnnotation,
     onGlobalAnnotationsChange,
     onImageAnnotationsClear,
@@ -228,50 +228,55 @@ export function AttributePanel() {
     };
   }, []);
 
-  const handleOnChange = (_changedValues: any, values: any[], type: GlobalAnnotationType) => {
-    const newAnnotations = [];
-    const existAnnotations: GlobalAnnotation[] = [];
+  const handleOnChange = useCallback(
+    (_changedValues: any, values: any[], type: GlobalAnnotationType) => {
+      const newAnnotations = [];
+      const existAnnotations: GlobalAnnotation[] = [];
 
-    for (const item of values) {
-      if (item.id && item.id in imageAnnotationsMapping) {
-        existAnnotations.push(item);
-      } else {
-        newAnnotations.push({
-          id: item.id || uid(),
-          type,
-          value: item.value,
-        });
-      }
-    }
-
-    const _annotations = {
-      ...globalAnnotations,
-    };
-
-    Object.keys(_annotations).forEach((key) => {
-      const toolAnnotations = _annotations[key as GlobalAnnotationType].map((item) => {
-        const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
-
-        if (existIndex >= 0) {
-          return existAnnotations[existIndex];
+      for (const item of values) {
+        if (item.id && item.id in allAnnotationsMapping) {
+          existAnnotations.push(item);
+        } else {
+          newAnnotations.push({
+            id: item.id || uid(),
+            type,
+            value: item.value,
+          });
         }
+      }
 
-        return item;
+      const _annotations = {
+        ...globalAnnotations,
+      };
+
+      Object.keys(_annotations).forEach((key) => {
+        const toolAnnotations = _annotations[key as GlobalAnnotationType].map((item) => {
+          const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
+
+          if (existIndex >= 0) {
+            return existAnnotations[existIndex];
+          }
+
+          return item;
+        });
+
+        _annotations[key as GlobalAnnotationType] = toolAnnotations;
       });
 
-      _annotations[key as GlobalAnnotationType] = toolAnnotations;
-    });
+      newAnnotations.forEach((item) => {
+        if (!_annotations[item.type]) {
+          _annotations[item.type] = [];
+        }
 
-    newAnnotations.forEach((item) => {
-      if (!_annotations[item.type]) {
-        _annotations[item.type] = [];
-      }
+        _annotations[item.type].push(item);
+      });
 
-      _annotations[item.type].push(item);
-    });
+      onGlobalAnnotationsChange(_annotations);
+    },
+    [globalAnnotations, allAnnotationsMapping, onGlobalAnnotationsChange],
+  );
 
-    onGlobalAnnotationsChange(_annotations);
-  };
+  console.log('useCallback', flatGlobalAnnotations);
 
   const handleClear = () => {
     if (!currentSample) {
@@ -340,8 +345,8 @@ export function AttributePanel() {
         })}
       </TabHeader>
       <Content activeKey={activeKey}>
-        <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
         <AttributeTree data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
+        <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
       </Content>
       <Footer onClick={handleClear}>
         <DeleteIcon />

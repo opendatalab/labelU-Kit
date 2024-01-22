@@ -210,28 +210,15 @@ function ForwardAnnotator(
       })
       .then(() => {
         Object.keys(annotationsFromSample).forEach((key) => {
-          engine?.loadData(key as ToolName, annotationsFromSample[key as ToolName]!);
+          if (TOOL_NAMES.includes(key as ToolName)) {
+            engine?.loadData(key as ToolName, annotationsFromSample[key as ToolName]!);
+          }
         });
-        engine?.switch('point');
       });
-  }, [annotationsFromSample, currentSample, engine]);
+  }, [annotationsFromSample, currentSample, engine, tools]);
 
   const selectedIndexRef = useRef<number>(-1);
 
-  const annotationsMapping = useMemo(() => {
-    const mapping: Record<string, AnnotationDataInUI> = {};
-
-    Object.keys(annotationsFromSample).forEach((key) => {
-      annotationsFromSample[key as ToolName]?.forEach((item) => {
-        mapping[item.id] = {
-          ...item,
-          tool: key as ToolName,
-        };
-      });
-    });
-
-    return mapping;
-  }, [annotationsFromSample]);
   const onRedoUndo = useCallback(
     (currentAnnotations: AnnotationsWithGlobal) => {
       engine?.clearData();
@@ -265,6 +252,27 @@ function ForwardAnnotator(
         onUndo: onRedoUndo,
       },
     );
+
+  const annotationsMapping = useMemo(() => {
+    const mapping: Record<string, AnnotationDataInUI> = {};
+
+    Object.keys(annotationsWithGlobal.global).forEach((key) => {
+      annotationsWithGlobal.global[key as TextAnnotationType | TagAnnotationType]?.forEach((item) => {
+        mapping[item.id] = item as unknown as AnnotationDataInUI;
+      });
+    });
+
+    Object.keys(annotationsWithGlobal.image).forEach((key) => {
+      annotationsWithGlobal.image[key as ToolName]?.forEach((item) => {
+        mapping[item.id] = {
+          ...item,
+          tool: key as ToolName,
+        };
+      });
+    });
+
+    return mapping;
+  }, [annotationsWithGlobal.global, annotationsWithGlobal.image]);
 
   const onGlobalAnnotationChange = useCallback(
     (newGlobalAnnotations: GlobalAnnotationPayload) => {
@@ -342,27 +350,26 @@ function ForwardAnnotator(
     });
   }, [updateAnnotationsWithGlobal]);
 
-  const onAnnotationChange = useCallback(
+  const onImageAnnotationChange = useCallback(
     (_annotation: AnnotationDataInUI) => {
       const toolName = _annotation.tool;
 
       updateAnnotationsWithGlobal((pre) => {
         const preImageAnnotations = { ...pre!.image };
-        const toolAnnotations = preImageAnnotations[toolName];
+        const toolAnnotations = preImageAnnotations[toolName].map((item) => {
+          if (_annotation.id === item.id) {
+            return _annotation;
+          }
 
-        toolAnnotations.forEach((item) => {
-          preImageAnnotations[item.tool] = preImageAnnotations[item.tool].map((annotation) => {
-            if (annotation.id === item.id) {
-              return item;
-            }
-
-            return annotation;
-          });
+          return item;
         });
 
         return {
           ...pre!,
-          image: preImageAnnotations,
+          image: {
+            ...preImageAnnotations,
+            [toolName]: toolAnnotations,
+          },
         };
       });
     },
@@ -379,7 +386,7 @@ function ForwardAnnotator(
         visible: true,
       };
       setSelectedAnnotation(newAnnotation);
-      onAnnotationChange(newAnnotation);
+      onImageAnnotationChange(newAnnotation);
       selectedIndexRef.current = sortedImageAnnotations.findIndex((item) => item.id === annotation.id);
     };
 
@@ -388,7 +395,7 @@ function ForwardAnnotator(
     return () => {
       engine?.off('select', handleSelectAnnotation);
     };
-  }, [engine, onAnnotationChange, sortedImageAnnotations]);
+  }, [engine, onImageAnnotationChange, sortedImageAnnotations]);
 
   useEffect(() => {
     const handleUnSelect = () => {
@@ -448,10 +455,11 @@ function ForwardAnnotator(
       });
     };
     // 添加标记
-    engine?.on('add', (annotation: AnnotationData) => {
+    engine?.on('add', (annotations: AnnotationData[]) => {
       _onAnnotationsChange();
       setSelectedAnnotation({
-        ...annotation,
+        // 默认选中第一个
+        ...annotations[0],
         tool: engine.activeToolName!,
       });
     });
@@ -577,8 +585,8 @@ function ForwardAnnotator(
       annotationsWithGlobal,
       sortedImageAnnotations,
       selectedAnnotation,
-      imageAnnotationsMapping: annotationsMapping,
-      onImageAnnotationChange: onAnnotationChange,
+      allAnnotationsMapping: annotationsMapping,
+      onImageAnnotationChange,
       onImageAnnotationsChange: onAnnotationsChange,
       onGlobalAnnotationsChange: onGlobalAnnotationChange,
       onGlobalAnnotationClear,
@@ -590,7 +598,7 @@ function ForwardAnnotator(
       annotationsMapping,
       onImageAnnotationsClear,
       annotationsWithGlobal,
-      onAnnotationChange,
+      onImageAnnotationChange,
       onAnnotationsChange,
       onGlobalAnnotationChange,
       onGlobalAnnotationClear,

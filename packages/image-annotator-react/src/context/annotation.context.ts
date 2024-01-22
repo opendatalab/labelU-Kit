@@ -29,7 +29,7 @@ export interface AnnotationContextType {
 
   selectedAnnotation: AnnotationDataInUI | undefined;
 
-  imageAnnotationsMapping: Record<string, AnnotationDataInUI>;
+  allAnnotationsMapping: Record<string, AnnotationDataInUI>;
 
   onImageAnnotationChange: (annotation: AnnotationDataInUI) => void;
 

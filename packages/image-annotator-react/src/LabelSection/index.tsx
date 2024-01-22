@@ -18,6 +18,9 @@ export interface AttributeModalOpenParams {
   e?: MouseEvent | React.MouseEvent;
   initialValues?: any;
   labelConfig?: ILabel;
+
+  /** 无论是否有标签属性，都打开编辑弹框 */
+  openModalAnyway?: boolean;
 }
 
 function generateDefaultAttributes(attributes?: (TextAttribute | EnumerableAttribute)[]) {
@@ -48,10 +51,22 @@ function generateDefaultAttributes(attributes?: (TextAttribute | EnumerableAttri
   return values;
 }
 
-export const openAttributeModal = ({ engine, labelValue, e, initialValues, labelConfig }: AttributeModalOpenParams) => {
+export const openAttributeModal = ({
+  engine,
+  labelValue,
+  e,
+  initialValues,
+  labelConfig,
+  openModalAnyway,
+}: AttributeModalOpenParams) => {
   const selectedAnnotation = engine?.getSelectedAnnotation();
 
   if (!dragModalRef.current || (!selectedAnnotation && !initialValues) || !labelValue || !labelConfig) {
+    return;
+  }
+
+  // 点击编辑属性时，不管有没有标签属性，都打开编辑框，用来编辑标签
+  if (!openModalAnyway && !labelConfig.attributes) {
     return;
   }
 

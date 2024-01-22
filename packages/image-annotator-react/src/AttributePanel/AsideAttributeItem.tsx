@@ -161,6 +161,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         labelValue: annotation!.label,
         engine,
         e,
+        openModalAnyway: true,
         initialValues: annotation!.attributes,
         labelConfig: engine.toolMap.get(annotation!.tool)?.labelMapping?.get(annotation!.label!),
       });
