@@ -164,7 +164,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   }
 
   protected archiveDraft() {
-    const { draft } = this;
+    const { draft, _creatingShape } = this;
+
+    if (_creatingShape) {
+      _creatingShape.destroy();
+      this._creatingShape = null;
+    }
 
     if (draft) {
       Tool.emitUnSelect(this.convertAnnotationItem(draft.data));
@@ -172,6 +177,15 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       this.recoverData();
       draft.destroy();
       this.draft = null;
+    }
+  }
+
+  protected destroyCreatingShapes() {
+    const { _creatingShape } = this;
+
+    if (_creatingShape) {
+      _creatingShape.destroy();
+      this._creatingShape = null;
     }
   }
 

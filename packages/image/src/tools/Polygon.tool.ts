@@ -218,6 +218,20 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     }
   }
 
+  protected destroyCreatingShapes() {
+    const { _creatingShapes, _creatingCurves } = this;
+
+    if (_creatingShapes) {
+      _creatingShapes.destroy();
+      this._creatingShapes = null;
+    }
+
+    if (_creatingCurves) {
+      _creatingCurves.destroy();
+      this._creatingCurves = null;
+    }
+  }
+
   protected rebuildDraft(data?: PolygonData) {
     if (!this.draft) {
       return;

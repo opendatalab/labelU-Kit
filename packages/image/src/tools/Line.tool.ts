@@ -207,6 +207,20 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
+  protected destroyCreatingShapes() {
+    const { _creatingLines, _creatingCurves } = this;
+
+    if (_creatingLines) {
+      _creatingLines.destroy();
+      this._creatingLines = null;
+    }
+
+    if (_creatingCurves) {
+      _creatingCurves.destroy();
+      this._creatingCurves = null;
+    }
+  }
+
   private _archiveCreatingShapes(e: MouseEvent) {
     const { _creatingLines, _creatingCurves } = this;
 
