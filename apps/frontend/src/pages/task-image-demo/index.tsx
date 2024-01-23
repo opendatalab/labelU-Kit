@@ -6,6 +6,8 @@ import { Button, Modal } from 'antd';
 import styled, { createGlobalStyle } from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
 
+import * as storage from '@/utils/storage';
+
 import { Wrapper } from '../tasks.[id].samples.[id]/style';
 
 export const annotationRef = createRef();
@@ -16,7 +18,7 @@ const sample = {
   id: 18887712,
   name: 'image-task-demo',
   url: '/image-task-demo.png',
-  result: '{}',
+  result: storage.get('image-demo-guide::result') || {},
 };
 const config = {
   tools: [
@@ -73,7 +75,7 @@ const config = {
           {
             color: '#c800ff',
             key: '笔记本电脑',
-            value: 'label-1',
+            value: 'laptop',
           },
         ],
       },
@@ -87,7 +89,7 @@ const config = {
           {
             color: '#ff6600',
             key: '龙的眼睛',
-            value: 'label-1',
+            value: 'dragon-eye',
           },
         ],
       },
@@ -105,7 +107,7 @@ const config = {
           {
             color: '#0062ff',
             key: '阿北',
-            value: 'label-1',
+            value: 'abe',
           },
         ],
       },
@@ -122,7 +124,7 @@ const config = {
           {
             color: '#08bf36',
             key: '龙的犄角',
-            value: 'label-1',
+            value: 'dragon-horn',
           },
         ],
       },
@@ -273,6 +275,8 @@ export default function ImageTaskDemo() {
           });
         }
       }
+
+      storage.set('image-demo-guide::result', res);
     });
   };
 

@@ -24,12 +24,12 @@ export function get(key: string) {
 
 export function set(key: string, payload: unknown) {
   try {
-    if (typeof payload === 'string') {
-      localStorage.setItem(key, payload);
+    if (typeof payload === 'string' || typeof payload === 'number' || typeof payload === 'boolean') {
+      localStorage.setItem(key, payload.toString());
     } else if (typeof payload === 'object') {
       localStorage.setItem(key, JSON.stringify(payload));
     } else {
-      throw new Error('payload type error');
+      throw new Error('Payload must be a string or an object');
     }
   } catch (err) {
     console.warn(err);

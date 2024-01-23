@@ -4,6 +4,8 @@ import { Button, Modal, Popover, Tabs } from 'antd';
 import { useLayoutEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
+import * as storage from '@/utils/storage';
+
 const ContentWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
@@ -180,11 +182,11 @@ const Content = ({ popover, onClose }: { popover?: boolean; onClose?: () => void
 
 export default function ImageDemoGuide({ visible }: { visible?: boolean }) {
   const [open, setOpen] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(!Boolean(storage.get('image-demo-guide::open')));
   const buttonRef = useRef<HTMLElement | null>(null);
 
   useLayoutEffect(() => {
-    if (visible && buttonRef.current) {
+    if (visible && buttonRef.current && !storage.get('image-demo-guide::open')) {
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const mouseEvent = new MouseEvent('click', {
         view: window,
@@ -206,6 +208,7 @@ export default function ImageDemoGuide({ visible }: { visible?: boolean }) {
 
   const handleCloseGuide = () => {
     setModalOpen(false);
+    storage.set('image-demo-guide::open', true);
   };
 
   if (!visible) {
