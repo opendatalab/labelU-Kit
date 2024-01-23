@@ -116,6 +116,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       Tool.error({
         type: 'minWidth',
         message: `The width of the rectangle is too small! Minimum width is ${config.minWidth!}!`,
+        value: config.minWidth,
       });
 
       return false;
@@ -125,6 +126,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       Tool.error({
         type: 'minHeight',
         message: `The height of the rectangle is too small! Minimum height is ${config.minHeight!}!`,
+        value: config.minHeight,
       });
 
       return false;
