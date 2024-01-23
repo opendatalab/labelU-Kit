@@ -16,6 +16,7 @@ export type EventName =
   | 'load'
   | 'labelChange'
   | 'attributesChange'
+  | 'backgroundImageLoaded'
   | 'toolChange'
   | 'click'
   | 'mouseup'

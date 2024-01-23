@@ -166,7 +166,7 @@ function ForwardAnnotator(
 
   useEffect(() => {
     if (engine) {
-      engine.once('load', () => {
+      engine.on('backgroundImageLoaded', () => {
         engine.switch(tools[0]);
       });
     }
