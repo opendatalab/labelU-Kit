@@ -62,11 +62,11 @@ const AnnotationPage = () => {
       }
 
       if (err.type === 'minWidth') {
-        message.error('拉框宽度不满足要求');
+        message.error(`拉框宽度不可小于${value}`);
       }
 
       if (err.type === 'minHeight') {
-        message.error('拉框高度不满足要求');
+        message.error(`拉框高度不可小于${value}`);
       }
     };
 
