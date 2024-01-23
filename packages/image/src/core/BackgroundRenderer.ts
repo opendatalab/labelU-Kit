@@ -1,6 +1,6 @@
 import type { RendererOptions } from './Renderer';
 import { Renderer } from './Renderer';
-import { axis } from '../singletons';
+import { axis, eventEmitter } from '../singletons';
 import type { AxisPoint } from '../shapes';
 
 const ImageProperties = ['contrast', 'saturation', 'brightness'] as const;
@@ -213,6 +213,8 @@ export class BackgroundRenderer extends Renderer {
       this._setImageOffset();
 
       this.render();
+
+      eventEmitter.emit('backgroundImageLoaded', _image);
 
       return this;
     });
