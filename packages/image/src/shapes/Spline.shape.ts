@@ -42,14 +42,13 @@ export class Spline extends Shape<LineStyle> {
       }) as [AxisPoint, AxisPoint];
 
       const [start, end] = this.dynamicCoordinate;
-      const [controlStart, controlEnd] = this.dynamicControlPoints;
 
-      // TODO: 更新曲线bbox，目前是使用切点 + 控制点标组成的bbox
+      // TODO: 更新曲线bbox，目前是使用切点组成的bbox
       this.bbox = {
-        minX: Math.min(start.x, end.x, controlStart.x, controlEnd.x),
-        minY: Math.min(start.y, end.y, controlStart.y, controlEnd.y),
-        maxX: Math.max(start.x, end.x, controlStart.x, controlEnd.x),
-        maxY: Math.max(start.y, end.y, controlStart.y, controlEnd.y),
+        minX: Math.min(start.x, end.x),
+        minY: Math.min(start.y, end.y),
+        maxX: Math.max(start.x, end.x),
+        maxY: Math.max(start.y, end.y),
       };
     });
   }

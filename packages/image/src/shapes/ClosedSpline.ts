@@ -43,7 +43,6 @@ export class ClosedSpline extends Shape<PolygonStyle> {
         return axis!.getScaledCoord(point);
       });
 
-      // const [start, end] = this.dynamicCoordinate;
       let minX = Infinity,
         minY = Infinity,
         maxX = -Infinity,
@@ -63,16 +62,7 @@ export class ClosedSpline extends Shape<PolygonStyle> {
         }
       }
 
-      for (let i = 0; i < this._dynamicControlPoints.length; i += 1) {
-        const { x, y } = this._dynamicControlPoints[i];
-
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x);
-        maxY = Math.max(maxY, y);
-      }
-
-      // TODO: 更新曲线bbox，目前是使用切点 + 控制点标组成的bbox
+      // TODO: 更新曲线bbox，目前是使用切点组成的bbox
       this.bbox = {
         minX,
         minY,
