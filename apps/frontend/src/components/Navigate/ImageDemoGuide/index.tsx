@@ -66,7 +66,7 @@ const items: TabsProps['items'] = [
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“拉框”工具标注“笔记本电脑”</p>
-        <video autoPlay controls>
+        <video autoPlay controls preload="metadata">
           <source src="/image-demo-guide-videos/rect.mp4" type="video/mp4" />
         </video>
       </div>
@@ -78,7 +78,7 @@ const items: TabsProps['items'] = [
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“标点”工具标记“龙的眼睛”</p>
-        <video autoPlay controls>
+        <video autoPlay controls preload="metadata">
           <source src="/image-demo-guide-videos/point.mp4" type="video/mp4" />
         </video>
       </div>
@@ -90,7 +90,7 @@ const items: TabsProps['items'] = [
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“多边形”工具标记“阿北”</p>
-        <video autoPlay controls>
+        <video autoPlay controls preload="metadata">
           <source src="/image-demo-guide-videos/polygon.mp4" type="video/mp4" />
         </video>
       </div>
@@ -102,7 +102,7 @@ const items: TabsProps['items'] = [
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“标线”工具标记“龙的犄角”</p>
-        <video autoPlay controls>
+        <video autoPlay controls preload="metadata">
           <source src="/image-demo-guide-videos/line.mp4" type="video/mp4" />
         </video>
       </div>
@@ -110,10 +110,10 @@ const items: TabsProps['items'] = [
   },
 ];
 
-const VideoTab = () => {
+const VideoTab = ({ visible }: { visible?: boolean }) => {
   return (
-    <VideoContent>
-      <Tabs style={{ width: '100%' }} defaultActiveKey="1" items={items} destroyInactiveTabPane />
+    <VideoContent style={{ display: visible ? 'flex' : 'none' }}>
+      <Tabs style={{ width: '100%' }} defaultActiveKey="1" items={items} />
     </VideoContent>
   );
 };
@@ -161,7 +161,7 @@ const Content = ({ popover, onClose }: { popover?: boolean; onClose?: () => void
   return (
     <ContentWrapper>
       {!isTaskGuideVisible && start}
-      {isTaskGuideVisible && <VideoTab />}
+      <VideoTab visible={isTaskGuideVisible} />
       <Footer>
         {!popover && isTaskGuideVisible && (
           <Button type="primary" onClick={handleNextStep}>
@@ -235,6 +235,7 @@ export default function ImageDemoGuide({ visible }: { visible?: boolean }) {
       </Popover>
       <Modal
         open={modalOpen}
+        forceRender
         footer={null}
         title={null}
         centered
