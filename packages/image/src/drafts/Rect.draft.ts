@@ -455,19 +455,19 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
     let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(edge.previousDynamicCoordinate!);
 
-    if (edge.name === 'left') {
+    if (safeX && edge.name === 'left') {
       safeX = Math.abs(x - _unscaledPreBBox!.maxX) >= minWidth;
     }
 
-    if (edge.name === 'right') {
+    if (safeX && edge.name === 'right') {
       safeX = Math.abs(x - _unscaledPreBBox!.minX) >= minWidth;
     }
 
-    if (edge.name === 'top') {
+    if (safeY && edge.name === 'top') {
       safeY = Math.abs(y - _unscaledPreBBox!.maxY) >= minHeight;
     }
 
-    if (edge.name === 'bottom') {
+    if (safeY && edge.name === 'bottom') {
       safeY = Math.abs(y - _unscaledPreBBox!.minY) >= minHeight;
     }
 

@@ -11,7 +11,7 @@ import { ControllerPoint } from '../ControllerPoint';
 import { Draft } from '../Draft';
 import { ControllerEdge } from '../ControllerEdge';
 import type { CuboidToolOptions } from '../../tools';
-import { axis } from '../../singletons';
+import { axis, eventEmitter } from '../../singletons';
 import { DomPortal } from '../../core/DomPortal';
 import domString from './domString';
 import { LabelBase } from '../../annotations/Label.base';
@@ -354,6 +354,8 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
     }
 
     this._refresh();
+
+    eventEmitter.emit('change');
   };
 
   private _refresh() {

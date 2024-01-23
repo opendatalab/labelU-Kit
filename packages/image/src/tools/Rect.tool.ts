@@ -164,12 +164,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   }
 
   protected archiveDraft() {
-    const { draft, _creatingShape } = this;
-
-    if (_creatingShape) {
-      _creatingShape.destroy();
-      this._creatingShape = null;
-    }
+    const { draft } = this;
 
     if (draft) {
       Tool.emitUnSelect(this.convertAnnotationItem(draft.data));
