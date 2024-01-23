@@ -166,7 +166,7 @@ function ForwardAnnotator(
 
   useEffect(() => {
     if (engine) {
-      engine.on('backgroundImageLoaded', () => {
+      engine.once('backgroundImageLoaded', () => {
         engine.switch(tools[0]);
       });
     }
@@ -483,8 +483,8 @@ function ForwardAnnotator(
       setSelectedLabel(_currentLabel);
     });
 
-    // 结束移动标记
-    engine?.on('moveEnd', _onAnnotationsChange);
+    // 标记变更，如移动，编辑等
+    engine?.on('change', _onAnnotationsChange);
   }, [engine, updateAnnotationsWithGlobal]);
 
   // ================== redo undo ==================
