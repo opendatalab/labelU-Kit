@@ -122,11 +122,6 @@ export class Group<T extends Shape<Style>, Style> {
     for (let i = 0; i < shapes.length; i += 1) {
       const item = shapes[i];
 
-      // 文本不更新样式
-      // if (item instanceof ShapeText) {
-      //   continue;
-      // }
-
       item.updateStyle(style);
     }
   }

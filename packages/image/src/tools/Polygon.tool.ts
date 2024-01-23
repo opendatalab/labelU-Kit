@@ -311,6 +311,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
             id: uuid(),
             style: {
               ...style,
+              stroke: 'transparent',
+              strokeWidth: 0,
               fill: Color(AnnotationPolygon.labelStatic.getLabelColor(activeLabel)).alpha(0.3).toString(),
             },
             coordinate: [
