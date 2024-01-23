@@ -3,7 +3,7 @@ import RBush from 'rbush';
 import { v4 as uuid } from 'uuid';
 
 import type { AxisPoint, Shape } from '../shapes';
-import { Point } from '../shapes';
+import { Line, Point } from '../shapes';
 import type { Group } from '../shapes/Group';
 import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
@@ -90,8 +90,6 @@ export class CustomRBush extends RBush<RBushItem> {
   /**
    * 扫描多边形并设置最近的点
    *
-   * @description 目前仅多边形需要支持吸附
-   *
    * @param dynamicCoordinate 动态坐标
    * @param threshold 阈值
    * @param excludeGroupIds 排除的组id
@@ -136,6 +134,81 @@ export class CustomRBush extends RBush<RBushItem> {
           break;
         }
       }
+    }
+
+    // 创建预设点
+    if (nearestPoint) {
+      const latestPointUnscaled = axis!.getOriginalCoord(nearestPoint);
+
+      if (_nearestPoint) {
+        _nearestPoint.coordinate[0].x = latestPointUnscaled.x;
+        _nearestPoint.coordinate[0].y = latestPointUnscaled.y;
+      } else {
+        this._nearestPoint = new Point({
+          id: uuid(),
+          style: { fill: '#fff', radius: 3, strokeWidth: 0, stroke: '#000' },
+          coordinate: latestPointUnscaled,
+        });
+      }
+    } else {
+      this._nearestPoint?.destroy();
+      this._nearestPoint = null;
+    }
+
+    return this._nearestPoint?.coordinate[0];
+  }
+
+  /**
+   * 扫描线段并设置最近的点
+   *
+   * @param dynamicCoordinate 动态坐标
+   * @param threshold 阈值
+   * @param excludeGroupIds 排除的组id
+   * @returns 最近的点
+   */
+  public scanLinesAndSetNearestPoint(
+    dynamicCoordinate: AxisPoint,
+    threshold: number,
+    excludeGroupIds: string[] | undefined = [],
+  ) {
+    if (threshold === 0) {
+      console.warn('threshold is 0');
+    }
+
+    if (!threshold) {
+      return;
+    }
+
+    const { _nearestPoint } = this;
+
+    let nearestPoint;
+    const rbushItems = this.scanCanvasObject(dynamicCoordinate, threshold);
+    const groups =
+      rbushItems
+        ?.filter((item) => item._group && !excludeGroupIds.includes(item._group.id))
+        .map((item) => item._group) ?? [];
+
+    // 找到距离最近的那条边
+    for (const group of groups) {
+      if (!group) {
+        continue;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-loop-func
+      group.each((shape) => {
+        if (shape instanceof Line) {
+          const distance = getDistanceToLine(dynamicCoordinate, shape.dynamicCoordinate[0], shape.dynamicCoordinate[1]);
+
+          if (distance < threshold) {
+            nearestPoint = getLatestPointOnLine(
+              dynamicCoordinate,
+              shape.dynamicCoordinate[0],
+              shape.dynamicCoordinate[1],
+            );
+            return;
+          }
+        }
+      });
     }
 
     // 创建预设点

@@ -175,6 +175,15 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
+  protected destroyCreatingShapes() {
+    const { _creatingShape } = this;
+
+    if (_creatingShape) {
+      _creatingShape.destroy();
+      this._creatingShape = null;
+    }
+  }
+
   private _archiveCreatingShapes(e: MouseEvent) {
     const { _creatingShape, activeLabel } = this;
 

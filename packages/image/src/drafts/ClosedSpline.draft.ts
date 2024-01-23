@@ -31,7 +31,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
     super({ ...params, name: 'polygon' });
 
     this.config = config;
-    this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
+    this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(this.data.label);
     this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();

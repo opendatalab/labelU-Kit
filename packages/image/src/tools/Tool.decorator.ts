@@ -161,6 +161,7 @@ export function ToolWrapper<
     public deactivate(): void {
       super.deactivate();
       this.archiveDraft();
+      this.destroyCreatingShapes();
       axis!.rerender();
     }
 

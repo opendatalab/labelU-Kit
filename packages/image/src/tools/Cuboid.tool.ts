@@ -124,6 +124,16 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     }
   }
 
+  protected destroyCreatingShapes() {
+    const { _creatingShape } = this;
+
+    // TODO：目前draft表示选中的标注，可能考虑一个恰当的方法名后再转移
+    if (_creatingShape) {
+      _creatingShape.destroy();
+      this._creatingShape = null;
+    }
+  }
+
   protected rebuildDraft(data?: CuboidData) {
     if (!this.draft) {
       return;

@@ -111,6 +111,11 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('archiveDraft is not implemented!');
   }
 
+  protected destroyCreatingShapes() {
+    // do nothing
+    console.warn('destroyCreatingShapes is not implemented!');
+  }
+
   protected rebuildDraft(_data: Data) {
     // do nothing
     console.warn('rebuildDraft is not implemented!');

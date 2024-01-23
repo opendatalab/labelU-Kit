@@ -9,7 +9,7 @@ import type { LineData, PointItem } from '../annotations';
 import { AnnotationLine } from '../annotations';
 import type { AxisPoint, PointStyle } from '../shapes';
 import { Point } from '../shapes';
-import { axis, eventEmitter, monitor } from '../singletons';
+import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Group } from '../shapes/Group';
 import { DraftLine, DraftLineCurve } from '../drafts';
@@ -207,6 +207,20 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
+  protected destroyCreatingShapes() {
+    const { _creatingLines, _creatingCurves } = this;
+
+    if (_creatingLines) {
+      _creatingLines.destroy();
+      this._creatingLines = null;
+    }
+
+    if (_creatingCurves) {
+      _creatingCurves.destroy();
+      this._creatingCurves = null;
+    }
+  }
+
   private _archiveCreatingShapes(e: MouseEvent) {
     const { _creatingLines, _creatingCurves } = this;
 
@@ -335,10 +349,24 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   protected handleMouseMove = (e: MouseEvent) => {
-    const { _creatingLines, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config } = this;
+    const { _creatingLines, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config, activeLabel } = this;
 
-    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
-    const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
+    let x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
+    let y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
+
+    // 激活状态才能吸附
+    if (activeLabel && config.lineType === 'line' && config.edgeAdsorptive) {
+      const nearestPoint = rbush.scanLinesAndSetNearestPoint(
+        { x: e.offsetX, y: e.offsetY },
+        10,
+        _creatingLines ? [_creatingLines.id] : [],
+      );
+
+      if (nearestPoint) {
+        x = nearestPoint.x;
+        y = nearestPoint.y;
+      }
+    }
 
     if (_creatingCurves) {
       const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as Spline;

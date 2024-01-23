@@ -5,7 +5,7 @@ import { EInternalEvent } from '../enums';
 import type { AnnotationParams } from '../annotations/Annotation';
 import type { BasicImageAnnotation, ToolName } from '../interface';
 import type { AxisPoint, Shape } from '../shapes';
-import { Point, Group, Spline } from '../shapes';
+import { Point, Group, Spline, ClosedSpline } from '../shapes';
 import { ControllerPoint } from './ControllerPoint';
 import { ControllerEdge } from './ControllerEdge';
 import { LabelBase } from '../annotations/Label.base';
@@ -257,7 +257,7 @@ export class Draft<
           }
         });
 
-        if (shape instanceof Spline) {
+        if (shape instanceof Spline || shape instanceof ClosedSpline) {
           shape.plainControlPoints.forEach((point, i) => {
             if (safeX) {
               shape.controlPoints[i].x = axis!.getOriginalX(
