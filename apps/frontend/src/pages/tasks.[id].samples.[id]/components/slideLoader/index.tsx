@@ -11,7 +11,7 @@ import AnnotationContext from '../../annotation.context';
 const LeftWrapper = styled.div`
   overflow-y: auto;
   overflow-x: hidden;
-  height: var(--height);
+  height: calc(100vh - var(--offset-top));
   box-sizing: border-box;
   padding: 1rem;
 `;
