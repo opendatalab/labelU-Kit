@@ -492,7 +492,33 @@ function ForwardAnnotator(
   // 重置历史记录
   useEffect(() => {
     reset();
-  }, [editingSample, reset]);
+    updateAnnotationsWithGlobal({
+      image: convertAnnotationDataToUI({
+        line: annotationsFromSample.line ?? [],
+        rect: annotationsFromSample.rect ?? [],
+        polygon: annotationsFromSample.polygon ?? [],
+        point: annotationsFromSample.point ?? [],
+        cuboid: annotationsFromSample.cuboid ?? [],
+      }),
+      global: {
+        text: annotationsFromSample.text ?? [],
+        tag: annotationsFromSample.tag ?? [],
+      },
+    });
+  }, [
+    annotationsFromSample.cuboid,
+    annotationsFromSample.line,
+    annotationsFromSample.point,
+    annotationsFromSample.polygon,
+    annotationsFromSample.rect,
+    annotationsFromSample.tag,
+    annotationsFromSample.text,
+    editingSample,
+    maxHistoryCount,
+    onRedoUndo,
+    reset,
+    updateAnnotationsWithGlobal,
+  ]);
 
   // ================== sample ==================
 
