@@ -155,11 +155,11 @@ const AttributeOperation = () => {
 
   useEffect(() => {
     if (!selectedResult) {
-      setActiveAttribute(toolInstance?.defaultAttribute);
+      setActiveAttribute(currentAttributes?.[0]?.value ?? toolInstance?.defaultAttribute);
     } else {
       setActiveAttribute(selectedResult.attribute!);
     }
-  }, [selectedResult, setActiveAttribute, toolInstance]);
+  }, [currentAttributes, selectedResult, setActiveAttribute, toolInstance]);
 
   // 计算attribute栏目 宽度
   useEffect(() => {

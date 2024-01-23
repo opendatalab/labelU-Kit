@@ -78,7 +78,7 @@ const NullTask = () => {
         <FlexLayout.Item flex="column" full justify="space-between" style={{ zIndex: 3 }}>
           <Title>Demo体验</Title>
           <Description>开始OpenXLab乐趣满满的新春标注任务之旅吧</Description>
-          <Link data-wiz="demo-start" to="/task-image-demo">
+          <Link data-wiz="demo-start" to="/tasks/task-image-demo">
             点击体验 &nbsp;&gt;&gt;
           </Link>
         </FlexLayout.Item>
