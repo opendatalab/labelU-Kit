@@ -49,7 +49,7 @@ type SimpleEdgePosition = 'top' | 'right' | 'bottom' | 'left';
 export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line | Polygon, PolygonStyle | PointStyle> {
   public config: CuboidToolOptions;
 
-  private _previousDynamicCoordinates: AxisPoint[][] | null = null;
+  private _previousDynamicCoordinate: AxisPoint[] | null = null;
 
   private _prevControllerDynamicCoordinates: Map<ControllerPosition, AxisPoint> = new Map();
 
@@ -404,13 +404,13 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
    * @param point
    * @description 按下控制点时，记录受影响的线段
    */
-  private _onControllerPointDown = () => {
+  private _onControllerPointDown = (controllerPoint: ControllerPoint) => {
     const { _controllerPositionMapping, _prevControllerDynamicCoordinates, data } = this;
 
     _controllerPositionMapping.forEach((point, key) => {
       _prevControllerDynamicCoordinates!.set(key, cloneDeep(point.dynamicCoordinate[0]));
     });
-    this._previousDynamicCoordinates = this.getDynamicCoordinates();
+    this._previousDynamicCoordinate = cloneDeep(controllerPoint.plainCoordinate);
     this._preBackHeight = axis!.scale * (data.back.bl.y - data.back.tl.y);
     this._preFrontHeight = axis!.scale * (data.front.bl.y - data.front.tl.y);
   };
@@ -425,7 +425,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
       config,
       _controllerPositionMapping,
       _edgePositionMapping,
-      _previousDynamicCoordinates,
+      _previousDynamicCoordinate,
       _realFrontPolygon,
       _connectedLineMapping,
       _preBackHeight,
@@ -458,7 +458,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
     const lineBl = _connectedLineMapping.get('bl')!;
 
     // eslint-disable-next-line prefer-const
-    let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinates!);
+    let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinate!);
 
     const [zPosition, position] = controllerPoint.name!.split('-') as [ZPosition, LinePosition];
 
@@ -1109,7 +1109,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
    */
   private _onControllerPointUp = () => {
     this._prevControllerDynamicCoordinates.clear();
-    this._previousDynamicCoordinates = null;
+    this._previousDynamicCoordinate = null;
     // 手动更新组合的包围盒
     this.group.update();
     // 控制点松开后会触发事件，在事件执行完后再刷新图形
@@ -1120,14 +1120,14 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
 
   // ========================== 控制边 ==========================
 
-  private _onEdgeDown = () => {
+  private _onEdgeDown = (_e: MouseEvent, edge: ControllerEdge) => {
     const { _controllerPositionMapping, _prevControllerDynamicCoordinates, data } = this;
 
     _controllerPositionMapping.forEach((point, key) => {
       _prevControllerDynamicCoordinates!.set(key, cloneDeep(point.dynamicCoordinate[0]));
     });
 
-    this._previousDynamicCoordinates = this.getDynamicCoordinates();
+    this._previousDynamicCoordinate = cloneDeep(edge.dynamicCoordinate);
     this._preBackHeight = axis!.scale * (data.back.bl.y - data.back.tl.y);
     this._preFrontHeight = axis!.scale * (data.front.bl.y - data.front.tl.y);
   };
@@ -1469,7 +1469,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
 
   private _onEdgeUp = () => {
     this._prevControllerDynamicCoordinates.clear();
-    this._previousDynamicCoordinates = null;
+    this._previousDynamicCoordinate = null;
     // 手动更新组合的包围盒
     this.group.update();
     // 控制点松开后会触发事件，在事件执行完后再刷新图形
