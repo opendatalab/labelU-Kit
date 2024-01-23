@@ -7,7 +7,7 @@ import { Line } from '../shapes/Line.shape';
 import { AnnotationLine, type LineData } from '../annotations';
 import type { PointStyle, Point } from '../shapes';
 import { Rect } from '../shapes';
-import { axis, eventEmitter, monitor } from '../singletons';
+import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
 import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
@@ -241,13 +241,31 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
    * @param changedCoordinate
    * @description 控制点移动时，更新线段的端点
    */
-  private _onControllerPointMove = ({ coordinate }: ControllerPoint) => {
-    const { _effectedLines } = this;
-    const x = coordinate[0].x;
-    const y = coordinate[0].y;
+  private _onControllerPointMove = ({ coordinate }: ControllerPoint, e: MouseEvent) => {
+    const { _effectedLines, config } = this;
+    let x = coordinate[0].x;
+    let y = coordinate[0].y;
 
     if (!_effectedLines) {
       return;
+    }
+
+    const latestPoint =
+      config.edgeAdsorptive &&
+      rbush.scanLinesAndSetNearestPoint(
+        {
+          x: e.offsetX,
+          y: e.offsetY,
+        },
+        10,
+        [this.group.id],
+      );
+
+    if (latestPoint) {
+      x = latestPoint.x;
+      y = latestPoint.y;
+      coordinate[0].x = x;
+      coordinate[0].y = y;
     }
 
     this._destroySelection();
