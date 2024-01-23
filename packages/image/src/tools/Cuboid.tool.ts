@@ -378,14 +378,14 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
   protected handleMouseMove = (e: MouseEvent) => {
     const { _creatingShape, _startPoint, config } = this;
 
-    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
-    const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
-
     if (!_creatingShape || !_startPoint) {
       return;
     }
 
     const frontRect = _creatingShape.shapes[0] as Rect;
+
+    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
+    let y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
     if (_creatingShape.shapes.length === 1) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
@@ -408,6 +408,8 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       if (y > frontRect.plainCoordinate[0].y + frontRect.height) {
         return;
       }
+
+      y = axis!.getSafeY(y - backRect.height) + backRect.height;
 
       const tl = {
         x: x - frontRect.width,
