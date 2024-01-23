@@ -122,9 +122,9 @@ export function ToolWrapper<
       };
 
       eventEmitter.emit('attributesChange', this.convertAnnotationItem(data));
-      eventEmitter.emit('change');
 
       this.rebuildDraft(data);
+      eventEmitter.emit('change');
     }
 
     public toggleOrderVisible(visible: boolean): void {
