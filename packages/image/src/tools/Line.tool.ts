@@ -144,6 +144,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       Tool.error({
         type: 'minPointAmount',
         message: `Line must have at least ${config.minPointAmount} points!`,
+        value: config.minPointAmount,
       });
 
       return false;

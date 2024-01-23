@@ -83,6 +83,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       Tool.error({
         type: 'maxPointAmount',
         message: `Maximum number of points reached!`,
+        value: config.maxPointAmount,
       });
 
       return false;

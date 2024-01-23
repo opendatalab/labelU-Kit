@@ -197,6 +197,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
         Tool.error({
           type: 'minPointAmount',
           message: `At least ${config.minPointAmount} points are required`,
+          value: config.minPointAmount,
         });
 
         return;
