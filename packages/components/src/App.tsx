@@ -236,7 +236,10 @@ const App = forwardRef<
     }
 
     if (!currentToolName) {
-      setToolName(tools[0].tool as EToolName);
+      const _toolNames = tools.filter((toolItem) => {
+        return toolItem.tool !== EToolName.Tag && toolItem.tool !== EToolName.Text;
+      });
+      setToolName(_toolNames[0].tool as EToolName);
     } else {
       setToolName(currentToolName);
     }
