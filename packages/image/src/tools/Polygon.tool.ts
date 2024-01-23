@@ -55,13 +55,25 @@ export interface PolygonToolOptions extends BasicToolParams<PolygonData, Polygon
 @ToolWrapper
 export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOptions> {
   static convertToCanvasCoordinates(data: PolygonData[]) {
-    return data.map((item) => ({
+    let _data = data.map((item) => ({
       ...item,
       points: item.points.map((point) => ({
         ...point,
         ...axis!.convertSourceCoordinate(point),
       })),
     }));
+
+    if (data?.[0]?.type === 'spline') {
+      _data = _data.map((item) => ({
+        ...item,
+        controlPoints: item.controlPoints!.map((point) => ({
+          ...point,
+          ...axis!.convertSourceCoordinate(point),
+        })),
+      }));
+    }
+
+    return _data;
   }
 
   public draft: DraftPolygon | DraftPolygonCurve | null = null;
