@@ -81,6 +81,8 @@ export class ControllerEdge extends Line {
     for (const handler of this._onMouseUpHandlers) {
       handler(e, this);
     }
+
+    eventEmitter.emit('change');
   };
 
   public onMove(handler: EdgeHandler) {

@@ -159,7 +159,7 @@ export class Draft<
       handler(e);
     }
 
-    eventEmitter.emit('moveEnd');
+    eventEmitter.emit('change');
   };
 
   private _digCoordinates(): AxisPoint[] | AxisPoint[][] {
