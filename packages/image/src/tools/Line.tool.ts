@@ -56,13 +56,25 @@ export interface LineToolOptions extends BasicToolParams<LineData, LineStyle> {
 @ToolWrapper
 export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   static convertToCanvasCoordinates(data: LineData[]) {
-    return data.map((item) => ({
+    let _data = data.map((item) => ({
       ...item,
       points: item.points.map((point) => ({
         ...point,
         ...axis!.convertSourceCoordinate(point),
       })),
     }));
+
+    if (data?.[0]?.type === 'spline') {
+      _data = _data.map((item) => ({
+        ...item,
+        controlPoints: item.controlPoints!.map((point) => ({
+          ...point,
+          ...axis!.convertSourceCoordinate(point),
+        })),
+      }));
+    }
+
+    return _data;
   }
 
   private _creatingLines: Group<Line | Point, LineStyle | PointStyle> | null = null;
