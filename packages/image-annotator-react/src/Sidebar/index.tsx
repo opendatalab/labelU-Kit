@@ -16,7 +16,7 @@ const Cards = styled.div`
 
 const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
   ...props,
-  className: 'labelu-video-editor__sidebar',
+  className: 'labelu-image-editor__sidebar',
 }))`
   position: relative;
   flex-shrink: 0;
