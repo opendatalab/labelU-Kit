@@ -1,4 +1,4 @@
-import { createRef, useMemo } from 'react';
+import { createRef, useMemo, useRef } from 'react';
 import AnnotationOperation from '@labelu/components';
 import '@labelu/components/dist/index.css';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
@@ -231,11 +231,13 @@ const InCompleteContent = ({ onClose }: { onClose: () => void }) => {
 export default function ImageTaskDemo() {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
+  const modalRef = useRef<any>(null);
 
   const handleComplete = () => {
+    modalRef.current?.destroy();
     annotationRef.current?.getResult?.().then((res) => {
       if (isContainsAtLestTreeTools(res)) {
-        Modal.info({
+        modalRef.current = Modal.info({
           centered: true,
           content: <CompleteContent />,
           icon: null,
