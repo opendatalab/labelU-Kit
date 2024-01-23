@@ -6,7 +6,7 @@ export type EventName =
   | EInternalEvent
   | 'hover'
   | 'move'
-  | 'moveEnd'
+  | 'change'
   | 'zoom'
   | 'select'
   | 'unselect'

@@ -6,6 +6,7 @@ import type { AxisPoint, PointStyle, ShapeText } from '../shapes';
 import { Point } from '../shapes';
 import { Draft } from './Draft';
 import type { PointToolOptions } from '../tools';
+import { eventEmitter } from '../singletons';
 
 export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> {
   public config: PointToolOptions;
@@ -39,6 +40,7 @@ export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> 
 
   private _onMouseUp = () => {
     this.syncCoordToData();
+    eventEmitter.emit('change');
   };
 
   public isUnderCursor(mouseCoord: AxisPoint) {

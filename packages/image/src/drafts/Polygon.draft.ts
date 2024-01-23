@@ -306,6 +306,8 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       this._pointToBeAdded = null;
       axis?.rerender();
 
+      eventEmitter.emit('change');
+
       return;
     }
 
@@ -326,6 +328,8 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       group.clear();
       this._setupShapes();
       axis?.rerender();
+
+      eventEmitter.emit('change');
 
       return;
     }

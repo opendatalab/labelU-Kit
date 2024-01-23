@@ -101,6 +101,8 @@ export class ControllerPoint extends Point {
     for (const handler of this._onMouseUpHandlers) {
       handler(this, e);
     }
+
+    eventEmitter.emit('change');
   };
 
   public clone() {

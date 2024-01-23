@@ -185,6 +185,8 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
       this._pointToBeAdded = null;
       axis?.rerender();
 
+      eventEmitter.emit('change');
+
       return;
     }
 
@@ -206,6 +208,8 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
       this._destroySelection();
       this._createSelection();
       axis?.rerender();
+
+      eventEmitter.emit('change');
 
       return;
     }

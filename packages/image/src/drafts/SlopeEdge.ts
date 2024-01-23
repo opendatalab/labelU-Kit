@@ -193,12 +193,6 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
     this.emit(EInternalEvent.ContactUp);
   };
 
-  private _onControllerPointDown = (_point: ControllerPoint) => {};
-
-  private _onControllerPointMove = (_point: ControllerPoint) => {};
-
-  private _onControllerPointUp = (_point: ControllerPoint) => {};
-
   public get contactPoint() {
     return this._contactPoint;
   }
