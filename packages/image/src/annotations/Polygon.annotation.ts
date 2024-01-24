@@ -72,7 +72,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
     if (data.type == 'line') {
       group.add(
         new Polygon({
-          id: data.id,
+          id: uuid(),
           coordinate: cloneDeep(data.points),
           style: {
             ...commonStyle,
@@ -85,7 +85,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
     } else if (data.type === 'spline') {
       group.add(
         new ClosedSpline({
-          id: data.id,
+          id: uuid(),
           coordinate: cloneDeep(data.points),
           controlPoints: data.controlPoints!,
           style: {

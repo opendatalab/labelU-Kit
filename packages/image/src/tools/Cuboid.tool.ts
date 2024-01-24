@@ -205,8 +205,6 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     monitor!.setSelectedAnnotationId(_creatingShape.id);
     axis!.rerender();
 
-    this.addToData(data);
-
     Tool.onAdd(
       [
         {
@@ -405,11 +403,12 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     } else if (_creatingShape.shapes.length > 1) {
       const backRect = _creatingShape.shapes[5] as Rect;
 
-      if (y > frontRect.plainCoordinate[0].y + frontRect.height) {
-        return;
-      }
-
+      // 后面的矩形也需要在安全区域内
       y = axis!.getSafeY(y - backRect.height) + backRect.height;
+
+      if (y > frontRect.plainCoordinate[0].y + frontRect.height) {
+        y = frontRect.plainCoordinate[0].y + frontRect.height;
+      }
 
       const tl = {
         x: x - frontRect.width,

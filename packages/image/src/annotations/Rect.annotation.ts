@@ -56,7 +56,7 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
 
     group.add(
       new Rect({
-        id: data.id,
+        id: uuid(),
         coordinate: {
           x: data.x,
           y: data.y,

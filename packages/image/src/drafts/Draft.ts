@@ -219,9 +219,8 @@ export class Draft<
   }
 
   public isUnderCursor(mouseCoord: AxisPoint) {
-    // 线条应该判定bbox在鼠标下
-
-    if (this.name === 'line') {
+    // 线条 和 立体框 应该判定bbox在鼠标下
+    if (this.name === 'line' || this.name === 'cuboid') {
       const bbox = this.getBBoxWithoutControllerPoint();
 
       return (

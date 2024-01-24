@@ -565,7 +565,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     Tool.onAdd([{ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }], e);
 
-    this.addToData(data);
     this._addAnnotation(data);
 
     _creatingLines.destroy();
@@ -618,8 +617,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     if (!this._validate(data)) {
       return;
     }
-
-    this.addToData(data);
 
     this._addAnnotation(data);
 

@@ -195,7 +195,6 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
       y: axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY)),
     };
 
-    this.addToData(data);
     // 创建草稿
     this._createDraft(data);
 

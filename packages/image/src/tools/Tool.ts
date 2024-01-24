@@ -252,7 +252,10 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   private _removeDataItem(id: string) {
     const index = this._data.findIndex((item) => item.id === id);
-    this._data.splice(index, 1);
+
+    if (index > -1) {
+      this._data.splice(index, 1);
+    }
   }
 
   static error(message: { type: string; message: string; value?: any }) {

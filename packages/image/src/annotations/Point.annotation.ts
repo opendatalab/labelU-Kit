@@ -52,7 +52,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
 
     group.add(
       new Point({
-        id: data.id,
+        id: uuid(),
         coordinate: {
           x: data.x,
           y: data.y,

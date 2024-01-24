@@ -207,8 +207,6 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       return;
     }
 
-    this.addToData(data);
-
     this._createDraft(data);
     _creatingShape.destroy();
     this._creatingShape = null;
