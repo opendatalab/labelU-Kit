@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 import { Tooltip } from '@labelu/components-react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useCallback } from 'react';
 
 import { tooltipStyle } from '@/Toolbar';
 import Slider from '@/Toolbar/Slider';
@@ -130,6 +132,20 @@ function Content() {
 export default function Footer() {
   const { engine } = useTool();
 
+  const handleRotate = useCallback(() => {
+    const lastRotate = engine?.backgroundRenderer?.rotate || 0;
+    engine.rotate(lastRotate + 90);
+  }, [engine]);
+
+  useHotkeys(
+    'r',
+    handleRotate,
+    {
+      preventDefault: true,
+    },
+    [handleRotate],
+  );
+
   return (
     <FooterBar>
       <Left>
@@ -157,13 +173,7 @@ export default function Footer() {
           <ScaleResetIcon className="labelu-svg-icon" />
           按原图比例显示
         </BarItem>
-        <BarItem
-          onClick={() => {
-            const lastRotate = engine?.backgroundRenderer?.rotate || 0;
-
-            engine.rotate(lastRotate + 90);
-          }}
-        >
+        <BarItem onClick={handleRotate}>
           <RotateIcon className="labelu-svg-icon" />
           旋转
         </BarItem>
