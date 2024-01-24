@@ -54,7 +54,7 @@ const start = (
     <p>欢迎进入OpenXLab的独特新春之旅，请您至少完成四项任务要求中的任意三项，并点击“完成”按钮提交标注任务。</p>
     <p>
       详情可查看 &nbsp;
-      <a href="https://google.com" target="_blank" rel="noreferrer">
+      <a href="https://openxlab.org.cn/apps/detail/openxlab-app/happy-long-year" target="_blank" rel="noreferrer">
         活动介绍
       </a>
     </p>
