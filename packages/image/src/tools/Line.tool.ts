@@ -466,14 +466,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   protected handleEscape = () => {
-    this._archiveCreatingShapes(
-      new MouseEvent('escape', {
-        bubbles: true,
-        cancelable: true,
-        clientX: axis?.cursor?.coordinate.x,
-        clientY: axis?.cursor?.coordinate.y,
-      }) as MouseEvent,
-    );
+    this._creatingCurves?.destroy();
+    this._creatingCurves = null;
+    this._creatingLines?.destroy();
+    this._creatingLines = null;
+
+    axis?.rerender();
   };
 
   protected handleDelete = () => {

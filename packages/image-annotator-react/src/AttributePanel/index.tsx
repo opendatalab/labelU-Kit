@@ -276,8 +276,6 @@ export function AttributePanel() {
     [globalAnnotations, allAnnotationsMapping, onGlobalAnnotationsChange],
   );
 
-  console.log('useCallback', flatGlobalAnnotations);
-
   const handleClear = () => {
     if (!currentSample) {
       return;
