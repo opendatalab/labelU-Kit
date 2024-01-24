@@ -92,11 +92,9 @@ export function ToolWrapper<
           ...data,
           label: value,
         });
-
-        eventEmitter.emit('labelChange', value);
-      } else {
-        eventEmitter.emit('labelChange');
       }
+
+      eventEmitter.emit('labelChange', value);
     }
 
     /**

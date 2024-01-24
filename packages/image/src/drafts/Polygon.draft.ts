@@ -204,13 +204,13 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
         };
       });
       this._tool.createAnnotationsFromData(newAnnotationsData);
+      axis?.rerender();
       Tool.onAdd(
         newAnnotationsData.map((item) => ({
           ...item,
           points: item.points.map((point) => axis!.convertCanvasCoordinate(point)),
         })),
       );
-      axis?.rerender();
     }
   }
 
