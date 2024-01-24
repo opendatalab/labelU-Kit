@@ -13,7 +13,7 @@ export const FileExtensionText = {
 };
 
 export const FileExtension = {
-  [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif'],
+  [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif', 'jpeg'],
   [MediaType.VIDEO]: ['mp4'],
   [MediaType.AUDIO]: ['mp3', 'wav', 'ogg'],
 };
