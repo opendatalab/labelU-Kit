@@ -156,6 +156,7 @@ const AttributeOperation = () => {
   useEffect(() => {
     if (!selectedResult) {
       setActiveAttribute(currentAttributes?.[0]?.value ?? toolInstance?.defaultAttribute);
+      toolInstance?.setDefaultAttribute(currentAttributes?.[0]?.value ?? toolInstance?.defaultAttribute);
     } else {
       setActiveAttribute(selectedResult.attribute!);
     }
