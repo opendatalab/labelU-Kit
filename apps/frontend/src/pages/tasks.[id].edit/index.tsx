@@ -17,6 +17,7 @@ import { deleteFile, deleteTask } from '@/api/services/task';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
+import { convertImageConfig } from '@/utils/convertImageConfig';
 
 import type { QueuedFile } from './partials/InputData';
 import InputData, { UploadStatus } from './partials/InputData';
@@ -524,7 +525,7 @@ const CreateTask = () => {
       if ([MediaType.VIDEO, MediaType.AUDIO].includes(taskData?.media_type)) {
         _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
       } else if (taskData?.media_type === MediaType.IMAGE) {
-        _config = annotationFormInstance.getFieldsValue();
+        _config = convertImageConfig(annotationFormInstance.getFieldsValue());
       }
 
       if (bridgeRef.current) {
