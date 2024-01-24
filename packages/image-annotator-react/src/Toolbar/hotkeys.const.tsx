@@ -44,7 +44,7 @@ export default [
             </>
           ) : (
             <>
-              <Kbd>Ctrl</Kbd> + <Kbd>Space</Kbd>
+              <Kbd>Ctrl</Kbd> + <Kbd>Z</Kbd>
             </>
           ),
       },
@@ -271,7 +271,7 @@ export default [
         ],
       },
       {
-        label: '3D 框',
+        label: '3D 立体框',
         key: 'cuboid',
         hotkeys: [
           {
