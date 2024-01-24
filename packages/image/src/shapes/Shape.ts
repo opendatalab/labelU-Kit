@@ -248,7 +248,6 @@ export class Shape<Style> {
   }
 
   public destroy() {
-    // FIXME: rbush的更新监听需要在销毁时清除
     this._onCoordinateChangeHandlers = [];
     rbush.remove(this._cachedRBush!);
     this._event.removeAllListeners();

@@ -436,11 +436,11 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       // 按住shift绘制水平或垂直线
       if (monitor?.keyboard.Shift) {
         // x距离大于y距离，绘制水平线
-        if (Math.abs(x - lastShape.dynamicCoordinate[0].x) > Math.abs(y - lastShape.dynamicCoordinate[0].y)) {
+        if (Math.abs(x - lastShape.plainCoordinate[0].x) > Math.abs(y - lastShape.plainCoordinate[0].y)) {
           lastShape.coordinate[1].x = x;
-          lastShape.coordinate[1].y = lastShape.dynamicCoordinate[0].y;
+          lastShape.coordinate[1].y = lastShape.plainCoordinate[0].y;
         } else {
-          lastShape.coordinate[1].x = lastShape.dynamicCoordinate[0].x;
+          lastShape.coordinate[1].x = lastShape.plainCoordinate[0].x;
           lastShape.coordinate[1].y = y;
         }
       } else {
@@ -565,7 +565,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     Tool.onAdd([{ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }], e);
 
-    this.addToData(data);
     this._addAnnotation(data);
 
     _creatingLines.destroy();
@@ -618,8 +617,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     if (!this._validate(data)) {
       return;
     }
-
-    this.addToData(data);
 
     this._addAnnotation(data);
 

@@ -126,7 +126,9 @@ export class Annotator {
     // 添加鼠标光标
     this._initialContainer();
     this._initialAxis();
-    this._monitor = createMonitor(this.renderer!.canvas);
+    this._monitor = createMonitor(this.renderer!.canvas, {
+      getTools: () => this._tools,
+    });
     this._initialTools();
 
     eventEmitter.on(EInternalEvent.ToolChange, this._handleToolChange);

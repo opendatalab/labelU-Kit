@@ -205,8 +205,6 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     monitor!.setSelectedAnnotationId(_creatingShape.id);
     axis!.rerender();
 
-    this.addToData(data);
-
     Tool.onAdd(
       [
         {
@@ -378,14 +376,14 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
   protected handleMouseMove = (e: MouseEvent) => {
     const { _creatingShape, _startPoint, config } = this;
 
-    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
-    const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
-
     if (!_creatingShape || !_startPoint) {
       return;
     }
 
     const frontRect = _creatingShape.shapes[0] as Rect;
+
+    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
+    let y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
     if (_creatingShape.shapes.length === 1) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
@@ -405,8 +403,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     } else if (_creatingShape.shapes.length > 1) {
       const backRect = _creatingShape.shapes[5] as Rect;
 
+      // 后面的矩形也需要在安全区域内
+      y = axis!.getSafeY(y - backRect.height) + backRect.height;
+
       if (y > frontRect.plainCoordinate[0].y + frontRect.height) {
-        return;
+        y = frontRect.plainCoordinate[0].y + frontRect.height;
       }
 
       const tl = {

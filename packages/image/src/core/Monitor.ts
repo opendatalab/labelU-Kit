@@ -1,6 +1,6 @@
 import { EInternalEvent } from '../enums';
 import { eventEmitter, rbush } from '../singletons';
-import type { AnnotationShape, GroupInAnnotation } from '../interface';
+import type { AnnotationShape, AnnotationTool, GroupInAnnotation, ToolName } from '../interface';
 import { Group } from '../shapes';
 
 const keyEventMapping = {
@@ -16,6 +16,10 @@ const keyEventMapping = {
 
 type EventKeyName = keyof typeof keyEventMapping;
 
+export interface MonitorOption {
+  getTools: () => Map<ToolName, AnnotationTool>;
+}
+
 /**
  * 画布监控器
  *
@@ -29,6 +33,8 @@ export class Monitor {
   private _hoveredShape: AnnotationShape | null = null;
 
   public selectedAnnotationId: string | null = null;
+
+  private _options: MonitorOption;
 
   // TODO: 清空标注时这里也要清空
   private _orderIndexedAnnotationIds: string[] = [];
@@ -45,12 +51,13 @@ export class Monitor {
     Escape: false,
   };
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, options: MonitorOption) {
     if (!canvas) {
       throw Error('canvas is required');
     }
 
     this._canvas = canvas;
+    this._options = options;
 
     this._bindEvents();
   }

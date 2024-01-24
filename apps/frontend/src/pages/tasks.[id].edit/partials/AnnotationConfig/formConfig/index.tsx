@@ -5,6 +5,7 @@ import React, { useContext, useEffect, useCallback, useMemo, useState } from 're
 import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
+import { createGlobalStyle } from 'styled-components';
 
 import { MediaType, TaskStatus } from '@/api/types';
 import FancyForm from '@/components/FancyForm';
@@ -27,6 +28,12 @@ import videoFrameTemplate from './templates/videoFrame.template';
 import audioSegmentTemplate from './templates/audioSegment.template';
 import audioFrameTemplate from './templates/audioFrame.template';
 import { AttributeBox, AttributeFormItem, ConfigForm, TabForm } from './style';
+
+const GlobalStyle = createGlobalStyle`
+  .labelu-tool-select-popup .rc-virtual-list-holder {
+    max-height: none !important;
+  }
+`;
 
 // 注册fancyInput自定义输入组件
 add('list-attribute', FancyAttributeList);
@@ -315,8 +322,14 @@ const FormConfig = () => {
       onValuesChange={handleFormValuesChange}
       validateTrigger="onBlur"
     >
+      <GlobalStyle />
       <Form.Item label="标注工具">
-        <Select placeholder="新增工具" options={toolsMenu} onSelect={handleToolItemClick}>
+        <Select
+          placeholder="新增工具"
+          popupClassName="labelu-tool-select-popup"
+          options={toolsMenu}
+          onSelect={handleToolItemClick}
+        >
           <PlusOutlined />
         </Select>
       </Form.Item>

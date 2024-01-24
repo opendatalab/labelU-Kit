@@ -701,8 +701,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
-    this.addToData(data);
-
     this._addAnnotation(data);
     _creatingCurves.destroy();
     this._creatingCurves = null;
@@ -761,7 +759,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       ],
       e,
     );
-    this.addToData(data);
 
     this._addAnnotation(data);
     _creatingShapes.destroy();
