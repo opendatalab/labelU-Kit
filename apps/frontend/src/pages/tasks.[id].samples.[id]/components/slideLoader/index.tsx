@@ -13,7 +13,7 @@ const LeftWrapper = styled.div`
   overflow-x: hidden;
   height: calc(100vh - var(--offset-top));
   box-sizing: border-box;
-  padding: 1rem;
+  padding: 1rem 0;
 `;
 
 export const slideRef = React.createRef<HTMLDivElement>();
