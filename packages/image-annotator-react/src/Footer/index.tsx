@@ -12,7 +12,6 @@ import { ReactComponent as SettingIcon } from './assets/setting.svg';
 import { ReactComponent as BrightnessIcon } from './assets/brightness.svg';
 import { ReactComponent as ContrastIcon } from './assets/contrast.svg';
 import { ReactComponent as SaturationIcon } from './assets/saturation.svg';
-import { ReactComponent as BgIcon } from './assets/background.svg';
 import { ReactComponent as ScaleResetIcon } from './assets/scale-reset.svg';
 import { ReactComponent as FitContainerIcon } from './assets/fit-container.svg';
 import { ReactComponent as RotateIcon } from './assets/rotate.svg';
@@ -35,6 +34,7 @@ const FooterBar = styled.div`
 
 const Left = styled.div`
   display: flex;
+  gap: 1rem;
 `;
 
 const Right = styled.div`
@@ -76,7 +76,7 @@ const ContentBody = styled.div`
 const ColorPicker = styled.input`
   border: 0;
   outline: none;
-  width: 100%;
+  width: 24px;
   height: 24px;
 `;
 
@@ -89,21 +89,6 @@ function Content() {
 
   return (
     <ContentBody>
-      <PropertyWrapper>
-        <TitleWrapper>
-          <BgIcon className="labelu-svg-icon" />
-          背景颜色
-        </TitleWrapper>
-        <ColorPicker
-          type="color"
-          defaultValue="#999999"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            if (engine?.backgroundRenderer) {
-              engine.backgroundRenderer.backgroundColor = e.target.value;
-            }
-          }}
-        />
-      </PropertyWrapper>
       <PropertyWrapper>
         <TitleWrapper>
           <SaturationIcon className="labelu-svg-icon" />
@@ -149,6 +134,21 @@ export default function Footer() {
   return (
     <FooterBar>
       <Left>
+        <label>
+          <BarItem>
+            <ColorPicker
+              type="color"
+              name="background-color"
+              defaultValue="#999999"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (engine?.backgroundRenderer) {
+                  engine.backgroundRenderer.backgroundColor = e.target.value;
+                }
+              }}
+            />
+            背景颜色
+          </BarItem>
+        </label>
         <Tooltip overlay={<Content />} overlayStyle={tooltipStyle} placement="topLeft">
           <BarItem>
             <SettingIcon className="labelu-svg-icon" />
