@@ -256,14 +256,11 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   }
 
   protected handleEscape = () => {
-    this._archiveCreatingShapes(
-      new MouseEvent('escape', {
-        bubbles: true,
-        cancelable: true,
-        clientX: axis?.cursor?.coordinate.x,
-        clientY: axis?.cursor?.coordinate.y,
-      }) as MouseEvent,
-    );
+    this._creatingCurves?.destroy();
+    this._creatingCurves = null;
+    this._creatingShapes?.destroy();
+    this._creatingShapes = null;
+    axis?.rerender();
   };
 
   protected handleDelete = () => {
