@@ -563,8 +563,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    Tool.onAdd([{ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }], e);
-
     this._addAnnotation(data);
 
     _creatingLines.destroy();
@@ -572,6 +570,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     axis!.rerender();
     this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
+    Tool.onAdd([{ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }], e);
   }
 
   private _archiveCurves(e: MouseEvent) {

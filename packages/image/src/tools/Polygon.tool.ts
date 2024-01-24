@@ -750,6 +750,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       return;
     }
 
+    this._addAnnotation(data);
+    _creatingShapes.destroy();
+    this._creatingShapes = null;
+    axis!.rerender();
+    this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
+    monitor!.setSelectedAnnotationId(data.id);
+
     Tool.onAdd(
       [
         {
@@ -759,13 +766,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       ],
       e,
     );
-
-    this._addAnnotation(data);
-    _creatingShapes.destroy();
-    this._creatingShapes = null;
-    axis!.rerender();
-    this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
-    monitor!.setSelectedAnnotationId(data.id);
   }
 
   public createAnnotationsFromData(datas: PolygonData[]) {

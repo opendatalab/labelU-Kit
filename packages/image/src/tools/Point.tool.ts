@@ -198,9 +198,8 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     // 创建草稿
     this._createDraft(data);
 
-    Tool.onAdd([{ ...data, ...axis!.convertCanvasCoordinate(data) }], e);
-
     axis?.rerender();
+    Tool.onAdd([{ ...data, ...axis!.convertCanvasCoordinate(data) }], e);
   };
 
   protected rebuildDraft(data?: PointData) {
