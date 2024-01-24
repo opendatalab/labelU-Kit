@@ -282,8 +282,12 @@ export function AttributePanel() {
     }
 
     if (activeKey === 'global') {
-      onGlobalAnnotationClear();
-    } else {
+      // eslint-disable-next-line no-alert
+      if (window.confirm('确定要清空所有全局标注吗？')) {
+        onGlobalAnnotationClear();
+      }
+      // eslint-disable-next-line no-alert
+    } else if (window.confirm('确定要清空所有图像标注吗？')) {
       engine?.clearData();
       onImageAnnotationsClear();
     }
