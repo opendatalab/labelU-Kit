@@ -75,7 +75,7 @@ const AnnotationPage = () => {
     return () => {
       engine?.off('error', handleError);
     };
-  });
+  }, []);
 
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -182,7 +182,7 @@ const AnnotationPage = () => {
         renderSidebar={renderSidebar}
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
-        offsetTop={156}
+        offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={configFromParent || editorConfig}
       />
