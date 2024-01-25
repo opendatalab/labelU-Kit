@@ -32,7 +32,7 @@ const toolNameTextMapping = {
   line: '标线',
   rect: '拉框',
   polygon: '多边形',
-  cuboid: '立体框',
+  cuboid: '3D 立体框',
 };
 
 export interface IToolbarInEditorProps {
