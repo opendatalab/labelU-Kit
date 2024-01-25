@@ -412,7 +412,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
     _controllerPositionMapping.forEach((point, key) => {
       _prevControllerDynamicCoordinates!.set(key, cloneDeep(point.dynamicCoordinate[0]));
     });
-    this._previousDynamicCoordinate = cloneDeep(controllerPoint.plainCoordinate);
+    this._previousDynamicCoordinate = cloneDeep(controllerPoint.dynamicCoordinate);
     this._preBackHeight = axis!.scale * (data.back.bl.y - data.back.tl.y);
     this._preFrontHeight = axis!.scale * (data.front.bl.y - data.front.tl.y);
   };
@@ -461,6 +461,8 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
 
     // eslint-disable-next-line prefer-const
     let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinate!);
+
+    console.log(safeX, safeY);
 
     const [zPosition, position] = controllerPoint.name!.split('-') as [ZPosition, LinePosition];
 
