@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { AudioCard } from '@labelu/components-react';
 
@@ -63,27 +63,15 @@ export interface SidebarProps {
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
-  const { samples, containerRef, currentSample } = useAnnotator();
-  const [height, setHeight] = useState<number>(0);
+  const { samples, currentSample } = useAnnotator();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
   const handleExpandTriggerClick = useCallback(() => {
     setCollapsed((prev) => !prev);
   }, []);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setHeight(containerRef.current?.clientHeight || 0);
-    });
-  });
-
-  if (!height) {
-    return null;
-  }
-
   return (
-    // @ts-ignore
-    <Wrapper collapsed={collapsed} style={{ '--height': `${height}px` }}>
+    <Wrapper collapsed={collapsed}>
       {renderSidebar ? (
         renderSidebar()
       ) : (
