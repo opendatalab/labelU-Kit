@@ -135,6 +135,7 @@ const GlobalStyle = createGlobalStyle`
 
     .ant-popover-content {
       width: 600px;
+      transform: translateY(20px);
       zoom: 0.5;
     }
 
