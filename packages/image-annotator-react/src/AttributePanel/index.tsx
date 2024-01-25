@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText, uid } from '@labelu/components-react';
+import {
+  AttributeTree,
+  CollapseWrapper,
+  AttributeTreeWrapper,
+  EllipsisText,
+  uid,
+  Tooltip,
+  FlexLayout,
+} from '@labelu/components-react';
 import type {
   EnumerableAttribute,
   GlobalAnnotationType,
@@ -15,6 +23,7 @@ import type { AnnotationDataInUI, GlobalAnnotation } from '@/context/annotation.
 import { useAnnotationCtx } from '@/context/annotation.context';
 import { useTool } from '@/context/tool.context';
 import { useSample } from '@/context/sample.context';
+import { tooltipStyle } from '@/Toolbar';
 
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
@@ -98,6 +107,73 @@ const Footer = styled.div`
 `;
 
 type HeaderType = 'global' | 'label';
+
+interface ConfirmProps {
+  title: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
+}
+
+const Button = styled.button<{ primary?: boolean }>`
+  border: 0;
+
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+
+  ${({ primary }) =>
+    primary &&
+    css`
+      background-color: var(--color-primary);
+      color: #fff;
+    `}
+`;
+
+function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
+  return (
+    <FlexLayout flex="column" gap="1rem" padding=".5rem">
+      <FlexLayout.Item>{title}</FlexLayout.Item>
+      <FlexLayout.Item flex items="center" justify="space-between" gap=".5rem">
+        <Button onClick={onCancel}>取消</Button>
+        <Button primary onClick={onConfirm}>
+          确定
+        </Button>
+      </FlexLayout.Item>
+    </FlexLayout>
+  );
+}
+
+function ClearAction({ onClear }: { onClear: () => void }) {
+  const [open, setOpen] = useState(false);
+
+  const handleConfirm = () => {
+    onClear?.();
+    setOpen(false);
+  };
+
+  return (
+    <Tooltip
+      visible={open}
+      trigger="click"
+      overlayStyle={tooltipStyle}
+      overlay={
+        <Confirm
+          title="确认清空标注吗？"
+          onConfirm={handleConfirm}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
+      }
+      placement="top"
+    >
+      <Footer onClick={() => setOpen((pre) => !pre)}>
+        <DeleteIcon />
+        &nbsp; 清空
+      </Footer>
+    </Tooltip>
+  );
+}
 
 export function AttributePanel() {
   const { engine, globalToolConfig, config, labelMapping } = useTool();
@@ -282,12 +358,8 @@ export function AttributePanel() {
     }
 
     if (activeKey === 'global') {
-      // eslint-disable-next-line no-alert
-      if (window.confirm('确定要清空所有全局标注吗？')) {
-        onGlobalAnnotationClear();
-      }
-      // eslint-disable-next-line no-alert
-    } else if (window.confirm('确定要清空所有图像标注吗？')) {
+      onGlobalAnnotationClear();
+    } else {
       engine?.clearData();
       onImageAnnotationsClear();
     }
@@ -350,10 +422,7 @@ export function AttributePanel() {
         <AttributeTree data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
       </Content>
-      <Footer onClick={handleClear}>
-        <DeleteIcon />
-        &nbsp; 清空
-      </Footer>
+      <ClearAction onClear={handleClear} />
     </Wrapper>
   );
 }
