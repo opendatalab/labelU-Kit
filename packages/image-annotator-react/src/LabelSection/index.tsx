@@ -55,13 +55,12 @@ export const openAttributeModal = ({
   engine,
   labelValue,
   e,
-  initialValues,
   labelConfig,
   openModalAnyway,
 }: AttributeModalOpenParams) => {
   const selectedAnnotation = engine?.getSelectedAnnotation();
 
-  if (!dragModalRef.current || (!selectedAnnotation && !initialValues) || !labelValue || !labelConfig) {
+  if (!dragModalRef.current || !selectedAnnotation || !labelValue || !labelConfig) {
     return;
   }
 
@@ -70,7 +69,7 @@ export const openAttributeModal = ({
     return;
   }
 
-  engine?.setAttributes(initialValues || generateDefaultAttributes(labelConfig.attributes));
+  engine?.setAttributes(generateDefaultAttributes(labelConfig.attributes));
 
   dragModalRef.current.toggleVisibility(true);
 
