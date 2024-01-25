@@ -98,7 +98,10 @@ const AnnotationPage = () => {
   }, [routeParams.taskId]);
   const [samples = [] as SampleResponse[], loading, setSamples] = useScrollFetch(
     fetchSamples,
-    () => document.querySelector('.lab-layout__left_sider'),
+    () =>
+      document.querySelector('.labelu-image__sidebar div') ||
+      document.querySelector('.labelu-audio__sidebar div') ||
+      document.querySelector('.labelu-video__sidebar div'),
     {
       isEnd: () => totalCount === samples.length,
     },
@@ -192,6 +195,7 @@ const AnnotationPage = () => {
       <Annotator
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
+        offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={configFromParent || editorConfig}
         toolbarRight={topActionContent}
@@ -203,6 +207,7 @@ const AnnotationPage = () => {
       <AudioAnnotator
         primaryColor="#0d53de"
         ref={audioAnnotationRef}
+        offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={configFromParent || editorConfig}
         toolbarRight={topActionContent}
