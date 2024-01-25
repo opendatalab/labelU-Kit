@@ -89,6 +89,9 @@ export interface AnnotatorProps {
   renderSidebar?: () => React.ReactNode;
   renderAttributes?: () => React.ReactNode;
   editingSample?: MediaSample;
+
+  offsetTop?: number;
+
   maxHistoryCount?: number;
   primaryColor?: string;
   toolbarExtra?: React.ReactNode;
@@ -103,6 +106,7 @@ function ForwardAnnotator(
     renderAttributes,
     editingSample,
     maxHistoryCount = 20,
+    offsetTop = 0,
     primaryColor = '#007aff',
     toolbarExtra,
     toolbarRight,
@@ -598,7 +602,7 @@ function ForwardAnnotator(
   return (
     <AnnotatorContext.Provider value={contextValue}>
       {/* @ts-ignore */}
-      <Wrapper style={{ '--color-primary': primaryColor }}>
+      <Wrapper style={{ '--color-primary': primaryColor, '--offset-top': `${offsetTop}px` }}>
         <AnnotatorToolbar extra={toolbarExtra} right={toolbarRight} />
         <LabelSection />
         <Content>
