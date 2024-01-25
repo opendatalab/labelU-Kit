@@ -80,6 +80,7 @@ export interface AnnotatorRef {
 export interface AnnotatorProps {
   samples: MediaSample[];
   autoPlay?: boolean;
+  offsetTop?: number;
   config?: AudioAnnotatorConfig;
   renderSidebar?: () => React.ReactNode;
   renderAttributes?: () => React.ReactNode;
@@ -97,6 +98,7 @@ function ForwardAnnotator(
     config,
     renderAttributes,
     editingSample,
+    offsetTop = 0,
     maxHistoryCount = 20,
     primaryColor = '#007aff',
     toolbarExtra,
@@ -227,7 +229,6 @@ function ForwardAnnotator(
 
   const handleAnnotationsChange = useCallback(
     (_annotations: MediaAnnotationWithTextAndTag[]) => {
-      console.info(JSON.stringify(_annotations, null, 2));
       updateCurrentSample((pre) => {
         return {
           ...pre!,
@@ -610,7 +611,7 @@ function ForwardAnnotator(
   return (
     <AnnotatorContext.Provider value={contextValue}>
       {/* @ts-ignore */}
-      <Wrapper style={{ '--color-primary': primaryColor }}>
+      <Wrapper style={{ '--color-primary': primaryColor, '--offset-top': `${offsetTop}px` }}>
         <AnnotatorToolbar extra={toolbarExtra} right={toolbarRight} />
         <LabelSection />
         <Content>
