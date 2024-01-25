@@ -164,14 +164,6 @@ function ForwardAnnotator(
 
   const engine = useImageAnnotator(containerRef, annotationOptions);
 
-  useEffect(() => {
-    if (engine) {
-      engine.once('backgroundImageLoaded', () => {
-        engine.switch(tools[0]);
-      });
-    }
-  }, [engine, tools]);
-
   const [orderVisible, setOrderVisible] = useState<boolean>(true);
 
   const onOrderVisibleChange = useCallback(
@@ -214,6 +206,8 @@ function ForwardAnnotator(
             engine?.loadData(key as ToolName, annotationsFromSample[key as ToolName]!);
           }
         });
+
+        engine.switch(tools[0]);
       });
   }, [annotationsFromSample, currentSample, engine, tools]);
 
@@ -494,6 +488,9 @@ function ForwardAnnotator(
   // 重置历史记录
   useEffect(() => {
     reset();
+  }, [currentSample, reset]);
+
+  useEffect(() => {
     updateAnnotationsWithGlobal({
       image: convertAnnotationDataToUI({
         line: annotationsFromSample.line ?? [],
@@ -515,10 +512,6 @@ function ForwardAnnotator(
     annotationsFromSample.rect,
     annotationsFromSample.tag,
     annotationsFromSample.text,
-    editingSample,
-    maxHistoryCount,
-    onRedoUndo,
-    reset,
     updateAnnotationsWithGlobal,
   ]);
 
@@ -596,17 +589,23 @@ function ForwardAnnotator(
     [engine, labels],
   );
 
-  useImperativeHandle(ref, () => ({
-    getAnnotations: () => {
-      return annotationsWithGlobal.image;
-    },
-    getGlobalAnnotations: () => {
-      return annotationsWithGlobal.global;
-    },
-    getSample: () => currentSample,
+  useImperativeHandle(
+    ref,
+    () => ({
+      getAnnotations: () => {
+        return annotationsWithGlobal.image;
+      },
+      getGlobalAnnotations: () => {
+        return annotationsWithGlobal.global;
+      },
+      getSample: () => currentSample,
 
-    getEngine: () => engine,
-  }));
+      getEngine: () => engine,
+    }),
+    [annotationsWithGlobal.global, annotationsWithGlobal.image, currentSample, engine],
+  );
+
+  console.log('annotationsWithGlobal', annotationsWithGlobal, annotationsFromSample);
 
   const annotationContextValue = useMemo(
     () => ({

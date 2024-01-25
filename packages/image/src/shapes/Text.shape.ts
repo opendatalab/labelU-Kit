@@ -54,9 +54,9 @@ const LINE_HEIGHT = 20;
 export class ShapeText extends Shape<TextStyle> {
   public style: Required<TextStyle> = {
     fontSize: 14,
-    fontFamily: 'Arial',
-    stroke: 'transparent',
-    strokeWidth: 0,
+    fontFamily: 'Sans-serif',
+    stroke: 'rgba(0, 0, 0, 0.7)',
+    strokeWidth: 1,
     fill: DEFAULT_LABEL_COLOR,
     opacity: 1,
   };
@@ -100,8 +100,6 @@ export class ShapeText extends Shape<TextStyle> {
     const { fontSize, fontFamily, fill, stroke, strokeWidth } = style;
     const offCtx = _offscreenCanvas!.getContext('2d')!;
 
-    offCtx.shadowColor = 'black';
-    offCtx.shadowBlur = 5;
     offCtx.font = `${fontSize}px ${fontFamily}`;
     offCtx.fillStyle = fill;
     offCtx.strokeStyle = stroke;
@@ -112,18 +110,21 @@ export class ShapeText extends Shape<TextStyle> {
     const textX = MARGIN;
     let textY = MARGIN + fontSize;
 
+    const renderLine = (_line: string, x: number, y: number) => {
+      offCtx.strokeText(_line, x, y);
+      offCtx.fillText(_line, x, y);
+    };
+
     for (let n = 0; n < text.length; n++) {
       // 换行
       if (text[n] === '\n') {
-        offCtx.fillText(line, textX, textY);
-        offCtx.strokeText(line, textX, textY);
+        renderLine(line, textX, textY);
         line = '';
         textY += LINE_HEIGHT;
       } else {
         letters = line + text[n];
         if (offCtx.measureText(letters).width > MAX_WIDTH) {
-          offCtx.fillText(line, textX, textY);
-          offCtx.strokeText(line, textX, textY);
+          renderLine(line, textX, textY);
           line = text[n];
           textY += LINE_HEIGHT;
         } else {
@@ -132,8 +133,7 @@ export class ShapeText extends Shape<TextStyle> {
       }
     }
 
-    offCtx.fillText(line, textX, textY);
-    offCtx.strokeText(line, textX, textY);
+    renderLine(line, textX, textY);
   }
 
   public serialize() {

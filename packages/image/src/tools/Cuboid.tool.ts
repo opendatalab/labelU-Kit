@@ -382,8 +382,10 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
 
     const frontRect = _creatingShape.shapes[0] as Rect;
 
-    const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
-    let y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
+    const scaledX = config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX);
+    const scaledY = config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY);
+    let x = axis!.getOriginalX(scaledX);
+    let y = axis!.getOriginalY(scaledY);
 
     if (_creatingShape.shapes.length === 1) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
@@ -404,7 +406,8 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       const backRect = _creatingShape.shapes[5] as Rect;
 
       // 后面的矩形也需要在安全区域内
-      y = axis!.getSafeY(y - backRect.height) + backRect.height;
+      y = axis!.getOriginalY(axis!.getSafeY(scaledY - backRect.height * axis!.scale)) + backRect.height;
+      x = axis!.getOriginalX(axis!.getSafeX(scaledX - backRect.width * axis!.scale)) + backRect.width;
 
       if (y > frontRect.plainCoordinate[0].y + frontRect.height) {
         y = frontRect.plainCoordinate[0].y + frontRect.height;
