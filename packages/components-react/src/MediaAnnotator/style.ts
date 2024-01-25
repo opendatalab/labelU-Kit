@@ -29,7 +29,7 @@ export const PlayerFrame = styled.div`
 
 export const ActivityBar = styled.div<{ editingType?: MediaAnnotationType }>`
   position: relative;
-  background-color: #333;
+  background-color: #222;
   height: var(--bar-height);
   border-top: 1px solid #e6e6e633;
   ${({ editingType }) =>
