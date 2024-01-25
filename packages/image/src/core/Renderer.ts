@@ -44,7 +44,7 @@ export class Renderer extends EventEmitter {
       this.canvas.height = height * this.ratio;
 
       // 解决canvas绘制模糊问题
-      this.ctx?.translate(0.5, 0.5);
+      // this.ctx?.translate(0.5, 0.5);
       this.ctx?.scale(this.ratio, this.ratio);
     }
   }
