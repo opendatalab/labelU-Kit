@@ -53,7 +53,7 @@ const RangeInput = styled.input`
     height: 12px;
     z-index: 3;
     border-radius: 3px 3px 0 0;
-    transform: translateY(-20px);
+    transform: translateY(-22px);
     background: var(--range-handle-color);
     box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
     cursor: pointer;
@@ -66,7 +66,9 @@ const RangeInput = styled.input`
     height: 12px;
     z-index: 3;
     border-radius: 3px 3px 0 0;
-    transform: translateY(-20px);
+    transform: translateY(-19px);
+    outline: 0;
+    border: 0;
     background: var(--range-handle-color);
     box-shadow: 1px 6px 10px 0px rgba(0, 0, 0, 0.5);
     cursor: pointer;

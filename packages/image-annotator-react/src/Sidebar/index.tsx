@@ -16,7 +16,7 @@ const Cards = styled.div`
 
 const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
   ...props,
-  className: 'labelu-image-editor__sidebar',
+  className: 'labelu-image__sidebar',
 }))`
   position: relative;
   flex-shrink: 0;
@@ -64,14 +64,22 @@ const CollapseTrigger = styled.div<{ collapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  top: 50%;
-  transform: translateY(-50%);
-  right: -18px;
+  top: 1rem;
+  right: -12px;
   z-index: 999;
-  height: 36px;
-  width: 18px;
-  border-radius: 0 2px 2px 0;
-  background-color: #e5e5e5;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0px 2px 10px 0px rgba(18, 19, 22, 0.1);
+
+  ${({ collapsed }) =>
+    collapsed &&
+    css`
+      opacity: 0.8;
+      border-radius: 0 50% 50% 0;
+      right: -20px;
+    `}
 
   svg {
     transform: rotate(${({ collapsed }) => (collapsed ? '0' : '180deg')});

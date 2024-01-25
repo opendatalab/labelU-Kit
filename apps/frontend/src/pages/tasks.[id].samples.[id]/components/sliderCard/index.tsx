@@ -6,15 +6,17 @@ import { AudioCard } from '@labelu/components-react';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
-import checkIconUrl from '@/assets/png/check.png';
+// import checkIconUrl from '@/assets/png/check.png';
+import { ReactComponent as CheckSvgIcon } from '@/assets/svg/check.svg';
 
-import { AudioWrapper, CheckBg, CheckWrapper, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
+import { AudioWrapper, CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
 
 function CheckIcon() {
   return (
-    <CheckWrapper>
-      <img src={checkIconUrl} alt="" />
-    </CheckWrapper>
+    <CheckBg>
+      <Triangle />
+      <CheckSvgIcon />
+    </CheckBg>
   );
 }
 
@@ -47,12 +49,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
         {type === MediaType.AUDIO && (
           <AudioCard src={url!} active={id === sampleId} title={filename} no={index! + 1} showNo />
         )}
-        {state === 'DONE' && (
-          <React.Fragment>
-            <CheckBg />
-            <CheckIcon />
-          </React.Fragment>
-        )}
+        {state === 'DONE' && <CheckIcon />}
         {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
       </AudioWrapper>
     );
@@ -69,12 +66,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
       >
         {type === MediaType.IMAGE && <img src={url} alt="" />}
         {type === MediaType.VIDEO && <VideoCard src={url!} showPlayIcon showDuration />}
-        {state === 'DONE' && (
-          <>
-            <CheckBg />
-            <CheckIcon />
-          </>
-        )}
+        {state === 'DONE' && <CheckIcon />}
         {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
       </ContentWrapper>
       <IdWrapper>{id}</IdWrapper>
