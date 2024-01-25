@@ -63,6 +63,8 @@ export class ShapeText extends Shape<TextStyle> {
 
   public text: string;
 
+  private _offscreenCanvas: HTMLCanvasElement = document.createElement('canvas');
+
   constructor({ id, style, text, coordinate }: TextParams) {
     super(id, coordinate);
     this.text = text;
@@ -70,6 +72,7 @@ export class ShapeText extends Shape<TextStyle> {
       ...this.style,
       ...style,
     };
+    this._renderTexts();
 
     this.onCoordinateChange(() => {
       const { dynamicCoordinate, style: latestStyle } = this;
@@ -85,6 +88,52 @@ export class ShapeText extends Shape<TextStyle> {
         maxY: y + height,
       };
     });
+  }
+
+  /**
+   * 渲染文字
+   *
+   * @description fillText 在Firefox上非常慢，使用离屏canvas渲染
+   */
+  private _renderTexts() {
+    const { text, _offscreenCanvas, style } = this;
+    const { fontSize, fontFamily, fill, stroke, strokeWidth } = style;
+    const offCtx = _offscreenCanvas!.getContext('2d')!;
+
+    offCtx.shadowColor = 'black';
+    offCtx.shadowBlur = 5;
+    offCtx.font = `${fontSize}px ${fontFamily}`;
+    offCtx.fillStyle = fill;
+    offCtx.strokeStyle = stroke;
+    offCtx.lineWidth = strokeWidth;
+
+    let line = '';
+    let letters = '';
+    const textX = MARGIN;
+    let textY = MARGIN + fontSize;
+
+    for (let n = 0; n < text.length; n++) {
+      // 换行
+      if (text[n] === '\n') {
+        offCtx.fillText(line, textX, textY);
+        offCtx.strokeText(line, textX, textY);
+        line = '';
+        textY += LINE_HEIGHT;
+      } else {
+        letters = line + text[n];
+        if (offCtx.measureText(letters).width > MAX_WIDTH) {
+          offCtx.fillText(line, textX, textY);
+          offCtx.strokeText(line, textX, textY);
+          line = text[n];
+          textY += LINE_HEIGHT;
+        } else {
+          line = letters;
+        }
+      }
+    }
+
+    offCtx.fillText(line, textX, textY);
+    offCtx.strokeText(line, textX, textY);
   }
 
   public serialize() {
@@ -115,46 +164,15 @@ export class ShapeText extends Shape<TextStyle> {
   }
 
   public render(ctx: CanvasRenderingContext2D) {
-    const { dynamicCoordinate, style, text } = this;
+    const { dynamicCoordinate, style, _offscreenCanvas } = this;
     const [{ x, y }] = dynamicCoordinate;
-    const { fontSize, opacity, fontFamily, fill, stroke, strokeWidth } = style;
+    const { opacity } = style;
 
     ctx.save();
 
     ctx.globalAlpha = opacity!;
-    ctx.shadowColor = 'black';
-    ctx.shadowBlur = 5;
-    ctx.font = `${fontSize}px ${fontFamily}`;
-    ctx.fillStyle = fill;
-    ctx.strokeStyle = stroke;
-    ctx.lineWidth = strokeWidth;
-    let line = '';
-    let testLine = '';
-    const textX = x + MARGIN;
-    let textY = y + MARGIN + fontSize;
 
-    for (let n = 0; n < text.length; n++) {
-      // 换行
-      if (text[n] === '\n') {
-        ctx.fillText(line, textX, textY);
-        ctx.strokeText(line, textX, textY);
-        line = '';
-        textY += LINE_HEIGHT;
-      } else {
-        testLine = line + text[n];
-        if (ctx.measureText(testLine).width > MAX_WIDTH) {
-          ctx.fillText(line, textX, textY);
-          ctx.strokeText(line, textX, textY);
-          line = text[n];
-          textY += LINE_HEIGHT;
-        } else {
-          line = testLine;
-        }
-      }
-    }
-
-    ctx.fillText(line, textX, textY);
-    ctx.strokeText(line, textX, textY);
+    ctx.drawImage(_offscreenCanvas!, x, y);
 
     // 恢复透明度
     ctx.globalAlpha = 1;
