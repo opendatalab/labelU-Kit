@@ -479,6 +479,8 @@ function ForwardAnnotator(
     // 改变标签
     engine?.on('labelChange', (label) => {
       _onAnnotationsChange();
+      // 清空上一次的属性
+      engine.setAttributes({});
       const _currentLabel = engine.activeTool?.labelMapping?.get(label);
       setSelectedLabel(_currentLabel);
     });

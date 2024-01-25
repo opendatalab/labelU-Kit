@@ -162,7 +162,6 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         engine,
         e,
         openModalAnyway: true,
-        initialValues: annotation!.attributes,
         labelConfig: engine.toolMap.get(annotation!.tool)?.labelMapping?.get(annotation!.label!),
       });
     });
