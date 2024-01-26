@@ -1,4 +1,5 @@
-import type { Rule } from 'antd/es/form';
+import type { FormInstance, FormItemProps, Rule } from 'antd/es/form';
+import type { NamePath } from 'antd/es/form/interface';
 
 export interface FancyItemIdentifier {
   /** form field type */
@@ -15,6 +16,16 @@ export interface FancyItemIdentifier {
   layout?: 'horizontal' | 'vertical';
   /** antd input component props, only in template definition */
   antProps?: Record<string, unknown>;
+
+  dependencies?: (string | number)[];
+  fieldProps?: FormItemProps;
+
+  disabled?: boolean;
+
+  tooltip?: string;
+
+  renderFormItem?: (params: FancyItemIdentifier, form: FormInstance, fullField: NamePath) => React.ReactNode;
+  renderGroup?: (params: FancyItemIdentifier, form: FormInstance, fullField: NamePath) => React.ReactNode;
 }
 
 export interface FancyInputProps {
