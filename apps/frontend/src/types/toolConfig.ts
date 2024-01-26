@@ -1,11 +1,9 @@
-import type { OneTag } from '@labelu/annotation';
-import type { BasicConfig, TextConfig } from '@labelu/components';
 import type { Attribute } from '@labelu/interface';
 
 export interface ToolsConfigState {
-  tools: BasicConfig[];
-  tagList: OneTag[];
+  tools: any[];
+  tagList: any[];
   attributes: Attribute[];
-  textConfig: TextConfig;
+  textConfig: any;
   commonAttributeConfigurable: boolean;
 }

@@ -262,7 +262,12 @@ const Samples = () => {
             onChange={handleTableChange}
           />
           <FlexLayout justify="space-between">
-            <ExportPortal taskId={+taskId!} sampleIds={selectedSampleIds} mediaType={task!.media_type!}>
+            <ExportPortal
+              taskId={+taskId!}
+              sampleIds={selectedSampleIds}
+              mediaType={task!.media_type!}
+              tools={task?.config?.tools}
+            >
               <Button type="link" disabled={selectedSampleIds.length === 0}>
                 批量数据导出
               </Button>
