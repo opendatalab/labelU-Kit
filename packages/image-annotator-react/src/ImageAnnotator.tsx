@@ -70,6 +70,13 @@ const Content = styled.div`
   display: flex;
 `;
 
+const ContentMid = styled.div`
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
 const AnnotationContainer = styled.div`
   flex: 1;
   width: auto !important;
@@ -702,10 +709,10 @@ function ForwardAnnotator(
               <LabelSection />
               <Content>
                 <Sidebar renderSidebar={renderSidebar} />
-                <div style={{ display: 'flex', flex: '1', flexDirection: 'column', maxWidth: '100vw' }}>
+                <ContentMid>
                   <AnnotationContainer ref={containerRef} />
                   <Footer />
-                </div>
+                </ContentMid>
                 {attributeSide}
               </Content>
             </Wrapper>
