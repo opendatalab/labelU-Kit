@@ -190,6 +190,16 @@ function ForwardAnnotator(
   }, [engine]);
 
   // ================== annotation ==================
+  // ================== label ==================
+  const labels = useMemo(() => {
+    if (!currentTool) {
+      return [];
+    }
+
+    return config?.[currentTool]?.labels ?? [];
+  }, [config, currentTool]);
+
+  const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(labels[0]);
   const [selectedAnnotation, setSelectedAnnotation] = useState<AnnotationDataInUI | undefined>();
   const annotationsFromSample = useMemo(() => {
     return currentSample?.data ?? {};
@@ -407,17 +417,6 @@ function ForwardAnnotator(
     };
   }, [engine]);
 
-  // ================== label ==================
-  const labels = useMemo(() => {
-    if (!currentTool) {
-      return [];
-    }
-
-    return config?.[currentTool]?.labels ?? [];
-  }, [config, currentTool]);
-
-  const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(labels[0]);
-
   const labelMappingByTool = useMemo(() => {
     const mapping: Record<string, Record<string, Attribute>> = {};
 
@@ -477,10 +476,15 @@ function ForwardAnnotator(
     // 改变标签
     engine?.on('labelChange', (label) => {
       _onAnnotationsChange();
-      // 清空上一次的属性
-      engine.setAttributes({});
       const _currentLabel = engine.activeTool?.labelMapping?.get(label);
       setSelectedLabel(_currentLabel);
+    });
+
+    engine?.on('attributesChange', (annotation: AnnotationData) => {
+      setSelectedAnnotation({
+        ...annotation,
+        tool: engine.activeToolName!,
+      });
     });
 
     // 标记变更，如移动，编辑等
@@ -592,7 +596,9 @@ function ForwardAnnotator(
     (e) => {
       const index = Number(e.key) - 1;
       if (index < labels.length) {
+        engine?.setAttributes({});
         engine?.setLabel(labels[index].value);
+        // 清空上一次的属性
         openAttributeModal({
           labelValue: labels[index].value,
           engine,

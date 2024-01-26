@@ -69,8 +69,6 @@ export const openAttributeModal = ({
     return;
   }
 
-  engine?.setAttributes(generateDefaultAttributes(labelConfig.attributes));
-
   dragModalRef.current.toggleVisibility(true);
 
   if (e) {
@@ -313,6 +311,8 @@ export function LabelSection() {
       attributes: selectedAnnotation?.attributes ?? generateDefaultAttributes(selectedLabel?.attributes),
     };
   }, [selectedAnnotation?.attributes, selectedLabel?.attributes, selectedLabel?.value]);
+
+  console.log('selectedAnnotation', selectedAnnotation, formValue);
 
   return (
     <Wrapper>
