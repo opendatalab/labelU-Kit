@@ -42,9 +42,11 @@ export const ContentWrapper = styled<any>(FlexLayout.Content)`
   /* } */
 
   & > img, & > div {
-    width: 200px;
-    height: 120px;
-    object-fit: cover;
+    &:first-child {
+      width: 200px;
+      height: 120px;
+      object-fit: cover;
+    }
   }
 
   ${({ active }) =>
