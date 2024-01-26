@@ -354,6 +354,10 @@ export class Annotator {
       return;
     }
 
+    if (toolName === this.activeToolName && label === this.activeTool?.activeLabel) {
+      return;
+    }
+
     if (activeToolName && activeToolName !== toolName) {
       this._tools.get(activeToolName)!.deactivate();
     }
