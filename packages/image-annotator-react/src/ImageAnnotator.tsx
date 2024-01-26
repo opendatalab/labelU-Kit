@@ -95,6 +95,9 @@ export interface ImageAnnotatorProps {
   primaryColor?: string;
   toolbarExtra?: React.ReactNode;
   toolbarRight?: React.ReactNode;
+
+  onError?: (error: { type: string; message: string; value?: any }) => void;
+
   /**
    * 顶部距离
    *
@@ -115,6 +118,7 @@ function ForwardAnnotator(
     primaryColor = '#007aff',
     toolbarExtra,
     toolbarRight,
+    onError,
   }: ImageAnnotatorProps,
   ref: React.Ref<AnnotatorRef>,
 ) {
@@ -483,7 +487,17 @@ function ForwardAnnotator(
     engine?.on('change', _onAnnotationsChange);
   }, [engine, updateAnnotationsWithGlobal]);
 
-  // ================== redo undo ==================
+  useEffect(() => {
+    if (!onError) {
+      return;
+    }
+
+    engine?.on('error', onError);
+
+    return () => {
+      engine?.off('error', onError);
+    };
+  }, [engine, onError]);
 
   // 重置历史记录
   useEffect(() => {
@@ -604,8 +618,6 @@ function ForwardAnnotator(
     }),
     [annotationsWithGlobal.global, annotationsWithGlobal.image, currentSample, engine],
   );
-
-  console.log('annotationsWithGlobal', annotationsWithGlobal, annotationsFromSample);
 
   const annotationContextValue = useMemo(
     () => ({
