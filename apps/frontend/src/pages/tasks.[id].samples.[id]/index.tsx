@@ -1,4 +1,4 @@
-import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
+import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
@@ -42,39 +42,29 @@ const AnnotationPage = () => {
 
   const sampleId = routeParams.sampleId;
 
-  useEffect(() => {
-    const engine = imageAnnotationRef.current?.getEngine();
+  // TODO： labelu/image中的错误定义
+  const onError = useCallback((err: any) => {
+    const value = err.value;
 
-    // TODO： labelu/image中的错误定义
-    const handleError = (err: any) => {
-      const value = err.value;
+    if (err.type === 'rotate') {
+      message.error('有标注数据时不可旋转图片');
+    }
 
-      if (err.type === 'rotate') {
-        message.error('有标注数据时不可旋转图片');
-      }
+    if (err.type === 'minPointAmount') {
+      message.error(`最少点数不能小于${value}个`);
+    }
 
-      if (err.type === 'minPointAmount') {
-        message.error(`最少点数不能小于${value}个`);
-      }
+    if (err.type === 'maxPointAmount') {
+      message.error(`点数最多不能大于${value}个`);
+    }
 
-      if (err.type === 'maxPointAmount') {
-        message.error(`点数最多不能大于${value}个`);
-      }
+    if (err.type === 'minWidth') {
+      message.error(`拉框宽度不可小于${value}`);
+    }
 
-      if (err.type === 'minWidth') {
-        message.error(`拉框宽度不可小于${value}`);
-      }
-
-      if (err.type === 'minHeight') {
-        message.error(`拉框高度不可小于${value}`);
-      }
-    };
-
-    engine?.on('error', handleError);
-
-    return () => {
-      engine?.off('error', handleError);
-    };
+    if (err.type === 'minHeight') {
+      message.error(`拉框高度不可小于${value}`);
+    }
   }, []);
 
   // 滚动加载
@@ -185,6 +175,7 @@ const AnnotationPage = () => {
         renderSidebar={renderSidebar}
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
+        onError={onError}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={configFromParent || editorConfig}
