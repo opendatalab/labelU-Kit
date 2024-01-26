@@ -2,6 +2,7 @@ import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import type { RuleRender } from 'antd/es/form';
 
 import type { FancyItemIdentifier } from '@/components/FancyInput/types';
+import FancyInput from '@/components/FancyInput';
 
 export default [
   {
@@ -112,6 +113,15 @@ export default [
         type: 'boolean',
         label: '边缘吸附',
         initialValue: false,
+        renderFormItem({ antProps, ...props }, form, fullField) {
+          const lineType = form.getFieldValue([...(fullField as any[]).slice(0, -1), 'lineType']);
+
+          if (lineType === 1) {
+            return null;
+          }
+
+          return <FancyInput {...props} {...antProps} />;
+        },
       },
       {
         field: 'attributes',
