@@ -51,6 +51,7 @@ const StyledFooter = styled.div`
   display: flex;
   justify-content: end;
   margin-top: 1rem;
+  gap: 0.5rem;
 `;
 
 interface TaskStep extends StepData {
