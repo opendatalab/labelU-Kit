@@ -70,13 +70,6 @@ export interface AnnotatorOptions {
    * @default 1
    */
   strokeOpacity?: number;
-
-  /**
-   * 背景颜色
-   *
-   * @default '#999'
-   */
-  backgroundColor?: string;
 }
 
 export class Annotator {
@@ -138,7 +131,7 @@ export class Annotator {
   }
 
   private _initialContainer() {
-    const { container, width, height, image, backgroundColor } = this._config;
+    const { container, width, height, image } = this._config;
 
     container.style.width = `${width}px`;
     container.style.height = `${height}px`;
@@ -153,7 +146,6 @@ export class Annotator {
       height,
       rotate: image?.rotate,
       zIndex: 1,
-      backgroundColor,
     });
   }
 
