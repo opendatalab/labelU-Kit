@@ -7,7 +7,7 @@ import type { RectData } from '../annotations';
 import { AnnotationRect } from '../annotations';
 import type { AxisPoint, RectStyle } from '../shapes';
 import { Rect } from '../shapes';
-import { axis, eventEmitter, monitor } from '../singletons';
+import { axis, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { DraftRect } from '../drafts/Rect.draft';
 import { ToolWrapper } from './Tool.decorator';
@@ -46,9 +46,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }));
   }
 
-  private _creatingShape: Rect | null = null;
-
   private _startPoint: AxisPoint | null = null;
+
+  public sketch: Rect | null = null;
 
   public draft: DraftRect | null = null;
 
@@ -86,16 +86,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    */
   protected onSelect = (annotation: AnnotationRect) => (_e: MouseEvent) => {
     this.archiveDraft();
-    Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
-    this?._creatingShape?.destroy();
-    this._creatingShape = null;
-    this.activate(annotation.data.label);
-    eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
-    // 2. 销毁成品
-    this.removeFromDrawing(annotation.id);
-    // 重新渲染
-    axis!.rerender();
+    this.onAnnotationSelect(annotation.data);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
   };
 
   protected setupShapes() {
@@ -177,29 +170,29 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   }
 
-  protected destroyCreatingShapes() {
-    const { _creatingShape } = this;
+  protected destroySketch() {
+    const { sketch } = this;
 
-    if (_creatingShape) {
-      _creatingShape.destroy();
-      this._creatingShape = null;
+    if (sketch) {
+      sketch.destroy();
+      this.sketch = null;
     }
   }
 
-  private _archiveCreatingShapes(e: MouseEvent) {
-    const { _creatingShape, activeLabel } = this;
+  private _archiveSketch(e: MouseEvent) {
+    const { sketch, activeLabel } = this;
 
-    if (!_creatingShape) {
+    if (!sketch) {
       return;
     }
 
     const data = {
-      id: _creatingShape.id,
-      x: _creatingShape.coordinate[0].x,
-      y: _creatingShape.coordinate[0].y,
+      id: sketch.id,
+      x: sketch.coordinate[0].x,
+      y: sketch.coordinate[0].y,
       label: activeLabel,
-      width: _creatingShape.width,
-      height: _creatingShape.height,
+      width: sketch.width,
+      height: sketch.height,
       order: monitor!.getNextOrder(),
     };
 
@@ -208,9 +201,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
 
     this._createDraft(data);
-    _creatingShape.destroy();
-    this._creatingShape = null;
-    monitor!.setSelectedAnnotationId(_creatingShape.id);
+    this.destroySketch();
+    monitor!.setSelectedAnnotationId(sketch.id);
     axis!.rerender();
 
     Tool.onAdd(
@@ -241,18 +233,16 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    * Esc键取消绘制
    */
   protected handleEscape = () => {
-    this._creatingShape?.destroy();
-    this._creatingShape = null;
+    this.destroySketch();
     axis?.rerender();
   };
 
   protected handleDelete = () => {
-    const { _creatingShape, draft } = this;
+    const { sketch, draft } = this;
 
     // 如果正在创建，则取消创建
-    if (_creatingShape) {
-      _creatingShape.destroy();
-      this._creatingShape = null;
+    if (sketch) {
+      this.destroySketch();
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
@@ -264,7 +254,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, draft, config, _creatingShape } = this;
+    const { activeLabel, style, draft, config, sketch } = this;
 
     const isUnderDraft = draft && draft.isRectAndControllersUnderCursor({ x: e.offsetX, y: e.offsetY });
 
@@ -275,8 +265,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     // 先归档上一次的草稿
     this.archiveDraft();
 
-    if (_creatingShape) {
-      this._archiveCreatingShapes(e);
+    if (sketch) {
+      this._archiveSketch(e);
     } else {
       // 记录起始点坐标
       this._startPoint = axis!.getOriginalCoord({
@@ -285,7 +275,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
         y: config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY),
       });
 
-      this._creatingShape = new Rect({
+      this.sketch = new Rect({
         id: uuid(),
         style: { ...style, stroke: AnnotationRect.labelStatic.getLabelColor(activeLabel) },
         coordinate: cloneDeep(this._startPoint),
@@ -296,28 +286,28 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   };
 
   protected handleMouseMove = (e: MouseEvent) => {
-    const { _creatingShape, _startPoint, config } = this;
+    const { sketch, _startPoint, config } = this;
 
     const x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
     const y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
 
-    if (_creatingShape && _startPoint) {
+    if (sketch && _startPoint) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
-        _creatingShape.coordinate[0].x = x;
+        sketch.coordinate[0].x = x;
       } else {
-        _creatingShape.coordinate[0].x = _startPoint.x;
+        sketch.coordinate[0].x = _startPoint.x;
       }
 
       if (e.offsetY < axis!.getScaledY(_startPoint.y)) {
-        _creatingShape.coordinate[0].y = y;
+        sketch.coordinate[0].y = y;
       } else {
-        _creatingShape.coordinate[0].y = _startPoint.y;
+        sketch.coordinate[0].y = _startPoint.y;
       }
 
-      _creatingShape.width = Math.abs(x - _startPoint.x);
-      _creatingShape.height = Math.abs(y - _startPoint.y);
+      sketch.width = Math.abs(x - _startPoint.x);
+      sketch.height = Math.abs(y - _startPoint.y);
 
-      _creatingShape.update();
+      sketch.update();
     }
   };
 
@@ -328,11 +318,5 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       width: data.width / axis!.initialBackgroundScale,
       height: data.height / axis!.initialBackgroundScale,
     };
-  }
-
-  public render(ctx: CanvasRenderingContext2D): void {
-    if (this._creatingShape) {
-      this._creatingShape.render(ctx);
-    }
   }
 }

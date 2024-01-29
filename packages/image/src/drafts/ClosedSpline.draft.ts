@@ -3,7 +3,7 @@ import Color from 'color';
 
 import type { LineStyle, Line } from '../shapes/Line.shape';
 import type { PolygonData } from '../annotations';
-import { Annotation, AnnotationLine, AnnotationPolygon } from '../annotations';
+import { AnnotationLine, AnnotationPolygon } from '../annotations';
 import type { PointStyle, Point, PolygonStyle, AxisPoint } from '../shapes';
 import { Spline, ClosedSpline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -28,11 +28,9 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
   private _pointIndex: number | null = null;
 
   constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>) {
-    super({ ...params, name: 'polygon' });
+    super({ ...params, name: 'polygon', labelColor: AnnotationPolygon.labelStatic.getLabelColor(params.data.label) });
 
     this.config = config;
-    this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(this.data.label);
-    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);

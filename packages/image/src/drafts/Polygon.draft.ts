@@ -52,12 +52,10 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
   private _tool: PolygonTool;
 
   constructor(config: PolygonToolOptions, params: AnnotationParams<PolygonData, PolygonStyle>, tool: PolygonTool) {
-    super({ ...params, name: 'polygon' });
+    super({ ...params, name: 'polygon', labelColor: AnnotationPolygon.labelStatic.getLabelColor(params.data.label) });
 
     this.config = config;
     this._tool = tool;
-    this.labelColor = AnnotationPolygon.labelStatic.getLabelColor(params.data.label);
-    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);

@@ -1,8 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
-import Color from 'color';
 
 import type { LineStyle, Line } from '../shapes/Line.shape';
-import { Annotation, AnnotationLine, type LineData } from '../annotations';
+import { AnnotationLine, type LineData } from '../annotations';
 import type { PointStyle, Point } from '../shapes';
 import { Spline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -25,11 +24,9 @@ export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyl
   private _effectedCurves: EffectedCurve[] = [];
 
   constructor(config: LineToolOptions, params: AnnotationParams<LineData, LineStyle>) {
-    super({ ...params, name: 'line' });
+    super({ ...params, name: 'line', labelColor: AnnotationLine.labelStatic.getLabelColor(params.data.label) });
 
     this.config = config;
-    this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
-    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);

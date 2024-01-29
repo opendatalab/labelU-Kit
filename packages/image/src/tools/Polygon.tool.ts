@@ -76,15 +76,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     return _data;
   }
 
-  public draft: DraftPolygon | DraftPolygonCurve | null = null;
-
-  private _creatingShapes: Group<Polygon | Line, PolygonStyle | LineStyle> | null = null;
-
   private _holdingSlopes: Point[] | null = null;
 
   private _holdingSlopeEdge: Line | null = null;
 
-  private _creatingCurves: Group<ClosedSpline | Line | Point, LineStyle | PointStyle> | null = null;
+  public draft: DraftPolygon | DraftPolygonCurve | null = null;
+
+  public sketch: Group<Polygon | ClosedSpline | Line | Point, PolygonStyle | LineStyle | PointStyle> | null = null;
 
   constructor(params: PolygonToolOptions) {
     super({
@@ -115,19 +113,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
    */
   protected onSelect = (annotation: AnnotationPolygon) => (_e: MouseEvent) => {
     this.archiveDraft();
-
-    Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
-
-    this?._creatingShapes?.destroy();
-    this._creatingShapes = null;
-    this.activate(annotation.data.label);
-    eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
-    // 2. 销毁成品
-    this.removeFromDrawing(annotation.id);
-
-    // 重新渲染
-    axis!.rerender();
+    this.onAnnotationSelect(annotation.data);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
   };
 
   protected setupShapes() {
@@ -218,17 +206,12 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     }
   }
 
-  protected destroyCreatingShapes() {
-    const { _creatingShapes, _creatingCurves } = this;
+  protected destroySketch() {
+    const { sketch } = this;
 
-    if (_creatingShapes) {
-      _creatingShapes.destroy();
-      this._creatingShapes = null;
-    }
-
-    if (_creatingCurves) {
-      _creatingCurves.destroy();
-      this._creatingCurves = null;
+    if (sketch) {
+      sketch.destroy();
+      this.sketch = null;
     }
   }
 
@@ -244,34 +227,17 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this._createDraft(dataClone);
   }
 
-  private _archiveCreatingShapes(e: MouseEvent) {
-    const { _creatingShapes, _creatingCurves } = this;
-
-    // 归档创建中的图形
-    if (_creatingCurves) {
-      this._archivePolygonCurves(e);
-    } else if (_creatingShapes) {
-      this._archivePolygons(e);
-    }
-  }
-
   protected handleEscape = () => {
-    this._creatingCurves?.destroy();
-    this._creatingCurves = null;
-    this._creatingShapes?.destroy();
-    this._creatingShapes = null;
+    this.destroySketch();
     axis?.rerender();
   };
 
   protected handleDelete = () => {
-    const { _creatingShapes, _creatingCurves, draft } = this;
+    const { sketch, draft } = this;
 
     // 如果正在创建，则取消创建
-    if (_creatingShapes || _creatingCurves) {
-      _creatingShapes?.destroy();
-      _creatingCurves?.destroy();
-      this._creatingShapes = null;
-      this._creatingCurves = null;
+    if (sketch) {
+      this.destroySketch();
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
@@ -283,7 +249,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, draft, config } = this;
+    const { activeLabel, style, draft, config, sketch } = this;
 
     const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
 
@@ -300,10 +266,10 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this.archiveDraft();
 
     if (config.lineType === 'spline') {
-      if (!this._creatingCurves) {
-        this._creatingCurves = new Group(uuid(), monitor!.getNextOrder());
+      if (!this.sketch) {
+        this.sketch = new Group(uuid(), monitor!.getNextOrder());
         // 背景填充
-        this._creatingCurves.add(
+        this.sketch.add(
           new ClosedSpline({
             id: uuid(),
             style: {
@@ -337,7 +303,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           }),
         );
       } else {
-        if (this._creatingCurves.shapes[0].coordinate.length + 1 > config.maxPointAmount!) {
+        if (this.sketch.shapes[0].coordinate.length + 1 > config.maxPointAmount!) {
           Tool.error({
             type: 'maxPointAmount',
             message: `Polygon must have at most ${config.maxPointAmount} points!`,
@@ -346,7 +312,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           return;
         }
         // 往曲线中增加一个点
-        const currentCreatingPolygonCurve = this._creatingCurves.shapes[0] as ClosedSpline;
+        const currentCreatingPolygonCurve = this.sketch.shapes[0] as ClosedSpline;
         currentCreatingPolygonCurve.coordinate = [
           ...currentCreatingPolygonCurve.plainCoordinate,
           cloneDeep(startPoint),
@@ -377,7 +343,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         coordinate: { ...startPoint },
       });
       this._holdingSlopes = [slopeStartPoint, slopeEndPoint];
-      this._creatingCurves.add(
+      this.sketch.add(
         new Spline({
           id: uuid(),
           style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },
@@ -412,67 +378,67 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         ],
       });
       this._holdingSlopeEdge = slopeEdge;
-      this._creatingCurves.add(slopeEdge);
-      this._creatingCurves.add(slopeStartPoint);
-      this._creatingCurves.add(slopeEndPoint);
+      this.sketch.add(slopeEdge);
+      this.sketch.add(slopeStartPoint);
+      this.sketch.add(slopeEndPoint);
+    } else {
+      if (!this.sketch) {
+        this.sketch = new Group(uuid(), monitor!.getNextOrder());
+        this.sketch?.add(
+          new Polygon({
+            id: uuid(),
+            style: {
+              ...style,
+              // 填充的多边形不需要边框
+              strokeWidth: 0,
+              stroke: 'transparent',
+              fill: Color(AnnotationPolygon.labelStatic.getLabelColor(activeLabel)).alpha(0.3).toString(),
+            },
+            coordinate: [
+              {
+                ...(rbush.nearestPoint?.coordinate[0] ?? startPoint),
+              },
+            ],
+          }),
+        );
+      }
 
-      return;
-    }
+      // 多边形增加一个点
+      if (this.sketch.shapes[0].coordinate.length + 1 > config.maxPointAmount!) {
+        Tool.error({
+          type: 'maxPointAmount',
+          message: `Polygon must have at most ${config.maxPointAmount} points!`,
+          value: config.maxPointAmount,
+        });
+        return;
+      }
 
-    if (!this._creatingShapes) {
-      this._creatingShapes = new Group(uuid(), monitor!.getNextOrder());
-      this._creatingShapes?.add(
-        new Polygon({
+      this.sketch.shapes[0].coordinate = [...this.sketch.shapes[0].plainCoordinate, cloneDeep(startPoint)];
+
+      // 创建新的线段
+      sketch?.add(
+        new Line({
           id: uuid(),
-          style: {
-            ...style,
-            // 填充的多边形不需要边框
-            strokeWidth: 0,
-            stroke: 'transparent',
-            fill: Color(AnnotationPolygon.labelStatic.getLabelColor(activeLabel)).alpha(0.3).toString(),
-          },
+          style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },
           coordinate: [
             {
               ...(rbush.nearestPoint?.coordinate[0] ?? startPoint),
+            },
+            {
+              ...startPoint,
             },
           ],
         }),
       );
     }
-
-    // 多边形增加一个点
-    const { _creatingShapes } = this;
-
-    if (this._creatingShapes.shapes[0].coordinate.length + 1 > config.maxPointAmount!) {
-      Tool.error({
-        type: 'maxPointAmount',
-        message: `Polygon must have at most ${config.maxPointAmount} points!`,
-        value: config.maxPointAmount,
-      });
-      return;
-    }
-
-    _creatingShapes.shapes[0].coordinate = [..._creatingShapes.shapes[0].plainCoordinate, cloneDeep(startPoint)];
-
-    // 创建新的线段
-    _creatingShapes?.add(
-      new Line({
-        id: uuid(),
-        style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },
-        coordinate: [
-          {
-            ...(rbush.nearestPoint?.coordinate[0] ?? startPoint),
-          },
-          {
-            ...startPoint,
-          },
-        ],
-      }),
-    );
   };
 
   protected handleMouseMove = (e: MouseEvent) => {
-    const { _creatingShapes, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config, activeLabel } = this;
+    const { sketch, _holdingSlopes, _holdingSlopeEdge, config, activeLabel } = this;
+
+    if (!sketch) {
+      return;
+    }
 
     let x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
     let y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
@@ -482,7 +448,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       const nearestPoint = rbush.scanPolygonsAndSetNearestPoint(
         { x: e.offsetX, y: e.offsetY },
         10,
-        _creatingShapes ? [_creatingShapes.id] : [],
+        sketch ? [sketch.id] : [],
       );
 
       if (nearestPoint) {
@@ -491,14 +457,14 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       }
     }
 
-    if (_creatingCurves) {
-      const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as Spline;
-      const polygonCurve = _creatingCurves.shapes[0] as ClosedSpline;
+    if (config.lineType === 'spline') {
+      const lastCurve = sketch.shapes[sketch.shapes.length - 4] as Spline;
+      const polygonCurve = sketch.shapes[0] as ClosedSpline;
 
       // 创建点不松开鼠标，等效拖拽控制点
       if (_holdingSlopes) {
         // 第一条曲线
-        if (_creatingCurves.shapes.length === 5) {
+        if (sketch.shapes.length === 5) {
           // 更新斜率点的坐标
           _holdingSlopes[0].coordinate[0].x = x;
           _holdingSlopes[0].coordinate[0].y = y;
@@ -537,7 +503,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
           _holdingSlopes[0].coordinate[0].x = 2 * lastCurve.coordinate[0].x - x;
           _holdingSlopes[0].coordinate[0].y = 2 * lastCurve.coordinate[0].y - y;
         } else {
-          const preCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 8] as Spline;
+          const preCurve = sketch.shapes[sketch.shapes.length - 8] as Spline;
 
           _holdingSlopeEdge!.coordinate[1].x = x;
           _holdingSlopeEdge!.coordinate[1].y = y;
@@ -603,18 +569,16 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         });
       }
 
-      _creatingCurves.update();
-    } else if (_creatingShapes) {
+      sketch.update();
+    } else {
       // 正在绘制的线段，最后一个端点的坐标跟随鼠标
-      const { shapes } = _creatingShapes;
+      const { shapes } = sketch;
       const lastShape = shapes[shapes.length - 1];
       lastShape.coordinate[1].x = x;
       lastShape.coordinate[1].y = y;
       // 更新多边形的最后一个点
-      _creatingShapes.shapes[0].coordinate[_creatingShapes.shapes[0].coordinate.length - 1] = cloneDeep(
-        lastShape.coordinate[1],
-      );
-      _creatingShapes.update();
+      sketch.shapes[0].coordinate[sketch.shapes[0].coordinate.length - 1] = cloneDeep(lastShape.coordinate[1]);
+      sketch.update();
     }
   };
 
@@ -624,17 +588,15 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
   };
 
   private _handleRightMouseUp = (e: MouseEvent) => {
-    const { _creatingShapes, _creatingCurves } = this;
+    const { sketch } = this;
     // 移动画布时的右键不归档
     if (axis?.isMoved) {
       return;
     }
 
     // 归档创建中的图形
-    if (_creatingCurves) {
-      this._archivePolygonCurves(e);
-    } else if (_creatingShapes) {
-      this._archivePolygons(e);
+    if (sketch) {
+      this._archiveSketch(e);
     }
   };
 
@@ -661,108 +623,86 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     return _temp;
   }
 
-  private _archivePolygonCurves(e: MouseEvent) {
-    const { _creatingCurves } = this;
+  private _archiveSketch(e: MouseEvent) {
+    const { sketch, config } = this;
 
-    if (!_creatingCurves) {
+    if (!sketch) {
       return;
     }
 
     const points = [];
-    const polygonCurve = _creatingCurves.shapes[0] as ClosedSpline;
-    const controlPoints: AxisPoint[] = [
-      ...polygonCurve.plainControlPoints.slice(0, polygonCurve.plainControlPoints.length - 3),
-      polygonCurve.plainControlPoints[polygonCurve.plainControlPoints.length - 1],
-    ];
+    let data: PolygonData;
+    let additionPayload;
 
-    // 最后一个点不加入标注
-    for (let i = 0; i < polygonCurve.coordinate.length - 1; i++) {
-      const shape = polygonCurve;
-      const point = shape.coordinate[i];
-      points.push({
+    if (config.lineType === 'spline') {
+      const polygonCurve = sketch.shapes[0] as ClosedSpline;
+      const controlPoints: AxisPoint[] = [
+        ...polygonCurve.plainControlPoints.slice(0, polygonCurve.plainControlPoints.length - 3),
+        polygonCurve.plainControlPoints[polygonCurve.plainControlPoints.length - 1],
+      ];
+
+      // 最后一个点不加入标注
+      for (let i = 0; i < polygonCurve.coordinate.length - 1; i++) {
+        const shape = polygonCurve;
+        const point = shape.coordinate[i];
+        points.push({
+          id: uuid(),
+          ...point,
+        });
+      }
+
+      data = {
         id: uuid(),
-        ...point,
-      });
-    }
+        type: 'spline',
+        points: points,
+        controlPoints,
+        label: this.activeLabel,
+        order: monitor!.getNextOrder(),
+      };
 
-    const data: PolygonData = {
-      id: uuid(),
-      type: 'spline',
-      points: points,
-      controlPoints,
-      label: this.activeLabel,
-      order: monitor!.getNextOrder(),
-    };
-
-    if (!this._validate(data.points)) {
-      return;
-    }
-
-    this._addAnnotation(data);
-    _creatingCurves.destroy();
-    this._creatingCurves = null;
-    axis!.rerender();
-    this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
-    monitor!.setSelectedAnnotationId(data.id);
-    Tool.onAdd(
-      [
+      additionPayload = [
         {
           ...data,
           points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
           controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
         },
-      ],
-      e,
-    );
-  }
+      ];
+    } else {
+      for (let i = 0; i < sketch.shapes[0].coordinate.length - 1; i++) {
+        const shape = sketch.shapes[0];
+        const point = shape.coordinate[i];
+        points.push({
+          id: uuid(),
+          ...point,
+        });
+      }
 
-  private _archivePolygons(e: MouseEvent) {
-    const { _creatingShapes } = this;
-
-    if (!_creatingShapes) {
-      return;
-    }
-
-    // 最后一个点不加入标注
-    const points = [];
-
-    for (let i = 0; i < _creatingShapes.shapes[0].coordinate.length - 1; i++) {
-      const shape = _creatingShapes.shapes[0];
-      const point = shape.coordinate[i];
-      points.push({
+      data = {
         id: uuid(),
-        ...point,
-      });
-    }
+        type: 'line',
+        points: points,
+        label: this.activeLabel,
+        order: monitor!.getNextOrder(),
+      };
 
-    const data: PolygonData = {
-      id: uuid(),
-      type: 'line',
-      points: points,
-      label: this.activeLabel,
-      order: monitor!.getNextOrder(),
-    };
+      additionPayload = [
+        {
+          ...data,
+          points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
+        },
+      ];
+    }
 
     if (!this._validate(data.points)) {
       return;
     }
 
     this._addAnnotation(data);
-    _creatingShapes.destroy();
-    this._creatingShapes = null;
+    this.destroySketch();
     axis!.rerender();
     this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
     monitor!.setSelectedAnnotationId(data.id);
-
-    Tool.onAdd(
-      [
-        {
-          ...data,
-          points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
-        },
-      ],
-      e,
-    );
+    Tool.onAdd(additionPayload, e);
   }
 
   public createAnnotationsFromData(datas: PolygonData[]) {
@@ -784,18 +724,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       annotation.group.on(EInternalEvent.Select, this.onSelect(annotation));
 
       drawing!.set(data.id, annotation);
-    });
-  }
-
-  public render(ctx: CanvasRenderingContext2D): void {
-    Promise.resolve().then(() => {
-      if (this._creatingCurves) {
-        this._creatingCurves.render(ctx);
-      }
-
-      if (this._creatingShapes) {
-        this._creatingShapes.render(ctx);
-      }
     });
   }
 

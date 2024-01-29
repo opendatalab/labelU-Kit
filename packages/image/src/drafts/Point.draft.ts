@@ -1,5 +1,3 @@
-import Color from 'color';
-
 import type { AnnotationParams, PointData } from '../annotations';
 import { Annotation, AnnotationPoint } from '../annotations';
 import type { AxisPoint, PointStyle, ShapeText } from '../shapes';
@@ -12,11 +10,9 @@ export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> 
   public config: PointToolOptions;
 
   constructor(config: PointToolOptions, params: AnnotationParams<PointData, PointStyle>) {
-    super({ ...params, name: 'point' });
+    super({ ...params, name: 'point', labelColor: AnnotationPoint.labelStatic.getLabelColor(params.data.label) });
 
     this.config = config;
-    this.labelColor = AnnotationPoint.labelStatic.getLabelColor(this.data.label);
-    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
 

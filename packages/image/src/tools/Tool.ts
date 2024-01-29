@@ -3,9 +3,10 @@ import cloneDeep from 'lodash.clonedeep';
 
 import type { Annotation } from '../annotations/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
-import type { Shape } from '../shapes';
-import { eventEmitter, monitor } from '../singletons';
+import type { Group, Shape } from '../shapes';
+import { axis, eventEmitter, monitor } from '../singletons';
 import type { Draft } from '../drafts/Draft';
+import { EInternalEvent } from '../enums';
 
 export interface BasicToolParams<Data, Style> {
   /** 标签配置 */
@@ -64,6 +65,11 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
    */
   public draft: Draft<Data, any, any> | null = null;
 
+  /**
+   * 绘制过程中的草稿
+   */
+  public sketch: Group<Shape<any>, any> | Shape<any> | null = null;
+
   public showOrder: boolean;
 
   protected _data: Data[];
@@ -111,9 +117,13 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('archiveDraft is not implemented!');
   }
 
-  protected destroyCreatingShapes() {
-    // do nothing
-    console.warn('destroyCreatingShapes is not implemented!');
+  protected destroySketch() {
+    const { sketch } = this;
+
+    if (sketch) {
+      sketch.destroy();
+      this.sketch = null;
+    }
   }
 
   protected rebuildDraft(_data: Data) {
@@ -185,39 +195,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this._data.push(data);
   }
 
-  public render(_ctx: CanvasRenderingContext2D) {
-    // do nothing
-  }
-
-  public activate(label?: string) {
-    const { activeLabel } = this;
-
-    if (!label) {
-      // 没有传入label且当前没有使用过label，则使用第一个label
-      if (!activeLabel) {
-        this.activeLabel = this.labelMapping.keys().next().value;
-      }
-
-      return;
-    }
-
-    this.activeLabel = label;
-  }
-
-  public deactivate() {
-    this.activeLabel = undefined;
-  }
-
-  _createLabelMapping(labels: ILabel[] | undefined) {
-    if (!labels) {
-      return;
-    }
-
-    for (const label of labels) {
-      this.labelMapping.set(label.value, label);
-    }
-  }
-
   protected removeFromDrawing(id: string) {
     const annotation = this.drawing?.get(id);
     annotation?.destroy();
@@ -250,6 +227,24 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     }
   }
 
+  protected onAnnotationSelect(data: Data) {
+    this.destroySketch();
+    this.activate(data.label);
+    this.removeFromDrawing(data.id);
+    eventEmitter.emit(EInternalEvent.ToolChange, this.name, data.label);
+    axis?.rerender();
+  }
+
+  private _createLabelMapping(labels: ILabel[] | undefined) {
+    if (!labels) {
+      return;
+    }
+
+    for (const label of labels) {
+      this.labelMapping.set(label.value, label);
+    }
+  }
+
   private _removeDataItem(id: string) {
     const index = this._data.findIndex((item) => item.id === id);
 
@@ -279,6 +274,25 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     eventEmitter.emit('delete', data);
   }
 
+  public activate(label?: string) {
+    const { activeLabel } = this;
+
+    if (!label) {
+      // 没有传入label且当前没有使用过label，则使用第一个label
+      if (!activeLabel) {
+        this.activeLabel = this.labelMapping.keys().next().value;
+      }
+
+      return;
+    }
+
+    this.activeLabel = label;
+  }
+
+  public deactivate() {
+    this.activeLabel = undefined;
+  }
+
   public get data() {
     const { drawing, draft } = this;
 
@@ -293,6 +307,14 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     return Array.from(drawing.values()).map((annotation) => annotation.data);
   }
 
+  public render(ctx: CanvasRenderingContext2D) {
+    if (this.sketch) {
+      Promise.resolve().then(() => {
+        this.sketch?.render(ctx);
+      });
+    }
+  }
+
   public destroy(): void;
   public destroy(): void {
     this.drawing?.forEach((annotation) => {
@@ -301,6 +323,8 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.drawing = null;
     this.draft?.destroy();
     this.draft = null;
+    this.sketch?.destroy();
+    this.sketch = null;
 
     this._data = [];
   }

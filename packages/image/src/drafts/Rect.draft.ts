@@ -31,11 +31,9 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
   private _edgePositionMapping: Map<EdgePosition, ControllerEdge> = new Map();
 
   constructor(config: RectToolOptions, params: AnnotationParams<RectData, RectStyle>) {
-    super({ ...params, name: 'rect' });
+    super({ ...params, name: 'rect', labelColor: AnnotationRect.labelStatic.getLabelColor(params.data.label) });
 
     this.config = config;
-    this.labelColor = AnnotationRect.labelStatic.getLabelColor(params.data.label);
-    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
