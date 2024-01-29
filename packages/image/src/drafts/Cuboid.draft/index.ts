@@ -14,7 +14,6 @@ import type { CuboidToolOptions } from '../../tools';
 import { axis, eventEmitter } from '../../singletons';
 import { DomPortal } from '../../core/DomPortal';
 import domString from './domString';
-import { LabelBase } from '../../annotations/Label.base';
 
 type ControllerPosition =
   | 'front-tl'
@@ -80,8 +79,6 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
   private _dom: DomPortal | null = null;
 
   private _timer: ReturnType<typeof setTimeout> | null = null;
-
-  public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   constructor(config: CuboidToolOptions, params: AnnotationParams<CuboidData, PolygonStyle>) {
     super({ ...params, name: 'cuboid', labelColor: AnnotationCuboid.labelStatic.getLabelColor(params.data.label) });
