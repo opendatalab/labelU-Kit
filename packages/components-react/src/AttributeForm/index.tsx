@@ -441,8 +441,9 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
       return {
         error,
         submit,
+        form,
       };
-    }, [error, submit]);
+    }, [error, form, submit]);
 
     useImperativeHandle(ref, () => contextValue);
 
