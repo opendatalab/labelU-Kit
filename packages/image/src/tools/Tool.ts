@@ -4,8 +4,9 @@ import cloneDeep from 'lodash.clonedeep';
 import type { Annotation } from '../annotations/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
 import type { Group, Shape } from '../shapes';
-import { eventEmitter, monitor } from '../singletons';
+import { axis, eventEmitter, monitor } from '../singletons';
 import type { Draft } from '../drafts/Draft';
+import { EInternalEvent } from '../enums';
 
 export interface BasicToolParams<Data, Style> {
   /** 标签配置 */
@@ -117,8 +118,12 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   }
 
   protected destroySketch() {
-    // do nothing
-    console.warn('destroySketch is not implemented!');
+    const { sketch } = this;
+
+    if (sketch) {
+      sketch.destroy();
+      this.sketch = null;
+    }
   }
 
   protected rebuildDraft(_data: Data) {
@@ -190,35 +195,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this._data.push(data);
   }
 
-  public activate(label?: string) {
-    const { activeLabel } = this;
-
-    if (!label) {
-      // 没有传入label且当前没有使用过label，则使用第一个label
-      if (!activeLabel) {
-        this.activeLabel = this.labelMapping.keys().next().value;
-      }
-
-      return;
-    }
-
-    this.activeLabel = label;
-  }
-
-  public deactivate() {
-    this.activeLabel = undefined;
-  }
-
-  _createLabelMapping(labels: ILabel[] | undefined) {
-    if (!labels) {
-      return;
-    }
-
-    for (const label of labels) {
-      this.labelMapping.set(label.value, label);
-    }
-  }
-
   protected removeFromDrawing(id: string) {
     const annotation = this.drawing?.get(id);
     annotation?.destroy();
@@ -251,6 +227,24 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     }
   }
 
+  protected onAnnotationSelect(data: Data) {
+    this.destroySketch();
+    this.activate(data.label);
+    this.removeFromDrawing(data.id);
+    eventEmitter.emit(EInternalEvent.ToolChange, this.name, data.label);
+    axis?.rerender();
+  }
+
+  private _createLabelMapping(labels: ILabel[] | undefined) {
+    if (!labels) {
+      return;
+    }
+
+    for (const label of labels) {
+      this.labelMapping.set(label.value, label);
+    }
+  }
+
   private _removeDataItem(id: string) {
     const index = this._data.findIndex((item) => item.id === id);
 
@@ -278,6 +272,25 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   static onDelete<T>(data: T) {
     eventEmitter.emit('delete', data);
+  }
+
+  public activate(label?: string) {
+    const { activeLabel } = this;
+
+    if (!label) {
+      // 没有传入label且当前没有使用过label，则使用第一个label
+      if (!activeLabel) {
+        this.activeLabel = this.labelMapping.keys().next().value;
+      }
+
+      return;
+    }
+
+    this.activeLabel = label;
+  }
+
+  public deactivate() {
+    this.activeLabel = undefined;
   }
 
   public get data() {

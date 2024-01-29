@@ -8,7 +8,7 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { PointData } from '../annotations/Point.annotation';
 import { AnnotationPoint } from '../annotations/Point.annotation';
-import { axis, eventEmitter, monitor } from '../singletons';
+import { axis, monitor } from '../singletons';
 import { DraftPoint } from '../drafts';
 import { ToolWrapper } from './Tool.decorator';
 
@@ -139,20 +139,9 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
   protected onSelect = (annotation: AnnotationPoint) => (_e: MouseEvent) => {
     this.archiveDraft();
-    Tool.emitSelect(
-      {
-        ...annotation.data,
-        ...axis!.convertCanvasCoordinate(annotation.data),
-      },
-      this.name,
-    );
-
-    this.activate(annotation.data.label);
-    eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
-    this.removeFromDrawing(annotation.id);
-    // 重新渲染
-    axis!.rerender();
+    this.onAnnotationSelect(annotation.data);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
   };
 
   protected archiveDraft() {

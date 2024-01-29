@@ -1,8 +1,9 @@
 import EventEmitter from 'eventemitter3';
+import Color from 'color';
 
 import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
-import type { AnnotationParams } from '../annotations/Annotation';
+import { Annotation, type AnnotationParams } from '../annotations/Annotation';
 import type { BasicImageAnnotation, ToolName } from '../interface';
 import type { AxisPoint, Shape } from '../shapes';
 import { Point, Group, Spline, ClosedSpline } from '../shapes';
@@ -53,7 +54,15 @@ export class Draft<
     }[];
   } | null = null;
 
-  constructor({ id, data, style, hoveredStyle, showOrder, name }: AnnotationParams<Data, Style> & { name: ToolName }) {
+  constructor({
+    id,
+    data,
+    style,
+    hoveredStyle,
+    showOrder,
+    name,
+    labelColor,
+  }: AnnotationParams<Data, Style> & { name: ToolName; labelColor: string }) {
     super();
 
     this.name = name;
@@ -62,6 +71,11 @@ export class Draft<
     this.style = style;
     this.hoveredStyle = hoveredStyle;
     this.showOrder = showOrder;
+    this.labelColor = labelColor;
+
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    // 光标颜色切换
+    axis!.cursor!.style!.stroke = this.labelColor;
 
     this.group = new Group(id, data.order, true);
 

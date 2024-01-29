@@ -77,10 +77,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     return _data;
   }
 
-  // private _creatingLines: Group<Line | Point, LineStyle | PointStyle> | null = null;
-
-  // private _creatingCurves: Group<Spline | Line | Point, LineStyle | PointStyle> | null = null;
-
   private _holdingSlopes: Point[] | null = null;
 
   private _holdingSlopeEdge: Line | null = null;
@@ -128,15 +124,9 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
    */
   protected onSelect = (annotation: AnnotationLine) => (_e: MouseEvent) => {
     this.archiveDraft();
-    Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
-    this?.sketch?.destroy();
-    this.sketch = null;
-    this.activate(annotation.data.label);
-    eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
-    this.removeFromDrawing(annotation.id);
-    // 重新渲染
-    axis!.rerender();
+    this.onAnnotationSelect(annotation.data);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
   };
 
   private _validate(data: LineData) {

@@ -113,19 +113,9 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
    */
   protected onSelect = (annotation: AnnotationPolygon) => (_e: MouseEvent) => {
     this.archiveDraft();
-
-    Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
-
-    this?.sketch?.destroy();
-    this.sketch = null;
-    this.activate(annotation.data.label);
-    eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
-    // 销毁成品
-    this.removeFromDrawing(annotation.id);
-
-    // 重新渲染
-    axis!.rerender();
+    this.onAnnotationSelect(annotation.data);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
   };
 
   protected setupShapes() {

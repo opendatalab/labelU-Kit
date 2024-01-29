@@ -1,6 +1,5 @@
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
-import Color from 'color';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
@@ -27,11 +26,9 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
   private _pointToBeAdded: ControllerPoint | null = null;
 
   constructor(config: LineToolOptions, params: AnnotationParams<LineData, LineStyle>) {
-    super({ ...params, name: 'line' });
+    super({ ...params, name: 'line', labelColor: AnnotationLine.labelStatic.getLabelColor(params.data.label) });
 
     this.config = config;
-    this.labelColor = AnnotationLine.labelStatic.getLabelColor(this.data.label);
-    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
 
     this._setupShapes();
     this.onMove(this._onMouseMove);

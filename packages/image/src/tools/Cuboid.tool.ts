@@ -7,7 +7,7 @@ import type { CuboidData, CuboidStyle } from '../annotations';
 import { Annotation, AnnotationCuboid } from '../annotations';
 import type { AxisPoint, LineStyle, RectStyle } from '../shapes';
 import { Line, Group, Rect } from '../shapes';
-import { axis, eventEmitter, monitor } from '../singletons';
+import { axis, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import mapValues from '../utils/mapValues';
 import { DraftCuboid } from '../drafts/Cuboid.draft';
@@ -61,15 +61,9 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
    */
   protected onSelect = (annotation: AnnotationCuboid) => (_e: MouseEvent) => {
     this.archiveDraft();
-    Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
-    this.destroySketch();
-    this.activate(annotation.data.label);
-    eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
-    // 2. 销毁成品
-    this.removeFromDrawing(annotation.id);
-    // 重新渲染
-    axis!.rerender();
+    this.onAnnotationSelect(annotation.data);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
   };
 
   protected setupShapes() {
