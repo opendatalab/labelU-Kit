@@ -395,6 +395,7 @@ function ForwardAnnotator(
     const handleSelectAnnotation = (annotation: AnnotationData, toolName: ToolName) => {
       // 选中了隐藏的标记，需要显示
       engine?.toggleAnnotationsVisibility(toolName, [annotation.id], true);
+      engine?.setLabel(annotation.label!);
       const newAnnotation = {
         ...annotation,
         tool: toolName,
