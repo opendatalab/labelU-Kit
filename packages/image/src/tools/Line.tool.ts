@@ -77,13 +77,15 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     return _data;
   }
 
-  private _creatingLines: Group<Line | Point, LineStyle | PointStyle> | null = null;
+  // private _creatingLines: Group<Line | Point, LineStyle | PointStyle> | null = null;
 
-  private _creatingCurves: Group<Spline | Line | Point, LineStyle | PointStyle> | null = null;
+  // private _creatingCurves: Group<Spline | Line | Point, LineStyle | PointStyle> | null = null;
 
   private _holdingSlopes: Point[] | null = null;
 
   private _holdingSlopeEdge: Line | null = null;
+
+  public sketch: Group<Line | Point | Spline, LineStyle | PointStyle> | null = null;
 
   public draft: DraftLine | DraftLineCurve | null = null;
 
@@ -127,8 +129,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   protected onSelect = (annotation: AnnotationLine) => (_e: MouseEvent) => {
     this.archiveDraft();
     Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
-    this?._creatingLines?.destroy();
-    this._creatingLines = null;
+    this?.sketch?.destroy();
+    this.sketch = null;
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
@@ -208,28 +210,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  protected destroyCreatingShapes() {
-    const { _creatingLines, _creatingCurves } = this;
+  protected destroySketch() {
+    const { sketch } = this;
 
-    if (_creatingLines) {
-      _creatingLines.destroy();
-      this._creatingLines = null;
-    }
-
-    if (_creatingCurves) {
-      _creatingCurves.destroy();
-      this._creatingCurves = null;
-    }
-  }
-
-  private _archiveCreatingShapes(e: MouseEvent) {
-    const { _creatingLines, _creatingCurves } = this;
-
-    // 归档创建中的图形
-    if (_creatingLines) {
-      this._archiveLines(e);
-    } else if (_creatingCurves) {
-      this._archiveCurves(e);
+    if (sketch) {
+      sketch.destroy();
+      this.sketch = null;
     }
   }
 
@@ -247,7 +233,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, _creatingLines, draft, config } = this;
+    const { activeLabel, style, sketch, draft, config } = this;
 
     const isUnderDraft =
       draft &&
@@ -268,8 +254,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this.archiveDraft();
 
     if (config.lineType === 'spline') {
-      if (!this._creatingCurves) {
-        this._creatingCurves = new Group(uuid(), monitor!.getNextOrder());
+      if (!this.sketch) {
+        this.sketch = new Group(uuid(), monitor!.getNextOrder());
       }
 
       // 按下鼠标左键的时候默认是拖拽第一个控制点
@@ -284,7 +270,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         coordinate: { ...startPoint },
       });
       this._holdingSlopes = [slopeStartPoint, slopeEndPoint];
-      this._creatingCurves.add(
+      this.sketch.add(
         new Spline({
           id: uuid(),
           style: { ...style, stroke: AnnotationLine.labelStatic.getLabelColor(activeLabel) },
@@ -319,38 +305,40 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         ],
       });
       this._holdingSlopeEdge = slopeEdge;
-      this._creatingCurves.add(slopeEdge);
-      this._creatingCurves.add(slopeStartPoint);
-      this._creatingCurves.add(slopeEndPoint);
+      this.sketch.add(slopeEdge);
+      this.sketch.add(slopeStartPoint);
+      this.sketch.add(slopeEndPoint);
+    } else {
+      // 绘制直线
+      if (!sketch) {
+        this.sketch = new Group(uuid(), monitor!.getNextOrder());
+      }
 
-      return;
+      // 创建新的线段
+      const lastLine = this.sketch?.last() as Line | null;
+      this.sketch?.add(
+        new Line({
+          id: uuid(),
+          style: { ...style, stroke: AnnotationLine.labelStatic.getLabelColor(activeLabel) },
+          coordinate: [
+            {
+              ...(lastLine ? lastLine.coordinate[1] : startPoint),
+            },
+            {
+              ...startPoint,
+            },
+          ],
+        }),
+      );
     }
-
-    // 绘制直线
-    if (!_creatingLines) {
-      this._creatingLines = new Group(uuid(), monitor!.getNextOrder());
-    }
-
-    // 创建新的线段
-    const lastLine = this._creatingLines?.last() as Line | null;
-    this._creatingLines?.add(
-      new Line({
-        id: uuid(),
-        style: { ...style, stroke: AnnotationLine.labelStatic.getLabelColor(activeLabel) },
-        coordinate: [
-          {
-            ...(lastLine ? lastLine.coordinate[1] : startPoint),
-          },
-          {
-            ...startPoint,
-          },
-        ],
-      }),
-    );
   };
 
   protected handleMouseMove = (e: MouseEvent) => {
-    const { _creatingLines, _creatingCurves, _holdingSlopes, _holdingSlopeEdge, config, activeLabel } = this;
+    const { sketch, _holdingSlopes, _holdingSlopeEdge, config, activeLabel } = this;
+
+    if (!sketch) {
+      return;
+    }
 
     let x = axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX));
     let y = axis!.getOriginalY(config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY));
@@ -360,7 +348,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       const nearestPoint = rbush.scanLinesAndSetNearestPoint(
         { x: e.offsetX, y: e.offsetY },
         10,
-        _creatingLines ? [_creatingLines.id] : [],
+        sketch ? [sketch.id] : [],
       );
 
       if (nearestPoint) {
@@ -369,13 +357,13 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       }
     }
 
-    if (_creatingCurves) {
-      const lastCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 4] as Spline;
+    if (config.lineType === 'spline') {
+      const lastCurve = sketch.shapes[sketch.shapes.length - 4] as Spline;
 
       // 创建点不松开鼠标，等效拖拽控制点
       if (_holdingSlopes) {
         // 第一条曲线
-        if (_creatingCurves.shapes.length === 4) {
+        if (sketch.shapes.length === 4) {
           // 更新斜率点的坐标
           _holdingSlopes[0].coordinate[0].x = x;
           _holdingSlopes[0].coordinate[0].y = y;
@@ -394,7 +382,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
           lastCurve.coordinate[1].x = x;
           lastCurve.coordinate[1].y = y;
         } else {
-          const preCurve = _creatingCurves.shapes[_creatingCurves.shapes.length - 8] as Spline;
+          const preCurve = sketch.shapes[sketch.shapes.length - 8] as Spline;
 
           _holdingSlopeEdge!.coordinate[1].x = x;
           _holdingSlopeEdge!.coordinate[1].y = y;
@@ -427,10 +415,10 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         lastCurve.controlPoints[1].y = y;
       }
 
-      _creatingCurves.update();
-    } else if (_creatingLines) {
+      sketch.update();
+    } else {
       // 正在绘制的线段，最后一个端点的坐标跟随鼠标
-      const { shapes } = _creatingLines;
+      const { shapes } = sketch;
       const lastShape = shapes[shapes.length - 1];
 
       // 按住shift绘制水平或垂直线
@@ -447,7 +435,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         lastShape.coordinate[1].x = x;
         lastShape.coordinate[1].y = y;
       }
-      _creatingLines.update();
+      sketch.update();
     }
   };
 
@@ -462,27 +450,23 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       return;
     }
 
-    this._archiveCreatingShapes(e);
+    this._archiveSketch(e);
   };
 
   protected handleEscape = () => {
-    this._creatingCurves?.destroy();
-    this._creatingCurves = null;
-    this._creatingLines?.destroy();
-    this._creatingLines = null;
+    this.sketch?.destroy();
+    this.sketch = null;
 
     axis?.rerender();
   };
 
   protected handleDelete = () => {
-    const { _creatingLines, _creatingCurves, draft } = this;
+    const { sketch, draft } = this;
 
     // 如果正在创建，则取消创建
-    if (_creatingLines || _creatingCurves) {
-      _creatingLines?.destroy();
-      _creatingCurves?.destroy();
-      this._creatingLines = null;
-      this._creatingCurves = null;
+    if (sketch) {
+      sketch?.destroy();
+      this.sketch = null;
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
@@ -515,134 +499,107 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     return _temp;
   }
 
-  private _archiveLines(e: MouseEvent) {
-    const { _creatingLines } = this;
+  private _archiveSketch(e: MouseEvent) {
+    const { sketch, config } = this;
 
-    if (!_creatingLines) {
+    if (!sketch) {
       return;
     }
 
-    const points = [];
-    // 最后一个点不需要加入标注
-    for (let i = 0; i < _creatingLines.shapes.length - 1; i++) {
-      const shape = _creatingLines.shapes[i];
+    let data: LineData;
+    const points: PointItem[] = [];
+    let additionPayload;
 
-      // 第一条曲线要把开始点也加上
-      if (i === 0) {
-        points.push(
-          {
-            id: shape.id,
-            x: axis!.getOriginalX(shape.dynamicCoordinate[0].x),
-            y: axis!.getOriginalY(shape.dynamicCoordinate[0].y),
-          },
-          {
+    if (config.lineType === 'line') {
+      // 最后一个点不需要加入标注
+      for (let i = 0; i < sketch.shapes.length - 1; i++) {
+        const shape = sketch.shapes[i];
+
+        // 第一条曲线要把开始点也加上
+        if (i === 0) {
+          points.push(
+            {
+              id: shape.id,
+              x: axis!.getOriginalX(shape.dynamicCoordinate[0].x),
+              y: axis!.getOriginalY(shape.dynamicCoordinate[0].y),
+            },
+            {
+              id: uuid(),
+              x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
+              y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
+            },
+          );
+        } else {
+          points.push({
             id: uuid(),
             x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
             y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
-          },
-        );
-      } else {
-        points.push({
-          id: uuid(),
-          x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
-          y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
-        });
+          });
+        }
       }
-    }
-    const data: LineData = {
-      id: uuid(),
-      type: 'line',
-      points: points,
-      label: this.activeLabel,
-      order: monitor!.getNextOrder(),
-    };
-
-    if (!this._validate(data)) {
-      return;
-    }
-
-    this._addAnnotation(data);
-
-    _creatingLines.destroy();
-    this._creatingLines = null;
-    axis!.rerender();
-    this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
-    monitor!.setSelectedAnnotationId(data.id);
-    Tool.onAdd([{ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }], e);
-  }
-
-  private _archiveCurves(e: MouseEvent) {
-    const { _creatingCurves } = this;
-
-    if (!_creatingCurves) {
-      return;
-    }
-
-    const points: PointItem[] = [];
-    // 最后一个点不需要加入标注
-    // 以四个图形为一组，分别是曲线、连接线，开始控制点、结束控制点，当前的i表示结束控制点
-    const controlPoints: AxisPoint[] = [];
-
-    for (let i = 0; i < _creatingCurves.shapes.length - 4; i += 4) {
-      const curve = _creatingCurves.shapes[i] as Spline;
-
-      controlPoints.push(...curve.plainControlPoints);
-
-      if (i === 0) {
-        // 第一条曲线取开始点和结束点
-        points.push({
-          id: uuid(),
-          x: curve.coordinate[0].x,
-          y: curve.coordinate[0].y,
-        });
-      }
-      points.push({
+      data = {
         id: uuid(),
-        x: curve.coordinate[1].x,
-        y: curve.coordinate[1].y,
-      });
-    }
-    const data: LineData = {
-      id: uuid(),
-      type: 'spline',
-      points: points,
-      controlPoints,
-      label: this.activeLabel,
-      order: monitor!.getNextOrder(),
-    };
+        type: 'line',
+        points: points,
+        label: this.activeLabel,
+        order: monitor!.getNextOrder(),
+      };
+      additionPayload = [{ ...data, points: data.points.map((point) => axis!.convertCanvasCoordinate(point)) }];
+    } else {
+      // 最后一个点不需要加入标注
+      // 以四个图形为一组，分别是曲线、连接线，开始控制点、结束控制点，当前的i表示结束控制点
+      const controlPoints: AxisPoint[] = [];
 
-    if (!this._validate(data)) {
-      return;
-    }
+      for (let i = 0; i < sketch.shapes.length - 4; i += 4) {
+        const curve = sketch.shapes[i] as Spline;
 
-    this._addAnnotation(data);
+        controlPoints.push(...curve.plainControlPoints);
 
-    _creatingCurves.destroy();
-    this._creatingCurves = null;
-    axis!.rerender();
-    this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
-    monitor!.setSelectedAnnotationId(data.id);
+        if (i === 0) {
+          // 第一条曲线取开始点和结束点
+          points.push({
+            id: uuid(),
+            x: curve.coordinate[0].x,
+            y: curve.coordinate[0].y,
+          });
+        }
+        points.push({
+          id: uuid(),
+          x: curve.coordinate[1].x,
+          y: curve.coordinate[1].y,
+        });
+      }
+      data = {
+        id: uuid(),
+        type: 'spline',
+        points: points,
+        controlPoints,
+        label: this.activeLabel,
+        order: monitor!.getNextOrder(),
+      };
 
-    Tool.onAdd(
-      [
+      additionPayload = [
         {
           ...data,
           points: data.points.map((point) => axis!.convertCanvasCoordinate(point)),
           controlPoints: data.controlPoints!.map((point) => axis!.convertCanvasCoordinate(point)),
         },
-      ],
-      e,
-    );
-  }
-
-  public render(ctx: CanvasRenderingContext2D): void {
-    if (this._creatingLines) {
-      this._creatingLines.render(ctx);
+      ];
     }
 
-    if (this._creatingCurves) {
-      this._creatingCurves.render(ctx);
+    if (!this._validate(data)) {
+      return;
     }
+
+    this._addAnnotation(data);
+
+    sketch.destroy();
+    this.sketch = null;
+    axis!.rerender();
+    this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
+    monitor!.setSelectedAnnotationId(data.id);
+
+    Tool.onAdd(additionPayload, e);
   }
 
   public destroy(): void {

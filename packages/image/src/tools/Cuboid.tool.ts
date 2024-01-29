@@ -32,7 +32,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     }));
   }
 
-  private _creatingShape: Group<Rect | Line, RectStyle | LineStyle> | null = null;
+  public sketch: Group<Rect | Line, RectStyle | LineStyle> | null = null;
 
   private _startPoint: AxisPoint | null = null;
 
@@ -62,8 +62,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
   protected onSelect = (annotation: AnnotationCuboid) => (_e: MouseEvent) => {
     this.archiveDraft();
     Tool.emitSelect(this.convertAnnotationItem(annotation.data), this.name);
-    this?._creatingShape?.destroy();
-    this._creatingShape = null;
+    this.destroySketch();
     this.activate(annotation.data.label);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, annotation.data.label);
     this._createDraft(annotation.data);
@@ -124,13 +123,12 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     }
   }
 
-  protected destroyCreatingShapes() {
-    const { _creatingShape } = this;
+  protected destroySketch() {
+    const { sketch } = this;
 
-    // TODO：目前draft表示选中的标注，可能考虑一个恰当的方法名后再转移
-    if (_creatingShape) {
-      _creatingShape.destroy();
-      this._creatingShape = null;
+    if (sketch) {
+      sketch.destroy();
+      this.sketch = null;
     }
   }
 
@@ -146,18 +144,18 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     this._createDraft(dataClone);
   }
 
-  private _archiveCreatingShapes(_e: MouseEvent) {
-    const { _creatingShape, activeLabel } = this;
+  private _archiveSketch(_e: MouseEvent) {
+    const { sketch, activeLabel } = this;
 
-    if (!_creatingShape) {
+    if (!sketch) {
       return;
     }
 
-    const frontRect = _creatingShape.shapes[0] as Rect;
-    const backRect = _creatingShape.shapes[5] as Rect;
+    const frontRect = sketch.shapes[0] as Rect;
+    const backRect = sketch.shapes[5] as Rect;
 
     const data: CuboidData = {
-      id: _creatingShape.id,
+      id: sketch.id,
       direction: 'front',
       front: {
         tl: {
@@ -200,9 +198,9 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     };
 
     this._createDraft(data);
-    _creatingShape.destroy();
-    this._creatingShape = null;
-    monitor!.setSelectedAnnotationId(_creatingShape.id);
+    sketch.destroy();
+    this.sketch = null;
+    monitor!.setSelectedAnnotationId(sketch.id);
     axis!.rerender();
 
     Tool.onAdd(
@@ -221,18 +219,18 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
    * Esc键取消绘制
    */
   protected handleEscape = () => {
-    this._creatingShape?.destroy();
-    this._creatingShape = null;
+    this.sketch?.destroy();
+    this.sketch = null;
     axis?.rerender();
   };
 
   protected handleDelete = () => {
-    const { _creatingShape, draft } = this;
+    const { sketch, draft } = this;
 
     // 如果正在创建，则取消创建
-    if (_creatingShape) {
-      _creatingShape.destroy();
-      this._creatingShape = null;
+    if (sketch) {
+      sketch.destroy();
+      this.sketch = null;
       axis?.rerender();
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
@@ -246,7 +244,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
 
   protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, draft, config, _creatingShape } = this;
+    const { activeLabel, style, draft, config, sketch } = this;
 
     const isUnderDraft = draft && draft.isRectAndControllersUnderCursor({ x: e.offsetX, y: e.offsetY });
 
@@ -264,10 +262,10 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       y: config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY),
     });
 
-    if (!_creatingShape) {
-      this._creatingShape = new Group(uuid(), monitor!.getNextOrder());
+    if (!sketch) {
+      this.sketch = new Group(uuid(), monitor!.getNextOrder());
 
-      this._creatingShape.add(
+      this.sketch.add(
         new Rect({
           id: uuid(),
           style: {
@@ -280,10 +278,10 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
           height: 1,
         }),
       );
-    } else if (_creatingShape.shapes.length === 1) {
-      const frontRect = _creatingShape.shapes[0] as Rect;
+    } else if (sketch.shapes.length === 1) {
+      const frontRect = sketch.shapes[0] as Rect;
 
-      _creatingShape.add(
+      sketch.add(
         new Line({
           id: uuid(),
           style: {
@@ -369,25 +367,25 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
         }),
       );
     } else {
-      this._archiveCreatingShapes(e);
+      this._archiveSketch(e);
     }
   };
 
   protected handleMouseMove = (e: MouseEvent) => {
-    const { _creatingShape, _startPoint, config } = this;
+    const { sketch, _startPoint, config } = this;
 
-    if (!_creatingShape || !_startPoint) {
+    if (!sketch || !_startPoint) {
       return;
     }
 
-    const frontRect = _creatingShape.shapes[0] as Rect;
+    const frontRect = sketch.shapes[0] as Rect;
 
     const scaledX = config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX);
     const scaledY = config.outOfImage ? e.offsetY : axis!.getSafeY(e.offsetY);
     let x = axis!.getOriginalX(scaledX);
     let y = axis!.getOriginalY(scaledY);
 
-    if (_creatingShape.shapes.length === 1) {
+    if (sketch.shapes.length === 1) {
       if (e.offsetX < axis!.getScaledX(_startPoint.x)) {
         frontRect.coordinate[0].x = x;
       } else {
@@ -402,8 +400,8 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
 
       frontRect.width = Math.abs(x - _startPoint.x);
       frontRect.height = Math.abs(y - _startPoint.y);
-    } else if (_creatingShape.shapes.length > 1) {
-      const backRect = _creatingShape.shapes[5] as Rect;
+    } else if (sketch.shapes.length > 1) {
+      const backRect = sketch.shapes[5] as Rect;
 
       // 后面的矩形也需要在安全区域内
       y = axis!.getOriginalY(axis!.getSafeY(scaledY - backRect.height * axis!.scale)) + backRect.height;
@@ -431,13 +429,13 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       };
 
       backRect.coordinate[0] = tl;
-      _creatingShape.shapes[1].coordinate[1] = tl;
-      _creatingShape.shapes[2].coordinate[1] = tr;
-      _creatingShape.shapes[3].coordinate[1] = br;
-      _creatingShape.shapes[4].coordinate[1] = bl;
+      sketch.shapes[1].coordinate[1] = tl;
+      sketch.shapes[2].coordinate[1] = tr;
+      sketch.shapes[3].coordinate[1] = br;
+      sketch.shapes[4].coordinate[1] = bl;
     }
 
-    _creatingShape.update();
+    sketch.update();
   };
 
   protected convertAnnotationItem(data: CuboidData) {
@@ -446,11 +444,5 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       front: mapValues(data.front, (point) => axis!.convertCanvasCoordinate(point)),
       back: mapValues(data.back, (point) => axis!.convertCanvasCoordinate(point)),
     };
-  }
-
-  public render(ctx: CanvasRenderingContext2D): void {
-    if (this._creatingShape) {
-      this._creatingShape.render(ctx);
-    }
   }
 }

@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 
 import type { Annotation } from '../annotations/Annotation';
 import type { ToolName, BasicImageAnnotation } from '../interface';
-import type { Shape } from '../shapes';
+import type { Group, Shape } from '../shapes';
 import { eventEmitter, monitor } from '../singletons';
 import type { Draft } from '../drafts/Draft';
 
@@ -64,6 +64,11 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
    */
   public draft: Draft<Data, any, any> | null = null;
 
+  /**
+   * 绘制过程中的草稿
+   */
+  public sketch: Group<Shape<any>, any> | Shape<any> | null = null;
+
   public showOrder: boolean;
 
   protected _data: Data[];
@@ -111,9 +116,9 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('archiveDraft is not implemented!');
   }
 
-  protected destroyCreatingShapes() {
+  protected destroySketch() {
     // do nothing
-    console.warn('destroyCreatingShapes is not implemented!');
+    console.warn('destroySketch is not implemented!');
   }
 
   protected rebuildDraft(_data: Data) {
@@ -183,10 +188,6 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   protected addToData(data: Data) {
     this._data.push(data);
-  }
-
-  public render(_ctx: CanvasRenderingContext2D) {
-    // do nothing
   }
 
   public activate(label?: string) {
@@ -293,6 +294,14 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     return Array.from(drawing.values()).map((annotation) => annotation.data);
   }
 
+  public render(ctx: CanvasRenderingContext2D) {
+    if (this.sketch) {
+      Promise.resolve().then(() => {
+        this.sketch?.render(ctx);
+      });
+    }
+  }
+
   public destroy(): void;
   public destroy(): void {
     this.drawing?.forEach((annotation) => {
@@ -301,6 +310,8 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.drawing = null;
     this.draft?.destroy();
     this.draft = null;
+    this.sketch?.destroy();
+    this.sketch = null;
 
     this._data = [];
   }
