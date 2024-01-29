@@ -5,7 +5,7 @@
     "packages/*",
     "apps/*"
   ],
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.21",
   "scripts": {
     "prepare": "husky install",
     "build": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
