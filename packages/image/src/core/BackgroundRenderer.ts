@@ -2,6 +2,7 @@ import type { RendererOptions } from './Renderer';
 import { Renderer } from './Renderer';
 import { axis, eventEmitter } from '../singletons';
 import type { AxisPoint } from '../shapes';
+import { DEFAULT_BACKGROUND_COLOR } from '../constant';
 
 const ImageProperties = ['contrast', 'saturation', 'brightness'] as const;
 
@@ -34,13 +35,6 @@ export interface ImageOption extends RendererOptions {
    * @default 0
    */
   brightness?: number;
-
-  /**
-   * 背景颜色
-   *
-   * @default '#999'
-   */
-  backgroundColor?: string;
 }
 
 export class BackgroundRenderer extends Renderer {
@@ -54,6 +48,8 @@ export class BackgroundRenderer extends Renderer {
     height: 0,
     zIndex: 1,
   };
+
+  static BACKGROUND_COLOR = DEFAULT_BACKGROUND_COLOR;
 
   private _image: HTMLImageElement | null = null;
 
@@ -76,20 +72,14 @@ export class BackgroundRenderer extends Renderer {
 
   private _imageUrl: string | null = null;
 
-  private _backgroundColor: string = '#999';
-
   public options: ImageOption = BackgroundRenderer.DEFAULT_OPTIONS;
 
-  constructor({ backgroundColor, ...options }: ImageOption) {
+  constructor(options: ImageOption) {
     super({
       ...BackgroundRenderer.DEFAULT_OPTIONS,
       ...options,
     });
     this._rotate = options.rotate || 0;
-
-    if (backgroundColor) {
-      this._backgroundColor = backgroundColor;
-    }
   }
   static createImage(url: string) {
     return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -241,8 +231,7 @@ export class BackgroundRenderer extends Renderer {
       return;
     }
 
-    this.options.backgroundColor = value;
-    this._backgroundColor = value;
+    BackgroundRenderer.BACKGROUND_COLOR = value;
     this.clear();
     this.render();
   }
@@ -299,7 +288,6 @@ export class BackgroundRenderer extends Renderer {
       ctx,
       canvas,
       _initialCoordinate,
-      _backgroundColor,
       _rotatedWidth,
       _rotatedHeight,
       _unRotatedWidth,
@@ -331,7 +319,7 @@ export class BackgroundRenderer extends Renderer {
 
     ctx.save();
 
-    ctx.fillStyle = _backgroundColor;
+    ctx.fillStyle = BackgroundRenderer.BACKGROUND_COLOR;
     // 整个画布填充背景色
     // 避免网页缩放后清空画布不完全
     ctx.fillRect(0, 0, canvas.width * 10, canvas.height * 10);

@@ -444,8 +444,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
   };
 
   protected handleEscape = () => {
-    this.sketch?.destroy();
-    this.sketch = null;
+    this.destroySketch();
 
     axis?.rerender();
   };
@@ -455,8 +454,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     // 如果正在创建，则取消创建
     if (sketch) {
-      sketch?.destroy();
-      this.sketch = null;
+      this.destroySketch();
     } else if (draft) {
       // 如果选中了草稿，则删除草稿
       const data = cloneDeep(draft.data);
