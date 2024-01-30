@@ -312,8 +312,6 @@ export function LabelSection() {
     };
   }, [selectedAnnotation?.attributes, selectedLabel?.attributes, selectedLabel?.value]);
 
-  console.log('selectedAnnotation', selectedAnnotation, formValue);
-
   return (
     <Wrapper>
       <Labels ref={labelsWrapperRef}>
