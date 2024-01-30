@@ -7,13 +7,13 @@ export const MediaTypeText = {
 };
 
 export const FileExtensionText = {
-  [MediaType.IMAGE]: 'jpg、png、bmp、gif',
+  [MediaType.IMAGE]: 'jpg、jpeg、png、bmp、gif',
   [MediaType.VIDEO]: 'mp4(h.264编码)',
   [MediaType.AUDIO]: 'mp3、wav、ogg',
 };
 
 export const FileExtension = {
-  [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif'],
+  [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif', 'jpeg'],
   [MediaType.VIDEO]: ['mp4'],
   [MediaType.AUDIO]: ['mp3', 'wav', 'ogg'],
 };

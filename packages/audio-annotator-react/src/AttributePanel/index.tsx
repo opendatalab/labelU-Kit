@@ -17,8 +17,7 @@ import { useAnnotator } from '../context';
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
 const Wrapper = styled.div<{ collapsed: boolean }>`
-  grid-area: attribute;
-  height: var(--height);
+  height: calc(100vh - var(--offset-top));
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -100,7 +99,6 @@ type HeaderType = 'global' | 'label';
 export function AttributePanel() {
   const {
     config,
-    containerRef,
     currentSample,
     onAnnotationsChange,
     annotationsMapping,
@@ -110,7 +108,6 @@ export function AttributePanel() {
     attributeMapping,
   } = useAnnotator();
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [height, setHeight] = useState<number>(0);
 
   const { globalAnnotations, videoAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
     const _globalAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
@@ -190,12 +187,6 @@ export function AttributePanel() {
     return _titles;
   }, [config?.frame, config?.segment, config?.tag, config?.text, globalAnnotations, annotations.length]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
-
-  useEffect(() => {
-    setTimeout(() => {
-      setHeight(containerRef.current?.clientHeight || 0);
-    });
-  });
 
   useEffect(() => {
     const handleCollapse = () => {
@@ -286,8 +277,7 @@ export function AttributePanel() {
   );
 
   return (
-    // @ts-ignore
-    <Wrapper collapsed={collapsed} style={{ '--height': `${height}px` }}>
+    <Wrapper collapsed={collapsed}>
       <TabHeader className="attribute-header">
         {titles.map((item) => {
           return (

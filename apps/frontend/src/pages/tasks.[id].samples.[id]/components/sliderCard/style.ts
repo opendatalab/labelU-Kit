@@ -2,7 +2,7 @@ import styled, { css } from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
 
 export const Wrapper = styled(FlexLayout)`
-  margin-bottom: 10px;
+  gap: 0.5rem;
   cursor: pointer;
 `;
 
@@ -29,22 +29,29 @@ export const SkipWrapper = styled.div`
 
 export const ContentWrapper = styled<any>(FlexLayout.Content)`
   position: relative;
-  margin-bottom: 10px;
   max-height: 118px;
   background: #fff;
   overflow: hidden;
 
-  & > img {
-    width: 200px;
-    height: 120px;
-    object-fit: cover;
+  /* & > * { */
+  ${({ active }) =>
+    active &&
+    css`
+      outline: 3px solid var(--color-primary);
+    `}
+  /* } */
+
+  & > img, & > div {
+    &:first-child {
+      width: 200px;
+      height: 120px;
+      object-fit: cover;
+    }
   }
 
   ${({ active }) =>
     active &&
     css`
-      outline: 3px solid var(--color-primary);
-
       & + ${IdWrapper} {
         background: var(--color-primary);
         color: #fff;
@@ -52,30 +59,36 @@ export const ContentWrapper = styled<any>(FlexLayout.Content)`
     `}
 `;
 
-export const CheckWrapper = styled.div`
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  z-index: 1000;
-  width: 16px;
-  height: 16px;
+export const CheckBg = styled.div`
+  & > svg {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+    font-size: 12px;
+    z-index: 1001;
+    color: #fff;
+  }
 `;
 
-export const CheckBg = styled.div`
+export const Triangle = styled.div`
   position: absolute;
-  top: -16px;
-  right: -16px;
-  z-index: 100;
-  width: 32px;
-  height: 32px;
-  transform: rotate(-45deg);
-  background-color: var(--color-primary);
+  top: 0;
+  right: 0;
+  z-index: 1000;
+  width: 0px;
+  height: 0px;
+  border-style: solid;
+  border-width: 0 28px 28px 0;
+  border-color: transparent var(--color-primary) transparent transparent;
+  transform: rotate(0deg);
 `;
 
 export const AudioWrapper = styled(FlexLayout)`
   position: relative;
   overflow: hidden;
   margin-bottom: 10px;
+  align-items: center;
+  width: 200px;
   cursor: pointer;
   border-radius: 3px;
 `;

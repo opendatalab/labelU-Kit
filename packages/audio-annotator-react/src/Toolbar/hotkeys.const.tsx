@@ -43,7 +43,7 @@ export default [
             </>
           ) : (
             <>
-              <Kbd>Ctrl</Kbd> + <Kbd>Space</Kbd>
+              <Kbd>Ctrl</Kbd> + <Kbd>Z</Kbd>
             </>
           ),
       },

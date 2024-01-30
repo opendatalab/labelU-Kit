@@ -65,6 +65,7 @@ const items: TabsProps['items'] = [
   {
     key: 'task-1',
     label: '任务一',
+    forceRender: true,
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“拉框”工具标注“笔记本电脑”</p>
@@ -77,6 +78,7 @@ const items: TabsProps['items'] = [
   {
     key: 'task-2',
     label: '任务二',
+    forceRender: true,
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“标点”工具标记“龙的眼睛”</p>
@@ -89,6 +91,7 @@ const items: TabsProps['items'] = [
   {
     key: 'task-3',
     label: '任务三',
+    forceRender: true,
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“多边形”工具标记“阿北”</p>
@@ -101,6 +104,7 @@ const items: TabsProps['items'] = [
   {
     key: 'task-4',
     label: '任务四',
+    forceRender: true,
     children: (
       <div style={{ textAlign: 'center' }}>
         <p>请用“标线”工具标记“龙的犄角”</p>

@@ -1,17 +1,17 @@
 {
   "name": "@labelu/frontend",
-  "version": "3.3.0-alpha.1",
+  "version": "4.0.0",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@labelu/annotation": "1.0.3-alpha.3",
-    "@labelu/audio-annotator-react": "1.2.2",
-    "@labelu/components": "1.0.3-alpha.3",
-    "@labelu/components-react": "1.2.2",
+    "@labelu/audio-annotator-react": "1.3.0",
+    "@labelu/components-react": "1.3.0",
+    "@labelu/image": "1.0.0",
     "@labelu/formatter": "1.0.2",
-    "@labelu/interface": "1.2.1",
-    "@labelu/video-annotator-react": "1.2.2",
-    "@labelu/video-react": "1.2.2",
+    "@labelu/image-annotator-react": "1.0.0",
+    "@labelu/interface": "1.3.0",
+    "@labelu/video-annotator-react": "1.3.0",
+    "@labelu/video-react": "1.2.3",
     "@tanstack/react-query": "^5.0.0",
     "antd": "5.10.1",
     "axios": "^1.3.4",
@@ -38,6 +38,7 @@
   "scripts": {
     "postinstall": "node ./scripts/generate_css_variables_from_antd_theme_token.js",
     "start": "vite --port 3004",
+    "preview": "vite preview --port 3007",
     "build": "cross-env CI=false vite build",
     "package:dist": "cross-env DIST=true vite",
     "release": "semantic-release",
@@ -92,7 +93,7 @@
     "@types/styled-components": "^5.1.26",
     "@types/uuid": "^9.0.0",
     "@vitejs/plugin-react": "^3.1.0",
-    "analyze-wiz": "1.2.0-alpha.10",
+    "analyze-wiz": "^1.2.0-beta.2",
     "cross-env": "^7.0.3",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -110,6 +111,6 @@
     "vite-plugin-imp": "^2.3.1",
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-svgr": "^2.4.0",
-    "vite-plugin-ts-mono-alias": "^1.1.0"
+    "vite-plugin-ts-mono-alias": "^1.1.8"
   }
 }

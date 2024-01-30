@@ -336,7 +336,7 @@ const InputData = () => {
                 <span style={{ display: 'inline-block', color: 'var(--color-primary)' }}>
                   {amountMapping.uploading}
                 </span>
-                <b>个；</b>
+                <span>个；</span>
               </FlexLayout>
               <FlexLayout gap=".25rem">
                 <span>上传成功</span>

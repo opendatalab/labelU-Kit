@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.lib.json",
+  "compilerOptions": {
+    "isolatedModules": false,
+    "sourceMap": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "outDir": "dist",
+    "declarationDir": "dist/types",
+    "baseUrl": "./"
+  },
+  "include": [
+    "./src"
+  ]
+}

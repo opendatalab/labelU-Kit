@@ -7,9 +7,9 @@ import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 import { ReactComponent as LocalDeploy } from '@/assets/svg/local-deploy.svg';
 import { goLogin } from '@/utils/sso';
 
+import TaskTip from './TaskTip';
 import Breadcrumb from '../Breadcrumb';
 import { LabeluLogo, NavigationWrapper } from './style';
-import TaskTip from './TaskTip';
 import ImageDemoGuide from './ImageDemoGuide';
 
 const Homepage = () => {
