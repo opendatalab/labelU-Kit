@@ -18,10 +18,10 @@ import { ReactComponent as RotateIcon } from './assets/rotate.svg';
 
 const FooterBar = styled.div`
   height: 36px;
-  background-color: #f7f7f7;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-top: 1px solid rgba(235, 236, 240, 1);
   padding: 0 16px;
   font-size: 14px;
   user-select: none;
@@ -139,7 +139,7 @@ export default function Footer() {
             <ColorPicker
               type="color"
               name="background-color"
-              defaultValue="#999999"
+              defaultValue="#F0F0F0"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 if (engine?.backgroundRenderer) {
                   engine.backgroundRenderer.backgroundColor = e.target.value;

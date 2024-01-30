@@ -1,22 +1,23 @@
 <div align="center">
   <article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <p align="center"><img width="300" src="./images/labelU-logo.svg" /></p>
-      <p>LabelU front-end annotation component library, supporting 2D box、point、line、polygon tools, supporting the combination of multiple tools. It can be used for labeling platform， out of the box</p>
+      <p>
+      LabelU is a frontend annotation component library that supports 2D bounding boxes, Points, Lines, Polygons, and Cuboids, as well as mixed annotation tools for images. It can be utilized for the development and integration of annotation platforms, ready for use out of the box.</p>
   </article>
   English | <a href="./README.md">简体中文</a>
 </div>
 
 ## Features
 
-- Supports 2D bounding box, point, line, and polygon annotation for images
+- Supports 2D bounding box, point, line (spline), cuboid, and polygon (closed-spline) annotation for images
 - Supports video annotation
 - Supports audio annotation
 - Modular components that can be freely combined
 
 ## Getting Started
 
-- Try online: [https://labelu.shlab.tech/](https://labelu.shlab.tech/)
-- Offline installation: [https://github.com/opendatalab/labelU/](https://github.com/opendatalab/labelU#install-locally-with-miniconda)
+- Try LabelU kit: [https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
+- Try LabelU: [https://labelu.shlab.tech/](https://labelu.shlab.tech/)
 - Documentation: [https://opendatalab.github.io/labelU-Kit](https://opendatalab.github.io/labelU-Kit)
 
 ## Packages
