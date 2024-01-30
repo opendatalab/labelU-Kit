@@ -88,7 +88,7 @@ const CollapseTrigger = styled.div<{ collapsed: boolean }>`
 `;
 
 export interface SidebarProps {
-  renderSidebar?: () => React.ReactNode;
+  renderSidebar?: null | (() => React.ReactNode);
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
@@ -100,7 +100,11 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
   }, []);
 
   const sidebar = useMemo(() => {
-    return renderSidebar?.() ?? null;
+    if (renderSidebar === null) {
+      return null;
+    }
+
+    return renderSidebar?.();
   }, [renderSidebar]);
 
   if (!sidebar) {
