@@ -464,6 +464,19 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   };
 
+  protected updateSketchStyleByLabel(label: string) {
+    const { sketch, style } = this;
+
+    if (!sketch) {
+      return;
+    }
+
+    sketch.updateStyle({
+      ...style,
+      stroke: AnnotationLine.labelStatic.getLabelColor(label),
+    });
+  }
+
   protected convertAnnotationItem(data: LineData) {
     const _temp = {
       ...data,

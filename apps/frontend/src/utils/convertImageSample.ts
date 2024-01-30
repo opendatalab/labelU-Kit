@@ -2,6 +2,8 @@ import _ from 'lodash';
 import type { ImageAnnotatorProps } from '@labelu/image-annotator-react';
 import type { ImageSample } from '@labelu/image-annotator-react/dist/context/sample.context';
 import { omit } from 'lodash/fp';
+import type { ToolName } from '@labelu/image';
+import { TOOL_NAMES } from '@labelu/image';
 
 import type { SampleData } from '@/api/types';
 
@@ -45,14 +47,14 @@ export function convertImageSample(
     url,
     data: _.chain(pool)
       .map(([type, key]) => {
-        if (!resultParsed[key]) {
+        if (!resultParsed[key] && TOOL_NAMES.includes(type as ToolName)) {
           return;
         }
 
         const items = _.get(resultParsed, [key, 'result'], []);
         if (!items.length && (type === 'tag' || type === 'text')) {
           // 生成全局工具的默认值
-          return generateDefaultValues(config?.[type]);
+          return [type, generateDefaultValues(config?.[type])];
         }
 
         return [

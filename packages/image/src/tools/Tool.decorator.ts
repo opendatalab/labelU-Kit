@@ -94,6 +94,9 @@ export function ToolWrapper<
         });
       }
 
+      // 更新正在绘制过程中的草稿样式
+      this.updateSketchStyleByLabel(value);
+
       eventEmitter.emit('labelChange', value);
     }
 

@@ -227,6 +227,30 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this._createDraft(dataClone);
   }
 
+  protected updateSketchStyleByLabel(label: string) {
+    const { sketch } = this;
+
+    if (!sketch) {
+      return;
+    }
+
+    const polygon = sketch.shapes[0] as Polygon;
+
+    polygon.updateStyle({
+      ...polygon.style,
+      fill: Color(AnnotationPolygon.labelStatic.getLabelColor(label)).alpha(0.3).toString(),
+    });
+
+    sketch.each((shape, index) => {
+      if (index > 0) {
+        shape.updateStyle({
+          ...shape.style,
+          stroke: AnnotationPolygon.labelStatic.getLabelColor(label),
+        });
+      }
+    });
+  }
+
   protected handleEscape = () => {
     this.destroySketch();
     axis?.rerender();
@@ -249,7 +273,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   protected handleMouseDown = (e: MouseEvent) => {
     // ====================== 绘制 ======================
-    const { activeLabel, style, draft, config, sketch } = this;
+    const { activeLabel, style, draft, config } = this;
 
     const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
 
@@ -416,7 +440,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       this.sketch.shapes[0].coordinate = [...this.sketch.shapes[0].plainCoordinate, cloneDeep(startPoint)];
 
       // 创建新的线段
-      sketch?.add(
+      this.sketch.add(
         new Line({
           id: uuid(),
           style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },

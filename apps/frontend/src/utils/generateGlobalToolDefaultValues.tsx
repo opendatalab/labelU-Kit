@@ -25,7 +25,7 @@ export function generateDefaultValues(
 
     const tagItem = attributes[i] as EnumerableAttribute;
 
-    if (tagItem.type === 'tag') {
+    if (tagItem.type === 'enum' || tagItem.type === 'array') {
       const defaultValues = [];
       for (let j = 0; j < tagItem.options.length; j++) {
         if (tagItem.options[j].isDefault) {
