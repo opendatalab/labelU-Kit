@@ -432,6 +432,19 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     sketch.update();
   };
 
+  protected updateSketchStyleByLabel(label: string) {
+    const { sketch, style } = this;
+
+    if (!sketch) {
+      return;
+    }
+
+    sketch.updateStyle({
+      ...style,
+      stroke: AnnotationCuboid.labelStatic.getLabelColor(label),
+    });
+  }
+
   protected convertAnnotationItem(data: CuboidData) {
     return {
       ...data,

@@ -311,6 +311,19 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }
   };
 
+  protected updateSketchStyleByLabel(label: string) {
+    const { sketch, style } = this;
+
+    if (!sketch) {
+      return;
+    }
+
+    sketch.updateStyle({
+      ...style,
+      stroke: AnnotationRect.labelStatic.getLabelColor(label),
+    });
+  }
+
   protected convertAnnotationItem(data: RectData) {
     return {
       ...data,

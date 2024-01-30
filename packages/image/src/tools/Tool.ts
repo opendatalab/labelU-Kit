@@ -166,6 +166,11 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('clear is not implemented!');
   }
 
+  protected updateSketchStyleByLabel(_labelValue: string) {
+    // do nothing
+    console.warn('updateSketchStyleByLabel is not implemented!');
+  }
+
   constructor({ name, data, style, hoveredStyle, selectedStyle, showOrder, ...config }: Config & ExtraParams) {
     // 创建标签映射
     this._createLabelMapping(config.labels);
