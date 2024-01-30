@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
@@ -88,7 +88,7 @@ const CollapseTrigger = styled.div<{ collapsed: boolean }>`
 `;
 
 export interface SidebarProps {
-  renderSidebar?: () => React.ReactNode;
+  renderSidebar?: null | (() => React.ReactNode);
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
@@ -99,11 +99,21 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
     setCollapsed((prev) => !prev);
   }, []);
 
+  const sidebar = useMemo(() => {
+    if (renderSidebar === null) {
+      return null;
+    }
+
+    return renderSidebar?.();
+  }, [renderSidebar]);
+
+  if (!sidebar) {
+    return null;
+  }
+
   return (
     <Wrapper collapsed={collapsed}>
-      {renderSidebar ? (
-        renderSidebar()
-      ) : (
+      {sidebar || (
         <Cards>
           {samples.map((sample, index) => {
             return (
