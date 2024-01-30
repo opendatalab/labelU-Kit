@@ -6,7 +6,7 @@ export enum ImageToolName {
   Polygon = 'polygonTool',
   /** 线条 */
   Line = 'lineTool',
-  /** 3D立体框 */
+  /** 立体框 */
   Cuboid = 'cuboidTool',
 }
 
