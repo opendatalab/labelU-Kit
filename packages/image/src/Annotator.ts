@@ -125,9 +125,6 @@ export class Annotator {
     this._initialTools();
 
     eventEmitter.on(EInternalEvent.ToolChange, this._handleToolChange);
-
-    // @ts-ignore
-    window.annotator = this;
   }
 
   private _initialContainer() {

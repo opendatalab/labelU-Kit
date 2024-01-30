@@ -25,9 +25,6 @@ export class CustomRBush extends RBush<RBushItem> {
   constructor() {
     super();
 
-    // @ts-ignore
-    window.rbush = this;
-
     eventEmitter.on(EInternalEvent.Render, this._onRender);
   }
 
