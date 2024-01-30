@@ -271,11 +271,11 @@ export default [
         ],
       },
       {
-        label: '3D 立体框',
+        label: '立体框',
         key: 'cuboid',
         hotkeys: [
           {
-            name: '标 3D 框',
+            name: '标 立体框',
             content: <MouseLeftClick />,
           },
           {
