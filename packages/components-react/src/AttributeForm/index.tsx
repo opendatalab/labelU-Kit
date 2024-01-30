@@ -441,8 +441,9 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
       return {
         error,
         submit,
+        form,
       };
-    }, [error, submit]);
+    }, [error, form, submit]);
 
     useImperativeHandle(ref, () => contextValue);
 
@@ -471,14 +472,18 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
               </Field>
             </FormItem>
           )}
-          {Array.isArray(resultAttributeOptions) &&
-            resultAttributeOptions.map((attributeOptionItem) => (
-              <AttributeFormItem
-                {...attributeOptionItem}
-                label={attributeOptionItem.key}
-                key={attributeOptionItem.value}
-              />
-            ))}
+          {Array.isArray(resultAttributeOptions) && resultAttributeOptions.length > 0 && (
+            <>
+              <h4>属性</h4>
+              {resultAttributeOptions.map((attributeOptionItem) => (
+                <AttributeFormItem
+                  {...attributeOptionItem}
+                  label={attributeOptionItem.key}
+                  key={attributeOptionItem.value}
+                />
+              ))}
+            </>
+          )}
         </Form>
       </ValidateContext.Provider>
     );

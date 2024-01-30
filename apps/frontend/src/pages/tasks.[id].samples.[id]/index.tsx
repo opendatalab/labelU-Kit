@@ -1,14 +1,13 @@
 import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
-import { Empty, Spin } from 'antd';
-import AnnotationOperation from '@labelu/components';
-import type { AnnotatorProps } from '@labelu/video-annotator-react';
+import { Empty, Spin, message } from 'antd';
 import { Annotator } from '@labelu/video-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
-import '@labelu/components/dist/index.css';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
+import type { AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
+import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
 
@@ -19,6 +18,8 @@ import { getSamples } from '@/api/services/samples';
 import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import { convertVideoSample } from '@/utils/convertVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
+import { convertImageConfig } from '@/utils/convertImageConfig';
+import { convertImageSample } from '@/utils/convertImageSample';
 
 import commonController from '../../utils/common';
 import SlideLoader from './components/slideLoader';
@@ -26,7 +27,7 @@ import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
 
-export const annotationRef = createRef();
+export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
 export const videoAnnotationRef = createRef();
 export const audioAnnotationRef = createRef();
 
@@ -40,6 +41,31 @@ const AnnotationPage = () => {
   const isMutating = useIsMutating();
 
   const sampleId = routeParams.sampleId;
+
+  // TODO： labelu/image中的错误定义
+  const onError = useCallback((err: any) => {
+    const value = err.value;
+
+    if (err.type === 'rotate') {
+      message.error('有标注数据时不可旋转图片');
+    }
+
+    if (err.type === 'minPointAmount') {
+      message.error(`最少点数不能小于${value}个`);
+    }
+
+    if (err.type === 'maxPointAmount') {
+      message.error(`点数最多不能大于${value}个`);
+    }
+
+    if (err.type === 'minWidth') {
+      message.error(`拉框宽度不可小于${value}`);
+    }
+
+    if (err.type === 'minHeight') {
+      message.error(`拉框高度不可小于${value}`);
+    }
+  }, []);
 
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -62,7 +88,10 @@ const AnnotationPage = () => {
   }, [routeParams.taskId]);
   const [samples = [] as SampleResponse[], loading, setSamples] = useScrollFetch(
     fetchSamples,
-    () => document.querySelector('.lab-layout__left_sider'),
+    () =>
+      document.querySelector('.labelu-image__sidebar div') ||
+      document.querySelector('.labelu-audio__sidebar div') ||
+      document.querySelector('.labelu-video__sidebar div'),
     {
       isEnd: () => totalCount === samples.length,
     },
@@ -105,12 +134,12 @@ const AnnotationPage = () => {
       return convertVideoConfig(taskConfig);
     }
 
-    return {} as AnnotatorProps['config'];
+    return convertImageConfig(taskConfig);
   }, [task?.media_type, taskConfig]);
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return transformed[0];
+      return convertImageSample(sample?.data?.data, routeParams.sampleId, editorConfig);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
       if (!transformed?.[0]) {
         return null;
@@ -142,15 +171,14 @@ const AnnotationPage = () => {
 
   if (task?.media_type === MediaType.IMAGE) {
     content = (
-      <AnnotationOperation
-        leftSiderContent={leftSiderContent}
-        topActionContent={topActionContent}
-        loading={loading}
-        ref={annotationRef}
-        isPreview={false}
-        sample={editingSample}
-        config={configFromParent || taskConfig}
-        isShowOrder={false}
+      <ImageAnnotator
+        renderSidebar={renderSidebar}
+        toolbarRight={topActionContent}
+        ref={imageAnnotationRef}
+        onError={onError}
+        offsetTop={configFromParent ? 100 : 156}
+        editingSample={editingSample}
+        config={configFromParent || editorConfig}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {
@@ -158,6 +186,7 @@ const AnnotationPage = () => {
       <Annotator
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
+        offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={configFromParent || editorConfig}
         toolbarRight={topActionContent}
@@ -169,6 +198,7 @@ const AnnotationPage = () => {
       <AudioAnnotator
         primaryColor="#0d53de"
         ref={audioAnnotationRef}
+        offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={configFromParent || editorConfig}
         toolbarRight={topActionContent}

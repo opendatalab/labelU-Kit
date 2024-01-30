@@ -18,6 +18,7 @@ import type {
 import { LabelSection, AnnotatorContext, AnnotatorToolbar, AttributePanel } from '@labelu/audio-annotator-react';
 import type { AudioAnnotatorConfig, MediaSample } from '@labelu/audio-annotator-react';
 import type { MediaAnnotatorRef } from '@labelu/components-react';
+import { useRedoUndo } from '@labelu/components-react';
 
 import Sidebar from './Sidebar';
 
@@ -79,6 +80,7 @@ export interface AnnotatorRef {
 export interface AnnotatorProps {
   samples: MediaSample[];
   autoPlay?: boolean;
+  offsetTop?: number;
   config?: AudioAnnotatorConfig;
   renderSidebar?: () => React.ReactNode;
   renderAttributes?: () => React.ReactNode;
@@ -96,6 +98,7 @@ function ForwardAnnotator(
     config,
     renderAttributes,
     editingSample,
+    offsetTop = 0,
     maxHistoryCount = 20,
     primaryColor = '#007aff',
     toolbarExtra,
@@ -156,62 +159,25 @@ function ForwardAnnotator(
   );
 
   // ================== sample state ==================
-  const [currentSample, setCurrentSample] = useState<MediaSample | undefined>(editingSample);
+  const [currentSample, setCurrentSample, redo, undo, pastRef, futureRef, reset] = useRedoUndo<MediaSample>(
+    editingSample!,
+    {
+      maxHistory: maxHistoryCount,
+    },
+  );
   // ================== redo undo ==================
-  const pastRef = useRef<MediaSample[]>([]);
-  const futureRef = useRef<MediaSample[]>([]);
 
   // 重置历史记录
   useEffect(() => {
-    pastRef.current = [];
-    futureRef.current = [];
-  }, [editingSample]);
+    reset();
+  }, [editingSample, reset]);
 
   const updateCurrentSample = useCallback(
     (_newSample: React.SetStateAction<MediaSample | undefined>) => {
-      setCurrentSample((pre) => {
-        const newSample = typeof _newSample === 'function' ? _newSample(pre) : _newSample;
-
-        if (pre) {
-          pastRef.current = [...pastRef.current, pre].slice(-maxHistoryCount);
-        }
-
-        return newSample;
-      });
-
-      futureRef.current = [];
+      setCurrentSample(_newSample);
     },
-    [maxHistoryCount],
+    [setCurrentSample],
   );
-
-  const undo = useCallback(() => {
-    if (pastRef.current.length === 0) {
-      return;
-    }
-
-    const newPresent = pastRef.current[pastRef.current.length - 1];
-    const newPast = pastRef.current.slice(0, pastRef.current.length - 1);
-
-    pastRef.current = newPast;
-    setCurrentSample(newPresent);
-    setSelectedAnnotation(undefined);
-    if (currentSample) {
-      futureRef.current = [currentSample, ...futureRef.current];
-    }
-  }, [currentSample]);
-
-  const redo = useCallback(() => {
-    if (futureRef.current.length === 0) {
-      return;
-    }
-
-    const newPresent = futureRef.current[0];
-    const newFuture = futureRef.current.slice(1);
-    pastRef.current = [...pastRef.current!, currentSample!];
-
-    setCurrentSample(newPresent);
-    futureRef.current = newFuture;
-  }, [currentSample]);
 
   // player
 
@@ -225,12 +191,14 @@ function ForwardAnnotator(
 
   // ================== sample ==================
 
-  const handleSelectSample = useCallback((sample: MediaSample) => {
-    setCurrentSample(sample);
-    setSelectedAnnotation(undefined);
-    pastRef.current = [];
-    futureRef.current = [];
-  }, []);
+  const handleSelectSample = useCallback(
+    (sample: MediaSample) => {
+      setCurrentSample(sample);
+      setSelectedAnnotation(undefined);
+      reset();
+    },
+    [reset, setCurrentSample],
+  );
 
   useEffect(() => {
     updateCurrentSample(editingSample || samples?.[0]);
@@ -261,7 +229,6 @@ function ForwardAnnotator(
 
   const handleAnnotationsChange = useCallback(
     (_annotations: MediaAnnotationWithTextAndTag[]) => {
-      console.info(JSON.stringify(_annotations, null, 2));
       updateCurrentSample((pre) => {
         return {
           ...pre!,
@@ -623,6 +590,8 @@ function ForwardAnnotator(
     onLabelChange,
     undo,
     redo,
+    pastRef,
+    futureRef,
     getCurrentTime,
     setCurrentTime,
   ]);
@@ -642,7 +611,7 @@ function ForwardAnnotator(
   return (
     <AnnotatorContext.Provider value={contextValue}>
       {/* @ts-ignore */}
-      <Wrapper style={{ '--color-primary': primaryColor }}>
+      <Wrapper style={{ '--color-primary': primaryColor, '--offset-top': `${offsetTop}px` }}>
         <AnnotatorToolbar extra={toolbarExtra} right={toolbarRight} />
         <LabelSection />
         <Content>

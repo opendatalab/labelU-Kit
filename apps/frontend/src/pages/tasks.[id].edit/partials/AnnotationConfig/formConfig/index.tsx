@@ -1,14 +1,17 @@
-import { EToolName, TOOL_NAME, EVideoToolName, EAudioToolName } from '@labelu/annotation';
+// import { ImageToolName, TOOL_NAME, EVideoToolName, EAudioToolName } from '@labelu/annotation';
 import type { FormProps, SelectProps, TabsProps } from 'antd';
 import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
 import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
+import { createGlobalStyle } from 'styled-components';
 
 import { MediaType, TaskStatus } from '@/api/types';
 import FancyForm from '@/components/FancyForm';
 import FancyInput, { add } from '@/components/FancyInput';
+import { EAudioToolName, EGlobalToolName, EVideoToolName, ImageToolName } from '@/enums';
+import { TOOL_NAME } from '@/constants/toolName';
 
 import { TaskCreationContext } from '../../../taskCreation.context';
 import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
@@ -16,6 +19,7 @@ import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
 import lineTemplate from './templates/line.template';
 import rectTemplate from './templates/rect.template';
 import polygonTemplate from './templates/polygon.template';
+import cuboidTemplate from './templates/cuboid.template';
 import pointTemplate from './templates/point.template';
 import tagTemplate from './templates/tag.template';
 import textTemplate from './templates/text.template';
@@ -25,12 +29,24 @@ import audioSegmentTemplate from './templates/audioSegment.template';
 import audioFrameTemplate from './templates/audioFrame.template';
 import { AttributeBox, AttributeFormItem, ConfigForm, TabForm } from './style';
 
+const GlobalStyle = createGlobalStyle`
+  .labelu-tool-select-popup .rc-virtual-list-holder {
+    max-height: none !important;
+  }
+`;
+
 // 注册fancyInput自定义输入组件
 add('list-attribute', FancyAttributeList);
 add('category-attribute', FancyCategoryAttribute);
 
-const globalTools = [EToolName.Tag, EToolName.Text];
-const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line];
+const globalTools = [EGlobalToolName.Tag, EGlobalToolName.Text];
+const graphicTools = [
+  ImageToolName.Rect,
+  ImageToolName.Point,
+  ImageToolName.Polygon,
+  ImageToolName.Line,
+  ImageToolName.Cuboid,
+];
 const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool];
 const audioAnnotationTools = [EAudioToolName.AudioSegmentTool, EAudioToolName.AudioFrameTool];
 
@@ -58,7 +74,7 @@ const toolMapping = {
 const getDefaultActiveTool = (mediaType?: MediaType) => {
   switch (mediaType) {
     case MediaType.IMAGE:
-      return EToolName.Rect;
+      return ImageToolName.Rect;
     case MediaType.VIDEO:
       return EVideoToolName.VideoSegmentTool;
     case MediaType.AUDIO:
@@ -69,12 +85,13 @@ const getDefaultActiveTool = (mediaType?: MediaType) => {
 };
 
 const templateMapping: Record<string, any> = {
-  [EToolName.Line]: lineTemplate,
-  [EToolName.Rect]: rectTemplate,
-  [EToolName.Polygon]: polygonTemplate,
-  [EToolName.Point]: pointTemplate,
-  [EToolName.Tag]: tagTemplate,
-  [EToolName.Text]: textTemplate,
+  [ImageToolName.Line]: lineTemplate,
+  [ImageToolName.Rect]: rectTemplate,
+  [ImageToolName.Polygon]: polygonTemplate,
+  [ImageToolName.Point]: pointTemplate,
+  [ImageToolName.Cuboid]: cuboidTemplate,
+  [EGlobalToolName.Tag]: tagTemplate,
+  [EGlobalToolName.Text]: textTemplate,
   [EVideoToolName.VideoSegmentTool]: videoSegmentTemplate,
   [EVideoToolName.VideoFrameTool]: videoFrameTemplate,
   [EAudioToolName.AudioSegmentTool]: audioSegmentTemplate,
@@ -146,7 +163,7 @@ const FormConfig = () => {
   const handleToolItemClick: SelectProps['onChange'] = (key) => {
     setSelectedTools((pre) => [...pre, key]);
 
-    if (globalTools.includes(key as EToolName)) {
+    if (globalTools.includes(key as EGlobalToolName)) {
       setSelectedGlobalTools((pre) => [...pre, key]);
       setActiveGlobalTool(key);
     } else {
@@ -160,11 +177,11 @@ const FormConfig = () => {
   };
 
   const handleRemoveTool = useCallback(
-    (toolName: EToolName) => () => {
+    (toolName: ImageToolName | EGlobalToolName) => () => {
       const newTools = selectedTools.filter((item) => item !== toolName);
       setSelectedTools(newTools);
 
-      if (globalTools.includes(toolName)) {
+      if (globalTools.includes(toolName as EGlobalToolName)) {
         const newGlobalTools = newTools.filter((item) => globalTools.includes(item));
         setSelectedGlobalTools(newGlobalTools);
         setActiveGlobalTool(newGlobalTools[0]);
@@ -234,7 +251,7 @@ const FormConfig = () => {
             <TabForm flex="column" gap=".5rem">
               {isToolDeletable && (
                 <FlexLayout.Header flex justify="flex-end">
-                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
+                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as ImageToolName)}>
                     <Button type="link" danger>
                       删除工具
                     </Button>
@@ -265,7 +282,7 @@ const FormConfig = () => {
             <TabForm flex="column" gap=".5rem">
               {isGlobalToolDeletable && (
                 <FlexLayout.Header flex justify="flex-end">
-                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as EToolName)}>
+                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as ImageToolName)}>
                     <Button type="link" danger>
                       删除工具
                     </Button>
@@ -305,8 +322,14 @@ const FormConfig = () => {
       onValuesChange={handleFormValuesChange}
       validateTrigger="onBlur"
     >
+      <GlobalStyle />
       <Form.Item label="标注工具">
-        <Select placeholder="新增工具" options={toolsMenu} onSelect={handleToolItemClick}>
+        <Select
+          placeholder="新增工具"
+          popupClassName="labelu-tool-select-popup"
+          options={toolsMenu}
+          onSelect={handleToolItemClick}
+        >
           <PlusOutlined />
         </Select>
       </Form.Item>
@@ -347,13 +370,13 @@ const FormConfig = () => {
           label={<span className="formTitle">通用标签</span>}
           name="commonAttributeConfigurable"
           tooltip="已经配置的所有标注工具均可以使用通用标签"
-          hidden={globalTools.includes(activeTool as EToolName)}
+          hidden={globalTools.includes(activeTool as EGlobalToolName)}
         >
           <FancyInput type="boolean" />
         </Form.Item>
       )}
 
-      {hasAttributes && !globalTools.includes(activeTool as EToolName) && (
+      {hasAttributes && !globalTools.includes(activeTool as EGlobalToolName) && (
         <Form.Item wrapperCol={{ offset: 4 }}>
           <AttributeBox>
             <AttributeFormItem name="attributes">
@@ -368,7 +391,7 @@ const FormConfig = () => {
           label="画布外标注"
           name="drawOutsideTarget"
           tooltip="开启后可以在媒体文件画布范围外进行标注"
-          hidden={!graphicTools.includes(activeTool as EToolName)}
+          hidden={!graphicTools.includes(activeTool as ImageToolName)}
         >
           <FancyInput type="boolean" />
         </Form.Item>

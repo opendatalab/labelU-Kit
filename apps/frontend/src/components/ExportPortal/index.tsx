@@ -11,6 +11,7 @@ export interface ExportPortalProps {
   taskId: number;
   mediaType: MediaType | undefined;
   sampleIds?: number[];
+  tools?: any[];
 }
 
 export const exportDescriptionMapping = {
@@ -48,7 +49,7 @@ const availableOptions = {
   ],
 };
 
-export default function ExportPortal({ taskId, sampleIds, mediaType, children }: ExportPortalProps) {
+export default function ExportPortal({ taskId, sampleIds, mediaType, tools, children }: ExportPortalProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const [exportType, setExportType] = useState<ExportType>(ExportType.JSON);
 
@@ -98,6 +99,31 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, children }:
     });
   }, [children, handleOpenModal]);
 
+  // cuboid 不需要导出coco和mask
+  const containsCuboidTool = useMemo(() => {
+    return tools?.find((item) => item.tool === 'cuboidTool');
+  }, [tools]);
+
+  if (containsCuboidTool) {
+    availableOptions[MediaType.IMAGE] = availableOptions[MediaType.IMAGE].filter(
+      (option) => option.value !== ExportType.COCO && option.value !== ExportType.MASK,
+    );
+  }
+
+  const options = useMemo(() => {
+    if (!mediaType) {
+      return [];
+    }
+
+    if (containsCuboidTool && mediaType === MediaType.IMAGE) {
+      return availableOptions[MediaType.IMAGE].filter(
+        (option) => option.value !== ExportType.COCO && option.value !== ExportType.MASK,
+      );
+    }
+
+    return availableOptions[mediaType || MediaType.IMAGE];
+  }, [containsCuboidTool, mediaType]);
+
   return (
     <>
       {plainChild}
@@ -106,7 +132,7 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, children }:
           <FlexLayout.Header items="center" gap="1rem" flex>
             <span>导出格式</span>
             <Radio.Group
-              options={mediaType ? availableOptions[mediaType] : []}
+              options={options}
               onChange={handleOptionChange}
               value={exportType}
               optionType="button"
