@@ -1,7 +1,7 @@
 <div align="center">
   <article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <p align="center"><img width="300" src="./images/labelU-logo.svg" /></p>
-      <p>LabelU前端标注组件库，支持图片2D框、点、线、多边形及混合标注工具，可用于标注平台开发集成，开箱即用。</p>
+      <p>LabelU前端标注组件库，支持图片2D框、点、线、多边形、立体框及混合标注工具，可用于标注平台开发集成，开箱即用。</p>
   </article>
   <a href="./README_en-US.md">English</a> | 简体中文
 
@@ -9,16 +9,15 @@
 
 ## 特性
 
-- 支持图片 2D 框、点、线、多边形标注
+- 支持图片 拉框、点、线（包含曲线）、多边形（包含闭合曲线）、立体框标注
 - 支持视频标注
 - 支持音频标注
 - 原子化模块，可自由组合
 
 ## 开始使用
 
-- 体验在线版：[https://labelu.shlab.tech/](https://labelu.shlab.tech/)
-- 安装离线版：[https://github.com/opendatalab/labelU/](https://github.com/opendatalab/labelU#install-locally-with-miniconda)
-- 使用文档：[https://opendatalab.github.io/labelU-Kit](https://opendatalab.github.io/labelU-Kit)
+- 体验标注工具：[https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
+- 体验 LabelU 在线版：[https://labelu.shlab.tech/](https://labelu.shlab.tech/)
 
 ## Packages
 
