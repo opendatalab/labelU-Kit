@@ -28,6 +28,7 @@ const Wrapper = styled.div`
   font-size: 14px;
   padding: 0 0.5rem;
   display: flex;
+  border-bottom: 1px solid rgba(235, 236, 240, 1);
   align-items: center;
   justify-content: space-between;
 `;
