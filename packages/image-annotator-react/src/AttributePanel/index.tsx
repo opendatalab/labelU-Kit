@@ -33,6 +33,7 @@ const Wrapper = styled.div<{ collapsed: boolean }>`
   overflow: auto;
   display: flex;
   flex-direction: column;
+  border-left: 1px solid rgba(235, 236, 240, 1);
 
   ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 280px;')}
 `;
@@ -98,7 +99,7 @@ const Footer = styled.div`
   justify-content: center;
   flex-shrink: 0;
   font-size: 14px;
-  border-top: #e5e5e5 1px solid;
+  border-top: 1px solid rgba(235, 236, 240, 1);
   cursor: pointer;
 
   &:hover {

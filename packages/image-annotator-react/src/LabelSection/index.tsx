@@ -90,6 +90,7 @@ const Wrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 44px;
+  border-bottom: 1px rgba(235, 236, 240, 1) solid;
   background-color: #f8f8f8;
   padding: 0 1rem;
   flex-shrink: 0;
