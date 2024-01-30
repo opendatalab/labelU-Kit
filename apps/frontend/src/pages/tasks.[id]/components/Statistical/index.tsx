@@ -87,7 +87,7 @@ const Statistical = () => {
         <Button type="text" icon={<SettingOutlined />} onClick={handleGoConfig}>
           任务配置
         </Button>
-        <ExportPortal taskId={+taskId!} mediaType={mediaType}>
+        <ExportPortal taskId={+taskId!} mediaType={mediaType} tools={taskData?.config?.tools}>
           <Button type="text" icon={<UploadOutlined />}>
             数据导出
           </Button>

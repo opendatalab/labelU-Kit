@@ -11,12 +11,14 @@ import AnnotationContext from '../../annotation.context';
 const LeftWrapper = styled.div`
   overflow-y: auto;
   overflow-x: hidden;
-  height: var(--height);
+  height: calc(100vh - var(--offset-top));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   box-sizing: border-box;
-  padding: 1rem;
+  padding: 1rem 0;
+  align-items: center;
 `;
-
-export const slideRef = React.createRef<HTMLDivElement>();
 
 const SlideLoader = () => {
   const handleSampleClick = (sample: SampleResponse) => {
@@ -41,7 +43,7 @@ const SlideLoader = () => {
   const { samples: samplesFromContext, task = {} as NonNullable<TaskInLoader> } = useContext(AnnotationContext);
 
   return (
-    <LeftWrapper ref={slideRef}>
+    <LeftWrapper>
       {samplesFromContext?.map((item: SampleResponse, index) => {
         return (
           <SliderCard cardInfo={item} type={task.media_type} key={item.id} onClick={handleSampleClick} index={index} />

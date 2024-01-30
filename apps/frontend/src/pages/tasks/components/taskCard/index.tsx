@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button, Progress, Tooltip } from 'antd';
 import { useNavigate, useRevalidator } from 'react-router';
 import Icon from '@ant-design/icons';
@@ -15,6 +15,7 @@ import { MediaTypeText } from '@/constants/mediaType';
 import type { MediaType } from '@/api/types';
 import { TaskStatus } from '@/api/types';
 import * as storage from '@/utils/storage';
+import { jsonParse } from '@/utils';
 
 import { ActionRow, CardWrapper, MediaBadge, Row, TaskName } from './style';
 
@@ -45,6 +46,9 @@ const TaskCard = (props: any) => {
   const unDoneSample = stats.new;
   const doneSample = stats.done + stats.skipped;
   const total = unDoneSample + doneSample;
+  const tools = useMemo(() => {
+    return jsonParse(cardInfo.config)?.tools;
+  }, [cardInfo]);
   const navigate = useNavigate();
   const turnToAnnotation = (e: any) => {
     if (!e.currentTarget.contains(e.target)) {
@@ -84,11 +88,14 @@ const TaskCard = (props: any) => {
           <MediaTypeTag type={cardInfo.media_type as MediaType} status={cardInfo.status} />
         </FlexLayout>
         <ActionRow justify="flex-end" items="center">
-          <ExportPortal taskId={cardInfo.id} mediaType={cardInfo.media_type}>
-            <Tooltip placement={'top'} title={'数据导出'}>
-              <Button size="small" type="text" icon={<Icon component={OutputIcon} />} />
-            </Tooltip>
-          </ExportPortal>
+          {cardInfo.config && (
+            <ExportPortal taskId={cardInfo.id} mediaType={cardInfo.media_type} tools={tools}>
+              <Tooltip placement={'top'} title={'数据导出'}>
+                <Button size="small" type="text" icon={<Icon component={OutputIcon} />} />
+              </Tooltip>
+            </ExportPortal>
+          )}
+
           {username === cardInfo.created_by.username && (
             <Tooltip title="删除任务" placement={'top'}>
               <Button onClick={handleDeleteTask} size="small" type="text" icon={<Icon component={DeleteIcon} />} />

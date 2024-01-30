@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { useCallback, useState } from 'react';
+import styled, { css } from 'styled-components';
 import { AudioCard } from '@labelu/components-react';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
@@ -12,17 +12,16 @@ const Cards = styled.div`
   padding: 1rem;
   box-sizing: border-box;
   gap: 1rem;
-  height: var(--height);
+  height: calc(100vh - var(--offset-top));
   overflow: auto;
 `;
 
 const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
   ...props,
-  className: 'labelu-video-editor__sidebar',
+  className: 'labelu-audio__sidebar',
 }))`
   position: relative;
-  grid-area: sidebar;
-  background-color: #ebecf0;
+  background-color: #fff;
 
   ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 232px;')}
 
@@ -37,14 +36,22 @@ const CollapseTrigger = styled.div<{ collapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  top: 50%;
-  transform: translateY(-50%);
-  right: -18px;
+  top: 1rem;
+  right: -12px;
   z-index: 999;
-  height: 36px;
-  width: 18px;
-  border-radius: 0 2px 2px 0;
-  background-color: #e5e5e5;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0px 2px 10px 0px rgba(18, 19, 22, 0.1);
+
+  ${({ collapsed }) =>
+    collapsed &&
+    css`
+      opacity: 0.8;
+      border-radius: 0 50% 50% 0;
+      right: -20px;
+    `}
 
   svg {
     transform: rotate(${({ collapsed }) => (collapsed ? '0' : '180deg')});
@@ -56,27 +63,15 @@ export interface SidebarProps {
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
-  const { samples, containerRef, currentSample } = useAnnotator();
-  const [height, setHeight] = useState<number>(0);
+  const { samples, currentSample } = useAnnotator();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
   const handleExpandTriggerClick = useCallback(() => {
     setCollapsed((prev) => !prev);
   }, []);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setHeight(containerRef.current?.clientHeight || 0);
-    });
-  });
-
-  if (!height) {
-    return null;
-  }
-
   return (
-    // @ts-ignore
-    <Wrapper collapsed={collapsed} style={{ '--height': `${height}px` }}>
+    <Wrapper collapsed={collapsed}>
       {renderSidebar ? (
         renderSidebar()
       ) : (
