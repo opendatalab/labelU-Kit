@@ -89,6 +89,10 @@ export const PlayerController = forwardRef<PlayerControllerRef, PlayerController
     } else {
       cancelAnimationFrame(frameIdRef.current!);
     }
+
+    return () => {
+      cancelAnimationFrame(frameIdRef.current!);
+    };
   }, [duration, getCurrentTime, onPlaying, playing]);
 
   // 暂停/播放

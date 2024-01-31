@@ -94,7 +94,7 @@ export interface AnnotatorRef {
 export interface ImageAnnotatorProps {
   samples?: ImageSample[];
   config?: ImageAnnotatorOptions & Partial<GlobalToolConfig>;
-  renderSidebar?: () => React.ReactNode;
+  renderSidebar?: null | (() => React.ReactNode);
   renderAttributes?: () => React.ReactNode;
   editingSample?: ImageSample;
 
