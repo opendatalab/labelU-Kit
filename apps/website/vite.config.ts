@@ -24,7 +24,7 @@ export default defineConfig({
     svgr(),
     ViteEjsPlugin(),
     process.env.ANALYZE && visualizer({ open: true, brotliSize: true, filename: './dist/_report.html' }),
-    process.env.NODE_ENV !== 'production' && tsMonoAlias(),
+    tsMonoAlias(),
   ].filter(Boolean),
 
   build: {
