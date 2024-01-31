@@ -83,10 +83,14 @@ jobs:
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
 
+      - name: pre-release
+        run: node ./scripts/before-release-frontend.js
+
       - name: Update frontend dependencies
         run: |
           npm cache clean -f
           pnpm install --no-frozen-lockfile
+
       - name: Build frontend
         run: pnpm run build:frontend
 
