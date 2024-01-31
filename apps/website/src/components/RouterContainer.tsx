@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 import _ from 'lodash';
 import DocumentTitle from 'react-document-title';
 import type { RouteObject } from 'react-router-dom';
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, useMatches } from 'react-router-dom';
+import { createHashRouter, createRoutesFromElements, Route, RouterProvider, useMatches } from 'react-router-dom';
 
 export type RouteWithParent = RouteObject & {
   parent: RouteWithParent | null;
@@ -60,14 +60,8 @@ export interface RouterProps {
   basename?: string;
 }
 
-export default function RouterContainer({ routes, basename }: RouterProps) {
-  const router = useMemo(
-    () =>
-      createBrowserRouter(createRoutesFromElements(mapRoutes(routes)), {
-        basename,
-      }),
-    [basename, routes],
-  );
+export default function RouterContainer({ routes }: RouterProps) {
+  const router = useMemo(() => createHashRouter(createRoutesFromElements(mapRoutes(routes))), [routes]);
   const fallback = <Spin style={{ width: '100vw', marginTop: '40vh' }} spinning />;
 
   return <RouterProvider router={router} fallbackElement={fallback} />;

@@ -4,7 +4,7 @@ import { Annotator } from '@labelu/audio-annotator-react';
 const samples = [
   {
     id: 'sample-12s',
-    url: '/sample-15s.mp3',
+    url: import.meta.env.BASE_URL + 'sample-15s.mp3',
     name: 'sample-12s.mp3',
     annotations: [
       {

@@ -268,6 +268,8 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   static emitSelect<T>(data: T, toolName: ToolName) {
     eventEmitter.emit('select', data, toolName);
+    // @ts-ignore
+    eventEmitter.emit('labelChange', data.label);
   }
 
   static emitUnSelect<T>(data: T) {
