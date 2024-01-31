@@ -7,3 +7,7 @@
 ```bash
 npm install @labelu/image-annotator-react
 ```
+
+## Usage
+
+see [example](https://opendatalab.github.io/labelU-Kit/)
