@@ -1,7 +1,37 @@
+import { CodeOutlined, SettingOutlined } from '@ant-design/icons';
 import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
-import { useRef } from 'react';
+import type { ToolName } from '@labelu/image';
+import { TOOL_NAMES } from '@labelu/image';
+import type { TabsProps } from 'antd';
+import { Button, Drawer, Form, Tabs } from 'antd';
+import { useRef, useState } from 'react';
 
-const samples = [
+import lineTemplate from '@/constant/templates/line.template';
+import rectTemplate from '@/constant/templates/rect.template';
+import polygonTemplate from '@/constant/templates/polygon.template';
+import pointTemplate from '@/constant/templates/point.template';
+import cuboidTemplate from '@/constant/templates/cuboid.template';
+import tagTemplate from '@/constant/templates/tag.template';
+import textTemplate from '@/constant/templates/text.template';
+import FancyForm from '@/components/FancyForm';
+import { add } from '@/components/FancyInput';
+import { FancyAttributeList } from '@/components/CustomFancy/ListAttribute.fancy';
+import { FancyCategoryAttribute } from '@/components/CustomFancy/CategoryAttribute.fancy';
+
+add('list-attribute', FancyAttributeList);
+add('category-attribute', FancyCategoryAttribute);
+
+const templateMapping: Record<ToolName | 'tag' | 'text', any> = {
+  line: lineTemplate,
+  rect: rectTemplate,
+  polygon: polygonTemplate,
+  point: pointTemplate,
+  cuboid: cuboidTemplate,
+  tag: tagTemplate,
+  text: textTemplate,
+};
+
+const presetSamples = [
   {
     url: import.meta.env.BASE_URL + 'sample-1.jpg',
     name: 'sample-1',
@@ -20,6 +50,7 @@ const samples = [
     meta: {
       width: 1280,
       height: 800,
+      rotate: 0,
     },
     data: {},
   },
@@ -30,6 +61,7 @@ const samples = [
     meta: {
       width: 1280,
       height: 800,
+      rotate: 0,
     },
     data: {},
   },
@@ -40,151 +72,95 @@ const samples = [
     meta: {
       width: 1280,
       height: 800,
+      rotate: 0,
     },
     data: {},
   },
 ];
 
-const config = {
+const defaultConfig = {
+  point: { maxPointAmount: 100, labels: [{ color: '#1899fb', key: 'Glass', value: 'glass' }] },
   line: {
-    lineType: 'spline',
-    outOfImage: false,
-    labels: [
-      {
-        id: '1',
-        value: 'noneAttribute',
-        key: '撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本',
-        color: '#ff0000',
-      },
-      {
-        id: 'car',
-        value: 'car',
-        key: '车子',
-        color: '#f69',
-      },
-    ],
+    lineType: 'line',
+    minPointAmount: 2,
+    maxPointAmount: 100,
+    edgeAdsorptive: false,
+    labels: [{ color: '#ff0000', key: 'Lane', value: 'lane' }],
   },
-  point: {
-    outOfCanvas: false,
-    labels: [
-      {
-        id: '1',
-        value: 'noneAttribute',
-        key: '无标签',
-        color: '#ff0000',
-      },
-      {
-        id: 'car',
-        value: 'car',
-        key: '车子',
-        color: '#f69',
-      },
-    ],
-  },
-  rect: {
-    outOfImage: false,
-    minWidth: 100,
-    minHeight: 50,
-    labels: [
-      {
-        id: '1',
-        value: 'noneAttribute',
-        key: '无标签',
-        color: '#e1ff00',
-      },
-      {
-        id: 'car',
-        value: 'car',
-        key: '车子',
-        color: '#6b66ff',
-      },
-    ],
-  },
+  rect: { minWidth: 1, minHeight: 1, labels: [{ color: '#00ff1e', key: 'Helmet', value: 'helmet' }] },
   polygon: {
     lineType: 'line',
-    outOfCanvas: false,
-    labels: [
-      {
-        id: '1',
-        value: 'noneAttribute',
-        key: '撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本撒丢我二请问这是一大段文本',
-        color: '#ff00d4',
-      },
-      {
-        id: 'car',
-        value: 'car',
-        key: '车子',
-        color: '#0920ef',
-      },
-    ],
+    minPointAmount: 2,
+    maxPointAmount: 100,
+    edgeAdsorptive: false,
+    labels: [{ color: '#ff6600', key: 'Building', value: 'building' }],
   },
   cuboid: {
     labels: [
-      {
-        id: '1',
-        value: 'human',
-        key: '人类',
-        color: '#9500ff',
-      },
-      {
-        id: 'car',
-        value: 'car',
-        key: '车子',
-        color: '#09ef18',
-        attributes: [
-          {
-            key: '行走姿势',
-            value: 'pose',
-            type: 'string',
-            maxLength: 1000,
-            required: true,
-            stringType: 'text' as const,
-            defaultValue: '奥赛奥赛去无二请问',
-            regexp: '',
-          },
-          {
-            key: '人种',
-            value: 'race',
-            type: 'enum',
-            required: true,
-            options: [
-              {
-                key: '非裔',
-                value: 'African',
-                isDefault: true,
-              },
-              {
-                key: '亚裔',
-                value: 'Asian',
-              },
-              {
-                key: '印度裔',
-                value: 'Indian',
-              },
-            ],
-          },
-        ],
-      },
+      { color: '#ff00d0', key: 'SUV', value: 'suv' },
+      { color: '#ff6d2e', key: 'Car', value: 'car' },
     ],
   },
-  text: [
-    {
-      key: '行走姿势',
-      value: 'pose',
-      type: 'string',
-      maxLength: 1000,
-      required: true,
-      stringType: 'text' as const,
-      defaultValue: '',
-      regexp: '',
-    },
-  ],
 };
 
 export default function ImagePage() {
   const annotatorRef = useRef<any>();
+  const [open, setOpen] = useState(false);
+  const [config, setConfig] = useState(defaultConfig);
+  const [currentSample, updateSample] = useState(presetSamples[0]);
+  const [form] = Form.useForm();
+
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    form.validateFields().then(() => {
+      setOpen(false);
+      form.submit();
+    });
+  };
+
+  const onFinish = (values: any) => {
+    setConfig(values.tools);
+  };
+
+  const items: TabsProps['items'] = TOOL_NAMES.map((item) => ({
+    key: item,
+    label: item,
+    forceRender: true,
+    children: <FancyForm template={templateMapping[item]} name={['tools', item]} />,
+  }));
 
   return (
-    <ImageAnnotator samples={samples} ref={annotatorRef} offsetTop={148} editingSample={samples[0]} config={config} />
+    <>
+      <ImageAnnotator
+        toolbarRight={
+          <div className="flex items-center gap-2">
+            {/* <Button type="primary" icon={<CodeOutlined rev={undefined} />} onClick={showDrawer}>
+              标注结果
+            </Button> */}
+            <Button icon={<SettingOutlined rev={undefined} />} onClick={showDrawer} />
+          </div>
+        }
+        samples={presetSamples}
+        ref={annotatorRef}
+        offsetTop={148}
+        editingSample={currentSample}
+        config={config}
+      />
+      <Drawer width={480} title="工具配置" onClose={onClose} open={open}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{
+            tools: defaultConfig,
+          }}
+        >
+          <Tabs items={items} />
+        </Form>
+      </Drawer>
+    </>
   );
 }
