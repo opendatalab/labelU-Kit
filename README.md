@@ -16,7 +16,7 @@
 
 ## 开始使用
 
-- 体验标注工具：[https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
+- Playground：[https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
 - 体验 LabelU 在线版：[https://labelu.shlab.tech/](https://labelu.shlab.tech/)
 
 ## Packages

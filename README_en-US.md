@@ -16,7 +16,7 @@
 
 ## Getting Started
 
-- Try LabelU kit: [https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
+- Playground: [https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
 - Try LabelU: [https://labelu.shlab.tech/](https://labelu.shlab.tech/)
 - Documentation: [https://opendatalab.github.io/labelU-Kit](https://opendatalab.github.io/labelU-Kit)
 
@@ -24,10 +24,10 @@
 
 | Name | Version | Description |
 | --- | --- | --- |
-| [@labelu/annotation](./packages/annotation) | [![npm](https://img.shields.io/npm/v/%40labelu/annotation.svg)](https://www.npmjs.com/package/@labelu/annotation) | 2d annotation engine（fork from [labelbee](https://github.com/open-mmlab/labelbee)） |
-| [@labelu/components](./packages/components) | [![npm](https://img.shields.io/npm/v/%40labelu/components.svg)](https://www.npmjs.com/package/@labelu/components) | React components for 2d annotator（fork from [labelbee](https://github.com/open-mmlab/labelbee)） |
+| [@labelu/image](./packages/image) | [![npm](https://img.shields.io/npm/v/%40labelu/image.svg)](https://www.npmjs.com/package/@labelu/image) | image annotation engine |
 | [@labelu/interface](./packages/interface) | [![npm](https://img.shields.io/npm/v/%40labelu/interface.svg)](https://www.npmjs.com/package/@labelu/interface) | Basic TypeScript interfaces for annotators |
 | [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | Basic React components for other packages |
+| [@labelu/image-annotator-react](./packages/image-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/image-annotator-react.svg)](https://www.npmjs.com/package/@labelu/image-annotator-react) | Image Annotator for React |
 | [@labelu/audio-react](./packages/audio-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-react.svg)](https://www.npmjs.com/package/@labelu/audio-react) | Basic React components for Audio annotator |
 | [@labelu/audio-annotator-react](./packages/audio-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/audio-annotator-react.svg)](https://www.npmjs.com/package/@labelu/audio-annotator-react) | Audio annotator for React |
 | [@labelu/video-react](./packages/video-react) | [![npm](https://img.shields.io/npm/v/%40labelu/video-react.svg)](https://www.npmjs.com/package/@labelu/video-react) | Basic React components for Video annotator |
