@@ -4,7 +4,7 @@ import { Annotator } from '@labelu/audio-annotator-react';
 const samples = [
   {
     id: 'sample-12s',
-    url: '/sample-15s.mp3',
+    url: import.meta.env.BASE_URL + 'sample-15s.mp3',
     name: 'sample-12s.mp3',
     annotations: [
       {
@@ -98,5 +98,5 @@ const annotatorConfig = {
 export default function AudioPage() {
   const [editType, setEditType] = useState('segment');
 
-  return <Annotator samples={samples} type={editType} config={annotatorConfig} />;
+  return <Annotator samples={samples} type={editType} config={annotatorConfig} offsetTop={156} />;
 }

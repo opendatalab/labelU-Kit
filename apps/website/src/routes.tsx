@@ -1,5 +1,5 @@
 import loadable from '@loadable/component';
-import { Spin } from 'antd';
+import Spin from 'antd/es/spin';
 
 import AudioPage from './pages/audio';
 import ImagePage from './pages/image';
@@ -33,7 +33,7 @@ export default [
         element: <ImagePage />,
         handle: {
           crumb: () => {
-            return 'Image Labeling';
+            return 'Image Annotating';
           },
         },
       },
@@ -42,7 +42,7 @@ export default [
         element: <AudioPage />,
         handle: {
           crumb: () => {
-            return 'Audio Labeling';
+            return 'Audio Annotating';
           },
         },
       },
@@ -51,10 +51,18 @@ export default [
         element: <VideoPage />,
         handle: {
           crumb: () => {
-            return 'Video Labeling';
+            return 'Video Annotating';
           },
         },
       },
     ],
+  },
+  {
+    path: '*',
+    element: (
+      <div>
+        <h1>404</h1>
+      </div>
+    ),
   },
 ];
