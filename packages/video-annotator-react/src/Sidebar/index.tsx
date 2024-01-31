@@ -45,7 +45,6 @@ const VideoCardWrapper = styled.div<{ selected: boolean }>`
 
   ${StyledVideo} {
     border-radius: 3px;
-    padding: 1rem;
 
     ${({ selected }) =>
       selected &&
@@ -112,12 +111,15 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
         <Cards>
           {samples.map((sample, index) => {
             return (
-              <VideoCardWrapper key={sample.id} selected={currentSample?.id === sample.id}>
+              <VideoCardWrapper
+                key={sample.id}
+                selected={currentSample?.id === sample.id}
+                onClick={() => handleSelectSample(sample)}
+              >
                 <VideoCard
                   src={sample.url}
                   showDuration={currentSample?.id !== sample.id}
                   showPlayIcon={currentSample?.id !== sample.id}
-                  onClick={() => handleSelectSample(sample)}
                 />
                 <CardIndex>{index + 1}</CardIndex>
               </VideoCardWrapper>
