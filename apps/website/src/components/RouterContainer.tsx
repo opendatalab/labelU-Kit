@@ -2,7 +2,7 @@
  * 此组件可用于react-router>=6.4.0的特性，比如loader等Data API
  * 见：https://reactrouter.com/en/main/routers/picking-a-router
  */
-import { Spin } from 'antd';
+import Spin from 'antd/es/spin';
 import React, { useMemo } from 'react';
 import _ from 'lodash';
 import DocumentTitle from 'react-document-title';

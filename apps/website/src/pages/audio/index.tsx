@@ -98,5 +98,5 @@ const annotatorConfig = {
 export default function AudioPage() {
   const [editType, setEditType] = useState('segment');
 
-  return <Annotator samples={samples} type={editType} config={annotatorConfig} />;
+  return <Annotator samples={samples} type={editType} config={annotatorConfig} offsetTop={156} />;
 }
