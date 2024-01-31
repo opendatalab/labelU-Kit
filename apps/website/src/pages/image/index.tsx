@@ -3,7 +3,7 @@ import { useRef } from 'react';
 
 const samples = [
   {
-    url: '/sample-1.jpg',
+    url: import.meta.env.BASE_URL + 'sample-1.jpg',
     name: 'sample-1',
     id: 'sample-1',
     meta: {
@@ -14,7 +14,7 @@ const samples = [
     data: {},
   },
   {
-    url: '/sample-2.jpg',
+    url: import.meta.env.BASE_URL + 'sample-2.jpg',
     name: 'sample-2',
     id: 'sample-2',
     meta: {
@@ -24,7 +24,7 @@ const samples = [
     data: {},
   },
   {
-    url: '/sample-3.jpg',
+    url: import.meta.env.BASE_URL + 'sample-3.jpg',
     name: 'sample-3',
     id: 'sample-3',
     meta: {
@@ -34,7 +34,7 @@ const samples = [
     data: {},
   },
   {
-    url: '/sample-4.jpg',
+    url: import.meta.env.BASE_URL + 'sample-4.jpg',
     name: 'sample-4',
     id: 'sample-4',
     meta: {

@@ -11,6 +11,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 export default defineConfig({
   base: '/labelU-Kit/',
   publicDir: resolve(__dirname, 'public'),
+
   server: {
     port: 3000,
   },
