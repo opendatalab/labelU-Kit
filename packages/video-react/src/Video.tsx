@@ -262,11 +262,16 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
     }
 
     const onTimeUpdate = () => {
-      setCurrentAnnotationIds(playerRef.current.currentTime());
+      setCurrentAnnotationIds(playerRef.current?.currentTime());
     };
 
     playerRef.current.off('timeupdate', onTimeUpdate);
     playerRef.current.on('timeupdate', onTimeUpdate);
+
+    return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      playerRef.current?.off('timeupdate', onTimeUpdate);
+    };
   }, [duration, setCurrentAnnotationIds]);
 
   const contextValue = useMemo(() => {
