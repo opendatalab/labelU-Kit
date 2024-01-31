@@ -66,6 +66,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build packages
+        run: pnpm run build
+
       - name: Build website
         run: pnpm run build:website
 
