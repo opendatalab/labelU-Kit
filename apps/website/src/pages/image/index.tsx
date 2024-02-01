@@ -7,7 +7,7 @@ import type { TabsProps } from 'antd';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { Button, Drawer, Form, Tabs } from 'antd';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import Modal from 'antd/es/modal/Modal';
 import message from 'antd/es/message';
 
@@ -1902,19 +1902,6 @@ export default function ImagePage() {
     forceRender: true,
     children: <FancyForm template={templateMapping[item]} name={['tools', item]} />,
   }));
-
-  useEffect(() => {
-    const engine = annotatorRef.current?.getEngine();
-
-    const onError = (err: any) => {
-      message.error(err.message);
-    };
-    engine?.on('error', onError);
-
-    return () => {
-      engine?.off('error', onError);
-    };
-  });
 
   const onError = useCallback((err: any) => {
     message.error(err.message);
