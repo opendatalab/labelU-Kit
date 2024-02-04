@@ -107,7 +107,7 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
     return renderSidebar?.();
   }, [renderSidebar]);
 
-  if (!sidebar) {
+  if (sidebar === null) {
     return null;
   }
 

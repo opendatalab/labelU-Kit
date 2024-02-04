@@ -5,13 +5,14 @@
     "packages/*",
     "apps/*"
   ],
-  "version": "4.0.0",
+  "version": "4.0.3",
   "scripts": {
     "prepare": "husky install",
     "build": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
     "clean": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react clean",
     "build:frontend": "pnpm --filter @labelu/frontend build",
     "release:frontend": "cd apps/frontend && npm run release",
+    "build:website": "pnpm --filter @labelu/website build",
     "lint:frontend": "eslint ./apps/frontend --ext .js,.jsx,.ts,.tsx --fix",
     "lint:packages": "eslint ./packages --ext .js,.jsx,.ts,.tsx --fix",
     "lint:style": "stylelint --fix '**/*.less'",
