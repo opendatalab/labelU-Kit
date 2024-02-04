@@ -1,5 +1,6 @@
-const minimist = require('minimist');
 const https = require('https');
+
+const minimist = require('minimist');
 const { Octokit } = require('@octokit/rest');
 
 const octokit = new Octokit({
@@ -76,7 +77,7 @@ function gitlabCiTrigger(nextVersion) {
 
 async function main() {
   const args = minimist(process.argv.slice(2));
-  const [branch, nextVersion, releaseTime, releaseNotes] = args._;
+  const [branch, nextVersion, releaseNotes] = args._;
   const version = `v${nextVersion}`;
   const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${version}/frontend.zip`;
 
