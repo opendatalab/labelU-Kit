@@ -41,7 +41,8 @@ function createPullRequest({ branchName, body, title = branchName, base = 'main'
 
 function gitlabCiTrigger(nextVersion) {
   const version = `v${nextVersion}`;
-  const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${version}/frontend.zip`;
+  // aliyun ecs 访问github有问题
+  const url = `https://static-files.shlab.tech/upload/labelU-Kit/releases/download/${version}/frontend.zip`;
   const gitlabTriggerUrl = new URL(
     `https://gitlab.shlab.tech/api/v4/projects/${process.env.GI_LABELU_PROJECT_ID}/trigger/pipeline?token=${process.env.GL_TRIGGER_TOKEN}&ref=test`,
   );
