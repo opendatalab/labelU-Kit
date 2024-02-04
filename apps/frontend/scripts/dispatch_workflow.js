@@ -1,5 +1,6 @@
-const minimist = require('minimist');
 const https = require('https');
+
+const minimist = require('minimist');
 
 function gitlabCiTrigger(nextVersion) {
   // aliyun ecs 访问github有问题
@@ -38,7 +39,7 @@ function gitlabCiTrigger(nextVersion) {
 
 async function main() {
   const args = minimist(process.argv.slice(2));
-  const [branch, nextVersion, releaseTime, releaseNotes] = args._;
+  const [branch, nextVersion] = args._;
   const version = `v${nextVersion}`;
 
   if (branch === 'online') {
