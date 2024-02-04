@@ -18,6 +18,41 @@ function findLatestVersion(versions) {
   return versions[versionNumbers.indexOf(Math.max(...versionNumbers))];
 }
 
+function uploadAssets(version) {
+  const file = fs.readFileSync(path.join(__dirname, '../frontend.zip'));
+  const options = {
+    hostname: 'static-files.shlab.tech',
+    path: `/upload/labelU-Kit/releases/download/v${version}`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/zip',
+      'Content-Length': file.length,
+      Authorization: `${process.env.STATIC_SERVER_TOKEN}`,
+    },
+  };
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      console.log(`statusCode: ${res.statusCode}`);
+
+      res.on('data', (d) => {
+        process.stdout.write(d);
+      });
+
+      res.on('end', () => {
+        console.log('upload success!');
+        resolve();
+      });
+    });
+
+    req.write(file);
+    req.end();
+    req.on('error', (e) => {
+      reject(e);
+    });
+  });
+}
+
 function createPullRequest({ branchName, body, title = branchName, base = 'main' }) {
   if (!branchName) {
     return Promise.reject('branch name is not set');
@@ -82,7 +117,9 @@ async function main() {
   const url = `https://github.com/opendatalab/labelU-Kit/releases/download/${version}/frontend.zip`;
 
   if (branch === 'online') {
-    gitlabCiTrigger(nextVersion);
+    // 上传zip到静态服务器
+    await uploadAssets(nextVersion);
+    await gitlabCiTrigger(nextVersion);
 
     return;
   }
