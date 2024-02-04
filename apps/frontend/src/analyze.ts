@@ -16,7 +16,7 @@ function main() {
     return;
   }
 
-  if (!window.IS_ONLINE) {
+  if (location.host.startsWith('localhost')) {
     return;
   }
 
