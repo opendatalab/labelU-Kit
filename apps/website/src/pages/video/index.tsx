@@ -155,6 +155,7 @@ export default function VideoPage() {
   return (
     <Annotator
       samples={samples}
+      offsetTop={156}
       type={editingType}
       config={{
         attributes: attributeData,

@@ -105,6 +105,8 @@ export interface ImageAnnotatorProps {
 
   onError?: (error: { type: string; message: string; value?: any }) => void;
 
+  onLoad?: (engine: ImageAnnotatorClass) => void;
+
   /**
    * 顶部距离
    *
@@ -126,6 +128,7 @@ function ForwardAnnotator(
     toolbarExtra,
     toolbarRight,
     onError,
+    onLoad,
   }: ImageAnnotatorProps,
   ref: React.Ref<AnnotatorRef>,
 ) {
@@ -510,6 +513,22 @@ function ForwardAnnotator(
       engine?.off('error', onError);
     };
   }, [engine, onError]);
+
+  useEffect(() => {
+    if (!onLoad) {
+      return;
+    }
+
+    const handleOnLoad = () => {
+      onLoad(engine!);
+    };
+
+    engine?.on('backgroundImageLoaded', handleOnLoad);
+
+    return () => {
+      engine?.off('backgroundImageLoaded', handleOnLoad);
+    };
+  }, [engine, onLoad]);
 
   // 重置历史记录
   useEffect(() => {

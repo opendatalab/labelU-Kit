@@ -16,6 +16,10 @@ function main() {
     return;
   }
 
+  if (!window.IS_ONLINE) {
+    return;
+  }
+
   if (userid) {
     window.AnalyzeWiz.setUser({
       id: `${username}-${userid}`,
