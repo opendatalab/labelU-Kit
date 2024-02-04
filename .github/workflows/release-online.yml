@@ -10,7 +10,6 @@ env:
   VITE_SSO_ORIGIN: ${{ secrets.VITE_SSO_ORIGIN }}
   GL_TRIGGER_TOKEN: ${{ secrets.GL_TRIGGER_TOKEN }}
   GI_LABELU_PROJECT_ID: ${{ secrets.GI_LABELU_PROJECT_ID }}
-  STATIC_SERVER_TOKEN: ${{ secrets.STATIC_SERVER_TOKEN }}
 
 # Controls when the workflow will run
 on:
@@ -86,3 +85,5 @@ jobs:
 
       - name: Release frontend
         run: pnpm run release:frontend
+        env:
+          STATIC_SERVER_TOKEN: ${{ secrets.STATIC_SERVER_TOKEN }}
