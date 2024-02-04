@@ -1,6 +1,7 @@
 const minimist = require('minimist');
 const https = require('https');
 const fs = require('fs');
+const path = require('path');
 const { Octokit } = require('@octokit/rest');
 
 const octokit = new Octokit({
