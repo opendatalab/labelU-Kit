@@ -90,6 +90,7 @@ async function main() {
   const inputs = {
     version: version,
     branch,
+    release_type: 'fix',
     name: 'frontend',
     assets_url: url,
     changelog: releaseNotes,
@@ -113,8 +114,8 @@ async function main() {
     .createWorkflowDispatch({
       owner: 'opendatalab',
       repo: 'labelU',
-      workflow_id: `${branch === 'release' ? 'release_' : ''}cicd_pipeline.yml`,
-      ref: branch === 'release' ? latestReleaseVersion : 'dev',
+      workflow_id: `release.yml`,
+      ref: branch,
       inputs,
     })
     .then((res) => {
