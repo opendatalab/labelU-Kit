@@ -89,7 +89,7 @@ async function main() {
     .createWorkflowDispatch({
       owner: 'opendatalab',
       repo: 'labelU',
-      workflow_id: `release.yml`,
+      workflow_id: 84825133,
       ref: branch,
       inputs,
     })
