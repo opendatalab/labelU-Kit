@@ -7,18 +7,6 @@ const octokit = new Octokit({
   auth: process.env.PERSONAL_TOKEN,
 });
 
-function findLatestVersion(versions) {
-  const maxVersionLength = Math.max(...versions.map((version) => version.split('.').length));
-  const versionNumbers = versions.map((version) => {
-    const versionParts = version.split('.');
-    return versionParts.reduce((total, part, index) => {
-      return total + parseInt(part.replace('release/v', '')) * Math.pow(10, (maxVersionLength - index - 1) * 3);
-    }, 0);
-  });
-
-  return versions[versionNumbers.indexOf(Math.max(...versionNumbers))];
-}
-
 function createPullRequest({ branchName, body, title = branchName, base = 'main' }) {
   if (!branchName) {
     return Promise.reject('branch name is not set');
@@ -91,24 +79,11 @@ async function main() {
     version: version,
     branch,
     release_type: 'fix',
-    name: 'frontend',
     assets_url: url,
     changelog: releaseNotes,
   };
 
   console.log('inputs', inputs);
-
-  const labelUBranches = await octokit.request('GET /repos/opendatalab/labelU/branches', {
-    owner: 'opendatalab',
-    repo: 'labelU',
-  });
-
-  const releaseBranches = (labelUBranches.data || [])
-    .filter((branch) => branch.name.startsWith('release/'))
-    .map((branch) => branch.name);
-  const latestReleaseVersion = findLatestVersion(releaseBranches);
-
-  console.log('labelu latest release version is', latestReleaseVersion);
 
   octokit.actions
     .createWorkflowDispatch({
