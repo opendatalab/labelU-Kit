@@ -1,5 +1,7 @@
 const path = require('path');
 const fs = require('fs');
+
+// eslint-disable-next-line import/order
 const { Octokit } = require('@octokit/rest');
 
 const octokit = new Octokit({
