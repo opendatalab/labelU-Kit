@@ -32,7 +32,7 @@
       "@semantic-release/exec",
       {
         "prepareCmd": "node ./scripts/inject_frontend_info.js ${branch.name} ${nextRelease.version} && zip -r frontend.zip ./dist",
-        "successCmd": "node ./scripts/dispatch_workflow.js ${branch.name} ${nextRelease.version} ${Date.now()} '${nextRelease.notes}'"
+        "successCmd": "node ./scripts/dispatch_workflow.js ${branch.name} ${nextRelease.version} '${nextRelease.notes}'"
       }
     ]
   ]
