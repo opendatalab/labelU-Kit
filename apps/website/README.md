@@ -34,4 +34,5 @@ npm run analyze
 
 ```bash
 MOCK=true npm run start:mock
+# MOCK=true pnpm start:chat
 ```
