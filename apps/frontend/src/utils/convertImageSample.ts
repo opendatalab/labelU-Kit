@@ -62,7 +62,7 @@ export function convertImageSample(
           items.map((item: any) => {
             const resultItem = {
               ...omit(['attribute'])(item),
-              label: item.attribute,
+              label: item.attribute ?? item.label,
             };
 
             if (type === 'line' || type === 'polygon') {
