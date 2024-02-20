@@ -38,9 +38,9 @@ const templateMapping: Record<ToolName | 'tag' | 'text', any> = {
 
 const presetSamples = [
   {
-    url: import.meta.env.BASE_URL + 'sample-1.jpg',
-    name: 'sample-1',
-    id: 'sample-1',
+    url: import.meta.env.BASE_URL + 'cuboid.jpg',
+    name: 'cuboid',
+    id: 'cuboid',
     meta: {
       width: 1280,
       height: 800,
@@ -142,12 +142,11 @@ const presetSamples = [
       text: [],
       tag: [],
     },
-
   },
   {
-    url: import.meta.env.BASE_URL + 'sample-2.jpg',
-    name: 'sample-2',
-    id: 'sample-2',
+    url: import.meta.env.BASE_URL + 'polygon-spline.jpg',
+    name: 'polygon-spline',
+    id: 'polygon-spline',
     meta: {
       width: 1700,
       height: 957,
@@ -591,9 +590,9 @@ const presetSamples = [
     },
   },
   {
-    url: import.meta.env.BASE_URL + 'sample-3.jpg',
-    name: 'sample-3',
-    id: 'sample-3',
+    url: import.meta.env.BASE_URL + 'point.jpg',
+    name: 'point',
+    id: 'point',
     meta: {
       width: 1280,
       height: 800,
@@ -1706,9 +1705,9 @@ const presetSamples = [
     },
   },
   {
-    url: import.meta.env.BASE_URL + 'sample-4.jpg',
-    name: 'sample-4',
-    id: 'sample-4',
+    url: import.meta.env.BASE_URL + 'rect.jpg',
+    name: 'rect',
+    id: 'rect',
     meta: {
       width: 1280,
       height: 800,

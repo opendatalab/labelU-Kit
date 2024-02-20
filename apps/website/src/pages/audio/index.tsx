@@ -3,9 +3,9 @@ import { useState } from 'react';
 
 const samples = [
   {
-    id: 'sample-12s',
-    url: import.meta.env.BASE_URL + 'sample-15s.mp3',
-    name: 'sample-12s.mp3',
+    id: 'audio-segment',
+    url: import.meta.env.BASE_URL + 'audio-segment.mp3',
+    name: 'audio-segment',
     annotations: [
       {
         id: '1',
@@ -13,6 +13,28 @@ const samples = [
         end: 11.533612,
         label: 'girls_taking',
         type: 'segment',
+        order: 1,
+      },
+      {
+        id: '3',
+        time: 13,
+        label: 'vehicle',
+        type: 'frame',
+        order: 2,
+      },
+    ],
+  },
+  {
+    id: 'audio-frame',
+    url: import.meta.env.BASE_URL + 'audio-frame.m4a',
+    name: 'audio-frame',
+    annotations: [
+      {
+        id: '1',
+        start: 6.087957,
+        end: 11.533612,
+        label: 'girls_taking',
+        type: 'frame',
         order: 1,
       },
       {

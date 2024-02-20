@@ -64,13 +64,8 @@ export default function VideoPage() {
 
   const [samples, updateSamples] = useState<any[]>([
     {
-      id: 'sample-1',
-      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      annotations: mockData1,
-    },
-    {
-      id: 'sample-2',
-      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+      id: 'video-frame',
+      url: import.meta.env.BASE_URL + 'video-frame.mp4',
       annotations: mockData2,
     },
   ]);
