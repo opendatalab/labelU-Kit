@@ -57,28 +57,23 @@ const Samples = () => {
     },
     {
       title: '数据预览',
-      dataIndex: 'data',
-      key: 'packageID',
+      dataIndex: 'file',
+      key: 'file',
       align: 'left',
       render: (data) => {
-        let url = '';
-        for (const sampleId in data.urls) {
-          url = data.urls[sampleId];
-        }
-
         if (task!.media_type === MediaType.IMAGE) {
-          return <img src={url} style={{ width: '116px', height: '70px' }} />;
+          return <img src={data?.url} style={{ width: '116px', height: '70px' }} />;
         } else if (task!.media_type === MediaType.AUDIO) {
-          return <audio src={url} controls />;
+          return <audio src={data?.url} controls />;
         } else {
-          return <VideoCard size={{ width: 116, height: 70 }} src={url} showPlayIcon showDuration />;
+          return <VideoCard size={{ width: 116, height: 70 }} src={data?.url} showPlayIcon showDuration />;
         }
       },
     },
     {
       title: '标注情况',
       dataIndex: 'state',
-      key: 'packageID',
+      key: 'state',
       align: 'left',
 
       render: (text) => {

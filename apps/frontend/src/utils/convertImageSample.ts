@@ -5,30 +5,25 @@ import { omit } from 'lodash/fp';
 import type { ToolName } from '@labelu/image';
 import { TOOL_NAMES } from '@labelu/image';
 
-import type { SampleData } from '@/api/types';
+import type { SampleResponse } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
 export function convertImageSample(
-  sample: SampleData | undefined,
-  sampleId: string | number | undefined,
+  sample: SampleResponse | undefined,
   config: ImageAnnotatorProps['config'],
 ): ImageSample | undefined {
-  if (!sample || !sampleId) {
+  if (!sample) {
     return;
   }
 
-  const id = sampleId!;
-  let url = sample.urls[+id];
-  // NOTE: urls里只有一个元素
-  for (const _id in sample.urls) {
-    url = sample.urls[_id];
-  }
+  const id = sample.id!;
+  const url = sample.file.url;
 
   let resultParsed: any = {};
-  if (sample.result && !_.isNull(sample.result)) {
-    resultParsed = jsonParse(sample.result);
+  if (sample?.data?.result && !_.isNull(sample?.data?.result)) {
+    resultParsed = jsonParse(sample.data.result);
   }
 
   // annotation
@@ -63,7 +58,7 @@ export function convertImageSample(
             const resultItem = {
               ...omit(['attribute'])(item),
               label: item.attribute ?? item.label,
-            };
+            } as any;
 
             if (type === 'line' || type === 'polygon') {
               return {

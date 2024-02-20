@@ -21,7 +21,6 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
 import { convertImageSample } from '@/utils/convertImageSample';
 
-import commonController from '../../utils/common';
 import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
@@ -97,14 +96,6 @@ const AnnotationPage = () => {
     },
   );
 
-  const transformed = useMemo(() => {
-    if (!sample?.data) {
-      return [];
-    }
-
-    return commonController.transformFileList(sample.data.data, +routeParams.sampleId!);
-  }, [sample?.data, routeParams.sampleId]);
-
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
 
@@ -139,15 +130,11 @@ const AnnotationPage = () => {
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageSample(sample?.data?.data, routeParams.sampleId, editorConfig);
+      return convertImageSample(sample?.data, routeParams.sampleId, editorConfig);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      if (!transformed?.[0]) {
-        return null;
-      }
-
-      return convertVideoSample(sample?.data?.data, routeParams.sampleId, editorConfig, task.media_type);
+      return convertVideoSample(sample?.data, routeParams.sampleId, editorConfig, task.media_type);
     }
-  }, [editorConfig, routeParams.sampleId, sample?.data, task?.media_type, transformed]);
+  }, [editorConfig, routeParams.sampleId, sample?.data, task?.media_type]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
@@ -207,7 +194,7 @@ const AnnotationPage = () => {
     );
   }
 
-  if (_.isEmpty(transformed)) {
+  if (_.isEmpty(sample.data.file)) {
     return (
       <FlexLayout.Content items="center" justify="center" flex>
         <Empty description="无样本数据" />

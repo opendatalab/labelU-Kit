@@ -41,13 +41,9 @@ export interface SampleData {
   id?: number;
   state?: SampleState;
   result: string;
-  fileNames: Record<number, string>;
-  urls: Record<number, string>;
 }
 
 export interface CreateSampleCommand {
-  /** Attachement Ids description: attachment file id */
-  attachement_ids: number[];
   /** Data description: sample data, include filename, file url, or result */
   data?: SampleData;
 }
@@ -213,8 +209,33 @@ export interface SampleResponse {
   state?: SampleState;
   /** Data description: sample data, include filename, file url, or result */
   data?: SampleData;
+  file: {
+    id: string;
+    url: string;
+    filename: string;
+  };
   /** Annotated Count description: annotate result count */
   annotated_count?: number;
+  /** Created At description: task created at time */
+  created_at?: string;
+  /** Created By description: task created by */
+  created_by?: UserResp;
+  /** Updated At description: task updated at time */
+  updated_at?: string;
+  /** Updated By description: task updated by */
+  updated_by?: UserResp;
+}
+
+export interface PreAnnotationResponse {
+  /** Id description: annotation id */
+  id?: number;
+  /** Data description: sample data, include filename, file url, or result */
+  data?: any;
+  file: {
+    id: string;
+    url: string;
+    filename: string;
+  };
   /** Created At description: task created at time */
   created_at?: string;
   /** Created By description: task created by */
@@ -262,7 +283,7 @@ export interface TaskResponse {
   tips?: string;
   /** Config description: task config content */
   config?: string;
-  /** Media Type description: task media type: IMAGE, VIDEO */
+  /** Media Type description: task media type: IMAGE, VIDEO, AUDIO */
   media_type?: MediaType;
   /** Status description: task status: DRAFT, IMPORTED, CONFIGURED, INPROGRESS, FINISHED */
   status?: TaskStatus;
@@ -283,7 +304,7 @@ export interface TaskResponseWithStatics {
   tips?: string;
   /** Config description: task config content */
   config?: string;
-  /** Media Type description: task media type: IMAGE, VIDEO */
+  /** Media Type description: task media type: IMAGE, VIDEO, AUDIO */
   media_type?: MediaType;
   /** Status description: task status: DRAFT, IMPORTED, CONFIGURED, INPROGRESS, FINISHED */
   status?: TaskStatus;
