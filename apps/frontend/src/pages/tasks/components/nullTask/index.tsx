@@ -69,7 +69,7 @@ const NullTask = () => {
   };
 
   const goDemo = () => {
-    navigate('/tasks/task-image-demo');
+    window.open('https://opendatalab.github.io/labelU-Kit/#/image', '_blank');
   };
 
   return (
@@ -77,10 +77,8 @@ const NullTask = () => {
       <Wrapper data-wiz="demo-start" onClick={goDemo} gap="1.5rem">
         <FlexLayout.Item flex="column" full justify="space-between" style={{ zIndex: 3 }}>
           <Title>Demo体验</Title>
-          <Description>开始OpenXLab乐趣满满的新春标注任务之旅吧</Description>
-          <Link data-wiz="demo-start" to="/tasks/task-image-demo">
-            点击体验 &nbsp;&gt;&gt;
-          </Link>
+          <Description>提供图片、音频、视频标注工具</Description>
+          <a data-wiz="demo-start">点击体验 &nbsp;&gt;&gt;</a>
         </FlexLayout.Item>
         <div style={{ zIndex: 3 }}>
           <img src={demoCreate} width={90} alt="demo-create" />
