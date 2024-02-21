@@ -77,7 +77,7 @@ const NullTask = () => {
       <Wrapper data-wiz="demo-start" onClick={goDemo} gap="1.5rem">
         <FlexLayout.Item flex="column" full justify="space-between" style={{ zIndex: 3 }}>
           <Title>Demo体验</Title>
-          <Description>提供图片、音频、视频标注工具</Description>
+          <Description>提供多种标注工具，点击 Demo 体验即可开始体验</Description>
           <a data-wiz="demo-start">点击体验 &nbsp;&gt;&gt;</a>
         </FlexLayout.Item>
         <div style={{ zIndex: 3 }}>
