@@ -11,16 +11,9 @@ const samples = [
         id: '1',
         start: 6.087957,
         end: 11.533612,
-        label: 'girls_taking',
+        label: 'the_old_man_is_taking',
         type: 'segment',
         order: 1,
-      },
-      {
-        id: '3',
-        time: 13,
-        label: 'vehicle',
-        type: 'frame',
-        order: 2,
       },
     ],
   },
@@ -40,7 +33,7 @@ const samples = [
       {
         id: '3',
         time: 13,
-        label: 'vehicle',
+        label: 'mon_is_getting_upset',
         type: 'frame',
         order: 2,
       },
@@ -52,15 +45,15 @@ const annotatorConfig = {
   segment: [
     {
       color: '#e600ff',
-      key: 'Girls talking',
-      value: 'girls_taking',
+      key: 'The old man is taking',
+      value: 'the_old_man_is_taking',
     },
   ],
   frame: [
     {
       color: '#40ff00',
-      key: 'Vehicle',
-      value: 'vehicle',
+      key: 'Mom is getting upset',
+      value: 'mon_is_getting_upset',
     },
   ],
 };

@@ -7,45 +7,8 @@ const mockData1: VideoAnnotation[] = [];
 const attributeData = [
   {
     color: '#a600ff',
-    key: 'Rabbit',
-    value: 'rabbit',
-    attributes: [
-      {
-        key: 'What is the rabbit doing?',
-        value: 'activity',
-        type: 'string',
-        maxLength: 1000,
-        required: true,
-        stringType: 'text' as const,
-        defaultValue: '',
-        regexp: '',
-      },
-      {
-        key: 'Size of the rabbit',
-        value: 'size',
-        type: 'enum',
-        required: true,
-        options: [
-          {
-            key: 'Small',
-            value: 'small',
-          },
-          {
-            key: 'Medium',
-            value: 'medium',
-          },
-          {
-            key: 'Large',
-            value: 'large',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    color: '#ad722f',
-    key: 'Squirrel',
-    value: 'squirrel',
+    key: "Ship's sailing",
+    value: 'ship',
   },
 ];
 
@@ -84,9 +47,9 @@ export default function VideoPage() {
         segment: attributeData,
         frame: [
           {
-            color: '#00ff44',
-            key: 'Forest',
-            value: 'forest',
+            color: '#ff6600',
+            key: "Car's showing",
+            value: 'car',
           },
         ],
       }}
