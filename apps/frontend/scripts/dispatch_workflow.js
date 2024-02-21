@@ -6,7 +6,7 @@ function gitlabCiTrigger(nextVersion) {
   // aliyun ecs 访问github有问题
   const url = `https://static-files.shlab.tech/download/labelU-Kit/releases/download/${nextVersion}/frontend.zip`;
   const gitlabTriggerUrl = new URL(
-    `https://gitlab.shlab.tech/api/v4/projects/${process.env.GI_LABELU_PROJECT_ID}/trigger/pipeline?token=${process.env.GL_TRIGGER_TOKEN}&ref=test`,
+    `https://gitlab.shlab.tech/api/v4/projects/${process.env.GI_LABELU_PROJECT_ID}/trigger/pipeline?token=${process.env.GL_TRIGGER_TOKEN}&ref=self-host`,
   );
 
   const formData = new URLSearchParams();
