@@ -613,24 +613,24 @@ const presetSamples = [
 ];
 
 const defaultConfig = {
-  point: { maxPointAmount: 100, labels: [{ color: '#1899fb', key: 'Eye', value: 'eye' }] },
+  point: { maxPointAmount: 100, labels: [{ color: '#1899fb', key: '眼睛', value: 'eye' }] },
   line: {
     lineType: 'line',
     minPointAmount: 2,
     maxPointAmount: 100,
     edgeAdsorptive: false,
-    labels: [{ color: '#ff0000', key: 'Lane', value: 'lane' }],
+    labels: [{ color: '#ff0000', key: '车道', value: 'lane' }],
   },
-  rect: { minWidth: 1, minHeight: 1, labels: [{ color: '#00ff1e', key: 'Helmet', value: 'helmet' }] },
+  rect: { minWidth: 1, minHeight: 1, labels: [{ color: '#00ff1e', key: '头盔', value: 'helmet' }] },
   polygon: {
     lineType: 'line',
     minPointAmount: 2,
     maxPointAmount: 100,
     edgeAdsorptive: false,
-    labels: [{ color: '#8400ff', key: 'Balloon', value: 'balloon' }],
+    labels: [{ color: '#8400ff', key: '热气球', value: 'balloon' }],
   },
   cuboid: {
-    labels: [{ color: '#ff6d2e', key: 'Car', value: 'car' }],
+    labels: [{ color: '#ff6d2e', key: '汽车', value: 'car' }],
   },
 };
 

@@ -7,13 +7,15 @@ const samples = [
     url: import.meta.env.BASE_URL + 'audio-segment.mp3',
     name: 'audio-segment',
     annotations: [
+      { id: '1', start: 5.496299, end: 8.477484, label: 'the_old_man_is_taking', type: 'segment', order: 1 },
+      { id: '4rsakqmt9zt', type: 'segment', start: 9.952124, end: 19.653833, order: 2, label: 'the_old_man_is_taking' },
       {
-        id: '1',
-        start: 6.087957,
-        end: 11.533612,
-        label: 'the_old_man_is_taking',
+        id: 'go8t24wjfbe',
         type: 'segment',
-        order: 1,
+        start: 27.304808,
+        end: 36.858098,
+        order: 3,
+        label: 'the_old_man_is_taking',
       },
     ],
   },
@@ -21,23 +23,7 @@ const samples = [
     id: 'audio-frame',
     url: import.meta.env.BASE_URL + 'audio-frame.m4a',
     name: 'audio-frame',
-    annotations: [
-      {
-        id: '1',
-        start: 6.087957,
-        end: 11.533612,
-        label: 'girls_taking',
-        type: 'frame',
-        order: 1,
-      },
-      {
-        id: '3',
-        time: 13,
-        label: 'mon_is_getting_upset',
-        type: 'frame',
-        order: 2,
-      },
-    ],
+    annotations: [{ id: 'wo2tiebj64e', type: 'frame', time: 5.2, label: 'mon_is_getting_upset', order: 3 }],
   },
 ];
 
@@ -45,14 +31,14 @@ const annotatorConfig = {
   segment: [
     {
       color: '#e600ff',
-      key: 'The old man is taking',
+      key: '老人说话',
       value: 'the_old_man_is_taking',
     },
   ],
   frame: [
     {
       color: '#40ff00',
-      key: 'Mom is getting upset',
+      key: '妈妈开始生气',
       value: 'mon_is_getting_upset',
     },
   ],
