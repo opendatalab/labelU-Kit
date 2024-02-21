@@ -3,7 +3,7 @@ import type { VideoAnnotation, VideoAnnotationType } from '@labelu/video-react';
 import { useState } from 'react';
 
 const mockData1: VideoAnnotation[] = [
-  { id: 'b2tk865g3w', type: 'segment', start: 1.4704797911227154, end: 7.903828, order: 1, label: 'ship' },
+  { id: 'b2tk865g3w', type: 'segment', start: 7.457498, end: 11.625751, order: 1, label: 'ship' },
 ];
 
 const attributeData = [
