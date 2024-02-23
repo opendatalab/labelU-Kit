@@ -79,13 +79,13 @@ const Samples = () => {
         if (record.file?.filename?.endsWith('.jsonl')) {
           return (
             <span>
-              {filename}
+              {formatter.format('ellipsis', filename, { maxWidth: 160, type: 'tooltip' })}
               &nbsp;
               <Tag color="processing">预标注</Tag>
             </span>
           );
         }
-        return filename;
+        return formatter.format('ellipsis', filename, { maxWidth: 160, type: 'tooltip' });
       },
     },
     {
