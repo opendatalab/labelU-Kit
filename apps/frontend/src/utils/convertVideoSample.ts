@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import type { VideoSample } from '@labelu/video-annotator-react/dist/Editor/context';
 import type { EditorProps } from '@labelu/video-annotator-react';
+import { omit } from 'lodash/fp';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
@@ -10,6 +11,7 @@ import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
 export function convertVideoSample(
   sample: SampleResponse,
+  preAnnotation: any,
   config: EditorProps['config'],
   mediaType?: MediaType,
 ): VideoSample | undefined {
@@ -22,6 +24,11 @@ export function convertVideoSample(
   let resultParsed: any = {};
   if (sample?.data?.result && !_.isNull(sample?.data?.result)) {
     resultParsed = jsonParse(sample.data.result);
+  }
+
+  // pre annotation
+  if (Object.keys(omit(['width', 'height', 'rotate'])(resultParsed)).length == 0 && preAnnotation) {
+    resultParsed = _.get(preAnnotation, '[0].data[0].annotations');
   }
 
   // annotation

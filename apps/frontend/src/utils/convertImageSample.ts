@@ -12,6 +12,7 @@ import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
 export function convertImageSample(
   sample: SampleResponse | undefined,
+  preAnnotation: any,
   config: ImageAnnotatorProps['config'],
 ): ImageSample | undefined {
   if (!sample) {
@@ -24,6 +25,11 @@ export function convertImageSample(
   let resultParsed: any = {};
   if (sample?.data?.result && !_.isNull(sample?.data?.result)) {
     resultParsed = jsonParse(sample.data.result);
+  }
+
+  // pre annotation
+  if (Object.keys(omit(['width', 'height', 'rotate'])(resultParsed)).length == 0 && preAnnotation) {
+    resultParsed = _.get(preAnnotation, '[0].data[0].annotations');
   }
 
   // annotation

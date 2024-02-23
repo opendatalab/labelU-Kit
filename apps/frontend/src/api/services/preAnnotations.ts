@@ -30,7 +30,7 @@ export async function getPreAnnotations({
   });
 }
 
-export async function deleteSamples(
+export async function deletePreAnnotations(
   { task_id }: DeleteApiV1TasksTaskIdDeleteParams,
   body: {
     pre_annotation_ids: number[];

@@ -210,7 +210,7 @@ export interface SampleResponse {
   /** Data description: sample data, include filename, file url, or result */
   data?: SampleData;
   file: {
-    id: string;
+    id: number;
     url: string;
     filename: string;
   };

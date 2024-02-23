@@ -20,6 +20,7 @@ import { convertVideoSample } from '@/utils/convertVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
 import { convertImageSample } from '@/utils/convertImageSample';
+import type { getPreAnnotations } from '@/api/services/preAnnotations';
 
 import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
@@ -33,7 +34,10 @@ export const audioAnnotationRef = createRef();
 const AnnotationPage = () => {
   const routeParams = useParams();
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
-  const sample = useRouteLoaderData('annotation') as Awaited<ReturnType<typeof getSample>>;
+  const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
+  const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation as Awaited<
+    ReturnType<typeof getPreAnnotations>
+  >;
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
   const isFetching = useIsFetching();
@@ -128,13 +132,15 @@ const AnnotationPage = () => {
     return convertImageConfig(taskConfig);
   }, [task?.media_type, taskConfig]);
 
+  console.log('preAnnotations', preAnnotation);
+
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageSample(sample?.data, routeParams.sampleId, editorConfig);
+      return convertImageSample(sample?.data, preAnnotation?.data, editorConfig);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertVideoSample(sample?.data, routeParams.sampleId, editorConfig, task.media_type);
+      return convertVideoSample(sample?.data, preAnnotation?.data, editorConfig, task.media_type);
     }
-  }, [editorConfig, routeParams.sampleId, sample?.data, task?.media_type]);
+  }, [editorConfig, preAnnotation?.data, sample?.data, task?.media_type]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
