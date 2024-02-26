@@ -1,10 +1,10 @@
 import { useMemo, useCallback, useContext } from 'react';
 import { v4 as uuid4 } from 'uuid';
 import type { TableColumnType } from 'antd';
-import { Popconfirm, Button, Table } from 'antd';
+import { Popconfirm, Button, Table, Tooltip } from 'antd';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
-import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons';
+import { FileOutlined, FolderOpenOutlined, QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import type { RcFile } from 'antd/lib/upload/interface';
 import { FlexLayout } from '@labelu/components-react';
 
@@ -23,12 +23,14 @@ import { useUploadFileMutation } from '@/api/mutations/attachment';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
+import schema from './preAnnotationJsonl.schema.json';
 
 export enum UploadStatus {
   Uploading = 'Uploading',
   Waiting = 'Waiting',
   Success = 'Success',
   Fail = 'Fail',
+  Error = 'Error',
 }
 
 const statusTextMapping = {
@@ -36,6 +38,7 @@ const statusTextMapping = {
   [UploadStatus.Waiting]: '等待上传',
   [UploadStatus.Success]: '上传成功',
   [UploadStatus.Fail]: '上传失败',
+  [UploadStatus.Error]: '解析失败',
 };
 
 export interface QueuedFile {
@@ -45,25 +48,54 @@ export interface QueuedFile {
   name: string;
   size: number;
   status: UploadStatus;
+  reason?: string;
   path: string;
   file: File;
 }
 
+const readFile = async (file: File, type?: 'text') => {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      resolve(event.target?.result as string);
+    };
+    reader.onerror = (error) => {
+      reject(error);
+    };
+
+    if (type === 'text') {
+      reader.readAsText(file);
+    } else {
+      reader.readAsDataURL(file);
+    }
+  });
+};
+
 const isCorrectFiles = (files: File[], type: MediaType) => {
   let result = true;
+
   if (files.length > 100) {
     commonController.notificationErrorMessage({ message: '单次上传文件数量超过上限100个，请分批上传' }, 3);
     return;
   }
-  for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
-    const fileUnit = files[fileIndex];
+
+  for (let i = 0; i < files.length; i++) {
+    const fileUnit = files[i];
     const isOverSize = commonController.isOverSize(fileUnit.size, type);
+
     if (isOverSize) {
       commonController.notificationErrorMessage({ message: `单个文件大小超过${MediaFileSize[type]}MB限制` }, 3);
       result = false;
       break;
     }
+
+    // 忽略jsonl文件的类型校验
+    if (fileUnit.name.endsWith('.jsonl')) {
+      continue;
+    }
+
     const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name, type);
+
     if (!isCorrectFileType) {
       commonController.notificationErrorMessage(
         { message: `请上传支持的文件类型，类型包括：${FileExtensionText[type]}` },
@@ -73,6 +105,7 @@ const isCorrectFiles = (files: File[], type: MediaType) => {
       break;
     }
   }
+
   return result;
 };
 
@@ -134,8 +167,44 @@ const InputData = () => {
       let succeed = 0;
       let failed = 0;
 
+      const { Draft07 } = await import('json-schema-library');
+      const jsonSchema = new Draft07(schema);
+
       for (const file of files) {
         const { file: fileBlob } = file;
+
+        // jsonl需要校验文件内容
+        if (fileBlob.name.endsWith('.jsonl')) {
+          try {
+            const content = await readFile(fileBlob, 'text');
+
+            for (const line of content.split('\n')) {
+              const jsonLine = JSON.parse(line as string);
+
+              // 校验 jsonl 文件格式
+              const errors = jsonSchema.validate(jsonLine);
+
+              if (errors.length > 0) {
+                throw new Error(errors.map((error) => error.message).join('; \n'));
+              }
+            }
+          } catch (error: any) {
+            setFileQueue((pre) =>
+              pre.map((item) => {
+                if (item.uid === file.uid) {
+                  return {
+                    ...item,
+                    status: UploadStatus.Error,
+                    reason: error.message,
+                  };
+                }
+                return item;
+              }),
+            );
+
+            continue;
+          }
+        }
 
         if ([UploadStatus.Success, UploadStatus.Uploading].includes(file.status)) {
           continue;
@@ -190,6 +259,7 @@ const InputData = () => {
 
   const handleFilesChange = (files: RcFile[]) => {
     const isCorrectCondition = isCorrectFiles(files, task.media_type!);
+
     if (!isCorrectCondition) {
       return;
     } else {
@@ -201,12 +271,15 @@ const InputData = () => {
 
   const handleFileDelete = useCallback(
     async (file: QueuedFile) => {
-      await deleteFile(
-        { task_id: taskId! },
-        {
-          attachment_ids: [file.id!],
-        },
-      );
+      if (file.status !== UploadStatus.Error) {
+        await deleteFile(
+          { task_id: taskId! },
+          {
+            attachment_ids: [file.id!],
+          },
+        );
+      }
+
       setFileQueue((pre) => pre.filter((item) => item.uid !== file.uid));
       commonController.notificationSuccessMessage({ message: '已删除一个文件' }, 3);
     },
@@ -248,9 +321,16 @@ const InputData = () => {
         key: 'status',
         render: (text: UploadStatus, record: QueuedFile) => {
           return (
-            <Status type={_.lowerCase(record.status) as StatusType} icon={<Spot />}>
-              {statusTextMapping[text]}
-            </Status>
+            <FlexLayout.Item flex gap="0.5rem">
+              <Status type={_.lowerCase(record.status) as StatusType} icon={<Spot />}>
+                {statusTextMapping[text]}
+              </Status>
+              {record.reason && (
+                <Tooltip title={record.reason}>
+                  <QuestionCircleOutlined />
+                </Tooltip>
+              )}
+            </FlexLayout.Item>
           );
         },
       },
@@ -300,32 +380,55 @@ const InputData = () => {
       </Header>
       <FlexLayout.Content flex items="stretch" gap="1.5rem">
         <Left flex="column">
-          <h4>本地上传</h4>
+          <h4>标注文件上传</h4>
           <UploadArea flex="column" gap="1rem" items="center">
             <UploadBg />
 
             <FlexLayout gap="1rem">
-              <Button type="primary" icon={<FileOutlined />}>
-                <NativeUpload
-                  onChange={handleFilesChange}
-                  directory={false}
-                  multiple={true}
-                  accept={FileMimeType[task.media_type!]}
-                >
-                  上传文件
-                </NativeUpload>
-              </Button>
-              <Button type="primary" ghost icon={<FolderOpenOutlined />}>
-                <NativeUpload onChange={handleFilesChange} directory={true} accept={FileMimeType[task.media_type!]}>
-                  上传文件夹
-                </NativeUpload>
-              </Button>
+              <NativeUpload
+                type="primary"
+                icon={<FileOutlined />}
+                onChange={handleFilesChange}
+                directory={false}
+                multiple={true}
+                accept={FileMimeType[task.media_type!]}
+              >
+                上传文件
+              </NativeUpload>
+              <NativeUpload
+                type="primary"
+                ghost
+                icon={<FolderOpenOutlined />}
+                onChange={handleFilesChange}
+                directory={true}
+                accept={FileMimeType[task.media_type!]}
+              >
+                上传文件夹
+              </NativeUpload>
             </FlexLayout>
             <ButtonWrapper flex="column" items="center" gap="0.25rem">
               <div>支持文件类型包括：{FileExtensionText[task.media_type!]}</div>
               <div> 单次上传文件最大数量为100个，建议单个文件大小不超过{MediaFileSize[task.media_type!]}MB </div>
             </ButtonWrapper>
           </UploadArea>
+          <h4>预标注上传</h4>
+          <FlexLayout.Item flex="column" items="flex-start" gap="0.5rem">
+            <NativeUpload
+              icon={<UploadOutlined />}
+              onChange={handleFilesChange}
+              directory={false}
+              multiple={true}
+              accept={'.jsonl'}
+            >
+              上传文件
+            </NativeUpload>
+            <div style={{ color: '#999' }}>
+              支持上传 jsonl 格式的预标注文件，参考{' '}
+              <a target="_blank" href="https://www.google.com" rel="noreferrer">
+                示例
+              </a>
+            </div>
+          </FlexLayout.Item>
         </Left>
         <Right flex="column" gap="1rem">
           {fileQueue.length > 0 && (

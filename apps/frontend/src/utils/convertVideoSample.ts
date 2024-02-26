@@ -1,33 +1,34 @@
 import _ from 'lodash';
 import type { VideoSample } from '@labelu/video-annotator-react/dist/Editor/context';
 import type { EditorProps } from '@labelu/video-annotator-react';
+import { omit } from 'lodash/fp';
 
-import type { SampleData } from '@/api/types';
+import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
 export function convertVideoSample(
-  sample: SampleData | undefined,
-  sampleId: string | number | undefined,
+  sample: SampleResponse,
+  preAnnotation: any,
   config: EditorProps['config'],
   mediaType?: MediaType,
 ): VideoSample | undefined {
-  if (!sample || !sampleId) {
+  if (!sample) {
     return;
   }
 
-  const id = sampleId!;
-  let url = sample.urls[+id];
-  // NOTE: urls里只有一个元素
-  for (const _id in sample.urls) {
-    url = sample.urls[_id];
-  }
+  const id = sample.id!;
 
   let resultParsed: any = {};
-  if (sample.result && !_.isNull(sample.result)) {
-    resultParsed = jsonParse(sample.result);
+  if (sample?.data?.result && !_.isNull(sample?.data?.result)) {
+    resultParsed = jsonParse(sample.data.result);
+  }
+
+  // pre annotation
+  if (Object.keys(omit(['width', 'height', 'rotate'])(resultParsed)).length == 0 && preAnnotation) {
+    resultParsed = _.get(preAnnotation, '[0].data[0].annotations');
   }
 
   // annotation
@@ -40,7 +41,7 @@ export function convertVideoSample(
 
   return {
     id,
-    url: mediaType === MediaType.VIDEO ? url.replace('attachment', 'partial') : url,
+    url: mediaType === MediaType.VIDEO ? sample.file.url.replace('attachment', 'partial') : sample.file.url,
     annotations: _.chain(pool)
       .map(([type, key]) => {
         const items = _.get(resultParsed, [key, 'result'], []);
