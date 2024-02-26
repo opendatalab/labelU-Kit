@@ -23,75 +23,90 @@
           "properties": {
             "toolName": {
               "type": "string",
-              "const": "pointTool"
+              "const": "pointTool",
+              "default": "pointTool"
             },
             "result": {
+              "description": "标注结果",
               "type": "array",
               "items": {
                 "$ref": "#/definitions/PointTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "rectTool": {
           "type": "object",
           "properties": {
             "toolName": {
               "type": "string",
-              "const": "rectTool"
+              "const": "rectTool",
+              "default": "rectTool"
             },
             "result": {
+              "description": "标注结果",
               "type": "array",
               "items": {
                 "$ref": "#/definitions/RectTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "polygonTool": {
           "type": "object",
           "properties": {
             "toolName": {
               "type": "string",
-              "const": "polygonTool"
+              "const": "polygonTool",
+              "default": "polygonTool"
             },
             "result": {
+              "description": "标注结果",
               "type": "array",
               "items": {
                 "$ref": "#/definitions/PolygonTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "lineTool": {
           "type": "object",
           "properties": {
             "toolName": {
               "type": "string",
-              "const": "lineTool"
+              "const": "lineTool",
+              "default": "lineTool"
             },
             "result": {
+              "description": "标注结果",
               "type": "array",
               "items": {
                 "$ref": "#/definitions/LineTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "cuboidTool": {
           "type": "object",
           "properties": {
             "toolName": {
               "type": "string",
-              "const": "cuboidTool"
+              "const": "cuboidTool",
+              "default": "cuboidTool"
             },
             "result": {
+              "description": "标注结果",
               "type": "array",
               "items": {
                 "$ref": "#/definitions/CuboidTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "videoSegmentTool": {
           "type": "object",
@@ -106,7 +121,8 @@
                 "$ref": "#/definitions/SegmentTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "videoFrameTool": {
           "type": "object",
@@ -121,7 +137,8 @@
                 "$ref": "#/definitions/FrameTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "audioSegmentTool": {
           "type": "object",
@@ -136,7 +153,8 @@
                 "$ref": "#/definitions/SegmentTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "audioFrameTool": {
           "type": "object",
@@ -151,7 +169,8 @@
                 "$ref": "#/definitions/FrameTool"
               }
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "textTool": {
           "type": "object",
@@ -163,7 +182,8 @@
             "result": {
               "$ref": "#/definitions/TextTool"
             }
-          }
+          },
+          "required": ["toolName", "result"]
         },
         "tagTool": {
           "type": "object",
@@ -175,7 +195,8 @@
             "result": {
               "$ref": "#/definitions/TagTool"
             }
-          }
+          },
+          "required": ["toolName", "result"]
         }
       },
       "required": ["width", "height", "rotate"]
@@ -183,6 +204,119 @@
   },
   "required": ["sample_name", "annotations"],
   "definitions": {
+    "LabelItem": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string",
+          "description": "标签颜色"
+        },
+        "key": {
+          "type": "string",
+          "description": "标签名称"
+        },
+        "value": {
+          "type": "string",
+          "description": "标签值"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/TextAttribute"
+              },
+              {
+                "$ref": "#/definitions/EnumAttribute"
+              }
+            ]
+          }
+        }
+      },
+      "required": ["key", "value"]
+    },
+    "TextAttribute": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "标签名称"
+        },
+        "value": {
+          "type": "string",
+          "description": "标签值"
+        },
+        "type": {
+          "type": "string",
+          "const": "string",
+          "description": "标签属性为文本类型",
+          "default": "string"
+        },
+        "max_length": {
+          "type": ["number", "null"],
+          "description": "最大字符长度"
+        },
+        "regexp": {
+          "type": "string",
+          "description": "字符正则验证"
+        },
+        "stringType": {
+          "type": "string",
+          "enum": ["text", "number", "regexp", "english", "order"],
+          "default": "text",
+          "description": "字符类型"
+        },
+        "defaultValue": {
+          "type": "string",
+          "description": "默认值"
+        }
+      },
+      "required": ["key", "value", "type"]
+    },
+    "EnumAttribute": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "标签名称"
+        },
+        "value": {
+          "type": "string",
+          "description": "标签值"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["array", "enum"],
+          "description": "标签属性为选择类型",
+          "default": "enum"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "isDefault": {
+                "type": "boolean",
+                "default": false
+              },
+              "key": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["key", "value"]
+          }
+        }
+      },
+      "required": ["key", "value", "type", "options"]
+    },
     "PointTool": {
       "type": "object",
       "properties": {
