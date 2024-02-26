@@ -1,6 +1,5 @@
 import React from 'react';
 import { useParams } from 'react-router';
-import _ from 'lodash-es';
 import { VideoCard } from '@labelu/video-annotator-react';
 import { AudioCard } from '@labelu/components-react';
 
@@ -28,10 +27,9 @@ interface SliderCardProps {
 }
 
 const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
-  const { id, state, data } = cardInfo;
-  const headId = _.chain(data).get('fileNames').keys().head().value();
-  const filename = _.get(data, `fileNames.${headId}`);
-  const url = _.get(data, `urls.${headId}`);
+  const { id, state, file } = cardInfo;
+  const filename = file.filename;
+  const url = file.url;
   const routeParams = useParams();
   const sampleId = +routeParams.sampleId!;
 

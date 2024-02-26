@@ -18,6 +18,7 @@ import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 import { convertImageConfig } from '@/utils/convertImageConfig';
+import { createPreAnnotations } from '@/api/services/preAnnotations';
 
 import type { QueuedFile } from './partials/InputData';
 import InputData, { UploadStatus } from './partials/InputData';
@@ -226,7 +227,7 @@ const CreateTask = () => {
       _.chain(samples)
         .get('data')
         .mapKeys((item) => {
-          return _.chain(item.data?.fileNames).keys().first().value();
+          return item.file?.id;
         })
         .value(),
     [samples],
@@ -241,24 +242,43 @@ const CreateTask = () => {
         return Promise.reject();
       }
 
+      const mediaFileList = [];
+      const jsonlFileList = [];
+
+      for (const file of uploadFileList) {
+        if (file.file.name.endsWith('.jsonl')) {
+          jsonlFileList.push(file);
+        } else {
+          mediaFileList.push(file);
+        }
+      }
+
       if (isExistTask) {
         if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList) && !attachmentsConnected.current) {
           await createSamples(
             taskId,
-            _.chain(uploadFileList)
+            _.chain(mediaFileList)
               .filter((item) => item.status === UploadStatus.Success)
-              .map((item) => ({
-                attachement_ids: [item.id!],
-                data: {
-                  fileNames: {
-                    [item.id!]: item.name!,
+              .map((item) => {
+                return {
+                  file_id: item.id!,
+                  data: {
+                    result: '{}',
                   },
-                  result: '{}',
-                  urls: {
-                    [item.id!]: item.url!,
-                  },
-                },
-              }))
+                };
+              })
+              .value(),
+          );
+
+          await createPreAnnotations(
+            taskId,
+            _.chain(jsonlFileList)
+              .filter((item) => item.status === UploadStatus.Success)
+              .map((item) => {
+                return {
+                  file_id: item.id!,
+                };
+              })
               .value(),
           );
 

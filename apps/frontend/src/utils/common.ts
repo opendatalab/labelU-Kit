@@ -169,29 +169,6 @@ const commonController = {
       }
     }
   },
-  transformFileList(data: any, sampleId: number) {
-    const id = sampleId;
-    let url = data.urls[sampleId];
-    for (const _sampleId in data.urls) {
-      url = data.urls[_sampleId];
-    }
-    // delete
-    let newResult: any = '';
-    if (data.result && !commonController.isNullObject(data.result)) {
-      newResult = data.result;
-    } else {
-      newResult = '{}';
-    }
-    const finalResult = [
-      {
-        id,
-        url,
-        result: newResult,
-      },
-    ];
-
-    return finalResult;
-  },
   drawImg(divId: number, src: string) {
     // eslint-disable-next-line no-console
     console.log(divId + '');

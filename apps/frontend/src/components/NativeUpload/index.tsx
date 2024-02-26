@@ -2,8 +2,9 @@ import type { HTMLAttributes, PropsWithChildren } from 'react';
 import React, { createRef, useEffect } from 'react';
 import type { RcFile } from 'antd/lib/upload/interface';
 import styled from 'styled-components';
+import Button from 'antd/es/button';
 
-const Wrapper = styled.div`
+const Wrapper = styled(Button)`
   position: relative;
   overflow: hidden;
   display: inline;
@@ -29,7 +30,7 @@ type IProps = HTMLAttributes<HTMLDivElement> & {
 
 const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
   const inputRef = createRef<any>();
-  const { children, directory, multiple, ...req } = props;
+  const { children, directory, multiple, onChange, accept, ...req } = props;
 
   useEffect(() => {
     inputRef.current.webkitdirectory = directory;
@@ -37,14 +38,14 @@ const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
   }, [directory, inputRef, multiple]);
 
   return (
-    <Wrapper>
+    <Wrapper {...req}>
       <input
         ref={inputRef}
         type="file"
+        accept={accept}
         name="fileList"
-        {...req}
         onChange={(e) => {
-          props.onChange?.(Array.from(e.target.files || []) as RcFile[]);
+          onChange?.(Array.from(e.target.files || []) as RcFile[]);
           e.target.value = '';
         }}
       />

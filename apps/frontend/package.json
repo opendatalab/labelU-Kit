@@ -94,6 +94,7 @@
     "@vitejs/plugin-react": "^3.1.0",
     "analyze-wiz": "^1.2.0-beta.2",
     "cross-env": "^7.0.3",
+    "json-schema-library": "^9.1.2",
     "minimist": "^1.2.7",
     "prettier": "^2.0.1",
     "sass": "^1.56.1",

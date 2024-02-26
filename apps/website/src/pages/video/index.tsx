@@ -2,54 +2,19 @@ import { Annotator } from '@labelu/video-annotator-react';
 import type { VideoAnnotation, VideoAnnotationType } from '@labelu/video-react';
 import { useState } from 'react';
 
-const mockData1: VideoAnnotation[] = [];
+const mockData1: VideoAnnotation[] = [
+  { id: 'b2tk865g3w', type: 'segment', start: 7.457498, end: 11.625751, order: 1, label: 'ship' },
+];
 
 const attributeData = [
   {
     color: '#a600ff',
-    key: 'Rabbit',
-    value: 'rabbit',
-    attributes: [
-      {
-        key: 'What is the rabbit doing?',
-        value: 'activity',
-        type: 'string',
-        maxLength: 1000,
-        required: true,
-        stringType: 'text' as const,
-        defaultValue: '',
-        regexp: '',
-      },
-      {
-        key: 'Size of the rabbit',
-        value: 'size',
-        type: 'enum',
-        required: true,
-        options: [
-          {
-            key: 'Small',
-            value: 'small',
-          },
-          {
-            key: 'Medium',
-            value: 'medium',
-          },
-          {
-            key: 'Large',
-            value: 'large',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    color: '#ad722f',
-    key: 'Squirrel',
-    value: 'squirrel',
+    key: '游艇行驶',
+    value: 'ship',
   },
 ];
 
-const mockData2: VideoAnnotation[] = [];
+const mockData2: VideoAnnotation[] = [{ id: 'eb7wjsga4ei', type: 'frame', time: 12.00722, label: 'car', order: 1 }];
 
 export default function VideoPage() {
   const [editingType, setEditingType] = useState<VideoAnnotationType>('segment');
@@ -64,13 +29,13 @@ export default function VideoPage() {
 
   const [samples, updateSamples] = useState<any[]>([
     {
-      id: 'sample-1',
-      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      id: 'video-segment',
+      url: import.meta.env.BASE_URL + 'video-segment.mp4',
       annotations: mockData1,
     },
     {
-      id: 'sample-2',
-      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+      id: 'video-frame',
+      url: import.meta.env.BASE_URL + 'video-frame.mp4',
       annotations: mockData2,
     },
   ]);
@@ -84,9 +49,9 @@ export default function VideoPage() {
         segment: attributeData,
         frame: [
           {
-            color: '#00ff44',
-            key: 'Forest',
-            value: 'forest',
+            color: '#ff6600',
+            key: '汽车出现',
+            value: 'car',
           },
         ],
       }}

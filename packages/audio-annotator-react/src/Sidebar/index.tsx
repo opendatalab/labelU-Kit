@@ -63,7 +63,7 @@ export interface SidebarProps {
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
-  const { samples, currentSample } = useAnnotator();
+  const { samples, currentSample, handleSelectSample } = useAnnotator();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
   const handleExpandTriggerClick = useCallback(() => {
@@ -83,6 +83,7 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
                 no={index + 1}
                 showNo
                 active={currentSample?.id === sample.id}
+                onClick={() => handleSelectSample(sample)}
                 src={sample.url}
                 title={sample.name}
               />
