@@ -424,7 +424,11 @@ const InputData = () => {
             </NativeUpload>
             <div style={{ color: '#999' }}>
               支持上传 jsonl 格式的预标注文件，参考{' '}
-              <a target="_blank" href="https://www.google.com" rel="noreferrer">
+              <a
+                target="_blank"
+                href="https://opendatalab.github.io/labelU/#/schema/pre-annotation/image"
+                rel="noreferrer"
+              >
                 示例
               </a>
             </div>
