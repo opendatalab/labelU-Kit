@@ -61,13 +61,14 @@ export interface AudioCardProps {
    * 显示序号
    */
   showNo?: boolean;
+  onClick?: () => void;
   /**
    * 序号
    */
   no: number;
 }
 
-export function AudioCard({ active, no, title, src, showNo }: AudioCardProps) {
+export function AudioCard({ active, no, title, src, showNo, onClick }: AudioCardProps) {
   const ref = useRef<HTMLAudioElement>(null);
   const [duration, setDuration] = useState(0);
 
@@ -76,7 +77,7 @@ export function AudioCard({ active, no, title, src, showNo }: AudioCardProps) {
   }, []);
 
   return (
-    <Wrapper active={!!active}>
+    <Wrapper active={!!active} onClick={onClick}>
       {showNo && <CardIndex>{no}</CardIndex>}
       <InnerWrapper>
         <Left>
