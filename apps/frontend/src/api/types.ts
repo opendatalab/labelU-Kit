@@ -1,3 +1,5 @@
+import type { EnumerableAttribute, ILabel, TextAttribute } from '@labelu/interface';
+
 export interface AttachmentDeleteCommand {
   /** Attachment Ids description: attachment file id */
   attachment_ids: number[];
@@ -230,7 +232,7 @@ export interface PreAnnotationResponse {
   /** Id description: annotation id */
   id?: number;
   /** Data description: sample data, include filename, file url, or result */
-  data?: any;
+  data?: PreAnnotationType[];
   file: {
     id: string;
     url: string;
@@ -374,4 +376,366 @@ export interface ValidationError {
   msg: string;
   /** Error Type */
   type: string;
+}
+
+interface TextTool {
+  /**
+   * 唯一标识
+   */
+  id?: string;
+  /**
+   * 文本类型: text（文本）
+   */
+  type?: 'text';
+  /**
+   * 文本内容
+   */
+  value?: Record<string, string>;
+}
+
+interface TagTool {
+  /**
+   * 唯一标识
+   */
+  id?: string;
+  type?: 'tag';
+  value?: Record<string, string[]>;
+}
+
+export interface PreAnnotationType {
+  /**
+   * The name of the sample file.
+   */
+  sample_name: string;
+  config: {
+    pointTool?: ILabel[];
+    rectTool?: ILabel[];
+    polygonTool?: ILabel[];
+    lineTool?: ILabel[];
+    cuboidTool?: ILabel[];
+    videoSegmentTool?: ILabel[];
+    videoFrameTool?: ILabel[];
+    audioSegmentTool?: ILabel[];
+    audioFrameTool?: ILabel[];
+    textTool?: TextAttribute[];
+    tagTool?: EnumerableAttribute[];
+  };
+  meta_data?: {
+    width?: number;
+    height?: number;
+    rotate?: number;
+    duration?: number;
+  };
+  annotations: {
+    pointTool?: {
+      toolName?: 'pointTool';
+      result?: PointTool[];
+    };
+    rectTool?: {
+      toolName?: 'rectTool';
+      result?: RectTool[];
+    };
+    polygonTool?: {
+      toolName?: 'polygonTool';
+      result?: PolygonTool[];
+    };
+    lineTool?: {
+      toolName?: 'lineTool';
+      result?: GeneratedSchemaForRoot[];
+    };
+    cuboidTool?: {
+      toolName?: 'cuboidTool';
+      result?: CuboidTool[];
+    };
+    videoSegmentTool?: {
+      toolName?: 'videoSegmentTool';
+      result?: SegmentTool[];
+    };
+    videoFrameTool?: {
+      toolName?: 'videoFrameTool';
+      result?: FrameTool[];
+    };
+    audioSegmentTool?: {
+      toolName?: 'audioSegmentTool';
+      result?: SegmentTool[];
+    };
+    audioFrameTool?: {
+      toolName?: 'audioFrameTool';
+      result?: FrameTool[];
+    };
+    textTool?: {
+      toolName?: 'textTool';
+      result?: TextTool[];
+    };
+    tagTool?: {
+      toolName?: 'tagTool';
+      result?: TagTool[];
+    };
+  };
+}
+
+interface PointTool {
+  /**
+   * 唯一标识
+   */
+  id: string;
+  /**
+   * x坐标
+   */
+  x: number;
+  /**
+   * y坐标
+   */
+  y: number;
+  /**
+   * 是否可见
+   */
+  visible?: boolean;
+  attributes?: Attribute;
+  /**
+   * 标注顺序
+   */
+  order: number;
+  /**
+   * 标注类别
+   */
+  label: string;
+}
+/**
+ * 类别属性，键值对
+ */
+export type Attribute = Record<string, string | string[]>;
+export interface RectTool {
+  /**
+   * 唯一标识
+   */
+  id: string;
+  /**
+   * 拉框左上角x坐标
+   */
+  x: number;
+  /**
+   * 拉框左上角y坐标
+   */
+  y: number;
+  /**
+   * 拉框宽度
+   */
+  width: number;
+  /**
+   * 拉框高度
+   */
+  height: number;
+  /**
+   * 是否可见
+   */
+  visible?: boolean;
+  attributes?: Attribute;
+  /**
+   * 标注顺序
+   */
+  order: number;
+  /**
+   * 标注类别
+   */
+  label: string;
+}
+export interface PolygonTool {
+  /**
+   * 唯一标识
+   */
+  id: string;
+  /**
+   * 线条类型: line（直线），spline（曲线）
+   */
+  lineType: 'line' | 'spline';
+  /**
+   * 控制点列表
+   */
+  controlPoints?: Point[];
+  /**
+   * 线条点列表
+   */
+  points: Point[];
+  /**
+   * 是否可见
+   */
+  visible?: boolean;
+  attributes?: Attribute;
+  /**
+   * 标注顺序
+   */
+  order: number;
+  /**
+   * 标注类别
+   */
+  label: string;
+}
+export interface Point {
+  /**
+   * x坐标
+   */
+  x: number;
+  /**
+   * y坐标
+   */
+  y: number;
+}
+export interface GeneratedSchemaForRoot {
+  /**
+   * 唯一标识
+   */
+  id: string;
+  /**
+   * 线条类型: line（直线），spline（曲线）
+   */
+  lineType: 'line' | 'spline';
+  /**
+   * 控制点列表
+   */
+  controlPoints?: Point[];
+  /**
+   * 线条点列表
+   */
+  points: Point[];
+  /**
+   * 是否可见
+   */
+  visible?: boolean;
+  attributes?: Attribute;
+  /**
+   * 标注顺序
+   */
+  order: number;
+  /**
+   * 标注类别
+   */
+  label: string;
+}
+export interface CuboidTool {
+  /**
+   * 唯一标识
+   */
+  id: string;
+  /**
+   * 正面方向: front（前面），back（后面），left（左侧面），right（右侧面）
+   */
+  direction: string;
+  /**
+   * 正面四个点坐标
+   */
+  front: {
+    /**
+     * 左上角坐标
+     */
+    tl: {
+      x: number;
+      y: number;
+    };
+    /**
+     * 右上角坐标
+     */
+    tr: {
+      x: number;
+      y: number;
+    };
+    /**
+     * 右下角坐标
+     */
+    br: {
+      x: number;
+      y: number;
+    };
+    /**
+     * 左下角坐标
+     */
+    bl: {
+      x: number;
+      y: number;
+    };
+  };
+  /**
+   * 背面四个点坐标
+   */
+  back: {
+    /**
+     * 左上角坐标
+     */
+    tl: {
+      x: number;
+      y: number;
+    };
+    /**
+     * 右上角坐标
+     */
+    tr: {
+      x: number;
+      y: number;
+    };
+    /**
+     * 右下角坐标
+     */
+    br: {
+      x: number;
+      y: number;
+    };
+    /**
+     * 左下角坐标
+     */
+    bl: {
+      x: number;
+      y: number;
+    };
+  };
+  /**
+   * 是否可见
+   */
+  visible?: boolean;
+  attributes?: Attribute;
+  /**
+   * 标注顺序
+   */
+  order: number;
+  /**
+   * 标注类别
+   */
+  label: string;
+}
+export interface SegmentTool {
+  /**
+   * 唯一标识
+   */
+  id: string;
+  /**
+   * 时间点
+   */
+  time?: number;
+  /**
+   * 标注顺序
+   */
+  order: number;
+  /**
+   * 标注类别
+   */
+  label: string;
+  attributes?: Attribute;
+}
+export interface FrameTool {
+  /**
+   * 唯一标识
+   */
+  id: string;
+  /**
+   * 时间点
+   */
+  time?: number;
+  /**
+   * 标注顺序
+   */
+  order: number;
+  /**
+   * 标注类别
+   */
+  label: string;
+  attributes?: Attribute;
 }

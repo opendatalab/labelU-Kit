@@ -21,7 +21,7 @@ export async function getPreAnnotations({
   ...params
 }: ListByApiV1TasksTaskIdSamplesGetParams & {
   sample_name?: string;
-}): Promise<PreAnnotationResponse> {
+}): Promise<{ data: PreAnnotationResponse }> {
   return await request.get(`/v1/tasks/${task_id}/pre_annotations`, {
     params: {
       ...params,
