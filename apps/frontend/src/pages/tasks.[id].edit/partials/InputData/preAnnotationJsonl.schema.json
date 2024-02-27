@@ -358,7 +358,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "required": {
+              "isDefault": {
                 "type": "boolean",
                 "default": false
               },
