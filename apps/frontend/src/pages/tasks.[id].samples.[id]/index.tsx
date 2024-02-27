@@ -199,6 +199,12 @@ const AnnotationPage = () => {
 
   const isLoading = useMemo(() => loading || isFetching > 0 || isMutating > 0, [loading, isFetching, isMutating]);
 
+  const config = useMemo(() => {
+    return isSampleAnnotationEmpty && !_.isEmpty(preAnnotationConfig)
+      ? preAnnotationConfig
+      : configFromParent || editorConfig;
+  }, [configFromParent, editorConfig, isSampleAnnotationEmpty, preAnnotationConfig]);
+
   if (task?.media_type === MediaType.IMAGE) {
     content = (
       <ImageAnnotator
@@ -208,7 +214,7 @@ const AnnotationPage = () => {
         onError={onError}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={isSampleAnnotationEmpty ? preAnnotationConfig : configFromParent || editorConfig}
+        config={config}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {
@@ -218,7 +224,7 @@ const AnnotationPage = () => {
         ref={videoAnnotationRef}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={isSampleAnnotationEmpty ? preAnnotationConfig : configFromParent || editorConfig}
+        config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
       />
@@ -230,7 +236,7 @@ const AnnotationPage = () => {
         ref={audioAnnotationRef}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={isSampleAnnotationEmpty ? preAnnotationConfig : configFromParent || editorConfig}
+        config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
       />
