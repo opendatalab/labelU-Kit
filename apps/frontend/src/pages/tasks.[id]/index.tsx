@@ -1,12 +1,13 @@
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { Link, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { Table, Pagination, Button, Popconfirm, Tag } from 'antd';
+import { Table, Pagination, Button, Popconfirm, Tag, Tooltip } from 'antd';
 import { VideoCard } from '@labelu/video-annotator-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
@@ -29,7 +30,7 @@ const Samples = () => {
   const routerData = useRouteLoaderData('task') as TaskLoaderResult;
   const samples = _.get(routerData, 'samples.data');
   const revalidator = useRevalidator();
-  const preAnnotations = _.get(routerData, 'preAnnotations.data');
+  const preAnnotations = _.get(routerData, 'preAnnotations.data') as any;
   const task = _.get(routerData, 'task');
   const metaData = routerData?.samples?.meta_data;
   const routeParams = useParams();
@@ -43,6 +44,10 @@ const Samples = () => {
       pageSize: '10',
     }),
   );
+
+  const preAnnotationMapping = useMemo(() => {
+    return _.chain(preAnnotations).map('data').flatten().keyBy('sample_name').value();
+  }, [preAnnotations]);
 
   const taskStatus = _.get(task, 'status');
   const isTaskReadyToAnnotate =
@@ -108,6 +113,42 @@ const Samples = () => {
       },
     },
     {
+      title: (
+        <>
+          预标注 &nbsp;
+          <Tooltip
+            title={
+              <>
+                数据导入时上传 label.jsonl 即可导入预标注，预标注格式参考{' '}
+                <a
+                  href="https://opendatalab.github.io/labelU/#/schema/pre-annotation/image"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  示例
+                </a>
+              </>
+            }
+          >
+            <QuestionCircleOutlined />
+          </Tooltip>
+        </>
+      ),
+      dataIndex: 'unknown',
+      key: 'unknown',
+      align: 'left',
+      render: (text, record) => {
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return '-';
+        }
+
+        // sample_name前8为是截取的uuid，截取第9位到最后一位
+        const realSampleName = record.file?.filename?.substring(9);
+
+        return preAnnotationMapping[realSampleName] ? '是' : '无';
+      },
+    },
+    {
       title: '标注情况',
       dataIndex: 'state',
       key: 'state',
@@ -156,8 +197,7 @@ const Samples = () => {
         return result;
       },
       sorter: true,
-
-      // width: 80,
+      width: 80,
     },
     {
       title: '标注者',
@@ -197,9 +237,9 @@ const Samples = () => {
       title: '',
       dataIndex: 'option',
       key: 'option',
-      width: 180,
+      width: 100,
       align: 'center',
-
+      fixed: 'right',
       render: (x, record) => {
         if (record.id !== enterRowId) {
           return '';

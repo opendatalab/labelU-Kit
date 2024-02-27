@@ -2,12 +2,84 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "sample_file": {
+    "sample_name": {
       "type": "string",
       "description": "The name of the sample file."
     },
-    "annotations": {
+    "config": {
       "type": "object",
+      "properties": {
+        "pointTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "rectTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "polygonTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "lineTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "cuboidTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "videoSegmentTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "videoFrameTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "audioSegmentTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "audioFrameTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "textTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TextAttribute"
+          }
+        },
+        "tagTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnumAttribute"
+          }
+        }
+      }
+    },
+    "meta_data": {
+      "type": "object",
+      "description": "The meta data of the sample file.",
       "properties": {
         "width": {
           "type": "number"
@@ -18,6 +90,14 @@
         "rotate": {
           "type": "number"
         },
+        "duration": {
+          "type": "number"
+        }
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "properties": {
         "pointTool": {
           "type": "object",
           "properties": {
@@ -177,12 +257,102 @@
             }
           }
         }
-      },
-      "required": ["width", "height", "rotate"]
+      }
     }
   },
-  "required": ["sample_name", "annotations"],
+  "required": ["sample_name", "annotations", "config"],
   "definitions": {
+    "LabelItem": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string",
+          "description": "标签颜色"
+        },
+        "key": {
+          "type": "string",
+          "description": "标签名称"
+        },
+        "value": {
+          "type": "string",
+          "description": "标签值"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/TextAttribute"
+              },
+              {
+                "$ref": "#/definitions/EnumAttribute"
+              }
+            ]
+          }
+        }
+      },
+      "required": ["key", "value"]
+    },
+    "TextAttribute": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "string",
+          "description": "标签属性为文本类型",
+          "default": "string"
+        },
+        "max_length": {
+          "type": ["number", "null"],
+          "description": "最大字符长度"
+        },
+        "regexp": {
+          "type": "string",
+          "description": "字符正则验证"
+        },
+        "stringType": {
+          "type": "string",
+          "enum": ["text", "number", "regexp", "english", "order"],
+          "default": "text",
+          "description": "字符类型"
+        },
+        "defaultValue": {
+          "type": "string",
+          "description": "默认值"
+        }
+      },
+      "required": ["type"]
+    },
+    "EnumAttribute": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["array", "enum"],
+          "description": "标签属性为选择类型",
+          "default": "enum"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean",
+                "default": false
+              },
+              "key": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["key", "value"]
+          }
+        }
+      }
+    },
     "PointTool": {
       "type": "object",
       "properties": {
