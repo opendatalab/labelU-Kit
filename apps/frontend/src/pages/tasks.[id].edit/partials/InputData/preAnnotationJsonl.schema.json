@@ -2,12 +2,84 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "sample_file": {
+    "sample_name": {
       "type": "string",
       "description": "The name of the sample file."
     },
-    "annotations": {
+    "config": {
       "type": "object",
+      "properties": {
+        "pointTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "rectTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "polygonTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "lineTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "cuboidTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "videoSegmentTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "videoFrameTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "audioSegmentTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "audioFrameTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
+        "textTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TextAttribute"
+          }
+        },
+        "tagTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnumAttribute"
+          }
+        }
+      }
+    },
+    "meta_data": {
+      "type": "object",
+      "description": "The meta data of the sample file.",
       "properties": {
         "width": {
           "type": "number"
@@ -18,6 +90,14 @@
         "rotate": {
           "type": "number"
         },
+        "duration": {
+          "type": "number"
+        }
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "properties": {
         "pointTool": {
           "type": "object",
           "properties": {
@@ -198,11 +278,10 @@
           },
           "required": ["toolName", "result"]
         }
-      },
-      "required": ["width", "height", "rotate"]
+      }
     }
   },
-  "required": ["sample_name", "annotations"],
+  "required": ["sample_name", "annotations", "config"],
   "definitions": {
     "LabelItem": {
       "type": "object",
@@ -238,14 +317,6 @@
     "TextAttribute": {
       "type": "object",
       "properties": {
-        "key": {
-          "type": "string",
-          "description": "标签名称"
-        },
-        "value": {
-          "type": "string",
-          "description": "标签值"
-        },
         "type": {
           "type": "string",
           "const": "string",
@@ -271,36 +342,23 @@
           "description": "默认值"
         }
       },
-      "required": ["key", "value", "type"]
+      "required": ["type"]
     },
     "EnumAttribute": {
       "type": "object",
       "properties": {
-        "key": {
-          "type": "string",
-          "description": "标签名称"
-        },
-        "value": {
-          "type": "string",
-          "description": "标签值"
-        },
         "type": {
           "type": "string",
           "enum": ["array", "enum"],
           "description": "标签属性为选择类型",
           "default": "enum"
         },
-        "required": {
-          "type": "boolean",
-          "default": false
-        },
-
         "options": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "isDefault": {
+              "required": {
                 "type": "boolean",
                 "default": false
               },
@@ -314,8 +372,7 @@
             "required": ["key", "value"]
           }
         }
-      },
-      "required": ["key", "value", "type", "options"]
+      }
     },
     "PointTool": {
       "type": "object",

@@ -5,14 +5,14 @@ import { omit } from 'lodash/fp';
 import type { ToolName } from '@labelu/image';
 import { TOOL_NAMES } from '@labelu/image';
 
-import type { SampleResponse } from '@/api/types';
+import type { PreAnnotationType, SampleResponse } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
 export function convertImageSample(
   sample: SampleResponse | undefined,
-  preAnnotation: any,
+  preAnnotations: PreAnnotationType[] | undefined,
   config: ImageAnnotatorProps['config'],
 ): ImageSample | undefined {
   if (!sample) {
@@ -28,8 +28,8 @@ export function convertImageSample(
   }
 
   // pre annotation
-  if (Object.keys(omit(['width', 'height', 'rotate'])(resultParsed)).length == 0 && preAnnotation) {
-    resultParsed = _.get(preAnnotation, '[0].data[0].annotations');
+  if (Object.keys(omit(['width', 'height', 'rotate'])(resultParsed)).length == 0 && preAnnotations) {
+    resultParsed = _.get(preAnnotations, '[0].data[0].annotations', {});
   }
 
   // annotation

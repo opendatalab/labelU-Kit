@@ -10,6 +10,7 @@ import type { AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-
 import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
+import type { ToolName } from '@labelu/image';
 
 import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
@@ -27,6 +28,8 @@ import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
 
+type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
+
 export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
 export const videoAnnotationRef = createRef();
 export const audioAnnotationRef = createRef();
@@ -38,6 +41,42 @@ const AnnotationPage = () => {
   const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation as Awaited<
     ReturnType<typeof getPreAnnotations>
   >;
+  const preAnnotationConfig = useMemo(() => {
+    const result: Partial<Record<AllToolName, any>> = {};
+
+    if (preAnnotation) {
+      const config = _.get(preAnnotation, 'data[0].data[0].config', {});
+
+      Object.keys(config).forEach((key) => {
+        const toolName = key.replace(/Tool$/, '') as AllToolName;
+
+        if (['segment', 'frame'].includes(toolName)) {
+          result[toolName] = config[key as keyof typeof config];
+        } else {
+          result[toolName] = { labels: config[key as keyof typeof config] };
+        }
+      });
+    }
+
+    return result;
+  }, [preAnnotation]);
+  const isSampleAnnotationEmpty = useMemo(() => {
+    const result = _.get(sample, 'data.data.result');
+
+    if (!result) {
+      return true;
+    }
+
+    try {
+      const parsedResult = JSON.parse(result) as Record<string, any>;
+
+      if (Object.keys(_.omit(parsedResult, ['width', 'height', 'rotate'])).length == 0) {
+        return true;
+      }
+    } catch (e) {
+      return true;
+    }
+  }, [sample]);
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
   const isFetching = useIsFetching();
@@ -132,8 +171,6 @@ const AnnotationPage = () => {
     return convertImageConfig(taskConfig);
   }, [task?.media_type, taskConfig]);
 
-  console.log('preAnnotations', preAnnotation);
-
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
       return convertImageSample(sample?.data, preAnnotation?.data, editorConfig);
@@ -171,7 +208,7 @@ const AnnotationPage = () => {
         onError={onError}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={configFromParent || editorConfig}
+        config={isSampleAnnotationEmpty ? preAnnotationConfig : configFromParent || editorConfig}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {
@@ -181,7 +218,7 @@ const AnnotationPage = () => {
         ref={videoAnnotationRef}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={configFromParent || editorConfig}
+        config={isSampleAnnotationEmpty ? preAnnotationConfig : configFromParent || editorConfig}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
       />
@@ -193,7 +230,7 @@ const AnnotationPage = () => {
         ref={audioAnnotationRef}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={configFromParent || editorConfig}
+        config={isSampleAnnotationEmpty ? preAnnotationConfig : configFromParent || editorConfig}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
       />
