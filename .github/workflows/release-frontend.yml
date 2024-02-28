@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: release
+name: release-frontend
 
 env:
   LAB_NPM_TOKEN: ${{ secrets.LAB_NPM_TOKEN }}
@@ -72,16 +72,6 @@ jobs:
 
       - name: Build packages
         run: pnpm run build
-
-      - name: Set npm registry
-        run: |
-          npm config set registry https://registry.npmjs.com/
-          npm config set //registry.npmjs.com/:_authToken ${NPM_TOKEN}
-
-      - name: Publish packages
-        run: pnpm run release
-        env:
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
 
       - name: pre-release
         run: node ./scripts/before-release-frontend.js

@@ -95,7 +95,7 @@ main 分支的代码变动时会出发 package build 的 CI 流程，用于测�
 - frontend 使用的是独立的 semantic-release；
 - release 会通过 github [workflow_dispatch](https://github.blog/changelog/2020-07-06-github-actions-manual-triggers-with-workflow_dispatch/) 与 [labelu 的 ci](https://github.com/opendatalab/labelU/blob/main/.github/workflows/release_cicd_pipeline.yml) 协同，发布 labelu 的 release，协同方案见：[飞书文档](https://aicarrier.feishu.cn/wiki/wikcnEUfLmZc8rA378UuhHWC6Yt)。
 
-### [release-online](./.github/workflows/release-online.yml)
+### [release-online](https://github.com/opendatalab/labelU-Kit/blob/online/.github/workflows/release-online.yml)
 
 当 online 更新时，会触发 release-online 的 CI 流程，用于发布 [LabelU 线上体验](https://labelu.shlab.tech/)功能，同时与内部的 Gitlab 仓库 [labelu-self](https://gitlab.shlab.tech/dps/labelu-self) 项目的 ci 协同。
 

@@ -4,6 +4,7 @@
  */
 const path = require('path');
 const fs = require('fs');
+
 const { getPackagesSync } = require('@manypkg/get-packages');
 const workspace = path.join(__dirname, '../');
 
