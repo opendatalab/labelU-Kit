@@ -49,7 +49,6 @@ export interface QueuedFile {
   size: number;
   status: UploadStatus;
   reason?: string;
-  path: string;
   file: File;
 }
 
@@ -116,7 +115,6 @@ const normalizeFiles = (files: File[]) => {
       name: file.name,
       size: file.size,
       status: UploadStatus.Waiting,
-      path: file.webkitRelativePath === '' ? './' : file.webkitRelativePath,
       file,
     };
   });
@@ -304,12 +302,15 @@ const InputData = () => {
       },
       {
         title: '地址',
-        dataIndex: 'path',
+        dataIndex: 'url',
         align: 'left',
         responsive: ['md', 'lg'],
-        key: 'path',
+        key: 'url',
         render: (text: string) => {
-          return formatter.format('ellipsis', text, { maxWidth: 160, type: 'tooltip' });
+          return formatter.format('ellipsis', `${location.protocol}//${location.host}${text}`, {
+            maxWidth: 160,
+            type: 'tooltip',
+          });
         },
       },
       {
