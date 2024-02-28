@@ -97,7 +97,7 @@ main 分支的代码变动时会出发 package build 的 CI 流程，用于测�
 
 ### [release-online](./.github/workflows/release-online.yml)
 
-当 online 更新时，会触发 release-online 的 CI 流程，用于发布 LabelU 线上体验功能，同时与内部的 Gitlab 仓库 [labelu-self](https://gitlab.shlab.tech/dps/labelu-self) 项目的 ci 协同。
+当 online 更新时，会触发 release-online 的 CI 流程，用于发布 [LabelU 线上体验](https://labelu.shlab.tech/)功能，同时与内部的 Gitlab 仓库 [labelu-self](https://gitlab.shlab.tech/dps/labelu-self) 项目的 ci 协同。
 
 由于内部的 gitlab ci 访问 github 有限制，所以在这个 workflow 中，会将 release 的产物上传到 [https://static-files.shlab.tech/download/labelU-Kit/releases/download/](https://static-files.shlab.tech/download/labelU-Kit/releases/download/)，方便内部的 gitlab ci 下载。相关的环境变量见 github 仓库 [settings](https://github.com/opendatalab/labelU-Kit/settings/secrets/actions)。
 

@@ -724,7 +724,7 @@
           "$ref": "#/definitions/Attribute"
         }
       },
-      "required": ["x", "y", "width", "height", "id", "order", "label"]
+      "required": ["time", "id", "order", "label"]
     },
     "SegmentTool": {
       "type": "object",
@@ -733,9 +733,13 @@
           "type": "string",
           "description": "唯一标识"
         },
-        "time": {
+        "start": {
           "type": "number",
-          "description": "时间点"
+          "description": "开始时间点"
+        },
+        "end": {
+          "type": "number",
+          "description": "结束时间点"
         },
         "order": {
           "type": "integer",
@@ -751,7 +755,7 @@
           "$ref": "#/definitions/Attribute"
         }
       },
-      "required": ["x", "y", "width", "height", "id", "order", "label"]
+      "required": ["start", "end", "id", "order", "label"]
     },
     "TextTool": {
       "type": "array",
