@@ -1,6 +1,7 @@
-const minimist = require('minimist');
 const path = require('path');
 const childProcess = require('child_process');
+
+const minimist = require('minimist');
 const { getPackagesSync } = require('@manypkg/get-packages');
 
 const workspace = path.join(__dirname, '../');

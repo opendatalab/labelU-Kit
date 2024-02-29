@@ -50,8 +50,10 @@ const AnnotationPage = () => {
       Object.keys(config).forEach((key) => {
         const toolName = key.replace(/Tool$/, '') as AllToolName;
 
-        if (['segment', 'frame'].includes(toolName)) {
-          result[toolName] = config[key as keyof typeof config];
+        if (['audioSegment', 'videoSegment'].includes(toolName)) {
+          result.segment = config[key as keyof typeof config];
+        } else if (['audioFrame', 'videoFrame'].includes(toolName)) {
+          result.frame = config[key as keyof typeof config];
         } else {
           result[toolName] = { labels: config[key as keyof typeof config] };
         }
