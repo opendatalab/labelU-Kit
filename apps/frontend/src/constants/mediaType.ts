@@ -9,13 +9,13 @@ export const MediaTypeText = {
 export const FileExtensionText = {
   [MediaType.IMAGE]: 'jpg、jpeg、png、bmp、gif',
   [MediaType.VIDEO]: 'mp4(h.264编码)',
-  [MediaType.AUDIO]: 'mp3、wav、ogg',
+  [MediaType.AUDIO]: 'mp3、wav、ogg、m4a',
 };
 
 export const FileExtension = {
   [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif', 'jpeg'],
   [MediaType.VIDEO]: ['mp4'],
-  [MediaType.AUDIO]: ['mp3', 'wav', 'ogg'],
+  [MediaType.AUDIO]: ['mp3', 'wav', 'ogg', 'm4a'],
 };
 
 export const MediaFileSize = {
@@ -33,5 +33,5 @@ export const MediaRouterPrefix = {
 export const FileMimeType = {
   [MediaType.IMAGE]: 'image/png,image/jpeg,image/bmp,image/gif',
   [MediaType.VIDEO]: 'video/mp4',
-  [MediaType.AUDIO]: 'audio/mpeg,audio/x-wav,audio/vnd.wav,audio/ogg',
+  [MediaType.AUDIO]: 'audio/mpeg,audio/x-wav,audio/vnd.wav,audio/ogg,audio/mp4',
 };
