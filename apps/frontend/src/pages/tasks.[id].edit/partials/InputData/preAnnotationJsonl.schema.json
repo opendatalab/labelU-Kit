@@ -502,7 +502,7 @@
           "default": "none"
         }
       },
-      "required": ["type", "points", "x", "y", "width", "height", "id", "order", "label"]
+      "required": ["type", "points", "id", "order", "label"]
     },
     "RectTool": {
       "type": "object",
