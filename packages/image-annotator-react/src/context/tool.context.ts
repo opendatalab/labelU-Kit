@@ -1,4 +1,4 @@
-import type { ToolName, Annotator as ImageAnnotator } from '@labelu/image';
+import type { ToolName, Annotator as ImageAnnotator, EditType } from '@labelu/image';
 import type { EnumerableAttribute, TextAttribute, ILabel } from '@labelu/interface';
 import { createContext, useContext } from 'react';
 
@@ -26,6 +26,10 @@ export interface ToolContextType {
   globalToolConfig: GlobalToolConfig;
 
   labelMapping: Record<ToolName, Record<string, ILabel>>;
+
+  requestEdit?: (type: EditType, payload: { toolName: ToolName; label?: string; modifiedProperty?: string }) => boolean;
+
+  preLabelMapping: Record<ToolName | 'text' | 'tag', Record<string, ILabel | TextAttribute | EnumerableAttribute>>;
 
   labels: ILabel[];
 }
