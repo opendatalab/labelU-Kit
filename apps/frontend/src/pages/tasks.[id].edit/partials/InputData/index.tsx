@@ -1,7 +1,7 @@
 import { useMemo, useCallback, useContext } from 'react';
 import { v4 as uuid4 } from 'uuid';
 import type { TableColumnType } from 'antd';
-import { Popconfirm, Button, Table, Tooltip } from 'antd';
+import { Popconfirm, Button, Table, Tooltip, Tag } from 'antd';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import { FileOutlined, FolderOpenOutlined, QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
@@ -295,7 +295,11 @@ const InputData = () => {
         render: (text: string) => {
           return (
             <IconText icon={<FileIcon />}>
-              {formatter.format('ellipsis', text, { maxWidth: 540, type: 'tooltip' })}
+              <div>
+                {formatter.format('ellipsis', text, { maxWidth: 540, type: 'tooltip' })}
+                &nbsp;
+                {text?.endsWith('.jsonl') && <Tag color="processing">预标注</Tag>}
+              </div>
             </IconText>
           );
         },
@@ -423,7 +427,7 @@ const InputData = () => {
             >
               上传文件
             </NativeUpload>
-            <div style={{ color: '#999' }}>
+            <div style={{ color: '#999', fontSize: 12 }}>
               支持上传 jsonl 格式的预标注文件，参考{' '}
               <a
                 target="_blank"
