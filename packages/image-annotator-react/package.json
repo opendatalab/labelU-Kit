@@ -39,6 +39,7 @@
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
+    "@types/lodash.clonedeep": "^4.5.9",
     "@types/react": "^18.2.20",
     "@types/react-slider": "^1.3.6",
     "@types/styled-components": "^5.1.26",
