@@ -23,6 +23,8 @@ import type {
   RectToolOptions,
 } from './tools';
 
+export type EditType = 'create' | 'edit' | 'delete';
+
 export type GroupInAnnotation = LineGroup | PointGroup | PolygonGroup | RectGroup;
 
 /**
@@ -53,6 +55,17 @@ export interface BasicImageAnnotation {
 
   /** 标签分类属性 */
   attributes?: Record<string, string | string[]>;
+
+  /**
+   * 是否可编辑
+   */
+  requestEdit?: (
+    type: EditType,
+    payload: {
+      toolName: ToolName;
+      label: string;
+    },
+  ) => boolean;
 }
 
 export type ToolOptions = LineToolOptions | PointToolOptions | RectToolOptions | PolygonToolOptions | CuboidToolOptions;
@@ -60,6 +73,8 @@ export type ToolOptions = LineToolOptions | PointToolOptions | RectToolOptions |
 export type { LineData };
 
 export type AnnotationData = LineData | PointData | RectData | PolygonData | CuboidData;
+
+export type AllTypeAnnotationDataGroup = CuboidData[] & PolygonData[] & RectData[] & PointData[] & LineData[];
 
 export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool | CuboidTool;
 

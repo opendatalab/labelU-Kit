@@ -23,6 +23,8 @@ type ControlMoveHandler = (controller: ControllerPoint, e: MouseEvent) => void;
 
 export interface ControllerPointParams extends PointParams {
   outOfImage?: boolean;
+
+  disabled?: boolean;
 }
 
 export class ControllerPoint extends Point {
@@ -36,10 +38,14 @@ export class ControllerPoint extends Point {
 
   private _onMouseUpHandlers: ControlMoveHandler[] = [];
 
-  constructor({ outOfImage, ...params }: ControllerPointParams) {
+  private _disabled: boolean = false;
+
+  constructor({ outOfImage, disabled, ...params }: ControllerPointParams) {
     super({ ...params, style: DEFAULT_STYLE });
 
     this._outOfCanvas = outOfImage ?? true;
+
+    this._disabled = disabled ?? false;
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
@@ -49,14 +55,26 @@ export class ControllerPoint extends Point {
   }
 
   private _onShapeOver = () => {
+    if (this._disabled) {
+      return;
+    }
+
     this.updateStyle(HOVERED_STYLE);
   };
 
   private _onShapeOut = () => {
+    if (this._disabled) {
+      return;
+    }
+
     this.updateStyle(DEFAULT_STYLE);
   };
 
   private _handleMouseDown = (e: MouseEvent) => {
+    if (this._disabled) {
+      return;
+    }
+
     if (this.isMouseOver) {
       this._previousDynamicCoordinate = cloneDeep(this.dynamicCoordinate[0]);
 
@@ -67,6 +85,10 @@ export class ControllerPoint extends Point {
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
+    if (this._disabled) {
+      return;
+    }
+
     const { _previousDynamicCoordinate, _onMoveHandlers, _outOfCanvas } = this;
 
     if (!_previousDynamicCoordinate) {
@@ -90,6 +112,10 @@ export class ControllerPoint extends Point {
   };
 
   private _handleMouseUp = (e: MouseEvent) => {
+    if (this._disabled) {
+      return;
+    }
+
     const { _previousDynamicCoordinate } = this;
 
     if (!_previousDynamicCoordinate) {

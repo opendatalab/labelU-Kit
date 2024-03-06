@@ -1,7 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
-import { v4 as uuid } from 'uuid';
 import type { ILabel } from '@labelu/interface';
 import Color from 'color';
+
+import uid from '@/utils/uid';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -72,7 +73,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
     if (data.type == 'line') {
       group.add(
         new Polygon({
-          id: uuid(),
+          id: uid(),
           coordinate: cloneDeep(data.points),
           style: {
             ...commonStyle,
@@ -85,7 +86,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
     } else if (data.type === 'spline') {
       group.add(
         new ClosedSpline({
-          id: uuid(),
+          id: uid(),
           coordinate: cloneDeep(data.points),
           controlPoints: data.controlPoints!,
           style: {
@@ -104,7 +105,7 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
 
     group.add(
       new ShapeText({
-        id: uuid(),
+        id: uid(),
         coordinate: data.points[0],
         text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {

@@ -23,7 +23,7 @@ export interface CursorParams {
 
 const dpr = window.devicePixelRatio || 1;
 
-export class Cursor {
+export class CrossCursor {
   public style: Required<CursorStyle> = {
     stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: dpr,

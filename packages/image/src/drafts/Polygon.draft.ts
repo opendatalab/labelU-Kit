@@ -1,6 +1,7 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
 import Color from 'color';
+
+import uid from '@/utils/uid';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
@@ -93,8 +94,9 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       const endPoint = fullPoints[i];
 
       const edge = new ControllerEdge({
-        id: uuid(),
+        id: uid(),
         coordinate: cloneDeep([startPoint, endPoint]),
+        disabled: !this.requestEdit('edit'),
         style: {
           ...style,
           stroke: strokeColor,
@@ -115,8 +117,9 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
     for (let i = 0; i < data.points.length; i++) {
       const pointItem = data.points[i];
       const point = new ControllerPoint({
-        id: uuid(),
+        id: uid(),
         outOfImage: config.outOfImage,
+        disabled: !this.requestEdit('edit'),
         // 深拷贝，避免出现引用问题
         coordinate: cloneDeep(pointItem),
       });
@@ -171,7 +174,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       // 第一个多边形使用当前多边形的id
       this.data.points = firstPolygon![0].map((item: number[]) => {
         return {
-          id: uuid(),
+          id: uid(),
           ...axis!.getOriginalCoord({
             x: item[0],
             y: item[1],
@@ -188,11 +191,11 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
 
         return {
           ...cloneDeep(this.data),
-          id: uuid(),
+          id: uid(),
           order: monitor!.getMaxOrder() + index + 1,
           points: items[0].map((item: number[]) => {
             return {
-              id: uuid(),
+              id: uid(),
               ...axis!.getOriginalCoord({
                 x: item[0],
                 y: item[1],
@@ -220,7 +223,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
     const { config, group, _pointToBeAdded } = this;
 
     // 只有按下 alt 键时，才能在线段上增加控制点
-    if (!monitor?.keyboard.Alt) {
+    if (!monitor?.keyboard.Alt || !this.requestEdit('edit')) {
       return;
     }
 
@@ -241,7 +244,8 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       const point = new ControllerPoint({
         // name存储线段的索引
         name: group.shapes.indexOf(line).toString(),
-        id: uuid(),
+        id: uid(),
+        disabled: !this.requestEdit('edit'),
         coordinate: axis!.getOriginalCoord(latestPointOnLine),
         outOfImage: config.outOfImage,
       });

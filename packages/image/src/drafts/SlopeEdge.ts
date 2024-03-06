@@ -1,5 +1,6 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+
+import uid from '@/utils/uid';
 
 import { EInternalEvent } from '../enums';
 import type { AxisPoint, LineStyle, Point, PointStyle } from '../shapes';
@@ -17,6 +18,8 @@ export interface SlopeEdgeParams {
 
   /** 后一条曲线的开始控制点，最后一条曲线没有 */
   startControlOfNextCurve?: AxisPoint;
+
+  disabled?: boolean;
 }
 
 export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
@@ -34,6 +37,8 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
 
   private _contactCoord: AxisPoint;
 
+  private _disabled: boolean = false;
+
   /**
    * NOTE: 给monitor鼠标经过的判断标识，目前只有曲线的控制器是组合Group
    */
@@ -44,10 +49,12 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
   constructor({
     endControlOfPrevCurve: prevCurveEndControl,
     startControlOfNextCurve: nextCurveStartControl,
+    disabled,
     contact,
   }: SlopeEdgeParams) {
-    super(uuid(), monitor!.getNextOrder());
+    super(uid(), monitor!.getNextOrder());
 
+    this._disabled = disabled ?? false;
     this._endControlCoordOfPrevCurve = prevCurveEndControl;
     this._startControlCoordOfNextCurve = nextCurveStartControl;
     this._contactCoord = contact;
@@ -61,7 +68,7 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
     if (_endControlCoordOfPrevCurve) {
       this.add(
         new Line({
-          id: uuid(),
+          id: uid(),
           coordinate: [{ ..._endControlCoordOfPrevCurve }, { ..._contactCoord }],
           style: {
             stroke: '#fff',
@@ -72,7 +79,7 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
       const prevCurveEndControl = new ControllerPoint({
         // 如果是从左往右画，这个点是上一个曲线的结束控制点
         name: 'end',
-        id: uuid(),
+        id: uid(),
         coordinate: { ..._endControlCoordOfPrevCurve },
       });
 
@@ -88,7 +95,7 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
     if (_startControlCoordOfNextCurve) {
       this.add(
         new Line({
-          id: uuid(),
+          id: uid(),
           coordinate: [{ ..._contactCoord }, { ..._startControlCoordOfNextCurve }],
           style: {
             stroke: '#fff',
@@ -98,7 +105,7 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
       );
       const nextCurveStartControl = new ControllerPoint({
         name: 'start',
-        id: uuid(),
+        id: uid(),
         coordinate: { ..._startControlCoordOfNextCurve },
       });
 
@@ -113,7 +120,7 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
 
     const contactPoint = new ControllerPoint({
       name: 'contact',
-      id: uuid(),
+      id: uid(),
       coordinate: { ..._contactCoord },
     });
 
@@ -127,12 +134,22 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
   }
 
   private _handleSlopeDown = (point: ControllerPoint) => {
-    const { _contactPoint } = this;
+    const { _contactPoint, _disabled } = this;
+
+    if (_disabled) {
+      return;
+    }
+
     this.emit(EInternalEvent.SlopeDown, point, _contactPoint);
   };
 
   private _handleSlopeMove = (point: ControllerPoint) => {
-    const { _endControlCoordOfPrevCurve } = this;
+    const { _endControlCoordOfPrevCurve, _disabled } = this;
+
+    if (_disabled) {
+      return;
+    }
+
     if (point.name === 'end') {
       this.shapes[0].coordinate[0].x = point.coordinate[0].x;
       this.shapes[0].coordinate[0].y = point.coordinate[0].y;
@@ -155,10 +172,18 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
   };
 
   private _handleSlopeUp = (point: ControllerPoint) => {
+    if (this._disabled) {
+      return;
+    }
+
     this.emit(EInternalEvent.SlopeUp, point);
   };
 
   private _handleContactDown = (point: ControllerPoint) => {
+    if (this._disabled) {
+      return;
+    }
+
     const { _endSlopePointOfPrevCurve, _startSlopePointOfNextCurve } = this;
     this.previousDynamicCoordinate = this.shapes.map((shape) => {
       return cloneDeep(shape.dynamicCoordinate);
@@ -173,6 +198,10 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
    */
   private _handleContactMove = (point: ControllerPoint) => {
     const { previousDynamicCoordinate, _endSlopePointOfPrevCurve, _startSlopePointOfNextCurve } = this;
+
+    if (this._disabled) {
+      return;
+    }
 
     this.each((shape, index) => {
       if ((shape as Point).name !== 'contact' && previousDynamicCoordinate) {
@@ -190,6 +219,10 @@ export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
   };
 
   private _handleContactUp = () => {
+    if (this._disabled) {
+      return;
+    }
+
     this.emit(EInternalEvent.ContactUp);
   };
 
