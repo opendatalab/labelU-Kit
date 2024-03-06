@@ -6,7 +6,6 @@ import type {
   GlobalAnnotationType,
   TagAnnotationEntity,
   TextAnnotationEntity,
-  MediaAnnotationInUI,
   TextAttribute,
   VideoAnnotationData,
 } from '@labelu/interface';
@@ -200,19 +199,35 @@ export function AttributePanel() {
     };
   }, []);
 
-  const handleOnChange = (_changedValues: any, values: any[], type: GlobalAnnotationType) => {
+  const handleOnChange = (
+    _changedValues: any,
+    values: Record<GlobalAnnotationType, Record<string, TextAnnotationEntity | TagAnnotationEntity>>,
+  ) => {
     const newAnnotations = [];
-    const existAnnotations: MediaAnnotationInUI[] = [];
+    const existAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
 
-    for (const item of values) {
-      if (item.id && item.id in annotationsMapping) {
-        existAnnotations.push(item);
-      } else {
-        newAnnotations.push({
-          id: item.id || uid(),
-          type,
-          value: item.value,
-        });
+    for (const type of Object.keys(values)) {
+      const annotationType = type as GlobalAnnotationType;
+      const innerValues = values[type as GlobalAnnotationType];
+      for (const field of Object.keys(innerValues)) {
+        const item = innerValues[field];
+        const configItems = config?.[annotationType] ?? [];
+
+        // 不在用户配置的全局标签不保存
+        // @ts-ignore
+        if (!configItems.find((_item) => _item.value === field)) {
+          continue;
+        }
+
+        if (item.id && item.id in annotationsMapping) {
+          existAnnotations.push(item);
+        } else {
+          newAnnotations.push({
+            id: item.id || uid(),
+            type: annotationType,
+            value: item.value,
+          });
+        }
       }
     }
 
