@@ -6,11 +6,12 @@ import { Annotator } from '@labelu/video-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
-import type { AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
+import type { ImageAnnotatorProps, AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
 import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
 import type { ToolName } from '@labelu/image';
+import type { ILabel } from '@labelu/interface';
 
 import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
@@ -20,8 +21,8 @@ import { convertVideoConfig } from '@/utils/convertVideoConfig';
 import { convertVideoSample } from '@/utils/convertVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
-import { convertImageSample } from '@/utils/convertImageSample';
-import type { getPreAnnotations } from '@/api/services/preAnnotations';
+import { convertImageAnnotations, convertImageSample } from '@/utils/convertImageSample';
+import { TOOL_NAME } from '@/constants/toolName';
 
 import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
@@ -38,9 +39,7 @@ const AnnotationPage = () => {
   const routeParams = useParams();
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
   const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
-  const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation as Awaited<
-    ReturnType<typeof getPreAnnotations>
-  >;
+  const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation;
   const preAnnotationConfig = useMemo(() => {
     const result: Partial<Record<AllToolName, any>> = {};
 
@@ -49,36 +48,21 @@ const AnnotationPage = () => {
 
       Object.keys(config).forEach((key) => {
         const toolName = key.replace(/Tool$/, '') as AllToolName;
-
-        if (['audioSegment', 'videoSegment'].includes(toolName)) {
-          result.segment = config[key as keyof typeof config];
-        } else if (['audioFrame', 'videoFrame'].includes(toolName)) {
-          result.frame = config[key as keyof typeof config];
-        } else {
-          result[toolName] = { labels: config[key as keyof typeof config] };
-        }
+        result[toolName] = config[key as keyof typeof config];
       });
     }
 
     return result;
   }, [preAnnotation]);
-  const isSampleAnnotationEmpty = useMemo(() => {
-    const result = _.get(sample, 'data.data.result');
-
-    if (!result) {
-      return true;
+  const preAnnotations = useMemo(() => {
+    if (preAnnotation) {
+      const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+      return convertImageAnnotations(_annotations, preAnnotationConfig);
     }
 
-    try {
-      const parsedResult = JSON.parse(result) as Record<string, any>;
+    return {};
+  }, [preAnnotation, preAnnotationConfig]);
 
-      if (Object.keys(_.omit(parsedResult, ['width', 'height', 'rotate'])).length == 0) {
-        return true;
-      }
-    } catch (e) {
-      return true;
-    }
-  }, [sample]);
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
   const isFetching = useIsFetching();
@@ -167,19 +151,19 @@ const AnnotationPage = () => {
 
   const editorConfig = useMemo(() => {
     if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertVideoConfig(taskConfig);
+      return convertVideoConfig(taskConfig, preAnnotationConfig);
     }
 
     return convertImageConfig(taskConfig);
-  }, [task?.media_type, taskConfig]);
+  }, [preAnnotationConfig, task?.media_type, taskConfig]);
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageSample(sample?.data, preAnnotation?.data, editorConfig);
+      return convertImageSample(sample?.data, editorConfig);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertVideoSample(sample?.data, preAnnotation?.data, editorConfig, task.media_type);
+      return convertVideoSample(sample?.data, editorConfig, task.media_type);
     }
-  }, [editorConfig, preAnnotation?.data, sample?.data, task?.media_type]);
+  }, [editorConfig, sample?.data, task?.media_type]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
@@ -202,10 +186,34 @@ const AnnotationPage = () => {
   const isLoading = useMemo(() => loading || isFetching > 0 || isMutating > 0, [loading, isFetching, isMutating]);
 
   const config = useMemo(() => {
-    return isSampleAnnotationEmpty && !_.isEmpty(preAnnotationConfig)
-      ? preAnnotationConfig
-      : configFromParent || editorConfig;
-  }, [configFromParent, editorConfig, isSampleAnnotationEmpty, preAnnotationConfig]);
+    return configFromParent || editorConfig;
+  }, [configFromParent, editorConfig]);
+
+  const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
+    (editType, { toolName, label }) => {
+      if (!toolName) {
+        return false;
+      }
+
+      const toolConfig = config[toolName];
+
+      if (editType === 'create' && !toolConfig?.labels?.find((item: ILabel) => item.value === label)) {
+        message.destroy();
+        message.error(`当前工具【${TOOL_NAME[toolName + 'Tool']}】不包含值为【${label}】的标签`);
+
+        return false;
+      }
+
+      if (editType === 'edit' && !config[toolName]) {
+        message.destroy();
+        message.error(`当前配置不存在【${TOOL_NAME[toolName + 'Tool']}】工具`);
+        return false;
+      }
+
+      return true;
+    },
+    [config],
+  );
 
   if (task?.media_type === MediaType.IMAGE) {
     content = (
@@ -213,10 +221,13 @@ const AnnotationPage = () => {
         renderSidebar={renderSidebar}
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
+        requestEdit={requestEdit}
         onError={onError}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        preAnnotationLabels={preAnnotationConfig}
+        preAnnotations={preAnnotations}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {

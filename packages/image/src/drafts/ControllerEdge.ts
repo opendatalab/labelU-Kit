@@ -7,6 +7,8 @@ import { Line } from '../shapes';
 
 export interface ControllerEdgeOptions extends LineParams {
   name?: string;
+
+  disabled?: boolean;
 }
 
 type EdgeHandler = (e: MouseEvent, edge: ControllerEdge) => void;
@@ -22,12 +24,17 @@ export class ControllerEdge extends Line {
 
   private _originalStyle: LineParams['style'] = {};
 
+  private _disabled: boolean = false;
+
   public name?: string;
 
-  constructor({ name, ...params }: ControllerEdgeOptions) {
+  constructor({ name, disabled, ...params }: ControllerEdgeOptions) {
     super(params);
 
     this.name = name;
+
+    this._disabled = disabled ?? false;
+
     this._originalStyle = cloneDeep(this.style);
 
     eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
@@ -38,16 +45,28 @@ export class ControllerEdge extends Line {
   }
 
   private _onShapeOver = () => {
+    if (this._disabled) {
+      return;
+    }
+
     this.updateStyle({
       strokeWidth: (this._originalStyle?.strokeWidth ?? 4) + 4,
     });
   };
 
   private _onShapeOut = () => {
+    if (this._disabled) {
+      return;
+    }
+
     this.updateStyle(this._originalStyle ?? {});
   };
 
   private _handleMouseDown = (e: MouseEvent) => {
+    if (this._disabled) {
+      return;
+    }
+
     if (this.isMouseOver) {
       this.previousDynamicCoordinate = cloneDeep(this.dynamicCoordinate);
 
@@ -58,6 +77,10 @@ export class ControllerEdge extends Line {
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
+    if (this._disabled) {
+      return;
+    }
+
     const { previousDynamicCoordinate, _onMoveHandlers } = this;
 
     if (!previousDynamicCoordinate) {
@@ -70,6 +93,10 @@ export class ControllerEdge extends Line {
   };
 
   private _handleMouseUp = (e: MouseEvent) => {
+    if (this._disabled) {
+      return;
+    }
+
     const { previousDynamicCoordinate } = this;
 
     if (!previousDynamicCoordinate) {

@@ -1,6 +1,7 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
 import Color from 'color';
+
+import uid from '@/utils/uid';
 
 import { AnnotationCuboid, type CuboidData, type CuboidVertex } from '../../annotations';
 import type { AxisPoint, LineCoordinate, PointStyle, PolygonStyle, Point } from '../../shapes';
@@ -103,7 +104,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
     // 给真正的正面添加背景色
     const realFrontCoordinates = AnnotationCuboid.generateFrontCoordinate(this.data);
     const realFront = new Polygon({
-      id: uuid(),
+      id: uid(),
       coordinate: realFrontCoordinates,
       style: {
         fill: Color(this.labelColor).alpha(Annotation.fillOpacity).string(),
@@ -149,7 +150,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
       // 后面只有左边和右边可以控制
       if (['back-top', 'back-bottom'].includes(edgeCoordinates[i].name)) {
         const line = new Line({
-          id: uuid(),
+          id: uid(),
           coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
           style: {
             ...style,
@@ -162,8 +163,9 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
         group.add(line);
       } else {
         const edge = new ControllerEdge({
-          id: uuid(),
+          id: uid(),
           name: edgeCoordinates[i].name,
+          disabled: !this.requestEdit('edit'),
           coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
           style: {
             ...style,
@@ -210,9 +212,10 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
     for (let i = 0; i < controllerCoordinates.length; i++) {
       // 控制点
       const point = new ControllerPoint({
-        id: uuid(),
+        id: uid(),
         name: controllerCoordinates[i].name,
         outOfImage: this.config.outOfImage,
+        disabled: !this.requestEdit('edit'),
         coordinate: cloneDeep(controllerCoordinates[i].coordinate),
       });
 
@@ -251,7 +254,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
 
     for (let i = 0; i < lineCoordinates.length; i++) {
       const line = new Line({
-        id: uuid(),
+        id: uid(),
         coordinate: cloneDeep(lineCoordinates[i].coordinate) as LineCoordinate,
         style: {
           ...style,
@@ -456,8 +459,6 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
 
     // eslint-disable-next-line prefer-const
     let [safeX, safeY] = config.outOfImage ? [true, true] : axis!.isCoordinatesSafe(_previousDynamicCoordinate!);
-
-    console.log(safeX, safeY);
 
     const [zPosition, position] = controllerPoint.name!.split('-') as [ZPosition, LinePosition];
 

@@ -2,7 +2,7 @@ export * from './Polygon.shape';
 export * from './Line.shape';
 export * from './Rect.shape';
 export * from './Point.shape';
-export * from './Cursor.shape';
+export * from './CrossCursor.shape';
 export * from './Spline.shape';
 export * from './ClosedSpline';
 export * from './Text.shape';

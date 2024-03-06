@@ -1,10 +1,17 @@
 import EventEmitter from 'eventemitter3';
 import Color from 'color';
 
+import { cursorManager } from '@/singletons/cursorManager';
+import type { RectToolOptions } from '@/tools/Rect.tool';
+import type { LineToolOptions } from '@/tools/Line.tool';
+import type { CuboidToolOptions } from '@/tools/Cuboid.tool';
+import type { PolygonToolOptions } from '@/tools/Polygon.tool';
+import type { PointToolOptions } from '@/tools/Point.tool';
+
 import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Annotation, type AnnotationParams } from '../annotations/Annotation';
-import type { BasicImageAnnotation, ToolName } from '../interface';
+import type { BasicImageAnnotation, EditType, ToolName } from '../interface';
 import type { AxisPoint, Shape } from '../shapes';
 import { Point, Group, Spline, ClosedSpline } from '../shapes';
 import { ControllerPoint } from './ControllerPoint';
@@ -20,7 +27,8 @@ export class Draft<
 > extends EventEmitter {
   public isPicked = false;
 
-  public config: any;
+  public config: RectToolOptions | LineToolOptions | CuboidToolOptions | PolygonToolOptions | PointToolOptions | null =
+    null;
 
   public labelColor = LabelBase.DEFAULT_COLOR;
 
@@ -75,7 +83,9 @@ export class Draft<
 
     this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
     // 光标颜色切换
-    axis!.cursor!.style!.stroke = this.labelColor;
+    if (cursorManager?.cursor) {
+      cursorManager.cursor.style.stroke = this.labelColor;
+    }
 
     this.group = new Group(id, data.order, true);
 
@@ -89,9 +99,20 @@ export class Draft<
     });
   }
 
+  protected requestEdit(type: EditType): boolean {
+    const { config } = this;
+
+    return (
+      config?.requestEdit?.(type, {
+        toolName: this.name,
+        label: this.data.label,
+      }) ?? true
+    );
+  }
+
   private _handleMouseDown = (e: MouseEvent) => {
     // 如果鼠标落在控制点或者控制边上，不选中草稿
-    if (this._isControlUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+    if (this._isControlUnderCursor({ x: e.offsetX, y: e.offsetY }) || !this.requestEdit('edit')) {
       return;
     }
 

@@ -177,13 +177,14 @@ function ClearAction({ onClear }: { onClear: () => void }) {
 }
 
 export function AttributePanel() {
-  const { engine, globalToolConfig, config, labelMapping } = useTool();
+  const { engine, globalToolConfig, config, labelMapping, preLabelMapping } = useTool();
   const { currentSample } = useSample();
   const {
     sortedImageAnnotations,
     annotationsWithGlobal,
     allAnnotationsMapping,
     selectedAnnotation,
+    preAnnotationsWithGlobal,
     onGlobalAnnotationsChange,
     onImageAnnotationsClear,
     onGlobalAnnotationClear,
@@ -213,10 +214,6 @@ export function AttributePanel() {
   const globals = useMemo(() => {
     const _globals: (TextAttribute | EnumerableAttribute)[] = [];
 
-    if (!globalToolConfig) {
-      return _globals;
-    }
-
     if (globalToolConfig.tag) {
       _globals.push(...globalToolConfig.tag);
     }
@@ -225,14 +222,42 @@ export function AttributePanel() {
       _globals.push(...globalToolConfig.text);
     }
 
+    // 预标注的文本和分类需要跟用户配置合并且根据其value去重
+    if (!annotationsWithGlobal.global?.tag?.length) {
+      Object.values(preLabelMapping?.tag ?? {})?.forEach((item) => {
+        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+          _globals.push({ ...item, disabled: true } as EnumerableAttribute);
+        }
+      });
+    }
+
+    if (!annotationsWithGlobal.global?.text?.length) {
+      Object.values(preLabelMapping?.text ?? {})?.forEach((item) => {
+        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+          _globals.push({ ...item, disabled: true } as TextAttribute);
+        }
+      });
+    }
+
     return _globals;
-  }, [globalToolConfig]);
+  }, [
+    annotationsWithGlobal.global?.tag?.length,
+    annotationsWithGlobal.global?.text?.length,
+    globalToolConfig.tag,
+    globalToolConfig.text,
+    preLabelMapping.tag,
+    preLabelMapping.text,
+  ]);
 
   const flatGlobalAnnotations = useMemo(() => {
     const result: GlobalAnnotation[] = [];
 
-    if (!globalAnnotations) {
-      return result;
+    if (!globalAnnotations || Object.values(globalAnnotations).every((item) => item.length === 0)) {
+      [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
+        if (values) {
+          result.push(...(values as GlobalAnnotation[]));
+        }
+      });
     }
 
     Object.keys(globalAnnotations).forEach((key) => {
@@ -240,12 +265,12 @@ export function AttributePanel() {
     });
 
     return result;
-  }, [globalAnnotations]);
+  }, [globalAnnotations, preAnnotationsWithGlobal]);
 
   const titles = useMemo(() => {
     const _titles = [];
     // 将文本描述和标签分类合并成全局配置
-    if (globalToolConfig?.tag || globalToolConfig?.text) {
+    if (globalToolConfig?.tag || globalToolConfig?.text || preLabelMapping.tag || preLabelMapping.text) {
       let isCompleted = false;
 
       const globalAnnotationMapping: Record<string, TextAnnotationEntity | TagAnnotationEntity> = {};
@@ -281,8 +306,10 @@ export function AttributePanel() {
 
     return _titles;
   }, [
-    globalToolConfig?.tag,
-    globalToolConfig?.text,
+    globalToolConfig.tag,
+    globalToolConfig.text,
+    preLabelMapping.tag,
+    preLabelMapping.text,
     config?.line,
     config?.point,
     config?.polygon,
@@ -306,19 +333,35 @@ export function AttributePanel() {
   }, []);
 
   const handleOnChange = useCallback(
-    (_changedValues: any, values: any[], type: GlobalAnnotationType) => {
-      const newAnnotations = [];
+    (
+      _changedValues: any,
+      values: Record<GlobalAnnotationType, Record<string, TextAnnotationEntity | TagAnnotationEntity>>,
+    ) => {
+      const newAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
       const existAnnotations: GlobalAnnotation[] = [];
 
-      for (const item of values) {
-        if (item.id && item.id in allAnnotationsMapping) {
-          existAnnotations.push(item);
-        } else {
-          newAnnotations.push({
-            id: item.id || uid(),
-            type,
-            value: item.value,
-          });
+      for (const type of Object.keys(values)) {
+        const annotationType = type as GlobalAnnotationType;
+        const innerValues = values[type as GlobalAnnotationType];
+        for (const field of Object.keys(innerValues)) {
+          const item = innerValues[field];
+          const configItems = globalToolConfig[annotationType] ?? [];
+
+          // 不在用户配置的全局标签不保存
+          // @ts-ignore
+          if (!configItems.find((_item) => _item.value === field)) {
+            continue;
+          }
+
+          if (item.id && item.id in allAnnotationsMapping) {
+            existAnnotations.push(item);
+          } else {
+            newAnnotations.push({
+              id: item.id || uid(),
+              type: annotationType,
+              value: item.value,
+            });
+          }
         }
       }
 
@@ -350,7 +393,7 @@ export function AttributePanel() {
 
       onGlobalAnnotationsChange(_annotations);
     },
-    [globalAnnotations, allAnnotationsMapping, onGlobalAnnotationsChange],
+    [globalAnnotations, onGlobalAnnotationsChange, globalToolConfig, allAnnotationsMapping],
   );
 
   const handleClear = () => {
@@ -369,7 +412,7 @@ export function AttributePanel() {
   const collapseItems = useMemo(
     () =>
       Array.from(imageAnnotationsGroup).map(([label, _annotations]) => {
-        const found = labelMapping[_annotations[0].tool]?.[label];
+        const found = labelMapping[_annotations[0].tool]?.[label] ?? preLabelMapping?.[_annotations[0].tool]?.[label];
         const labelText = found ? found?.key ?? DEFAULT_LABEL_TEXT : DEFAULT_LABEL_TEXT;
 
         return {
@@ -385,22 +428,28 @@ export function AttributePanel() {
           key: label,
           children: (
             <AsideWrapper>
-              {_annotations.map((item) => (
-                <AsideAttributeItem
-                  key={item.id}
-                  active={item.id === selectedAnnotation?.id}
-                  order={item.order}
-                  annotation={item}
-                  labelText={labelMapping[item.tool]?.[label]?.key ?? DEFAULT_LABEL_TEXT}
-                  color={labelMapping[item.tool]?.[label]?.color ?? DEFAULT_LABEL_COLOR}
-                />
-              ))}
+              {_annotations.map((item) => {
+                const labelOfAnnotation = labelMapping[item.tool]?.[label] ?? preLabelMapping?.[item.tool]?.[label];
+
+                return (
+                  <AsideAttributeItem
+                    key={item.id}
+                    active={item.id === selectedAnnotation?.id}
+                    order={item.order}
+                    annotation={item}
+                    labelText={labelOfAnnotation?.key ?? DEFAULT_LABEL_TEXT}
+                    color={labelOfAnnotation?.color ?? DEFAULT_LABEL_COLOR}
+                  />
+                );
+              })}
             </AsideWrapper>
           ),
         };
       }),
-    [labelMapping, selectedAnnotation?.id, imageAnnotationsGroup],
+    [imageAnnotationsGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
+
+  console.log(flatGlobalAnnotations);
 
   return (
     <Wrapper collapsed={collapsed}>

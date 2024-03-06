@@ -15,9 +15,10 @@ export function convertImageConfig(taskConfig?: ToolsConfigState) {
 
     if (TOOL_NAMES.includes(toolName as ToolName)) {
       if (!editorConfig[toolName]) {
-        editorConfig[toolName] = {};
+        editorConfig[toolName] = {} as any;
       }
 
+      // @ts-ignore
       editorConfig[toolName] = {
         labels: [...commonLabels, ...(item.config.attributes ?? [])],
         // @ts-ignore

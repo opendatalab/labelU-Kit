@@ -1,6 +1,7 @@
-import { v4 as uuid } from 'uuid';
 import type { ILabel } from '@labelu/interface';
 import Color from 'color';
+
+import uid from '@/utils/uid';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -52,7 +53,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
 
     group.add(
       new Point({
-        id: uuid(),
+        id: uid(),
         coordinate: {
           x: data.x,
           y: data.y,
@@ -65,7 +66,7 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
 
     group.add(
       new ShapeText({
-        id: uuid(),
+        id: uid(),
         coordinate: {
           x: data.x,
           y: data.y,

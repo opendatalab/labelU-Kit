@@ -68,16 +68,19 @@ export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyl
       let edge: SlopeEdge;
       if (i === 0) {
         edge = new SlopeEdge({
+          disabled: !this.requestEdit('edit'),
           startControlOfNextCurve: { ...currentControls[0] },
           contact,
         });
       } else if (i === data.points.length - 1) {
         edge = new SlopeEdge({
+          disabled: !this.requestEdit('edit'),
           contact,
           endControlOfPrevCurve: { ...currentControls[0] },
         });
       } else {
         edge = new SlopeEdge({
+          disabled: !this.requestEdit('edit'),
           endControlOfPrevCurve: { ...currentControls[0] },
           startControlOfNextCurve: { ...currentControls[1] },
           contact,

@@ -126,7 +126,7 @@ export interface AttributeActionProps {
 }
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
-  const { engine } = useTool();
+  const { engine, requestEdit, labelMapping, currentTool } = useTool();
   const { onImageAnnotationChange, onImageAnnotationsChange } = useAnnotationCtx();
 
   const annotationsMapping = useMemo(() => {
@@ -155,6 +155,30 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
   const handleEditClick = (e: React.MouseEvent) => {
     engine.selectAnnotation(annotation!.tool, annotation!.id);
 
+    if (!annotation?.label) {
+      return;
+    }
+
+    const editable =
+      typeof requestEdit === 'function'
+        ? requestEdit('edit', {
+            label: annotation!.label,
+            toolName: annotation!.tool,
+          })
+        : true;
+
+    if (!editable) {
+      return;
+    }
+
+    const currentLabelConfig = labelMapping[annotation.tool][annotation.label];
+    const defaultLabelConfig = Object.values(labelMapping[annotation.tool])[0];
+
+    // 如果预标注的标签不在用户配置中，打开编辑框时默认选中用户配置的第一个标签
+    if (currentTool === annotation!.tool && !currentLabelConfig) {
+      engine.setLabel(defaultLabelConfig.value);
+    }
+
     // 等selectedAnnotation状态更新了再打开，因为Form里的值是从selectedAnnotation里取的
     setTimeout(() => {
       openAttributeModal({
@@ -162,7 +186,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         engine,
         e,
         openModalAnyway: true,
-        labelConfig: engine.toolMap.get(annotation!.tool)?.labelMapping?.get(annotation!.label!),
+        labelConfig: currentLabelConfig || defaultLabelConfig,
       });
     });
   };

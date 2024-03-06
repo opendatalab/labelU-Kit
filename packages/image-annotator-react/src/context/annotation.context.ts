@@ -29,6 +29,10 @@ export interface AnnotationContextType {
 
   selectedAnnotation: AnnotationDataInUI | undefined;
 
+  preAnnotationsWithGlobal?: Partial<
+    Record<ToolName | TextAnnotationType | TagAnnotationType, AnnotationData[] | GlobalAnnotation[]>
+  >;
+
   allAnnotationsMapping: Record<string, AnnotationDataInUI>;
 
   onImageAnnotationChange: (annotation: AnnotationDataInUI) => void;

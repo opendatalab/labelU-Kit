@@ -1,6 +1,7 @@
 import type { BBox } from 'rbush';
 import RBush from 'rbush';
-import { v4 as uuid } from 'uuid';
+
+import uid from '@/utils/uid';
 
 import type { AxisPoint, Shape } from '../shapes';
 import { Line, Point } from '../shapes';
@@ -142,7 +143,7 @@ export class CustomRBush extends RBush<RBushItem> {
         _nearestPoint.coordinate[0].y = latestPointUnscaled.y;
       } else {
         this._nearestPoint = new Point({
-          id: uuid(),
+          id: uid(),
           style: { fill: '#fff', radius: 3, strokeWidth: 0, stroke: '#000' },
           coordinate: latestPointUnscaled,
         });
@@ -217,7 +218,7 @@ export class CustomRBush extends RBush<RBushItem> {
         _nearestPoint.coordinate[0].y = latestPointUnscaled.y;
       } else {
         this._nearestPoint = new Point({
-          id: uuid(),
+          id: uid(),
           style: { fill: '#fff', radius: 3, strokeWidth: 0, stroke: '#000' },
           coordinate: latestPointUnscaled,
         });

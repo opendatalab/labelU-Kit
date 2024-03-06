@@ -1,10 +1,24 @@
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import type { Attribute, ILabel, TextAnnotationType, TagAnnotationType } from '@labelu/interface';
+import type {
+  Attribute,
+  ILabel,
+  TextAnnotationType,
+  TagAnnotationType,
+  TextAttribute,
+  EnumerableAttribute,
+} from '@labelu/interface';
 import { useRedoUndo } from '@labelu/components-react';
 import { TOOL_NAMES } from '@labelu/image';
-import type { AnnotationData, ToolName, Annotator as ImageAnnotatorClass } from '@labelu/image';
+import type {
+  AnnotationData,
+  ToolName,
+  Annotator as ImageAnnotatorClass,
+  AnnotationToolData,
+  EditType,
+} from '@labelu/image';
+import cloneDeep from 'lodash.clonedeep';
 
 import Sidebar from './Sidebar';
 import { AnnotatorToolbar } from './Toolbar';
@@ -94,6 +108,18 @@ export interface AnnotatorRef {
 export interface ImageAnnotatorProps {
   samples?: ImageSample[];
   config?: ImageAnnotatorOptions & Partial<GlobalToolConfig>;
+
+  /**
+   * 预标注的标签配置
+   */
+  preAnnotationLabels?: Partial<
+    Record<ToolName | TextAnnotationType | TagAnnotationType, ILabel[] | TextAttribute[] | EnumerableAttribute[]>
+  >;
+
+  preAnnotations?: Partial<
+    Record<ToolName | TextAnnotationType | TagAnnotationType, AnnotationData[] | GlobalAnnotation[]>
+  >;
+
   renderSidebar?: null | (() => React.ReactNode);
   renderAttributes?: () => React.ReactNode;
   editingSample?: ImageSample;
@@ -106,6 +132,11 @@ export interface ImageAnnotatorProps {
   onError?: (error: { type: string; message: string; value?: any }) => void;
 
   onLoad?: (engine: ImageAnnotatorClass) => void;
+
+  /**
+   * 标注是否可编辑
+   */
+  requestEdit?: (type: EditType, payload: { toolName: ToolName; label?: string; modifiedProperty?: string }) => boolean;
 
   /**
    * 顶部距离
@@ -127,6 +158,9 @@ function ForwardAnnotator(
     primaryColor = '#007aff',
     toolbarExtra,
     toolbarRight,
+    preAnnotationLabels,
+    preAnnotations,
+    requestEdit,
     onError,
     onLoad,
   }: ImageAnnotatorProps,
@@ -164,17 +198,37 @@ function ForwardAnnotator(
   }, [config?.tag, config?.text]);
 
   const annotationOptions = useMemo(() => {
+    const configWithPreAnnotationLabels = cloneDeep(config ?? {}) as ImageAnnotatorOptions & Partial<GlobalToolConfig>;
+
+    TOOL_NAMES.forEach((tool) => {
+      const preLabels = preAnnotationLabels?.[tool];
+      const _labels = [...(configWithPreAnnotationLabels?.[tool]?.labels ?? [])];
+
+      for (const preLabel of preLabels ?? []) {
+        if (!_labels?.find((label) => label.value === preLabel.value)) {
+          _labels?.push(preLabel as ILabel);
+        }
+      }
+
+      if (preLabels) {
+        if (!configWithPreAnnotationLabels![tool]) {
+          configWithPreAnnotationLabels![tool] = {};
+        }
+
+        configWithPreAnnotationLabels![tool]!.labels = _labels;
+      }
+    });
+
     return {
-      width: 0,
-      height: 0,
       showOrder: true,
-      ...config,
+      requestEdit,
+      ...configWithPreAnnotationLabels,
       image: {
         url: currentSample?.url ?? '',
         rotate: currentSample?.meta?.rotate ?? 0,
       },
     };
-  }, [config, currentSample]);
+  }, [config, currentSample?.meta?.rotate, currentSample?.url, requestEdit, preAnnotationLabels]);
 
   const engine = useImageAnnotator(containerRef, annotationOptions);
 
@@ -227,13 +281,24 @@ function ForwardAnnotator(
       .then(() => {
         Object.keys(annotationsFromSample).forEach((key) => {
           if (TOOL_NAMES.includes(key as ToolName)) {
-            engine?.loadData(key as ToolName, annotationsFromSample[key as ToolName]!);
+            engine?.loadData(key as ToolName, annotationsFromSample[key as ToolName] as AnnotationToolData<ToolName>);
           }
         });
 
-        engine.switch(tools[0]);
+        Object.keys(preAnnotations ?? {}).forEach((key) => {
+          if (TOOL_NAMES.includes(key as ToolName)) {
+            engine?.loadData(
+              key as ToolName,
+              preAnnotations![key as ToolName] as unknown as AnnotationToolData<ToolName>,
+            );
+          }
+        });
+
+        if (tools[0] && config?.[tools[0]]?.labels?.length) {
+          engine.switch(tools[0]);
+        }
       });
-  }, [annotationsFromSample, currentSample, engine, tools]);
+  }, [annotationsFromSample, config, currentSample, engine, preAnnotations, tools]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -243,7 +308,7 @@ function ForwardAnnotator(
       const imageAnnotations = currentAnnotations.image;
 
       Object.keys(imageAnnotations).forEach((tool) => {
-        engine?.loadData(tool as ToolName, imageAnnotations[tool as ToolName]);
+        engine?.loadData(tool as ToolName, imageAnnotations[tool as ToolName] as AnnotationToolData<ToolName>);
       });
     },
     [engine],
@@ -432,9 +497,9 @@ function ForwardAnnotator(
     const mapping: Record<string, Record<string, Attribute>> = {};
 
     TOOL_NAMES.forEach((key) => {
-      const _attributes: Attribute[] = config?.[key]?.labels ?? [];
+      const _labels: Attribute[] = config?.[key]?.labels ?? [];
       mapping[key] = {};
-      _attributes.reduce((acc, cur) => {
+      _labels.reduce((acc, cur) => {
         acc[cur.value] = cur;
         return acc;
       }, mapping[key]);
@@ -442,6 +507,21 @@ function ForwardAnnotator(
 
     return mapping;
   }, [config]);
+
+  const preLabelsMappingByTool = useMemo(() => {
+    const mapping: Record<string, Record<string, Attribute>> = {};
+
+    [...TOOL_NAMES, 'tag' as const, 'text' as const].forEach((key) => {
+      const _labels: Attribute[] = (preAnnotationLabels?.[key] as unknown as Attribute[]) ?? [];
+      mapping[key] = {};
+      _labels.reduce((acc, cur) => {
+        acc[cur.value] = cur;
+        return acc;
+      }, mapping[key]);
+    });
+
+    return mapping;
+  }, [preAnnotationLabels]);
 
   const onLabelChange = useCallback(
     (label: ILabel) => {
@@ -487,8 +567,8 @@ function ForwardAnnotator(
     // 改变标签
     engine?.on('labelChange', (label) => {
       _onAnnotationsChange();
-      const _currentLabel = engine.activeTool?.labelMapping?.get(label);
-      setSelectedLabel(_currentLabel);
+
+      setSelectedLabel(engine.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined);
     });
 
     engine?.on('attributesChange', (annotation: AnnotationData) => {
@@ -500,7 +580,7 @@ function ForwardAnnotator(
 
     // 标记变更，如移动，编辑等
     engine?.on('change', _onAnnotationsChange);
-  }, [engine, updateAnnotationsWithGlobal]);
+  }, [engine, labelMappingByTool, updateAnnotationsWithGlobal]);
 
   useEffect(() => {
     if (!onError) {
@@ -622,6 +702,7 @@ function ForwardAnnotator(
     '1,2,3,4,5,6,7,8,9',
     (e) => {
       const index = Number(e.key) - 1;
+
       if (index < labels.length) {
         engine?.setAttributes({});
         engine?.setLabel(labels[index].value);
@@ -664,20 +745,22 @@ function ForwardAnnotator(
       onGlobalAnnotationClear,
       onImageAnnotationsClear,
       orderVisible,
+      preAnnotationsWithGlobal: preAnnotations,
       onOrderVisibleChange,
     }),
     [
-      annotationsMapping,
-      onImageAnnotationsClear,
       annotationsWithGlobal,
+      sortedImageAnnotations,
+      selectedAnnotation,
+      annotationsMapping,
       onImageAnnotationChange,
       onAnnotationsChange,
       onGlobalAnnotationChange,
       onGlobalAnnotationClear,
-      onOrderVisibleChange,
+      onImageAnnotationsClear,
       orderVisible,
-      selectedAnnotation,
-      sortedImageAnnotations,
+      preAnnotations,
+      onOrderVisibleChange,
     ],
   );
 
@@ -687,13 +770,27 @@ function ForwardAnnotator(
       currentTool,
       config,
       selectedLabel,
+      requestEdit,
       onLabelChange,
       tools,
       globalToolConfig,
       labelMapping: labelMappingByTool,
+      preLabelMapping: preLabelsMappingByTool,
       labels,
     }),
-    [labelMappingByTool, config, currentTool, engine, globalToolConfig, labels, onLabelChange, selectedLabel, tools],
+    [
+      engine,
+      currentTool,
+      config,
+      selectedLabel,
+      requestEdit,
+      onLabelChange,
+      tools,
+      globalToolConfig,
+      labelMappingByTool,
+      preLabelsMappingByTool,
+      labels,
+    ],
   );
 
   const historyContextValue = useMemo(

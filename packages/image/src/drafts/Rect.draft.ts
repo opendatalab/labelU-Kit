@@ -1,7 +1,8 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
 import type { BBox } from 'rbush';
 import Color from 'color';
+
+import uid from '@/utils/uid';
 
 import { Rect, type RectStyle } from '../shapes/Rect.shape';
 import { AnnotationRect, type RectData } from '../annotations';
@@ -77,7 +78,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
     group.add(
       new Rect({
-        id: uuid(),
+        id: uid(),
         coordinate: { ...nwCoord },
         width: data.width,
         height: data.height,
@@ -93,8 +94,9 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
     for (let i = 0; i < lineCoordinates.length; i++) {
       const edge = new ControllerEdge({
-        id: uuid(),
+        id: uid(),
         name: lineCoordinates[i].name,
+        disabled: !this.requestEdit('edit'),
         coordinate: lineCoordinates[i].coordinate,
         style: {
           ...style,
@@ -138,8 +140,9 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
     // 点要覆盖在线上
     for (let i = 0; i < points.length; i++) {
       const point = new ControllerPoint({
-        id: uuid(),
+        id: uid(),
         name: points[i].name,
+        disabled: !this.requestEdit('edit'),
         outOfImage: config.outOfImage,
         coordinate: points[i],
       });

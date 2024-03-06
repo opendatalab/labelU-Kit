@@ -418,9 +418,16 @@ const CreateTask = () => {
       if (
         currentStep === StepEnum.Upload &&
         isEmpty(samples?.data) &&
-        filter(uploadFileList, (item) => item.status === UploadStatus.Success).length === 0
+        filter(uploadFileList, (item) => item.status === UploadStatus.Success && !item.name.endsWith('.jsonl'))
+          .length === 0
       ) {
         message.error('请至少上传一个文件');
+        return;
+      }
+
+      // 文件错误
+      if (filter(uploadFileList, (item) => item.status === UploadStatus.Error).length > 0) {
+        message.error('请先处理异常文件');
         return;
       }
 
