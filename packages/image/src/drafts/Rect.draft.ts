@@ -96,7 +96,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
       const edge = new ControllerEdge({
         id: uid(),
         name: lineCoordinates[i].name,
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         coordinate: lineCoordinates[i].coordinate,
         style: {
           ...style,
@@ -142,7 +142,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
       const point = new ControllerPoint({
         id: uid(),
         name: points[i].name,
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         outOfImage: config.outOfImage,
         coordinate: points[i],
       });

@@ -96,7 +96,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       const edge = new ControllerEdge({
         id: uid(),
         coordinate: cloneDeep([startPoint, endPoint]),
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         style: {
           ...style,
           stroke: strokeColor,
@@ -119,7 +119,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
       const point = new ControllerPoint({
         id: uid(),
         outOfImage: config.outOfImage,
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         // 深拷贝，避免出现引用问题
         coordinate: cloneDeep(pointItem),
       });
@@ -223,7 +223,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
     const { config, group, _pointToBeAdded } = this;
 
     // 只有按下 alt 键时，才能在线段上增加控制点
-    if (!monitor?.keyboard.Alt || !this.requestEdit('edit')) {
+    if (!monitor?.keyboard.Alt || !this.requestEdit('update')) {
       return;
     }
 
@@ -245,7 +245,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
         // name存储线段的索引
         name: group.shapes.indexOf(line).toString(),
         id: uid(),
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         coordinate: axis!.getOriginalCoord(latestPointOnLine),
         outOfImage: config.outOfImage,
       });

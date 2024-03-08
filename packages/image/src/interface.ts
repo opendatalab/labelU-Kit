@@ -23,7 +23,7 @@ import type {
   RectToolOptions,
 } from './tools';
 
-export type EditType = 'create' | 'edit' | 'delete';
+export type EditType = 'create' | 'update' | 'delete';
 
 export type GroupInAnnotation = LineGroup | PointGroup | PolygonGroup | RectGroup;
 
