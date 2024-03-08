@@ -292,14 +292,10 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
     form.setFieldsValue(formData);
   }, [form, formData]);
 
-  console.log(textConfig, formData);
-
   return (
     <AttributeTreeWrapper className={className}>
       <FormWithValidation form={form} onValuesChange={onChange} initialValues={formData}>
         <CollapseWrapper items={tagFormItems} defaultActiveKey={tagDefaultActiveKeys} />
-        {/* </FormWithValidation>
-      <FormWithValidation form={textForm} onValuesChange={handleOnChange('text')} initialValues={textData}> */}
         <CollapseWrapper items={textFormItems} defaultActiveKey={textDefaultActiveKeys} />
       </FormWithValidation>
     </AttributeTreeWrapper>

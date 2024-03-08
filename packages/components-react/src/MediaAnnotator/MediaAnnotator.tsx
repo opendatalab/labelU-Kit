@@ -19,6 +19,8 @@ export interface MediaAnnotatorProps {
   getCurrentTime: () => number;
 }
 
+export type EditType = 'create' | 'update' | 'delete';
+
 export interface MediaAnnotatorRef {
   reset: () => void;
   updateTime: (time: number) => void;
