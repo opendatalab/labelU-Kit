@@ -161,7 +161,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
     const editable =
       typeof requestEdit === 'function'
-        ? requestEdit('edit', {
+        ? requestEdit('update', {
             label: annotation!.label,
             toolName: annotation!.tool,
           })

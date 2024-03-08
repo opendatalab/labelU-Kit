@@ -199,7 +199,7 @@ export function LabelSection() {
   const isLabelEditable = useCallback(
     (toolName: ToolName | undefined, label: string | undefined) => {
       return typeof requestEdit === 'function'
-        ? requestEdit('edit', {
+        ? requestEdit('update', {
             toolName: toolName!,
             label,
             modifiedProperty: 'label',

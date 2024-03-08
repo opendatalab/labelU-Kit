@@ -97,6 +97,8 @@ const AnnotationContainer = styled.div`
   height: auto !important;
 `;
 
+export type { ImageAnnotatorOptions } from './hooks/useImageAnnotator';
+
 export interface AnnotatorRef {
   getAnnotations: () => Record<ToolName, AnnotationData[]> | undefined;
   getGlobalAnnotations: () => Record<TextAnnotationType | TagAnnotationType, GlobalAnnotation[]>;
