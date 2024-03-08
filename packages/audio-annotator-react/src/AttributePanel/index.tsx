@@ -11,8 +11,10 @@ import type {
 } from '@labelu/interface';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
+import { useTool } from '@/context/tool.context';
+import { useAnnotationCtx } from '@/context/annotation.context';
+import { useSample } from '@/context/sample.context';
 
-import { useAnnotator } from '../context';
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
 const Wrapper = styled.div<{ collapsed: boolean }>`
@@ -20,6 +22,7 @@ const Wrapper = styled.div<{ collapsed: boolean }>`
   overflow: auto;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 
   ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 280px;')}
 `;
@@ -96,42 +99,42 @@ const Footer = styled.div`
 type HeaderType = 'global' | 'label';
 
 export function AttributePanel() {
+  const { config, labelMapping } = useTool();
+  const { currentSample } = useSample();
   const {
-    config,
-    currentSample,
-    onAnnotationsChange,
-    annotationsMapping,
-    onAnnotationsRemove,
-    annotations,
+    annotationsWithGlobal,
+    allAnnotationsMapping,
     selectedAnnotation,
-    attributeMapping,
-  } = useAnnotator();
+    onAnnotationsChange,
+    onGlobalAnnotationClear,
+    onMediaAnnotationClear,
+  } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
-  const { globalAnnotations, videoAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
-    const _globalAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
-    currentSample?.annotations.forEach((item) => {
-      if (['tag', 'text'].includes(item.type)) {
-        _globalAnnotations.push(item as TextAnnotationEntity | TagAnnotationEntity);
-      }
-    });
+  const { globalAnnotations, mediaAnnotations, mediaAnnotationGroup, defaultActiveKeys } = useMemo(() => {
+    const mediaAnnotationGroupByLabel = new Map<string, VideoAnnotationData[]>();
+    const _mediaAnnotations = [...(annotationsWithGlobal?.segment ?? []), ...(annotationsWithGlobal?.frame ?? [])];
 
-    const videoAnnotationsGroupByLabel = new Map<string, VideoAnnotationData[]>();
-
-    for (const item of annotations) {
-      if (!videoAnnotationsGroupByLabel.has(item.label)) {
-        videoAnnotationsGroupByLabel.set(item.label, []);
+    for (const item of _mediaAnnotations) {
+      if (!mediaAnnotationGroupByLabel.has(item.label)) {
+        mediaAnnotationGroupByLabel.set(item.label, []);
       }
 
-      videoAnnotationsGroupByLabel?.get(item.label)?.push(item);
+      mediaAnnotationGroupByLabel?.get(item.label)?.push(item);
     }
 
     return {
-      globalAnnotations: _globalAnnotations,
-      videoAnnotationsGroup: videoAnnotationsGroupByLabel,
-      defaultActiveKeys: Array.from(videoAnnotationsGroupByLabel.keys()),
+      globalAnnotations: [...(annotationsWithGlobal?.tag ?? []), ...(annotationsWithGlobal?.text ?? [])],
+      mediaAnnotations: _mediaAnnotations,
+      mediaAnnotationGroup: mediaAnnotationGroupByLabel,
+      defaultActiveKeys: Array.from(mediaAnnotationGroupByLabel.keys()),
     };
-  }, [currentSample?.annotations, annotations]);
+  }, [
+    annotationsWithGlobal?.tag,
+    annotationsWithGlobal?.text,
+    annotationsWithGlobal?.segment,
+    annotationsWithGlobal?.frame,
+  ]);
 
   const globals = useMemo(() => {
     const _globals: (TextAttribute | EnumerableAttribute)[] = [];
@@ -179,12 +182,12 @@ export function AttributePanel() {
       _titles.push({
         title: '标记',
         key: 'label' as const,
-        subtitle: `${annotations.length}条`,
+        subtitle: `${mediaAnnotations.length}条`,
       });
     }
 
     return _titles;
-  }, [config?.frame, config?.segment, config?.tag, config?.text, globalAnnotations, annotations.length]);
+  }, [config?.tag, config?.text, config?.segment, config?.frame, globalAnnotations, mediaAnnotations.length]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
   useEffect(() => {
@@ -219,7 +222,7 @@ export function AttributePanel() {
           continue;
         }
 
-        if (item.id && item.id in annotationsMapping) {
+        if (item.id && item.id in allAnnotationsMapping) {
           existAnnotations.push(item);
         } else {
           newAnnotations.push({
@@ -232,7 +235,7 @@ export function AttributePanel() {
     }
 
     const _annotations =
-      currentSample?.annotations.map((item) => {
+      mediaAnnotations.map((item) => {
         const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
         if (existIndex >= 0) {
           return existAnnotations[existIndex];
@@ -249,16 +252,16 @@ export function AttributePanel() {
     }
 
     if (activeKey === 'global') {
-      onAnnotationsRemove(globalAnnotations);
+      onGlobalAnnotationClear();
     } else {
-      onAnnotationsRemove(annotations);
+      onMediaAnnotationClear();
     }
   };
 
   const collapseItems = useMemo(
     () =>
-      Array.from(videoAnnotationsGroup).map(([label, _annotations]) => {
-        const found = attributeMapping[_annotations[0].type]?.[label];
+      Array.from(mediaAnnotationGroup).map(([label, _annotations]) => {
+        const found = labelMapping[_annotations[0].type]?.[label];
         const labelText = found ? found?.key ?? '无标签' : '无标签';
 
         return {
@@ -280,15 +283,15 @@ export function AttributePanel() {
                   active={item.id === selectedAnnotation?.id}
                   order={item.order}
                   annotation={item}
-                  labelText={attributeMapping[item.type]?.[label]?.key ?? '无标签'}
-                  color={attributeMapping[item.type]?.[label]?.color ?? '#999'}
+                  labelText={labelMapping[item.type]?.[label]?.key ?? '无标签'}
+                  color={labelMapping[item.type]?.[label]?.color ?? '#999'}
                 />
               ))}
             </AsideWrapper>
           ),
         };
       }),
-    [attributeMapping, selectedAnnotation?.id, videoAnnotationsGroup],
+    [labelMapping, selectedAnnotation?.id, mediaAnnotationGroup],
   );
 
   return (

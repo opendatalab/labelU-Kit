@@ -1,10 +1,12 @@
+import type { PropsWithChildren } from 'react';
 import styled, { css } from 'styled-components';
 
 export interface StyledMediaErrorProps {
   visible?: boolean;
+  className?: string;
 }
 
-const StyledMediaError = styled.div<StyledMediaErrorProps>`
+const StyledMediaError: React.FC<PropsWithChildren<StyledMediaErrorProps>> = styled.div<StyledMediaErrorProps>`
   display: none;
   width: 100%;
   height: 100%;

@@ -6,7 +6,8 @@ import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation,
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
-import { useAnnotator } from '@/context';
+import { useTool } from '@/context/tool.context';
+import { useAnnotationCtx } from '@/context/annotation.context';
 
 const Wrapper = styled.div`
   display: flex;
@@ -112,19 +113,8 @@ function LabelItem({
 }
 
 export function LabelSection() {
-  const {
-    selectedAttribute,
-    play,
-    pause,
-    getDuration,
-    attributeMapping,
-    selectedAnnotation,
-    onAttributeChange,
-    containerRef,
-    onLabelChange,
-    attributes,
-    onAnnotationSelect,
-  } = useAnnotator();
+  const { selectedLabel, player, labelMapping, containerRef, onLabelChange, labels, onAttributeChange } = useTool();
+  const { selectedAnnotation, onAnnotationSelect } = useAnnotationCtx();
   const validationRef = useRef<ValidationContextType | null>(null);
   const dragModalRef = useRef<DraggableModalRef | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -136,12 +126,12 @@ export function LabelSection() {
     if (
       !dragModalRef.current ||
       !selectedAnnotation ||
-      !attributeMapping[selectedAnnotation.type][attribute.value]?.attributes?.length
+      !labelMapping[selectedAnnotation.type][attribute.value]?.attributes?.length
     ) {
       return;
     }
 
-    pause();
+    player.pause();
 
     const rect = e.currentTarget.getBoundingClientRect();
 
@@ -164,7 +154,7 @@ export function LabelSection() {
       if (
         !dragModalRef.current ||
         !annotation ||
-        !attributeMapping[annotation.type][annotation.label]?.attributes?.length
+        !labelMapping[annotation.type][annotation.label]?.attributes?.length
       ) {
         return;
       }
@@ -172,7 +162,7 @@ export function LabelSection() {
       dragModalRef.current.toggleVisibility(true);
 
       if (containerRef.current) {
-        const duration = getDuration();
+        const duration = player.getDuration();
         const timePercentage =
           ((annotation as VideoSegmentAnnotation).end || (annotation as VideoFrameAnnotation).time || 0) / duration;
         const offset = timePercentage * containerRef.current.clientWidth;
@@ -183,9 +173,7 @@ export function LabelSection() {
       }
 
       // 标记结束后暂停播放，填完属性后再播放
-      pause();
-
-      // 打开属性编辑框
+      player.pause();
     };
 
     document.addEventListener('annotate-end', handleAnnotateEnd as EventListener);
@@ -193,7 +181,7 @@ export function LabelSection() {
     return () => {
       document.removeEventListener('annotate-end', handleAnnotateEnd as EventListener);
     };
-  }, [attributeMapping, containerRef, getDuration, pause]);
+  }, [containerRef, labelMapping, player]);
 
   useEffect(() => {
     const handleAttributeEdit = (
@@ -204,11 +192,11 @@ export function LabelSection() {
     ) => {
       const { annotation, mouseEvent } = e.detail;
 
-      if (!dragModalRef.current || !annotation || !attributeMapping[annotation.type][annotation.label]) {
+      if (!dragModalRef.current || !annotation || !labelMapping[annotation.type][annotation.label]) {
         return;
       }
 
-      pause();
+      player.pause();
 
       // 打开属性编辑框
       dragModalRef.current.toggleVisibility(true);
@@ -224,7 +212,7 @@ export function LabelSection() {
     return () => {
       document.removeEventListener('annotation-attribute-edit', handleAttributeEdit as EventListener);
     };
-  }, [attributeMapping, onAnnotationSelect, pause]);
+  }, [labelMapping, onAnnotationSelect, player]);
 
   const handleModalClose = async () => {
     if (!dragModalRef.current || !validationRef.current) {
@@ -238,7 +226,7 @@ export function LabelSection() {
     }
 
     // 关闭属性编辑框后继续播放
-    play();
+    player.play();
 
     dragModalRef.current.toggleVisibility(false);
   };
@@ -290,10 +278,10 @@ export function LabelSection() {
     return () => {
       window.removeEventListener('resize', processAttributes);
     };
-  }, [attributes]);
+  }, [labels]);
 
-  const finalAttributes = sliceIndex > 0 ? attributes.slice(0, sliceIndex) : attributes;
-  const extraAttributes = sliceIndex > 0 ? attributes.slice(sliceIndex) : [];
+  const finalAttributes = sliceIndex > 0 ? labels.slice(0, sliceIndex) : labels;
+  const extraAttributes = sliceIndex > 0 ? labels.slice(sliceIndex) : [];
 
   return (
     <Wrapper>
@@ -304,7 +292,7 @@ export function LabelSection() {
               attribute={attribute}
               key={attribute.value}
               onSelect={handleSelect}
-              active={selectedAttribute?.value === attribute.value}
+              active={selectedLabel?.value === attribute.value}
             >
               {attribute.key}
             </LabelItem>
@@ -326,7 +314,7 @@ export function LabelSection() {
               attribute={attribute}
               key={attribute.value}
               onSelect={handleSelect}
-              active={selectedAttribute?.value === attribute.value}
+              active={selectedLabel?.value === attribute.value}
             >
               {attribute.key}
             </LabelItem>
@@ -354,9 +342,9 @@ export function LabelSection() {
           ref={validationRef}
           onAttributeChange={onAttributeChange}
           onLabelChange={onLabelChange}
-          attributes={attributes}
+          attributes={labels}
           initialValues={selectedAnnotation}
-          currentAttribute={selectedAttribute}
+          currentAttribute={selectedLabel}
         />
       </DraggableModel>
     </Wrapper>

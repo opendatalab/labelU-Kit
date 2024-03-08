@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+import type { PropsWithChildren } from 'react';
 import { useMemo } from 'react';
 import { EllipsisText, secondsToMinute } from '@labelu/components-react';
 import type { MediaAnnotationInUI, MediaAnnotationWithTextAndTag } from '@labelu/interface';
@@ -9,8 +10,7 @@ import { ReactComponent as EditIcon } from '@/assets/icons/edit.svg';
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 import { ReactComponent as VisibilityIcon } from '@/assets/icons/visibility.svg';
 import { ReactComponent as VisibilityOffIcon } from '@/assets/icons/visibility-off.svg';
-
-import { useAnnotator } from '../context';
+import { useAnnotationCtx } from '@/context/annotation.context';
 
 interface AttributeItemProps {
   annotation: MediaAnnotationInUI;
@@ -20,7 +20,7 @@ interface AttributeItemProps {
   active?: boolean;
 }
 
-export const Action = styled.div`
+export const Action: React.FC<PropsWithChildren> = styled.div`
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -43,7 +43,7 @@ export const Action = styled.div`
   }
 `;
 
-export const Header = styled.div`
+export const Header: React.FC<PropsWithChildren> = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -109,8 +109,7 @@ export interface AttributeActionProps {
 }
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
-  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationChange, onAnnotationsChange, currentSample } =
-    useAnnotator();
+  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange } = useAnnotationCtx();
 
   const annotationsMapping = useMemo(() => {
     if (!annotations) {
@@ -159,7 +158,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
     }
 
     onAnnotationsChange(
-      currentSample!.annotations.map((item) => {
+      annotations.map((item) => {
         if (annotationsMapping[item.id]) {
           return { ...item, visible: value };
         }
@@ -192,7 +191,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
 export default function AsideAttributeItem({ annotation, active, order, labelText, color }: AttributeItemProps) {
   const { type } = annotation;
-  const { onAnnotationSelect } = useAnnotator();
+  const { onAnnotationSelect } = useAnnotationCtx();
 
   if (type === 'segment') {
     const { start, end } = annotation;
