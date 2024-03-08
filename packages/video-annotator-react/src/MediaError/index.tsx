@@ -1,20 +1,25 @@
 import React from 'react';
+import type { StyledComponent } from 'styled-components';
+import styled from 'styled-components';
 
-import StyledMediaError from './styled';
 import { ReactComponent as MediaErrorIcon } from './videoError.svg';
 
-export interface MediaErrorProps {
-  visible: boolean;
-  className?: string;
-}
+const StyledMediaError: StyledComponent<'div', any> = styled.div`
+  width: 100%;
+  height: 100%;
 
-export default function MediaError({ visible, className }: MediaErrorProps) {
-  if (!visible) {
-    return null;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .media-error-image {
+    height: 50%;
   }
+`;
 
+export default function MediaError({ className }: { className?: string }) {
   return (
-    <StyledMediaError visible={visible} className={className}>
+    <StyledMediaError className={className}>
       <MediaErrorIcon className="media-error-image" />
     </StyledMediaError>
   );
