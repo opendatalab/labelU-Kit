@@ -14,7 +14,7 @@ import type { TaskResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import { createSamples, deleteSamples } from '@/api/services/samples';
 import { deleteFile, deleteTask } from '@/api/services/task';
-import { convertVideoConfig } from '@/utils/convertVideoConfig';
+import { convertAudioAndVideoConfig } from '@/utils/convertAudioAndVideoConfig';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 import { convertImageConfig } from '@/utils/convertImageConfig';
@@ -551,7 +551,7 @@ const CreateTask = () => {
       let _config;
 
       if ([MediaType.VIDEO, MediaType.AUDIO].includes(taskData?.media_type)) {
-        _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
+        _config = convertAudioAndVideoConfig(annotationFormInstance.getFieldsValue());
       } else if (taskData?.media_type === MediaType.IMAGE) {
         _config = convertImageConfig(annotationFormInstance.getFieldsValue());
       }

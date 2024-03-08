@@ -3,6 +3,7 @@ import React, { createRef, useEffect } from 'react';
 import type { RcFile } from 'antd/lib/upload/interface';
 import styled from 'styled-components';
 import Button from 'antd/es/button';
+import type { ButtonProps } from 'antd/lib';
 
 const Wrapper = styled(Button)`
   position: relative;
@@ -21,14 +22,15 @@ const Wrapper = styled(Button)`
   }
 `;
 
-type IProps = HTMLAttributes<HTMLDivElement> & {
-  accept?: string;
-  directory?: boolean; // 是否开启文件夹上传
-  multiple?: boolean; // 多文件上传
-  onChange?: (files: RcFile[]) => void;
-};
+type UploadProps = Omit<HTMLAttributes<HTMLInputElement>, 'onChange'> &
+  Omit<ButtonProps, 'onChange'> & {
+    accept?: string;
+    directory?: boolean;
+    multiple?: boolean;
+    onChange?: (files: RcFile[]) => void;
+  };
 
-const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
+const NativeUpload: React.FC<PropsWithChildren<UploadProps>> = (props) => {
   const inputRef = createRef<any>();
   const { children, directory, multiple, onChange, accept, ...req } = props;
 

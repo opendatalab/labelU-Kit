@@ -202,9 +202,8 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
     } else if (task.media_type === MediaType.VIDEO) {
       const videoAnnotations = await videoAnnotationRef.current?.getAnnotations();
 
-      videoAnnotations.forEach((annotation: any) => {
-        const innerAnnotation = omit(['type', 'visible'])(annotation);
-        if (annotation.type === 'tag') {
+      Object.keys(videoAnnotations ?? {}).forEach((toolName) => {
+        if (toolName === 'tag') {
           if (!result.tagTool) {
             result.tagTool = {
               toolName: 'tagTool',
@@ -212,10 +211,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.tagTool.result.push(innerAnnotation);
+          result.tagTool.result.push(...videoAnnotations[toolName]);
         }
 
-        if (annotation.type === 'text') {
+        if (toolName === 'text') {
           if (!result.textTool) {
             result.textTool = {
               toolName: 'textTool',
@@ -223,10 +222,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.textTool.result.push(innerAnnotation);
+          result.textTool.result.push(...videoAnnotations[toolName]);
         }
 
-        if (annotation.type === 'frame') {
+        if (toolName === 'frame') {
           if (!result.videoFrameTool) {
             result.videoFrameTool = {
               toolName: 'videoFrameTool',
@@ -234,10 +233,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.videoFrameTool.result.push(innerAnnotation);
+          result.videoFrameTool.result.push(...videoAnnotations[toolName]);
         }
 
-        if (annotation.type === 'segment') {
+        if (toolName === 'segment') {
           if (!result.videoSegmentTool) {
             result.videoSegmentTool = {
               toolName: 'videoSegmentTool',
@@ -245,7 +244,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.videoSegmentTool.result.push(innerAnnotation);
+          result.videoSegmentTool.result.push(...videoAnnotations[toolName]);
         }
       });
 
@@ -253,9 +252,8 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
     } else if (task.media_type === MediaType.AUDIO) {
       const audioAnnotations = await audioAnnotationRef.current?.getAnnotations();
 
-      audioAnnotations.forEach((annotation: any) => {
-        const innerAnnotation = omit(['type', 'visible'])(annotation);
-        if (annotation.type === 'tag') {
+      Object.keys(audioAnnotations ?? {}).forEach((toolName) => {
+        if (toolName === 'tag') {
           if (!result.tagTool) {
             result.tagTool = {
               toolName: 'tagTool',
@@ -263,10 +261,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.tagTool.result.push(innerAnnotation);
+          result.tagTool.result.push(...audioAnnotations[toolName]);
         }
 
-        if (annotation.type === 'text') {
+        if (toolName === 'text') {
           if (!result.textTool) {
             result.textTool = {
               toolName: 'textTool',
@@ -274,10 +272,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.textTool.result.push(innerAnnotation);
+          result.textTool.result.push(...audioAnnotations[toolName]);
         }
 
-        if (annotation.type === 'frame') {
+        if (toolName === 'frame') {
           if (!result.audioFrameTool) {
             result.audioFrameTool = {
               toolName: 'audioFrameTool',
@@ -285,10 +283,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.audioFrameTool.result.push(innerAnnotation);
+          result.audioFrameTool.result.push(...audioAnnotations[toolName]);
         }
 
-        if (annotation.type === 'segment') {
+        if (toolName === 'segment') {
           if (!result.audioSegmentTool) {
             result.audioSegmentTool = {
               toolName: 'audioSegmentTool',
@@ -296,7 +294,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.audioSegmentTool.result.push(innerAnnotation);
+          result.audioSegmentTool.result.push(...audioAnnotations[toolName]);
         }
       });
 

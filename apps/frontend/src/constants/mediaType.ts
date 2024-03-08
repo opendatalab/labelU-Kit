@@ -33,5 +33,5 @@ export const MediaRouterPrefix = {
 export const FileMimeType = {
   [MediaType.IMAGE]: 'image/png,image/jpeg,image/bmp,image/gif',
   [MediaType.VIDEO]: 'video/mp4',
-  [MediaType.AUDIO]: 'audio/mpeg,audio/x-wav,audio/vnd.wav,audio/ogg,audio/mp4',
+  [MediaType.AUDIO]: 'audio/mpeg,audio/x-wav,audio/vnd.wav,audio/ogg,audio/x-m4a',
 };

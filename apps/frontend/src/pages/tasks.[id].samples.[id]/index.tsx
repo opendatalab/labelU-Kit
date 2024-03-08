@@ -3,6 +3,7 @@ import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
 import { Annotator } from '@labelu/video-annotator-react';
+import type { AudioAndVideoAnnotatorRef } from '@labelu/audio-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
@@ -17,8 +18,8 @@ import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import type { getSample } from '@/api/services/samples';
 import { getSamples } from '@/api/services/samples';
-import { convertVideoConfig } from '@/utils/convertVideoConfig';
-import { convertVideoSample } from '@/utils/convertVideoSample';
+import { convertAudioAndVideoConfig } from '@/utils/convertAudioAndVideoConfig';
+import { convertAudioAndVideoSample } from '@/utils/convertAudioAndVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
 import { convertImageAnnotations, convertImageSample } from '@/utils/convertImageSample';
@@ -32,8 +33,8 @@ import { LoadingWrapper, Wrapper } from './style';
 type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
 
 export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
-export const videoAnnotationRef = createRef();
-export const audioAnnotationRef = createRef();
+export const videoAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
+export const audioAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
 
 const AnnotationPage = () => {
   const routeParams = useParams();
@@ -151,17 +152,17 @@ const AnnotationPage = () => {
 
   const editorConfig = useMemo(() => {
     if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertVideoConfig(taskConfig, preAnnotationConfig);
+      return convertAudioAndVideoConfig(taskConfig);
     }
 
     return convertImageConfig(taskConfig);
-  }, [preAnnotationConfig, task?.media_type, taskConfig]);
+  }, [task?.media_type, taskConfig]);
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
       return convertImageSample(sample?.data, editorConfig);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertVideoSample(sample?.data, editorConfig, task.media_type);
+      return convertAudioAndVideoSample(sample?.data, editorConfig, task.media_type);
     }
   }, [editorConfig, sample?.data, task?.media_type]);
 
@@ -204,7 +205,7 @@ const AnnotationPage = () => {
         return false;
       }
 
-      if (editType === 'edit' && !config[toolName]) {
+      if (editType === 'update' && !config[toolName]) {
         message.destroy();
         message.error(`当前配置不存在【${TOOL_NAME[toolName + 'Tool']}】工具`);
         return false;
@@ -221,11 +222,11 @@ const AnnotationPage = () => {
         renderSidebar={renderSidebar}
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
-        requestEdit={requestEdit}
         onError={onError}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        requestEdit={requestEdit}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -240,6 +241,9 @@ const AnnotationPage = () => {
         config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
+        requestEdit={requestEdit}
+        preAnnotationLabels={preAnnotationConfig}
+        preAnnotations={preAnnotations}
       />
     );
   } else if (task?.media_type === MediaType.AUDIO) {
@@ -252,6 +256,9 @@ const AnnotationPage = () => {
         config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
+        requestEdit={requestEdit}
+        preAnnotationLabels={preAnnotationConfig}
+        preAnnotations={preAnnotations}
       />
     );
   }
