@@ -4,14 +4,15 @@ import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText, uid
 import type {
   EnumerableAttribute,
   GlobalAnnotationType,
+  MediaAnnotationInUI,
   TagAnnotationEntity,
   TextAnnotationEntity,
   TextAttribute,
-  VideoAnnotationData,
 } from '@labelu/interface';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 import { useTool } from '@/context/tool.context';
+import type { GlobalAnnotation } from '@/context/annotation.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
 import { useSample } from '@/context/sample.context';
 
@@ -99,21 +100,44 @@ const Footer = styled.div`
 type HeaderType = 'global' | 'label';
 
 export function AttributePanel() {
-  const { config, labelMapping } = useTool();
+  const { config, labelMapping, preLabelMapping } = useTool();
   const { currentSample } = useSample();
   const {
     annotationsWithGlobal,
     allAnnotationsMapping,
     selectedAnnotation,
+    preAnnotationsWithGlobal,
     onAnnotationsChange,
     onGlobalAnnotationClear,
     onMediaAnnotationClear,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
-  const { globalAnnotations, mediaAnnotations, mediaAnnotationGroup, defaultActiveKeys } = useMemo(() => {
-    const mediaAnnotationGroupByLabel = new Map<string, VideoAnnotationData[]>();
+  const {
+    globalAnnotations,
+    globalAnnotationsWithPreAnnotation,
+    mediaAnnotations,
+    preMediaAnnotationGroup,
+    mediaAnnotationGroup,
+    defaultActiveKeys,
+  } = useMemo(() => {
+    const mediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
     const _mediaAnnotations = [...(annotationsWithGlobal?.segment ?? []), ...(annotationsWithGlobal?.frame ?? [])];
+    const _globalAnnotations = [...(annotationsWithGlobal?.tag ?? []), ...(annotationsWithGlobal?.text ?? [])];
+    const _globalAnnotationsWithPreAnnotation = [..._globalAnnotations];
+    const preMediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
+    const preMediaAnnotations = [
+      ...(preAnnotationsWithGlobal?.segment ?? []),
+      ...(preAnnotationsWithGlobal?.frame ?? []),
+    ] as MediaAnnotationInUI[];
+
+    if (!_globalAnnotations.length) {
+      [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
+        if (values) {
+          _globalAnnotationsWithPreAnnotation.push(...(values as GlobalAnnotation[]));
+        }
+      });
+    }
 
     for (const item of _mediaAnnotations) {
       if (!mediaAnnotationGroupByLabel.has(item.label)) {
@@ -123,41 +147,75 @@ export function AttributePanel() {
       mediaAnnotationGroupByLabel?.get(item.label)?.push(item);
     }
 
+    for (const item of preMediaAnnotations) {
+      if (!preMediaAnnotationGroupByLabel.has(item.label)) {
+        preMediaAnnotationGroupByLabel.set(item.label, []);
+      }
+
+      preMediaAnnotationGroupByLabel?.get(item.label)?.push(item);
+    }
+
     return {
-      globalAnnotations: [...(annotationsWithGlobal?.tag ?? []), ...(annotationsWithGlobal?.text ?? [])],
+      globalAnnotations: _globalAnnotations,
+      globalAnnotationsWithPreAnnotation: _globalAnnotationsWithPreAnnotation,
       mediaAnnotations: _mediaAnnotations,
+      preMediaAnnotationGroup: preMediaAnnotationGroupByLabel,
       mediaAnnotationGroup: mediaAnnotationGroupByLabel,
       defaultActiveKeys: Array.from(mediaAnnotationGroupByLabel.keys()),
     };
   }, [
-    annotationsWithGlobal?.tag,
-    annotationsWithGlobal?.text,
     annotationsWithGlobal?.segment,
     annotationsWithGlobal?.frame,
+    annotationsWithGlobal?.tag,
+    annotationsWithGlobal?.text,
+    preAnnotationsWithGlobal?.segment,
+    preAnnotationsWithGlobal?.frame,
+    preAnnotationsWithGlobal?.tag,
+    preAnnotationsWithGlobal?.text,
   ]);
 
   const globals = useMemo(() => {
     const _globals: (TextAttribute | EnumerableAttribute)[] = [];
 
-    if (!config) {
-      return _globals;
-    }
-
-    if (config.tag) {
+    if (config?.tag) {
       _globals.push(...config.tag);
     }
 
-    if (config.text) {
+    if (config?.text) {
       _globals.push(...config.text);
     }
 
+    // 预标注的文本和分类需要跟用户配置合并且根据其value去重
+    if (!annotationsWithGlobal?.tag?.length) {
+      Object.values(preLabelMapping?.tag ?? {})?.forEach((item) => {
+        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+          _globals.push({ ...item, disabled: true } as EnumerableAttribute);
+        }
+      });
+    }
+
+    if (!annotationsWithGlobal?.text?.length) {
+      Object.values(preLabelMapping?.text ?? {})?.forEach((item) => {
+        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+          _globals.push({ ...item, disabled: true } as TextAttribute);
+        }
+      });
+    }
+
     return _globals;
-  }, [config]);
+  }, [
+    annotationsWithGlobal?.tag?.length,
+    annotationsWithGlobal?.text?.length,
+    config?.tag,
+    config?.text,
+    preLabelMapping?.tag,
+    preLabelMapping?.text,
+  ]);
 
   const titles = useMemo(() => {
     const _titles = [];
     // 将文本描述和标签分类合并成全局配置
-    if (config?.tag || config?.text) {
+    if (config?.tag || config?.text || preLabelMapping.tag || preLabelMapping.text) {
       let isCompleted = false;
 
       const globalAnnotationMapping = globalAnnotations.reduce((acc, item) => {
@@ -167,7 +225,7 @@ export function AttributePanel() {
       }, {} as Record<string, TextAnnotationEntity | TagAnnotationEntity>);
 
       /** 如果所有的文本描述都是必填的，那么只要有一个不存在，那么就是未完成  */
-      isCompleted = [...(config.text ?? []), ...(config.tag ?? [])]
+      isCompleted = [...(config?.text ?? []), ...(config?.tag ?? [])]
         .filter((item) => item.required)
         .every((item) => globalAnnotationMapping[item.value]?.value?.[item.value]);
 
@@ -179,15 +237,30 @@ export function AttributePanel() {
     }
 
     if (config?.segment || config?.frame) {
+      const flatPreMediaAnnotations = Array.from(preMediaAnnotationGroup.values()).reduce((acc, item) => {
+        acc.push(...item);
+        return acc;
+      }, []);
+
       _titles.push({
         title: '标记',
         key: 'label' as const,
-        subtitle: `${mediaAnnotations.length}条`,
+        subtitle: `${mediaAnnotations.length || flatPreMediaAnnotations.length}条`,
       });
     }
 
     return _titles;
-  }, [config?.tag, config?.text, config?.segment, config?.frame, globalAnnotations, mediaAnnotations.length]);
+  }, [
+    config?.tag,
+    config?.text,
+    config?.segment,
+    config?.frame,
+    preLabelMapping.tag,
+    preLabelMapping.text,
+    globalAnnotations,
+    mediaAnnotations.length,
+    preMediaAnnotationGroup,
+  ]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
   useEffect(() => {
@@ -260,38 +333,44 @@ export function AttributePanel() {
 
   const collapseItems = useMemo(
     () =>
-      Array.from(mediaAnnotationGroup).map(([label, _annotations]) => {
-        const found = labelMapping[_annotations[0].type]?.[label];
-        const labelText = found ? found?.key ?? '无标签' : '无标签';
+      Array.from(mediaAnnotationGroup.size > 0 ? mediaAnnotationGroup : preMediaAnnotationGroup).map(
+        ([label, _annotations]) => {
+          const found = labelMapping[_annotations[0].type]?.[label] ?? preLabelMapping?.[_annotations[0].type]?.[label];
+          const labelText = found ? found?.key ?? '无标签' : '无标签';
 
-        return {
-          label: (
-            <Header>
-              <EllipsisText maxWidth={180} title={labelText}>
-                <div>{labelText}</div>
-              </EllipsisText>
+          return {
+            label: (
+              <Header>
+                <EllipsisText maxWidth={180} title={labelText}>
+                  <div>{labelText}</div>
+                </EllipsisText>
 
-              <AttributeAction annotations={_annotations} showEdit={false} />
-            </Header>
-          ),
-          key: label,
-          children: (
-            <AsideWrapper>
-              {_annotations.map((item) => (
-                <AsideAttributeItem
-                  key={item.id}
-                  active={item.id === selectedAnnotation?.id}
-                  order={item.order}
-                  annotation={item}
-                  labelText={labelMapping[item.type]?.[label]?.key ?? '无标签'}
-                  color={labelMapping[item.type]?.[label]?.color ?? '#999'}
-                />
-              ))}
-            </AsideWrapper>
-          ),
-        };
-      }),
-    [labelMapping, selectedAnnotation?.id, mediaAnnotationGroup],
+                <AttributeAction annotations={_annotations} showEdit={false} />
+              </Header>
+            ),
+            key: label,
+            children: (
+              <AsideWrapper>
+                {_annotations.map((item) => {
+                  const labelOfAnnotation = labelMapping[item.type]?.[label] ?? preLabelMapping?.[item.type]?.[label];
+
+                  return (
+                    <AsideAttributeItem
+                      key={item.id}
+                      active={item.id === selectedAnnotation?.id}
+                      order={item.order}
+                      annotation={item}
+                      labelText={labelOfAnnotation?.key ?? '无标签'}
+                      color={labelOfAnnotation?.color ?? '#999'}
+                    />
+                  );
+                })}
+              </AsideWrapper>
+            ),
+          };
+        },
+      ),
+    [mediaAnnotationGroup, preMediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
 
   return (
@@ -313,7 +392,7 @@ export function AttributePanel() {
       </TabHeader>
       <Content activeKey={activeKey}>
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
-        <AttributeTree data={globalAnnotations} config={globals} onChange={handleOnChange} />
+        <AttributeTree data={globalAnnotationsWithPreAnnotation} config={globals} onChange={handleOnChange} />
       </Content>
       <Footer onClick={handleClear}>
         <DeleteIcon />

@@ -12,6 +12,8 @@ import { ReactComponent as VisibilityIcon } from '@/assets/icons/visibility.svg'
 import { ReactComponent as VisibilityOffIcon } from '@/assets/icons/visibility-off.svg';
 import { useAnnotationCtx } from '@/context/annotation.context';
 
+import { openAttributeModal, useTool } from '..';
+
 interface AttributeItemProps {
   annotation: MediaAnnotationInUI;
   order: number;
@@ -110,6 +112,7 @@ export interface AttributeActionProps {
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
   const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange } = useAnnotationCtx();
+  const { labelMapping, requestEdit, player } = useTool();
 
   const annotationsMapping = useMemo(() => {
     if (!annotations) {
@@ -135,7 +138,27 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
   }, [annotation, annotations]);
 
   const handleEditClick = (e: React.MouseEvent) => {
-    document.dispatchEvent(new CustomEvent('annotation-attribute-edit', { detail: { annotation, mouseEvent: e } }));
+    if (!annotation?.label) {
+      return;
+    }
+
+    player.pause();
+
+    const editable =
+      typeof requestEdit === 'function'
+        ? requestEdit('update', { toolName: annotation.type, label: annotation.label })
+        : true;
+
+    if (!editable) {
+      return;
+    }
+
+    openAttributeModal({
+      labelValue: annotation?.label,
+      e,
+      labelConfig: labelMapping[annotation.type][annotation.label],
+      openModalAnyway: true,
+    });
   };
 
   const toggleOneVisibility = (value: boolean) => (e: React.MouseEvent) => {

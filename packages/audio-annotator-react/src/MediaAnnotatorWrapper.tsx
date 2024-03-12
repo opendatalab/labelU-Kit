@@ -18,14 +18,14 @@ import type {
   AudioAnnotationType,
   AudioAnnotationInUI,
 } from '@labelu/interface';
-import type { MediaAnnotatorRef } from '@labelu/components-react';
+import type { EditType, MediaAnnotatorRef } from '@labelu/components-react';
 import { useRedoUndo } from '@labelu/components-react';
 import '@labelu/components-react/dist/style.css';
 import cloneDeep from 'lodash.clonedeep';
 
 import Sidebar from './Sidebar';
 import { AttributePanel } from './AttributePanel';
-import { LabelSection } from './LabelSection';
+import { LabelSection, openAttributeModal } from './LabelSection';
 import { AnnotatorToolbar } from './Toolbar';
 import { HistoryContext } from './context/history.context';
 import { ToolContext } from './context/tool.context';
@@ -126,6 +126,9 @@ export interface MediaPlayerProps {
   editingLabel?: string;
   /** 标注列表 */
   annotations: AudioAnnotationInUI[];
+
+  preAnnotationLabels?: MediaAnnotatorConfig;
+
   /** 是否禁用 */
   disabled?: boolean;
   /** 标注工具配置 */
@@ -160,6 +163,16 @@ export interface MediaPlayerProps {
    * @param e 事件，需要根据鼠标事件中的位置来控制标签属性表单弹框的显示位置；当通过快捷键结束标注时，e为undefined，此时弹框显示在默认位置。
    */
   onAnnotateEnd?: (annotation: AudioAnnotationInUI, e?: MouseEvent) => void;
+  /**
+   * 编辑前的确认
+   */
+  requestEdit?: (
+    type: EditType,
+    payload: {
+      toolName: 'segment' | 'frame' | undefined;
+      label?: string;
+    },
+  ) => boolean;
 }
 
 export interface AnnotatorProps {
@@ -180,6 +193,14 @@ export interface AnnotatorProps {
   preAnnotationLabels?: MediaAnnotatorConfig;
 
   preAnnotations?: AnnotationsWithGlobal;
+
+  requestEdit?: (
+    type: EditType,
+    payload: {
+      toolName: 'segment' | 'frame' | undefined;
+      label?: string;
+    },
+  ) => boolean;
 }
 
 export interface AnnotatorWrapperProps extends AnnotatorProps {
@@ -200,6 +221,7 @@ function ForwardAnnotator(
     toolbarRight,
     preAnnotationLabels,
     preAnnotations,
+    requestEdit,
     children,
   }: AnnotatorWrapperProps,
   ref: React.Ref<AudioAndVideoAnnotatorRef>,
@@ -210,6 +232,9 @@ function ForwardAnnotator(
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
   const selectedIndexRef = useRef<number>(-1);
+  const isSampleDataEmpty = useMemo(() => {
+    return Object.values(currentSample?.data ?? {}).every((item) => item.length === 0);
+  }, [currentSample]);
   const labels = useMemo(() => {
     if (!currentTool) {
       return [];
@@ -299,9 +324,12 @@ function ForwardAnnotator(
 
   // ================== sample state ==================
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
-    useRedoUndo<AnnotationsWithGlobal>(convertAnnotationDataToUI(annotationsFromSample), {
-      maxHistory: maxHistoryCount,
-    });
+    useRedoUndo<AnnotationsWithGlobal>(
+      convertAnnotationDataToUI(isSampleDataEmpty && preAnnotations ? preAnnotations : annotationsFromSample),
+      {
+        maxHistory: maxHistoryCount,
+      },
+    );
 
   // 重置历史记录
   useEffect(() => {
@@ -464,7 +492,7 @@ function ForwardAnnotator(
   const onAnnotationSelect = useCallback(
     (annotation: MediaAnnotationInUI) => {
       setSelectedAnnotation(annotation);
-      setSelectedLabel(labelMappingByTool[annotation.type][annotation.label!]);
+      setSelectedLabel(labelMappingByTool?.[annotation.type]?.[annotation.label!]);
       setCurrentTool(annotation.type);
       selectedIndexRef.current = sortedMediaAnnotations.findIndex((item) => item.id === annotation.id);
     },
@@ -482,14 +510,12 @@ function ForwardAnnotator(
         ..._annotation,
         attributes: defaultAttributes,
       });
-      document.dispatchEvent(
-        new CustomEvent('annotate-end', {
-          detail: {
-            annotation: _annotation,
-            mouseEvent: e,
-          },
-        }),
-      );
+
+      openAttributeModal({
+        labelValue: _annotation.label,
+        e,
+        labelConfig: labelMappingByTool[_annotation.type][_annotation.label],
+      });
     },
     [labelMappingByTool],
   );
@@ -665,13 +691,11 @@ function ForwardAnnotator(
 
         // 正在标注时变更标签，应该更新正在标注的片断
         if (playerRef.current && newAnnotation && !annotatorRef.current?.getAnnotatingSegment()) {
-          document.dispatchEvent(
-            new CustomEvent('annotate-end', {
-              detail: {
-                annotation: newAnnotation,
-              },
-            }),
-          );
+          playerRef.current.pause();
+          openAttributeModal({
+            labelValue: labels[index].value,
+            labelConfig: labels[index],
+          });
         }
       }
     },
@@ -710,13 +734,39 @@ function ForwardAnnotator(
     return typeof renderAttributes === 'function' ? renderAttributes() : <AttributePanel />;
   }, [renderAttributes]);
 
-  const toolConfig = useMemo(
-    () => ({
-      segment: config?.segment ?? ([] as Attribute[]),
-      frame: config?.frame ?? ([] as Attribute[]),
-    }),
-    [config?.frame, config?.segment],
-  );
+  const toolConfig = useMemo(() => {
+    const segmentLabels: Attribute[] = [];
+    const frameLabels: Attribute[] = [];
+
+    if (config?.segment) {
+      segmentLabels.push(...config.segment);
+    }
+
+    if (config?.frame) {
+      frameLabels.push(...config.frame);
+    }
+
+    if (preAnnotationLabels?.segment) {
+      preAnnotationLabels?.segment.forEach((item) => {
+        if (!segmentLabels.find((i) => i.value === item.value)) {
+          segmentLabels.push(item);
+        }
+      });
+    }
+
+    if (preAnnotationLabels?.frame) {
+      preAnnotationLabels?.frame.forEach((item) => {
+        if (!frameLabels.find((i) => i.value === item.value)) {
+          frameLabels.push(item);
+        }
+      });
+    }
+
+    return {
+      segment: segmentLabels,
+      frame: frameLabels,
+    };
+  }, [config?.frame, config?.segment, preAnnotationLabels?.frame, preAnnotationLabels?.segment]);
 
   const onMediaLoad = useCallback(() => {
     annotatorRef.current?.updateTime(0);
@@ -771,6 +821,7 @@ function ForwardAnnotator(
       labelMapping: labelMappingByTool,
       containerRef,
       globalToolConfig,
+      requestEdit,
       config,
       tools,
       labels,
@@ -784,6 +835,7 @@ function ForwardAnnotator(
     onToolChange,
     onAttributeChange,
     labelMappingByTool,
+    requestEdit,
     globalToolConfig,
     config,
     tools,
@@ -829,7 +881,9 @@ function ForwardAnnotator(
                     src: currentSample.url,
                     editingType: currentTool,
                     selectedAnnotation,
-                    annotations: sortedMediaAnnotations as unknown as MediaAnnotationInUI[],
+                    annotations: sortedMediaAnnotations,
+                    requestEdit,
+                    preAnnotationLabels,
                     toolConfig,
                     onChange: onAnnotationChange,
                     onAdd: onAnnotationAdd,

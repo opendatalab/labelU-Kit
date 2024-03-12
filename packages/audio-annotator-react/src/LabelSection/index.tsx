@@ -1,8 +1,8 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { createRef, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
 import { DraggableModel, AttributeForm, EllipsisText } from '@labelu/components-react';
-import type { VideoAnnotationData, VideoFrameAnnotation, VideoSegmentAnnotation, Attribute } from '@labelu/interface';
+import type { Attribute } from '@labelu/interface';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
@@ -89,6 +89,43 @@ const LabelWrapper = styled.div<{ color: string; active: boolean }>`
   }
 `;
 
+export interface AttributeModalOpenParams {
+  labelValue: string | undefined;
+  e?: MouseEvent | React.MouseEvent;
+  labelConfig?: Attribute;
+
+  /** 无论是否有标签属性，都打开编辑弹框 */
+  openModalAnyway?: boolean;
+}
+
+export const dragModalRef = createRef<DraggableModalRef>();
+
+export const openAttributeModal = ({ labelValue, e, labelConfig, openModalAnyway }: AttributeModalOpenParams) => {
+  if (!dragModalRef.current || !labelValue || !labelConfig) {
+    return;
+  }
+
+  // 点击编辑属性时，不管有没有标签属性，都打开编辑框，用来编辑标签
+  if (!openModalAnyway && !labelConfig.attributes) {
+    return;
+  }
+
+  dragModalRef.current.toggleVisibility(true);
+
+  if (e) {
+    dragModalRef.current.setPosition({
+      x: e.pageX + 10 + 330,
+      y: e.pageY + 10,
+    });
+  } else {
+    // 通过快捷键设置属性打开属性编辑框，默认位置为顶部居中
+    dragModalRef.current.setPosition({
+      x: window.innerWidth / 2 - 330 / 2,
+      y: 160,
+    });
+  }
+};
+
 function LabelItem({
   children,
   attribute,
@@ -113,106 +150,23 @@ function LabelItem({
 }
 
 export function LabelSection() {
-  const { selectedLabel, player, labelMapping, containerRef, onLabelChange, labels, onAttributeChange } = useTool();
-  const { selectedAnnotation, onAnnotationSelect } = useAnnotationCtx();
+  const { selectedLabel, player, onLabelChange, labels, onAttributeChange } = useTool();
+  const { selectedAnnotation } = useAnnotationCtx();
   const validationRef = useRef<ValidationContextType | null>(null);
-  const dragModalRef = useRef<DraggableModalRef | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
   const handleSelect = (attribute: Attribute, e: React.MouseEvent) => {
     onLabelChange(attribute);
 
-    if (
-      !dragModalRef.current ||
-      !selectedAnnotation ||
-      !labelMapping[selectedAnnotation.type][attribute.value]?.attributes?.length
-    ) {
-      return;
-    }
-
     player.pause();
 
-    const rect = e.currentTarget.getBoundingClientRect();
-
-    dragModalRef.current.toggleVisibility(true);
-    dragModalRef.current.setPosition({
-      x: rect.left + 10 + 330,
-      y: rect.top + 10 + rect.height,
+    openAttributeModal({
+      labelValue: attribute.value,
+      labelConfig: attribute,
+      e,
     });
   };
-
-  useEffect(() => {
-    const handleAnnotateEnd = (
-      e: CustomEvent<{
-        annotation: VideoAnnotationData;
-        mouseEvent?: MouseEvent;
-      }>,
-    ) => {
-      const { annotation } = e.detail;
-
-      if (
-        !dragModalRef.current ||
-        !annotation ||
-        !labelMapping[annotation.type][annotation.label]?.attributes?.length
-      ) {
-        return;
-      }
-
-      dragModalRef.current.toggleVisibility(true);
-
-      if (containerRef.current) {
-        const duration = player.getDuration();
-        const timePercentage =
-          ((annotation as VideoSegmentAnnotation).end || (annotation as VideoFrameAnnotation).time || 0) / duration;
-        const offset = timePercentage * containerRef.current.clientWidth;
-        dragModalRef.current.setPosition({
-          x: offset + 230,
-          y: containerRef.current.clientHeight - 136,
-        });
-      }
-
-      // 标记结束后暂停播放，填完属性后再播放
-      player.pause();
-    };
-
-    document.addEventListener('annotate-end', handleAnnotateEnd as EventListener);
-
-    return () => {
-      document.removeEventListener('annotate-end', handleAnnotateEnd as EventListener);
-    };
-  }, [containerRef, labelMapping, player]);
-
-  useEffect(() => {
-    const handleAttributeEdit = (
-      e: CustomEvent<{
-        annotation: VideoAnnotationData;
-        mouseEvent?: MouseEvent;
-      }>,
-    ) => {
-      const { annotation, mouseEvent } = e.detail;
-
-      if (!dragModalRef.current || !annotation || !labelMapping[annotation.type][annotation.label]) {
-        return;
-      }
-
-      player.pause();
-
-      // 打开属性编辑框
-      dragModalRef.current.toggleVisibility(true);
-
-      dragModalRef.current.setPosition({
-        x: (mouseEvent?.clientX || 0) - 200,
-        y: mouseEvent?.clientY || 0,
-      });
-    };
-
-    document.addEventListener('annotation-attribute-edit', handleAttributeEdit as EventListener);
-
-    return () => {
-      document.removeEventListener('annotation-attribute-edit', handleAttributeEdit as EventListener);
-    };
-  }, [labelMapping, onAnnotationSelect, player]);
 
   const handleModalClose = async () => {
     if (!dragModalRef.current || !validationRef.current) {
