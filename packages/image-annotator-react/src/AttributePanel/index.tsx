@@ -449,8 +449,6 @@ export function AttributePanel() {
     [imageAnnotationsGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
 
-  console.log(flatGlobalAnnotations);
-
   return (
     <Wrapper collapsed={collapsed}>
       <TabHeader className="attribute-header">
