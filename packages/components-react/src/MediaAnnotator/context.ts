@@ -32,7 +32,16 @@ export interface MediaAnnotationContextType {
   playingAnnotationIds: string[];
   setCurrentTime: (time: number) => void;
   getCurrentTime: () => number;
+  requestEdit?: (
+    type: EditType,
+    payload: {
+      toolName: 'segment' | 'frame' | undefined;
+      label?: string;
+    },
+  ) => boolean;
 }
+
+export type EditType = 'create' | 'update' | 'delete';
 
 export const MediaAnnotationContext = createContext<MediaAnnotationContextType>({} as MediaAnnotationContextType);
 

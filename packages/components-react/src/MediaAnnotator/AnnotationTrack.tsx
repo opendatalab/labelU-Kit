@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import type { VideoAnnotationData, Attribute, AudioAnnotationData, MediaAnnotationInUI } from '@labelu/interface';
-import { useContext, useRef } from 'react';
+import { useRef } from 'react';
 
-import { MediaAnnotationContext } from './context';
+import { useMediaAnnotator } from './context';
 import { AnnotationItem } from './AnnotationBar';
 
 const Wrapper = styled.div`
@@ -35,8 +35,7 @@ export interface AnnotationTrackProps {
 }
 
 export function AnnotationTrack({ annotations }: AnnotationTrackProps) {
-  const { selectAnnotation, attributeConfigMapping, selectedAnnotation, playingAnnotationIds } =
-    useContext(MediaAnnotationContext);
+  const { selectAnnotation, attributeConfigMapping, selectedAnnotation, playingAnnotationIds } = useMediaAnnotator();
   const barWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const handleAnnotationClick = (_annotation: MediaAnnotationData) => (e: React.MouseEvent) => {
