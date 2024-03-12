@@ -47,11 +47,27 @@ function addToolNameToAnnotationData(item: AnnotationData, toolName: ToolName) {
   };
 }
 
-function convertAnnotationDataToUI(datas: Record<string, AnnotationData[]>) {
-  const result: Record<string, AnnotationDataInUI[]> = {};
+function pick<T extends Record<string, any>, K extends keyof T>(
+  obj: T | undefined,
+  keys: K[],
+  defaultValue: T,
+  itemDefaultValue?: any,
+): NonNullable<Pick<T, K>> {
+  if (!obj) {
+    return defaultValue;
+  }
+
+  return keys.reduce((acc, key) => {
+    acc[key] = obj[key] ?? itemDefaultValue;
+    return acc;
+  }, {} as T);
+}
+
+function convertAnnotationDataToUI(datas: Partial<Record<ToolName, AnnotationData[]>>) {
+  const result: Partial<Record<ToolName, AnnotationDataInUI[]>> = {};
 
   Object.keys(datas).forEach((key) => {
-    result[key as ToolName] = datas[key as ToolName].map((item) => {
+    result[key as ToolName] = datas[key as ToolName]?.map((item) => {
       return {
         ...item,
         tool: key as ToolName,
@@ -97,8 +113,10 @@ const AnnotationContainer = styled.div`
   height: auto !important;
 `;
 
+export type { ImageAnnotatorOptions } from './hooks/useImageAnnotator';
+
 export interface AnnotatorRef {
-  getAnnotations: () => Record<ToolName, AnnotationData[]> | undefined;
+  getAnnotations: () => Partial<Record<ToolName, AnnotationData[]>> | undefined;
   getGlobalAnnotations: () => Record<TextAnnotationType | TagAnnotationType, GlobalAnnotation[]>;
   getSample: () => ImageSample | undefined;
 
@@ -173,6 +191,10 @@ function ForwardAnnotator(
   useEffect(() => {
     setCurrentSample(editingSample || samples?.[0]);
   }, [editingSample, samples, setCurrentSample]);
+
+  const isSampleDataEmpty = useMemo(() => {
+    return Object.values(currentSample?.data ?? {}).every((item) => item.length === 0);
+  }, [currentSample]);
 
   // ================== tool ==================
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -285,20 +307,22 @@ function ForwardAnnotator(
           }
         });
 
-        Object.keys(preAnnotations ?? {}).forEach((key) => {
-          if (TOOL_NAMES.includes(key as ToolName)) {
-            engine?.loadData(
-              key as ToolName,
-              preAnnotations![key as ToolName] as unknown as AnnotationToolData<ToolName>,
-            );
-          }
-        });
+        if (isSampleDataEmpty) {
+          Object.keys(preAnnotations ?? {}).forEach((key) => {
+            if (TOOL_NAMES.includes(key as ToolName)) {
+              engine?.loadData(
+                key as ToolName,
+                preAnnotations![key as ToolName] as unknown as AnnotationToolData<ToolName>,
+              );
+            }
+          });
+        }
 
         if (tools[0] && config?.[tools[0]]?.labels?.length) {
           engine.switch(tools[0]);
         }
       });
-  }, [annotationsFromSample, config, currentSample, engine, preAnnotations, tools]);
+  }, [annotationsFromSample, config, currentSample, engine, isSampleDataEmpty, preAnnotations, tools]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -317,16 +341,23 @@ function ForwardAnnotator(
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
     useRedoUndo<AnnotationsWithGlobal>(
       {
-        image: convertAnnotationDataToUI({
-          line: annotationsFromSample.line ?? [],
-          rect: annotationsFromSample.rect ?? [],
-          polygon: annotationsFromSample.polygon ?? [],
-          point: annotationsFromSample.point ?? [],
-          cuboid: annotationsFromSample.cuboid ?? [],
-        }),
+        image: convertAnnotationDataToUI(
+          isSampleDataEmpty
+            ? (pick(preAnnotations, Array.from(TOOL_NAMES) as ToolName[], {}, []) as AnnotationsWithGlobal['image'])
+            : (pick(
+                annotationsFromSample,
+                Array.from(TOOL_NAMES) as ToolName[],
+                {},
+                [],
+              ) as AnnotationsWithGlobal['image']),
+        ),
         global: {
-          text: annotationsFromSample.text ?? [],
-          tag: annotationsFromSample.tag ?? [],
+          text: isSampleDataEmpty
+            ? ((preAnnotations?.text ?? []) as GlobalAnnotation[])
+            : annotationsFromSample.text ?? [],
+          tag: isSampleDataEmpty
+            ? ((preAnnotations?.tag ?? []) as GlobalAnnotation[])
+            : annotationsFromSample.tag ?? [],
         },
       },
       {
@@ -388,7 +419,7 @@ function ForwardAnnotator(
     const result: AnnotationDataInUI[] = [];
 
     Object.keys(annotationsWithGlobal.image).forEach((key) => {
-      result.push(...annotationsWithGlobal.image[key as ToolName]);
+      result.push(...(annotationsWithGlobal.image[key as ToolName] ?? []));
     });
 
     return result.sort((a, b) => a.order - b.order);
@@ -400,7 +431,7 @@ function ForwardAnnotator(
         const preImageAnnotations = { ...pre!.image };
 
         _annotations.forEach((item) => {
-          preImageAnnotations[item.tool] = preImageAnnotations[item.tool].map((annotation) => {
+          preImageAnnotations[item.tool] = preImageAnnotations[item.tool]?.map((annotation) => {
             if (annotation.id === item.id) {
               return item;
             }
@@ -439,7 +470,7 @@ function ForwardAnnotator(
 
       updateAnnotationsWithGlobal((pre) => {
         const preImageAnnotations = { ...pre!.image };
-        const toolAnnotations = preImageAnnotations[toolName].map((item) => {
+        const toolAnnotations = preImageAnnotations[toolName]?.map((item) => {
           if (_annotation.id === item.id) {
             return _annotation;
           }
@@ -617,19 +648,23 @@ function ForwardAnnotator(
 
   useEffect(() => {
     updateAnnotationsWithGlobal({
-      image: convertAnnotationDataToUI({
-        line: annotationsFromSample.line ?? [],
-        rect: annotationsFromSample.rect ?? [],
-        polygon: annotationsFromSample.polygon ?? [],
-        point: annotationsFromSample.point ?? [],
-        cuboid: annotationsFromSample.cuboid ?? [],
-      }),
+      image: convertAnnotationDataToUI(
+        isSampleDataEmpty
+          ? (pick(preAnnotations, Array.from(TOOL_NAMES) as ToolName[], {}, []) as AnnotationsWithGlobal['image'])
+          : (pick(
+              annotationsFromSample,
+              Array.from(TOOL_NAMES) as ToolName[],
+              {},
+              [],
+            ) as AnnotationsWithGlobal['image']),
+      ),
       global: {
         text: annotationsFromSample.text ?? [],
         tag: annotationsFromSample.tag ?? [],
       },
     });
   }, [
+    annotationsFromSample,
     annotationsFromSample.cuboid,
     annotationsFromSample.line,
     annotationsFromSample.point,
@@ -637,6 +672,8 @@ function ForwardAnnotator(
     annotationsFromSample.rect,
     annotationsFromSample.tag,
     annotationsFromSample.text,
+    isSampleDataEmpty,
+    preAnnotations,
     updateAnnotationsWithGlobal,
   ]);
 

@@ -112,7 +112,7 @@ export class Draft<
 
   private _handleMouseDown = (e: MouseEvent) => {
     // 如果鼠标落在控制点或者控制边上，不选中草稿
-    if (this._isControlUnderCursor({ x: e.offsetX, y: e.offsetY }) || !this.requestEdit('edit')) {
+    if (this._isControlUnderCursor({ x: e.offsetX, y: e.offsetY }) || !this.requestEdit('update')) {
       return;
     }
 

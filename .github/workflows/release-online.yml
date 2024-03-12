@@ -4,8 +4,8 @@ name: release-online
 
 env:
   LAB_NPM_TOKEN: ${{ secrets.LAB_NPM_TOKEN }}
-  # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # GH_TOKEN: ${{ secrets.GH_TOKEN }}
   VITE_SSO_CLIENT_ID: ${{ secrets.VITE_SSO_CLIENT_ID }}
   VITE_SSO_ORIGIN: ${{ secrets.VITE_SSO_ORIGIN }}
   GL_TRIGGER_TOKEN: ${{ secrets.GL_TRIGGER_TOKEN }}

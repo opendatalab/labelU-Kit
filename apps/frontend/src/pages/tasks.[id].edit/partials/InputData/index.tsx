@@ -16,14 +16,16 @@ import commonController from '@/utils/common';
 import NativeUpload from '@/components/NativeUpload';
 import { deleteFile } from '@/api/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
-import type { MediaType } from '@/api/types';
+import { MediaType } from '@/api/types';
 import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
 import type { TaskInLoader } from '@/loaders/task.loader';
 import { useUploadFileMutation } from '@/api/mutations/attachment';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
-import schema from './preAnnotationJsonl.schema.json';
+import imageSchema from './imagePreAnnotationJsonl.schema.json';
+import audioSchema from './audioPreAnnotationJsonl.schema.json';
+import videoSchema from './videoPreAnnotationJsonl.schema.json';
 
 export enum UploadStatus {
   Uploading = 'Uploading',
@@ -41,6 +43,12 @@ const statusTextMapping = {
   [UploadStatus.Error]: '解析失败',
 };
 
+const jsonlMapping = {
+  [MediaType.IMAGE]: imageSchema,
+  [MediaType.VIDEO]: videoSchema,
+  [MediaType.AUDIO]: audioSchema,
+};
+
 export interface QueuedFile {
   id?: number;
   url?: string;
@@ -50,6 +58,7 @@ export interface QueuedFile {
   status: UploadStatus;
   reason?: string;
   file: File;
+  completed?: boolean;
 }
 
 const readFile = async (file: File, type?: 'text') => {
@@ -159,14 +168,14 @@ const InputData = () => {
   }, [fileQueue]);
 
   const processUpload = useCallback(
-    async (files: QueuedFile[]) => {
+    async (files: QueuedFile[], mediaType: MediaType) => {
       // 开始上传
       setFileQueue((pre) => _.uniqBy([...pre, ...files], 'uid'));
       let succeed = 0;
       let failed = 0;
 
       const { Draft07 } = await import('json-schema-library');
-      const jsonSchema = new Draft07(schema);
+      const jsonSchema = new Draft07(jsonlMapping[mediaType]);
 
       for (const file of files) {
         const { file: fileBlob } = file;
@@ -264,7 +273,7 @@ const InputData = () => {
       commonController.notificationSuccessMessage({ message: '已添加' + files.length + '个文件至上传列表' }, 3);
     }
 
-    processUpload(normalizeFiles(files));
+    processUpload(normalizeFiles(files), task.media_type!);
   };
 
   const handleFileDelete = useCallback(
@@ -354,7 +363,7 @@ const InputData = () => {
                   type="link"
                   size="small"
                   onClick={() => {
-                    processUpload(fileQueue);
+                    processUpload(fileQueue, task.media_type!);
                   }}
                 >
                   重新上传
@@ -375,7 +384,7 @@ const InputData = () => {
         },
       },
     ] as TableColumnType<QueuedFile>[];
-  }, [fileQueue, handleFileDelete, processUpload]);
+  }, [fileQueue, handleFileDelete, processUpload, task.media_type]);
 
   return (
     <Wrapper flex="column" full>

@@ -14,7 +14,7 @@ import type { TaskResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import { createSamples, deleteSamples } from '@/api/services/samples';
 import { deleteFile, deleteTask } from '@/api/services/task';
-import { convertVideoConfig } from '@/utils/convertVideoConfig';
+import { convertAudioAndVideoConfig } from '@/utils/convertAudioAndVideoConfig';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 import { convertImageConfig } from '@/utils/convertImageConfig';
@@ -86,7 +86,6 @@ const CreateTask = () => {
   const searchParams = new URLSearchParams(location.search);
   const isCreateNewTask = searchParams.get('isNew') === 'true';
   const [isAnnotationFormValid, toggleAnnotationFormValidation] = useState<boolean>(true);
-  const attachmentsConnected = useRef<boolean>(false);
 
   const addTask = useAddTaskMutation();
   const updateTaskConfig = useUpdateTaskConfigMutation(taskId);
@@ -246,44 +245,41 @@ const CreateTask = () => {
       const jsonlFileList = [];
 
       for (const file of uploadFileList) {
-        if (file.file.name.endsWith('.jsonl')) {
-          jsonlFileList.push(file);
-        } else {
-          mediaFileList.push(file);
+        if (file.file.name.endsWith('.jsonl') && file.status === UploadStatus.Success && !file.completed) {
+          jsonlFileList.push({
+            file_id: file.id!,
+          });
+        } else if (file.status === UploadStatus.Success && !file.completed) {
+          mediaFileList.push({
+            file_id: file.id!,
+            data: {
+              result: '{}',
+            },
+          });
         }
       }
 
       if (isExistTask) {
-        if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList) && !attachmentsConnected.current) {
-          await createSamples(
-            taskId,
-            _.chain(mediaFileList)
-              .filter((item) => item.status === UploadStatus.Success)
-              .map((item) => {
-                return {
-                  file_id: item.id!,
-                  data: {
-                    result: '{}',
-                  },
-                };
-              })
-              .value(),
-          );
+        if (currentStep === StepEnum.Upload) {
+          if (!_.isEmpty(mediaFileList)) {
+            await createSamples(taskId, mediaFileList);
+          }
 
-          await createPreAnnotations(
-            taskId,
-            _.chain(jsonlFileList)
-              .filter((item) => item.status === UploadStatus.Success)
-              .map((item) => {
-                return {
-                  file_id: item.id!,
-                };
-              })
-              .value(),
-          );
+          if (!_.isEmpty(jsonlFileList)) {
+            await createPreAnnotations(taskId, jsonlFileList);
+          }
 
-          // 切换到其他步骤后，再切换回来，不会再次创建文件
-          attachmentsConnected.current = true;
+          setUploadFileList((prev) => {
+            return prev.map((item) => {
+              if (item.status === UploadStatus.Success) {
+                return {
+                  ...item,
+                  completed: true,
+                };
+              }
+              return item;
+            });
+          });
         }
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
@@ -551,7 +547,7 @@ const CreateTask = () => {
       let _config;
 
       if ([MediaType.VIDEO, MediaType.AUDIO].includes(taskData?.media_type)) {
-        _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
+        _config = convertAudioAndVideoConfig(annotationFormInstance.getFieldsValue());
       } else if (taskData?.media_type === MediaType.IMAGE) {
         _config = convertImageConfig(annotationFormInstance.getFieldsValue());
       }

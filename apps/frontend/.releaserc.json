@@ -18,7 +18,8 @@
     [
       "@semantic-release/github",
       {
-        "assets": [{ "path": "./*.zip", "label": "labelu-frontend-${nextRelease.version}.zip" }]
+        "assets": [{ "path": "./*.zip", "label": "labelu-frontend-${nextRelease.version}.zip" }],
+        "successComment": false
       }
     ],
     [

@@ -1,10 +1,13 @@
+import type { PropsWithChildren } from 'react';
 import React, { useCallback, useRef, useState } from 'react';
-import { secondsToMinute } from '@labelu/video-react';
+import type { StyledComponent } from 'styled-components';
 import styled, { css } from 'styled-components';
 
-import MediaError from '@/MediaError';
+import { secondsToMinute } from '@/utils';
 
+import MediaError from './Error';
 import { ReactComponent as PlayIcon } from './play.svg';
+import { StatusCard } from '../StatusCard';
 
 function DurationBar({ value = 0 }) {
   const volumeStyle = {
@@ -22,27 +25,26 @@ interface Size {
   height: number;
 }
 
-export interface VideoCardProps {
-  size?: Size;
-  src: string;
-  onClick?: (e: React.MouseEvent) => void;
-  className?: string;
-  style?: React.CSSProperties;
-  showPlayIcon?: boolean;
-  showDuration?: boolean;
-}
-
 export interface StyledVideoProps {
   isPlaying?: boolean;
+
   className?: string;
+
+  style?: React.CSSProperties;
+
+  onMouseOver?: (e: React.MouseEvent) => void;
+
+  onMouseLeave?: (e: React.MouseEvent) => void;
 }
 
 const videoClassName = 'labelu-video-card';
 
-export const StyledVideo = styled.div.attrs((props: StyledVideoProps) => ({
-  ...props,
-  className: `${videoClassName} ${props.className || ''}` as string,
-}))`
+export const StyledVideo: StyledComponent<'div', any, PropsWithChildren<StyledVideoProps>> = styled.div.attrs(
+  (props: StyledVideoProps) => ({
+    ...props,
+    className: `${videoClassName} ${props.className || ''}` as string,
+  }),
+)`
   position: relative;
   width: 100%;
   height: 100%;
@@ -144,6 +146,29 @@ export const StyledVideo = styled.div.attrs((props: StyledVideoProps) => ({
   }
 `;
 
+export interface VideoCardProps {
+  size?: Size;
+
+  showPlayIcon?: boolean;
+
+  showDuration?: boolean;
+
+  style?: React.CSSProperties;
+
+  className?: string;
+
+  active?: boolean;
+
+  completed?: boolean;
+
+  skipped?: boolean;
+
+  src: string;
+
+  title: React.ReactNode;
+
+  onClick?: () => void;
+}
 export function VideoCard({
   size = {} as Size,
   src,
@@ -152,6 +177,10 @@ export function VideoCard({
   showPlayIcon = true,
   showDuration = false,
   style = {},
+  completed,
+  title,
+  skipped,
+  active,
 }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [duration, setDuration] = useState<number>(0);
@@ -219,7 +248,6 @@ export function VideoCard({
         onTimeUpdate={handleTimeUpdate}
         preload="preload"
         onCanPlay={handleCanPlay}
-        onClick={onClick}
         onError={handleVideoError}
       />
       {showDuration && (
@@ -230,18 +258,20 @@ export function VideoCard({
       )}
     </>
   ) : (
-    <MediaError visible={!isVideoValid} />
+    <MediaError />
   );
 
   return (
-    <StyledVideo
-      isPlaying={isPlaying}
-      className={className}
-      style={cardStyle}
-      onMouseOver={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {bodyNodes}
-    </StyledVideo>
+    <StatusCard completed={completed} active={active} skipped={skipped} onClick={onClick} title={title}>
+      <StyledVideo
+        isPlaying={isPlaying}
+        className={className}
+        style={cardStyle}
+        onMouseOver={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {bodyNodes}
+      </StyledVideo>
+    </StatusCard>
   );
 }

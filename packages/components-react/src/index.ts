@@ -5,6 +5,8 @@ export * from './Divider';
 export * from './Toolbar';
 export * from './Tooltip';
 export * from './EllipsisText';
+export * from './StatusCard';
+export * from './VideoCard';
 export * from './AttributeTree';
 export * from './HotkeyPanel';
 export * from './HotkeyTable';

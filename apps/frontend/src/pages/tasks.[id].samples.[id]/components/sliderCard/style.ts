@@ -88,7 +88,6 @@ export const AudioWrapper = styled(FlexLayout)`
   overflow: hidden;
   margin-bottom: 10px;
   align-items: center;
-  width: 200px;
   cursor: pointer;
   border-radius: 3px;
 `;

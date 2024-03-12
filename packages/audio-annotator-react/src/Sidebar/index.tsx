@@ -3,8 +3,7 @@ import styled, { css } from 'styled-components';
 import { AudioCard } from '@labelu/components-react';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
-
-import { useAnnotator } from '../context';
+import { useSample } from '@/context/sample.context';
 
 const Cards = styled.div`
   display: flex;
@@ -22,8 +21,11 @@ const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
 }))`
   position: relative;
   background-color: #fff;
+  flex-shrink: 0;
+  padding: 0 1rem;
+  box-sizing: border-box;
 
-  ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 232px;')}
+  ${({ collapsed }) => (collapsed ? 'width: 0; padding: 0;' : 'width: 232px;')}
 
   ${Cards} {
     ${({ collapsed }) => (collapsed ? 'display: none;' : 'display: flex;')}
@@ -63,7 +65,7 @@ export interface SidebarProps {
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
-  const { samples, currentSample, handleSelectSample } = useAnnotator();
+  const { samples, currentSample, onSampleSelect } = useSample();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
   const handleExpandTriggerClick = useCallback(() => {
@@ -83,7 +85,7 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
                 no={index + 1}
                 showNo
                 active={currentSample?.id === sample.id}
-                onClick={() => handleSelectSample(sample)}
+                onClick={() => onSampleSelect(sample)}
                 src={sample.url}
                 title={sample.name}
               />

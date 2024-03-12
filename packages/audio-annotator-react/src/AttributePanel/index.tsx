@@ -4,15 +4,18 @@ import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText, uid
 import type {
   EnumerableAttribute,
   GlobalAnnotationType,
+  MediaAnnotationInUI,
   TagAnnotationEntity,
   TextAnnotationEntity,
   TextAttribute,
-  VideoAnnotationData,
 } from '@labelu/interface';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
+import { useTool } from '@/context/tool.context';
+import type { GlobalAnnotation } from '@/context/annotation.context';
+import { useAnnotationCtx } from '@/context/annotation.context';
+import { useSample } from '@/context/sample.context';
 
-import { useAnnotator } from '../context';
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
 const Wrapper = styled.div<{ collapsed: boolean }>`
@@ -20,6 +23,7 @@ const Wrapper = styled.div<{ collapsed: boolean }>`
   overflow: auto;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 
   ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 280px;')}
 `;
@@ -96,65 +100,122 @@ const Footer = styled.div`
 type HeaderType = 'global' | 'label';
 
 export function AttributePanel() {
+  const { config, labelMapping, preLabelMapping } = useTool();
+  const { currentSample } = useSample();
   const {
-    config,
-    currentSample,
-    onAnnotationsChange,
-    annotationsMapping,
-    onAnnotationsRemove,
-    annotations,
+    annotationsWithGlobal,
+    allAnnotationsMapping,
     selectedAnnotation,
-    attributeMapping,
-  } = useAnnotator();
+    preAnnotationsWithGlobal,
+    onAnnotationsChange,
+    onGlobalAnnotationClear,
+    onMediaAnnotationClear,
+  } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
-  const { globalAnnotations, videoAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
-    const _globalAnnotations: (TextAnnotationEntity | TagAnnotationEntity)[] = [];
-    currentSample?.annotations.forEach((item) => {
-      if (['tag', 'text'].includes(item.type)) {
-        _globalAnnotations.push(item as TextAnnotationEntity | TagAnnotationEntity);
+  const {
+    globalAnnotations,
+    globalAnnotationsWithPreAnnotation,
+    mediaAnnotations,
+    preMediaAnnotationGroup,
+    mediaAnnotationGroup,
+    defaultActiveKeys,
+  } = useMemo(() => {
+    const mediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
+    const _mediaAnnotations = [...(annotationsWithGlobal?.segment ?? []), ...(annotationsWithGlobal?.frame ?? [])];
+    const _globalAnnotations = [...(annotationsWithGlobal?.tag ?? []), ...(annotationsWithGlobal?.text ?? [])];
+    const _globalAnnotationsWithPreAnnotation = [..._globalAnnotations];
+    const preMediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
+    const preMediaAnnotations = [
+      ...(preAnnotationsWithGlobal?.segment ?? []),
+      ...(preAnnotationsWithGlobal?.frame ?? []),
+    ] as MediaAnnotationInUI[];
+
+    if (!_globalAnnotations.length) {
+      [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
+        if (values) {
+          _globalAnnotationsWithPreAnnotation.push(...(values as GlobalAnnotation[]));
+        }
+      });
+    }
+
+    for (const item of _mediaAnnotations) {
+      if (!mediaAnnotationGroupByLabel.has(item.label)) {
+        mediaAnnotationGroupByLabel.set(item.label, []);
       }
-    });
 
-    const videoAnnotationsGroupByLabel = new Map<string, VideoAnnotationData[]>();
+      mediaAnnotationGroupByLabel?.get(item.label)?.push(item);
+    }
 
-    for (const item of annotations) {
-      if (!videoAnnotationsGroupByLabel.has(item.label)) {
-        videoAnnotationsGroupByLabel.set(item.label, []);
+    for (const item of preMediaAnnotations) {
+      if (!preMediaAnnotationGroupByLabel.has(item.label)) {
+        preMediaAnnotationGroupByLabel.set(item.label, []);
       }
 
-      videoAnnotationsGroupByLabel?.get(item.label)?.push(item);
+      preMediaAnnotationGroupByLabel?.get(item.label)?.push(item);
     }
 
     return {
       globalAnnotations: _globalAnnotations,
-      videoAnnotationsGroup: videoAnnotationsGroupByLabel,
-      defaultActiveKeys: Array.from(videoAnnotationsGroupByLabel.keys()),
+      globalAnnotationsWithPreAnnotation: _globalAnnotationsWithPreAnnotation,
+      mediaAnnotations: _mediaAnnotations,
+      preMediaAnnotationGroup: preMediaAnnotationGroupByLabel,
+      mediaAnnotationGroup: mediaAnnotationGroupByLabel,
+      defaultActiveKeys: Array.from(mediaAnnotationGroupByLabel.keys()),
     };
-  }, [currentSample?.annotations, annotations]);
+  }, [
+    annotationsWithGlobal?.segment,
+    annotationsWithGlobal?.frame,
+    annotationsWithGlobal?.tag,
+    annotationsWithGlobal?.text,
+    preAnnotationsWithGlobal?.segment,
+    preAnnotationsWithGlobal?.frame,
+    preAnnotationsWithGlobal?.tag,
+    preAnnotationsWithGlobal?.text,
+  ]);
 
   const globals = useMemo(() => {
     const _globals: (TextAttribute | EnumerableAttribute)[] = [];
 
-    if (!config) {
-      return _globals;
-    }
-
-    if (config.tag) {
+    if (config?.tag) {
       _globals.push(...config.tag);
     }
 
-    if (config.text) {
+    if (config?.text) {
       _globals.push(...config.text);
     }
 
+    // 预标注的文本和分类需要跟用户配置合并且根据其value去重
+    if (!annotationsWithGlobal?.tag?.length) {
+      Object.values(preLabelMapping?.tag ?? {})?.forEach((item) => {
+        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+          _globals.push({ ...item, disabled: true } as EnumerableAttribute);
+        }
+      });
+    }
+
+    if (!annotationsWithGlobal?.text?.length) {
+      Object.values(preLabelMapping?.text ?? {})?.forEach((item) => {
+        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+          _globals.push({ ...item, disabled: true } as TextAttribute);
+        }
+      });
+    }
+
     return _globals;
-  }, [config]);
+  }, [
+    annotationsWithGlobal?.tag?.length,
+    annotationsWithGlobal?.text?.length,
+    config?.tag,
+    config?.text,
+    preLabelMapping?.tag,
+    preLabelMapping?.text,
+  ]);
 
   const titles = useMemo(() => {
     const _titles = [];
     // 将文本描述和标签分类合并成全局配置
-    if (config?.tag || config?.text) {
+    if (config?.tag || config?.text || preLabelMapping.tag || preLabelMapping.text) {
       let isCompleted = false;
 
       const globalAnnotationMapping = globalAnnotations.reduce((acc, item) => {
@@ -164,7 +225,7 @@ export function AttributePanel() {
       }, {} as Record<string, TextAnnotationEntity | TagAnnotationEntity>);
 
       /** 如果所有的文本描述都是必填的，那么只要有一个不存在，那么就是未完成  */
-      isCompleted = [...(config.text ?? []), ...(config.tag ?? [])]
+      isCompleted = [...(config?.text ?? []), ...(config?.tag ?? [])]
         .filter((item) => item.required)
         .every((item) => globalAnnotationMapping[item.value]?.value?.[item.value]);
 
@@ -176,15 +237,30 @@ export function AttributePanel() {
     }
 
     if (config?.segment || config?.frame) {
+      const flatPreMediaAnnotations = Array.from(preMediaAnnotationGroup.values()).reduce((acc, item) => {
+        acc.push(...item);
+        return acc;
+      }, []);
+
       _titles.push({
         title: '标记',
         key: 'label' as const,
-        subtitle: `${annotations.length}条`,
+        subtitle: `${mediaAnnotations.length || flatPreMediaAnnotations.length}条`,
       });
     }
 
     return _titles;
-  }, [config?.frame, config?.segment, config?.tag, config?.text, globalAnnotations, annotations.length]);
+  }, [
+    config?.tag,
+    config?.text,
+    config?.segment,
+    config?.frame,
+    preLabelMapping.tag,
+    preLabelMapping.text,
+    globalAnnotations,
+    mediaAnnotations.length,
+    preMediaAnnotationGroup,
+  ]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
   useEffect(() => {
@@ -219,7 +295,7 @@ export function AttributePanel() {
           continue;
         }
 
-        if (item.id && item.id in annotationsMapping) {
+        if (item.id && item.id in allAnnotationsMapping) {
           existAnnotations.push(item);
         } else {
           newAnnotations.push({
@@ -232,7 +308,7 @@ export function AttributePanel() {
     }
 
     const _annotations =
-      currentSample?.annotations.map((item) => {
+      mediaAnnotations.map((item) => {
         const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
         if (existIndex >= 0) {
           return existAnnotations[existIndex];
@@ -249,46 +325,52 @@ export function AttributePanel() {
     }
 
     if (activeKey === 'global') {
-      onAnnotationsRemove(globalAnnotations);
+      onGlobalAnnotationClear();
     } else {
-      onAnnotationsRemove(annotations);
+      onMediaAnnotationClear();
     }
   };
 
   const collapseItems = useMemo(
     () =>
-      Array.from(videoAnnotationsGroup).map(([label, _annotations]) => {
-        const found = attributeMapping[_annotations[0].type]?.[label];
-        const labelText = found ? found?.key ?? '无标签' : '无标签';
+      Array.from(mediaAnnotationGroup.size > 0 ? mediaAnnotationGroup : preMediaAnnotationGroup).map(
+        ([label, _annotations]) => {
+          const found = labelMapping[_annotations[0].type]?.[label] ?? preLabelMapping?.[_annotations[0].type]?.[label];
+          const labelText = found ? found?.key ?? '无标签' : '无标签';
 
-        return {
-          label: (
-            <Header>
-              <EllipsisText maxWidth={180} title={labelText}>
-                <div>{labelText}</div>
-              </EllipsisText>
+          return {
+            label: (
+              <Header>
+                <EllipsisText maxWidth={180} title={labelText}>
+                  <div>{labelText}</div>
+                </EllipsisText>
 
-              <AttributeAction annotations={_annotations} showEdit={false} />
-            </Header>
-          ),
-          key: label,
-          children: (
-            <AsideWrapper>
-              {_annotations.map((item) => (
-                <AsideAttributeItem
-                  key={item.id}
-                  active={item.id === selectedAnnotation?.id}
-                  order={item.order}
-                  annotation={item}
-                  labelText={attributeMapping[item.type]?.[label]?.key ?? '无标签'}
-                  color={attributeMapping[item.type]?.[label]?.color ?? '#999'}
-                />
-              ))}
-            </AsideWrapper>
-          ),
-        };
-      }),
-    [attributeMapping, selectedAnnotation?.id, videoAnnotationsGroup],
+                <AttributeAction annotations={_annotations} showEdit={false} />
+              </Header>
+            ),
+            key: label,
+            children: (
+              <AsideWrapper>
+                {_annotations.map((item) => {
+                  const labelOfAnnotation = labelMapping[item.type]?.[label] ?? preLabelMapping?.[item.type]?.[label];
+
+                  return (
+                    <AsideAttributeItem
+                      key={item.id}
+                      active={item.id === selectedAnnotation?.id}
+                      order={item.order}
+                      annotation={item}
+                      labelText={labelOfAnnotation?.key ?? '无标签'}
+                      color={labelOfAnnotation?.color ?? '#999'}
+                    />
+                  );
+                })}
+              </AsideWrapper>
+            ),
+          };
+        },
+      ),
+    [mediaAnnotationGroup, preMediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
 
   return (
@@ -310,7 +392,7 @@ export function AttributePanel() {
       </TabHeader>
       <Content activeKey={activeKey}>
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
-        <AttributeTree data={globalAnnotations} config={globals} onChange={handleOnChange} />
+        <AttributeTree data={globalAnnotationsWithPreAnnotation} config={globals} onChange={handleOnChange} />
       </Content>
       <Footer onClick={handleClear}>
         <DeleteIcon />

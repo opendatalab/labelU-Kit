@@ -165,7 +165,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
         const edge = new ControllerEdge({
           id: uid(),
           name: edgeCoordinates[i].name,
-          disabled: !this.requestEdit('edit'),
+          disabled: !this.requestEdit('update'),
           coordinate: cloneDeep(edgeCoordinates[i].coordinate) as LineCoordinate,
           style: {
             ...style,
@@ -215,7 +215,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
         id: uid(),
         name: controllerCoordinates[i].name,
         outOfImage: this.config.outOfImage,
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         coordinate: cloneDeep(controllerCoordinates[i].coordinate),
       });
 

@@ -1,14 +1,11 @@
-import React from 'react';
 import { useParams } from 'react-router';
-import { VideoCard } from '@labelu/video-annotator-react';
-import { AudioCard } from '@labelu/components-react';
+import { VideoCard, AudioCard } from '@labelu/components-react';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
-// import checkIconUrl from '@/assets/png/check.png';
 import { ReactComponent as CheckSvgIcon } from '@/assets/svg/check.svg';
 
-import { AudioWrapper, CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
+import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
 
 function CheckIcon() {
   return (
@@ -43,13 +40,31 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
 
   if (type === MediaType.AUDIO) {
     return (
-      <AudioWrapper flex="column" items="stretch" justify="center" onClick={() => handleOnClick(cardInfo)}>
-        {type === MediaType.AUDIO && (
-          <AudioCard src={url!} active={id === sampleId} title={filename} no={index! + 1} showNo />
-        )}
-        {state === 'DONE' && <CheckIcon />}
-        {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
-      </AudioWrapper>
+      <AudioCard
+        src={url!}
+        active={id === sampleId}
+        onClick={() => handleOnClick(cardInfo)}
+        title={filename}
+        no={index! + 1}
+        showNo
+        completed={state === 'DONE'}
+        skipped={state === 'SKIPPED'}
+      />
+    );
+  }
+
+  if (type === MediaType.VIDEO) {
+    return (
+      <VideoCard
+        src={url!}
+        title={id}
+        active={id === sampleId}
+        onClick={() => handleOnClick(cardInfo)}
+        showPlayIcon
+        showDuration
+        completed={state === 'DONE'}
+        skipped={state === 'SKIPPED'}
+      />
     );
   }
 
@@ -63,7 +78,6 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
         onClick={() => handleOnClick(cardInfo)}
       >
         {type === MediaType.IMAGE && <img src={url} alt="" />}
-        {type === MediaType.VIDEO && <VideoCard src={url!} showPlayIcon showDuration />}
         {state === 'DONE' && <CheckIcon />}
         {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
       </ContentWrapper>

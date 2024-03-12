@@ -3,6 +3,7 @@ import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import { scheduleAnnotationTrack, throttle, uid } from '../utils';
+import type { EditType } from './context';
 import { useMediaAnnotator } from './context';
 import { AnnotationTrack } from './AnnotationTrack';
 import { AnnotationItem } from './AnnotationBar';
@@ -17,6 +18,13 @@ export interface MediaAnnotatorProps {
   label?: string;
   updateCurrentTime: (time: number) => void;
   getCurrentTime: () => number;
+  requestEdit?: (
+    type: EditType,
+    payload: {
+      toolName: 'segment' | 'frame' | undefined;
+      label?: string;
+    },
+  ) => boolean;
 }
 
 export interface MediaAnnotatorRef {
@@ -29,7 +37,7 @@ export interface MediaAnnotatorRef {
 }
 
 export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>(function ForwardRefAnnotator(
-  { disabled, type, duration, onEnd, label = '', updateCurrentTime, getCurrentTime, ...rest },
+  { disabled, type, duration, onEnd, label = '', updateCurrentTime, getCurrentTime, requestEdit, ...rest },
   ref,
 ) {
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -46,6 +54,17 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
   const editingSegmentAnnotationRef = useRef<MediaSegment | null>(null);
   const throttledUpdater = useRef<React.Dispatch<React.SetStateAction<MediaSegment | null>>>(
     throttle(setAnnotatingSegment, 100),
+  );
+
+  const shouldEdit = useCallback(
+    (editType: EditType, editLabel: string) => {
+      if (typeof requestEdit === 'function') {
+        return requestEdit(editType, { toolName: type, label: editLabel });
+      }
+
+      return true;
+    },
+    [requestEdit, type],
   );
 
   const tracks = useMemo(() => scheduleAnnotationTrack(annotations), [annotations]);
@@ -145,13 +164,16 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
     }
 
     if (type === 'frame') {
-      onEnd?.({
-        id: uid(),
-        type: 'frame',
-        time: (offsetX / rect.width) * duration,
-        label,
-        order: maxOrder + 1,
-      });
+      onEnd?.(
+        {
+          id: uid(),
+          type: 'frame',
+          time: (offsetX / rect.width) * duration,
+          label,
+          order: maxOrder + 1,
+        },
+        e,
+      );
     }
   };
 
@@ -170,6 +192,10 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
       isSettingCurrentTimeRef.current = true;
 
       if (disabled) {
+        return;
+      }
+
+      if (!shouldEdit('create', label)) {
         return;
       }
 

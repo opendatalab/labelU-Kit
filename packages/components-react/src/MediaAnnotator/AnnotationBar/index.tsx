@@ -41,8 +41,15 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
   ({ attributeConfig, active, onContextMenu, barWrapperRef, annotation, visible, isNew }, ref) => {
     const { type, attributes = {}, order } = annotation;
     const wrapperRef = useRef<HTMLDivElement | null>(null);
-    const { duration, getCurrentTime, setCurrentTime, onAnnotationChange, showOrder, attributeConfigMapping } =
-      useMediaAnnotator();
+    const {
+      duration,
+      getCurrentTime,
+      setCurrentTime,
+      onAnnotationChange,
+      showOrder,
+      attributeConfigMapping,
+      requestEdit,
+    } = useMediaAnnotator();
     const [currentAnnotation, setCurrentAnnotation] = useState<MediaSegment>(annotation as MediaSegment);
     const throttledUpdater = useRef<React.Dispatch<React.SetStateAction<MediaAnnotationData | null>>>(
       throttle(setCurrentAnnotation, 100),
@@ -144,6 +151,15 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       e.preventDefault();
       e.stopPropagation();
 
+      if (
+        !requestEdit?.('update', {
+          toolName: 'segment',
+          label: annotation.label,
+        })
+      ) {
+        return;
+      }
+
       const diffX = e.clientX - startPositionRef.current.x;
 
       if (startPositionRef.current.direction === 'left') {
@@ -190,6 +206,15 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
 
+      if (
+        !requestEdit?.('update', {
+          toolName: 'segment',
+          label: annotation.label,
+        })
+      ) {
+        return;
+      }
+
       const diffX = e.clientX - startPositionRef.current.x;
 
       if (diffX === 0) {
@@ -210,7 +235,13 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
     };
 
     const handleMouseDown = (_direction: 'left' | 'right') => (e: React.MouseEvent) => {
-      if (!wrapperRef.current) {
+      if (
+        !wrapperRef.current ||
+        !requestEdit?.('update', {
+          toolName: 'segment',
+          label: annotation.label,
+        })
+      ) {
         return;
       }
 

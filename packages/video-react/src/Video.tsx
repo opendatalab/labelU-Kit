@@ -8,7 +8,7 @@ import type {
   EnumerableAttribute,
   VideoAnnotationInUI,
 } from '@labelu/interface';
-import type { MediaAnnotatorRef } from '@labelu/components-react';
+import type { MediaAnnotatorProps, MediaAnnotatorRef } from '@labelu/components-react';
 import { MediaAnnotator, MediaAnnotationContext, AttributeOverlay, parseTime } from '@labelu/components-react';
 
 import { VideoPlayer } from './VideoPlayer';
@@ -31,6 +31,7 @@ export interface VideoProps {
   onAdd?: (annotations: VideoAnnotationInUI) => void;
   onAnnotationSelect?: (annotation: VideoAnnotationInUI) => void;
   onAnnotateEnd?: (annotation: VideoAnnotationInUI, e?: MouseEvent) => void;
+  requestEdit?: MediaAnnotatorProps['requestEdit'];
   className?: string;
 }
 
@@ -48,6 +49,7 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
     selectedAnnotation: propsSelectedAnnotation,
     onAnnotateEnd,
     onAdd,
+    requestEdit,
     showOrder = true,
     disabled,
     className,
@@ -284,6 +286,7 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
       selectAnnotation: handleAnnotationSelect,
       onAnnotationChange: handleAnnotationChange,
       attributeConfigMapping,
+      requestEdit,
       playingAnnotationIds,
       showOrder,
       setCurrentTime: (time: number) => playerRef.current?.currentTime(time),
@@ -295,6 +298,7 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
     handleAnnotationSelect,
     onChange,
     showOrder,
+    requestEdit,
     annotations,
     selectedAnnotation,
     attributeConfigMapping,

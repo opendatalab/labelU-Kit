@@ -402,6 +402,75 @@ interface TagTool {
   value?: Record<string, string[]>;
 }
 
+export interface ParsedResult {
+  pointTool?: PointResult;
+  rectTool?: RectResult;
+  polygonTool?: PolygonResult;
+  lineTool?: LineResult;
+  cuboidTool?: CuboidResult;
+  videoSegmentTool?: VideoSegmentResult;
+  videoFrameTool?: VideoFrameResult;
+  audioSegmentTool?: AudioSegmentResult;
+  audioFrameTool?: AudioFrameResult;
+  textTool?: TextResult;
+  tagTool?: TagResult;
+}
+
+export interface PointResult {
+  toolName?: 'pointTool';
+  result?: PointTool[];
+}
+
+export interface RectResult {
+  toolName?: 'rectTool';
+  result?: RectTool[];
+}
+
+export interface PolygonResult {
+  toolName?: 'polygonTool';
+  result?: PolygonTool[];
+}
+
+export interface LineResult {
+  toolName?: 'lineTool';
+  result?: GeneratedSchemaForRoot[];
+}
+
+export interface CuboidResult {
+  toolName?: 'cuboidTool';
+  result?: CuboidTool[];
+}
+
+export interface VideoSegmentResult {
+  toolName?: 'videoSegmentTool';
+  result?: SegmentTool[];
+}
+
+export interface VideoFrameResult {
+  toolName?: 'videoFrameTool';
+  result?: FrameTool[];
+}
+
+export interface AudioSegmentResult {
+  toolName?: 'audioSegmentTool';
+  result?: SegmentTool[];
+}
+
+export interface AudioFrameResult {
+  toolName?: 'audioFrameTool';
+  result?: FrameTool[];
+}
+
+export interface TextResult {
+  toolName?: 'textTool';
+  result?: TextTool[];
+}
+
+export interface TagResult {
+  toolName?: 'tagTool';
+  result?: TagTool[];
+}
+
 export interface PreAnnotationType {
   /**
    * The name of the sample file.
@@ -427,50 +496,17 @@ export interface PreAnnotationType {
     duration?: number;
   };
   annotations: {
-    pointTool?: {
-      toolName?: 'pointTool';
-      result?: PointTool[];
-    };
-    rectTool?: {
-      toolName?: 'rectTool';
-      result?: RectTool[];
-    };
-    polygonTool?: {
-      toolName?: 'polygonTool';
-      result?: PolygonTool[];
-    };
-    lineTool?: {
-      toolName?: 'lineTool';
-      result?: GeneratedSchemaForRoot[];
-    };
-    cuboidTool?: {
-      toolName?: 'cuboidTool';
-      result?: CuboidTool[];
-    };
-    videoSegmentTool?: {
-      toolName?: 'videoSegmentTool';
-      result?: SegmentTool[];
-    };
-    videoFrameTool?: {
-      toolName?: 'videoFrameTool';
-      result?: FrameTool[];
-    };
-    audioSegmentTool?: {
-      toolName?: 'audioSegmentTool';
-      result?: SegmentTool[];
-    };
-    audioFrameTool?: {
-      toolName?: 'audioFrameTool';
-      result?: FrameTool[];
-    };
-    textTool?: {
-      toolName?: 'textTool';
-      result?: TextTool[];
-    };
-    tagTool?: {
-      toolName?: 'tagTool';
-      result?: TagTool[];
-    };
+    pointTool?: PointResult;
+    rectTool?: RectResult;
+    polygonTool?: PolygonResult;
+    lineTool?: LineResult;
+    cuboidTool?: CuboidResult;
+    videoSegmentTool?: VideoSegmentResult;
+    videoFrameTool?: VideoFrameResult;
+    audioSegmentTool?: AudioSegmentResult;
+    audioFrameTool?: AudioFrameResult;
+    textTool?: TextResult;
+    tagTool?: TagResult;
   };
 }
 

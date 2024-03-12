@@ -70,7 +70,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
       const pointItem = data.points[i];
       const point = new ControllerPoint({
         id: pointItem.id,
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         outOfImage: config.outOfImage,
         // 深拷贝，避免出现引用问题
         coordinate: { ...pointItem },
@@ -103,7 +103,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
     const { config, group, _pointToBeAdded } = this;
 
     // 只有按下 alt 键时，才能在线段上增加控制点
-    if (!monitor?.keyboard.Alt || !this.requestEdit('edit')) {
+    if (!monitor?.keyboard.Alt || !this.requestEdit('update')) {
       return;
     }
 
@@ -129,7 +129,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
         // name存储线段的索引
         name: group.shapes.indexOf(line).toString(),
         id: uid(),
-        disabled: !this.requestEdit('edit'),
+        disabled: !this.requestEdit('update'),
         coordinate: axis!.getOriginalCoord(latestPointOnLine),
         outOfImage: config.outOfImage,
       });

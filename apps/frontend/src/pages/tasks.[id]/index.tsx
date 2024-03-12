@@ -2,11 +2,10 @@ import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { Link, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { Table, Pagination, Button, Popconfirm, Tag, Tooltip } from 'antd';
-import { VideoCard } from '@labelu/video-annotator-react';
+import { VideoCard, FlexLayout } from '@labelu/components-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
-import { FlexLayout } from '@labelu/components-react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
 import type { SampleResponse } from '@/api/types';

@@ -1,16 +1,18 @@
 import _ from 'lodash';
-import type { ImageAnnotatorProps } from '@labelu/image-annotator-react';
-import type { ImageSample } from '@labelu/image-annotator-react/dist/context/sample.context';
+import type { GlobalToolConfig, ImageAnnotatorOptions, ImageSample } from '@labelu/image-annotator-react';
 import { omit } from 'lodash/fp';
 import type { ToolName } from '@labelu/image';
 import { TOOL_NAMES } from '@labelu/image';
 
-import type { SampleResponse } from '@/api/types';
+import type { ParsedResult, SampleResponse } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
-export function convertImageAnnotations(annotations: ImageSample['data'], config: ImageAnnotatorProps['config']) {
+export function convertImageAnnotations(
+  result: ParsedResult,
+  config: Pick<ImageAnnotatorOptions, ToolName> & GlobalToolConfig,
+) {
   // annotation
   const pool = [
     ['line', 'lineTool'],
@@ -20,16 +22,15 @@ export function convertImageAnnotations(annotations: ImageSample['data'], config
     ['cuboid', 'cuboidTool'],
     ['text', 'textTool'],
     ['tag', 'tagTool'],
-  ];
+  ] as const;
 
   return _.chain(pool)
     .map(([type, key]) => {
-      // @ts-ignore
-      if (!annotations[key] && TOOL_NAMES.includes(type as ToolName)) {
+      if (!result[key] && TOOL_NAMES.includes(type as ToolName)) {
         return;
       }
 
-      const items = _.get(annotations, [key, 'result']) || _.get(annotations, [type, 'result'], []);
+      const items = _.get(result, [key, 'result']) || _.get(result, [type, 'result'], []);
       if (!items.length && (type === 'tag' || type === 'text')) {
         // 生成全局工具的默认值
         return [type, generateDefaultValues(config?.[type])];
@@ -62,7 +63,7 @@ export function convertImageAnnotations(annotations: ImageSample['data'], config
 
 export function convertImageSample(
   sample: SampleResponse | undefined,
-  config: ImageAnnotatorProps['config'],
+  config: Pick<ImageAnnotatorOptions, ToolName> & GlobalToolConfig,
 ): ImageSample | undefined {
   if (!sample) {
     return;

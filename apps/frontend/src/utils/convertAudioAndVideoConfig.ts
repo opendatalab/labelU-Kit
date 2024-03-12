@@ -1,9 +1,9 @@
-import type { AudioAnnotatorConfig } from '@labelu/audio-annotator-react';
+import type { MediaAnnotatorConfig } from '@labelu/audio-annotator-react';
 
 import type { ToolsConfigState } from '@/types/toolConfig';
 
-export function convertVideoConfig(taskConfig?: ToolsConfigState) {
-  const editorConfig: AudioAnnotatorConfig = {} as AudioAnnotatorConfig;
+export function convertAudioAndVideoConfig(taskConfig?: ToolsConfigState) {
+  const editorConfig: MediaAnnotatorConfig = {} as MediaAnnotatorConfig;
 
   taskConfig?.tools?.forEach((item) => {
     if (['videoSegmentTool', 'audioSegmentTool'].includes(item.tool)) {

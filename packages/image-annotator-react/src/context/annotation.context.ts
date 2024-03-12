@@ -17,7 +17,7 @@ export type AnnotationDataInUI = AnnotationData & {
 
 export interface AnnotationsWithGlobal {
   /** 已根据order排序的图片标注数据 */
-  image: Record<ToolName, AnnotationDataInUI[]>;
+  image: Partial<Record<ToolName, AnnotationDataInUI[]>>;
 
   global: GlobalAnnotationPayload;
 }
