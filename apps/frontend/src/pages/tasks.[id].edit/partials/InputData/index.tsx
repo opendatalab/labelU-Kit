@@ -58,6 +58,7 @@ export interface QueuedFile {
   status: UploadStatus;
   reason?: string;
   file: File;
+  completed?: boolean;
 }
 
 const readFile = async (file: File, type?: 'text') => {
