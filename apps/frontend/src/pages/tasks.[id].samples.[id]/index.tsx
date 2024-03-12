@@ -19,7 +19,7 @@ import { useScrollFetch } from '@/hooks/useScrollFetch';
 import type { getSample } from '@/api/services/samples';
 import { getSamples } from '@/api/services/samples';
 import { convertAudioAndVideoConfig } from '@/utils/convertAudioAndVideoConfig';
-import { convertAudioAndVideoSample } from '@/utils/convertAudioAndVideoSample';
+import { convertAudioAndVideoSample, convertMediaAnnotations } from '@/utils/convertAudioAndVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
 import { convertImageAnnotations, convertImageSample } from '@/utils/convertImageSample';
@@ -48,7 +48,13 @@ const AnnotationPage = () => {
       const config = _.get(preAnnotation, 'data[0].data[0].config', {});
 
       Object.keys(config).forEach((key) => {
-        const toolName = key.replace(/Tool$/, '') as AllToolName;
+        let toolName = key.replace(/Tool$/, '') as AllToolName;
+
+        if (key.includes('audio') || key.includes('video')) {
+          // audioSegmentTool => segment
+          toolName = toolName.replace(/audio|video/, '').toLowerCase() as AllToolName;
+        }
+
         result[toolName] = config[key as keyof typeof config];
       });
     }
@@ -56,13 +62,20 @@ const AnnotationPage = () => {
     return result;
   }, [preAnnotation]);
   const preAnnotations = useMemo(() => {
-    if (preAnnotation) {
-      const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+    if (!preAnnotation) {
+      return {};
+    }
+
+    const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+
+    if (task?.media_type === MediaType.IMAGE) {
       return convertImageAnnotations(_annotations, preAnnotationConfig);
+    } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
+      return convertMediaAnnotations(task.media_type, _annotations, preAnnotationConfig);
     }
 
     return {};
-  }, [preAnnotation, preAnnotationConfig]);
+  }, [preAnnotation, preAnnotationConfig, task?.media_type]);
 
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
@@ -197,23 +210,27 @@ const AnnotationPage = () => {
       }
 
       const toolConfig = config[toolName];
+      const toolNameKey =
+        (toolName.includes('frame') || toolName.includes('segment')
+          ? task!.media_type?.toLowerCase() + _.upperFirst(toolName)
+          : toolName) + 'Tool';
 
       if (editType === 'create' && !toolConfig?.labels?.find((item: ILabel) => item.value === label)) {
         message.destroy();
-        message.error(`当前工具【${TOOL_NAME[toolName + 'Tool']}】不包含值为【${label}】的标签`);
+        message.error(`当前工具【${TOOL_NAME[toolNameKey]}】不包含值为【${label}】的标签`);
 
         return false;
       }
 
       if (editType === 'update' && !config[toolName]) {
         message.destroy();
-        message.error(`当前配置不存在【${TOOL_NAME[toolName + 'Tool']}】工具`);
+        message.error(`当前配置不存在【${TOOL_NAME[toolNameKey]}】工具`);
         return false;
       }
 
       return true;
     },
-    [config],
+    [config, task],
   );
 
   if (task?.media_type === MediaType.IMAGE) {
