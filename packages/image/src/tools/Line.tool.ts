@@ -90,7 +90,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   public draft: DraftLine | DraftLineCurve | null = null;
 
-  constructor({ style, data, ...params }: LineToolOptions) {
+  constructor({ style, ...params }: LineToolOptions) {
     super({
       name: 'line',
       lineType: 'line',
@@ -100,7 +100,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       labels: [],
       selectedStyle: {},
       // ----------------
-      data: LineTool.convertToCanvasCoordinates(data ?? []),
+      data: [],
       style: {
         ...Line.DEFAULT_STYLE,
         ...style,
