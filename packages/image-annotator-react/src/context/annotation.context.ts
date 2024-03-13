@@ -15,35 +15,41 @@ export type AnnotationDataInUI = AnnotationData & {
   tool: ToolName;
 };
 
-export interface AnnotationsWithGlobal {
-  /** 已根据order排序的图片标注数据 */
-  image: Partial<Record<ToolName, AnnotationDataInUI[]>>;
+export type AllAnnotationType = TextAnnotationType | TagAnnotationType | ToolName;
 
-  global: GlobalAnnotationPayload;
-}
+export type AnnotationWithTool = (GlobalAnnotation | AnnotationData) & { tool: AllAnnotationType };
+
+export type AllAnnotationMapping = Record<
+  string,
+  (GlobalAnnotation | AnnotationData) & {
+    tool: TextAnnotationType | TagAnnotationType | ToolName;
+  }
+>;
 
 export interface AnnotationContextType {
-  annotationsWithGlobal: AnnotationsWithGlobal;
+  annotationsWithGlobal: AllAnnotationMapping;
 
   sortedImageAnnotations: AnnotationDataInUI[];
 
   selectedAnnotation: AnnotationDataInUI | undefined;
 
-  preAnnotationsWithGlobal?: Partial<
-    Record<ToolName | TextAnnotationType | TagAnnotationType, AnnotationData[] | GlobalAnnotation[]>
-  >;
+  preAnnotationsWithGlobal?: Partial<Record<AllAnnotationType, AnnotationData[] | GlobalAnnotation[]>>;
 
-  allAnnotationsMapping: Record<string, AnnotationDataInUI>;
+  allAnnotationsMapping: AllAnnotationMapping;
 
-  onImageAnnotationChange: (annotation: AnnotationDataInUI) => void;
+  // onImageAnnotationChange: (annotation: AnnotationDataInUI) => void;
 
-  onImageAnnotationsChange: (annotations: AnnotationDataInUI[]) => void;
+  onAnnotationsChange: (annotations: AnnotationWithTool[]) => void;
 
-  onGlobalAnnotationsChange: (annotations: GlobalAnnotationPayload) => void;
+  onAnnotationChange: (annotation: AnnotationWithTool) => void;
 
-  onGlobalAnnotationClear: () => void;
+  // onGlobalAnnotationsChange: (annotations: GlobalAnnotationPayload) => void;
 
-  onImageAnnotationsClear: () => void;
+  onAnnotationClear: () => void;
+
+  // onGlobalAnnotationClear: () => void;
+
+  // onImageAnnotationsClear: () => void;
 
   orderVisible: boolean;
 

@@ -2,7 +2,7 @@ import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
-import { set, omit } from 'lodash/fp';
+import { set } from 'lodash/fp';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
@@ -166,8 +166,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
 
     if (task.media_type === MediaType.IMAGE) {
       // @ts-ignore
-      const imageResult = (await imageAnnotationRef.current?.getAnnotations()) ?? {};
-      const tagOrTextResult = (await imageAnnotationRef.current?.getGlobalAnnotations()) ?? {};
+      const exportedResult = (await imageAnnotationRef.current?.getAnnotations()) ?? {};
       const engine = await imageAnnotationRef.current?.getEngine();
 
       result.width = engine?.backgroundRenderer?.image?.width ?? 0;
@@ -176,26 +175,11 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
 
       innerSample = await imageAnnotationRef?.current?.getSample();
 
-      Object.keys(imageResult).forEach((item) => {
-        if (imageResult?.[item]?.length) {
+      Object.keys(exportedResult).forEach((item) => {
+        if (exportedResult?.[item]?.length) {
           result[item + 'Tool'] = {
             toolName: item + 'Tool',
-            result: imageResult[item].map((annotation: any) => {
-              const resultItem = {
-                ...omit(['tool', 'visible'])(annotation),
-              };
-
-              return resultItem;
-            }),
-          };
-        }
-      });
-
-      Object.keys(tagOrTextResult).forEach((item) => {
-        if (tagOrTextResult?.[item]?.length) {
-          result[item + 'Tool'] = {
-            toolName: item + 'Tool',
-            result: tagOrTextResult[item],
+            result: exportedResult[item],
           };
         }
       });

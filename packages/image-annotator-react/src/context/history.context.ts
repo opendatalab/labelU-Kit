@@ -1,12 +1,12 @@
 import { createContext, useContext } from 'react';
 
-import type { AnnotationsWithGlobal } from './annotation.context';
+import type { AllAnnotationMapping } from './annotation.context';
 
 export interface HistoryContextType {
   redo: () => void;
   undo: () => void;
-  pastRef: React.RefObject<AnnotationsWithGlobal[]>;
-  futureRef: React.RefObject<AnnotationsWithGlobal[]>;
+  pastRef: React.RefObject<AllAnnotationMapping[]>;
+  futureRef: React.RefObject<AllAnnotationMapping[]>;
 }
 
 export const HistoryContext = createContext<HistoryContextType>({} as HistoryContextType);
