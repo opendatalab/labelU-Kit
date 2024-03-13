@@ -25,7 +25,7 @@ const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
   padding: 0 1rem;
   box-sizing: border-box;
 
-  ${({ collapsed }) => (collapsed ? 'width: 0; padding: 0;' : 'width: 232px;')}
+  ${({ collapsed }) => (collapsed ? 'width: 0; padding: 0;' : 'width: 236;')}
 
   ${Cards} {
     ${({ collapsed }) => (collapsed ? 'display: none;' : 'display: flex;')}

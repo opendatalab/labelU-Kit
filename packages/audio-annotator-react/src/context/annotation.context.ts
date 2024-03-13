@@ -19,8 +19,10 @@ export type GlobalAnnotationPayload = Record<TextAnnotationType | TagAnnotationT
 export type AnnotationsWithGlobal = Partial<GlobalAnnotationPayload> &
   Partial<Record<MediaAnnotationType, MediaAnnotationInUI[]>>;
 
+export type AllAnnotationMapping = Record<string, MediaAnnotationInUI | TextAnnotationEntity | TagAnnotationEntity>;
+
 export interface AnnotationContextType {
-  annotationsWithGlobal: AnnotationsWithGlobal;
+  annotationsWithGlobal: AllAnnotationMapping;
 
   sortedMediaAnnotations: MediaAnnotationInUI[];
 
@@ -30,9 +32,7 @@ export interface AnnotationContextType {
 
   allAnnotationsMapping: Record<string, MediaAnnotationInUI | TextAnnotationEntity | TagAnnotationEntity>;
 
-  onGlobalAnnotationClear: () => void;
-
-  onMediaAnnotationClear: () => void;
+  onAnnotationClear: () => void;
 
   onAnnotationsChange: (annotations: MediaAnnotationWithTextAndTag[]) => void;
 

@@ -105,77 +105,81 @@ export function AttributePanel() {
   const {
     annotationsWithGlobal,
     allAnnotationsMapping,
+    sortedMediaAnnotations,
     selectedAnnotation,
     preAnnotationsWithGlobal,
     onAnnotationsChange,
-    onGlobalAnnotationClear,
-    onMediaAnnotationClear,
+    onAnnotationClear,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
-  const {
-    globalAnnotations,
-    globalAnnotationsWithPreAnnotation,
-    mediaAnnotations,
-    preMediaAnnotationGroup,
-    mediaAnnotationGroup,
-    defaultActiveKeys,
-  } = useMemo(() => {
-    const mediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
-    const _mediaAnnotations = [...(annotationsWithGlobal?.segment ?? []), ...(annotationsWithGlobal?.frame ?? [])];
-    const _globalAnnotations = [...(annotationsWithGlobal?.tag ?? []), ...(annotationsWithGlobal?.text ?? [])];
-    const _globalAnnotationsWithPreAnnotation = [..._globalAnnotations];
-    const preMediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
-    const preMediaAnnotations = [
-      ...(preAnnotationsWithGlobal?.segment ?? []),
-      ...(preAnnotationsWithGlobal?.frame ?? []),
-    ] as MediaAnnotationInUI[];
-
-    if (!_globalAnnotations.length) {
-      [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
-        if (values) {
-          _globalAnnotationsWithPreAnnotation.push(...(values as GlobalAnnotation[]));
-        }
+  const { globalAnnotations, globalAnnotationsWithPreAnnotation, mediaAnnotationGroup, defaultActiveKeys } =
+    useMemo(() => {
+      const mediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
+      const _globalAnnotations = Object.values(annotationsWithGlobal).filter((item) => {
+        return item.type === 'tag' || item.type === 'text';
       });
-    }
+      const _globalAnnotationsWithPreAnnotation = [..._globalAnnotations];
+      const preMediaAnnotationGroupByLabel = new Map<string, MediaAnnotationInUI[]>();
+      const preMediaAnnotations = [
+        ...(preAnnotationsWithGlobal?.segment ?? []),
+        ...(preAnnotationsWithGlobal?.frame ?? []),
+      ] as MediaAnnotationInUI[];
 
-    for (const item of _mediaAnnotations) {
-      if (!mediaAnnotationGroupByLabel.has(item.label)) {
-        mediaAnnotationGroupByLabel.set(item.label, []);
+      if (!_globalAnnotations.length) {
+        [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
+          if (values) {
+            _globalAnnotationsWithPreAnnotation.push(...(values as GlobalAnnotation[]));
+          }
+        });
       }
 
-      mediaAnnotationGroupByLabel?.get(item.label)?.push(item);
-    }
+      for (const item of sortedMediaAnnotations) {
+        if (!mediaAnnotationGroupByLabel.has(item.label)) {
+          mediaAnnotationGroupByLabel.set(item.label, []);
+        }
 
-    for (const item of preMediaAnnotations) {
-      if (!preMediaAnnotationGroupByLabel.has(item.label)) {
-        preMediaAnnotationGroupByLabel.set(item.label, []);
+        mediaAnnotationGroupByLabel?.get(item.label)?.push(item);
       }
 
-      preMediaAnnotationGroupByLabel?.get(item.label)?.push(item);
-    }
+      for (const item of preMediaAnnotations) {
+        if (!preMediaAnnotationGroupByLabel.has(item.label)) {
+          preMediaAnnotationGroupByLabel.set(item.label, []);
+        }
 
-    return {
-      globalAnnotations: _globalAnnotations,
-      globalAnnotationsWithPreAnnotation: _globalAnnotationsWithPreAnnotation,
-      mediaAnnotations: _mediaAnnotations,
-      preMediaAnnotationGroup: preMediaAnnotationGroupByLabel,
-      mediaAnnotationGroup: mediaAnnotationGroupByLabel,
-      defaultActiveKeys: Array.from(mediaAnnotationGroupByLabel.keys()),
-    };
-  }, [
-    annotationsWithGlobal?.segment,
-    annotationsWithGlobal?.frame,
-    annotationsWithGlobal?.tag,
-    annotationsWithGlobal?.text,
-    preAnnotationsWithGlobal?.segment,
-    preAnnotationsWithGlobal?.frame,
-    preAnnotationsWithGlobal?.tag,
-    preAnnotationsWithGlobal?.text,
-  ]);
+        preMediaAnnotationGroupByLabel?.get(item.label)?.push(item);
+      }
+
+      return {
+        globalAnnotations: _globalAnnotations as GlobalAnnotation[],
+        globalAnnotationsWithPreAnnotation: _globalAnnotationsWithPreAnnotation as GlobalAnnotation[],
+        preMediaAnnotationGroup: preMediaAnnotationGroupByLabel,
+        mediaAnnotationGroup: mediaAnnotationGroupByLabel,
+        defaultActiveKeys: Array.from(mediaAnnotationGroupByLabel.keys()),
+      };
+    }, [
+      annotationsWithGlobal,
+      preAnnotationsWithGlobal?.segment,
+      preAnnotationsWithGlobal?.frame,
+      preAnnotationsWithGlobal?.tag,
+      preAnnotationsWithGlobal?.text,
+      sortedMediaAnnotations,
+    ]);
 
   const globals = useMemo(() => {
     const _globals: (TextAttribute | EnumerableAttribute)[] = [];
+    const _tagAnnotations = [];
+    const _textAnnotations = [];
+
+    Object.values(annotationsWithGlobal ?? {}).forEach((item) => {
+      if (item.type === 'tag') {
+        _tagAnnotations.push(item);
+      }
+
+      if (item.type === 'text') {
+        _textAnnotations.push(item);
+      }
+    });
 
     if (config?.tag) {
       _globals.push(...config.tag);
@@ -186,31 +190,20 @@ export function AttributePanel() {
     }
 
     // 预标注的文本和分类需要跟用户配置合并且根据其value去重
-    if (!annotationsWithGlobal?.tag?.length) {
-      Object.values(preLabelMapping?.tag ?? {})?.forEach((item) => {
-        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
-          _globals.push({ ...item, disabled: true } as EnumerableAttribute);
-        }
-      });
-    }
+    Object.values(preLabelMapping?.tag ?? {})?.forEach((item) => {
+      if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+        _globals.push({ ...item, disabled: true } as EnumerableAttribute);
+      }
+    });
 
-    if (!annotationsWithGlobal?.text?.length) {
-      Object.values(preLabelMapping?.text ?? {})?.forEach((item) => {
-        if (!_globals.some((innerItem) => innerItem.value === item.value)) {
-          _globals.push({ ...item, disabled: true } as TextAttribute);
-        }
-      });
-    }
+    Object.values(preLabelMapping?.text ?? {})?.forEach((item) => {
+      if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+        _globals.push({ ...item, disabled: true } as TextAttribute);
+      }
+    });
 
     return _globals;
-  }, [
-    annotationsWithGlobal?.tag?.length,
-    annotationsWithGlobal?.text?.length,
-    config?.tag,
-    config?.text,
-    preLabelMapping?.tag,
-    preLabelMapping?.text,
-  ]);
+  }, [annotationsWithGlobal, config?.tag, config?.text, preLabelMapping?.tag, preLabelMapping?.text]);
 
   const titles = useMemo(() => {
     const _titles = [];
@@ -237,15 +230,10 @@ export function AttributePanel() {
     }
 
     if (config?.segment || config?.frame) {
-      const flatPreMediaAnnotations = Array.from(preMediaAnnotationGroup.values()).reduce((acc, item) => {
-        acc.push(...item);
-        return acc;
-      }, []);
-
       _titles.push({
         title: '标记',
         key: 'label' as const,
-        subtitle: `${mediaAnnotations.length || flatPreMediaAnnotations.length}条`,
+        subtitle: `${sortedMediaAnnotations.length}条`,
       });
     }
 
@@ -258,8 +246,7 @@ export function AttributePanel() {
     preLabelMapping.tag,
     preLabelMapping.text,
     globalAnnotations,
-    mediaAnnotations.length,
-    preMediaAnnotationGroup,
+    sortedMediaAnnotations.length,
   ]);
   const [activeKey, setActiveKey] = useState<HeaderType>(globals.length === 0 ? 'label' : 'global');
 
@@ -307,16 +294,7 @@ export function AttributePanel() {
       }
     }
 
-    const _annotations =
-      mediaAnnotations.map((item) => {
-        const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
-        if (existIndex >= 0) {
-          return existAnnotations[existIndex];
-        }
-
-        return item;
-      }) ?? [];
-    onAnnotationsChange([..._annotations, ...newAnnotations]);
+    onAnnotationsChange(newAnnotations);
   };
 
   const handleClear = () => {
@@ -324,53 +302,47 @@ export function AttributePanel() {
       return;
     }
 
-    if (activeKey === 'global') {
-      onGlobalAnnotationClear();
-    } else {
-      onMediaAnnotationClear();
-    }
+    onAnnotationClear();
   };
 
   const collapseItems = useMemo(
     () =>
-      Array.from(mediaAnnotationGroup.size > 0 ? mediaAnnotationGroup : preMediaAnnotationGroup).map(
-        ([label, _annotations]) => {
-          const found = labelMapping[_annotations[0].type]?.[label] ?? preLabelMapping?.[_annotations[0].type]?.[label];
-          const labelText = found ? found?.key ?? '无标签' : '无标签';
+      Array.from(mediaAnnotationGroup).map(([label, _annotations]) => {
+        const found = labelMapping[_annotations[0].type]?.[label] ?? preLabelMapping?.[_annotations[0].type]?.[label];
+        const labelText = found ? found?.key ?? '无标签' : '无标签';
 
-          return {
-            label: (
-              <Header>
-                <EllipsisText maxWidth={180} title={labelText}>
-                  <div>{labelText}</div>
-                </EllipsisText>
+        return {
+          label: (
+            <Header>
+              <EllipsisText maxWidth={180} title={labelText}>
+                <div>{labelText}</div>
+              </EllipsisText>
 
-                <AttributeAction annotations={_annotations} showEdit={false} />
-              </Header>
-            ),
-            key: label,
-            children: (
-              <AsideWrapper>
-                {_annotations.map((item) => {
-                  const labelOfAnnotation = labelMapping[item.type]?.[label] ?? preLabelMapping?.[item.type]?.[label];
+              <AttributeAction annotations={_annotations} showEdit={false} />
+            </Header>
+          ),
+          key: label,
+          children: (
+            <AsideWrapper>
+              {_annotations.map((item) => {
+                const labelOfAnnotation = labelMapping[item.type]?.[label] ?? preLabelMapping?.[item.type]?.[label];
 
-                  return (
-                    <AsideAttributeItem
-                      key={item.id}
-                      active={item.id === selectedAnnotation?.id}
-                      order={item.order}
-                      annotation={item}
-                      labelText={labelOfAnnotation?.key ?? '无标签'}
-                      color={labelOfAnnotation?.color ?? '#999'}
-                    />
-                  );
-                })}
-              </AsideWrapper>
-            ),
-          };
-        },
-      ),
-    [mediaAnnotationGroup, preMediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
+                return (
+                  <AsideAttributeItem
+                    key={item.id}
+                    active={item.id === selectedAnnotation?.id}
+                    order={item.order}
+                    annotation={item}
+                    labelText={labelOfAnnotation?.key ?? '无标签'}
+                    color={labelOfAnnotation?.color ?? '#999'}
+                  />
+                );
+              })}
+            </AsideWrapper>
+          ),
+        };
+      }),
+    [mediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
 
   return (

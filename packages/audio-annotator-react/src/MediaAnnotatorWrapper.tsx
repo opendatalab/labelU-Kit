@@ -29,7 +29,11 @@ import { LabelSection, openAttributeModal } from './LabelSection';
 import { AnnotatorToolbar } from './Toolbar';
 import { HistoryContext } from './context/history.context';
 import { ToolContext } from './context/tool.context';
-import type { AnnotationsWithGlobal, MediaAnnotationTypeWithGlobal } from './context/annotation.context';
+import type {
+  AllAnnotationMapping,
+  AnnotationsWithGlobal,
+  MediaAnnotationTypeWithGlobal,
+} from './context/annotation.context';
 import { AnnotationContext } from './context/annotation.context';
 import type { MediaAnnotatorConfig, MediaSample } from './context/sample.context';
 import { SampleContext } from './context/sample.context';
@@ -63,20 +67,29 @@ function generateDefaultValues(attributes?: (TextAttribute | EnumerableAttribute
 }
 
 function convertAnnotationDataToUI(datas: AnnotationsWithGlobal) {
-  const result: AnnotationsWithGlobal = {};
+  const result: AllAnnotationMapping = {};
 
   Object.keys(datas).forEach((key) => {
-    // @ts-ignore
-    result[key as keyof AnnotationsWithGlobal] =
+    const type = key as MediaAnnotationTypeWithGlobal;
+    const _annotations = datas[type] ?? [];
+
+    _annotations.forEach((item) => {
       // @ts-ignore
-      datas?.[key as keyof AnnotationsWithGlobal].map((item) => {
-        return {
-          ...item,
-          type: key as MediaAnnotationType,
-        };
-      }) ?? [];
+      result[item.id] = {
+        ...item,
+        type: (item.type as MediaAnnotationTypeWithGlobal) || type,
+      };
+    });
   });
 
+  return result;
+}
+
+function omit<T, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
+  const result = { ...obj };
+  keys.forEach((key) => {
+    delete result[key];
+  });
   return result;
 }
 
@@ -322,13 +335,18 @@ function ForwardAnnotator(
     [config],
   );
 
+  const convertedAnnotations = useMemo(() => {
+    return convertAnnotationDataToUI(isSampleDataEmpty && preAnnotations ? preAnnotations : annotationsFromSample);
+  }, [annotationsFromSample, isSampleDataEmpty, preAnnotations]);
+
   // ================== sample state ==================
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
-    useRedoUndo<AnnotationsWithGlobal>(
-      convertAnnotationDataToUI(isSampleDataEmpty && preAnnotations ? preAnnotations : annotationsFromSample),
+    useRedoUndo<AllAnnotationMapping>(
+      convertedAnnotations,
       {
         maxHistory: maxHistoryCount,
       },
+      [convertedAnnotations],
     );
 
   // 重置历史记录
@@ -369,26 +387,21 @@ function ForwardAnnotator(
   }, [annotationsFromSample]);
 
   const sortedMediaAnnotations = useMemo(() => {
-    const _mediaAnnotations = [
-      ...(annotationsWithGlobal.segment ?? []),
-      ...(annotationsWithGlobal.frame ?? []),
-    ] as MediaAnnotationInUI[];
+    const _mediaAnnotations = Object.values(annotationsWithGlobal).filter((item) => {
+      return item.type === 'segment' || item.type === 'frame';
+    }) as MediaAnnotationInUI[];
 
     _mediaAnnotations.sort((a, b) => a.order - b.order);
 
     return _mediaAnnotations;
-  }, [annotationsWithGlobal.frame, annotationsWithGlobal.segment]);
+  }, [annotationsWithGlobal]);
 
   const onAnnotationsChange = useCallback(
     (_annotations: MediaAnnotationWithTextAndTag[]) => {
-      const annotationGroupByTool = {} as Record<string, MediaAnnotationWithTextAndTag[]>;
+      const annotationGroupByTool: AllAnnotationMapping = {};
 
       _annotations.forEach((item) => {
-        if (!annotationGroupByTool[item.type]) {
-          annotationGroupByTool[item.type] = [];
-        }
-
-        annotationGroupByTool[item.type].push(item);
+        annotationGroupByTool[item.id] = item;
       });
 
       updateAnnotationsWithGlobal((pre) => {
@@ -406,12 +419,7 @@ function ForwardAnnotator(
       updateAnnotationsWithGlobal((pre) => {
         return {
           ...pre!,
-          [_annotation.type]: pre![_annotation.type]!.map((item) => {
-            if (item.id === _annotation.id) {
-              return _annotation;
-            }
-            return item;
-          }),
+          [_annotation.id]: _annotation,
         };
       });
     },
@@ -423,7 +431,7 @@ function ForwardAnnotator(
       updateAnnotationsWithGlobal((pre) => {
         return {
           ...pre!,
-          [_annotation.type]: [...(pre![_annotation.type] ?? []), _annotation],
+          [_annotation.id]: _annotation,
         };
       });
 
@@ -438,12 +446,7 @@ function ForwardAnnotator(
         return;
       }
 
-      updateAnnotationsWithGlobal((pre) => {
-        return {
-          ...pre!,
-          [_annotation.type]: pre![_annotation.type]?.filter((i) => i.id !== _annotation.id) ?? [],
-        };
-      });
+      updateAnnotationsWithGlobal((pre) => (pre ? omit(pre, _annotation.id) : pre));
       setSelectedAnnotation(undefined);
     },
     [updateAnnotationsWithGlobal],
@@ -451,17 +454,16 @@ function ForwardAnnotator(
 
   const onAnnotationsRemove = useCallback(
     (_annotations: MediaAnnotationWithTextAndTag[]) => {
-      const removedMapping: Record<string, MediaAnnotationWithTextAndTag> = _annotations.reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, {} as Record<string, MediaAnnotationWithTextAndTag>);
-
       updateAnnotationsWithGlobal((pre) => {
-        return {
-          ...pre!,
-          segment: pre!.segment!.filter((i) => !removedMapping[i.id]),
-          frame: pre!.frame!.filter((i) => !removedMapping[i.id]),
-        };
+        let newAnnotationWithGlobal = pre;
+
+        if (newAnnotationWithGlobal) {
+          _annotations.forEach((item) => {
+            newAnnotationWithGlobal = omit(newAnnotationWithGlobal!, item.id);
+          });
+        }
+
+        return newAnnotationWithGlobal;
       });
 
       setSelectedAnnotation(undefined);
@@ -469,23 +471,9 @@ function ForwardAnnotator(
     [updateAnnotationsWithGlobal],
   );
 
-  const onGlobalAnnotationClear = useCallback(() => {
-    updateAnnotationsWithGlobal((pre) => {
-      return {
-        ...pre!,
-        text: [],
-        tag: [],
-      };
-    });
-  }, [updateAnnotationsWithGlobal]);
-
-  const onMediaAnnotationClear = useCallback(() => {
-    updateAnnotationsWithGlobal((pre) => {
-      return {
-        ...pre!,
-        segment: [],
-        frame: [],
-      };
+  const onAnnotationClear = useCallback(() => {
+    updateAnnotationsWithGlobal(() => {
+      return {};
     });
   }, [updateAnnotationsWithGlobal]);
 
@@ -552,16 +540,9 @@ function ForwardAnnotator(
       };
 
       updateAnnotationsWithGlobal((pre) => {
-        const annotationGroup = pre?.[newAnnotation.type] ?? [];
-
         return {
           ...pre!,
-          [newAnnotation.type]: annotationGroup.map((item) => {
-            if (item.id === selectedAnnotation?.id) {
-              return newAnnotation as MediaAnnotationInUI;
-            }
-            return item;
-          }),
+          [newAnnotation.id]: newAnnotation,
         };
       });
 
@@ -599,16 +580,9 @@ function ForwardAnnotator(
       setSelectedAnnotation(() => newAnnotation);
 
       updateAnnotationsWithGlobal((pre) => {
-        const annotationGroup = pre?.[newAnnotation.type] ?? [];
-        // TODO: not in annotation mapping.
         return {
           ...pre!,
-          [newAnnotation.type]: annotationGroup.map((item) => {
-            if (item.id === selectedAnnotation?.id) {
-              return newAnnotation as MediaAnnotationInUI;
-            }
-            return item;
-          }),
+          [newAnnotation.id]: newAnnotation,
         };
       });
     },
@@ -622,10 +596,11 @@ function ForwardAnnotator(
     () => {
       if (selectedAnnotation) {
         updateAnnotationsWithGlobal((pre) => {
-          return {
-            ...pre!,
-            [selectedAnnotation.type]: pre![selectedAnnotation.type]!.filter((i) => i.id !== selectedAnnotation.id),
-          };
+          if (pre) {
+            return omit(pre, selectedAnnotation.id);
+          }
+
+          return pre;
         });
       }
     },
@@ -714,18 +689,18 @@ function ForwardAnnotator(
 
   useImperativeHandle(ref, () => ({
     getAnnotations: () => {
-      return Object.keys(annotationsWithGlobal).reduce((acc, cur) => {
-        const toolName = cur as MediaAnnotationType;
+      const result: AnnotationsWithGlobal = {};
 
-        acc[toolName] = annotationsWithGlobal[toolName]?.map((item) => {
-          // omit visible
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-          const { visible, ...rest } = item;
+      Object.values(annotationsWithGlobal).forEach((item) => {
+        if (!result[item.type]) {
+          result[item.type] = [];
+        }
 
-          return rest;
-        });
-        return acc;
-      }, {} as AnnotationsWithGlobal);
+        // @ts-ignore
+        result[item.type]!.push(omit(item, 'visible'));
+      });
+
+      return result;
     },
     getSample: () => currentSample,
   }));
@@ -781,8 +756,7 @@ function ForwardAnnotator(
       allAnnotationsMapping: annotationsMapping,
       onAnnotationsChange,
       onAnnotationChange,
-      onGlobalAnnotationClear,
-      onMediaAnnotationClear,
+      onAnnotationClear,
       orderVisible,
       onAnnotationSelect,
       onAnnotationRemove,
@@ -797,11 +771,10 @@ function ForwardAnnotator(
       selectedAnnotation,
       annotationsMapping,
       onAnnotationsChange,
-      onAnnotationSelect,
       onAnnotationChange,
-      onGlobalAnnotationClear,
-      onMediaAnnotationClear,
+      onAnnotationClear,
       orderVisible,
+      onAnnotationSelect,
       onAnnotationRemove,
       onAnnotationAdd,
       onAnnotationsRemove,
