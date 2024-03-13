@@ -341,13 +341,9 @@ function ForwardAnnotator(
 
   // ================== sample state ==================
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
-    useRedoUndo<AllAnnotationMapping>(
-      convertedAnnotations,
-      {
-        maxHistory: maxHistoryCount,
-      },
-      [convertedAnnotations],
-    );
+    useRedoUndo<AllAnnotationMapping>(convertedAnnotations, {
+      maxHistory: maxHistoryCount,
+    });
 
   // 重置历史记录
   useEffect(() => {
