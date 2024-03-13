@@ -330,13 +330,6 @@ export function AttributePanel() {
         const innerValues = values[type as GlobalAnnotationType];
         for (const field of Object.keys(innerValues)) {
           const item = innerValues[field];
-          const configItems = globalToolConfig[annotationType] ?? [];
-
-          // 不在用户配置的全局标签不保存
-          // @ts-ignore
-          if (!configItems.find((_item) => _item.value === field)) {
-            continue;
-          }
 
           if (item.id && item.id in allAnnotationsMapping) {
             existAnnotations.push(item);
@@ -353,7 +346,7 @@ export function AttributePanel() {
 
       onAnnotationsChange([...existAnnotations, ...newAnnotations] as AnnotationWithTool[]);
     },
-    [onAnnotationsChange, globalToolConfig, allAnnotationsMapping],
+    [onAnnotationsChange, allAnnotationsMapping],
   );
 
   const handleClear = () => {
