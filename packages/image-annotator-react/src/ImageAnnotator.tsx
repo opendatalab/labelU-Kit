@@ -28,10 +28,11 @@ import type { ImageAnnotatorOptions } from './hooks/useImageAnnotator';
 import { useImageAnnotator } from './hooks/useImageAnnotator';
 import Footer from './Footer';
 import type {
+  AllAnnotationMapping,
+  AllAnnotationType,
   AnnotationDataInUI,
-  AnnotationsWithGlobal,
+  AnnotationWithTool,
   GlobalAnnotation,
-  GlobalAnnotationPayload,
 } from './context/annotation.context';
 import { AnnotationContext } from './context/annotation.context';
 import type { GlobalToolConfig } from './context/tool.context';
@@ -40,38 +41,16 @@ import { HistoryContext } from './context/history.context';
 import type { ImageSample } from './context/sample.context';
 import { SampleContext } from './context/sample.context';
 
-function addToolNameToAnnotationData(item: AnnotationData, toolName: ToolName) {
-  return {
-    ...item,
-    tool: toolName,
-  };
-}
+function addToolNameToAnnotationData(annotationData: Partial<Record<ToolName, AnnotationData[]>>) {
+  const result = [] as AnnotationDataInUI[];
 
-function pick<T extends Record<string, any>, K extends keyof T>(
-  obj: T | undefined,
-  keys: K[],
-  defaultValue: T,
-  itemDefaultValue?: any,
-): NonNullable<Pick<T, K>> {
-  if (!obj) {
-    return defaultValue;
-  }
-
-  return keys.reduce((acc, key) => {
-    acc[key] = obj[key] ?? itemDefaultValue;
-    return acc;
-  }, {} as T);
-}
-
-function convertAnnotationDataToUI(datas: Partial<Record<ToolName, AnnotationData[]>>) {
-  const result: Partial<Record<ToolName, AnnotationDataInUI[]>> = {};
-
-  Object.keys(datas).forEach((key) => {
-    result[key as ToolName] = datas[key as ToolName]?.map((item) => {
-      return {
+  Object.keys(annotationData).forEach((key) => {
+    const _toolName = key as ToolName;
+    annotationData[_toolName]?.forEach((item) => {
+      result.push({
         ...item,
-        tool: key as ToolName,
-      };
+        tool: _toolName,
+      });
     });
   });
 
@@ -116,8 +95,7 @@ const AnnotationContainer = styled.div`
 export type { ImageAnnotatorOptions } from './hooks/useImageAnnotator';
 
 export interface AnnotatorRef {
-  getAnnotations: () => Partial<Record<ToolName, AnnotationData[]>> | undefined;
-  getGlobalAnnotations: () => Record<TextAnnotationType | TagAnnotationType, GlobalAnnotation[]>;
+  getAnnotations: () => Partial<Record<AllAnnotationType, AnnotationData[] | GlobalAnnotation[]>> | undefined;
   getSample: () => ImageSample | undefined;
 
   getEngine: () => ImageAnnotatorClass | null;
@@ -327,57 +305,42 @@ function ForwardAnnotator(
   const selectedIndexRef = useRef<number>(-1);
 
   const onRedoUndo = useCallback(
-    (currentAnnotations: AnnotationsWithGlobal) => {
+    (currentAnnotations: AllAnnotationMapping) => {
       engine?.clearData();
-      const imageAnnotations = currentAnnotations.image;
+      const imageAnnotations: Partial<Record<ToolName, AnnotationDataInUI[]>> = {};
 
-      Object.keys(imageAnnotations).forEach((tool) => {
-        engine?.loadData(tool as ToolName, imageAnnotations[tool as ToolName] as AnnotationToolData<ToolName>);
+      Object.values(currentAnnotations).forEach((_item) => {
+        if (TOOL_NAMES.includes(_item.tool as ToolName)) {
+          const toolName = _item.tool as ToolName;
+          if (!imageAnnotations[toolName]) {
+            imageAnnotations[toolName] = [];
+          }
+
+          imageAnnotations![toolName]!.push(_item as AnnotationDataInUI);
+        }
       });
     },
     [engine],
   );
 
-  const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
-    useRedoUndo<AnnotationsWithGlobal>(
-      {
-        image: convertAnnotationDataToUI(
-          isSampleDataEmpty
-            ? (pick(preAnnotations, Array.from(TOOL_NAMES) as ToolName[], {}, []) as AnnotationsWithGlobal['image'])
-            : (pick(
-                annotationsFromSample,
-                Array.from(TOOL_NAMES) as ToolName[],
-                {},
-                [],
-              ) as AnnotationsWithGlobal['image']),
-        ),
-        global: {
-          text: isSampleDataEmpty
-            ? ((preAnnotations?.text ?? []) as GlobalAnnotation[])
-            : annotationsFromSample.text ?? [],
-          tag: isSampleDataEmpty
-            ? ((preAnnotations?.tag ?? []) as GlobalAnnotation[])
-            : annotationsFromSample.tag ?? [],
-        },
-      },
-      {
-        maxHistory: maxHistoryCount,
-        onRedo: onRedoUndo,
-        onUndo: onRedoUndo,
-      },
-    );
-
   const annotationsMapping = useMemo(() => {
-    const mapping: Record<string, AnnotationDataInUI> = {};
+    const mapping: AllAnnotationMapping = {};
+    const _data = currentSample?.data ?? {};
+    const _preData = preAnnotations ?? {};
 
-    Object.keys(annotationsWithGlobal.global).forEach((key) => {
-      annotationsWithGlobal.global[key as TextAnnotationType | TagAnnotationType]?.forEach((item) => {
-        mapping[item.id] = item as unknown as AnnotationDataInUI;
+    if (isSampleDataEmpty) {
+      Object.keys(_preData).forEach((key) => {
+        _preData[key as AllAnnotationType]?.forEach((item) => {
+          mapping[item.id] = {
+            ...item,
+            tool: key as AllAnnotationType,
+          };
+        });
       });
-    });
+    }
 
-    Object.keys(annotationsWithGlobal.image).forEach((key) => {
-      annotationsWithGlobal.image[key as ToolName]?.forEach((item) => {
+    Object.keys(_data).forEach((key) => {
+      _data[key as ToolName]?.forEach((item) => {
         mapping[item.id] = {
           ...item,
           tool: key as ToolName,
@@ -386,104 +349,55 @@ function ForwardAnnotator(
     });
 
     return mapping;
-  }, [annotationsWithGlobal.global, annotationsWithGlobal.image]);
+  }, [currentSample?.data, isSampleDataEmpty, preAnnotations]);
 
-  const onGlobalAnnotationChange = useCallback(
-    (newGlobalAnnotations: GlobalAnnotationPayload) => {
-      updateAnnotationsWithGlobal((pre) => {
-        return {
-          ...pre!,
-          global: {
-            ...pre!.global,
-            ...newGlobalAnnotations,
-          },
-        };
-      });
-    },
-    [updateAnnotationsWithGlobal],
-  );
+  const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
+    useRedoUndo<AllAnnotationMapping>(annotationsMapping, {
+      maxHistory: maxHistoryCount,
+      onRedo: onRedoUndo,
+      onUndo: onRedoUndo,
+    });
 
-  const onGlobalAnnotationClear = useCallback(() => {
-    updateAnnotationsWithGlobal((pre) => {
-      return {
-        ...pre!,
-        global: {
-          text: [],
-          tag: [],
-        },
-      };
+  const onAnnotationClear = useCallback(() => {
+    updateAnnotationsWithGlobal(() => {
+      return {};
     });
   }, [updateAnnotationsWithGlobal]);
 
   const sortedImageAnnotations = useMemo(() => {
-    const result: AnnotationDataInUI[] = [];
+    const result = Object.values(annotationsWithGlobal).filter((item) => {
+      return TOOL_NAMES.includes(item.tool as ToolName);
+    }) as AnnotationDataInUI[];
 
-    Object.keys(annotationsWithGlobal.image).forEach((key) => {
-      result.push(...(annotationsWithGlobal.image[key as ToolName] ?? []));
-    });
+    result.sort((a, b) => a.order - b.order);
 
-    return result.sort((a, b) => a.order - b.order);
-  }, [annotationsWithGlobal.image]);
+    return result;
+  }, [annotationsWithGlobal]);
 
   const onAnnotationsChange = useCallback(
-    (_annotations: AnnotationDataInUI[]) => {
+    (_annotations: AnnotationWithTool[]) => {
+      const annotationGroupByTool: AllAnnotationMapping = {};
+
+      _annotations.forEach((item) => {
+        annotationGroupByTool[item.id] = item;
+      });
+
       updateAnnotationsWithGlobal((pre) => {
-        const preImageAnnotations = { ...pre!.image };
-
-        _annotations.forEach((item) => {
-          preImageAnnotations[item.tool] = preImageAnnotations[item.tool]?.map((annotation) => {
-            if (annotation.id === item.id) {
-              return item;
-            }
-
-            return annotation;
-          });
-        });
-
         return {
           ...pre!,
-          image: preImageAnnotations,
+          ...annotationGroupByTool,
         };
       });
     },
     [updateAnnotationsWithGlobal],
   );
 
-  const onImageAnnotationsClear = useCallback(() => {
-    updateAnnotationsWithGlobal((pre) => {
-      const preImageAnnotations = { ...pre!.image };
-
-      Object.keys(preImageAnnotations).forEach((key) => {
-        preImageAnnotations[key as ToolName] = [];
-      });
-
-      return {
-        ...pre!,
-        image: preImageAnnotations,
-      };
-    });
-  }, [updateAnnotationsWithGlobal]);
-
-  const onImageAnnotationChange = useCallback(
-    (_annotation: AnnotationDataInUI) => {
-      const toolName = _annotation.tool;
-
+  const onAnnotationChange = useCallback(
+    (_annotation: AnnotationWithTool) => {
       updateAnnotationsWithGlobal((pre) => {
-        const preImageAnnotations = { ...pre!.image };
-        const toolAnnotations = preImageAnnotations[toolName]?.map((item) => {
-          if (_annotation.id === item.id) {
-            return _annotation;
-          }
-
-          return item;
-        });
-
         return {
           ...pre!,
-          image: {
-            ...preImageAnnotations,
-            [toolName]: toolAnnotations,
-          },
+          [_annotation.id]: _annotation,
         };
       });
     },
@@ -501,7 +415,7 @@ function ForwardAnnotator(
         visible: true,
       };
       setSelectedAnnotation(newAnnotation);
-      onImageAnnotationChange(newAnnotation);
+      onAnnotationChange(newAnnotation);
       selectedIndexRef.current = sortedImageAnnotations.findIndex((item) => item.id === annotation.id);
     };
 
@@ -510,7 +424,7 @@ function ForwardAnnotator(
     return () => {
       engine?.off('select', handleSelectAnnotation);
     };
-  }, [engine, onImageAnnotationChange, sortedImageAnnotations]);
+  }, [engine, onAnnotationChange, sortedImageAnnotations]);
 
   useEffect(() => {
     const handleUnSelect = () => {
@@ -566,12 +480,7 @@ function ForwardAnnotator(
   // effects
   useEffect(() => {
     const _onAnnotationsChange = () => {
-      updateAnnotationsWithGlobal((pre) => {
-        return {
-          ...pre!,
-          image: engine!.getDataByTool(addToolNameToAnnotationData),
-        };
-      });
+      onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
     };
     // 添加标记
     engine?.on('add', (annotations: AnnotationData[]) => {
@@ -611,7 +520,7 @@ function ForwardAnnotator(
 
     // 标记变更，如移动，编辑等
     engine?.on('change', _onAnnotationsChange);
-  }, [engine, labelMappingByTool, updateAnnotationsWithGlobal]);
+  }, [engine, labelMappingByTool, onAnnotationsChange]);
 
   useEffect(() => {
     if (!onError) {
@@ -645,37 +554,6 @@ function ForwardAnnotator(
   useEffect(() => {
     reset();
   }, [currentSample, reset]);
-
-  useEffect(() => {
-    updateAnnotationsWithGlobal({
-      image: convertAnnotationDataToUI(
-        isSampleDataEmpty
-          ? (pick(preAnnotations, Array.from(TOOL_NAMES) as ToolName[], {}, []) as AnnotationsWithGlobal['image'])
-          : (pick(
-              annotationsFromSample,
-              Array.from(TOOL_NAMES) as ToolName[],
-              {},
-              [],
-            ) as AnnotationsWithGlobal['image']),
-      ),
-      global: {
-        text: annotationsFromSample.text ?? [],
-        tag: annotationsFromSample.tag ?? [],
-      },
-    });
-  }, [
-    annotationsFromSample,
-    annotationsFromSample.cuboid,
-    annotationsFromSample.line,
-    annotationsFromSample.point,
-    annotationsFromSample.polygon,
-    annotationsFromSample.rect,
-    annotationsFromSample.tag,
-    annotationsFromSample.text,
-    isSampleDataEmpty,
-    preAnnotations,
-    updateAnnotationsWithGlobal,
-  ]);
 
   // ================== sample ==================
 
@@ -758,16 +636,28 @@ function ForwardAnnotator(
     ref,
     () => ({
       getAnnotations: () => {
-        return annotationsWithGlobal.image;
-      },
-      getGlobalAnnotations: () => {
-        return annotationsWithGlobal.global;
+        const result: Partial<Record<AllAnnotationType, AnnotationData[] | GlobalAnnotation[]>> = {};
+
+        Object.values(annotationsWithGlobal).forEach((item) => {
+          // @ts-ignore
+          // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+          const { visible, tool, ...rest } = item;
+          const _toolName = tool;
+
+          if (!result[_toolName]) {
+            result[_toolName] = [];
+          }
+
+          result![_toolName]!.push(rest as any);
+        });
+
+        return result;
       },
       getSample: () => currentSample,
 
       getEngine: () => engine,
     }),
-    [annotationsWithGlobal.global, annotationsWithGlobal.image, currentSample, engine],
+    [annotationsWithGlobal, currentSample, engine],
   );
 
   const annotationContextValue = useMemo(
@@ -776,11 +666,12 @@ function ForwardAnnotator(
       sortedImageAnnotations,
       selectedAnnotation,
       allAnnotationsMapping: annotationsMapping,
-      onImageAnnotationChange,
-      onImageAnnotationsChange: onAnnotationsChange,
-      onGlobalAnnotationsChange: onGlobalAnnotationChange,
-      onGlobalAnnotationClear,
-      onImageAnnotationsClear,
+      onAnnotationChange,
+      onAnnotationsChange,
+      // onGlobalAnnotationsChange: onGlobalAnnotationChange,
+      onAnnotationClear,
+      // onGlobalAnnotationClear,
+      // onImageAnnotationsClear,
       orderVisible,
       preAnnotationsWithGlobal: preAnnotations,
       onOrderVisibleChange,
@@ -790,11 +681,12 @@ function ForwardAnnotator(
       sortedImageAnnotations,
       selectedAnnotation,
       annotationsMapping,
-      onImageAnnotationChange,
+      onAnnotationChange,
       onAnnotationsChange,
-      onGlobalAnnotationChange,
-      onGlobalAnnotationClear,
-      onImageAnnotationsClear,
+      // onGlobalAnnotationChange,
+      onAnnotationClear,
+      // onGlobalAnnotationClear,
+      // onImageAnnotationsClear,
       orderVisible,
       preAnnotations,
       onOrderVisibleChange,

@@ -127,7 +127,7 @@ export interface AttributeActionProps {
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
   const { engine, requestEdit, labelMapping, currentTool } = useTool();
-  const { onImageAnnotationChange, onImageAnnotationsChange } = useAnnotationCtx();
+  const { onAnnotationChange, onAnnotationsChange } = useAnnotationCtx();
 
   const annotationsMapping = useMemo(() => {
     if (!annotations) {
@@ -201,7 +201,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
     engine?.toggleAnnotationsVisibility(annotation.tool, [annotation.id], value);
 
-    onImageAnnotationChange({ ...annotation, visible: value });
+    onAnnotationChange({ ...annotation, visible: value });
   };
 
   const toggleBatchVisibility = (value: boolean) => (e: React.MouseEvent) => {
@@ -226,7 +226,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       engine?.toggleAnnotationsVisibility(tool as ToolName, toolIds[tool as ToolName], value);
     });
 
-    onImageAnnotationsChange(
+    onAnnotationsChange(
       annotations.map((item) => {
         if (annotationsMapping[item.id]) {
           return { ...item, visible: value };
