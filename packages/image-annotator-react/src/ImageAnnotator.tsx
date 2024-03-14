@@ -642,7 +642,7 @@ function ForwardAnnotator(
           // @ts-ignore
           // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
           const { visible, tool, ...rest } = item;
-          const _toolName = tool;
+          const _toolName = tool || (item as GlobalAnnotation).type;
 
           if (!result[_toolName]) {
             result[_toolName] = [];
@@ -668,10 +668,7 @@ function ForwardAnnotator(
       allAnnotationsMapping: annotationsMapping,
       onAnnotationChange,
       onAnnotationsChange,
-      // onGlobalAnnotationsChange: onGlobalAnnotationChange,
       onAnnotationClear,
-      // onGlobalAnnotationClear,
-      // onImageAnnotationsClear,
       orderVisible,
       preAnnotationsWithGlobal: preAnnotations,
       onOrderVisibleChange,
