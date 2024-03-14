@@ -24,7 +24,7 @@ export interface CursorParams {
 const dpr = window.devicePixelRatio || 1;
 
 export class CrossCursor {
-  public style: Required<CursorStyle> = {
+  private _style: Required<CursorStyle> = {
     stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: dpr,
     fill: '#fff',
@@ -42,11 +42,22 @@ export class CrossCursor {
     };
 
     if (params.style) {
-      this.style = {
+      this._style = {
         ...this.style,
         ...params.style,
       } as Required<CursorStyle>;
     }
+  }
+
+  public setStyle(style: CursorStyle) {
+    this._style = {
+      ...this._style,
+      ...style,
+    };
+  }
+
+  public get style() {
+    return this._style;
   }
 
   public updateCoordinate(x: number, y: number) {
@@ -68,7 +79,7 @@ export class CrossCursor {
       return;
     }
 
-    const { stroke, strokeWidth, fill } = this.style;
+    const { stroke, strokeWidth, fill } = this._style;
     const canvas = ctx.canvas;
 
     ctx.strokeStyle = stroke;

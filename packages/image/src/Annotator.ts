@@ -172,7 +172,7 @@ export class Annotator extends AnnotatorBase {
     const AnnotationClass = AnnotationMapping[toolName];
 
     if (this.cursorManager) {
-      this.cursorManager.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(pickedLabel);
+      this.cursorManager.color = AnnotationClass.labelStatic.getLabelColor(pickedLabel);
     }
 
     tool.activate(pickedLabel);
@@ -372,7 +372,7 @@ export class Annotator extends AnnotatorBase {
     currentTool!.setLabel(value);
 
     if (this.cursorManager) {
-      this.cursorManager.cursor!.style.stroke = AnnotationClass.labelStatic.getLabelColor(value);
+      this.cursorManager.color = AnnotationClass.labelStatic.getLabelColor(value);
     }
 
     this.render();
