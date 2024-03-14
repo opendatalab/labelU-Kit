@@ -37,13 +37,13 @@ export interface AnnotationContextType {
 
   allAnnotationsMapping: AllAnnotationMapping;
 
-  // onImageAnnotationChange: (annotation: AnnotationDataInUI) => void;
+  onAnnotationRemove: (annotation: AnnotationDataInUI) => void;
 
   onAnnotationsChange: (annotations: AnnotationWithTool[]) => void;
 
   onAnnotationChange: (annotation: AnnotationWithTool) => void;
 
-  // onGlobalAnnotationsChange: (annotations: GlobalAnnotationPayload) => void;
+  onAnnotationsRemove: (annotations: AnnotationDataInUI[]) => void;
 
   onAnnotationClear: () => void;
 

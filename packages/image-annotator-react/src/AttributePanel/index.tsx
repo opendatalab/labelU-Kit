@@ -186,7 +186,6 @@ export function AttributePanel() {
     selectedAnnotation,
     preAnnotationsWithGlobal,
     onAnnotationsChange,
-    // onGlobalAnnotationsChange,
     onAnnotationClear,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
