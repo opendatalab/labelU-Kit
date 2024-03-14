@@ -84,7 +84,7 @@ export class Draft<
     this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
     // 光标颜色切换
     if (cursorManager?.cursor) {
-      cursorManager.cursor.style.stroke = this.labelColor;
+      cursorManager.color = this.labelColor;
     }
 
     this.group = new Group(id, data.order, true);
@@ -111,6 +111,11 @@ export class Draft<
   }
 
   private _handleMouseDown = (e: MouseEvent) => {
+    // data不存在说明当前的草稿被销毁，在创建点之后，不取消选中立即再创建新的点，此时事件还没来得及销毁
+    if (!this.data) {
+      return;
+    }
+
     // 如果鼠标落在控制点或者控制边上，不选中草稿
     if (this._isControlUnderCursor({ x: e.offsetX, y: e.offsetY }) || !this.requestEdit('update')) {
       return;

@@ -125,7 +125,7 @@ export class Axis {
   }
 
   private _handleKeyUp = () => {
-    cursorManager?.enable();
+    cursorManager?.default();
   };
 
   private _handleMoveStart = (e: MouseEvent) => {
@@ -157,7 +157,7 @@ export class Axis {
   };
 
   private _pan = (e: MouseEvent) => {
-    const { _startPanPoint, _renderer, _startMovePoint } = this;
+    const { _startPanPoint, _startMovePoint } = this;
     const point = {
       x: e.offsetX,
       y: e.offsetY,
@@ -169,7 +169,7 @@ export class Axis {
     this._x = point.x - _startPanPoint!.x;
     this._y = point.y - _startPanPoint!.y;
 
-    _renderer!.canvas.style.cursor = 'grabbing';
+    cursorManager?.grabbing();
 
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
@@ -220,6 +220,8 @@ export class Axis {
   private _handleRightMouseUp = (e: MouseEvent) => {
     this._startPanPoint = null;
     this._startMovePoint = null;
+
+    cursorManager?.default();
 
     if (!this.isMoved) {
       eventEmitter.emit(EInternalEvent.RightMouseUpWithoutAxisChange, e);
