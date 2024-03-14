@@ -41,6 +41,14 @@ import { HistoryContext } from './context/history.context';
 import type { ImageSample } from './context/sample.context';
 import { SampleContext } from './context/sample.context';
 
+function omit<T, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
+  const result = { ...obj };
+  keys.forEach((key) => {
+    delete result[key];
+  });
+  return result;
+}
+
 function addToolNameToAnnotationData(annotationData: Partial<Record<ToolName, AnnotationData[]>>) {
   const result = [] as AnnotationDataInUI[];
 
@@ -359,10 +367,42 @@ function ForwardAnnotator(
     });
 
   const onAnnotationClear = useCallback(() => {
+    engine?.clearData();
     updateAnnotationsWithGlobal(() => {
       return {};
     });
-  }, [updateAnnotationsWithGlobal]);
+  }, [engine, updateAnnotationsWithGlobal]);
+
+  const onAnnotationRemove = useCallback(
+    (_annotation: AnnotationWithTool) => {
+      if (!_annotation?.tool) {
+        return;
+      }
+
+      updateAnnotationsWithGlobal((pre) => (pre ? omit(pre, _annotation.id) : pre));
+      setSelectedAnnotation(undefined);
+    },
+    [updateAnnotationsWithGlobal],
+  );
+
+  const onAnnotationsRemove = useCallback(
+    (_annotations: AnnotationWithTool[]) => {
+      updateAnnotationsWithGlobal((pre) => {
+        let newAnnotationWithGlobal = pre;
+
+        if (newAnnotationWithGlobal) {
+          _annotations.forEach((item) => {
+            newAnnotationWithGlobal = omit(newAnnotationWithGlobal!, item.id);
+          });
+        }
+
+        return newAnnotationWithGlobal;
+      });
+
+      setSelectedAnnotation(undefined);
+    },
+    [updateAnnotationsWithGlobal],
+  );
 
   const sortedImageAnnotations = useMemo(() => {
     const result = Object.values(annotationsWithGlobal).filter((item) => {
@@ -668,6 +708,8 @@ function ForwardAnnotator(
       allAnnotationsMapping: annotationsMapping,
       onAnnotationChange,
       onAnnotationsChange,
+      onAnnotationRemove,
+      onAnnotationsRemove,
       onAnnotationClear,
       orderVisible,
       preAnnotationsWithGlobal: preAnnotations,
@@ -680,10 +722,9 @@ function ForwardAnnotator(
       annotationsMapping,
       onAnnotationChange,
       onAnnotationsChange,
-      // onGlobalAnnotationChange,
+      onAnnotationRemove,
+      onAnnotationsRemove,
       onAnnotationClear,
-      // onGlobalAnnotationClear,
-      // onImageAnnotationsClear,
       orderVisible,
       preAnnotations,
       onOrderVisibleChange,

@@ -127,7 +127,7 @@ export interface AttributeActionProps {
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
   const { engine, requestEdit, labelMapping, currentTool } = useTool();
-  const { onAnnotationChange, onAnnotationsChange } = useAnnotationCtx();
+  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove } = useAnnotationCtx();
 
   const annotationsMapping = useMemo(() => {
     if (!annotations) {
@@ -244,7 +244,12 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         {showEdit && <EditIcon onClick={handleEditClick} />}
         {visible && <VisibilityIcon onClick={toggleOneVisibility(false)} />}
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
-        <DeleteIcon onClick={() => engine?.removeAnnotationById(annotation.tool, annotation.id)} />
+        <DeleteIcon
+          onClick={() => {
+            engine?.removeAnnotationById(annotation.tool, annotation.id);
+            onAnnotationRemove(annotation);
+          }}
+        />
       </Action>
     );
   }
@@ -257,6 +262,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       {!visible && <StyledVisibilityOffIcon onClick={toggleBatchVisibility(true)} />}
       <DeleteIcon
         onClick={() => {
+          onAnnotationsRemove(annotations!);
           annotations?.forEach((item) => {
             engine?.removeAnnotationById(item.tool, item.id);
           });
