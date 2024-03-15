@@ -1,6 +1,6 @@
 import { redirect } from 'react-router';
 
-import { goLogin } from '@/utils/sso';
+import { goAuth } from '@/utils/sso';
 import * as storage from '@/utils/storage';
 
 export async function loginLoader() {
@@ -9,7 +9,7 @@ export async function loginLoader() {
   }
 
   if (window.IS_ONLINE) {
-    goLogin();
+    goAuth();
 
     return Promise.resolve();
   }

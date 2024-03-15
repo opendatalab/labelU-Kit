@@ -5,7 +5,7 @@ import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 import { ReactComponent as LocalDeploy } from '@/assets/svg/local-deploy.svg';
-import { goLogin } from '@/utils/sso';
+import { goAuth } from '@/utils/sso';
 
 import TaskTip from './TaskTip';
 import Breadcrumb from '../Breadcrumb';
@@ -27,7 +27,7 @@ const Homepage = () => {
     localStorage.setItem('token', '');
 
     if (window.IS_ONLINE) {
-      await goLogin();
+      await goAuth();
     } else {
       navigate('/login');
     }
