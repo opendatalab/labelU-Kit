@@ -262,10 +262,10 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       {!visible && <StyledVisibilityOffIcon onClick={toggleBatchVisibility(true)} />}
       <DeleteIcon
         onClick={() => {
-          onAnnotationsRemove(annotations!);
           annotations?.forEach((item) => {
             engine?.removeAnnotationById(item.tool, item.id);
           });
+          onAnnotationsRemove(annotations!);
         }}
       />
     </Action>
