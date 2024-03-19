@@ -191,7 +191,7 @@ export function AttributePanel() {
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const globalAnnotations = useMemo(() => {
     return Object.values(annotationsWithGlobal).filter((item) =>
-      ['text', 'tag'].includes(item.tool),
+      ['text', 'tag'].includes((item as GlobalAnnotation).type),
     ) as GlobalAnnotation[];
   }, [annotationsWithGlobal]);
 
