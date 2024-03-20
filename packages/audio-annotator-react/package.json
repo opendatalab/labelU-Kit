@@ -1,6 +1,6 @@
 {
   "name": "@labelu/audio-annotator-react",
-  "version": "1.4.0-alpha.6",
+  "version": "1.4.0-alpha.7",
   "description": "audio annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
