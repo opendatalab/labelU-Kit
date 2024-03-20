@@ -687,13 +687,15 @@ function ForwardAnnotator(
     getAnnotations: () => {
       const result: AnnotationsWithGlobal = {};
 
-      Object.values(annotationsWithGlobal).forEach((item) => {
-        if (!result[item.type]) {
-          result[item.type] = [];
+      // @ts-ignore
+      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+      Object.values(annotationsWithGlobal).forEach(({ type, visible, ...rest }) => {
+        if (!result[type]) {
+          result[type] = [];
         }
 
         // @ts-ignore
-        result[item.type]!.push(omit(item, 'visible'));
+        result[type]!.push(rest);
       });
 
       return result;
