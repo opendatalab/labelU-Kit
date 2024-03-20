@@ -208,7 +208,12 @@ export function AttributePanel() {
   const titles = useMemo(() => {
     const _titles = [];
     // 将文本描述和标签分类合并成全局配置
-    if (config?.tag || config?.text || preLabelMapping.tag || preLabelMapping.text) {
+    if (
+      config?.tag ||
+      config?.text ||
+      Object.keys(preLabelMapping.tag ?? {}).length ||
+      Object.keys(preLabelMapping.text ?? {}).length
+    ) {
       let isCompleted = false;
 
       const globalAnnotationMapping = globalAnnotations.reduce((acc, item) => {
@@ -287,7 +292,7 @@ export function AttributePanel() {
       }
     }
 
-    onAnnotationsChange(newAnnotations);
+    onAnnotationsChange([...existAnnotations, ...newAnnotations]);
   };
 
   const handleClear = () => {
