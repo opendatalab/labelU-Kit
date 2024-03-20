@@ -323,17 +323,18 @@ export function AttributePanel() {
 
   const handleOnChange = useCallback(
     (
-      _changedValues: any,
+      changedValues: Partial<Record<GlobalAnnotationType, Record<string, TextAnnotationEntity | TagAnnotationEntity>>>,
       values: Record<GlobalAnnotationType, Record<string, TextAnnotationEntity | TagAnnotationEntity>>,
     ) => {
       const newAnnotations: AnnotationWithTool[] = [];
       const existAnnotations: GlobalAnnotation[] = [];
 
-      for (const type of Object.keys(values)) {
+      for (const type of Object.keys(changedValues)) {
         const annotationType = type as GlobalAnnotationType;
-        const innerValues = values[type as GlobalAnnotationType];
-        for (const field of Object.keys(innerValues)) {
-          const item = innerValues[field];
+        const changedInnerValues = changedValues[type as GlobalAnnotationType] ?? {};
+        const allInnerValues = values[annotationType] ?? [];
+        for (const field of Object.keys(changedInnerValues)) {
+          const item = allInnerValues[field];
 
           if (item.id && item.id in allAnnotationsMapping) {
             existAnnotations.push(item);
