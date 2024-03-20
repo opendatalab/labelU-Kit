@@ -94,7 +94,7 @@ const commonController = {
     message.success(info.message, time);
   },
   notificationWarnMessage(info: any, time: number) {
-    message.warn(info.message, time);
+    message.warning(info.message, time);
   },
   notificationInfoMessage(info: any, time: number) {
     message.info(info.message, time);
