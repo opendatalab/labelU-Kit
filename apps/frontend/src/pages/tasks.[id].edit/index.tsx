@@ -10,7 +10,7 @@ import { FlexLayout } from '@labelu/components-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 
 import { message, modal } from '@/StaticAnt';
-import type { TaskResponse } from '@/api/types';
+import type { OkRespCreateSampleResponse, TaskResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import { createSamples, deleteSamples } from '@/api/services/samples';
 import { deleteFile, deleteTask } from '@/api/services/task';
@@ -245,11 +245,11 @@ const CreateTask = () => {
       const jsonlFileList = [];
 
       for (const file of uploadFileList) {
-        if (file.file.name.endsWith('.jsonl') && file.status === UploadStatus.Success && !file.completed) {
+        if (file.file.name.endsWith('.jsonl') && file.status === UploadStatus.Success && _.isNil(file.refId)) {
           jsonlFileList.push({
             file_id: file.id!,
           });
-        } else if (file.status === UploadStatus.Success && !file.completed) {
+        } else if (file.status === UploadStatus.Success && _.isNil(file.refId)) {
           mediaFileList.push({
             file_id: file.id!,
             data: {
@@ -261,20 +261,22 @@ const CreateTask = () => {
 
       if (isExistTask) {
         if (currentStep === StepEnum.Upload) {
+          let response: OkRespCreateSampleResponse | undefined;
           if (!_.isEmpty(mediaFileList)) {
-            await createSamples(taskId, mediaFileList);
+            response = await createSamples(taskId, mediaFileList);
           }
 
           if (!_.isEmpty(jsonlFileList)) {
-            await createPreAnnotations(taskId, jsonlFileList);
+            response = await createPreAnnotations(taskId, jsonlFileList);
           }
 
           setUploadFileList((prev) => {
             return prev.map((item) => {
-              if (item.status === UploadStatus.Success) {
+              const uploadFileIndex = uploadFileList.findIndex((file) => file.id === item.id);
+              if (uploadFileIndex > -1 && response?.data?.ids?.[uploadFileIndex]) {
                 return {
                   ...item,
-                  completed: true,
+                  refId: response.data.ids[uploadFileIndex],
                 };
               }
               return item;
