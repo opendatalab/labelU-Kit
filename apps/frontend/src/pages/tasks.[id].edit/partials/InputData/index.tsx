@@ -20,6 +20,7 @@ import { MediaType } from '@/api/types';
 import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
 import type { TaskInLoader } from '@/loaders/task.loader';
 import { useUploadFileMutation } from '@/api/mutations/attachment';
+import { deleteSamples } from '@/api/services/samples';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
@@ -58,7 +59,8 @@ export interface QueuedFile {
   status: UploadStatus;
   reason?: string;
   file: File;
-  completed?: boolean;
+  // sample id or pre-annotation id
+  refId?: number;
 }
 
 const readFile = async (file: File, type?: 'text') => {
@@ -278,12 +280,22 @@ const InputData = () => {
 
   const handleFileDelete = useCallback(
     async (file: QueuedFile) => {
-      if (file.status !== UploadStatus.Error) {
+      if (file.status === UploadStatus.Success) {
         await deleteFile(
           { task_id: taskId! },
           {
             attachment_ids: [file.id!],
           },
+        );
+      }
+
+      // 删除样本
+      if (file.refId) {
+        await deleteSamples(
+          {
+            task_id: taskId!,
+          },
+          { sample_ids: [file.refId] },
         );
       }
 
