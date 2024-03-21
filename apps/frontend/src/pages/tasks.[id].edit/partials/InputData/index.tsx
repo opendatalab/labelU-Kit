@@ -7,6 +7,7 @@ import formatter from '@labelu/formatter';
 import { FileOutlined, FolderOpenOutlined, QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import type { RcFile } from 'antd/lib/upload/interface';
 import { FlexLayout } from '@labelu/components-react';
+import { useRevalidator } from 'react-router';
 
 import IconText from '@/components/IconText';
 import type { StatusType } from '@/components/Status';
@@ -139,6 +140,7 @@ const InputData = () => {
     task = {} as NonNullable<TaskInLoader>,
   } = useContext(TaskCreationContext);
   const uploadMutation = useUploadFileMutation();
+  const revalidator = useRevalidator();
 
   const taskId = task.id;
 
@@ -301,8 +303,9 @@ const InputData = () => {
 
       setFileQueue((pre) => pre.filter((item) => item.uid !== file.uid));
       commonController.notificationSuccessMessage({ message: '已删除一个文件' }, 3);
+      revalidator.revalidate();
     },
-    [setFileQueue, taskId],
+    [revalidator, setFileQueue, taskId],
   );
 
   const tableColumns = useMemo(() => {
