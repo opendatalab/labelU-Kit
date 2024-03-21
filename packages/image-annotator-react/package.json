@@ -1,6 +1,6 @@
 {
   "name": "@labelu/image-annotator-react",
-  "version": "1.0.2",
+  "version": "2.0.0-alpha.9",
   "description": "image annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -29,15 +29,17 @@
     "react"
   ],
   "dependencies": {
-    "@labelu/components-react": "1.3.1",
-    "@labelu/image": "1.0.1",
-    "@labelu/interface": "1.3.0",
+    "@labelu/components-react": "1.4.0-alpha.4",
+    "@labelu/image": "1.1.0-alpha.3",
+    "@labelu/interface": "1.3.1-alpha.1",
+    "lodash.clonedeep": "^4.5.0",
     "polished": "^4.2.2",
     "react-hotkeys-hook": "^4.4.1",
     "resize-observer-polyfill": "^1.5.1",
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
+    "@types/lodash.clonedeep": "^4.5.9",
     "@types/react": "^18.2.20",
     "@types/react-slider": "^1.3.6",
     "@types/styled-components": "^5.1.26",

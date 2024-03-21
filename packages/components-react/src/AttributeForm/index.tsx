@@ -49,6 +49,12 @@ const Select = styled.select`
   border-radius: 6px;
   outline: none;
 
+  /* aria-disabled */
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
   &:focus {
     border-color: var(--color-primary);
   }
@@ -61,6 +67,12 @@ const TextAreaWrapper = styled.textarea`
   line-height: 22px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
     'Helvetica Neue', sans-serif;
+
+  /* aria-disabled */
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 
   &:focus {
     border-color: var(--color-primary);
@@ -77,6 +89,7 @@ export function FormItem({
 }: React.PropsWithChildren<{
   label?: React.ReactNode;
   required?: boolean;
+  disabled?: boolean;
   errors?: string[];
   className?: string;
 }>) {
@@ -147,6 +160,8 @@ interface RadioGroupProps {
   onChange?: (value: string[] | undefined) => void;
   options: FieldOption[];
   value?: string[];
+
+  disabled?: boolean;
 }
 
 export const RadioGroupWrapper = styled.div`
@@ -154,6 +169,12 @@ export const RadioGroupWrapper = styled.div`
   flex-direction: column;
   gap: 0.5rem;
   padding-left: 1rem;
+
+  /* aria-disabled */
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 
   label {
     cursor: pointer;
@@ -168,9 +189,13 @@ export const RadioGroupWrapper = styled.div`
   }
 `;
 
-function RadioGroup({ onChange, value: propsValue, options }: RadioGroupProps) {
+function RadioGroup({ onChange, value: propsValue, options, disabled }: RadioGroupProps) {
   const [value, setValue] = useState<string[] | undefined>(propsValue || []);
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) {
+      return;
+    }
+
     setValue([e.target.value]);
     onChange?.([e.target.value]);
   };
@@ -180,7 +205,7 @@ function RadioGroup({ onChange, value: propsValue, options }: RadioGroupProps) {
   }, [propsValue]);
 
   return (
-    <RadioGroupWrapper>
+    <RadioGroupWrapper aria-disabled={disabled}>
       {options.map((item) => {
         return (
           <label key={item.value}>
@@ -193,10 +218,14 @@ function RadioGroup({ onChange, value: propsValue, options }: RadioGroupProps) {
   );
 }
 
-function CheckboxGroup({ onChange, value: propsValue, options }: RadioGroupProps) {
+function CheckboxGroup({ onChange, value: propsValue, options, disabled }: RadioGroupProps) {
   const [value, setValue] = useState<string[] | undefined>(propsValue);
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue: string[] | undefined = [];
+
+    if (disabled) {
+      return;
+    }
 
     if (e.target.checked) {
       newValue = [...(value ?? []), e.target.value];
@@ -213,7 +242,7 @@ function CheckboxGroup({ onChange, value: propsValue, options }: RadioGroupProps
   }, [propsValue]);
 
   return (
-    <RadioGroupWrapper>
+    <RadioGroupWrapper aria-disabled={disabled}>
       {options.map((item) => {
         return (
           <label key={item.value}>
@@ -234,6 +263,7 @@ interface TextAreaProps {
 function TextArea({
   value: propsValue,
   onChange,
+  disabled,
   ...props
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & TextAreaProps) {
   const [value, setValue] = useState<string | undefined>(propsValue);
@@ -248,6 +278,7 @@ function TextArea({
 
   return (
     <TextAreaWrapper
+      aria-disabled={disabled}
       onChange={handleOnChange}
       value={value ?? ''}
       onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
@@ -268,6 +299,8 @@ interface AttributeResultProps {
   stringType?: StringType[keyof StringType];
   className?: string;
   name?: string | number | (string | number)[];
+
+  disabled?: boolean;
 }
 
 export function AttributeFormItem({
@@ -276,6 +309,7 @@ export function AttributeFormItem({
   label,
   value,
   required,
+  disabled,
   regexp,
   maxLength,
   stringType,
@@ -322,16 +356,23 @@ export function AttributeFormItem({
   let child: React.ReactNode = <input />;
 
   if (type === 'enum') {
-    child = <RadioGroup options={finalOptions} />;
+    child = <RadioGroup disabled={disabled} options={finalOptions} />;
   } else {
-    child = <CheckboxGroup options={finalOptions} />;
+    child = <CheckboxGroup disabled={disabled} options={finalOptions} />;
   }
 
   if (type === 'string') {
-    child = <TextArea rows={3} onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()} maxLength={maxLength} />;
+    child = (
+      <TextArea
+        disabled={disabled}
+        rows={3}
+        onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+        maxLength={maxLength}
+      />
+    );
 
     if (stringType === 'order') {
-      child = <input disabled />;
+      child = <input disabled={disabled} aria-disabled={disabled} />;
     }
   }
 
@@ -365,10 +406,26 @@ export interface AttributeFormProps {
   onLabelChange?: (attribute: Attribute) => void;
   currentAttribute?: Attribute;
   extra?: React.ReactNode;
+
+  labelDisabled?: boolean;
+
+  attributeDisabled?: boolean;
 }
 
 export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProps>(
-  ({ onAttributeChange, labelChangeable = true, attributes, currentAttribute, initialValues, onLabelChange }, ref) => {
+  (
+    {
+      onAttributeChange,
+      labelChangeable = true,
+      attributes,
+      currentAttribute,
+      initialValues,
+      onLabelChange,
+      labelDisabled,
+      attributeDisabled,
+    },
+    ref,
+  ) => {
     const [form] = useForm();
     const [selectedAttribute, setSelectedAttribute] = useState<Attribute>();
     const [error, setError] = useState<ValidateErrorEntity>({} as ValidateErrorEntity);
@@ -460,7 +517,7 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
                   },
                 ]}
               >
-                <Select>
+                <Select aria-disabled={labelDisabled}>
                   {attributeOptions.map((item) => {
                     return (
                       <option key={item.value} value={item.value!}>
@@ -478,6 +535,7 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
               {resultAttributeOptions.map((attributeOptionItem) => (
                 <AttributeFormItem
                   {...attributeOptionItem}
+                  disabled={attributeDisabled}
                   label={attributeOptionItem.key}
                   key={attributeOptionItem.value}
                 />

@@ -34,7 +34,9 @@ export class LabelBase {
 
   public getLabelByValue(value: string | undefined) {
     if (typeof value !== 'string') {
-      throw Error('value is not a string', value);
+      console.error('value is not a string', value);
+
+      return;
     }
 
     return this.labelMapping.get(value);
@@ -103,8 +105,11 @@ export class LabelBase {
 
   public getLabelText(value?: string): string {
     if (typeof value !== 'string') {
-      throw new Error('Value is not a string');
+      console.error('Value is not a string');
+
+      return LabelBase.DEFAULT_LABEL_TEXT;
     }
+
     return this.getLabelByValue(value)?.key ?? LabelBase.DEFAULT_LABEL_TEXT;
   }
 

@@ -1,5 +1,6 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+
+import uid from '@/utils/uid';
 
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
@@ -30,6 +31,10 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       front: mapValues(item.front, (point) => axis!.convertSourceCoordinate(point)),
       back: mapValues(item.back, (point) => axis!.convertSourceCoordinate(point)),
     }));
+  }
+
+  static create({ data, ...config }: CuboidToolOptions) {
+    return new CuboidTool({ ...config, data: CuboidTool.convertToCanvasCoordinates(data ?? []) });
   }
 
   public sketch: Group<Rect | Line, RectStyle | LineStyle> | null = null;
@@ -103,6 +108,12 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
       this.archiveDraft();
       axis!.rerender();
     });
+  }
+
+  public load(data: CuboidData[]) {
+    this._data.push(...CuboidTool.convertToCanvasCoordinates(data));
+    this.clearDrawing();
+    this.setupShapes();
   }
 
   protected archiveDraft() {
@@ -242,7 +253,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
 
     const isUnderDraft = draft && draft.isRectAndControllersUnderCursor({ x: e.offsetX, y: e.offsetY });
 
-    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
+    if (isUnderDraft) {
       return;
     }
 
@@ -257,11 +268,11 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     });
 
     if (!sketch) {
-      this.sketch = new Group(uuid(), monitor!.getNextOrder());
+      this.sketch = new Group(uid(), monitor!.getNextOrder());
 
       this.sketch.add(
         new Rect({
-          id: uuid(),
+          id: uid(),
           style: {
             ...style,
             stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
@@ -277,7 +288,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
 
       sketch.add(
         new Line({
-          id: uuid(),
+          id: uid(),
           style: {
             ...style,
             stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
@@ -295,7 +306,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
           ],
         }),
         new Line({
-          id: uuid(),
+          id: uid(),
           style: {
             ...style,
             stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
@@ -313,7 +324,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
           ],
         }),
         new Line({
-          id: uuid(),
+          id: uid(),
           style: {
             ...style,
             stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
@@ -331,7 +342,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
           ],
         }),
         new Line({
-          id: uuid(),
+          id: uid(),
           style: {
             ...style,
             stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),
@@ -349,7 +360,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
           ],
         }),
         new Rect({
-          id: uuid(),
+          id: uid(),
           style: {
             ...style,
             stroke: AnnotationCuboid.labelStatic.getLabelColor(activeLabel),

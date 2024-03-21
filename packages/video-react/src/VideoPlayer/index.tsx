@@ -289,7 +289,6 @@ export const VideoPlayer = memo(
 
       const handlePlaying = useCallback(
         (time: number) => {
-          console.log('playing', time);
           onPlaying?.(time);
         },
         [onPlaying],

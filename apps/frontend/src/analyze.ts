@@ -16,6 +16,10 @@ function main() {
     return;
   }
 
+  if (location.host.startsWith('localhost')) {
+    return;
+  }
+
   if (userid) {
     window.AnalyzeWiz.setUser({
       id: `${username}-${userid}`,

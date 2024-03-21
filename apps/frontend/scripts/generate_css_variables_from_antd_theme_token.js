@@ -21,7 +21,7 @@ try {
     .keys()
     .map((key) => {
       const newKey = key
-        .replace(/([A-Z])+/g, (match, p1) => {
+        .replace(/([A-Z])+/g, (match) => {
           return `-${match}`;
         })
         .toLowerCase();

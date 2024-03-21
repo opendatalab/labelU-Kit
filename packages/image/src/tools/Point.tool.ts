@@ -1,5 +1,6 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+
+import uid from '@/utils/uid';
 
 import { EInternalEvent } from '../enums';
 import type { PointStyle } from '../shapes/Point.shape';
@@ -47,6 +48,10 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     }));
   }
 
+  static create({ data, ...config }: PointToolOptions) {
+    return new PointTool({ ...config, data: PointTool.convertToCanvasCoordinates(data ?? []) });
+  }
+
   public draft: DraftPoint | null = null;
 
   constructor(params: PointToolOptions) {
@@ -67,6 +72,12 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     AnnotationPoint.buildLabelMapping(params.labels ?? []);
 
+    this.setupShapes();
+  }
+
+  public load(data: PointData[]) {
+    this._data.push(...PointTool.convertToCanvasCoordinates(data));
+    this.clearDrawing();
     this.setupShapes();
   }
 
@@ -96,7 +107,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     const { style, config } = this;
 
     this.draft = new DraftPoint(config, {
-      id: data.id || uuid(),
+      id: data.id || uid(),
       data,
       showOrder: this.showOrder,
       style,
@@ -165,7 +176,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     // 1. 没有激活工具则不进行绘制
     // 2. 按下空格键时不进行绘制
-    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
+    if (isUnderDraft) {
       return;
     }
 
@@ -177,7 +188,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
 
     const data = {
       order: monitor!.getNextOrder(),
-      id: uuid(),
+      id: uid(),
       label: activeLabel,
       // 超出安全区域的点直接落在安全区域边缘
       x: axis!.getOriginalX(config.outOfImage ? e.offsetX : axis!.getSafeX(e.offsetX)),

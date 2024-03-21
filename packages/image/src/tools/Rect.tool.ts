@@ -1,5 +1,6 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+
+import uid from '@/utils/uid';
 
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
@@ -46,6 +47,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     }));
   }
 
+  static create({ data, ...config }: RectToolOptions) {
+    return new RectTool({ ...config, data: RectTool.convertToCanvasCoordinates(data ?? []) });
+  }
+
   private _startPoint: AxisPoint | null = null;
 
   public sketch: Rect | null = null;
@@ -70,6 +75,12 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
     AnnotationRect.buildLabelMapping(params.labels ?? []);
 
+    this.setupShapes();
+  }
+
+  public load(data: RectData[]) {
+    this._data.push(...RectTool.convertToCanvasCoordinates(data));
+    this.clearDrawing();
     this.setupShapes();
   }
 
@@ -258,7 +269,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
     const isUnderDraft = draft && draft.isRectAndControllersUnderCursor({ x: e.offsetX, y: e.offsetY });
 
-    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
+    if (isUnderDraft) {
       return;
     }
 
@@ -276,7 +287,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       });
 
       this.sketch = new Rect({
-        id: uuid(),
+        id: uid(),
         style: { ...style, stroke: AnnotationRect.labelStatic.getLabelColor(activeLabel) },
         coordinate: cloneDeep(this._startPoint),
         width: 1,

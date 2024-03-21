@@ -1,8 +1,8 @@
 import type { BBox } from 'rbush';
 
+import { cursorManager } from '@/singletons/cursorManager';
+
 import type { AxisPoint } from '../shapes/Point.shape';
-import { Cursor } from '../shapes/Cursor.shape';
-import type { CursorParams } from '../shapes/Cursor.shape';
 import { Ticker } from './Ticker';
 import { EInternalEvent } from '../enums';
 import * as eventEmitter from '../singletons/eventEmitter';
@@ -16,8 +16,6 @@ export interface AxisParams {
    * 画布元素
    */
   renderer: Renderer;
-
-  cursor?: CursorParams | false;
 }
 
 /**
@@ -58,7 +56,7 @@ export class Axis {
 
   private _distanceY: number = 0;
 
-  private _cursor: Cursor | null = null;
+  // private _cursor: CrossCursor | null = null;
 
   private _renderer: Renderer | null = null;
 
@@ -95,10 +93,10 @@ export class Axis {
     return this._initialBackgroundOffset;
   }
 
-  constructor({ renderer, cursor }: AxisParams) {
+  constructor({ renderer }: AxisParams) {
     this._createTicker();
     this._bindEvents();
-    this._cursor = new Cursor({ x: 0, y: 0, ...cursor });
+    // this._cursor = new CrossCursor({ x: 0, y: 0, ...cursor });
     this._renderer = renderer;
     // NOTE: debug
     // this._renderRBushTree();
@@ -127,9 +125,7 @@ export class Axis {
   }
 
   private _handleKeyUp = () => {
-    const { _renderer } = this;
-
-    _renderer!.canvas.style.cursor = 'none';
+    cursorManager?.default();
   };
 
   private _handleMoveStart = (e: MouseEvent) => {
@@ -161,7 +157,7 @@ export class Axis {
   };
 
   private _pan = (e: MouseEvent) => {
-    const { _startPanPoint, _renderer, _startMovePoint } = this;
+    const { _startPanPoint, _startMovePoint } = this;
     const point = {
       x: e.offsetX,
       y: e.offsetY,
@@ -173,7 +169,7 @@ export class Axis {
     this._x = point.x - _startPanPoint!.x;
     this._y = point.y - _startPanPoint!.y;
 
-    _renderer!.canvas.style.cursor = 'grabbing';
+    cursorManager?.grabbing();
 
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
@@ -183,11 +179,11 @@ export class Axis {
       this._pan(e);
 
       // 移动画布时隐藏鼠标指针，移动时始终在图片外面
-      this._cursor!.updateCoordinate(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
+      cursorManager?.move(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
     } else {
       this._calcMouseMove(e);
       eventEmitter.emit(EInternalEvent.MouseMoveWithoutAxisChange, e);
-      this._cursor!.updateCoordinate(e.offsetX, e.offsetY);
+      cursorManager?.move(e.offsetX, e.offsetY);
     }
 
     // 只要鼠标在画布内移动，触发画布更新
@@ -222,12 +218,10 @@ export class Axis {
   };
 
   private _handleRightMouseUp = (e: MouseEvent) => {
-    const { _renderer } = this;
-
-    _renderer!.canvas.style.cursor = 'none';
-
     this._startPanPoint = null;
     this._startMovePoint = null;
+
+    cursorManager?.default();
 
     if (!this.isMoved) {
       eventEmitter.emit(EInternalEvent.RightMouseUpWithoutAxisChange, e);
@@ -330,11 +324,11 @@ export class Axis {
   }
 
   public rerender() {
-    const { _cursor, _renderer } = this;
+    const { _renderer } = this;
 
     eventEmitter.emit(EInternalEvent.Render, _renderer!.ctx);
     // 光标需要在最上层
-    Promise.resolve().then(() => _cursor!.render(_renderer!.ctx));
+    Promise.resolve().then(() => cursorManager!.render(_renderer!.ctx));
     // debug
     // this._renderRBushTree();
   }
@@ -543,10 +537,6 @@ export class Axis {
 
   public get isMoved() {
     return this._distanceX !== 0 || this._distanceY !== 0;
-  }
-
-  public get cursor() {
-    return this._cursor;
   }
 
   /**

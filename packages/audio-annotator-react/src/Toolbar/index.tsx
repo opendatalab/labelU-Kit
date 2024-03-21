@@ -6,8 +6,10 @@ import styled from 'styled-components';
 import { ReactComponent as SegmentIcon } from '@/assets/icons/segment.svg';
 import { ReactComponent as FrameIcon } from '@/assets/icons/frame.svg';
 import { ReactComponent as CursorIcon } from '@/assets/icons/cursor.svg';
+import { useTool } from '@/context/tool.context';
+import { useAnnotationCtx } from '@/context/annotation.context';
+import { useHistoryCtx } from '@/context/history.context';
 
-import { useAnnotator } from '../context';
 import hotkeysConst from './hotkeys.const';
 
 const ToolbarWrapper = styled(Toolbar)`
@@ -26,8 +28,9 @@ const tooltipStyle = {
 } as React.CSSProperties;
 
 export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
-  const { onToolChange, currentTool, onOrderVisibleChange, config, orderVisible, redo, undo, pastRef, futureRef } =
-    useAnnotator();
+  const { onToolChange, currentTool, config } = useTool();
+  const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
+  const { redo, undo, pastRef, futureRef } = useHistoryCtx();
 
   const handleToolChange = (tool?: VideoAnnotationType) => () => {
     onToolChange(tool);

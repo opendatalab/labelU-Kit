@@ -126,8 +126,8 @@ export interface AttributeActionProps {
 }
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
-  const { engine } = useTool();
-  const { onImageAnnotationChange, onImageAnnotationsChange } = useAnnotationCtx();
+  const { engine, requestEdit, labelMapping, currentTool } = useTool();
+  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove } = useAnnotationCtx();
 
   const annotationsMapping = useMemo(() => {
     if (!annotations) {
@@ -155,6 +155,30 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
   const handleEditClick = (e: React.MouseEvent) => {
     engine.selectAnnotation(annotation!.tool, annotation!.id);
 
+    if (!annotation?.label) {
+      return;
+    }
+
+    const editable =
+      typeof requestEdit === 'function'
+        ? requestEdit('update', {
+            label: annotation!.label,
+            toolName: annotation!.tool,
+          })
+        : true;
+
+    if (!editable) {
+      return;
+    }
+
+    const currentLabelConfig = labelMapping[annotation.tool][annotation.label];
+    const defaultLabelConfig = Object.values(labelMapping[annotation.tool])[0];
+
+    // 如果预标注的标签不在用户配置中，打开编辑框时默认选中用户配置的第一个标签
+    if (currentTool === annotation!.tool && !currentLabelConfig) {
+      engine.setLabel(defaultLabelConfig.value);
+    }
+
     // 等selectedAnnotation状态更新了再打开，因为Form里的值是从selectedAnnotation里取的
     setTimeout(() => {
       openAttributeModal({
@@ -162,7 +186,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         engine,
         e,
         openModalAnyway: true,
-        labelConfig: engine.toolMap.get(annotation!.tool)?.labelMapping?.get(annotation!.label!),
+        labelConfig: currentLabelConfig || defaultLabelConfig,
       });
     });
   };
@@ -177,7 +201,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
     engine?.toggleAnnotationsVisibility(annotation.tool, [annotation.id], value);
 
-    onImageAnnotationChange({ ...annotation, visible: value });
+    onAnnotationChange({ ...annotation, visible: value });
   };
 
   const toggleBatchVisibility = (value: boolean) => (e: React.MouseEvent) => {
@@ -202,7 +226,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       engine?.toggleAnnotationsVisibility(tool as ToolName, toolIds[tool as ToolName], value);
     });
 
-    onImageAnnotationsChange(
+    onAnnotationsChange(
       annotations.map((item) => {
         if (annotationsMapping[item.id]) {
           return { ...item, visible: value };
@@ -220,7 +244,12 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         {showEdit && <EditIcon onClick={handleEditClick} />}
         {visible && <VisibilityIcon onClick={toggleOneVisibility(false)} />}
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
-        <DeleteIcon onClick={() => engine?.removeAnnotationById(annotation.tool, annotation.id)} />
+        <DeleteIcon
+          onClick={() => {
+            engine?.removeAnnotationById(annotation.tool, annotation.id);
+            onAnnotationRemove(annotation);
+          }}
+        />
       </Action>
     );
   }
@@ -236,6 +265,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
           annotations?.forEach((item) => {
             engine?.removeAnnotationById(item.tool, item.id);
           });
+          onAnnotationsRemove(annotations!);
         }}
       />
     </Action>

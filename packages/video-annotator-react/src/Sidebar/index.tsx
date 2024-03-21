@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { useAnnotator } from '@labelu/audio-annotator-react';
+import { useSample } from '@labelu/audio-annotator-react';
+import { VideoCard } from '@labelu/components-react';
 
 import { ReactComponent as ExpandIcon } from '@/assets/icons/arrow.svg';
-import { VideoCard, StyledVideo } from '@/VideoCard';
 
 const Cards = styled.div`
   display: flex;
@@ -21,6 +21,7 @@ const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
 }))`
   position: relative;
   background-color: #fff;
+  flex-shrink: 0;
 
   ${({ collapsed }) => (collapsed ? 'width: 0;' : 'width: 232px;')}
 
@@ -42,16 +43,6 @@ const VideoCardWrapper = styled.div<{ selected: boolean }>`
   align-items: center;
   gap: 0.5rem;
   font-size: 14px;
-
-  ${StyledVideo} {
-    border-radius: 3px;
-
-    ${({ selected }) =>
-      selected &&
-      css`
-        outline: 3px solid var(--color-primary);
-      `}
-  }
 
   ${({ selected }) =>
     selected &&
@@ -96,7 +87,7 @@ export interface SidebarProps {
 }
 
 export default function Sidebar({ renderSidebar }: SidebarProps) {
-  const { samples, handleSelectSample, currentSample } = useAnnotator();
+  const { samples, onSampleSelect, currentSample } = useSample();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
   const handleExpandTriggerClick = useCallback(() => {
@@ -114,9 +105,10 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
               <VideoCardWrapper
                 key={sample.id}
                 selected={currentSample?.id === sample.id}
-                onClick={() => handleSelectSample(sample)}
+                onClick={() => onSampleSelect(sample)}
               >
                 <VideoCard
+                  title={sample.name}
                   src={sample.url}
                   showDuration={currentSample?.id !== sample.id}
                   showPlayIcon={currentSample?.id !== sample.id}

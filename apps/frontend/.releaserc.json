@@ -18,7 +18,8 @@
     [
       "@semantic-release/github",
       {
-        "assets": [{ "path": "./*.zip", "label": "frontend app distribution" }]
+        "assets": [{ "path": "./*.zip", "label": "labelu-frontend-${nextRelease.version}.zip" }],
+        "successComment": false
       }
     ],
     [
@@ -32,7 +33,7 @@
       "@semantic-release/exec",
       {
         "prepareCmd": "node ./scripts/inject_frontend_info.js ${branch.name} ${nextRelease.version} && zip -r frontend.zip ./dist",
-        "successCmd": "node ./scripts/dispatch_workflow.js ${branch.name} ${nextRelease.version} ${Date.now()} '${nextRelease.notes}'"
+        "successCmd": "node ./scripts/dispatch_workflow.js ${branch.name} ${nextRelease.version} '${nextRelease.notes}'"
       }
     ]
   ]

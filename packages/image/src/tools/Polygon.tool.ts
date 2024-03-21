@@ -1,6 +1,7 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
 import Color from 'color';
+
+import uid from '@/utils/uid';
 
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
@@ -76,6 +77,10 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     return _data;
   }
 
+  static create({ data, ...config }: PolygonToolOptions) {
+    return new PolygonTool({ ...config, data: PolygonTool.convertToCanvasCoordinates(data ?? []) });
+  }
+
   private _holdingSlopes: Point[] | null = null;
 
   private _holdingSlopeEdge: Line | null = null;
@@ -106,6 +111,12 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+  }
+
+  public load(data: PolygonData[]) {
+    this._data.push(...PolygonTool.convertToCanvasCoordinates(data));
+    this.clearDrawing();
+    this.setupShapes();
   }
 
   /**
@@ -277,7 +288,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     const isUnderDraft = draft && draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY });
 
-    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
+    if (isUnderDraft) {
       return;
     }
 
@@ -291,11 +302,11 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     if (config.lineType === 'spline') {
       if (!this.sketch) {
-        this.sketch = new Group(uuid(), monitor!.getNextOrder());
+        this.sketch = new Group(uid(), monitor!.getNextOrder());
         // 背景填充
         this.sketch.add(
           new ClosedSpline({
-            id: uuid(),
+            id: uid(),
             style: {
               ...style,
               stroke: 'transparent',
@@ -357,19 +368,19 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
       // 按下鼠标左键的时候默认是拖拽第一个控制点
       const slopeStartPoint = new Point({
-        id: uuid(),
+        id: uid(),
         style: { ...style, fill: '#fff', radius: 4, strokeWidth: 0, opacity: 0.5 },
         coordinate: { ...startPoint },
       });
       const slopeEndPoint = new Point({
-        id: uuid(),
+        id: uid(),
         style: { ...style, fill: '#fff', radius: 4, strokeWidth: 0, opacity: 0.5 },
         coordinate: { ...startPoint },
       });
       this._holdingSlopes = [slopeStartPoint, slopeEndPoint];
       this.sketch.add(
         new Spline({
-          id: uuid(),
+          id: uid(),
           style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },
           coordinate: [
             {
@@ -390,7 +401,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         }),
       );
       const slopeEdge = new Line({
-        id: uuid(),
+        id: uid(),
         style: { ...style, stroke: '#fff', strokeWidth: 1, opacity: 0.5 },
         coordinate: [
           {
@@ -407,10 +418,10 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       this.sketch.add(slopeEndPoint);
     } else {
       if (!this.sketch) {
-        this.sketch = new Group(uuid(), monitor!.getNextOrder());
+        this.sketch = new Group(uid(), monitor!.getNextOrder());
         this.sketch?.add(
           new Polygon({
-            id: uuid(),
+            id: uid(),
             style: {
               ...style,
               // 填充的多边形不需要边框
@@ -442,7 +453,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
       // 创建新的线段
       this.sketch.add(
         new Line({
-          id: uuid(),
+          id: uid(),
           style: { ...style, stroke: AnnotationPolygon.labelStatic.getLabelColor(activeLabel) },
           coordinate: [
             {
@@ -670,13 +681,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         const shape = polygonCurve;
         const point = shape.coordinate[i];
         points.push({
-          id: uuid(),
+          id: uid(),
           ...point,
         });
       }
 
       data = {
-        id: uuid(),
+        id: uid(),
         type: 'spline',
         points: points,
         controlPoints,
@@ -696,13 +707,13 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         const shape = sketch.shapes[0];
         const point = shape.coordinate[i];
         points.push({
-          id: uuid(),
+          id: uid(),
           ...point,
         });
       }
 
       data = {
-        id: uuid(),
+        id: uid(),
         type: 'line',
         points: points,
         label: this.activeLabel,

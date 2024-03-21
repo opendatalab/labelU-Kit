@@ -1,18 +1,20 @@
-import React, { useLayoutEffect, useState } from 'react';
-import { Link, useParams, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
+import { Link, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { Table, Pagination, Button } from 'antd';
-import { VideoCard } from '@labelu/video-annotator-react';
+import { Table, Pagination, Button, Popconfirm, Tag, Tooltip } from 'antd';
+import { VideoCard, FlexLayout } from '@labelu/components-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
-import { FlexLayout } from '@labelu/components-react';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
+import { downloadFromUrl } from '@/utils';
+import { deletePreAnnotations } from '@/api/services/preAnnotations';
 
 import type { TaskStatusProps } from './components/Statistical';
 import Statistical, { TaskStatus as TaskStatusComponent } from './components/Statistical';
@@ -26,6 +28,8 @@ const HeaderWrapper = styled(FlexLayout.Header)`
 const Samples = () => {
   const routerData = useRouteLoaderData('task') as TaskLoaderResult;
   const samples = _.get(routerData, 'samples.data');
+  const revalidator = useRevalidator();
+  const preAnnotations = _.get(routerData, 'preAnnotations.data') as any;
   const task = _.get(routerData, 'task');
   const metaData = routerData?.samples?.meta_data;
   const routeParams = useParams();
@@ -40,6 +44,10 @@ const Samples = () => {
     }),
   );
 
+  const preAnnotationMapping = useMemo(() => {
+    return _.chain(preAnnotations).map('data').flatten().keyBy('sample_name').value();
+  }, [preAnnotations]);
+
   const taskStatus = _.get(task, 'status');
   const isTaskReadyToAnnotate =
     ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!) &&
@@ -47,6 +55,17 @@ const Samples = () => {
     Object.keys(task?.config).length > 0;
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
+
+  const handleDeleteJsonls = async (ids: number[]) => {
+    await deletePreAnnotations(
+      {
+        task_id: taskId,
+      },
+      { pre_annotation_ids: ids },
+    );
+
+    revalidator.revalidate();
+  };
 
   const columns: ColumnsType<SampleResponse> = [
     {
@@ -56,34 +75,91 @@ const Samples = () => {
       align: 'left',
     },
     {
+      title: '文件名',
+      dataIndex: ['file', 'filename'],
+      key: 'filename',
+      align: 'left',
+      render: (filename, record) => {
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return (
+            <span>
+              {formatter.format('ellipsis', filename, { maxWidth: 160, type: 'tooltip' })}
+              &nbsp;
+              <Tag color="processing">预标注</Tag>
+            </span>
+          );
+        }
+        return formatter.format('ellipsis', filename, { maxWidth: 160, type: 'tooltip' });
+      },
+    },
+    {
       title: '数据预览',
-      dataIndex: 'data',
-      key: 'packageID',
+      dataIndex: 'file',
+      key: 'file',
       align: 'left',
       render: (data) => {
-        let url = '';
-        for (const sampleId in data.urls) {
-          url = data.urls[sampleId];
+        if (data?.filename?.endsWith('.jsonl')) {
+          return '-';
         }
 
         if (task!.media_type === MediaType.IMAGE) {
-          return <img src={url} style={{ width: '116px', height: '70px' }} />;
+          return <img src={data?.url} style={{ width: '116px', height: '70px' }} />;
         } else if (task!.media_type === MediaType.AUDIO) {
-          return <audio src={url} controls />;
+          return <audio src={data?.url} controls />;
         } else {
-          return <VideoCard size={{ width: 116, height: 70 }} src={url} showPlayIcon showDuration />;
+          return <VideoCard size={{ width: 116, height: 70 }} src={data?.url} showPlayIcon showDuration />;
         }
+      },
+    },
+    {
+      title: (
+        <>
+          预标注 &nbsp;
+          <Tooltip
+            title={
+              <>
+                数据导入时上传 label.jsonl 即可导入预标注，预标注格式参考{' '}
+                <a
+                  href="https://opendatalab.github.io/labelU/#/schema/pre-annotation/image"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  示例
+                </a>
+              </>
+            }
+          >
+            <QuestionCircleOutlined />
+          </Tooltip>
+        </>
+      ),
+      dataIndex: 'unknown',
+      key: 'unknown',
+      align: 'left',
+      render: (text, record) => {
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return '-';
+        }
+
+        // sample_name前8为是截取的uuid，截取第9位到最后一位
+        const realSampleName = record.file?.filename?.substring(9);
+
+        return preAnnotationMapping[realSampleName] ? '是' : '无';
       },
     },
     {
       title: '标注情况',
       dataIndex: 'state',
-      key: 'packageID',
+      key: 'state',
       align: 'left',
 
-      render: (text) => {
+      render: (text, record) => {
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return '-';
+        }
+
         if (!isTaskReadyToAnnotate) {
-          return '';
+          return '-';
         }
 
         return <TaskStatusComponent status={_.lowerCase(text) as TaskStatusProps['status']} />;
@@ -97,6 +173,10 @@ const Samples = () => {
       align: 'left',
 
       render: (_unused, record) => {
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return '-';
+        }
+
         let result = 0;
         const resultJson = record?.data?.result ? JSON.parse(record?.data?.result) : {};
         for (const key in resultJson) {
@@ -116,8 +196,7 @@ const Samples = () => {
         return result;
       },
       sorter: true,
-
-      // width: 80,
+      width: 80,
     },
     {
       title: '标注者',
@@ -125,9 +204,13 @@ const Samples = () => {
       key: 'created_by',
       align: 'left',
 
-      render: (created_by) => {
+      render: (created_by, record) => {
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return '-';
+        }
+
         if (!isTaskReadyToAnnotate) {
-          return '';
+          return '-';
         }
         return created_by.username;
       },
@@ -137,7 +220,11 @@ const Samples = () => {
       dataIndex: 'updated_at',
       key: 'updated_at',
       align: 'left',
-      render: (updated_at) => {
+      render: (updated_at, record) => {
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return '-';
+        }
+
         if (!isTaskReadyToAnnotate) {
           return '';
         }
@@ -149,13 +236,32 @@ const Samples = () => {
       title: '',
       dataIndex: 'option',
       key: 'option',
-      width: 180,
+      width: 100,
       align: 'center',
-
+      fixed: 'right',
       render: (x, record) => {
+        if (record.id !== enterRowId) {
+          return '';
+        }
+
+        if (record.file?.filename?.endsWith('.jsonl')) {
+          return (
+            <div>
+              <Button type="link" onClick={() => downloadFromUrl(record.file.url, record.file?.filename)}>
+                下载
+              </Button>
+              <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteJsonls([record.id!])}>
+                <Button type="link" danger>
+                  删除
+                </Button>
+              </Popconfirm>
+            </div>
+          );
+        }
+
         return (
           <>
-            {record.id === enterRowId && isTaskReadyToAnnotate && (
+            {isTaskReadyToAnnotate && (
               <Link to={`/tasks/${taskId}/samples/${record.id}`}>
                 <Button type="link">进入标注</Button>
               </Link>
@@ -240,6 +346,10 @@ const Samples = () => {
     };
   }, [task?.media_type]);
 
+  const data = useMemo(() => {
+    return [...(preAnnotations ?? []), ...(samples ?? [])];
+  }, [preAnnotations, samples]);
+
   return (
     <FlexLayout flex="column" full gap="2rem">
       <HeaderWrapper flex items="center">
@@ -254,7 +364,7 @@ const Samples = () => {
         <FlexLayout justify="space-between" flex="column" gap="1rem" padding="0 1.5rem 1.5rem">
           <Table
             columns={columns}
-            dataSource={samples || []}
+            dataSource={data}
             pagination={false}
             rowKey={(record) => record.id!}
             rowSelection={rowSelection}

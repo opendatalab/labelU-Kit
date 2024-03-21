@@ -10,14 +10,15 @@ import { FlexLayout } from '@labelu/components-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 
 import { message, modal } from '@/StaticAnt';
-import type { TaskResponse } from '@/api/types';
+import type { OkRespCreateSampleResponse, TaskResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import { createSamples, deleteSamples } from '@/api/services/samples';
 import { deleteFile, deleteTask } from '@/api/services/task';
-import { convertVideoConfig } from '@/utils/convertVideoConfig';
+import { convertAudioAndVideoConfig } from '@/utils/convertAudioAndVideoConfig';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 import { convertImageConfig } from '@/utils/convertImageConfig';
+import { createPreAnnotations } from '@/api/services/preAnnotations';
 
 import type { QueuedFile } from './partials/InputData';
 import InputData, { UploadStatus } from './partials/InputData';
@@ -85,7 +86,6 @@ const CreateTask = () => {
   const searchParams = new URLSearchParams(location.search);
   const isCreateNewTask = searchParams.get('isNew') === 'true';
   const [isAnnotationFormValid, toggleAnnotationFormValidation] = useState<boolean>(true);
-  const attachmentsConnected = useRef<boolean>(false);
 
   const addTask = useAddTaskMutation();
   const updateTaskConfig = useUpdateTaskConfigMutation(taskId);
@@ -226,7 +226,7 @@ const CreateTask = () => {
       _.chain(samples)
         .get('data')
         .mapKeys((item) => {
-          return _.chain(item.data?.fileNames).keys().first().value();
+          return item.file?.id;
         })
         .value(),
     [samples],
@@ -241,29 +241,47 @@ const CreateTask = () => {
         return Promise.reject();
       }
 
-      if (isExistTask) {
-        if (currentStep === StepEnum.Upload && !_.isEmpty(uploadFileList) && !attachmentsConnected.current) {
-          await createSamples(
-            taskId,
-            _.chain(uploadFileList)
-              .filter((item) => item.status === UploadStatus.Success)
-              .map((item) => ({
-                attachement_ids: [item.id!],
-                data: {
-                  fileNames: {
-                    [item.id!]: item.name!,
-                  },
-                  result: '{}',
-                  urls: {
-                    [item.id!]: item.url!,
-                  },
-                },
-              }))
-              .value(),
-          );
+      const mediaFileList = [];
+      const jsonlFileList = [];
 
-          // 切换到其他步骤后，再切换回来，不会再次创建文件
-          attachmentsConnected.current = true;
+      for (const file of uploadFileList) {
+        if (file.file.name.endsWith('.jsonl') && file.status === UploadStatus.Success && _.isNil(file.refId)) {
+          jsonlFileList.push({
+            file_id: file.id!,
+          });
+        } else if (file.status === UploadStatus.Success && _.isNil(file.refId)) {
+          mediaFileList.push({
+            file_id: file.id!,
+            data: {
+              result: '{}',
+            },
+          });
+        }
+      }
+
+      if (isExistTask) {
+        if (currentStep === StepEnum.Upload) {
+          let response: OkRespCreateSampleResponse | undefined;
+          if (!_.isEmpty(mediaFileList)) {
+            response = await createSamples(taskId, mediaFileList);
+          }
+
+          if (!_.isEmpty(jsonlFileList)) {
+            response = await createPreAnnotations(taskId, jsonlFileList);
+          }
+
+          setUploadFileList((prev) => {
+            return prev.map((item) => {
+              const uploadFileIndex = uploadFileList.findIndex((file) => file.id === item.id);
+              if (uploadFileIndex > -1 && response?.data?.ids?.[uploadFileIndex]) {
+                return {
+                  ...item,
+                  refId: response.data.ids[uploadFileIndex],
+                };
+              }
+              return item;
+            });
+          });
         }
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
@@ -398,9 +416,16 @@ const CreateTask = () => {
       if (
         currentStep === StepEnum.Upload &&
         isEmpty(samples?.data) &&
-        filter(uploadFileList, (item) => item.status === UploadStatus.Success).length === 0
+        filter(uploadFileList, (item) => item.status === UploadStatus.Success && !item.name.endsWith('.jsonl'))
+          .length === 0
       ) {
         message.error('请至少上传一个文件');
+        return;
+      }
+
+      // 文件错误
+      if (filter(uploadFileList, (item) => item.status === UploadStatus.Error).length > 0) {
+        message.error('请先处理异常文件');
         return;
       }
 
@@ -524,7 +549,7 @@ const CreateTask = () => {
       let _config;
 
       if ([MediaType.VIDEO, MediaType.AUDIO].includes(taskData?.media_type)) {
-        _config = convertVideoConfig(annotationFormInstance.getFieldsValue());
+        _config = convertAudioAndVideoConfig(annotationFormInstance.getFieldsValue());
       } else if (taskData?.media_type === MediaType.IMAGE) {
         _config = convertImageConfig(annotationFormInstance.getFieldsValue());
       }

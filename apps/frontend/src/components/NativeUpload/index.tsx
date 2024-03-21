@@ -2,8 +2,10 @@ import type { HTMLAttributes, PropsWithChildren } from 'react';
 import React, { createRef, useEffect } from 'react';
 import type { RcFile } from 'antd/lib/upload/interface';
 import styled from 'styled-components';
+import Button from 'antd/es/button';
+import type { ButtonProps } from 'antd/lib';
 
-const Wrapper = styled.div`
+const Wrapper = styled(Button)`
   position: relative;
   overflow: hidden;
   display: inline;
@@ -20,16 +22,17 @@ const Wrapper = styled.div`
   }
 `;
 
-type IProps = HTMLAttributes<HTMLDivElement> & {
-  accept?: string;
-  directory?: boolean; // 是否开启文件夹上传
-  multiple?: boolean; // 多文件上传
-  onChange?: (files: RcFile[]) => void;
-};
+type UploadProps = Omit<HTMLAttributes<HTMLInputElement>, 'onChange'> &
+  Omit<ButtonProps, 'onChange'> & {
+    accept?: string;
+    directory?: boolean;
+    multiple?: boolean;
+    onChange?: (files: RcFile[]) => void;
+  };
 
-const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
+const NativeUpload: React.FC<PropsWithChildren<UploadProps>> = (props) => {
   const inputRef = createRef<any>();
-  const { children, directory, multiple, ...req } = props;
+  const { children, directory, multiple, onChange, accept, ...req } = props;
 
   useEffect(() => {
     inputRef.current.webkitdirectory = directory;
@@ -37,14 +40,14 @@ const NativeUpload: React.FC<PropsWithChildren<IProps>> = (props) => {
   }, [directory, inputRef, multiple]);
 
   return (
-    <Wrapper>
+    <Wrapper {...req}>
       <input
         ref={inputRef}
         type="file"
+        accept={accept}
         name="fileList"
-        {...req}
         onChange={(e) => {
-          props.onChange?.(Array.from(e.target.files || []) as RcFile[]);
+          onChange?.(Array.from(e.target.files || []) as RcFile[]);
           e.target.value = '';
         }}
       />

@@ -36,7 +36,6 @@ export class Renderer extends EventEmitter {
       this.canvas.style.width = `${width}px`;
       this.canvas.style.height = `${height}px`;
       this.canvas.style.left = '0';
-      this.canvas.style.cursor = 'none';
       this.canvas.style.top = '0';
       this.canvas.style.zIndex = '' + options.zIndex;
 

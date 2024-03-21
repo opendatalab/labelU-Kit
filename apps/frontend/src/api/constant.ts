@@ -20,4 +20,5 @@ export const ErrorMessages = {
   [TASK_INIT_CODE + 1001]: '附近没找到',
   [TASK_INIT_CODE + 5000]: '参数错误：after,before,pageNo,只能选一个，pageNo 可以说是0',
   [TASK_INIT_CODE + 5001]: '没有此sample',
+  [TASK_INIT_CODE + 5003]: '预标注中的sample_name在数据库中已存在',
 } as const;

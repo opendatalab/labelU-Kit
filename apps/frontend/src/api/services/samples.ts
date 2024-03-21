@@ -21,7 +21,7 @@ import type {
 export async function createSamples(
   taskId: number,
   data: {
-    attachement_ids: number[];
+    file_id: number;
     data: SampleData;
   }[],
 ): Promise<OkRespCreateSampleResponse> {

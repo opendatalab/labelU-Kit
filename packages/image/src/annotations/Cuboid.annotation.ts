@@ -1,6 +1,7 @@
-import { v4 as uuid } from 'uuid';
 import Color from 'color';
 import type { ILabel } from '@labelu/interface';
+
+import uid from '@/utils/uid';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -174,7 +175,7 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
     };
 
     const realFront = new Polygon({
-      id: uuid(),
+      id: uid(),
       coordinate: frontCoordinate,
       style: {
         ...commonStyle,
@@ -191,34 +192,34 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
       realFront,
       // 前面的矩形（非真实的前面）
       new Polygon({
-        id: uuid(),
+        id: uid(),
         coordinate: [front.tl, front.tr, front.br, front.bl],
         style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
       // 后面的矩形（非真实的前面）
       new Polygon({
-        id: uuid(),
+        id: uid(),
         coordinate: [back.tl, back.tr, back.br, back.bl],
         style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth },
       }),
       // 平行四边形
       new Polygon({
-        id: uuid(),
+        id: uid(),
         coordinate: [front.tl, front.tr, back.tr, back.tl],
         style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
-        id: uuid(),
+        id: uid(),
         coordinate: [front.tr, front.br, back.br, back.tr],
         style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
-        id: uuid(),
+        id: uid(),
         coordinate: [front.br, front.bl, back.bl, back.br],
         style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
       new Polygon({
-        id: uuid(),
+        id: uid(),
         coordinate: [front.bl, front.tl, back.tl, back.bl],
         style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth, fill: 'transparent' },
       }),
@@ -229,7 +230,7 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
     // label
     group.add(
       new ShapeText({
-        id: uuid(),
+        id: uid(),
         coordinate: {
           x: front.bl.x,
           y: front.bl.y,

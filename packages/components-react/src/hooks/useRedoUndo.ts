@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface RedoUndoOptions<T> {
   maxHistory?: number;
@@ -58,6 +58,11 @@ export function useRedoUndo<T>(initialValue: T, options: RedoUndoOptions<T>) {
     pastRef.current = [];
     futureRef.current = [];
   }, []);
+
+  useEffect(() => {
+    reset();
+    setCurrentValue(initialValue);
+  }, [initialValue, reset]);
 
   const update = useCallback(
     (value: React.SetStateAction<T | undefined>) => {
