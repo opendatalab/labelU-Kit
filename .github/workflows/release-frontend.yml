@@ -63,14 +63,14 @@ jobs:
         run: |
           echo $RELEASE_VERSION
 
+      - name: pre-release
+        run: node ./scripts/before-release-frontend.js
+
       - name: Install dependencies
         run: pnpm install
 
       - name: Build packages
         run: pnpm run build
-
-      - name: pre-release
-        run: node ./scripts/before-release-frontend.js
 
       - name: Update frontend dependencies
         run: |
