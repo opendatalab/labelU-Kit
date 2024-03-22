@@ -77,7 +77,7 @@ async function main() {
 
   const inputs = {
     version: version,
-    branch,
+    branch: branch === 'release' ? 'main' : branch,
     release_type: 'fix',
     assets_url: url,
     changelog: releaseNotes,
