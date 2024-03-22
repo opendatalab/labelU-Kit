@@ -29,12 +29,14 @@ export default function VideoPage() {
 
   const [samples, updateSamples] = useState<any[]>([
     {
-      id: 'video-segment',
+      id: 1,
+      name: 'video-segment',
       url: import.meta.env.BASE_URL + 'video-segment.mp4',
       annotations: mockData1,
     },
     {
-      id: 'video-frame',
+      id: 2,
+      name: 'video-frame',
       url: import.meta.env.BASE_URL + 'video-frame.mp4',
       annotations: mockData2,
     },
