@@ -2,7 +2,7 @@ import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
-import { set, omit } from 'lodash/fp';
+import { set } from 'lodash/fp';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
@@ -166,47 +166,28 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
 
     if (task.media_type === MediaType.IMAGE) {
       // @ts-ignore
-      const imageResult = (await imageAnnotationRef.current?.getAnnotations()) ?? {};
-      const tagOrTextResult = (await imageAnnotationRef.current?.getGlobalAnnotations()) ?? {};
+      const exportedResult = (await imageAnnotationRef.current?.getAnnotations()) ?? {};
+      const engine = await imageAnnotationRef.current?.getEngine();
+
+      result.width = engine?.backgroundRenderer?.image?.width ?? 0;
+      result.height = engine?.backgroundRenderer?.image?.height ?? 0;
+      result.rotate = engine?.backgroundRenderer?.rotate ?? 0;
 
       innerSample = await imageAnnotationRef?.current?.getSample();
 
-      Object.keys(imageResult).forEach((item) => {
-        if (imageResult?.[item]?.length) {
+      Object.keys(exportedResult).forEach((item) => {
+        if (exportedResult?.[item]?.length) {
           result[item + 'Tool'] = {
             toolName: item + 'Tool',
-            result: imageResult[item].map((annotation: any) => {
-              const resultItem = {
-                ...omit(['tool', 'visible', 'label'])(annotation),
-                attribute: annotation.label,
-              };
-
-              if (item === 'line' || item === 'polygon') {
-                return {
-                  ...omit(['points'])(resultItem),
-                  pointList: annotation.points,
-                };
-              }
-              return resultItem;
-            }),
-          };
-        }
-      });
-
-      Object.keys(tagOrTextResult).forEach((item) => {
-        if (tagOrTextResult?.[item]?.length) {
-          result[item + 'Tool'] = {
-            toolName: item + 'Tool',
-            result: tagOrTextResult[item],
+            result: exportedResult[item],
           };
         }
       });
     } else if (task.media_type === MediaType.VIDEO) {
       const videoAnnotations = await videoAnnotationRef.current?.getAnnotations();
 
-      videoAnnotations.forEach((annotation: any) => {
-        const innerAnnotation = omit(['type', 'visible'])(annotation);
-        if (annotation.type === 'tag') {
+      Object.keys(videoAnnotations ?? {}).forEach((toolName) => {
+        if (toolName === 'tag') {
           if (!result.tagTool) {
             result.tagTool = {
               toolName: 'tagTool',
@@ -214,10 +195,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.tagTool.result.push(innerAnnotation);
+          result.tagTool.result.push(...videoAnnotations[toolName]);
         }
 
-        if (annotation.type === 'text') {
+        if (toolName === 'text') {
           if (!result.textTool) {
             result.textTool = {
               toolName: 'textTool',
@@ -225,10 +206,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.textTool.result.push(innerAnnotation);
+          result.textTool.result.push(...videoAnnotations[toolName]);
         }
 
-        if (annotation.type === 'frame') {
+        if (toolName === 'frame') {
           if (!result.videoFrameTool) {
             result.videoFrameTool = {
               toolName: 'videoFrameTool',
@@ -236,10 +217,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.videoFrameTool.result.push(innerAnnotation);
+          result.videoFrameTool.result.push(...videoAnnotations[toolName]);
         }
 
-        if (annotation.type === 'segment') {
+        if (toolName === 'segment') {
           if (!result.videoSegmentTool) {
             result.videoSegmentTool = {
               toolName: 'videoSegmentTool',
@@ -247,7 +228,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.videoSegmentTool.result.push(innerAnnotation);
+          result.videoSegmentTool.result.push(...videoAnnotations[toolName]);
         }
       });
 
@@ -255,9 +236,8 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
     } else if (task.media_type === MediaType.AUDIO) {
       const audioAnnotations = await audioAnnotationRef.current?.getAnnotations();
 
-      audioAnnotations.forEach((annotation: any) => {
-        const innerAnnotation = omit(['type', 'visible'])(annotation);
-        if (annotation.type === 'tag') {
+      Object.keys(audioAnnotations ?? {}).forEach((toolName) => {
+        if (toolName === 'tag') {
           if (!result.tagTool) {
             result.tagTool = {
               toolName: 'tagTool',
@@ -265,10 +245,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.tagTool.result.push(innerAnnotation);
+          result.tagTool.result.push(...audioAnnotations[toolName]);
         }
 
-        if (annotation.type === 'text') {
+        if (toolName === 'text') {
           if (!result.textTool) {
             result.textTool = {
               toolName: 'textTool',
@@ -276,10 +256,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.textTool.result.push(innerAnnotation);
+          result.textTool.result.push(...audioAnnotations[toolName]);
         }
 
-        if (annotation.type === 'frame') {
+        if (toolName === 'frame') {
           if (!result.audioFrameTool) {
             result.audioFrameTool = {
               toolName: 'audioFrameTool',
@@ -287,10 +267,10 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.audioFrameTool.result.push(innerAnnotation);
+          result.audioFrameTool.result.push(...audioAnnotations[toolName]);
         }
 
-        if (annotation.type === 'segment') {
+        if (toolName === 'segment') {
           if (!result.audioSegmentTool) {
             result.audioSegmentTool = {
               toolName: 'audioSegmentTool',
@@ -298,7 +278,7 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
             };
           }
 
-          result.audioSegmentTool.result.push(innerAnnotation);
+          result.audioSegmentTool.result.push(...audioAnnotations[toolName]);
         }
       });
 

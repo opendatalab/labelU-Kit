@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import type WaveSurfer from 'wavesurfer.js';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
-import type { MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
+import type { MediaAnnotatorProps, MediaAnnotatorRef, PlayerControllerRef } from '@labelu/components-react';
 import type {
   Attribute,
   AudioAnnotationType,
@@ -80,6 +80,8 @@ export interface AudioAnnotatorProps {
    * @param e 事件，需要根据鼠标事件中的位置来控制标签属性表单弹框的显示位置；当通过快捷键结束标注时，e为undefined，此时弹框显示在默认位置。
    */
   onAnnotateEnd?: (annotation: AudioAnnotationInUI, e?: MouseEvent) => void;
+
+  requestEdit?: MediaAnnotatorProps['requestEdit'];
 }
 
 /**
@@ -106,6 +108,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     toolConfig,
     annotations,
     selectedAnnotation: propsSelectedAnnotation,
+    requestEdit,
   },
   ref,
 ) {
@@ -354,6 +357,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
       onAnnotationChange: handleAnnotationChange,
       attributeConfigMapping,
       playingAnnotationIds,
+      requestEdit,
       showOrder: Boolean(showOrder),
     };
   }, [
@@ -362,6 +366,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     getCurrentTime,
     onChange,
     annotations,
+    requestEdit,
     selectedAnnotation,
     handleAnnotationSelect,
     handleAnnotationChange,

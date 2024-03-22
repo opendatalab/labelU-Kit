@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 
+import { StatusCard } from '@/StatusCard';
+
 import { ReactComponent as PlayIcon } from './play.svg';
 import { EllipsisText } from '../EllipsisText';
 import { secondsToMinute } from '../utils';
@@ -26,7 +28,7 @@ const CardIndex = styled.div`
 `;
 
 const Wrapper = styled.div<{
-  active: boolean;
+  active?: boolean;
 }>`
   font-size: 14px;
   display: flex;
@@ -36,10 +38,6 @@ const Wrapper = styled.div<{
   ${({ active }) =>
     active &&
     css`
-      ${InnerWrapper} {
-        border-color: var(--color-primary);
-      }
-
       ${CardIndex} {
         background-color: var(--color-primary);
         color: #fff;
@@ -54,20 +52,27 @@ const Left = styled.div`
 `;
 
 export interface AudioCardProps {
-  src: string;
   active?: boolean;
+
+  completed?: boolean;
+
+  skipped?: boolean;
+
+  src: string;
+
   title: React.ReactNode;
   /**
    * 显示序号
    */
   showNo?: boolean;
+  onClick?: () => void;
   /**
    * 序号
    */
   no: number;
 }
 
-export function AudioCard({ active, no, title, src, showNo }: AudioCardProps) {
+export function AudioCard({ active, no, title, src, showNo, onClick, completed, skipped }: AudioCardProps) {
   const ref = useRef<HTMLAudioElement>(null);
   const [duration, setDuration] = useState(0);
 
@@ -76,19 +81,20 @@ export function AudioCard({ active, no, title, src, showNo }: AudioCardProps) {
   }, []);
 
   return (
-    <Wrapper active={!!active}>
+    <Wrapper active={active}>
       {showNo && <CardIndex>{no}</CardIndex>}
-      <InnerWrapper>
-        <Left>
-          <PlayIcon />
-          <EllipsisText title={title} maxWidth={72}>
-            {/* @ts-ignore */}
-            {title}
-          </EllipsisText>
-        </Left>
-        <span>{secondsToMinute(duration)}</span>
-        <audio ref={ref} onLoadedMetadata={onMetadataLoad} src={src} />
-      </InnerWrapper>
+      <StatusCard onClick={onClick} active={active} completed={completed} skipped={skipped}>
+        <InnerWrapper>
+          <Left>
+            <PlayIcon />
+            <EllipsisText title={title} maxWidth={72}>
+              <span>{title}</span>
+            </EllipsisText>
+          </Left>
+          <span>{secondsToMinute(duration)}</span>
+          <audio ref={ref} onLoadedMetadata={onMetadataLoad} src={src} />
+        </InnerWrapper>
+      </StatusCard>
     </Wrapper>
   );
 }

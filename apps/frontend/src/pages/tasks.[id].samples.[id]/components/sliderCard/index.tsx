@@ -1,15 +1,11 @@
-import React from 'react';
 import { useParams } from 'react-router';
-import _ from 'lodash-es';
-import { VideoCard } from '@labelu/video-annotator-react';
-import { AudioCard } from '@labelu/components-react';
+import { VideoCard, AudioCard } from '@labelu/components-react';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
-// import checkIconUrl from '@/assets/png/check.png';
 import { ReactComponent as CheckSvgIcon } from '@/assets/svg/check.svg';
 
-import { AudioWrapper, CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
+import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
 
 function CheckIcon() {
   return (
@@ -28,10 +24,9 @@ interface SliderCardProps {
 }
 
 const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
-  const { id, state, data } = cardInfo;
-  const headId = _.chain(data).get('fileNames').keys().head().value();
-  const filename = _.get(data, `fileNames.${headId}`);
-  const url = _.get(data, `urls.${headId}`);
+  const { id, state, file } = cardInfo;
+  const filename = file.filename;
+  const url = file.url;
   const routeParams = useParams();
   const sampleId = +routeParams.sampleId!;
 
@@ -45,13 +40,31 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
 
   if (type === MediaType.AUDIO) {
     return (
-      <AudioWrapper flex="column" items="stretch" justify="center" onClick={() => handleOnClick(cardInfo)}>
-        {type === MediaType.AUDIO && (
-          <AudioCard src={url!} active={id === sampleId} title={filename} no={index! + 1} showNo />
-        )}
-        {state === 'DONE' && <CheckIcon />}
-        {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
-      </AudioWrapper>
+      <AudioCard
+        src={url!}
+        active={id === sampleId}
+        onClick={() => handleOnClick(cardInfo)}
+        title={filename}
+        no={index! + 1}
+        showNo
+        completed={state === 'DONE'}
+        skipped={state === 'SKIPPED'}
+      />
+    );
+  }
+
+  if (type === MediaType.VIDEO) {
+    return (
+      <VideoCard
+        src={url!}
+        title={id}
+        active={id === sampleId}
+        onClick={() => handleOnClick(cardInfo)}
+        showPlayIcon
+        showDuration
+        completed={state === 'DONE'}
+        skipped={state === 'SKIPPED'}
+      />
     );
   }
 
@@ -65,7 +78,6 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
         onClick={() => handleOnClick(cardInfo)}
       >
         {type === MediaType.IMAGE && <img src={url} alt="" />}
-        {type === MediaType.VIDEO && <VideoCard src={url!} showPlayIcon showDuration />}
         {state === 'DONE' && <CheckIcon />}
         {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
       </ContentWrapper>

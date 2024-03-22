@@ -104,12 +104,6 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
     return tools?.find((item) => item.tool === 'cuboidTool');
   }, [tools]);
 
-  if (containsCuboidTool) {
-    availableOptions[MediaType.IMAGE] = availableOptions[MediaType.IMAGE].filter(
-      (option) => option.value !== ExportType.COCO && option.value !== ExportType.MASK,
-    );
-  }
-
   const options = useMemo(() => {
     if (!mediaType) {
       return [];

@@ -18,12 +18,12 @@
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@codemirror/lang-json": "^6.0.1",
-    "@labelu/audio-annotator-react": "workspace:*",
-    "@labelu/components-react": "workspace:*",
-    "@labelu/formatter": "1.0.2",
-    "@labelu/image": "workspace:*",
-    "@labelu/image-annotator-react": "workspace:*",
-    "@labelu/video-annotator-react": "workspace:*",
+    "@labelu/audio-annotator-react": "latest",
+    "@labelu/components-react": "latest",
+    "@labelu/formatter": "latest",
+    "@labelu/image": "latest",
+    "@labelu/image-annotator-react": "latest",
+    "@labelu/video-annotator-react": "latest",
     "@loadable/component": "^5.15.3",
     "@types/loadable__component": "^5.13.4",
     "@uiw/react-codemirror": "^4.21.21",
@@ -58,8 +58,5 @@
     "vite-plugin-ejs": "^1.6.4",
     "vite-plugin-svgr": "^2.4.0",
     "vite-plugin-ts-mono-alias": "^1.1.8"
-  },
-  "engines": {
-    "node": ">=16.15.1"
   }
 }

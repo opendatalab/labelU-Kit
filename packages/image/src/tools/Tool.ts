@@ -2,7 +2,7 @@ import { type Attribute, type ILabel } from '@labelu/interface';
 import cloneDeep from 'lodash.clonedeep';
 
 import type { Annotation } from '../annotations/Annotation';
-import type { ToolName, BasicImageAnnotation } from '../interface';
+import type { ToolName, BasicImageAnnotation, EditType } from '../interface';
 import type { Group, Shape } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import type { Draft } from '../drafts/Draft';
@@ -11,6 +11,7 @@ import { EInternalEvent } from '../enums';
 export interface BasicToolParams<Data, Style> {
   /** 标签配置 */
   labels?: Attribute[];
+
   data?: Data[];
 
   /** 标注静止的样式 */
@@ -28,6 +29,14 @@ export interface BasicToolParams<Data, Style> {
    * @default false
    */
   showOrder?: boolean;
+
+  requestEdit?: (
+    type: EditType,
+    payload: {
+      toolName: ToolName;
+      label?: string;
+    },
+  ) => boolean;
 }
 
 type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Shape<Style>, Style>;
@@ -169,6 +178,17 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
   protected updateSketchStyleByLabel(_labelValue: string) {
     // do nothing
     console.warn('updateSketchStyleByLabel is not implemented!');
+  }
+
+  protected requestEdit(type: EditType) {
+    const { config } = this;
+
+    return (
+      config?.requestEdit?.(type, {
+        toolName: this.name,
+        label: this.activeLabel,
+      }) ?? true
+    );
   }
 
   constructor({ name, data, style, hoveredStyle, selectedStyle, showOrder, ...config }: Config & ExtraParams) {

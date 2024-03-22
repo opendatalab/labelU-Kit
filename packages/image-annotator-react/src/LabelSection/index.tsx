@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
 import { DraggableModel, AttributeForm, EllipsisText } from '@labelu/components-react';
 import type { Attribute, AttributeValue, EnumerableAttribute, ILabel, TextAttribute } from '@labelu/interface';
-import type { AnnotationData, Annotator } from '@labelu/image';
+import type { AnnotationData, Annotator, ToolName } from '@labelu/image';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
@@ -190,13 +190,30 @@ function LabelItem({
 }
 
 export function LabelSection() {
-  const { engine, labels, selectedLabel, onLabelChange } = useTool();
+  const { engine, labels, selectedLabel, onLabelChange, requestEdit, currentTool } = useTool();
   const { selectedAnnotation } = useAnnotationCtx();
   const validationRef = useRef<ValidationContextType | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
+  const isLabelEditable = useCallback(
+    (toolName: ToolName | undefined, label: string | undefined) => {
+      return typeof requestEdit === 'function'
+        ? requestEdit('update', {
+            toolName: toolName!,
+            label,
+            modifiedProperty: 'label',
+          })
+        : true;
+    },
+    [requestEdit],
+  );
+
   const handleSelect = (label: ILabel, e: React.MouseEvent) => {
+    if (!isLabelEditable(currentTool, label.value)) {
+      return;
+    }
+
     // 清除上一个标签的属性
     engine?.setAttributes({});
     engine?.setLabel(label.value);
@@ -213,7 +230,13 @@ export function LabelSection() {
 
   const handleAttributesChange = useCallback(
     (values: any) => {
-      const { attributes } = values;
+      const { attributes, label } = values;
+
+      if (label) {
+        // 清除上一个标签的属性
+        engine?.setAttributes({});
+        engine?.setLabel(label);
+      }
 
       if (attributes) {
         engine?.setAttributes(attributes);
@@ -313,6 +336,10 @@ export function LabelSection() {
     };
   }, [selectedAnnotation?.attributes, selectedLabel?.attributes, selectedLabel?.value]);
 
+  const isLabelDisabled = useMemo(() => {
+    return !isLabelEditable(currentTool, formValue.label);
+  }, [currentTool, formValue.label, isLabelEditable]);
+
   return (
     <Wrapper>
       <Labels ref={labelsWrapperRef}>
@@ -385,6 +412,7 @@ export function LabelSection() {
             engine?.setLabel(label.value);
           }}
           attributes={labels}
+          labelDisabled={isLabelDisabled}
           initialValues={formValue}
           currentAttribute={selectedLabel}
         />

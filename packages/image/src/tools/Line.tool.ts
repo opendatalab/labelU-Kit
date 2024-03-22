@@ -1,5 +1,6 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+
+import uid from '@/utils/uid';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
@@ -77,6 +78,10 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     return _data;
   }
 
+  static create({ data, ...config }: LineToolOptions) {
+    return new LineTool({ ...config, data: LineTool.convertToCanvasCoordinates(data ?? []) });
+  }
+
   private _holdingSlopes: Point[] | null = null;
 
   private _holdingSlopeEdge: Line | null = null;
@@ -85,7 +90,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   public draft: DraftLine | DraftLineCurve | null = null;
 
-  constructor({ style, data, ...params }: LineToolOptions) {
+  constructor({ style, ...params }: LineToolOptions) {
     super({
       name: 'line',
       lineType: 'line',
@@ -95,7 +100,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       labels: [],
       selectedStyle: {},
       // ----------------
-      data: LineTool.convertToCanvasCoordinates(data ?? []),
+      data: [],
       style: {
         ...Line.DEFAULT_STYLE,
         ...style,
@@ -109,6 +114,12 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.on(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
+  }
+
+  public load(data: LineData[]) {
+    this._data.push(...LineTool.convertToCanvasCoordinates(data));
+    this.clearDrawing();
+    this.setupShapes();
   }
 
   protected setupShapes() {
@@ -230,7 +241,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       (draft.isUnderCursor({ x: e.offsetX, y: e.offsetY }) ||
         draft.group.isShapesUnderCursor({ x: e.offsetX, y: e.offsetY }));
 
-    if (!activeLabel || isUnderDraft || monitor?.keyboard.Space) {
+    if (isUnderDraft) {
       return;
     }
 
@@ -245,24 +256,24 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     if (config.lineType === 'spline') {
       if (!this.sketch) {
-        this.sketch = new Group(uuid(), monitor!.getNextOrder());
+        this.sketch = new Group(uid(), monitor!.getNextOrder());
       }
 
       // 按下鼠标左键的时候默认是拖拽第一个控制点
       const slopeStartPoint = new Point({
-        id: uuid(),
+        id: uid(),
         style: { ...style, fill: '#fff', radius: 4, strokeWidth: 0, opacity: 0.5 },
         coordinate: { ...startPoint },
       });
       const slopeEndPoint = new Point({
-        id: uuid(),
+        id: uid(),
         style: { ...style, fill: '#fff', radius: 4, strokeWidth: 0, opacity: 0.5 },
         coordinate: { ...startPoint },
       });
       this._holdingSlopes = [slopeStartPoint, slopeEndPoint];
       this.sketch.add(
         new Spline({
-          id: uuid(),
+          id: uid(),
           style: { ...style, stroke: AnnotationLine.labelStatic.getLabelColor(activeLabel) },
           coordinate: [
             {
@@ -283,7 +294,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         }),
       );
       const slopeEdge = new Line({
-        id: uuid(),
+        id: uid(),
         style: { ...style, stroke: '#fff', strokeWidth: 1, opacity: 0.5 },
         coordinate: [
           {
@@ -301,14 +312,14 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     } else {
       // 绘制直线
       if (!sketch) {
-        this.sketch = new Group(uuid(), monitor!.getNextOrder());
+        this.sketch = new Group(uid(), monitor!.getNextOrder());
       }
 
       // 创建新的线段
       const lastLine = this.sketch?.last() as Line | null;
       this.sketch?.add(
         new Line({
-          id: uuid(),
+          id: uid(),
           style: { ...style, stroke: AnnotationLine.labelStatic.getLabelColor(activeLabel) },
           coordinate: [
             {
@@ -525,21 +536,21 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
               y: axis!.getOriginalY(shape.dynamicCoordinate[0].y),
             },
             {
-              id: uuid(),
+              id: uid(),
               x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
               y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
             },
           );
         } else {
           points.push({
-            id: uuid(),
+            id: uid(),
             x: axis!.getOriginalX(shape.dynamicCoordinate[1].x),
             y: axis!.getOriginalY(shape.dynamicCoordinate[1].y),
           });
         }
       }
       data = {
-        id: uuid(),
+        id: uid(),
         type: 'line',
         points: points,
         label: this.activeLabel,
@@ -559,19 +570,19 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
         if (i === 0) {
           // 第一条曲线取开始点和结束点
           points.push({
-            id: uuid(),
+            id: uid(),
             x: curve.coordinate[0].x,
             y: curve.coordinate[0].y,
           });
         }
         points.push({
-          id: uuid(),
+          id: uid(),
           x: curve.coordinate[1].x,
           y: curve.coordinate[1].y,
         });
       }
       data = {
-        id: uuid(),
+        id: uid(),
         type: 'spline',
         points: points,
         controlPoints,

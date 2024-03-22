@@ -19,7 +19,7 @@ import type {
 import { DEFAULT_LABEL_COLOR, DEFAULT_LABEL_TEXT } from '@labelu/image';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
-import type { AnnotationDataInUI, GlobalAnnotation } from '@/context/annotation.context';
+import type { AnnotationDataInUI, AnnotationWithTool, GlobalAnnotation } from '@/context/annotation.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
 import { useTool } from '@/context/tool.context';
 import { useSample } from '@/context/sample.context';
@@ -177,19 +177,23 @@ function ClearAction({ onClear }: { onClear: () => void }) {
 }
 
 export function AttributePanel() {
-  const { engine, globalToolConfig, config, labelMapping } = useTool();
+  const { engine, globalToolConfig, config, labelMapping, preLabelMapping } = useTool();
   const { currentSample } = useSample();
   const {
     sortedImageAnnotations,
     annotationsWithGlobal,
     allAnnotationsMapping,
     selectedAnnotation,
-    onGlobalAnnotationsChange,
-    onImageAnnotationsClear,
-    onGlobalAnnotationClear,
+    preAnnotationsWithGlobal,
+    onAnnotationsChange,
+    onAnnotationClear,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const globalAnnotations = annotationsWithGlobal?.global;
+  const globalAnnotations = useMemo(() => {
+    return Object.values(annotationsWithGlobal).filter((item) =>
+      ['text', 'tag'].includes((item as GlobalAnnotation).type),
+    ) as GlobalAnnotation[];
+  }, [annotationsWithGlobal]);
 
   const { imageAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
     const imageAnnotationsGroupByLabel = new Map<string, AnnotationDataInUI[]>();
@@ -213,10 +217,6 @@ export function AttributePanel() {
   const globals = useMemo(() => {
     const _globals: (TextAttribute | EnumerableAttribute)[] = [];
 
-    if (!globalToolConfig) {
-      return _globals;
-    }
-
     if (globalToolConfig.tag) {
       _globals.push(...globalToolConfig.tag);
     }
@@ -225,38 +225,52 @@ export function AttributePanel() {
       _globals.push(...globalToolConfig.text);
     }
 
-    return _globals;
-  }, [globalToolConfig]);
-
-  const flatGlobalAnnotations = useMemo(() => {
-    const result: GlobalAnnotation[] = [];
-
-    if (!globalAnnotations) {
-      return result;
-    }
-
-    Object.keys(globalAnnotations).forEach((key) => {
-      result.push(...globalAnnotations[key as GlobalAnnotationType]);
+    // 预标注的文本和分类需要跟用户配置合并且根据其value去重
+    Object.values(preLabelMapping?.tag ?? {})?.forEach((item) => {
+      if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+        _globals.push({ ...item, disabled: true } as EnumerableAttribute);
+      }
     });
 
+    Object.values(preLabelMapping?.text ?? {})?.forEach((item) => {
+      if (!_globals.some((innerItem) => innerItem.value === item.value)) {
+        _globals.push({ ...item, disabled: true } as TextAttribute);
+      }
+    });
+
+    return _globals;
+  }, [globalToolConfig.tag, globalToolConfig.text, preLabelMapping?.tag, preLabelMapping?.text]);
+
+  const flatGlobalAnnotations = useMemo(() => {
+    const result = globalAnnotations;
+
+    if (globalAnnotations.length === 0) {
+      [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
+        if (values) {
+          result.push(...(values as GlobalAnnotation[]));
+        }
+      });
+    }
+
     return result;
-  }, [globalAnnotations]);
+  }, [globalAnnotations, preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text]);
 
   const titles = useMemo(() => {
     const _titles = [];
     // 将文本描述和标签分类合并成全局配置
-    if (globalToolConfig?.tag || globalToolConfig?.text) {
+    if (
+      globalToolConfig?.tag ||
+      globalToolConfig?.text ||
+      Object.keys(preLabelMapping.tag ?? {}).length ||
+      Object.keys(preLabelMapping.text ?? {}).length
+    ) {
       let isCompleted = false;
 
       const globalAnnotationMapping: Record<string, TextAnnotationEntity | TagAnnotationEntity> = {};
 
-      Object.keys(globalAnnotations).forEach((key) => {
-        const items = globalAnnotations[key as GlobalAnnotationType];
-
-        items.forEach((item) => {
-          const _key = Object.keys(item.value)[0];
-          globalAnnotationMapping[_key] = item;
-        });
+      globalAnnotations.forEach((item) => {
+        const _key = Object.keys(item.value)[0];
+        globalAnnotationMapping[_key] = item;
       });
 
       /** 如果所有的文本描述都是必填的，那么只要有一个不存在，那么就是未完成  */
@@ -281,8 +295,10 @@ export function AttributePanel() {
 
     return _titles;
   }, [
-    globalToolConfig?.tag,
-    globalToolConfig?.text,
+    globalToolConfig.tag,
+    globalToolConfig.text,
+    preLabelMapping.tag,
+    preLabelMapping.text,
     config?.line,
     config?.point,
     config?.polygon,
@@ -306,51 +322,36 @@ export function AttributePanel() {
   }, []);
 
   const handleOnChange = useCallback(
-    (_changedValues: any, values: any[], type: GlobalAnnotationType) => {
-      const newAnnotations = [];
+    (
+      changedValues: Partial<Record<GlobalAnnotationType, Record<string, TextAnnotationEntity | TagAnnotationEntity>>>,
+      values: Record<GlobalAnnotationType, Record<string, TextAnnotationEntity | TagAnnotationEntity>>,
+    ) => {
+      const newAnnotations: AnnotationWithTool[] = [];
       const existAnnotations: GlobalAnnotation[] = [];
 
-      for (const item of values) {
-        if (item.id && item.id in allAnnotationsMapping) {
-          existAnnotations.push(item);
-        } else {
-          newAnnotations.push({
-            id: item.id || uid(),
-            type,
-            value: item.value,
-          });
+      for (const type of Object.keys(changedValues)) {
+        const annotationType = type as GlobalAnnotationType;
+        const changedInnerValues = changedValues[type as GlobalAnnotationType] ?? {};
+        const allInnerValues = values[annotationType] ?? [];
+        for (const field of Object.keys(changedInnerValues)) {
+          const item = allInnerValues[field];
+
+          if (item.id && item.id in allAnnotationsMapping) {
+            existAnnotations.push(item);
+          } else {
+            newAnnotations.push({
+              id: item.id || uid(),
+              type: annotationType,
+              tool: annotationType,
+              value: item.value,
+            });
+          }
         }
       }
 
-      const _annotations = {
-        ...globalAnnotations,
-      };
-
-      Object.keys(_annotations).forEach((key) => {
-        const toolAnnotations = _annotations[key as GlobalAnnotationType].map((item) => {
-          const existIndex = existAnnotations.findIndex((innerItem) => innerItem.id === item.id);
-
-          if (existIndex >= 0) {
-            return existAnnotations[existIndex];
-          }
-
-          return item;
-        });
-
-        _annotations[key as GlobalAnnotationType] = toolAnnotations;
-      });
-
-      newAnnotations.forEach((item) => {
-        if (!_annotations[item.type]) {
-          _annotations[item.type] = [];
-        }
-
-        _annotations[item.type].push(item);
-      });
-
-      onGlobalAnnotationsChange(_annotations);
+      onAnnotationsChange([...existAnnotations, ...newAnnotations] as AnnotationWithTool[]);
     },
-    [globalAnnotations, allAnnotationsMapping, onGlobalAnnotationsChange],
+    [onAnnotationsChange, allAnnotationsMapping],
   );
 
   const handleClear = () => {
@@ -358,18 +359,16 @@ export function AttributePanel() {
       return;
     }
 
-    if (activeKey === 'global') {
-      onGlobalAnnotationClear();
-    } else {
+    onAnnotationClear();
+    if (activeKey === 'label') {
       engine?.clearData();
-      onImageAnnotationsClear();
     }
   };
 
   const collapseItems = useMemo(
     () =>
       Array.from(imageAnnotationsGroup).map(([label, _annotations]) => {
-        const found = labelMapping[_annotations[0].tool]?.[label];
+        const found = labelMapping[_annotations[0].tool]?.[label] ?? preLabelMapping?.[_annotations[0].tool]?.[label];
         const labelText = found ? found?.key ?? DEFAULT_LABEL_TEXT : DEFAULT_LABEL_TEXT;
 
         return {
@@ -385,21 +384,25 @@ export function AttributePanel() {
           key: label,
           children: (
             <AsideWrapper>
-              {_annotations.map((item) => (
-                <AsideAttributeItem
-                  key={item.id}
-                  active={item.id === selectedAnnotation?.id}
-                  order={item.order}
-                  annotation={item}
-                  labelText={labelMapping[item.tool]?.[label]?.key ?? DEFAULT_LABEL_TEXT}
-                  color={labelMapping[item.tool]?.[label]?.color ?? DEFAULT_LABEL_COLOR}
-                />
-              ))}
+              {_annotations.map((item) => {
+                const labelOfAnnotation = labelMapping[item.tool]?.[label] ?? preLabelMapping?.[item.tool]?.[label];
+
+                return (
+                  <AsideAttributeItem
+                    key={item.id}
+                    active={item.id === selectedAnnotation?.id}
+                    order={item.order}
+                    annotation={item}
+                    labelText={labelOfAnnotation?.key ?? DEFAULT_LABEL_TEXT}
+                    color={labelOfAnnotation?.color ?? DEFAULT_LABEL_COLOR}
+                  />
+                );
+              })}
             </AsideWrapper>
           ),
         };
       }),
-    [labelMapping, selectedAnnotation?.id, imageAnnotationsGroup],
+    [imageAnnotationsGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
 
   return (

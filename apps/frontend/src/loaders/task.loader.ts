@@ -6,6 +6,8 @@ import queryClient from '@/api/queryClient';
 import { getSamples } from '@/api/services/samples';
 import type { SampleListResponse, TaskResponseWithStatics } from '@/api/types';
 import type { ToolsConfigState } from '@/types/toolConfig';
+import { preAnnotationKey } from '@/api/queryKeyFactories/preAnnotation';
+import { getPreAnnotations } from '@/api/services/preAnnotations';
 
 export async function tasksLoader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -29,12 +31,18 @@ export type TaskInLoader = Omit<TaskResponseWithStatics, 'config'> & {
 export interface TaskLoaderResult {
   samples?: SampleListResponse;
   task?: TaskInLoader;
+
+  preAnnotations?: {
+    sample_name: string;
+    annotations: any;
+  }[];
 }
 
 export async function taskLoader({ params, request }: LoaderFunctionArgs) {
   const result: TaskLoaderResult = {
     samples: undefined,
     task: undefined,
+    preAnnotations: undefined,
   };
 
   // taskId 为 0 时，表示新建任务
@@ -55,6 +63,15 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
     queryKey: sampleQueryKey,
     queryFn: () => getSamples(queryParams),
   });
+
+  if (searchParams.get('isNew') !== 'true') {
+    const preAnnotationQueryKey = preAnnotationKey.list({ task_id: +params.taskId });
+
+    result.preAnnotations = await queryClient.fetchQuery({
+      queryKey: preAnnotationQueryKey,
+      queryFn: () => getPreAnnotations(queryParams),
+    });
+  }
 
   const taskDetail = await queryClient.fetchQuery({
     queryKey: taskKey.detail(params.taskId),

@@ -1,5 +1,6 @@
-import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash.clonedeep';
+
+import uid from '@/utils/uid';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
@@ -49,7 +50,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
       const endPoint = data.points[i];
 
       const line = new Line({
-        id: uuid(),
+        id: uid(),
         coordinate: [{ ...startPoint }, { ...endPoint }],
         style: {
           ...style,
@@ -69,6 +70,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
       const pointItem = data.points[i];
       const point = new ControllerPoint({
         id: pointItem.id,
+        disabled: !this.requestEdit('update'),
         outOfImage: config.outOfImage,
         // 深拷贝，避免出现引用问题
         coordinate: { ...pointItem },
@@ -101,7 +103,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
     const { config, group, _pointToBeAdded } = this;
 
     // 只有按下 alt 键时，才能在线段上增加控制点
-    if (!monitor?.keyboard.Alt) {
+    if (!monitor?.keyboard.Alt || !this.requestEdit('update')) {
       return;
     }
 
@@ -126,7 +128,8 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
       const point = new ControllerPoint({
         // name存储线段的索引
         name: group.shapes.indexOf(line).toString(),
-        id: uuid(),
+        id: uid(),
+        disabled: !this.requestEdit('update'),
         coordinate: axis!.getOriginalCoord(latestPointOnLine),
         outOfImage: config.outOfImage,
       });
@@ -304,7 +307,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
     const bbox = this.getBBoxWithoutControllerPoint();
 
     this._selectionShape = new Rect({
-      id: uuid(),
+      id: uid(),
       coordinate: axis!.getOriginalCoord({
         x: bbox.minX,
         y: bbox.minY,

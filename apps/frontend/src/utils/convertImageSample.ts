@@ -1,36 +1,18 @@
 import _ from 'lodash';
-import type { ImageAnnotatorProps } from '@labelu/image-annotator-react';
-import type { ImageSample } from '@labelu/image-annotator-react/dist/context/sample.context';
+import type { GlobalToolConfig, ImageAnnotatorOptions, ImageSample } from '@labelu/image-annotator-react';
 import { omit } from 'lodash/fp';
 import type { ToolName } from '@labelu/image';
 import { TOOL_NAMES } from '@labelu/image';
 
-import type { SampleData } from '@/api/types';
+import type { ParsedResult, SampleResponse } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
-export function convertImageSample(
-  sample: SampleData | undefined,
-  sampleId: string | number | undefined,
-  config: ImageAnnotatorProps['config'],
-): ImageSample | undefined {
-  if (!sample || !sampleId) {
-    return;
-  }
-
-  const id = sampleId!;
-  let url = sample.urls[+id];
-  // NOTE: urls里只有一个元素
-  for (const _id in sample.urls) {
-    url = sample.urls[_id];
-  }
-
-  let resultParsed: any = {};
-  if (sample.result && !_.isNull(sample.result)) {
-    resultParsed = jsonParse(sample.result);
-  }
-
+export function convertImageAnnotations(
+  result: ParsedResult,
+  config: Pick<ImageAnnotatorOptions, ToolName> & GlobalToolConfig,
+) {
   // annotation
   const pool = [
     ['line', 'lineTool'],
@@ -40,45 +22,64 @@ export function convertImageSample(
     ['cuboid', 'cuboidTool'],
     ['text', 'textTool'],
     ['tag', 'tagTool'],
-  ];
+  ] as const;
+
+  return _.chain(pool)
+    .map(([type, key]) => {
+      if (!result[key] && TOOL_NAMES.includes(type as ToolName)) {
+        return;
+      }
+
+      const items = _.get(result, [key, 'result']) || _.get(result, [type, 'result'], []);
+      if (!items.length && (type === 'tag' || type === 'text')) {
+        // 生成全局工具的默认值
+        return [type, generateDefaultValues(config?.[type])];
+      }
+
+      return [
+        type,
+        items.map((item: any) => {
+          const resultItem = {
+            ...omit(['attribute'])(item),
+            label: item.attribute ?? item.label,
+          } as any;
+
+          if (type === 'line' || type === 'polygon') {
+            return {
+              ...omit(['pointList'])(resultItem),
+              type: resultItem.type ?? 'line',
+              points: item.pointList ?? item.points,
+            };
+          }
+
+          return resultItem;
+        }),
+      ];
+    })
+    .compact()
+    .fromPairs()
+    .value();
+}
+
+export function convertImageSample(
+  sample: SampleResponse | undefined,
+  config: Pick<ImageAnnotatorOptions, ToolName> & GlobalToolConfig,
+): ImageSample | undefined {
+  if (!sample) {
+    return;
+  }
+
+  const id = sample.id!;
+  const url = sample.file.url;
+
+  let resultParsed: any = {};
+  if (sample?.data?.result && !_.isNull(sample?.data?.result)) {
+    resultParsed = jsonParse(sample.data.result);
+  }
 
   return {
     id,
     url,
-    data: _.chain(pool)
-      .map(([type, key]) => {
-        if (!resultParsed[key] && TOOL_NAMES.includes(type as ToolName)) {
-          return;
-        }
-
-        const items = _.get(resultParsed, [key, 'result'], []);
-        if (!items.length && (type === 'tag' || type === 'text')) {
-          // 生成全局工具的默认值
-          return [type, generateDefaultValues(config?.[type])];
-        }
-
-        return [
-          type,
-          items.map((item: any) => {
-            const resultItem = {
-              ...omit(['attribute'])(item),
-              label: item.attribute,
-            };
-
-            if (type === 'line' || type === 'polygon') {
-              return {
-                ...omit(['pointList'])(resultItem),
-                type: resultItem.type ?? 'line',
-                points: item.pointList ?? item.points,
-              };
-            }
-
-            return resultItem;
-          }),
-        ];
-      })
-      .compact()
-      .fromPairs()
-      .value(),
+    data: convertImageAnnotations(resultParsed, config),
   };
 }

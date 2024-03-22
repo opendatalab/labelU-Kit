@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash.clonedeep';
 
-import { axis, eventEmitter } from '../singletons';
+import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { BasicImageAnnotation } from '../interface';
 import type { BasicToolParams } from './Tool';
@@ -35,14 +35,28 @@ export function ToolWrapper<
     constructor(...params: any[]) {
       super(...params);
 
-      eventEmitter.on(EInternalEvent.LeftMouseDown, this.handleMouseDown);
+      eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
       eventEmitter.on(EInternalEvent.MouseMove, this.handleMouseMove);
       eventEmitter.on(EInternalEvent.Escape, this.handleEscape);
       eventEmitter.on(EInternalEvent.Delete, this._handleDelete);
       eventEmitter.on(EInternalEvent.BackSpace, this._handleDelete);
     }
 
+    private _handleLeftMouseDown = (e: MouseEvent) => {
+      if (!this.activeLabel || monitor?.keyboard.Space || !this.requestEdit('create')) {
+        return;
+      }
+
+      if (this.handleMouseDown) {
+        this.handleMouseDown(e);
+      }
+    };
+
     private _handleDelete = (e: KeyboardEvent) => {
+      if (!this.requestEdit('delete')) {
+        return;
+      }
+
       if (this.handleDelete) {
         this.handleDelete(e);
       }
@@ -50,15 +64,11 @@ export function ToolWrapper<
       axis?.rerender();
     };
 
-    /**
-     * 追加数据
-     */
-    public load(data: Data[]) {
-      this._data.push(...data);
-      this.refresh();
-    }
-
     public deleteAnnotation(id: string) {
+      if (!this.requestEdit('delete')) {
+        return;
+      }
+
       const { draft } = this;
 
       // 如果正在创建，则取消创建
@@ -187,7 +197,7 @@ export function ToolWrapper<
     public destroy() {
       super.destroy();
 
-      eventEmitter.off(EInternalEvent.LeftMouseDown, this.handleMouseDown);
+      eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleLeftMouseDown);
       eventEmitter.off(EInternalEvent.MouseMove, this.handleMouseMove);
       eventEmitter.off(EInternalEvent.Escape, this.handleEscape);
       eventEmitter.off(EInternalEvent.Delete, this._handleDelete);

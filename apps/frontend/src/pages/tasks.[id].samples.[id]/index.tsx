@@ -3,38 +3,80 @@ import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
 import { Annotator } from '@labelu/video-annotator-react';
+import type { AudioAndVideoAnnotatorRef } from '@labelu/audio-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
 import { useSearchParams } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
-import type { AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
+import type { ImageAnnotatorProps, AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
 import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
+import type { ToolName } from '@labelu/image';
+import type { ILabel } from '@labelu/interface';
 
 import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import type { getSample } from '@/api/services/samples';
 import { getSamples } from '@/api/services/samples';
-import { convertVideoConfig } from '@/utils/convertVideoConfig';
-import { convertVideoSample } from '@/utils/convertVideoSample';
+import { convertAudioAndVideoConfig } from '@/utils/convertAudioAndVideoConfig';
+import { convertAudioAndVideoSample, convertMediaAnnotations } from '@/utils/convertAudioAndVideoSample';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
-import { convertImageSample } from '@/utils/convertImageSample';
+import { convertImageAnnotations, convertImageSample } from '@/utils/convertImageSample';
+import { TOOL_NAME } from '@/constants/toolName';
 
-import commonController from '../../utils/common';
 import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
 
+type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
+
 export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
-export const videoAnnotationRef = createRef();
-export const audioAnnotationRef = createRef();
+export const videoAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
+export const audioAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
 
 const AnnotationPage = () => {
   const routeParams = useParams();
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
-  const sample = useRouteLoaderData('annotation') as Awaited<ReturnType<typeof getSample>>;
+  const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
+  const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation;
+  const preAnnotationConfig = useMemo(() => {
+    const result: Partial<Record<AllToolName, any>> = {};
+
+    if (preAnnotation) {
+      const config = _.get(preAnnotation, 'data[0].data[0].config', {});
+
+      Object.keys(config).forEach((key) => {
+        let toolName = key.replace(/Tool$/, '') as AllToolName;
+
+        if (key.includes('audio') || key.includes('video')) {
+          // audioSegmentTool => segment
+          toolName = toolName.replace(/audio|video/, '').toLowerCase() as AllToolName;
+        }
+
+        result[toolName] = config[key as keyof typeof config];
+      });
+    }
+
+    return result;
+  }, [preAnnotation]);
+  const preAnnotations = useMemo(() => {
+    if (!preAnnotation) {
+      return {};
+    }
+
+    const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+
+    if (task?.media_type === MediaType.IMAGE) {
+      return convertImageAnnotations(_annotations, preAnnotationConfig);
+    } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
+      return convertMediaAnnotations(task.media_type, _annotations, preAnnotationConfig);
+    }
+
+    return {};
+  }, [preAnnotation, preAnnotationConfig, task?.media_type]);
+
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
   const isFetching = useIsFetching();
@@ -97,14 +139,6 @@ const AnnotationPage = () => {
     },
   );
 
-  const transformed = useMemo(() => {
-    if (!sample?.data) {
-      return [];
-    }
-
-    return commonController.transformFileList(sample.data.data, +routeParams.sampleId!);
-  }, [sample?.data, routeParams.sampleId]);
-
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
 
@@ -131,7 +165,7 @@ const AnnotationPage = () => {
 
   const editorConfig = useMemo(() => {
     if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertVideoConfig(taskConfig);
+      return convertAudioAndVideoConfig(taskConfig);
     }
 
     return convertImageConfig(taskConfig);
@@ -139,15 +173,11 @@ const AnnotationPage = () => {
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageSample(sample?.data?.data, routeParams.sampleId, editorConfig);
+      return convertImageSample(sample?.data, editorConfig);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      if (!transformed?.[0]) {
-        return null;
-      }
-
-      return convertVideoSample(sample?.data?.data, routeParams.sampleId, editorConfig, task.media_type);
+      return convertAudioAndVideoSample(sample?.data, editorConfig, task.media_type);
     }
-  }, [editorConfig, routeParams.sampleId, sample?.data, task?.media_type, transformed]);
+  }, [editorConfig, sample?.data, task?.media_type]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
@@ -169,6 +199,40 @@ const AnnotationPage = () => {
 
   const isLoading = useMemo(() => loading || isFetching > 0 || isMutating > 0, [loading, isFetching, isMutating]);
 
+  const config = useMemo(() => {
+    return configFromParent || editorConfig;
+  }, [configFromParent, editorConfig]);
+
+  const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
+    (editType, { toolName, label }) => {
+      if (!toolName) {
+        return false;
+      }
+
+      const toolConfig = config[toolName];
+      const toolNameKey =
+        (toolName.includes('frame') || toolName.includes('segment')
+          ? task!.media_type?.toLowerCase() + _.upperFirst(toolName)
+          : toolName) + 'Tool';
+
+      if (editType === 'create' && !toolConfig?.labels?.find((item: ILabel) => item.value === label)) {
+        message.destroy();
+        message.error(`当前工具【${TOOL_NAME[toolNameKey]}】不包含值为【${label}】的标签`);
+
+        return false;
+      }
+
+      if (editType === 'update' && !config[toolName]) {
+        message.destroy();
+        message.error(`当前配置不存在【${TOOL_NAME[toolNameKey]}】工具`);
+        return false;
+      }
+
+      return true;
+    },
+    [config, task],
+  );
+
   if (task?.media_type === MediaType.IMAGE) {
     content = (
       <ImageAnnotator
@@ -178,7 +242,10 @@ const AnnotationPage = () => {
         onError={onError}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={configFromParent || editorConfig}
+        config={config}
+        requestEdit={requestEdit}
+        preAnnotationLabels={preAnnotationConfig}
+        preAnnotations={preAnnotations}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {
@@ -188,9 +255,12 @@ const AnnotationPage = () => {
         ref={videoAnnotationRef}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={configFromParent || editorConfig}
+        config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
+        requestEdit={requestEdit}
+        preAnnotationLabels={preAnnotationConfig}
+        preAnnotations={preAnnotations}
       />
     );
   } else if (task?.media_type === MediaType.AUDIO) {
@@ -200,14 +270,17 @@ const AnnotationPage = () => {
         ref={audioAnnotationRef}
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
-        config={configFromParent || editorConfig}
+        config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
+        requestEdit={requestEdit}
+        preAnnotationLabels={preAnnotationConfig}
+        preAnnotations={preAnnotations}
       />
     );
   }
 
-  if (_.isEmpty(transformed)) {
+  if (_.isEmpty(sample.data.file)) {
     return (
       <FlexLayout.Content items="center" justify="center" flex>
         <Empty description="无样本数据" />

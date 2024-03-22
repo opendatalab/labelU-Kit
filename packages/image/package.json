@@ -1,6 +1,6 @@
 {
   "name": "@labelu/image",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Image annotation tool for labelU",
   "author": {
     "name": "GaryShen",
@@ -46,11 +46,10 @@
     "eventemitter3": "^5.0.0",
     "lodash.clonedeep": "^4.5.0",
     "polygon-clipping": "^0.15.7",
-    "rbush": "^3.0.1",
-    "uuid": "^9.0.0"
+    "rbush": "^3.0.1"
   },
   "devDependencies": {
-    "@labelu/interface": "1.3.0",
+    "@labelu/interface": "1.3.1",
     "@types/color": "^3.0.6",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.mapvalues": "^4.6.9",

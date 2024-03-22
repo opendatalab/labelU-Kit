@@ -1,6 +1,7 @@
-import { v4 as uuid } from 'uuid';
 import type { ILabel } from '@labelu/interface';
 import Color from 'color';
+
+import uid from '@/utils/uid';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -133,7 +134,7 @@ export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineS
 
     group.add(
       new ShapeText({
-        id: uuid(),
+        id: uid(),
         coordinate: data.points[0],
         text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
         style: {

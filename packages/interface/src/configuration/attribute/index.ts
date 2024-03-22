@@ -54,6 +54,8 @@ export interface TextAttribute extends AttributeItem {
    * @description 仅当type为text时有效
    */
   defaultValue?: string;
+
+  disabled?: boolean;
 }
 
 /**
@@ -66,6 +68,7 @@ export interface EnumerableAttribute extends AttributeItem {
   type: 'enum' | 'array';
   /** 标签的所有选项 */
   options: AttributeOption[];
+  disabled?: boolean;
 }
 
 /** 标签属性的类型 */

@@ -1,4 +1,4 @@
-import type { GlobalAnnotationType, InnerAttribute, TextAttribute } from '@labelu/interface';
+import type { InnerAttribute, TagAnnotationEntity, TextAnnotationEntity, TextAttribute } from '@labelu/interface';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo } from 'react';
@@ -144,15 +144,14 @@ export interface AttributeDataItem {
 }
 
 export interface AttributeTreeProps {
-  data?: AttributeDataItem[];
+  data?: (TagAnnotationEntity | TextAnnotationEntity)[];
   config?: InnerAttribute[];
-  onChange?: (changedValues: any, values: any, type: GlobalAnnotationType) => void;
+  onChange?: FormProps['onValuesChange'];
   className?: string;
 }
 
 export function AttributeTree({ data, config, onChange, className }: AttributeTreeProps) {
-  const [tagForm] = useForm();
-  const [textForm] = useForm();
+  const [form] = useForm();
   const attributeMappingByTool = useMemo(() => {
     const mapping: Record<string, Record<string, InnerAttribute>> = {};
 
@@ -173,51 +172,53 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
   const textConfig = useMemo(() => config?.filter((item) => item.type === 'string'), [config]);
   const tagDefaultActiveKeys = useMemo(() => tagConfig?.map((item) => item.value), [tagConfig]);
   const textDefaultActiveKeys = useMemo(() => textConfig?.map((item) => item.value), [textConfig]);
-  const tagData = useMemo(() => {
-    let _tagData = data?.filter((item) => item.type === 'tag');
+  const formData = useMemo(() => {
+    const _tagData: Record<string, TagAnnotationEntity> = {};
+    const _textData: Record<string, TextAnnotationEntity> = {};
 
-    if (!_tagData?.length) {
-      _tagData = tagConfig?.map(
-        (item) =>
-          ({
-            id: uid(),
-            type: 'tag',
-            value: {
-              [item.value]: [],
-            },
-          } as AttributeDataItem),
-      );
-    }
+    data?.forEach((item) => {
+      if (item.type === 'tag') {
+        _tagData[Object.keys(item.value)[0]] = item;
+      }
+
+      if (item.type === 'text') {
+        _textData[Object.keys(item.value)[0]] = item;
+      }
+    });
+
+    tagConfig?.forEach((item) => {
+      if (!_tagData[item.value]) {
+        _tagData[item.value] = {
+          id: uid(),
+          type: 'tag',
+          value: {
+            [item.value]: [],
+          },
+        } as TagAnnotationEntity;
+      }
+    });
+
+    textConfig?.forEach((item) => {
+      if (!_textData[item.value]) {
+        _textData[item.value] = {
+          id: uid(),
+          type: 'text',
+          value: {
+            [item.value]: '',
+          },
+        } as TextAnnotationEntity;
+      }
+    });
 
     return {
       tag: _tagData,
-    };
-  }, [tagConfig, data]);
-
-  const textData = useMemo(() => {
-    let _textData = data?.filter((item) => item.type === 'text');
-
-    if (!_textData?.length) {
-      _textData = textConfig?.map(
-        (item) =>
-          ({
-            id: uid(),
-            type: 'text',
-            value: {
-              [item.value]: '',
-            },
-          } as AttributeDataItem),
-      );
-    }
-
-    return {
       text: _textData,
     };
-  }, [textConfig, data]);
+  }, [data, tagConfig, textConfig]);
 
   const tagFormItems = useMemo(() => {
     return (
-      tagConfig?.map((item, index) => {
+      tagConfig?.map((item) => {
         const attributeConfigItem = attributeMappingByTool[item.type as string][item.value];
         return {
           key: item.value,
@@ -232,16 +233,16 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
           forceRender: true,
           children: (
             <div>
-              <Field name={['tag', index, 'id']}>
+              <Field name={['tag', item.value, 'id']}>
                 <input style={{ display: 'none' }} />
               </Field>
-              <Field name={['tag', index, 'type']}>
+              <Field name={['tag', item.value, 'type']}>
                 <input style={{ display: 'none' }} />
               </Field>
               <AttributeFormWrapper
                 {...attributeConfigItem}
                 key={attributeConfigItem.value}
-                name={['tag', index, 'value', attributeConfigItem.value]}
+                name={['tag', item.value, 'value', attributeConfigItem.value]}
               />
             </div>
           ),
@@ -252,7 +253,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
 
   const textFormItems = useMemo(() => {
     return (
-      (textConfig as TextAttribute[])?.map((item, index) => {
+      (textConfig as TextAttribute[])?.map((item) => {
         const attributeConfigItem = attributeMappingByTool[item.type as string][item.value];
 
         return {
@@ -268,16 +269,16 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
           forceRender: true,
           children: (
             <div>
-              <Field name={['text', index, 'id']}>
+              <Field name={['text', item.value, 'id']}>
                 <input style={{ display: 'none' }} />
               </Field>
-              <Field name={['text', index, 'type']}>
+              <Field name={['text', item.value, 'type']}>
                 <input style={{ display: 'none' }} />
               </Field>
               <AttributeFormWrapper
                 {...attributeConfigItem}
                 key={attributeConfigItem.value}
-                name={['text', index, 'value', attributeConfigItem.value]}
+                name={['text', item.value, 'value', attributeConfigItem.value]}
               />
             </div>
           ),
@@ -288,21 +289,13 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
 
   // 切换样本时，需要更新表单数据
   useEffect(() => {
-    tagForm.setFieldsValue(tagData);
-    textForm.setFieldsValue(textData);
-  }, [tagData, tagForm, textData, textForm]);
-
-  const handleOnChange = (_name: GlobalAnnotationType) =>
-    ((_changedValues, values) => {
-      onChange?.(_changedValues[_name], values[_name], _name);
-    }) as FormProps['onValuesChange'];
+    form.setFieldsValue(formData);
+  }, [form, formData]);
 
   return (
     <AttributeTreeWrapper className={className}>
-      <FormWithValidation form={tagForm} onValuesChange={handleOnChange('tag')} initialValues={tagData}>
+      <FormWithValidation form={form} onValuesChange={onChange} initialValues={formData}>
         <CollapseWrapper items={tagFormItems} defaultActiveKey={tagDefaultActiveKeys} />
-      </FormWithValidation>
-      <FormWithValidation form={textForm} onValuesChange={handleOnChange('text')} initialValues={textData}>
         <CollapseWrapper items={textFormItems} defaultActiveKey={textDefaultActiveKeys} />
       </FormWithValidation>
     </AttributeTreeWrapper>
