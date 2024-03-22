@@ -22,6 +22,7 @@ import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/medi
 import type { TaskInLoader } from '@/loaders/task.loader';
 import { useUploadFileMutation } from '@/api/mutations/attachment';
 import { deleteSamples } from '@/api/services/samples';
+import { deletePreAnnotations } from '@/api/services/preAnnotations';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
@@ -291,14 +292,26 @@ const InputData = () => {
         );
       }
 
-      // 删除样本
       if (file.refId) {
-        await deleteSamples(
-          {
-            task_id: taskId!,
-          },
-          { sample_ids: [file.refId] },
-        );
+        if (file.name.endsWith('.jsonl')) {
+          // 删除预标注
+          await deletePreAnnotations(
+            {
+              task_id: taskId!,
+            },
+            {
+              pre_annotation_ids: [file.refId],
+            },
+          );
+        } else {
+          // 删除样本
+          await deleteSamples(
+            {
+              task_id: taskId!,
+            },
+            { sample_ids: [file.refId] },
+          );
+        }
       }
 
       setFileQueue((pre) => pre.filter((item) => item.uid !== file.uid));

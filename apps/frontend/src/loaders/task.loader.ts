@@ -64,12 +64,14 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
     queryFn: () => getSamples(queryParams),
   });
 
-  const preAnnotationQueryKey = preAnnotationKey.list({ task_id: +params.taskId });
+  if (searchParams.get('isNew') !== 'true') {
+    const preAnnotationQueryKey = preAnnotationKey.list({ task_id: +params.taskId });
 
-  result.preAnnotations = await queryClient.fetchQuery({
-    queryKey: preAnnotationQueryKey,
-    queryFn: () => getPreAnnotations(queryParams),
-  });
+    result.preAnnotations = await queryClient.fetchQuery({
+      queryKey: preAnnotationQueryKey,
+      queryFn: () => getPreAnnotations(queryParams),
+    });
+  }
 
   const taskDetail = await queryClient.fetchQuery({
     queryKey: taskKey.detail(params.taskId),

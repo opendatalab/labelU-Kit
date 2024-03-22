@@ -221,6 +221,27 @@ const CreateTask = () => {
       });
   }, [annotationFormInstance]);
 
+  const updateFileQueue = useCallback((files: any[], sampleIds: number[] | undefined = []) => {
+    const fileIdSampleIdMapping = _.chain(files)
+      .map((item, index) => {
+        return [item.file_id, sampleIds[index]];
+      })
+      .fromPairs()
+      .value();
+
+    setUploadFileList((prev) => {
+      return prev.map((item) => {
+        if (fileIdSampleIdMapping[item.id!]) {
+          return {
+            ...item,
+            refId: fileIdSampleIdMapping[item.id!],
+          };
+        }
+        return item;
+      });
+    });
+  }, []);
+
   const correctSampleIdsMappings = useMemo(
     () =>
       _.chain(samples)
@@ -264,24 +285,15 @@ const CreateTask = () => {
           let response: OkRespCreateSampleResponse | undefined;
           if (!_.isEmpty(mediaFileList)) {
             response = await createSamples(taskId, mediaFileList);
+
+            updateFileQueue(mediaFileList, response?.data?.ids);
           }
 
           if (!_.isEmpty(jsonlFileList)) {
             response = await createPreAnnotations(taskId, jsonlFileList);
-          }
 
-          setUploadFileList((prev) => {
-            return prev.map((item) => {
-              const uploadFileIndex = uploadFileList.findIndex((file) => file.id === item.id);
-              if (uploadFileIndex > -1 && response?.data?.ids?.[uploadFileIndex]) {
-                return {
-                  ...item,
-                  refId: response.data.ids[uploadFileIndex],
-                };
-              }
-              return item;
-            });
-          });
+            updateFileQueue(jsonlFileList, response?.data?.ids);
+          }
         }
 
         const annotationConfig = annotationFormInstance.getFieldsValue();
@@ -327,6 +339,7 @@ const CreateTask = () => {
       revalidator,
       taskData,
       taskId,
+      updateFileQueue,
       updateTaskConfig,
       uploadFileList,
     ],
