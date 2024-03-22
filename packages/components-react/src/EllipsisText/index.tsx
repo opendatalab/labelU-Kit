@@ -24,7 +24,7 @@ export function EllipsisText({
   }, [isEnter, maxWidth]);
 
   const newChildren = cloneElement(
-    typeof children === 'string' ? <span>{children}</span> : (children as NonNullable<any>),
+    typeof children === 'string' || !children ? <span>{children ?? ''}</span> : (children as NonNullable<any>),
     {
       ref,
       style: {

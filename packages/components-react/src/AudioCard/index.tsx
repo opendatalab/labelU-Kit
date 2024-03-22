@@ -88,8 +88,7 @@ export function AudioCard({ active, no, title, src, showNo, onClick, completed, 
           <Left>
             <PlayIcon />
             <EllipsisText title={title} maxWidth={72}>
-              {/* @ts-ignore */}
-              {title}
+              <span>{title}</span>
             </EllipsisText>
           </Left>
           <span>{secondsToMinute(duration)}</span>
