@@ -7,8 +7,8 @@ import type { TabsProps } from 'antd';
 import { Button, Drawer, Form, Modal, Tabs } from 'antd';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeOutlined, SettingOutlined } from '@ant-design/icons';
+import message from 'antd/es/message';
 
-import { message } from '@/components/StaticAnt';
 import FancyForm from '@/components/FancyForm';
 import videoSegmentTemplate from '@/constant/templates/videoSegment.template';
 import videoFrameTemplate from '@/constant/templates/videoFrame.template';
