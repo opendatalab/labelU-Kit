@@ -22,7 +22,6 @@ const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
   position: relative;
   background-color: #fff;
   flex-shrink: 0;
-  padding: 0 1rem;
   box-sizing: border-box;
 
   ${({ collapsed }) => (collapsed ? 'width: 0; padding: 0;' : 'width: 236px;')}
