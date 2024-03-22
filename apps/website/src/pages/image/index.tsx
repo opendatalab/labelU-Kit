@@ -53,48 +53,46 @@ const presetSamples = [
       polygon: [],
       cuboid: [
         {
-          id: '7142eaef-f079-4ee1-8eaa-18bf6510392f',
+          id: '8wtj5rpk9vs',
           direction: 'front',
           front: {
             tl: {
-              x: 308.1018276762405,
-              y: 1608.2114882506526,
+              x: 93.6936936936937,
+              y: 283.8243243243243,
             },
             tr: {
-              x: 2087.89817232376,
-              y: 1608.2114882506526,
+              x: 573.6936936936937,
+              y: 283.8243243243243,
             },
             br: {
-              x: 2087.89817232376,
-              y: 3068.958224543081,
+              x: 573.6936936936937,
+              y: 667.2477477477478,
             },
             bl: {
-              x: 308.1018276762405,
-              y: 3068.958224543081,
+              x: 93.6936936936937,
+              y: 667.2477477477478,
             },
           },
           back: {
             tl: {
-              x: 3654.9947780678854,
-              y: 1124.945169712793,
+              x: 768.7488992752151,
+              y: 204.54504504504504,
             },
             tr: {
-              x: 5434.7911227154045,
-              y: 1124.945169712793,
+              x: 1181.981981981982,
+              y: 204.54504504504504,
             },
             br: {
-              x: 5434.7911227154045,
-              y: 2585.691906005222,
+              x: 1181.981981981982,
+              y: 534.6351351351351,
             },
             bl: {
-              x: 3654.9947780678854,
-              y: 2585.691906005222,
+              x: 768.7488992752151,
+              y: 534.6351351351351,
             },
           },
           label: 'car',
-          order: 2,
-          visible: true,
-          tool: 'cuboid',
+          order: 1,
         },
       ],
       text: [],
@@ -673,7 +671,6 @@ export default function ImagePage() {
     const updateSampleData = () => {
       setResult(() => ({
         ...annotatorRef.current?.getAnnotations(),
-        ...annotatorRef.current?.getGlobalAnnotations(),
       }));
     };
     engine.on('add', updateSampleData);
@@ -685,11 +682,9 @@ export default function ImagePage() {
 
   const showResult = useCallback(() => {
     const imageAnnotations = annotatorRef.current?.getAnnotations();
-    const globalAnnotations = annotatorRef.current?.getGlobalAnnotations();
 
     setResult(() => ({
       ...imageAnnotations,
-      ...globalAnnotations,
     }));
 
     setResultOpen(true);
