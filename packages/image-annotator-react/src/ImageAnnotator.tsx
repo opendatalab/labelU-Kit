@@ -137,6 +137,10 @@ export interface ImageAnnotatorProps {
 
   onLoad?: (engine: ImageAnnotatorClass) => void;
 
+  onLabelChange?: (label: ILabel) => void;
+
+  selectedLabel?: string;
+
   /**
    * 标注是否可编辑
    */
@@ -165,6 +169,8 @@ function ForwardAnnotator(
     preAnnotationLabels,
     preAnnotations,
     requestEdit,
+    onLabelChange: propsOnLabelChange,
+    selectedLabel: propsSelectedLabel,
     onError,
     onLoad,
   }: ImageAnnotatorProps,
@@ -271,7 +277,9 @@ function ForwardAnnotator(
     return config?.[currentTool]?.labels ?? [];
   }, [config, currentTool]);
 
-  const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(labels[0]);
+  const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(
+    propsSelectedLabel ? labels.find((item) => item.value === propsSelectedLabel) : labels[0],
+  );
   const [selectedAnnotation, setSelectedAnnotation] = useState<AnnotationDataInUI | undefined>();
   const annotationsFromSample = useMemo(() => {
     return currentSample?.data ?? {};
@@ -306,9 +314,22 @@ function ForwardAnnotator(
 
         if (tools[0] && config?.[tools[0]]?.labels?.length) {
           engine.switch(tools[0]);
+
+          if (propsSelectedLabel) {
+            engine.setLabel(propsSelectedLabel);
+          }
         }
       });
-  }, [annotationsFromSample, config, currentSample, engine, isSampleDataEmpty, preAnnotations, tools]);
+  }, [
+    annotationsFromSample,
+    config,
+    currentSample,
+    engine,
+    isSampleDataEmpty,
+    preAnnotations,
+    propsSelectedLabel,
+    tools,
+  ]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -513,8 +534,9 @@ function ForwardAnnotator(
       engine?.setLabel(label.value);
       engine?.setAttributes({});
       setSelectedLabel(label);
+      propsOnLabelChange?.(label);
     },
-    [engine],
+    [engine, propsOnLabelChange],
   );
 
   // effects
