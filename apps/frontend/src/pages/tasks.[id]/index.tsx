@@ -349,10 +349,13 @@ const Samples = () => {
   }, [task?.media_type]);
 
   const data = useMemo(() => {
-    return [...(preAnnotations ?? []), ...(samples ?? [])];
+    return [
+      ...(preAnnotations ?? []),
+      ...(samples ?? []).sort(
+        (a, b) => new Date(b.created_at ?? '').valueOf() - new Date(a.created_at ?? '').valueOf(),
+      ),
+    ];
   }, [preAnnotations, samples]);
-
-  console.log(data);
 
   return (
     <FlexLayout flex="column" full gap="2rem">

@@ -44,7 +44,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
         src={url!}
         active={id === sampleId}
         onClick={() => handleOnClick(cardInfo)}
-        title={filename}
+        title={filename.substring(9)}
         no={index! + 1}
         showNo
         completed={state === 'DONE'}

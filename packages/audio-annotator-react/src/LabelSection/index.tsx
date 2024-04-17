@@ -1,4 +1,4 @@
-import React, { createRef, useLayoutEffect, useRef, useState } from 'react';
+import React, { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
 import { DraggableModel, AttributeForm, EllipsisText } from '@labelu/components-react';
@@ -156,17 +156,20 @@ export function LabelSection() {
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
-  const handleSelect = (attribute: Attribute, e: React.MouseEvent) => {
-    onLabelChange(attribute);
+  const handleSelect = useCallback(
+    (attribute: Attribute, e: React.MouseEvent) => {
+      onLabelChange(attribute);
 
-    player.pause();
+      player.pause();
 
-    openAttributeModal({
-      labelValue: attribute.value,
-      labelConfig: attribute,
-      e,
-    });
-  };
+      openAttributeModal({
+        labelValue: attribute.value,
+        labelConfig: attribute,
+        e,
+      });
+    },
+    [onLabelChange, player],
+  );
 
   const handleModalClose = async () => {
     if (!dragModalRef.current || !validationRef.current) {
