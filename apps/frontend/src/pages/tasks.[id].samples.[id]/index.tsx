@@ -233,12 +233,26 @@ const AnnotationPage = () => {
     [config, task],
   );
 
-  const handleLabelChange = useCallback((label: ILabel) => {
+  const [currentTool, setCurrentTool] = useState<any>();
+  const [labelMapping, setLabelMapping] = useState<Record<any, string>>();
+
+  const handleLabelChange = useCallback((toolName: any, label: ILabel) => {
     // 缓存当前标签
-    localStorage.setItem('annotator::label', label.value);
+    setLabelMapping((prev) => {
+      return {
+        ...prev,
+        [toolName]: label.value,
+      };
+    });
   }, []);
 
-  const selectedLabel = localStorage.getItem('annotator::label');
+  const handleToolChange = useCallback((toolName: any) => {
+    setCurrentTool(toolName);
+  }, []);
+
+  const currentLabel = useMemo(() => {
+    return labelMapping?.[currentTool];
+  }, [currentTool, labelMapping]);
 
   if (task?.media_type === MediaType.IMAGE) {
     content = (
@@ -252,7 +266,9 @@ const AnnotationPage = () => {
         config={config}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
-        selectedLabel={selectedLabel}
+        onToolChange={handleToolChange}
+        selectedTool={currentTool}
+        selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -269,7 +285,9 @@ const AnnotationPage = () => {
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
-        selectedLabel={selectedLabel}
+        onToolChange={handleToolChange}
+        selectedTool={currentTool}
+        selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -286,7 +304,9 @@ const AnnotationPage = () => {
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
-        selectedLabel={selectedLabel}
+        onToolChange={handleToolChange}
+        selectedTool={currentTool}
+        selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
