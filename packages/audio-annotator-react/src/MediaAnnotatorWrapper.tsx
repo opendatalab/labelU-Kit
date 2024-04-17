@@ -207,7 +207,11 @@ export interface AnnotatorProps {
 
   preAnnotations?: AnnotationsWithGlobal;
 
-  onLabelChange?: (label: Attribute) => void;
+  onLabelChange?: (toolName: VideoAnnotationType | undefined, label: Attribute) => void;
+
+  onToolChange?: (tool?: VideoAnnotationType) => void;
+
+  selectedTool?: VideoAnnotationType;
 
   selectedLabel?: string;
 
@@ -239,6 +243,8 @@ function ForwardAnnotator(
     preAnnotationLabels,
     onLabelChange: propsOnLabelChange,
     selectedLabel: propsSelectedLabel,
+    onToolChange: propsOnToolChange,
+    selectedTool: propsSelectedTool,
     preAnnotations,
     requestEdit,
     children,
@@ -246,7 +252,12 @@ function ForwardAnnotator(
   ref: React.Ref<AudioAndVideoAnnotatorRef>,
 ) {
   const [currentSample, setCurrentSample] = useState<MediaSample | undefined>(editingSample);
-  const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>();
+  const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>(propsSelectedTool);
+
+  useEffect(() => {
+    setCurrentTool(propsSelectedTool);
+  }, [propsSelectedTool]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
@@ -288,6 +299,10 @@ function ForwardAnnotator(
   const playerRef = useRef<any | null>(null);
   const [selectedAnnotation, setSelectedAnnotation] = useState<MediaAnnotationInUI | undefined>();
   const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(selectedLabelFromProps ?? labels[0]);
+
+  useEffect(() => {
+    setSelectedLabel(selectedLabelFromProps);
+  }, [selectedLabelFromProps]);
 
   const annotationsFromSample = useMemo(() => {
     return currentSample?.data ?? {};
@@ -335,6 +350,7 @@ function ForwardAnnotator(
     (tool?: VideoAnnotationType) => {
       setCurrentTool(tool);
       setSelectedAnnotation(undefined);
+      propsOnToolChange?.(tool);
 
       // 默认选中第一个标签
       if (tool) {
@@ -342,7 +358,7 @@ function ForwardAnnotator(
         setSelectedLabel(selectedLabelFromProps ?? _labels[0]);
       }
     },
-    [config, selectedLabelFromProps],
+    [config, propsOnToolChange, selectedLabelFromProps],
   );
 
   const convertedAnnotations = useMemo(() => {
@@ -488,12 +504,13 @@ function ForwardAnnotator(
   const onAnnotationSelect = useCallback(
     (annotation: MediaAnnotationInUI) => {
       setSelectedAnnotation(annotation);
-      setSelectedLabel(labelMappingByTool?.[annotation.type]?.[annotation.label!]);
-      propsOnLabelChange?.(labelMappingByTool?.[annotation.type]?.[annotation.label!]);
+      const _label = labelMappingByTool?.[annotation.type]?.[annotation.label!];
+      setSelectedLabel(_label);
+      propsOnLabelChange?.(currentTool, _label);
       setCurrentTool(annotation.type);
       selectedIndexRef.current = sortedMediaAnnotations.findIndex((item) => item.id === annotation.id);
     },
-    [labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
+    [currentTool, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
   );
 
   const handleAnnotateEnd: AudioAnnotatorProps['onAnnotateEnd'] = useCallback(
@@ -521,7 +538,7 @@ function ForwardAnnotator(
   const onLabelChange = useCallback(
     (label: Attribute) => {
       setSelectedLabel(label);
-      propsOnLabelChange?.(label);
+      propsOnLabelChange?.(currentTool, label);
 
       if (!selectedAnnotation) {
         return;
@@ -567,7 +584,7 @@ function ForwardAnnotator(
         };
       });
     },
-    [propsOnLabelChange, selectedAnnotation, updateAnnotationsWithGlobal],
+    [currentTool, propsOnLabelChange, selectedAnnotation, updateAnnotationsWithGlobal],
   );
 
   // ================== attribute ==================
