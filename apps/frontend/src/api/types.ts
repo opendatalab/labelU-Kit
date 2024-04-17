@@ -207,6 +207,7 @@ export interface PatchSampleCommand {
 export interface SampleResponse {
   /** Id description: annotation id */
   id?: number;
+  inner_id: number;
   /** State description: sample file state, NEW is has not start yet, DONE is completed, SKIPPED is skipped */
   state?: SampleState;
   /** Data description: sample data, include filename, file url, or result */

@@ -70,8 +70,8 @@ const Samples = () => {
   const columns: ColumnsType<SampleResponse> = [
     {
       title: '数据ID',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'inner_id',
+      key: 'inner_id',
       align: 'left',
     },
     {
@@ -80,16 +80,18 @@ const Samples = () => {
       key: 'filename',
       align: 'left',
       render: (filename, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const _filename = (record.file?.filename ?? '').substring(9);
+
+        if (_filename.endsWith('.jsonl')) {
           return (
             <span>
-              {formatter.format('ellipsis', filename, { maxWidth: 160, type: 'tooltip' })}
+              {formatter.format('ellipsis', _filename, { maxWidth: 160, type: 'tooltip' })}
               &nbsp;
               <Tag color="processing">预标注</Tag>
             </span>
           );
         }
-        return formatter.format('ellipsis', filename, { maxWidth: 160, type: 'tooltip' });
+        return formatter.format('ellipsis', _filename, { maxWidth: 160, type: 'tooltip' });
       },
     },
     {
@@ -349,6 +351,8 @@ const Samples = () => {
   const data = useMemo(() => {
     return [...(preAnnotations ?? []), ...(samples ?? [])];
   }, [preAnnotations, samples]);
+
+  console.log(data);
 
   return (
     <FlexLayout flex="column" full gap="2rem">
