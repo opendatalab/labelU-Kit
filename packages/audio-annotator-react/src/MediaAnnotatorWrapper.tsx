@@ -371,8 +371,10 @@ function ForwardAnnotator(
     [reset, setCurrentSample],
   );
 
+  // sample 切换
   useEffect(() => {
     setCurrentSample(editingSample || samples?.[0]);
+    setSelectedAnnotation(undefined);
   }, [editingSample, samples, setCurrentSample]);
 
   // ================== annotation ==================
