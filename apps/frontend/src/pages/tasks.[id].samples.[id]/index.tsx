@@ -233,6 +233,13 @@ const AnnotationPage = () => {
     [config, task],
   );
 
+  const handleLabelChange = useCallback((label: ILabel) => {
+    // 缓存当前标签
+    localStorage.setItem('annotator::label', label.value);
+  }, []);
+
+  const selectedLabel = localStorage.getItem('annotator::label');
+
   if (task?.media_type === MediaType.IMAGE) {
     content = (
       <ImageAnnotator
@@ -244,6 +251,8 @@ const AnnotationPage = () => {
         editingSample={editingSample}
         config={config}
         requestEdit={requestEdit}
+        onLabelChange={handleLabelChange}
+        selectedLabel={selectedLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -259,6 +268,8 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
+        onLabelChange={handleLabelChange}
+        selectedLabel={selectedLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -274,6 +285,8 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
+        onLabelChange={handleLabelChange}
+        selectedLabel={selectedLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
