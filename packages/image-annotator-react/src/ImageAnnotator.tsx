@@ -137,6 +137,14 @@ export interface ImageAnnotatorProps {
 
   onLoad?: (engine: ImageAnnotatorClass) => void;
 
+  onLabelChange?: (toolName: ToolName | undefined, label: ILabel) => void;
+
+  onToolChange?: (toolName: ToolName) => void;
+
+  selectedLabel?: string;
+
+  selectedTool?: ToolName;
+
   /**
    * 标注是否可编辑
    */
@@ -165,6 +173,10 @@ function ForwardAnnotator(
     preAnnotationLabels,
     preAnnotations,
     requestEdit,
+    onLabelChange: propsOnLabelChange,
+    selectedLabel: propsSelectedLabel,
+    onToolChange: propsOnToolChange,
+    selectedTool: propsSelectedTool,
     onError,
     onLoad,
   }: ImageAnnotatorProps,
@@ -184,7 +196,19 @@ function ForwardAnnotator(
 
   // ================== tool ==================
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [currentTool, setCurrentTool] = useState<ToolName | undefined>();
+  const [currentTool, setCurrentTool] = useState<ToolName | undefined>(propsSelectedTool);
+
+  useEffect(() => {
+    setCurrentTool(propsSelectedTool);
+  }, [propsSelectedTool]);
+
+  const onToolChange = useCallback(
+    (toolName: ToolName) => {
+      propsOnToolChange?.(toolName);
+      setCurrentTool(toolName);
+    },
+    [propsOnToolChange],
+  );
 
   const tools = useMemo(() => {
     const result: ToolName[] = [];
@@ -254,12 +278,12 @@ function ForwardAnnotator(
   );
 
   useEffect(() => {
-    engine?.on('toolChange', setCurrentTool);
+    engine?.on('toolChange', onToolChange);
 
     return () => {
-      engine?.off('toolChange', setCurrentTool);
+      engine?.off('toolChange', onToolChange);
     };
-  }, [engine]);
+  }, [engine, onToolChange]);
 
   // ================== annotation ==================
   // ================== label ==================
@@ -271,7 +295,18 @@ function ForwardAnnotator(
     return config?.[currentTool]?.labels ?? [];
   }, [config, currentTool]);
 
-  const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(labels[0]);
+  const selectedLabelFromProps = useMemo(() => {
+    return labels.find((item) => item.value === propsSelectedLabel);
+  }, [labels, propsSelectedLabel]);
+
+  const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(
+    propsSelectedLabel ? selectedLabelFromProps : labels[0],
+  );
+
+  useEffect(() => {
+    setSelectedLabel(selectedLabelFromProps);
+  }, [selectedLabelFromProps]);
+
   const [selectedAnnotation, setSelectedAnnotation] = useState<AnnotationDataInUI | undefined>();
   const annotationsFromSample = useMemo(() => {
     return currentSample?.data ?? {};
@@ -305,10 +340,24 @@ function ForwardAnnotator(
         }
 
         if (tools[0] && config?.[tools[0]]?.labels?.length) {
-          engine.switch(tools[0]);
+          engine.switch(propsSelectedTool || tools[0]);
+
+          if (propsSelectedLabel) {
+            engine.setLabel(propsSelectedLabel);
+          }
         }
       });
-  }, [annotationsFromSample, config, currentSample, engine, isSampleDataEmpty, preAnnotations, tools]);
+  }, [
+    annotationsFromSample,
+    config,
+    currentSample,
+    engine,
+    isSampleDataEmpty,
+    preAnnotations,
+    propsSelectedLabel,
+    propsSelectedTool,
+    tools,
+  ]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -513,8 +562,9 @@ function ForwardAnnotator(
       engine?.setLabel(label.value);
       engine?.setAttributes({});
       setSelectedLabel(label);
+      propsOnLabelChange?.(currentTool, label);
     },
-    [engine],
+    [currentTool, engine, propsOnLabelChange],
   );
 
   // effects
