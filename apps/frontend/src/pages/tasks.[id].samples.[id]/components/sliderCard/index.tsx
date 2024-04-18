@@ -24,7 +24,7 @@ interface SliderCardProps {
 }
 
 const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
-  const { id, state, file } = cardInfo;
+  const { id, inner_id, state, file } = cardInfo;
   const filename = file.filename;
   const url = file.url;
   const routeParams = useParams();
@@ -44,7 +44,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
         src={url!}
         active={id === sampleId}
         onClick={() => handleOnClick(cardInfo)}
-        title={filename}
+        title={filename.substring(9)}
         no={index! + 1}
         showNo
         completed={state === 'DONE'}
@@ -57,7 +57,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
     return (
       <VideoCard
         src={url!}
-        title={id}
+        title={inner_id}
         active={id === sampleId}
         onClick={() => handleOnClick(cardInfo)}
         showPlayIcon
@@ -81,7 +81,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
         {state === 'DONE' && <CheckIcon />}
         {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
       </ContentWrapper>
-      <IdWrapper>{id}</IdWrapper>
+      <IdWrapper>{inner_id}</IdWrapper>
     </Wrapper>
   );
 };

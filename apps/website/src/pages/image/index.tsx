@@ -36,6 +36,16 @@ const templateMapping: Record<ToolName | 'tag' | 'text', any> = {
   text: textTemplate,
 };
 
+const toolNameMapping = {
+  line: '线',
+  rect: '矩形',
+  polygon: '多边形',
+  point: '点',
+  cuboid: '立体框',
+  tag: '标签分类',
+  text: '文本描述',
+};
+
 const presetSamples = [
   {
     url: import.meta.env.BASE_URL + 'cuboid.jpg',
@@ -658,7 +668,7 @@ export default function ImagePage() {
 
   const items: TabsProps['items'] = TOOL_NAMES.map((item) => ({
     key: item,
-    label: item,
+    label: toolNameMapping[item],
     forceRender: true,
     children: <FancyForm template={templateMapping[item]} name={['tools', item]} />,
   }));

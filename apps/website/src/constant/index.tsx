@@ -4,17 +4,17 @@ import { ReactComponent as ImageIcon } from '@/assets/image.svg';
 
 export const MENU = [
   {
-    name: 'Image',
+    name: '图片',
     path: '/image',
     icon: <ImageIcon className="text-lg" />,
   },
   {
-    name: 'Audio',
+    name: '音频',
     path: '/audio',
     icon: <AudioIcon className="text-lg" />,
   },
   {
-    name: 'Video',
+    name: '视频',
     path: '/video',
     icon: <VideoIcon className="text-lg" />,
   },

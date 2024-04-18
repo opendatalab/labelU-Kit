@@ -233,6 +233,27 @@ const AnnotationPage = () => {
     [config, task],
   );
 
+  const [currentTool, setCurrentTool] = useState<any>();
+  const [labelMapping, setLabelMapping] = useState<Record<any, string>>();
+
+  const handleLabelChange = useCallback((toolName: any, label: ILabel) => {
+    // 缓存当前标签
+    setLabelMapping((prev) => {
+      return {
+        ...prev,
+        [toolName]: label.value,
+      };
+    });
+  }, []);
+
+  const handleToolChange = useCallback((toolName: any) => {
+    setCurrentTool(toolName);
+  }, []);
+
+  const currentLabel = useMemo(() => {
+    return labelMapping?.[currentTool];
+  }, [currentTool, labelMapping]);
+
   if (task?.media_type === MediaType.IMAGE) {
     content = (
       <ImageAnnotator
@@ -244,6 +265,10 @@ const AnnotationPage = () => {
         editingSample={editingSample}
         config={config}
         requestEdit={requestEdit}
+        onLabelChange={handleLabelChange}
+        onToolChange={handleToolChange}
+        selectedTool={currentTool}
+        selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -259,6 +284,10 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
+        onLabelChange={handleLabelChange}
+        onToolChange={handleToolChange}
+        selectedTool={currentTool}
+        selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -274,6 +303,10 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
+        onLabelChange={handleLabelChange}
+        onToolChange={handleToolChange}
+        selectedTool={currentTool}
+        selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />

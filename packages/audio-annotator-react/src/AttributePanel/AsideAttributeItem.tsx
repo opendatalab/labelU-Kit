@@ -191,13 +191,19 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
     );
   };
 
+  const handleRemove = (_annotation: MediaAnnotationInUI) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onAnnotationRemove(_annotation);
+  };
+
   if (annotation) {
     return (
       <Action>
         {showEdit && <EditIcon onClick={handleEditClick} />}
         {visible && <VisibilityIcon onClick={toggleOneVisibility(false)} />}
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
-        <DeleteIcon onClick={() => onAnnotationRemove(annotation)} />
+        <DeleteIcon onClick={handleRemove(annotation)} />
       </Action>
     );
   }
