@@ -101,7 +101,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
 
     const rect = activityBarRef.current.getBoundingClientRect();
     const frame = frameRef.current;
-    const offsetX = e.clientX - rect.left;
+    const offsetX = Math.max(e.clientX - rect.left, 0);
     const currentTime = (offsetX / rect.width) * duration;
 
     if (disabled) {
@@ -117,9 +117,13 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
     }
 
     if (isSettingCurrentTimeRef.current && editingSegmentAnnotationRef.current && editingElementRef.current) {
-      editingElementRef.current.style.width = `${
-        ((currentTime - editingSegmentAnnotationRef.current.start!) / duration) * 100
-      }%`;
+      const diff = currentTime - editingSegmentAnnotationRef.current.start;
+
+      if (diff <= 0) {
+        return;
+      }
+
+      editingElementRef.current.style.width = `${(diff / duration) * 100}%`;
       throttledUpdater.current((pre) =>
         pre
           ? {
