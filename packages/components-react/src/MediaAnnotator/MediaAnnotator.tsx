@@ -293,6 +293,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
     () => ({
       reset: () => {
         resetAnnotatingSegment();
+        currentTimeRef.current = 0;
       },
       updateTime: (time) => {
         if (frameRef.current) {
