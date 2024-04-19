@@ -96,78 +96,6 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
     [navigate, searchParams],
   );
 
-  const handleCancelSkipSample = async () => {
-    if (noSave) {
-      return;
-    }
-
-    await updateSampleState(
-      {
-        task_id: +taskId!,
-        sample_id: +sampleId!,
-      },
-      {
-        ...currentSample,
-        state: SampleState.NEW,
-      },
-    );
-
-    setSamples(
-      samples.map((sample: SampleResponse) =>
-        sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
-      ),
-    );
-  };
-
-  const handleSkipSample = async () => {
-    if (noSave) {
-      return;
-    }
-
-    await updateSampleState(
-      {
-        task_id: +taskId!,
-        sample_id: +sampleId!,
-      },
-      {
-        ...currentSample,
-        state: SampleState.SKIPPED,
-      },
-    );
-
-    setSamples(
-      samples.map((sample: SampleResponse) =>
-        sample.id === +sampleId! ? { ...sample, state: SampleState.SKIPPED } : sample,
-      ),
-    );
-    // 切换到下一个文件
-    if (!isLastSample) {
-      navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
-    } else {
-      navigateWithSearch(`/tasks/${taskId}/samples/finished`);
-    }
-  };
-
-  useHotkeys(
-    'ctrl+space, meta+space',
-    () => {
-      if (noSave) {
-        return;
-      }
-
-      if (currentSample.state === SampleState.SKIPPED) {
-        handleCancelSkipSample();
-      } else {
-        handleSkipSample();
-      }
-    },
-    {
-      keyup: true,
-      keydown: false,
-    },
-    [handleSkipSample, handleCancelSkipSample, currentSample],
-  );
-
   const saveCurrentSample = useCallback(async () => {
     if (currentSample?.state === SampleState.SKIPPED || noSave || !task?.media_type) {
       return;
@@ -313,6 +241,60 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
     setTimeout(revalidator.revalidate);
   }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
+  const handleCancelSkipSample = async () => {
+    if (noSave) {
+      return;
+    }
+
+    await updateSampleState(
+      {
+        task_id: +taskId!,
+        sample_id: +sampleId!,
+      },
+      {
+        ...currentSample,
+        state: SampleState.NEW,
+      },
+    );
+
+    setSamples(
+      samples.map((sample: SampleResponse) =>
+        sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
+      ),
+    );
+  };
+
+  const handleSkipSample = async () => {
+    if (noSave) {
+      return;
+    }
+
+    await updateSampleState(
+      {
+        task_id: +taskId!,
+        sample_id: +sampleId!,
+      },
+      {
+        ...currentSample,
+        state: SampleState.SKIPPED,
+      },
+    );
+
+    setSamples(
+      samples.map((sample: SampleResponse) =>
+        sample.id === +sampleId! ? { ...sample, state: SampleState.SKIPPED } : sample,
+      ),
+    );
+
+    await saveCurrentSample();
+    // 切换到下一个文件
+    if (!isLastSample) {
+      navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+    } else {
+      navigateWithSearch(`/tasks/${taskId}/samples/finished`);
+    }
+  };
+
   const handleNextSample = useCallback(() => {
     // 到达分页边界，触发加载下一页
     if (sampleIndex === samples.length - 2 && samples.length < totalSize) {
@@ -370,6 +352,26 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       [handleNextSample, handlePrevSample, sampleIndex],
     ),
     500,
+  );
+
+  useHotkeys(
+    'ctrl+space, meta+space',
+    () => {
+      if (noSave) {
+        return;
+      }
+
+      if (currentSample.state === SampleState.SKIPPED) {
+        handleCancelSkipSample();
+      } else {
+        handleSkipSample();
+      }
+    },
+    {
+      keyup: true,
+      keydown: false,
+    },
+    [handleSkipSample, handleCancelSkipSample, currentSample],
   );
 
   useEffect(() => {
