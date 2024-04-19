@@ -67,6 +67,9 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
   if (searchParams.get('isNew') !== 'true') {
     const preAnnotationQueryKey = preAnnotationKey.list({ task_id: +params.taskId });
 
+    // @ts-ignore
+    delete queryParams.sort;
+
     result.preAnnotations = await queryClient.fetchQuery({
       queryKey: preAnnotationQueryKey,
       queryFn: () => getPreAnnotations(queryParams),
