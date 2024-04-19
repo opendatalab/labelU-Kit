@@ -23,7 +23,7 @@ export function useScrollFetch<T extends any[] | undefined>(
   service: (isReset: boolean) => Promise<T>,
   container?: HTMLDivElement | (() => HTMLDivElement | null) | undefined,
   options?: Option<T>,
-): [T, boolean, Dispatch<SetStateAction<T>>] {
+): [T, boolean, Dispatch<SetStateAction<T>>, () => Promise<unknown>] {
   const { threshold, afterFetching, isEnd, watch } = {
     threshold: 0,
     ...options,
@@ -122,5 +122,5 @@ export function useScrollFetch<T extends any[] | undefined>(
     };
   }, [container, handleOnScroll]);
 
-  return [data, isLoading, setData];
+  return [data, isLoading, setData, wrappedService];
 }

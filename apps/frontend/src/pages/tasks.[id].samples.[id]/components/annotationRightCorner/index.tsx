@@ -18,10 +18,12 @@ import { message } from '@/StaticAnt';
 import AnnotationContext from '../../annotation.context';
 
 interface AnnotationRightCornerProps {
-  isLastSample: boolean;
-  isFirstSample: boolean;
   // 用于标注预览
   noSave?: boolean;
+
+  fetchNext?: () => void;
+
+  totalSize: number;
 }
 
 export const SAMPLE_CHANGED = 'sampleChanged';
@@ -56,7 +58,7 @@ export interface AnnotationLoaderData {
   samples: SampleListResponse;
 }
 
-const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: AnnotationRightCornerProps) => {
+const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRightCornerProps) => {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const isGlobalLoading = isFetching > 0 || isMutating > 0;
@@ -67,9 +69,19 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
   const sampleId = routeParams.sampleId;
   const { samples, setSamples, task } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
+  const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
+  const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
   const currentSample = samples[sampleIndex];
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
+
+  // 第一次进入就是40的倍数时，获取下一页数据
+  useEffect(() => {
+    if (isLastSample && samples.length < totalSize) {
+      // TODO: fetchNext 调用两次
+      fetchNext?.();
+    }
+  }, [fetchNext, isLastSample, samples.length, totalSize]);
 
   const navigateWithSearch = useCallback(
     (to: string) => {
@@ -302,6 +314,11 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
   }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
   const handleNextSample = useCallback(() => {
+    // 到达分页边界，触发加载下一页
+    if (sampleIndex === samples.length - 2 && samples.length < totalSize) {
+      fetchNext?.();
+    }
+
     if (noSave) {
       navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
 
@@ -315,7 +332,18 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
         navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
       });
     }
-  }, [noSave, isLastSample, navigateWithSearch, taskId, samples, sampleIndex, handleComplete, saveCurrentSample]);
+  }, [
+    sampleIndex,
+    samples,
+    totalSize,
+    noSave,
+    isLastSample,
+    fetchNext,
+    navigateWithSearch,
+    taskId,
+    handleComplete,
+    saveCurrentSample,
+  ]);
 
   const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
