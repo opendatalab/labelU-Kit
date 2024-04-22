@@ -69,7 +69,7 @@ const TaskList = () => {
       <br />
       backend: {_.get(window.__backend, 'version', 'unknown')}
       <br />
-      build@{_.get(window.__backend, 'build_date', 'unknown')}
+      build@{_.get(window.__backend, 'build_time', 'unknown')}
     </div>
   );
 

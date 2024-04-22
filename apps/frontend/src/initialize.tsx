@@ -21,7 +21,9 @@ declare global {
 
     __backend: {
       version: string;
-      build_date: string;
+      build_time: string;
+      name: 'labelu';
+      commit: string;
     };
     __frontend: {
       version: string;
