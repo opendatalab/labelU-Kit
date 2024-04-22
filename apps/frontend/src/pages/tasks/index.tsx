@@ -37,24 +37,6 @@ const AppVersion = styled(FlexLayout.Footer)`
 
 const TaskCardItem = styled(TaskCard)``;
 
-const versionInfo = (
-  <div>
-    frontend: {window.__frontend.version}
-    <br />
-    {Object.keys(window.__frontend.deps).map((key) => {
-      return (
-        <div key={key}>
-          {key}@{window.__frontend.deps[key]}
-        </div>
-      );
-    })}
-    <br />
-    backend: {window.__backend.version}
-    <br />
-    build@{window.__backend.build_date}
-  </div>
-);
-
 const TaskList = () => {
   const navigate = useNavigate();
   const routerLoaderData = useRouteLoaderData('tasks') as TaskListResponseWithStatics;
@@ -69,6 +51,27 @@ const TaskList = () => {
   const createTask = () => {
     navigate('/tasks/0/edit?isNew=true');
   };
+
+  const versionInfo = (
+    <div>
+      frontend: {_.get(window.__frontend, 'version', 'unknown')}
+      <br />
+      {_.chain(window.__frontend.deps)
+        .keys()
+        .map((key) => {
+          return (
+            <div key={key}>
+              {key}@{window.__frontend.deps[key]}
+            </div>
+          );
+        })
+        .value()}
+      <br />
+      backend: {_.get(window.__backend, 'version', 'unknown')}
+      <br />
+      build@{_.get(window.__backend, 'build_date', 'unknown')}
+    </div>
+  );
 
   return (
     <Wrapper flex="column">
