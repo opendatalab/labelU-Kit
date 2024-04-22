@@ -61,7 +61,7 @@ const TaskList = () => {
         .map((key) => {
           return (
             <div key={key}>
-              {key}@{window.__frontend.deps[key]}
+              {key}: {window.__frontend.deps[key]}
             </div>
           );
         })
