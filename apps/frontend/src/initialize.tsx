@@ -18,6 +18,15 @@ declare global {
     IS_ONLINE: boolean;
 
     AnalyzeWiz: typeof AnalyzeWiz;
+
+    __backend: {
+      version: string;
+      build_date: string;
+    };
+    __frontend: {
+      version: string;
+      deps: Record<string, string>;
+    };
   }
 }
 

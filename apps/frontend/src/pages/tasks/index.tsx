@@ -1,4 +1,4 @@
-import { Alert, Button, Pagination } from 'antd';
+import { Alert, Button, Pagination, Popover } from 'antd';
 import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -29,7 +29,31 @@ const Footer = styled(FlexLayout.Footer)`
   padding: 1rem 0;
 `;
 
+const AppVersion = styled(FlexLayout.Footer)`
+  padding: 1rem 0;
+  text-align: center;
+  color: var(--color-text-tertiary);
+`;
+
 const TaskCardItem = styled(TaskCard)``;
+
+const versionInfo = (
+  <div>
+    frontend: {window.__frontend.version}
+    <br />
+    {Object.keys(window.__frontend.deps).map((key) => {
+      return (
+        <div key={key}>
+          {key}@{window.__frontend.deps[key]}
+        </div>
+      );
+    })}
+    <br />
+    backend: {window.__backend.version}
+    <br />
+    build@{window.__backend.build_date}
+  </div>
+);
 
 const TaskList = () => {
   const navigate = useNavigate();
@@ -104,6 +128,9 @@ const TaskList = () => {
           />
         )}
       </Footer>
+      <AppVersion>
+        <Popover content={versionInfo}>labelu@{window.__backend.version}</Popover>
+      </AppVersion>
     </Wrapper>
   );
 };
