@@ -1,5 +1,5 @@
 import type { Attribute, MediaAnnotationData, MediaFrame, MediaSegment } from '@labelu/interface';
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 import { parseTime, secondsToMinute } from '../../utils';
 import { Tooltip } from '../../Tooltip';
@@ -51,6 +51,10 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       requestEdit,
     } = useMediaAnnotator();
     const [currentAnnotation, setCurrentAnnotation] = useState<MediaSegment>(annotation as MediaSegment);
+
+    useEffect(() => {
+      setCurrentAnnotation(annotation as MediaSegment);
+    }, [annotation]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useImperativeHandle(ref, () => wrapperRef.current as HTMLDivElement, [duration]);
@@ -212,31 +216,18 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
         return;
       }
 
-      const diffX = e.clientX - startPositionRef.current.x;
-
-      if (diffX <= 0) {
-        return;
-      }
+      // const diffX = e.clientX - startPositionRef.current.x;
 
       if (startPositionRef.current.direction === 'left') {
         onAnnotationChange?.({
-          ...annotation,
+          ...currentAnnotation,
           start: getCurrentTime() ?? 0,
         });
-        setCurrentAnnotation((pre) => ({
-          ...pre!,
-          start: getCurrentTime() ?? 0,
-        }));
       } else {
         onAnnotationChange?.({
-          ...annotation,
+          ...currentAnnotation,
           end: getCurrentTime() ?? 0,
         });
-
-        setCurrentAnnotation((pre) => ({
-          ...pre!,
-          end: getCurrentTime() ?? 0,
-        }));
       }
     };
 
