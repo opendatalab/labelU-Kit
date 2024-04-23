@@ -55,16 +55,18 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
 
   if (type === MediaType.VIDEO) {
     return (
-      <VideoCard
-        src={url!}
-        title={inner_id}
-        active={id === sampleId}
-        onClick={() => handleOnClick(cardInfo)}
-        showPlayIcon
-        showDuration
-        completed={state === 'DONE'}
-        skipped={state === 'SKIPPED'}
-      />
+      <div style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+        <VideoCard
+          src={url!}
+          title={inner_id}
+          active={id === sampleId}
+          onClick={() => handleOnClick(cardInfo)}
+          showPlayIcon
+          showDuration
+          completed={state === 'DONE'}
+          skipped={state === 'SKIPPED'}
+        />
+      </div>
     );
   }
 

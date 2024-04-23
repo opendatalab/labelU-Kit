@@ -73,6 +73,7 @@ const Samples = () => {
       dataIndex: 'inner_id',
       key: 'inner_id',
       align: 'left',
+      sorter: true,
     },
     {
       title: '文件名',
@@ -222,6 +223,7 @@ const Samples = () => {
       dataIndex: 'updated_at',
       key: 'updated_at',
       align: 'left',
+      sorter: true,
       render: (updated_at, record) => {
         if (record.file?.filename?.endsWith('.jsonl')) {
           return '-';
@@ -349,12 +351,7 @@ const Samples = () => {
   }, [task?.media_type]);
 
   const data = useMemo(() => {
-    return [
-      ...(preAnnotations ?? []),
-      ...(samples ?? []).sort(
-        (a, b) => new Date(b.created_at ?? '').valueOf() - new Date(a.created_at ?? '').valueOf(),
-      ),
-    ];
+    return [...(preAnnotations ?? []), ...(samples ?? [])];
   }, [preAnnotations, samples]);
 
   return (
