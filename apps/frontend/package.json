@@ -1,6 +1,6 @@
 {
   "name": "@labelu/frontend",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
