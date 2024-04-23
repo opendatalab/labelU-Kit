@@ -1,7 +1,7 @@
 import type { Attribute, MediaAnnotationData, MediaFrame, MediaSegment } from '@labelu/interface';
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
-import { parseTime, secondsToMinute, throttle } from '../../utils';
+import { parseTime, secondsToMinute } from '../../utils';
 import { Tooltip } from '../../Tooltip';
 import { ReactComponent as VideoFramePin } from '../pin.svg';
 import { useMediaAnnotator } from '../context';
@@ -51,9 +51,10 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       requestEdit,
     } = useMediaAnnotator();
     const [currentAnnotation, setCurrentAnnotation] = useState<MediaSegment>(annotation as MediaSegment);
-    const throttledUpdater = useRef<React.Dispatch<React.SetStateAction<MediaAnnotationData | null>>>(
-      throttle(setCurrentAnnotation, 100),
-    );
+
+    useEffect(() => {
+      setCurrentAnnotation(annotation as MediaSegment);
+    }, [annotation]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useImperativeHandle(ref, () => wrapperRef.current as HTMLDivElement, [duration]);
@@ -175,7 +176,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
         if (barWrapperRef.current) {
           const currentTime = duration * (newLeft / barWrapperRef.current.clientWidth);
           setCurrentTime(currentTime);
-          throttledUpdater.current((pre) => ({
+          setCurrentAnnotation((pre) => ({
             ...pre!,
             start: currentTime,
           }));
@@ -193,7 +194,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
         if (barWrapperRef.current) {
           const currentTime = duration * (newRight / barWrapperRef.current.clientWidth);
           setCurrentTime(currentTime);
-          throttledUpdater.current((pre) => ({
+          setCurrentAnnotation((pre) => ({
             ...pre!,
             end: currentTime,
           }));
@@ -215,20 +216,16 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
         return;
       }
 
-      const diffX = e.clientX - startPositionRef.current.x;
-
-      if (diffX === 0) {
-        return;
-      }
+      // const diffX = e.clientX - startPositionRef.current.x;
 
       if (startPositionRef.current.direction === 'left') {
         onAnnotationChange?.({
-          ...annotation,
+          ...currentAnnotation,
           start: getCurrentTime() ?? 0,
         });
       } else {
         onAnnotationChange?.({
-          ...annotation,
+          ...currentAnnotation,
           end: getCurrentTime() ?? 0,
         });
       }
@@ -249,7 +246,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       e.stopPropagation();
 
       const wrapperStyle = getComputedStyle(wrapperRef.current);
-      const time = duration * (parseFloat(wrapperStyle.left) / parseFloat(wrapperStyle.width));
+      const time = _direction === 'left' ? currentAnnotation.start : currentAnnotation.end;
       setCurrentTime(time);
       setCurrentAnnotation(annotation);
 

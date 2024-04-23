@@ -90,7 +90,7 @@ async function main() {
       owner: 'opendatalab',
       repo: 'labelU',
       workflow_id: 84825133,
-      ref: branch,
+      ref: branch === 'release' ? 'main' : branch,
       inputs,
     })
     .then((res) => {

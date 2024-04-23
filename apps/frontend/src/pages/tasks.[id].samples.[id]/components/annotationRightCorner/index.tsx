@@ -18,10 +18,12 @@ import { message } from '@/StaticAnt';
 import AnnotationContext from '../../annotation.context';
 
 interface AnnotationRightCornerProps {
-  isLastSample: boolean;
-  isFirstSample: boolean;
   // 用于标注预览
   noSave?: boolean;
+
+  fetchNext?: () => void;
+
+  totalSize: number;
 }
 
 export const SAMPLE_CHANGED = 'sampleChanged';
@@ -56,7 +58,7 @@ export interface AnnotationLoaderData {
   samples: SampleListResponse;
 }
 
-const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: AnnotationRightCornerProps) => {
+const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRightCornerProps) => {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const isGlobalLoading = isFetching > 0 || isMutating > 0;
@@ -67,9 +69,19 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
   const sampleId = routeParams.sampleId;
   const { samples, setSamples, task } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
+  const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
+  const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
   const currentSample = samples[sampleIndex];
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
+
+  // 第一次进入就是40的倍数时，获取下一页数据
+  useEffect(() => {
+    if (isLastSample && samples.length < totalSize) {
+      // TODO: fetchNext 调用两次
+      fetchNext?.();
+    }
+  }, [fetchNext, isLastSample, samples.length, totalSize]);
 
   const navigateWithSearch = useCallback(
     (to: string) => {
@@ -82,78 +94,6 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
       }
     },
     [navigate, searchParams],
-  );
-
-  const handleCancelSkipSample = async () => {
-    if (noSave) {
-      return;
-    }
-
-    await updateSampleState(
-      {
-        task_id: +taskId!,
-        sample_id: +sampleId!,
-      },
-      {
-        ...currentSample,
-        state: SampleState.NEW,
-      },
-    );
-
-    setSamples(
-      samples.map((sample: SampleResponse) =>
-        sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
-      ),
-    );
-  };
-
-  const handleSkipSample = async () => {
-    if (noSave) {
-      return;
-    }
-
-    await updateSampleState(
-      {
-        task_id: +taskId!,
-        sample_id: +sampleId!,
-      },
-      {
-        ...currentSample,
-        state: SampleState.SKIPPED,
-      },
-    );
-
-    setSamples(
-      samples.map((sample: SampleResponse) =>
-        sample.id === +sampleId! ? { ...sample, state: SampleState.SKIPPED } : sample,
-      ),
-    );
-    // 切换到下一个文件
-    if (!isLastSample) {
-      navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
-    } else {
-      navigateWithSearch(`/tasks/${taskId}/samples/finished`);
-    }
-  };
-
-  useHotkeys(
-    'ctrl+space, meta+space',
-    () => {
-      if (noSave) {
-        return;
-      }
-
-      if (currentSample.state === SampleState.SKIPPED) {
-        handleCancelSkipSample();
-      } else {
-        handleSkipSample();
-      }
-    },
-    {
-      keyup: true,
-      keydown: false,
-    },
-    [handleSkipSample, handleCancelSkipSample, currentSample],
   );
 
   const saveCurrentSample = useCallback(async () => {
@@ -301,7 +241,66 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
     setTimeout(revalidator.revalidate);
   }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
+  const handleCancelSkipSample = async () => {
+    if (noSave) {
+      return;
+    }
+
+    await updateSampleState(
+      {
+        task_id: +taskId!,
+        sample_id: +sampleId!,
+      },
+      {
+        ...currentSample,
+        state: SampleState.NEW,
+      },
+    );
+
+    setSamples(
+      samples.map((sample: SampleResponse) =>
+        sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
+      ),
+    );
+  };
+
+  const handleSkipSample = async () => {
+    if (noSave) {
+      return;
+    }
+
+    await updateSampleState(
+      {
+        task_id: +taskId!,
+        sample_id: +sampleId!,
+      },
+      {
+        ...currentSample,
+        state: SampleState.SKIPPED,
+      },
+    );
+
+    setSamples(
+      samples.map((sample: SampleResponse) =>
+        sample.id === +sampleId! ? { ...sample, state: SampleState.SKIPPED } : sample,
+      ),
+    );
+
+    await saveCurrentSample();
+    // 切换到下一个文件
+    if (!isLastSample) {
+      navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
+    } else {
+      navigateWithSearch(`/tasks/${taskId}/samples/finished`);
+    }
+  };
+
   const handleNextSample = useCallback(() => {
+    // 到达分页边界，触发加载下一页
+    if (sampleIndex === samples.length - 2 && samples.length < totalSize) {
+      fetchNext?.();
+    }
+
     if (noSave) {
       navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
 
@@ -315,7 +314,18 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
         navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
       });
     }
-  }, [noSave, isLastSample, navigateWithSearch, taskId, samples, sampleIndex, handleComplete, saveCurrentSample]);
+  }, [
+    sampleIndex,
+    samples,
+    totalSize,
+    noSave,
+    isLastSample,
+    fetchNext,
+    navigateWithSearch,
+    taskId,
+    handleComplete,
+    saveCurrentSample,
+  ]);
 
   const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
@@ -342,6 +352,26 @@ const AnnotationRightCorner = ({ isLastSample, isFirstSample, noSave }: Annotati
       [handleNextSample, handlePrevSample, sampleIndex],
     ),
     500,
+  );
+
+  useHotkeys(
+    'ctrl+space, meta+space',
+    () => {
+      if (noSave) {
+        return;
+      }
+
+      if (currentSample.state === SampleState.SKIPPED) {
+        handleCancelSkipSample();
+      } else {
+        handleSkipSample();
+      }
+    },
+    {
+      keyup: true,
+      keydown: false,
+    },
+    [handleSkipSample, handleCancelSkipSample, currentSample],
   );
 
   useEffect(() => {

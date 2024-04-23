@@ -773,6 +773,7 @@ function ForwardAnnotator(
   }, [config?.frame, config?.segment, preAnnotationLabels?.frame, preAnnotationLabels?.segment]);
 
   const onMediaLoad = useCallback(() => {
+    annotatorRef.current?.reset();
     annotatorRef.current?.updateTime(0);
     playerRef.current?.setTime(0);
   }, []);
