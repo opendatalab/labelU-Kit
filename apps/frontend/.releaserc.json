@@ -33,8 +33,8 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node ./scripts/inject_frontend_info.js ${branch.name} ${nextRelease.version} && zip -r frontend.zip ./dist",
-        "successCmd": "node ./scripts/dispatch_workflow.js ${branch.name} ${nextRelease.version} '${nextRelease.notes}'"
+        "prepareCmd": "node ./scripts/inject_frontend_info.js ${branch.name} ${nextRelease.version} && zip -r frontend.zip ./dist && curl -H 'Authorization: ${process.env.STATIC_SERVER_TOKEN}' -F filea=@${process.cwd()}/frontend.zip  https://static-files.shlab.tech/upload/labelU-Kit/releases/download/v${nextRelease.version}",
+        "successCmd": "node ./scripts/dispatch_workflow.js ${branch.name} ${nextRelease.version} ${Date.now()} '${nextRelease.notes}'"
       }
     ]
   ]

@@ -29,12 +29,7 @@ export default defineConfig({
     include: ['react/jsx-runtime'],
   },
 
-  plugins: [
-    react(),
-    svgr(),
-    ViteEjsPlugin(),
-    !process.env.DIST && process.env.NODE_ENV !== 'production' && tsMonoAlias(),
-  ].filter(Boolean),
+  plugins: [react(), svgr(), ViteEjsPlugin(), !process.env.DIST && tsMonoAlias()].filter(Boolean),
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/'),

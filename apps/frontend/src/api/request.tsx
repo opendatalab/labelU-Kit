@@ -4,7 +4,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import commonController from '@/utils/common';
-import { goLogin } from '@/utils/sso';
+import { goAuth } from '@/utils/sso';
 
 /**
  * 后端返回的结构由 { data, meta_data } 包裹
@@ -50,7 +50,7 @@ const authorizationBearerFailed = (error: any) => {
   if (error?.response?.status === 401) {
     setTimeout(() => {
       if (window.IS_ONLINE) {
-        goLogin();
+        goAuth();
       } else {
         window.location.href = '/login';
       }

@@ -5,16 +5,18 @@ import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 import { ReactComponent as LocalDeploy } from '@/assets/svg/local-deploy.svg';
-import { goLogin } from '@/utils/sso';
+import { goAuth } from '@/utils/sso';
 
 import TaskTip from './TaskTip';
 import Breadcrumb from '../Breadcrumb';
 import { LabeluLogo, NavigationWrapper } from './style';
+import ImageDemoGuide from './ImageDemoGuide';
 
 const Homepage = () => {
   const username = localStorage.getItem('username');
   const navigate = useNavigate();
   const isSampleDetail = useMatch('/tasks/:taskId/samples/:sampleId');
+  const isImageDemo = useMatch('/tasks/task-image-demo');
 
   const logout = async (e: any) => {
     e.stopPropagation();
@@ -25,7 +27,7 @@ const Homepage = () => {
     localStorage.setItem('token', '');
 
     if (window.IS_ONLINE) {
-      await goLogin();
+      await goAuth();
     } else {
       navigate('/login');
     }
@@ -50,6 +52,7 @@ const Homepage = () => {
       </FlexLayout.Item>
       <FlexLayout.Item flex gap="1rem">
         <TaskTip visible={Boolean(isSampleDetail)} />
+        <ImageDemoGuide visible={Boolean(isImageDemo)} />
         {window.IS_ONLINE && (
           <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/#/guide/install">
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>

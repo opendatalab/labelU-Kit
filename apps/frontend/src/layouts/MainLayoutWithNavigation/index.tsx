@@ -10,7 +10,7 @@ const LayoutWrapper = styled(FlexLayout)`
 `;
 
 const MainContent = styled(FlexLayout.Content)`
-  background-color: #f4f5f7;
+  background: linear-gradient(178deg, #f0f6fb 0%, #f4f4fc 100%);
 `;
 
 const MainLayout = () => {

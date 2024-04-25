@@ -85,3 +85,5 @@ jobs:
 
       - name: Release frontend
         run: pnpm run release:frontend
+        env:
+          STATIC_SERVER_TOKEN: ${{ secrets.STATIC_SERVER_TOKEN }}

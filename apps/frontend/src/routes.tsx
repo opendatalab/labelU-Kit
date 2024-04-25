@@ -65,6 +65,7 @@ const routes: RouteObject[] = [
             index: true,
             element: <Tasks />,
           },
+
           {
             path: ':taskId',
             id: 'task',
