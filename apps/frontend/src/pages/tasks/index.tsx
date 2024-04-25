@@ -1,4 +1,4 @@
-import { Alert, Button, Pagination } from 'antd';
+import { Alert, Button, Pagination, Popover } from 'antd';
 import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -29,6 +29,12 @@ const Footer = styled(FlexLayout.Footer)`
   padding: 1rem 0;
 `;
 
+const AppVersion = styled(FlexLayout.Footer)`
+  padding: 1rem 0;
+  text-align: center;
+  color: var(--color-text-tertiary);
+`;
+
 const TaskCardItem = styled(TaskCard)``;
 
 const TaskList = () => {
@@ -45,6 +51,27 @@ const TaskList = () => {
   const createTask = () => {
     navigate('/tasks/0/edit?isNew=true');
   };
+
+  const versionInfo = (
+    <div>
+      frontend: {_.get(window.__frontend, 'version', 'unknown')}
+      <br />
+      {_.chain(window.__frontend.deps)
+        .keys()
+        .map((key) => {
+          return (
+            <div key={key}>
+              {key}: {window.__frontend.deps[key]}
+            </div>
+          );
+        })
+        .value()}
+      <br />
+      backend: {_.get(window.__backend, 'version', 'unknown')}
+      <br />
+      build@{_.get(window.__backend, 'build_time', 'unknown')}
+    </div>
+  );
 
   return (
     <Wrapper flex="column">
@@ -104,6 +131,9 @@ const TaskList = () => {
           />
         )}
       </Footer>
+      <AppVersion>
+        <Popover content={versionInfo}>labelu@{window.__backend.version}</Popover>
+      </AppVersion>
     </Wrapper>
   );
 };

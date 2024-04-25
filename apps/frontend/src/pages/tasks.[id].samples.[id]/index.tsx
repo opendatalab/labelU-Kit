@@ -82,8 +82,6 @@ const AnnotationPage = () => {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
 
-  const sampleId = routeParams.sampleId;
-
   // TODO： labelu/image中的错误定义
   const onError = useCallback((err: any) => {
     const value = err.value;
@@ -128,7 +126,7 @@ const AnnotationPage = () => {
 
     return data;
   }, [routeParams.taskId]);
-  const [samples = [] as SampleResponse[], loading, setSamples] = useScrollFetch(
+  const [samples = [] as SampleResponse[], loading, setSamples, svc] = useScrollFetch(
     fetchSamples,
     () =>
       document.querySelector('.labelu-image__sidebar div') ||
@@ -139,17 +137,10 @@ const AnnotationPage = () => {
     },
   );
 
-  const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
-  const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
-
   const leftSiderContent = useMemo(() => <SlideLoader />, []);
 
   const topActionContent = (
-    <AnnotationRightCorner
-      isLastSample={isLastSample}
-      isFirstSample={isFirstSample}
-      noSave={!!searchParams.get('noSave')}
-    />
+    <AnnotationRightCorner totalSize={totalCount} fetchNext={svc} noSave={!!searchParams.get('noSave')} />
   );
 
   const annotationContextValue = useMemo(() => {

@@ -4,7 +4,7 @@ import { sampleKey, taskKey } from '@/api/queryKeyFactories';
 import { getTaskList, getTask } from '@/api/services/task';
 import queryClient from '@/api/queryClient';
 import { getSamples } from '@/api/services/samples';
-import type { SampleListResponse, TaskResponseWithStatics } from '@/api/types';
+import type { ListByApiV1TasksTaskIdSamplesGetParams, SampleListResponse, TaskResponseWithStatics } from '@/api/types';
 import type { ToolsConfigState } from '@/types/toolConfig';
 import { preAnnotationKey } from '@/api/queryKeyFactories/preAnnotation';
 import { getPreAnnotations } from '@/api/services/preAnnotations';
@@ -55,7 +55,12 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
   const queryParams = {
     task_id: +params.taskId,
     ...Object.fromEntries(searchParams.entries()),
-  };
+  } as ListByApiV1TasksTaskIdSamplesGetParams;
+
+  // task page
+  if (params.taskId && !params.sampleId && !queryParams.pageSize) {
+    queryParams.pageSize = 10;
+  }
 
   const sampleQueryKey = sampleKey.list(queryParams);
 
@@ -66,6 +71,8 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
 
   if (searchParams.get('isNew') !== 'true') {
     const preAnnotationQueryKey = preAnnotationKey.list({ task_id: +params.taskId });
+
+    delete queryParams.sort;
 
     result.preAnnotations = await queryClient.fetchQuery({
       queryKey: preAnnotationQueryKey,
