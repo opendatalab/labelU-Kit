@@ -41,32 +41,35 @@ const AnnotationPage = () => {
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
   const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
   const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation;
-  const preAnnotationConfig = useMemo(() => {
-    const result: Partial<Record<AllToolName, any>> = {};
 
-    if (preAnnotation) {
-      const config = _.get(preAnnotation, 'data[0].data[0].config', {});
-
-      Object.keys(config).forEach((key) => {
-        let toolName = key.replace(/Tool$/, '') as AllToolName;
-
-        if (key.includes('audio') || key.includes('video')) {
-          // audioSegmentTool => segment
-          toolName = toolName.replace(/audio|video/, '').toLowerCase() as AllToolName;
-        }
-
-        result[toolName] = config[key as keyof typeof config];
-      });
-    }
-
-    return result;
-  }, [preAnnotation]);
-  const preAnnotations = useMemo(() => {
-    if (!preAnnotation) {
+  const preAnnotationData = useMemo(() => {
+    try {
+      return JSON.parse(_.get(preAnnotation, 'data.data', ''));
+    } catch (e) {
       return {};
     }
+  }, [preAnnotation]);
 
-    const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+  const preAnnotationConfig = useMemo(() => {
+    const result: Partial<Record<AllToolName, any>> = {};
+    const config = _.get(preAnnotationData, 'config', {});
+
+    Object.keys(config).forEach((key) => {
+      let toolName = key.replace(/Tool$/, '') as AllToolName;
+
+      if (key.includes('audio') || key.includes('video')) {
+        // audioSegmentTool => segment
+        toolName = toolName.replace(/audio|video/, '').toLowerCase() as AllToolName;
+      }
+
+      result[toolName] = config[key as keyof typeof config];
+    });
+
+    return result;
+  }, [preAnnotationData]);
+
+  const preAnnotations = useMemo(() => {
+    const _annotations = _.get(preAnnotationData, 'annotations', {});
 
     if (task?.media_type === MediaType.IMAGE) {
       return convertImageAnnotations(_annotations, preAnnotationConfig);
@@ -75,7 +78,7 @@ const AnnotationPage = () => {
     }
 
     return {};
-  }, [preAnnotation, preAnnotationConfig, task?.media_type]);
+  }, [preAnnotationConfig, preAnnotationData, task?.media_type]);
 
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');

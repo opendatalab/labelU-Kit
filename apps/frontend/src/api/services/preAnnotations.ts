@@ -1,6 +1,8 @@
 import request from '../request';
 import type {
   DeleteApiV1TasksTaskIdDeleteParams,
+  GetPreAnnotationDetailParams,
+  GetPreAnnotationDetailsParams,
   ListByApiV1TasksTaskIdSamplesGetParams,
   OkRespCommonDataResp,
   OkRespCreateSampleResponse,
@@ -19,13 +21,28 @@ export async function createPreAnnotations(
 export async function getPreAnnotations({
   task_id,
   ...params
-}: ListByApiV1TasksTaskIdSamplesGetParams & {
-  sample_name?: string;
-}): Promise<{ data: PreAnnotationResponse }> {
+}: ListByApiV1TasksTaskIdSamplesGetParams): Promise<{ data: PreAnnotationResponse }> {
   return await request.get(`/v1/tasks/${task_id}/pre_annotations`, {
     params: {
       ...params,
       pageNo: typeof params.pageNo === 'undefined' ? 0 : params.pageNo - 1,
+    },
+  });
+}
+
+export async function getPreAnnotationDetails({
+  task_id,
+}: GetPreAnnotationDetailsParams): Promise<{ data: PreAnnotationResponse }> {
+  return await request.get(`/v1/tasks/${task_id}/pre_annotation_details`);
+}
+
+export async function getPreAnnotationDetail({
+  task_id,
+  sample_name,
+}: GetPreAnnotationDetailParams): Promise<{ data: PreAnnotationResponse }> {
+  return await request.get(`/v1/tasks/${task_id}/pre_annotation_detail`, {
+    params: {
+      sample_name: sample_name,
     },
   });
 }

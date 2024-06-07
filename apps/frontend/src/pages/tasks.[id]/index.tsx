@@ -13,7 +13,7 @@ import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
-import { downloadFromUrl } from '@/utils';
+// import { downloadFromUrl } from '@/utils';
 import { deletePreAnnotations } from '@/api/services/preAnnotations';
 
 import type { TaskStatusProps } from './components/Statistical';
@@ -45,7 +45,13 @@ const Samples = () => {
   );
 
   const preAnnotationMapping = useMemo(() => {
-    return _.chain(preAnnotations).map('data').flatten().keyBy('sample_name').value();
+    return _.chain(preAnnotations)
+      .map((item) => {
+        return _.flatten(item.details);
+      })
+      .flatten()
+      .keyBy('sample_name')
+      .value();
   }, [preAnnotations]);
 
   const taskStatus = _.get(task, 'status');
@@ -81,7 +87,7 @@ const Samples = () => {
       key: 'filename',
       align: 'left',
       render: (filename, record) => {
-        const _filename = (record.file?.filename ?? '').substring(9);
+        const _filename = (_.get(record, 'filename') || _.get(record, 'file.filename', '')).substring(9);
 
         if (_filename.endsWith('.jsonl')) {
           return (
@@ -100,8 +106,10 @@ const Samples = () => {
       dataIndex: 'file',
       key: 'file',
       align: 'left',
-      render: (data) => {
-        if (data?.filename?.endsWith('.jsonl')) {
+      render: (data, record) => {
+        const _filename = (_.get(record, 'filename') || _.get(record, 'file.filename', '')).substring(9);
+
+        if (_filename.endsWith('.jsonl')) {
           return '-';
         }
 
@@ -140,7 +148,8 @@ const Samples = () => {
       key: 'unknown',
       align: 'left',
       render: (text, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const _filename = _.get(record, 'filename') || _.get(record, 'file.filename', '');
+        if (_filename.endsWith('.jsonl')) {
           return '-';
         }
 
@@ -157,7 +166,9 @@ const Samples = () => {
       align: 'left',
 
       render: (text, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const _filename = _.get(record, 'filename') || _.get(record, 'file.filename', '');
+
+        if (_filename.endsWith('.jsonl')) {
           return '-';
         }
 
@@ -176,7 +187,9 @@ const Samples = () => {
       align: 'left',
 
       render: (_unused, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const _filename = _.get(record, 'filename') || _.get(record, 'file.filename', '');
+
+        if (_filename.endsWith('.jsonl')) {
           return '-';
         }
 
@@ -208,7 +221,9 @@ const Samples = () => {
       align: 'left',
 
       render: (created_by, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const _filename = _.get(record, 'filename') || _.get(record, 'file.filename', '');
+
+        if (_filename.endsWith('.jsonl')) {
           return '-';
         }
 
@@ -225,7 +240,9 @@ const Samples = () => {
       align: 'left',
       sorter: true,
       render: (updated_at, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const _filename = _.get(record, 'filename') || _.get(record, 'file.filename', '');
+
+        if (_filename.endsWith('.jsonl')) {
           return '-';
         }
 
@@ -244,22 +261,19 @@ const Samples = () => {
       align: 'center',
       fixed: 'right',
       render: (x, record) => {
+        const _filename = _.get(record, 'filename') || _.get(record, 'file.filename', '');
+
         if (record.id !== enterRowId) {
           return '';
         }
 
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        if (_filename.endsWith('.jsonl')) {
           return (
-            <div>
-              <Button type="link" onClick={() => downloadFromUrl(record.file.url, record.file?.filename)}>
-                下载
+            <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteJsonls([record.id!])}>
+              <Button type="link" danger>
+                删除
               </Button>
-              <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteJsonls([record.id!])}>
-                <Button type="link" danger>
-                  删除
-                </Button>
-              </Popconfirm>
-            </div>
+            </Popconfirm>
           );
         }
 

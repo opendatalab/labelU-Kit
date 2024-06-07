@@ -4,14 +4,14 @@ import queryClient from '@/api/queryClient';
 import { sampleKey } from '@/api/queryKeyFactories';
 import { getSample } from '@/api/services/samples';
 import { preAnnotationKey } from '@/api/queryKeyFactories/preAnnotation';
-import { getPreAnnotations } from '@/api/services/preAnnotations';
+import { getPreAnnotationDetail } from '@/api/services/preAnnotations';
 
 export async function sampleLoader({ params }: LoaderFunctionArgs) {
   const queryKey = sampleKey.detail(params.sampleId!);
 
   const result: {
     sample: Awaited<ReturnType<typeof getSample>> | undefined;
-    preAnnotation: Awaited<ReturnType<typeof getPreAnnotations>> | undefined;
+    preAnnotation: Awaited<ReturnType<typeof getPreAnnotationDetail>> | undefined;
   } = {
     sample: undefined,
     preAnnotation: undefined,
@@ -34,9 +34,9 @@ export async function sampleLoader({ params }: LoaderFunctionArgs) {
   result.preAnnotation = await queryClient.fetchQuery({
     queryKey: preAnnotationQueryKey,
     queryFn: () =>
-      getPreAnnotations({
+      getPreAnnotationDetail({
         task_id: +params.taskId!,
-        sample_name: result?.sample?.data?.file?.filename,
+        sample_name: result.sample!.data.file!.filename.substring(9),
       }),
   });
 

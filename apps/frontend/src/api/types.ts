@@ -121,6 +121,16 @@ export interface ListByApiV1TasksTaskIdSamplesGetParams {
   sort?: string;
 }
 
+export interface GetPreAnnotationDetailsParams {
+  task_id: number;
+}
+
+export interface GetPreAnnotationDetailParams {
+  task_id: number;
+
+  sample_name: string;
+}
+
 export interface LoginCommand {
   /** Username */
   username: string;
@@ -232,13 +242,8 @@ export interface SampleResponse {
 export interface PreAnnotationResponse {
   /** Id description: annotation id */
   id?: number;
-  /** Data description: sample data, include filename, file url, or result */
-  data?: PreAnnotationType[];
-  file: {
-    id: string;
-    url: string;
-    filename: string;
-  };
+  details: PreAnnotationDetailResponse[];
+  filename: string;
   /** Created At description: task created at time */
   created_at?: string;
   /** Created By description: task created by */
@@ -247,6 +252,16 @@ export interface PreAnnotationResponse {
   updated_at?: string;
   /** Updated By description: task updated by */
   updated_by?: UserResp;
+}
+
+export interface PreAnnotationDetailResponse {
+  /** Id description: annotation id */
+  id?: number;
+  /** Data description: sample data, include filename, file url, or result */
+  data?: string;
+  sample_name: string;
+  pre_annotation_id: string;
+  task_id: string;
 }
 
 export interface SampleListResponse {
