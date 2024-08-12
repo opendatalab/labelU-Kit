@@ -1,16 +1,18 @@
-import { Button, Divider, Dropdown, Tag } from 'antd';
-import { Link, useMatch, useNavigate } from 'react-router-dom';
 import Icon, { BellOutlined, PoweroffOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
+import { Button, Divider, Dropdown, Popover, Tag } from 'antd';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
 
-import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 import { ReactComponent as LocalDeploy } from '@/assets/svg/local-deploy.svg';
+import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
+import { ReactComponent as ToolboxSvg } from '@/assets/svg/toolbox.svg';
 import { goAuth } from '@/utils/sso';
 
-import TaskTip from './TaskTip';
+import AppPanel from '../AppPanel';
 import Breadcrumb from '../Breadcrumb';
-import { LabeluLogo, NavigationWrapper } from './style';
 import ImageDemoGuide from './ImageDemoGuide';
+import { LabeluLogo, NavigationWrapper } from './style';
+import TaskTip from './TaskTip';
 
 const Homepage = () => {
   const username = localStorage.getItem('username');
@@ -53,6 +55,17 @@ const Homepage = () => {
       <FlexLayout.Item flex gap="1rem">
         <TaskTip visible={Boolean(isSampleDetail)} />
         <ImageDemoGuide visible={Boolean(isImageDemo)} />
+        {window.IS_ONLINE && (
+          <Popover title={null} content={<AppPanel />}>
+            <Button
+              type="link"
+              icon={<ToolboxSvg />}
+              style={{ color: 'rgba(0, 0, 0, 0.85)', display: 'flex', alignItems: 'center' }}
+            >
+              开源工具箱
+            </Button>
+          </Popover>
+        )}
         {window.IS_ONLINE && (
           <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/#/guide/install">
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>
