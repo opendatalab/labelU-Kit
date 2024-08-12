@@ -38,7 +38,7 @@ const apps = [
     description: '专业致力于 LLM 对话标注，通过灵活的工具配置与多种数据模态的广泛兼容，为大模型打造高质量数据',
   },
   {
-    name: 'MinorU',
+    name: 'MinerU',
     links: [
       { name: 'Github', link: 'https://github.com/opendatalab/MinerU' },
       { name: '在线体验', link: 'https://opendatalab.com/OpenSourceTools/Extractor/PDF' },
