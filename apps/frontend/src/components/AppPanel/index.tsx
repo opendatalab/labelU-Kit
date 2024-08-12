@@ -28,14 +28,19 @@ const apps = [
   },
   {
     name: 'LabelLLM',
-    links: [{ name: 'Github', link: 'https://labelllm.com' }],
+    links: [
+      {
+        name: 'Github',
+        link: 'https://github.com/opendatalab/LabelLLM?tab=readme-ov-file#labelllm-the-open-source-data-annotation-platform',
+      },
+    ],
     icon: <LabelLLM />,
     description: '专业致力于 LLM 对话标注，通过灵活的工具配置与多种数据模态的广泛兼容，为大模型打造高质量数据',
   },
   {
     name: 'MinorU',
     links: [
-      { name: 'Github', link: 'https://minoru.com' },
+      { name: 'Github', link: 'https://github.com/opendatalab/MinerU' },
       { name: '在线体验', link: 'https://opendatalab.com/OpenSourceTools/Extractor/PDF' },
     ],
     icon: <MinorU />,
