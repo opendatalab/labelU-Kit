@@ -5,7 +5,7 @@
     "packages/*",
     "apps/*"
   ],
-  "version": "5.1.0-alpha.14",
+  "version": "5.2.1",
   "scripts": {
     "prepare": "husky install",
     "build": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
@@ -44,11 +44,11 @@
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
     "@commitlint/config-conventional": "8.3.4",
-    "@manypkg/get-packages": "^2.1.0",
+    "@manypkg/get-packages": "^2.2.2",
     "@octokit/rest": "^19.0.7",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^8.0.7",
+    "@semantic-release/github": "^10.0.3",
     "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "@shlab/fabric": "^1.2.1",
