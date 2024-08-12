@@ -19,7 +19,7 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: isOnline ? 'https://labelu.shlab.tech' : 'http://127.0.0.1:8000',
+        target: 'https://labelu.shlab.tech',
         changeOrigin: true,
       },
     },
