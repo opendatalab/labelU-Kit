@@ -1,7 +1,8 @@
 import React, { createRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
-import { DraggableModel, AttributeForm, EllipsisText } from '@labelu/components-react';
+import { Kbd, getOS, DraggableModel, AttributeForm, EllipsisText, FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 import type { Attribute, AttributeValue, EnumerableAttribute, ILabel, TextAttribute } from '@labelu/interface';
 import type { AnnotationData, Annotator, ToolName } from '@labelu/image';
 
@@ -9,7 +10,8 @@ import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
 import { useTool } from '@/context/tool.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
-
+import { ReactComponent as MouseRightClick } from '@/Toolbar/assets/mouse-right.svg';
+const os = getOS();
 export const dragModalRef = createRef<DraggableModalRef>();
 
 export interface AttributeModalOpenParams {
@@ -181,7 +183,7 @@ function LabelItem({
   };
 
   return (
-    <EllipsisText maxWidth={112} title={children}>
+    <EllipsisText maxWidth={112} title={children as any}>
       <LabelWrapper active={active} color={attribute.color ?? '#000'} onClick={handleClick}>
         {children as string}
       </LabelWrapper>
@@ -195,6 +197,8 @@ export function LabelSection() {
   const validationRef = useRef<ValidationContextType | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const isLabelEditable = useCallback(
     (toolName: ToolName | undefined, label: string | undefined) => {
@@ -232,7 +236,7 @@ export function LabelSection() {
     (values: any) => {
       const { attributes, label } = values;
 
-      if (label) {
+      if (label && label !== selectedLabel?.value) {
         // 清除上一个标签的属性
         engine?.setAttributes({});
         engine?.setLabel(label);
@@ -242,7 +246,7 @@ export function LabelSection() {
         engine?.setAttributes(attributes);
       }
     },
-    [engine],
+    [engine, selectedLabel?.value],
   );
 
   // 标记完后打开标签属性编辑框
@@ -357,7 +361,7 @@ export function LabelSection() {
         })}
         {extraLabels.length > 0 && (
           <MoreTrigger onMouseOver={handleOnMouseOver} onMouseOut={handleOnMouseOut}>
-            更多
+            {t('more')}
           </MoreTrigger>
         )}
 
@@ -397,11 +401,15 @@ export function LabelSection() {
       </TriggerWrapper>
       <DraggableModel
         beforeClose={handleModalClose}
-        title="详细信息"
+        title={
+          <FlexLayout items="center" gap="0.5rem">
+            {t('details')} &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
+          </FlexLayout>
+        }
         ref={dragModalRef}
         width={333}
-        okText="确认"
-        cancelText="取消"
+        okText={t('ok')}
+        cancelText={t('cancel')}
       >
         <AttributeForm
           ref={validationRef}

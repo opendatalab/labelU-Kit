@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { useCallback } from 'react';
+import { useTranslation } from '@labelu/i18n';
 
 // import { useAnnotator } from '@/context';
 
@@ -37,6 +38,8 @@ export const TitleWrapper = styled.div`
 
 export default function ToolStyle() {
   const { engine } = useTool();
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const handleStrokeWidthChange = useCallback(
     (value: number) => {
@@ -64,7 +67,7 @@ export default function ToolStyle() {
       <PropertyWrapper>
         <TitleWrapper>
           <StrokeWidthIcon />
-          边框粗细
+          {t('strokeWidth')}
         </TitleWrapper>
         <SliderWrapper style={{ padding: '0 0.75rem' }}>
           <Slider type="mark" max={5} min={1} value={2} step={1} onChange={handleStrokeWidthChange} />
@@ -73,7 +76,7 @@ export default function ToolStyle() {
       <PropertyWrapper>
         <TitleWrapper>
           <OpacityStrokeIcon />
-          边框透明度
+          {t('strokeOpacity')}
         </TitleWrapper>
         <SliderWrapper style={{ padding: '0 0.75rem' }}>
           <Slider type="fill" max={0.9} min={0.1} value={0.9} step={0.2} onChange={handleStrokeOpacityChange} />
@@ -82,7 +85,7 @@ export default function ToolStyle() {
       <PropertyWrapper>
         <TitleWrapper>
           <OpacityFillIcon />
-          填充透明度
+          {t('fillOpacity')}
         </TitleWrapper>
         <SliderWrapper style={{ padding: '0 0.75rem' }}>
           <Slider type="fill" max={0.9} min={0.1} value={0.7} step={0.2} onChange={handleFillOpacityChange} />

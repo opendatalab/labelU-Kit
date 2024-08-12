@@ -2,6 +2,7 @@ import { CheckOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useRevalidator, useRouteLoaderData } from 'react-router';
 import { Button } from 'antd';
 import styled from 'styled-components';
+import { useTranslation } from '@labelu/i18n';
 import { FlexLayout } from '@labelu/components-react';
 
 import ExportPortal from '@/components/ExportPortal';
@@ -45,6 +46,7 @@ const SamplesFinished = () => {
     navigate(`/tasks/${taskId}?t=${Date.now()}`);
     setTimeout(revalidator.revalidate);
   };
+  const { t } = useTranslation();
 
   return (
     <Wrapper flex="column" items="center" justify="center">
@@ -52,22 +54,26 @@ const SamplesFinished = () => {
         <CircleCheck items="center" justify="center" flex>
           <CheckOutlined style={{ color: 'var(--color-success)', fontSize: '40px' }} />
         </CircleCheck>
-        <h1>标注完成</h1>
+        <h1>{t('finished')}</h1>
         <Statistic>
-          <div>已标注： {taskData?.stats?.done}，</div>
           <div>
-            未标注： <span style={{ color: 'red' }}>{taskData?.stats?.new}</span>，
+            {t('annotated')} {taskData?.stats?.done}，
           </div>
-          <div>跳过：{taskData?.stats?.skipped}</div>
+          <div>
+            {t('unannotated')} <span style={{ color: 'red' }}>{taskData?.stats?.new}</span>，
+          </div>
+          <div>
+            {t('skipped')} {taskData?.stats?.skipped}
+          </div>
         </Statistic>
         <ButtonWrapper gap="1.5rem">
           <ExportPortal taskId={taskId} mediaType={taskData?.media_type} tools={taskData?.config?.tools}>
             <Button type="primary" size="large">
-              导出数据
+              {t('export')}
             </Button>
           </ExportPortal>
           <Button type="default" size="large" onClick={handleGoHome}>
-            返回主页
+            {t('backToSamples')}
           </Button>
         </ButtonWrapper>
       </Inner>

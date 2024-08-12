@@ -9,7 +9,7 @@ import { createContext, useContext } from 'react';
 
 export interface MediaAnnotationContextType {
   selectedAnnotation: MediaAnnotationInUI | undefined;
-  selectAnnotation: (annotation: MediaAnnotationInUI) => void;
+  selectAnnotation: (annotation: MediaAnnotationInUI, e: React.MouseEvent) => void;
   duration: number;
   annotations: MediaAnnotationInUI[];
   showOrder: boolean;

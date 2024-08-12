@@ -68,7 +68,8 @@ jobs:
           echo $RELEASE_VERSION
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm install
 
       - name: Build packages
         run: pnpm run build

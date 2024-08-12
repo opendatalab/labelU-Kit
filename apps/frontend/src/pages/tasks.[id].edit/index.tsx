@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { Bridge } from 'iframe-message-bridge';
 import { FlexLayout } from '@labelu/components-react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
+import { useTranslation } from '@labelu/i18n';
 
 import { message, modal } from '@/StaticAnt';
 import type { OkRespCreateSampleResponse, TaskResponse } from '@/api/types';
@@ -21,7 +22,7 @@ import { convertImageConfig } from '@/utils/convertImageConfig';
 import { createPreAnnotations } from '@/api/services/preAnnotations';
 
 import type { QueuedFile } from './partials/InputData';
-import InputData, { UploadStatus } from './partials/InputData';
+import InputData from './partials/InputData';
 import AnnotationConfig from './partials/AnnotationConfig';
 import InputInfoConfig from './partials/InputInfoConfig';
 import type { StepData } from './components/Step';
@@ -29,18 +30,13 @@ import Step from './components/Step';
 import commonController from '../../utils/common';
 import { TaskCreationContext } from './taskCreation.context';
 import { ContentWrapper, PreviewFrame, StepRow } from './style';
+import { isPreAnnotationFile, UploadStatus } from './partials/InputData/utils';
 
 enum StepEnum {
   Basic = 'basic',
   Upload = 'upload',
   Config = 'config',
 }
-
-const stepTitleMapping = {
-  [StepEnum.Basic]: '基础配置',
-  [StepEnum.Upload]: '数据导入',
-  [StepEnum.Config]: '标注配置',
-};
 
 const partialMapping = {
   [StepEnum.Basic]: InputInfoConfig,
@@ -78,6 +74,7 @@ const CreateTask = () => {
   const modalRef = useRef<any>(null);
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
   const bridgeRef = useRef<Bridge | null>(null);
+  const { t } = useTranslation();
 
   const taskId = routeParams.taskId ? parseInt(routeParams.taskId, 10) : 0;
   const [currentStep, setCurrentStep] = useState<StepEnum>(
@@ -106,6 +103,15 @@ const CreateTask = () => {
       });
     },
     [location.pathname, location.search, navigate],
+  );
+
+  const stepTitleMapping = useMemo(
+    () => ({
+      [StepEnum.Basic]: t('basicConfig'),
+      [StepEnum.Upload]: t('uploadData'),
+      [StepEnum.Config]: t('annotationConfig'),
+    }),
+    [t],
   );
 
   const partials = useMemo(() => {
@@ -141,7 +147,7 @@ const CreateTask = () => {
         isFinished: [TaskStatus.CONFIGURED, TaskStatus.FINISHED, TaskStatus.INPROGRESS].includes(taskStatus),
       },
     ],
-    [isExistTask, taskStatus],
+    [isExistTask, stepTitleMapping, taskStatus],
   );
 
   useEffect(() => {
@@ -180,7 +186,7 @@ const CreateTask = () => {
       try {
         await annotationFormInstance.validateFields();
       } catch (err) {
-        commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
+        commonController.notificationErrorMessage({ message: t('pleaseCheckToolConfig') }, 1);
         return;
       }
 
@@ -191,7 +197,7 @@ const CreateTask = () => {
         currentStep === StepEnum.Config &&
         !isFromCancel
       ) {
-        commonController.notificationErrorMessage({ message: '请选择工具' }, 1);
+        commonController.notificationErrorMessage({ message: t('pleaseSelectTool') }, 1);
         return;
       }
 
@@ -206,7 +212,7 @@ const CreateTask = () => {
           revalidator.revalidate();
         });
     },
-    [annotationFormInstance, basicFormInstance, currentStep, navigate, revalidator, taskData, updateTaskConfig],
+    [annotationFormInstance, basicFormInstance, currentStep, navigate, revalidator, t, taskData, updateTaskConfig],
   );
 
   const [previewVisible, setPreviewVisible] = useState(false);
@@ -217,9 +223,9 @@ const CreateTask = () => {
         setPreviewVisible(true);
       })
       .catch(() => {
-        commonController.notificationErrorMessage({ message: '请检查标注配置' }, 1);
+        commonController.notificationErrorMessage({ message: t('pleaseCheckToolConfig') }, 1);
       });
-  }, [annotationFormInstance]);
+  }, [annotationFormInstance, t]);
 
   const updateFileQueue = useCallback((files: any[], sampleIds: number[] | undefined = []) => {
     const fileIdSampleIdMapping = _.chain(files)
@@ -263,11 +269,11 @@ const CreateTask = () => {
       }
 
       const mediaFileList = [];
-      const jsonlFileList = [];
+      const preAnnotationFiles = [];
 
       for (const file of uploadFileList) {
-        if (file.file.name.endsWith('.jsonl') && file.status === UploadStatus.Success && _.isNil(file.refId)) {
-          jsonlFileList.push({
+        if (isPreAnnotationFile(file.file.name) && file.status === UploadStatus.Success && _.isNil(file.refId)) {
+          preAnnotationFiles.push({
             file_id: file.id!,
           });
         } else if (file.status === UploadStatus.Success && _.isNil(file.refId)) {
@@ -289,10 +295,10 @@ const CreateTask = () => {
             updateFileQueue(mediaFileList, response?.data?.ids);
           }
 
-          if (!_.isEmpty(jsonlFileList)) {
-            response = await createPreAnnotations(taskId, jsonlFileList);
+          if (!_.isEmpty(preAnnotationFiles)) {
+            response = await createPreAnnotations(taskId, preAnnotationFiles);
 
-            updateFileQueue(jsonlFileList, response?.data?.ids);
+            updateFileQueue(preAnnotationFiles, response?.data?.ids);
           }
         }
 
@@ -380,14 +386,14 @@ const CreateTask = () => {
 
   const handleCancelConfirm = useCallback(() => {
     modalRef.current = modal.confirm({
-      title: '提示',
-      content: '是否保存已编辑的内容？',
-      okText: '保存并退出',
-      cancelText: '不保存',
+      title: t('confirm'),
+      content: t('saveUnModified'),
+      okText: t('saveAndExit'),
+      cancelText: t('dontSave'),
       closable: true,
       footer: (
         <StyledFooter>
-          <Button onClick={handleCancel}>不保存</Button>
+          <Button onClick={handleCancel}>{t('dontSave')}</Button>
           <Button
             type="primary"
             onClick={async () => {
@@ -400,12 +406,12 @@ const CreateTask = () => {
               }
             }}
           >
-            保存并退出
+            {t('saveAndExit')}
           </Button>
         </StyledFooter>
       ),
     });
-  }, [handleCancel, currentStep, submitForm, handleSave]);
+  }, [t, handleCancel, currentStep, submitForm, handleSave]);
 
   const handleNextStep = useCallback(
     async function (step: TaskStep | React.MouseEvent) {
@@ -429,16 +435,16 @@ const CreateTask = () => {
       if (
         currentStep === StepEnum.Upload &&
         isEmpty(samples?.data) &&
-        filter(uploadFileList, (item) => item.status === UploadStatus.Success && !item.name.endsWith('.jsonl'))
+        filter(uploadFileList, (item) => item.status === UploadStatus.Success && !isPreAnnotationFile(item.name))
           .length === 0
       ) {
-        message.error('请至少上传一个文件');
+        message.error(t('atLeastUploadAFile'));
         return;
       }
 
       // 文件错误
       if (filter(uploadFileList, (item) => item.status === UploadStatus.Error).length > 0) {
-        message.error('请先处理异常文件');
+        message.error(t('pleaseHandleErrorFile'));
         return;
       }
 
@@ -458,6 +464,7 @@ const CreateTask = () => {
       submitForm,
       updateCurrentStep,
       uploadFileList,
+      t,
     ],
   );
 
@@ -467,7 +474,7 @@ const CreateTask = () => {
       try {
         await annotationFormInstance.validateFields();
       } catch (err) {
-        message.error('请检查标注配置');
+        message.error(t('pleaseCheckToolConfig'));
         return;
       }
 
@@ -488,7 +495,7 @@ const CreateTask = () => {
         return (
           <Button onClick={() => setPreviewVisible(false)}>
             <ArrowLeftOutlined />
-            退出预览
+            {t('exitPreview')}
           </Button>
         );
       }
@@ -497,12 +504,12 @@ const CreateTask = () => {
       return (
         <FlexLayout gap=".5rem">
           <Button onClick={handleOpenPreview} disabled={previewDisabled}>
-            进入预览
+            {t('preview')}
             <ArrowRightOutlined />
           </Button>
-          <Button onClick={handleCancelConfirm}>取消</Button>
+          <Button onClick={handleCancelConfirm}>{t('cancel')}</Button>
           <Button loading={loading} type="primary" onClick={commonController.debounce(handleSave, 200)}>
-            保存
+            {t('save')}
           </Button>
         </FlexLayout>
       );
@@ -510,9 +517,9 @@ const CreateTask = () => {
 
     return (
       <FlexLayout gap=".5rem">
-        <Button onClick={handleCancelConfirm}>取消</Button>
+        <Button onClick={handleCancelConfirm}>{t('cancel')}</Button>
         <Button loading={loading} type="primary" onClick={commonController.debounce(handleNextStep, 100)}>
-          下一步
+          {t('nextStep')}
         </Button>
       </FlexLayout>
     );
@@ -526,6 +533,7 @@ const CreateTask = () => {
     samples?.data,
     handleOpenPreview,
     handleSave,
+    t,
   ]);
 
   const taskCreationContextValue = useMemo(

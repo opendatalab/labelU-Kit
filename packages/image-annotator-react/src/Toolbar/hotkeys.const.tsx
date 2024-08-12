@@ -1,4 +1,5 @@
 import { Kbd, getOS } from '@labelu/components-react';
+import { i18n } from '@labelu/i18n';
 
 import { ReactComponent as MouseRightClick } from './assets/mouse-right.svg';
 import { ReactComponent as MouseLeftClick } from './assets/mouse-left.svg';
@@ -6,11 +7,11 @@ const os = getOS();
 
 export default [
   {
-    label: '通用',
+    label: i18n.t('general'),
     key: 'common',
     hotkeys: [
       {
-        name: '保存',
+        name: i18n.t('save'),
         content:
           os === 'MacOS' ? (
             <>
@@ -23,7 +24,7 @@ export default [
           ),
       },
       {
-        name: '跳过',
+        name: i18n.t('skip'),
         content:
           os === 'MacOS' ? (
             <>
@@ -36,7 +37,7 @@ export default [
           ),
       },
       {
-        name: '撤销',
+        name: i18n.t('undo'),
         content:
           os === 'MacOS' ? (
             <>
@@ -49,7 +50,7 @@ export default [
           ),
       },
       {
-        name: '重做',
+        name: i18n.t('redo'),
         content:
           os === 'MacOS' ? (
             <>
@@ -62,15 +63,15 @@ export default [
           ),
       },
       {
-        name: '上一张',
+        name: i18n.t('prevImage'),
         content: <Kbd>A</Kbd>,
       },
       {
-        name: '下一张',
+        name: i18n.t('nextImage'),
         content: <Kbd>D</Kbd>,
       },
       {
-        name: '选择前9个标签',
+        name: i18n.t('select9'),
         content: (
           <>
             <Kbd>1</Kbd> ~ <Kbd>9</Kbd>
@@ -80,80 +81,88 @@ export default [
     ],
   },
   {
-    label: '基础操作',
+    label: i18n.t('basicAction'),
     key: 'actions',
     hotkeys: [
       {
-        name: '旋转',
+        name: i18n.t('rotate'),
         content: <Kbd>R</Kbd>,
       },
       {
-        name: '移动画布',
+        name: i18n.t('moveCanvas'),
         content: (
           <>
-            长按
+            {i18n.t('longPress')}
             <MouseRightClick />
           </>
         ),
       },
       {
-        name: '选中标记',
+        name: i18n.t('selectLabel'),
         content: <MouseRightClick />,
       },
       {
-        name: '删除标记',
+        name: i18n.t('deleteLabel'),
         content: (
           <>
-            选中标记，按 <Kbd>Del</Kbd> 或 <Kbd>Backspace</Kbd>
+            {i18n.t('selectLabelAndPress')} <Kbd>Del</Kbd> {i18n.t('or')} <Kbd>Backspace</Kbd>
           </>
         ),
       },
       {
-        name: '上一个标记',
+        name: i18n.t('editAttribute'),
+        content: (
+          <>
+            {os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
+          </>
+        ),
+      },
+      {
+        name: i18n.t('prevLabel'),
         content: <Kbd>↑</Kbd>,
       },
       {
-        name: '下一个标记',
+        name: i18n.t('nextLabel'),
         content: <Kbd>↓</Kbd>,
       },
       {
-        name: '取消',
+        name: i18n.t('cancel'),
         content: <Kbd>Esc</Kbd>,
       },
     ],
   },
   {
-    label: '标注工具',
+    label: i18n.t('tools'),
     key: 'tools',
     children: [
       {
-        label: '点',
+        label: i18n.t('plainPoint'),
         key: 'point',
         hotkeys: [
           {
-            name: '标点',
+            name: i18n.t('point'),
             content: <MouseLeftClick />,
           },
           {
-            name: '移动点',
+            name: i18n.t('movePoint'),
             content: (
               <>
-                选中点，长按 <MouseLeftClick /> 拖拽点
+                {i18n.t('selectPointAndLongPress')} <MouseLeftClick /> {i18n.t('dragPoint')}
               </>
             ),
           },
         ],
       },
       {
-        label: '线',
+        label: i18n.t('plainLine'),
         key: 'line',
         hotkeys: [
           {
-            name: '标线',
+            name: i18n.t('line'),
             content: <MouseLeftClick />,
           },
           {
-            name: '标水平 / 垂直线',
+            name: i18n.t('shiftLine'),
             content: (
               <>
                 <Kbd>Shift</Kbd> + <MouseLeftClick />
@@ -161,103 +170,103 @@ export default [
             ),
           },
           {
-            name: '移动点',
+            name: i18n.t('movePoint'),
             content: (
               <>
-                选中点，长按 <MouseLeftClick /> 拖拽点
+                {i18n.t('selectPointAndLongPress')} <MouseLeftClick /> {i18n.t('dragPoint')}
               </>
             ),
           },
           {
-            name: '插入点',
+            name: i18n.t('insertPoint'),
             content: (
               <>
-                在边上按住 <Kbd>Alt</Kbd>，然后点击 <MouseLeftClick />
+                {i18n.t('edgePress')} <Kbd>Alt</Kbd>, {i18n.t('thenClick')} <MouseLeftClick />
               </>
             ),
           },
           {
-            name: '删除点',
+            name: i18n.t('deletePoint'),
             content: (
               <>
-                在点上按住 <Kbd>Alt</Kbd>，然后点击 <MouseLeftClick />
+                {i18n.t('pointPress')} <Kbd>Alt</Kbd>, {i18n.t('thenClick')} <MouseLeftClick />
               </>
             ),
           },
         ],
       },
       {
-        label: '矩形框',
+        label: i18n.t('plainRect'),
         key: 'rect',
         hotkeys: [
           {
-            name: '拉框',
+            name: i18n.t('rect'),
             content: <MouseLeftClick />,
           },
           {
-            name: '移动边',
+            name: i18n.t('moveEdge'),
             content: (
               <>
-                选中边，长按 <MouseLeftClick /> 拖拽边
+                {i18n.t('selectEdgeAndLongPress')} <MouseLeftClick /> {i18n.t('dragEdge')}
               </>
             ),
           },
           {
-            name: '移动点',
+            name: i18n.t('movePoint'),
             content: (
               <>
-                选中点，长按 <MouseLeftClick /> 拖拽点
+                {i18n.t('selectPointAndLongPress')} <MouseLeftClick /> {i18n.t('dragPoint')}
               </>
             ),
           },
           {
-            name: '取消',
+            name: i18n.t('cancel'),
             content: <Kbd>Esc</Kbd>,
           },
         ],
       },
       {
-        label: '多边形',
+        label: i18n.t('plainPolygon'),
         key: 'polygon',
         hotkeys: [
           {
-            name: '标多边形',
+            name: i18n.t('polygon'),
             content: <MouseLeftClick />,
           },
           {
-            name: '移动边',
+            name: i18n.t('moveEdge'),
             content: (
               <>
-                选中边，长按 <MouseLeftClick /> 拖拽边
+                {i18n.t('selectEdgeAndLongPress')} <MouseLeftClick /> {i18n.t('dragEdge')}
               </>
             ),
           },
           {
-            name: '移动点',
+            name: i18n.t('movePoint'),
             content: (
               <>
-                选中点，长按 <MouseLeftClick /> 拖拽点
+                {i18n.t('selectPointAndLongPress')} <MouseLeftClick /> {i18n.t('dragPoint')}
               </>
             ),
           },
           {
-            name: '插入点',
+            name: i18n.t('insertPoint'),
             content: (
               <>
-                在边上按住 <Kbd>Alt</Kbd>，然后点击 <MouseLeftClick />
+                {i18n.t('pointPress')} <Kbd>Alt</Kbd>, {i18n.t('thenClick')} <MouseLeftClick />
               </>
             ),
           },
           {
-            name: '删除点',
+            name: i18n.t('deletePoint'),
             content: (
               <>
-                在点上按住 <Kbd>Alt</Kbd>，然后点击 <MouseLeftClick />
+                {i18n.t('pointPress')} <Kbd>Alt</Kbd>, {i18n.t('thenClick')} <MouseLeftClick />
               </>
             ),
           },
           {
-            name: '裁剪重叠区域',
+            name: i18n.t('cropOverlap'),
             content: (
               <>
                 <Kbd>Alt</Kbd> + <Kbd>X</Kbd>
@@ -265,37 +274,37 @@ export default [
             ),
           },
           {
-            name: '取消',
+            name: i18n.t('cancel'),
             content: <Kbd>Esc</Kbd>,
           },
         ],
       },
       {
-        label: '立体框',
+        label: i18n.t('cuboid'),
         key: 'cuboid',
         hotkeys: [
           {
-            name: '标 立体框',
+            name: i18n.t('makeCuboid'),
             content: <MouseLeftClick />,
           },
           {
-            name: '移动边',
+            name: i18n.t('moveEdge'),
             content: (
               <>
-                选中边，长按 <MouseLeftClick /> 拖拽边
+                {i18n.t('selectEdgeAndLongPress')} <MouseLeftClick /> {i18n.t('dragEdge')}
               </>
             ),
           },
           {
-            name: '移动点',
+            name: i18n.t('movePoint'),
             content: (
               <>
-                选中点，长按 <MouseLeftClick /> 拖拽点
+                {i18n.t('selectPointAndLongPress')} <MouseLeftClick /> {i18n.t('dragPoint')}
               </>
             ),
           },
           {
-            name: '取消',
+            name: i18n.t('cancel'),
             content: <Kbd>Esc</Kbd>,
           },
         ],

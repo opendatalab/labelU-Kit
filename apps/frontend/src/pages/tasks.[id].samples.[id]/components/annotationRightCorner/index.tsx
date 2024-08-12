@@ -3,6 +3,7 @@ import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
+import { i18n, useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
@@ -74,6 +75,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const currentSample = samples[sampleIndex];
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   // 第一次进入就是40的倍数时，获取下一页数据
   useEffect(() => {
@@ -125,6 +127,11 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       });
     } else if (task.media_type === MediaType.VIDEO) {
       const videoAnnotations = await videoAnnotationRef.current?.getAnnotations();
+      const player = await videoAnnotationRef.current?.getPlayer();
+
+      result.width = player?.videoWidth();
+      result.height = player?.videoHeight();
+      result.duration = player?.duration();
 
       Object.keys(videoAnnotations ?? {}).forEach((toolName) => {
         if (toolName === 'tag') {
@@ -175,6 +182,9 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       innerSample = await videoAnnotationRef?.current?.getSample();
     } else if (task.media_type === MediaType.AUDIO) {
       const audioAnnotations = await audioAnnotationRef.current?.getAnnotations();
+      const player = await audioAnnotationRef.current?.getPlayer();
+
+      result.duration = player?.getDuration();
 
       Object.keys(audioAnnotations ?? {}).forEach((toolName) => {
         if (toolName === 'tag') {
@@ -286,7 +296,6 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       ),
     );
 
-    await saveCurrentSample();
     // 切换到下一个文件
     if (!isLastSample) {
       navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);
@@ -390,7 +399,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       }
 
       saveCurrentSample().then(() => {
-        message.success('已保存');
+        message.success(t('saved'));
       });
     },
     {
@@ -453,25 +462,25 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
     <FlexLayout items="center" gap=".5rem">
       {isSampleSkipped ? (
         <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
-          取消跳过
+          {t('cancelSkip')}
         </Button>
       ) : (
         <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
-          跳过
+          {t('skip')}
         </Button>
       )}
       {!isFirstSample && (
         <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
-          上一页
+          {t('prevImage')}
         </Button>
       )}
       {isLastSample ? (
         <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
-          完成
+          {t('finish')}
         </Button>
       ) : (
         <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
-          下一页
+          {t('nextImage')}
         </Button>
       )}
     </FlexLayout>

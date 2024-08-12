@@ -2,6 +2,7 @@ import { SwapOutlined } from '@ant-design/icons';
 import { Tag } from 'antd';
 import { useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@labelu/i18n';
 
 export interface TagSwitcherProps {
   value?: boolean;
@@ -19,7 +20,7 @@ export default function TagSwitcher({
   value = false,
   disabled,
   onChange,
-  titleMapping = { true: '开', false: '关' },
+  titleMapping = { true: i18n.t('on'), false: i18n.t('off') },
 }: TagSwitcherProps) {
   const [open, setOpen] = useState(value);
 

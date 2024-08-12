@@ -1,3 +1,5 @@
+import { i18n } from '@labelu/i18n';
+
 import type { FancyItemIdentifier } from '@/components/FancyInput/types';
 
 export default [
@@ -25,17 +27,17 @@ export default [
         key: 'field',
         field: 'attributes',
         label: '',
-        addTagText: '新建',
+        addTagText: i18n.t('add'),
         showAddString: false,
         initialValue: [
           {
-            key: '标签-1',
+            key: i18n.t('label1'),
             value: 'tag-label-1',
             required: true,
             type: 'enum',
             options: [
               {
-                key: '标签-1-1',
+                key: i18n.t('label1-1'),
                 value: 'tag-label-1-1',
               },
             ],

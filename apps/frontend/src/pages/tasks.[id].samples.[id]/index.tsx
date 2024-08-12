@@ -13,6 +13,7 @@ import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
 import type { ToolName } from '@labelu/image';
 import type { ILabel } from '@labelu/interface';
+import { useTranslation } from '@labelu/i18n';
 
 import { MediaType, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
@@ -41,13 +42,25 @@ const AnnotationPage = () => {
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
   const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
   const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation;
+  const { t } = useTranslation();
+
   const preAnnotationConfig = useMemo(() => {
     const result: Partial<Record<AllToolName, any>> = {};
 
     if (preAnnotation) {
-      const config = _.get(preAnnotation, 'data[0].data[0].config', {});
+      const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
 
-      Object.keys(config).forEach((key) => {
+      if (!preAnnotationResult) {
+        return {};
+      }
+
+      const config = preAnnotationResult.config;
+
+      if (!config) {
+        return {};
+      }
+
+      Object.keys(preAnnotationResult.config).forEach((key) => {
         let toolName = key.replace(/Tool$/, '') as AllToolName;
 
         if (key.includes('audio') || key.includes('video')) {
@@ -55,7 +68,7 @@ const AnnotationPage = () => {
           toolName = toolName.replace(/audio|video/, '').toLowerCase() as AllToolName;
         }
 
-        result[toolName] = config[key as keyof typeof config];
+        result[toolName] = preAnnotationResult.config[key as keyof typeof config];
       });
     }
 
@@ -66,7 +79,25 @@ const AnnotationPage = () => {
       return {};
     }
 
-    const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+    const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
+    let _annotations = _.get(preAnnotationResult, 'annotations', {});
+    const preAnnotationFile = _.get(preAnnotation, 'data[0].file', {});
+    // 兼容json预标注
+    if (preAnnotationFile.filename?.endsWith('.json')) {
+      _annotations = _.chain(preAnnotationResult)
+        .get('result.annotations')
+        .map((item) => {
+          return [
+            item.toolName,
+            {
+              toolName: item.toolName,
+              result: item.result,
+            },
+          ];
+        })
+        .fromPairs()
+        .value();
+    }
 
     if (task?.media_type === MediaType.IMAGE) {
       return convertImageAnnotations(_annotations, preAnnotationConfig);
@@ -83,29 +114,32 @@ const AnnotationPage = () => {
   const isMutating = useIsMutating();
 
   // TODO： labelu/image中的错误定义
-  const onError = useCallback((err: any) => {
-    const value = err.value;
+  const onError = useCallback(
+    (err: any) => {
+      const value = err.value;
 
-    if (err.type === 'rotate') {
-      message.error('有标注数据时不可旋转图片');
-    }
+      if (err.type === 'rotate') {
+        message.error(t('cannotRotateWhenAnnotationExist'));
+      }
 
-    if (err.type === 'minPointAmount') {
-      message.error(`最少点数不能小于${value}个`);
-    }
+      if (err.type === 'minPointAmount') {
+        message.error(`${t('minPointAmountCannotSmallThan')} ${value}`);
+      }
 
-    if (err.type === 'maxPointAmount') {
-      message.error(`点数最多不能大于${value}个`);
-    }
+      if (err.type === 'maxPointAmount') {
+        message.error(`${t('maxPointAmountCannotExceed')} ${value}`);
+      }
 
-    if (err.type === 'minWidth') {
-      message.error(`拉框宽度不可小于${value}`);
-    }
+      if (err.type === 'minWidth') {
+        message.error(`${t('minWidthCannotSmallThan')}${value}`);
+      }
 
-    if (err.type === 'minHeight') {
-      message.error(`拉框高度不可小于${value}`);
-    }
-  }, []);
+      if (err.type === 'minHeight') {
+        message.error(`${t('minHeightCannotSmallThan')} ${value}`);
+      }
+    },
+    [t],
+  );
 
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -208,20 +242,20 @@ const AnnotationPage = () => {
 
       if (editType === 'create' && !toolConfig?.labels?.find((item: ILabel) => item.value === label)) {
         message.destroy();
-        message.error(`当前工具【${TOOL_NAME[toolNameKey]}】不包含值为【${label}】的标签`);
+        message.error(`${t('currentTool')}【${TOOL_NAME[toolNameKey]}】${t('doesntInclude')}【${label}】`);
 
         return false;
       }
 
       if (editType === 'update' && !config[toolName]) {
         message.destroy();
-        message.error(`当前配置不存在【${TOOL_NAME[toolNameKey]}】工具`);
+        message.error(`${'currentConfigDoesntInclude'}【${TOOL_NAME[toolNameKey]}】`);
         return false;
       }
 
       return true;
     },
-    [config, task],
+    [t, config, task],
   );
 
   const [currentTool, setCurrentTool] = useState<any>();
@@ -307,7 +341,7 @@ const AnnotationPage = () => {
   if (_.isEmpty(sample.data.file)) {
     return (
       <FlexLayout.Content items="center" justify="center" flex>
-        <Empty description="无样本数据" />
+        <Empty description={t('noSample')} />
       </FlexLayout.Content>
     );
   }
@@ -315,7 +349,7 @@ const AnnotationPage = () => {
   if (_.isEmpty(taskConfig?.tools) && _.isEmpty(configFromParent)) {
     return (
       <FlexLayout.Content items="center" justify="center" flex>
-        <Empty description="无标注工具" />
+        <Empty description={t('noTool')} />
       </FlexLayout.Content>
     );
   }

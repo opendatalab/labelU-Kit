@@ -137,7 +137,8 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);
-    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
+    monitor!.setSelectedAnnotationId(annotation.id);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name, _e);
   };
 
   private _validate(data: LineData) {
@@ -609,7 +610,6 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     this.sketch = null;
     axis!.rerender();
     this.onSelect(this.drawing!.get(data.id) as AnnotationLine)(new MouseEvent(''));
-    monitor!.setSelectedAnnotationId(data.id);
 
     Tool.onAdd(additionPayload, e);
   }

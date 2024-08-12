@@ -718,6 +718,12 @@ export default function ImagePage() {
     );
   }, [showDrawer, showResult]);
 
+  const initialValues = useMemo(() => {
+    return {
+      tools: defaultConfig,
+    };
+  }, []);
+
   return (
     <>
       <ImageAnnotator
@@ -732,14 +738,7 @@ export default function ImagePage() {
         onError={onError}
       />
       <Drawer width={480} title="工具配置" onClose={onClose} open={configOpen}>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={onFinish}
-          initialValues={{
-            tools: defaultConfig,
-          }}
-        >
+        <Form form={form} layout="vertical" onFinish={onFinish} initialValues={initialValues}>
           <Tabs items={items} />
         </Form>
       </Drawer>

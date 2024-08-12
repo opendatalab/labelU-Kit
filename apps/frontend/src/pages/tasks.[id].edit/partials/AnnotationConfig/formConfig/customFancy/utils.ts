@@ -2,6 +2,7 @@ import type { FormInstance } from 'antd';
 import type { NamePath } from 'antd/es/form/interface';
 import { map, omit } from 'lodash/fp';
 import { v4 as uuid4 } from 'uuid';
+import { i18n } from '@labelu/i18n';
 
 export function wrapWithId(item: any) {
   return {
@@ -26,7 +27,7 @@ export const duplicatedValueValidator =
         }
 
         if (values[i].value === _value && _value !== undefined && _value !== '') {
-          return Promise.reject(new Error('请勿填写重复值'));
+          return Promise.reject(new Error(i18n.t("duplicatedValueNotAllowed")));
         }
       }
 
@@ -44,7 +45,7 @@ export const duplicatedValueValidator =
 
       for (let i = 0; i < commonAttributes.length; i++) {
         if (commonAttributes[i].value === _value && _value !== undefined && _value !== '') {
-          return Promise.reject(new Error('不可与通用标签的value重复'));
+          return Promise.reject(new Error(i18n.t('duplicatedWithGlobalNotAllowed')));
         }
       }
 
