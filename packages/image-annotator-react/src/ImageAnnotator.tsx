@@ -376,10 +376,6 @@ function ForwardAnnotator(
           imageAnnotations![toolName]!.push(_item as AnnotationDataInUI);
         }
       });
-
-      Object.keys(imageAnnotations).forEach((key) => {
-        engine?.loadData(key as ToolName, imageAnnotations[key as ToolName] as AnnotationToolData<ToolName>);
-      });
     },
     [engine],
   );
@@ -418,8 +414,6 @@ function ForwardAnnotator(
       onRedo: onRedoUndo,
       onUndo: onRedoUndo,
     });
-
-  console.log('annotationsWithGlobal', annotationsWithGlobal);
 
   const onAnnotationClear = useCallback(() => {
     engine?.clearData();
