@@ -8,7 +8,7 @@ search labelu in [Test Pypi](https://test.pypi.org/), to find the right version 
 
 ```bash
 # change version '0.1.220' to the version you need.
-pip install -i https://test.pypi.org/simple/ labelu==1.0.6a5
+pip install -i https://test.pypi.org/simple/ labelu==0.1.220
 labelu --help
 labelu --port 8000
 ```
