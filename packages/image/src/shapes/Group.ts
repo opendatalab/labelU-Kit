@@ -56,7 +56,7 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _onAxisChange = () => {
     // 组合在图形之后创建，所以需要延迟一帧更新
-    setTimeout(() => {
+    Promise.resolve().then(() => {
       this._updateBBox()._updateRBush();
     });
   };

@@ -91,7 +91,7 @@ export class Draft<
 
     // 应该让草稿内的图形对象先于草稿对象监听鼠标事件
     // TODO：模仿DOM的事件设计冒泡机制，处理重叠的图形鼠标事件
-    setTimeout(() => {
+    this.on('setup', () => {
       eventEmitter.on(EInternalEvent.LeftMouseDown, this._handleMouseDown);
       eventEmitter.on(EInternalEvent.MouseMove, this._handleMouseMove);
       eventEmitter.on(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
@@ -184,11 +184,9 @@ export class Draft<
      * 因为清除isMoved是异步的
      * see https://github.com/opendatalab/labelU-Kit/blob/main/packages/image/src/core/Axis.ts#L230
      */
-    setTimeout(() => {
-      if (!isUnderCursor && !axis?.isMoved) {
-        this.group.emit(EInternalEvent.UnSelect, e, this);
-      }
-    });
+    if (!isUnderCursor && !axis?.isMoved) {
+      this.group.emit(EInternalEvent.UnSelect, e, this);
+    }
   };
 
   private _handleLeftMouseUp = (e: MouseEvent) => {
@@ -218,6 +216,10 @@ export class Draft<
     };
 
     return (this._serializeData?.shapes?.map(loop) as AxisPoint[] | AxisPoint[][]) ?? [];
+  }
+
+  public finishSetup() {
+    this.emit('setup');
   }
 
   public onMove(handler: MouseEventHandler) {
@@ -348,7 +350,8 @@ export class Draft<
     this.data = null as any;
     this.group.destroy();
     this.clearHandlers();
-
+    axis?.resetOffset();
+    this.removeAllListeners();
     eventEmitter.off(EInternalEvent.LeftMouseDown, this._handleMouseDown);
     eventEmitter.off(EInternalEvent.MouseMove, this._handleMouseMove);
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);

@@ -37,6 +37,7 @@ export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointSt
     this._createSelection();
 
     eventEmitter.on(EInternalEvent.KeyUp, this._onKeyUp);
+    this.finishSetup();
   }
 
   /**

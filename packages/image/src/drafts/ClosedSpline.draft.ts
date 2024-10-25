@@ -34,6 +34,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
+    this.finishSetup();
   }
 
   /**
