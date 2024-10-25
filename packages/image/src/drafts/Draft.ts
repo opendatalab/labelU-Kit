@@ -180,9 +180,15 @@ export class Draft<
   private _handleRightMouseUp = (e: MouseEvent) => {
     const isUnderCursor = this.isUnderCursor({ x: e.offsetX, y: e.offsetY });
 
-    if (!isUnderCursor && !axis?.isMoved) {
-      this.group.emit(EInternalEvent.UnSelect, e, this);
-    }
+    /**
+     * 因为清除isMoved是异步的
+     * see https://github.com/opendatalab/labelU-Kit/blob/main/packages/image/src/core/Axis.ts#L230
+     */
+    setTimeout(() => {
+      if (!isUnderCursor && !axis?.isMoved) {
+        this.group.emit(EInternalEvent.UnSelect, e, this);
+      }
+    });
   };
 
   private _handleLeftMouseUp = (e: MouseEvent) => {
