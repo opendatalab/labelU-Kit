@@ -38,6 +38,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
+    this.finishSetup();
   }
 
   /**

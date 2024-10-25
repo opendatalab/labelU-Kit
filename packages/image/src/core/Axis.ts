@@ -265,6 +265,13 @@ export class Axis {
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
 
+  public resetOffset() {
+    this._distanceX = 0;
+    this._distanceY = 0;
+    this._startPanPoint = null;
+    this._startMovePoint = null;
+  }
+
   /**
    * 根据图片的初始位置和缩放比例，计算在画布上的精确位置
    *

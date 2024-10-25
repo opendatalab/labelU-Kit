@@ -110,7 +110,7 @@ export class Shape<Style> {
     },
   };
 
-  private _bindEvents() {
+  private async _bindEvents() {
     eventEmitter.on(EInternalEvent.AxisChange, this.update);
     eventEmitter.on(EInternalEvent.LeftMouseUp, this.update);
   }

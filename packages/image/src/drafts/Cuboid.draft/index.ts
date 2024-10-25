@@ -88,6 +88,7 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
+    this.finishSetup();
   }
 
   /**

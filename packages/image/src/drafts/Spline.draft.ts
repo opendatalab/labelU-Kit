@@ -30,6 +30,7 @@ export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyl
 
     this._setupShapes();
     this.onMouseUp(this._onMouseUp);
+    this.finishSetup();
   }
 
   /**
