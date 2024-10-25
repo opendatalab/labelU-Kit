@@ -15,8 +15,8 @@ export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> 
     this.config = config;
 
     this._setupShapes();
-
     this.onMouseUp(this._onMouseUp);
+    this.finishSetup();
   }
 
   private _setupShapes() {
