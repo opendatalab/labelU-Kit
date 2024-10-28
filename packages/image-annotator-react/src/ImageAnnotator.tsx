@@ -322,6 +322,9 @@ function ForwardAnnotator(
         rotate: currentSample?.meta?.rotate ?? 0,
       })
       .then(() => {
+        // 避免重复添加
+        engine.clearData();
+
         Object.keys(annotationsFromSample).forEach((key) => {
           if (TOOL_NAMES.includes(key as ToolName)) {
             engine?.loadData(key as ToolName, annotationsFromSample[key as ToolName] as AnnotationToolData<ToolName>);
@@ -418,8 +421,6 @@ function ForwardAnnotator(
       onRedo: onRedoUndo,
       onUndo: onRedoUndo,
     });
-
-  console.log('annotationsWithGlobal', annotationsWithGlobal);
 
   const onAnnotationClear = useCallback(() => {
     engine?.clearData();
