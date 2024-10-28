@@ -487,6 +487,21 @@ function ForwardAnnotator(
     [updateAnnotationsWithGlobal],
   );
 
+  const onAnnotationDelete = useCallback(
+    (restAnnotations: AnnotationWithTool[]) => {
+      const annotationGroupByTool: AllAnnotationMapping = {};
+
+      restAnnotations.forEach((item) => {
+        annotationGroupByTool[item.id] = item;
+      });
+
+      updateAnnotationsWithGlobal(() => {
+        return annotationGroupByTool;
+      });
+    },
+    [updateAnnotationsWithGlobal],
+  );
+
   const onAnnotationChange = useCallback(
     (_annotation: AnnotationWithTool) => {
       updateAnnotationsWithGlobal((pre) => {
@@ -575,6 +590,20 @@ function ForwardAnnotator(
 
   // effects
   useEffect(() => {
+    // 删除标记
+    engine?.on('delete', (annotation: AnnotationData) => {
+      onAnnotationDelete(addToolNameToAnnotationData(engine!.getDataByTool()));
+      setSelectedAnnotation((pre) => {
+        if (pre?.id === annotation.id) {
+          return undefined;
+        }
+
+        return pre;
+      });
+    });
+  }, [engine, onAnnotationDelete]);
+
+  useEffect(() => {
     const _onAnnotationsChange = () => {
       onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
     };
@@ -585,18 +614,6 @@ function ForwardAnnotator(
         // 默认选中第一个
         ...annotations[0],
         tool: engine.activeToolName!,
-      });
-    });
-
-    // 删除标记
-    engine?.on('delete', (annotation: AnnotationData) => {
-      _onAnnotationsChange();
-      setSelectedAnnotation((pre) => {
-        if (pre?.id === annotation.id) {
-          return undefined;
-        }
-
-        return pre;
       });
     });
 
