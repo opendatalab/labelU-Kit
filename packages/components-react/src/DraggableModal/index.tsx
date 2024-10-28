@@ -116,6 +116,8 @@ export interface DraggableModalRef {
   toggleVisibility: (value: boolean) => void;
   setPosition: (position: Position) => void;
   getModalRef: () => React.RefObject<HTMLDivElement | null>;
+
+  getVisibility: () => boolean;
 }
 
 const ForwardDraggableModel = (props: Iprops, ref: React.ForwardedRef<DraggableModalRef>) => {
@@ -163,8 +165,9 @@ const ForwardDraggableModel = (props: Iprops, ref: React.ForwardedRef<DraggableM
       },
       setPosition: updatePosition,
       getModalRef: () => modalRef,
+      getVisibility: () => isVisible,
     }),
-    [updatePosition],
+    [updatePosition, isVisible],
   );
 
   const bodyStyle = useMemo(() => {
