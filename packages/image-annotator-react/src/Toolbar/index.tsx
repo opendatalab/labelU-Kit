@@ -2,6 +2,7 @@ import { Toolbar, Tooltip, HotkeyPanel } from '@labelu/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import styled from 'styled-components';
 import type { ToolName } from '@labelu/image';
+import { useCallback } from 'react';
 
 import { ReactComponent as PointIcon } from '@/assets/tools/point.svg';
 import { ReactComponent as LineIcon } from '@/assets/tools/line.svg';
@@ -11,6 +12,7 @@ import { ReactComponent as CuboidIcon } from '@/assets/tools/cuboid.svg';
 import { useTool } from '@/context/tool.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
 import { useHistoryCtx } from '@/context/history.context';
+import { dragModalRef } from '@/LabelSection';
 
 import ToolStyle from './ToolStyle';
 import hotkeysConst from './hotkeys.const';
@@ -57,11 +59,19 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
   const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
   const { redo, undo, futureRef, pastRef } = useHistoryCtx();
 
+  const handleUndo = useCallback(() => {
+    if (dragModalRef.current?.getVisibility()) {
+      return;
+    }
+
+    undo();
+  }, [undo]);
+
   const handleToolChange = (tool: ToolName) => () => {
     engine.switch(tool);
   };
 
-  useHotkeys('ctrl+z, meta+z', undo, [undo]);
+  useHotkeys('ctrl+z, meta+z', handleUndo, [handleUndo]);
   useHotkeys('ctrl+shift+z, meta+shift+z', redo, [undo]);
 
   return (
