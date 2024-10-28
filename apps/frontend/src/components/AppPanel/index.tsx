@@ -3,7 +3,7 @@ import { Avatar } from 'antd';
 import _ from 'lodash';
 
 import { ReactComponent as LabelLLM } from '@/assets/svg/labelllm.svg';
-import { ReactComponent as MinorU } from '@/assets/svg/minoru.svg';
+import { ReactComponent as MinerU } from '@/assets/svg/mineru.svg';
 import { ReactComponent as OpenDataLab } from '@/assets/svg/opendatalab.svg';
 
 import styles from './index.module.css';
@@ -43,7 +43,7 @@ const apps = [
       { name: 'Github', link: 'https://github.com/opendatalab/MinerU' },
       { name: '在线体验', link: 'https://opendatalab.com/OpenSourceTools/Extractor/PDF' },
     ],
-    icon: <MinorU />,
+    icon: <MinerU />,
     description: '一站式开源高质量数据提取工具，支持多格式（PDF/网页/电子书），智能萃取，生成高质量语料',
   },
 ];
