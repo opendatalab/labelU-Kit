@@ -322,6 +322,9 @@ function ForwardAnnotator(
         rotate: currentSample?.meta?.rotate ?? 0,
       })
       .then(() => {
+        // 避免重复添加
+        engine.clearData();
+
         Object.keys(annotationsFromSample).forEach((key) => {
           if (TOOL_NAMES.includes(key as ToolName)) {
             engine?.loadData(key as ToolName, annotationsFromSample[key as ToolName] as AnnotationToolData<ToolName>);
@@ -375,6 +378,10 @@ function ForwardAnnotator(
 
           imageAnnotations![toolName]!.push(_item as AnnotationDataInUI);
         }
+      });
+
+      Object.keys(imageAnnotations).forEach((key) => {
+        engine?.loadData(key as ToolName, imageAnnotations[key as ToolName] as AnnotationToolData<ToolName>);
       });
     },
     [engine],
@@ -481,6 +488,21 @@ function ForwardAnnotator(
     [updateAnnotationsWithGlobal],
   );
 
+  const onAnnotationDelete = useCallback(
+    (restAnnotations: AnnotationWithTool[]) => {
+      const annotationGroupByTool: AllAnnotationMapping = {};
+
+      restAnnotations.forEach((item) => {
+        annotationGroupByTool[item.id] = item;
+      });
+
+      updateAnnotationsWithGlobal(() => {
+        return annotationGroupByTool;
+      });
+    },
+    [updateAnnotationsWithGlobal],
+  );
+
   const onAnnotationChange = useCallback(
     (_annotation: AnnotationWithTool) => {
       updateAnnotationsWithGlobal((pre) => {
@@ -569,6 +591,20 @@ function ForwardAnnotator(
 
   // effects
   useEffect(() => {
+    // 删除标记
+    engine?.on('delete', (annotation: AnnotationData) => {
+      onAnnotationDelete(addToolNameToAnnotationData(engine!.getDataByTool()));
+      setSelectedAnnotation((pre) => {
+        if (pre?.id === annotation.id) {
+          return undefined;
+        }
+
+        return pre;
+      });
+    });
+  }, [engine, onAnnotationDelete]);
+
+  useEffect(() => {
     const _onAnnotationsChange = () => {
       onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
     };
@@ -579,18 +615,6 @@ function ForwardAnnotator(
         // 默认选中第一个
         ...annotations[0],
         tool: engine.activeToolName!,
-      });
-    });
-
-    // 删除标记
-    engine?.on('delete', (annotation: AnnotationData) => {
-      _onAnnotationsChange();
-      setSelectedAnnotation((pre) => {
-        if (pre?.id === annotation.id) {
-          return undefined;
-        }
-
-        return pre;
       });
     });
 

@@ -286,7 +286,6 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       ),
     );
 
-    await saveCurrentSample();
     // 切换到下一个文件
     if (!isLastSample) {
       navigateWithSearch(`/tasks/${taskId}/samples/${_.get(samples, `[${sampleIndex + 1}].id`)}`);

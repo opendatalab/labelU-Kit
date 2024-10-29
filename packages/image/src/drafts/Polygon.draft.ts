@@ -63,6 +63,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
 
     eventEmitter.on(EInternalEvent.KeyDown, this._onKeyDown);
     eventEmitter.on(EInternalEvent.KeyUp, this._onKeyUp);
+    this.finishSetup();
   }
 
   /**

@@ -22,7 +22,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@labelu/image': resolve(__dirname, '../src'),
     },
   },
 });
