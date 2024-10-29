@@ -513,7 +513,7 @@ function ForwardAnnotator(
   );
 
   useEffect(() => {
-    const handleSelectAnnotation = (annotation: AnnotationData, toolName: ToolName) => {
+    const handleSelectAnnotation = (annotation: AnnotationData, toolName: ToolName, mouseEvent: MouseEvent) => {
       // 选中了隐藏的标记，需要显示
       engine?.toggleAnnotationsVisibility(toolName, [annotation.id], true);
       engine?.setLabel(annotation.label!);
@@ -524,6 +524,16 @@ function ForwardAnnotator(
       };
       setSelectedAnnotation(newAnnotation);
       onAnnotationChange(newAnnotation);
+      // 按住shift键时，调起属性框
+      if (engine?.keyboard?.Shift) {
+        const labelConfig = labels.find((item) => item.value === annotation.label);
+        openAttributeModal({
+          labelValue: annotation.label,
+          e: mouseEvent,
+          engine,
+          labelConfig,
+        });
+      }
       selectedIndexRef.current = sortedImageAnnotations.findIndex((item) => item.id === annotation.id);
     };
 
@@ -532,7 +542,7 @@ function ForwardAnnotator(
     return () => {
       engine?.off('select', handleSelectAnnotation);
     };
-  }, [engine, onAnnotationChange, sortedImageAnnotations]);
+  }, [engine, labels, onAnnotationChange, sortedImageAnnotations]);
 
   useEffect(() => {
     const handleUnSelect = () => {

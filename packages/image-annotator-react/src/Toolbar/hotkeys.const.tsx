@@ -109,6 +109,14 @@ export default [
         ),
       },
       {
+        name: '调出属性编辑',
+        content: (
+          <>
+            <Kbd>Shift</Kbd> + <MouseRightClick />
+          </>
+        ),
+      },
+      {
         name: '上一个标记',
         content: <Kbd>↑</Kbd>,
       },
