@@ -109,10 +109,10 @@ export default [
         ),
       },
       {
-        name: '调出属性编辑',
+        name: '编辑属性',
         content: (
           <>
-            <Kbd>Shift</Kbd> + <MouseRightClick />
+            {os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
           </>
         ),
       },
