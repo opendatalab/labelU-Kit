@@ -68,6 +68,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);
+    monitor!.setSelectedAnnotationId(annotation.id);
     Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
   };
 

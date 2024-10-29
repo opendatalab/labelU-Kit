@@ -126,7 +126,8 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);
-    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
+    monitor!.setSelectedAnnotationId(annotation.id);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name, _e);
   };
 
   protected setupShapes() {
@@ -736,7 +737,6 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     this.destroySketch();
     axis!.rerender();
     this.onSelect(this.drawing!.get(data.id) as AnnotationPolygon)(new MouseEvent(''));
-    monitor!.setSelectedAnnotationId(data.id);
     Tool.onAdd(additionPayload, e);
   }
 

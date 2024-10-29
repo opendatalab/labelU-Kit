@@ -152,7 +152,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);
-    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name, _e);
   };
 
   protected archiveDraft() {
