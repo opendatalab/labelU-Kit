@@ -419,8 +419,6 @@ function ForwardAnnotator(
       onUndo: onRedoUndo,
     });
 
-  console.log('annotationsWithGlobal', annotationsWithGlobal);
-
   const onAnnotationClear = useCallback(() => {
     engine?.clearData();
     updateAnnotationsWithGlobal(() => {
