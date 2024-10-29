@@ -278,6 +278,8 @@ export class Monitor {
       _hoveredGroup.emit(EInternalEvent.Select, e);
       this.selectedAnnotationId = _hoveredGroup.id;
     }
+
+    eventEmitter.emit('rightClick', e, _hoveredGroup?.id);
   };
 
   public setSelectedAnnotationId(id: string | null) {
