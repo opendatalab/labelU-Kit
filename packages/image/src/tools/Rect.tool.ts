@@ -78,6 +78,11 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this.setupShapes();
   }
 
+  /**
+   * load 不会清空原有数据，会在原来数据上追加
+   * NOTE: 如果不希望追加，需要在load之前调用标注器实例的clearData方法
+   * @param data
+   */
   public load(data: RectData[]) {
     this._data.push(...RectTool.convertToCanvasCoordinates(data));
     this.clearDrawing();
