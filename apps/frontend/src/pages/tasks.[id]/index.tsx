@@ -15,6 +15,7 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
 import { downloadFromUrl } from '@/utils';
 import { deletePreAnnotations } from '@/api/services/preAnnotations';
+import { deleteSamples } from '@/api/services/samples';
 
 import type { TaskStatusProps } from './components/Statistical';
 import Statistical, { TaskStatus as TaskStatusComponent } from './components/Statistical';
@@ -64,6 +65,11 @@ const Samples = () => {
       { pre_annotation_ids: ids },
     );
 
+    revalidator.revalidate();
+  };
+
+  const handleDeleteSample = async (ids: number[]) => {
+    await deleteSamples({ task_id: taskId }, { sample_ids: ids });
     revalidator.revalidate();
   };
 
@@ -270,6 +276,11 @@ const Samples = () => {
                 <Button type="link">进入标注</Button>
               </Link>
             )}
+            <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteSample([record.id!])}>
+              <Button type="link" danger>
+                删除
+              </Button>
+            </Popconfirm>
           </>
         );
       },
