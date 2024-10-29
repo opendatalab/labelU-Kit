@@ -20,33 +20,19 @@ export const exportDescriptionMapping = {
   [ExportType.MASK]: '面向图像分割（多边形）任务',
 };
 
-const availableOptions = {
-  [MediaType.IMAGE]: [
-    {
-      label: ExportType.JSON,
-      value: ExportType.JSON,
-    },
-    {
-      label: ExportType.COCO,
-      value: ExportType.COCO,
-    },
-    {
-      label: ExportType.MASK,
-      value: ExportType.MASK,
-    },
-  ],
-  [MediaType.VIDEO]: [
-    {
-      label: ExportType.JSON,
-      value: ExportType.JSON,
-    },
-  ],
-  [MediaType.AUDIO]: [
-    {
-      label: ExportType.JSON,
-      value: ExportType.JSON,
-    },
-  ],
+const optionMapping = {
+  [ExportType.JSON]: {
+    label: ExportType.JSON,
+    value: ExportType.JSON,
+  },
+  [ExportType.COCO]: {
+    label: ExportType.COCO,
+    value: ExportType.COCO,
+  },
+  [ExportType.MASK]: {
+    label: ExportType.MASK,
+    value: ExportType.MASK,
+  },
 };
 
 export default function ExportPortal({ taskId, sampleIds, mediaType, tools, children }: ExportPortalProps) {
@@ -99,24 +85,34 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
     });
   }, [children, handleOpenModal]);
 
-  // cuboid 不需要导出coco和mask
-  const containsCuboidTool = useMemo(() => {
-    return tools?.find((item) => item.tool === 'cuboidTool');
-  }, [tools]);
-
   const options = useMemo(() => {
+    const result = [optionMapping[ExportType.JSON]];
+
     if (!mediaType) {
-      return [];
+      return result;
     }
 
-    if (containsCuboidTool && mediaType === MediaType.IMAGE) {
-      return availableOptions[MediaType.IMAGE].filter(
-        (option) => option.value !== ExportType.COCO && option.value !== ExportType.MASK,
-      );
+    const onlyPolygonTool = tools?.length === 1 && tools[0].tool === 'polygonTool';
+    const onlyRectTool = tools?.length === 1 && tools[0].tool === 'rectTool';
+    const polygonOrRectTool =
+      tools?.length === 2 &&
+      tools.find((item) => item.tool === 'polygonTool') &&
+      tools.find((item) => item.tool === 'rectTool');
+
+    // coco: rect, polygon
+    // mask: polygon
+    if (mediaType === MediaType.IMAGE) {
+      if (polygonOrRectTool || onlyPolygonTool || onlyRectTool) {
+        result.push(optionMapping[ExportType.COCO]);
+      }
+
+      if (onlyPolygonTool) {
+        result.push(optionMapping[ExportType.MASK]);
+      }
     }
 
-    return availableOptions[mediaType || MediaType.IMAGE];
-  }, [containsCuboidTool, mediaType]);
+    return result;
+  }, [mediaType, tools]);
 
   return (
     <>
