@@ -11,3 +11,5 @@ Try it out at [opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/
 ```bash
 npm install @labelu/image
 ```
+
+<!-- release -->
