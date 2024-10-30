@@ -233,7 +233,7 @@ export function LabelSection() {
     (values: any) => {
       const { attributes, label } = values;
 
-      if (label) {
+      if (label && label !== selectedLabel?.value) {
         // 清除上一个标签的属性
         engine?.setAttributes({});
         engine?.setLabel(label);
@@ -243,7 +243,7 @@ export function LabelSection() {
         engine?.setAttributes(attributes);
       }
     },
-    [engine],
+    [engine, selectedLabel?.value],
   );
 
   // 标记完后打开标签属性编辑框
