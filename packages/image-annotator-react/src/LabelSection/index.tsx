@@ -182,7 +182,7 @@ function LabelItem({
   };
 
   return (
-    <EllipsisText maxWidth={112} title={children}>
+    <EllipsisText maxWidth={112} title={children as any}>
       <LabelWrapper active={active} color={attribute.color ?? '#000'} onClick={handleClick}>
         {children as string}
       </LabelWrapper>
