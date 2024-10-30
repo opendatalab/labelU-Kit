@@ -10,6 +10,7 @@ export function useRedoUndo<T>(initialValue: T, options: RedoUndoOptions<T>) {
   const [currentValue, setCurrentValue] = useState<T>(initialValue);
   const pastRef = useRef<T[]>([]);
   const futureRef = useRef<T[]>([]);
+  const skippedHistories = useRef<T[]>([]);
   const finalOptions = useMemo<RedoUndoOptions<T>>(() => {
     return {
       maxHistory: 20,
@@ -57,6 +58,7 @@ export function useRedoUndo<T>(initialValue: T, options: RedoUndoOptions<T>) {
   const reset = useCallback(() => {
     pastRef.current = [];
     futureRef.current = [];
+    skippedHistories.current = [];
   }, []);
 
   useEffect(() => {
@@ -65,12 +67,19 @@ export function useRedoUndo<T>(initialValue: T, options: RedoUndoOptions<T>) {
   }, [initialValue, reset]);
 
   const update = useCallback(
-    (value: React.SetStateAction<T | undefined>) => {
+    (value: React.SetStateAction<T | undefined>, skip: boolean = false) => {
       setCurrentValue((pre) => {
         const newValue = typeof value === 'function' ? (value as Function)(pre) : value;
 
+        if (skip) {
+          skippedHistories.current.push(newValue);
+        }
+
         if (pre) {
-          pastRef.current = [...pastRef.current, pre].slice(-finalOptions.maxHistory!);
+          // skip 来跳过不需要记录的历史
+          pastRef.current = [...pastRef.current, pre]
+            .filter((state) => !skippedHistories.current.includes(state))
+            .slice(-finalOptions.maxHistory!);
         }
 
         return newValue;
