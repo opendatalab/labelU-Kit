@@ -246,7 +246,7 @@ const Samples = () => {
       title: '',
       dataIndex: 'option',
       key: 'option',
-      width: 100,
+      width: 140,
       align: 'center',
       fixed: 'right',
       render: (x, record) => {
@@ -256,7 +256,7 @@ const Samples = () => {
 
         if (record.file?.filename?.endsWith('.jsonl')) {
           return (
-            <div>
+            <FlexLayout items="center">
               <Button type="link" onClick={() => downloadFromUrl(record.file.url, record.file?.filename)}>
                 下载
               </Button>
@@ -265,12 +265,12 @@ const Samples = () => {
                   删除
                 </Button>
               </Popconfirm>
-            </div>
+            </FlexLayout>
           );
         }
 
         return (
-          <>
+          <FlexLayout items="center" gap="0.5rem">
             {isTaskReadyToAnnotate && (
               <Link to={`/tasks/${taskId}/samples/${record.id}`}>
                 <Button type="link">进入标注</Button>
@@ -281,7 +281,7 @@ const Samples = () => {
                 删除
               </Button>
             </Popconfirm>
-          </>
+          </FlexLayout>
         );
       },
     },
