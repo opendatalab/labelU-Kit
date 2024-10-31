@@ -86,6 +86,8 @@ export enum ExportType {
   JSON = 'JSON',
   MASK = 'MASK',
   COCO = 'COCO',
+  YOLO = 'YOLO',
+  CSV = 'CSV',
   LABEL_ME = 'LABEL_ME',
 }
 

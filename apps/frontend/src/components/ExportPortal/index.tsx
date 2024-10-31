@@ -17,8 +17,10 @@ export interface ExportPortalProps {
 
 export const exportDescriptionMapping = {
   [ExportType.JSON]: 'Label U 标准格式，包含任务id、标注结果、url、fileName字段',
+  [ExportType.CSV]: '适用于单一标注类型的任务场景',
   [ExportType.COCO]: 'COCO数据集标准格式，面向物体检测（拉框）和图像分割（多边形）任务',
   [ExportType.MASK]: '面向图像分割（多边形）任务',
+  [ExportType.YOLO]: 'YOLO数据集标准格式，面向物体检测（拉框）任务',
   [ExportType.LABEL_ME]: '兼容 Labelme 标注工具的标注数据格式（不支持立体框、曲线）',
 };
 
@@ -26,6 +28,14 @@ const optionMapping = {
   [ExportType.JSON]: {
     label: ExportType.JSON,
     value: ExportType.JSON,
+  },
+  [ExportType.CSV]: {
+    label: ExportType.CSV,
+    value: ExportType.CSV,
+  },
+  [ExportType.YOLO]: {
+    label: ExportType.YOLO,
+    value: ExportType.YOLO,
   },
   [ExportType.COCO]: {
     label: ExportType.COCO,
@@ -36,7 +46,7 @@ const optionMapping = {
     value: ExportType.MASK,
   },
   [ExportType.LABEL_ME]: {
-    label: 'Labelme',
+    label: 'Labelme' as any,
     value: ExportType.LABEL_ME,
   },
 };
@@ -108,17 +118,31 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
     }
 
     const onlyPolygonTool = tools?.length === 1 && tools[0].tool === 'polygonTool';
+    const onlyRectTool = tools?.length === 1 && tools[0].tool === 'rectTool';
+    const onlyPointTool = tools?.length === 1 && tools[0].tool === 'pointTool';
+    const onlyCuboidTool = tools?.length === 1 && tools[0].tool === 'cuboidTool';
+    const onlyLineTool = tools?.length === 1 && tools[0].tool === 'lineTool';
 
     if (mediaType === MediaType.IMAGE) {
-      result.push(optionMapping[ExportType.LABEL_ME] as any);
+      if (onlyPolygonTool || onlyRectTool || onlyPointTool || onlyCuboidTool || onlyLineTool) {
+        result.push(optionMapping[ExportType.CSV]);
+      }
 
       if (isIncludeCoco(tools)) {
         result.push(optionMapping[ExportType.COCO]);
       }
 
+      if (onlyRectTool) {
+        result.push(optionMapping[ExportType.YOLO]);
+      }
+
       // mask: polygon
       if (onlyPolygonTool) {
         result.push(optionMapping[ExportType.MASK]);
+      }
+
+      if (!tools?.find((item) => ['cuboidTool'].includes(item.tool))) {
+        result.push(optionMapping[ExportType.LABEL_ME] as any);
       }
     }
 

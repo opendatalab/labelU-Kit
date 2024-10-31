@@ -2,20 +2,21 @@ import commonController from '@/utils/common';
 
 import request from '../request';
 import { getTask } from './task';
-import type {
-  DeleteApiV1TasksTaskIdDeleteParams,
-  DeleteSampleCommand,
-  GetApiV1TasksTaskIdSamplesSampleIdGetParams,
-  GetPreApiV1TasksTaskIdSamplesSampleIdPreGetParams,
-  ListByApiV1TasksTaskIdSamplesGetParams,
-  OkRespCommonDataResp,
-  OkRespCreateSampleResponse,
-  OkRespSampleResponse,
-  PatchSampleCommand,
-  SampleData,
-  SampleListResponse,
-  SampleResponse,
-  UpdateApiV1TasksTaskIdSamplesSampleIdPatchParams,
+import {
+  ExportType,
+  type DeleteApiV1TasksTaskIdDeleteParams,
+  type DeleteSampleCommand,
+  type GetApiV1TasksTaskIdSamplesSampleIdGetParams,
+  type GetPreApiV1TasksTaskIdSamplesSampleIdPreGetParams,
+  type ListByApiV1TasksTaskIdSamplesGetParams,
+  type OkRespCommonDataResp,
+  type OkRespCreateSampleResponse,
+  type OkRespSampleResponse,
+  type PatchSampleCommand,
+  type SampleData,
+  type SampleListResponse,
+  type SampleResponse,
+  type UpdateApiV1TasksTaskIdSamplesSampleIdPatchParams,
 } from '../types';
 
 export async function createSamples(
@@ -79,11 +80,10 @@ export async function updateSampleAnnotationResult(
   );
 }
 
-export async function outputSample(taskId: number, sampleIds: number[], activeTxt: string) {
-  // TODO: 后期改成前端导出，不调用后端接口
+export async function outputSample(taskId: number, sampleIds: number[], activeTxt: ExportType) {
   let res;
 
-  if (activeTxt === 'MASK' || activeTxt === 'LABEL_ME') {
+  if ([ExportType.MASK, ExportType.LABEL_ME, ExportType.YOLO, ExportType.CSV].includes(activeTxt)) {
     res = await request.post(
       `/v1/tasks/${taskId}/samples/export`,
       {
@@ -120,12 +120,14 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
   let filename = taskRes.data.name;
 
   switch (activeTxt) {
-    case 'JSON':
-    case 'COCO':
+    case ExportType.JSON:
+    case ExportType.COCO:
       filename = filename + '.json';
       break;
-    case 'MASK':
-    case 'LABEL_ME':
+    case ExportType.MASK:
+    case ExportType.CSV:
+    case ExportType.LABEL_ME:
+    case ExportType.YOLO:
       url = window.URL.createObjectURL(data as any);
       break;
   }
