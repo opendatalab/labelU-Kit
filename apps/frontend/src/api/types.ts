@@ -86,6 +86,7 @@ export enum ExportType {
   JSON = 'JSON',
   MASK = 'MASK',
   COCO = 'COCO',
+  LABEL_ME = 'LABEL_ME',
 }
 
 export interface GetApiV1TasksTaskIdGetParams {

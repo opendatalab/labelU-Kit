@@ -5,6 +5,7 @@ import { FlexLayout } from '@labelu/components-react';
 
 import { ExportType, MediaType } from '@/api/types';
 import { outputSample, outputSamples } from '@/api/services/samples';
+import { ImageToolName } from '@/enums';
 
 export interface ExportPortalProps {
   children: React.ReactChild;
@@ -18,6 +19,7 @@ export const exportDescriptionMapping = {
   [ExportType.JSON]: 'Label U 标准格式，包含任务id、标注结果、url、fileName字段',
   [ExportType.COCO]: 'COCO数据集标准格式，面向物体检测（拉框）和图像分割（多边形）任务',
   [ExportType.MASK]: '面向图像分割（多边形）任务',
+  [ExportType.LABEL_ME]: '兼容 Labelme 标注工具的标注数据格式（不支持立体框、曲线）',
 };
 
 const optionMapping = {
@@ -33,7 +35,20 @@ const optionMapping = {
     label: ExportType.MASK,
     value: ExportType.MASK,
   },
+  [ExportType.LABEL_ME]: {
+    label: 'Labelme',
+    value: ExportType.LABEL_ME,
+  },
 };
+
+function isIncludeCoco(tools?: any[]) {
+  if (!tools) {
+    return false;
+  }
+
+  // coco 包含 rect 和 polygon、point
+  return !tools.some((item) => [ImageToolName.Cuboid, ImageToolName.Line, ImageToolName.Point].includes(item.tool));
+}
 
 export default function ExportPortal({ taskId, sampleIds, mediaType, tools, children }: ExportPortalProps) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -93,19 +108,15 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
     }
 
     const onlyPolygonTool = tools?.length === 1 && tools[0].tool === 'polygonTool';
-    const onlyRectTool = tools?.length === 1 && tools[0].tool === 'rectTool';
-    const polygonOrRectTool =
-      tools?.length === 2 &&
-      tools.find((item) => item.tool === 'polygonTool') &&
-      tools.find((item) => item.tool === 'rectTool');
 
-    // coco: rect, polygon
-    // mask: polygon
     if (mediaType === MediaType.IMAGE) {
-      if (polygonOrRectTool || onlyPolygonTool || onlyRectTool) {
+      result.push(optionMapping[ExportType.LABEL_ME] as any);
+
+      if (isIncludeCoco(tools)) {
         result.push(optionMapping[ExportType.COCO]);
       }
 
+      // mask: polygon
       if (onlyPolygonTool) {
         result.push(optionMapping[ExportType.MASK]);
       }

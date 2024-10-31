@@ -81,20 +81,9 @@ export async function updateSampleAnnotationResult(
 
 export async function outputSample(taskId: number, sampleIds: number[], activeTxt: string) {
   // TODO: 后期改成前端导出，不调用后端接口
-  let res = await request.post(
-    `/v1/tasks/${taskId}/samples/export`,
-    {
-      sample_ids: sampleIds,
-    },
-    {
-      params: {
-        task_id: taskId,
-        export_type: activeTxt,
-      },
-    },
-  );
+  let res;
 
-  if (activeTxt === 'MASK') {
+  if (activeTxt === 'MASK' || activeTxt === 'LABEL_ME') {
     res = await request.post(
       `/v1/tasks/${taskId}/samples/export`,
       {
@@ -106,6 +95,19 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
           export_type: activeTxt,
         },
         responseType: 'blob',
+      },
+    );
+  } else {
+    await request.post(
+      `/v1/tasks/${taskId}/samples/export`,
+      {
+        sample_ids: sampleIds,
+      },
+      {
+        params: {
+          task_id: taskId,
+          export_type: activeTxt,
+        },
       },
     );
   }
@@ -123,6 +125,7 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
       filename = filename + '.json';
       break;
     case 'MASK':
+    case 'LABEL_ME':
       url = window.URL.createObjectURL(data as any);
       break;
   }
