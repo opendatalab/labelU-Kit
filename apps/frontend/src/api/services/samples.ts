@@ -83,7 +83,16 @@ export async function updateSampleAnnotationResult(
 export async function outputSample(taskId: number, sampleIds: number[], activeTxt: ExportType) {
   let res;
 
-  if ([ExportType.MASK, ExportType.LABEL_ME, ExportType.YOLO, ExportType.CSV].includes(activeTxt)) {
+  if (
+    [
+      ExportType.MASK,
+      ExportType.LABEL_ME,
+      ExportType.YOLO,
+      ExportType.CSV,
+      ExportType.TF_RECORD,
+      ExportType.PASCAL_VOC,
+    ].includes(activeTxt)
+  ) {
     res = await request.post(
       `/v1/tasks/${taskId}/samples/export`,
       {
@@ -98,7 +107,7 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
       },
     );
   } else {
-    await request.post(
+    res = await request.post(
       `/v1/tasks/${taskId}/samples/export`,
       {
         sample_ids: sampleIds,
@@ -124,10 +133,15 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
     case ExportType.COCO:
       filename = filename + '.json';
       break;
+    case ExportType.XML:
+      filename = filename + '.xml';
+      break;
     case ExportType.MASK:
     case ExportType.CSV:
     case ExportType.LABEL_ME:
     case ExportType.YOLO:
+    case ExportType.TF_RECORD:
+    case ExportType.PASCAL_VOC:
       url = window.URL.createObjectURL(data as any);
       break;
   }
@@ -136,7 +150,7 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
   a.click();
 }
 
-export async function outputSamples(taskId: number, activeTxt: string) {
+export async function outputSamples(taskId: number, activeTxt: ExportType) {
   const samplesRes = await getSamples({ task_id: taskId, pageNo: 1, pageSize: 100000 });
   const sampleIdArrays = samplesRes.data;
   const sampleIds = [];

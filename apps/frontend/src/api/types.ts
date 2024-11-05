@@ -88,7 +88,10 @@ export enum ExportType {
   COCO = 'COCO',
   YOLO = 'YOLO',
   CSV = 'CSV',
+  XML = 'XML',
   LABEL_ME = 'LABEL_ME',
+  TF_RECORD = 'TF_RECORD',
+  PASCAL_VOC = 'PASCAL_VOC',
 }
 
 export interface GetApiV1TasksTaskIdGetParams {
