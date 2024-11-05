@@ -307,9 +307,7 @@ export class Monitor {
   }
 
   public getNextOrder() {
-    const maxOrder = this.getMaxOrder();
-    console.log('maxOrder', maxOrder);
-    return maxOrder + 1;
+    return this.getMaxOrder() + 1;
   }
 
   public destroy() {
