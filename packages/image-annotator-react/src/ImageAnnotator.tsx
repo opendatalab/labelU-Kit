@@ -185,6 +185,8 @@ function ForwardAnnotator(
   // ================== sample ==================
   const [currentSample, setCurrentSample] = useState<ImageSample | undefined>(editingSample);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
+  // remember last tool
+  const memorizeToolLabel = useRef<Record<ToolName, Attribute>>({} as Record<ToolName, Attribute>);
 
   useEffect(() => {
     setCurrentSample(editingSample || samples?.[0]);
@@ -201,14 +203,6 @@ function ForwardAnnotator(
   useEffect(() => {
     setCurrentTool(propsSelectedTool);
   }, [propsSelectedTool]);
-
-  const onToolChange = useCallback(
-    (toolName: ToolName) => {
-      propsOnToolChange?.(toolName);
-      setCurrentTool(toolName);
-    },
-    [propsOnToolChange],
-  );
 
   const tools = useMemo(() => {
     const result: ToolName[] = [];
@@ -277,16 +271,6 @@ function ForwardAnnotator(
     [engine],
   );
 
-  useEffect(() => {
-    engine?.on('toolChange', onToolChange);
-
-    return () => {
-      engine?.off('toolChange', onToolChange);
-    };
-  }, [engine, onToolChange]);
-
-  // ================== annotation ==================
-  // ================== label ==================
   const labels = useMemo(() => {
     if (!currentTool) {
       return [];
@@ -303,9 +287,21 @@ function ForwardAnnotator(
     propsSelectedLabel ? selectedLabelFromProps : labels[0],
   );
 
+  const onToolChange = useCallback(
+    (toolName: ToolName) => {
+      propsOnToolChange?.(toolName);
+      setCurrentTool(toolName);
+    },
+    [propsOnToolChange],
+  );
+
   useEffect(() => {
-    setSelectedLabel(selectedLabelFromProps);
-  }, [selectedLabelFromProps]);
+    engine?.on('toolChange', onToolChange);
+
+    return () => {
+      engine?.off('toolChange', onToolChange);
+    };
+  }, [engine, onToolChange]);
 
   const [selectedAnnotation, setSelectedAnnotation] = useState<AnnotationDataInUI | undefined>();
   const annotationsFromSample = useMemo(() => {
@@ -348,16 +344,7 @@ function ForwardAnnotator(
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    annotationsFromSample,
-    config,
-    currentSample,
-    engine,
-    isSampleDataEmpty,
-    preAnnotations,
-    propsSelectedLabel,
-    tools,
-  ]);
+  }, [annotationsFromSample, config, currentSample, engine, isSampleDataEmpty, preAnnotations, tools]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -589,6 +576,10 @@ function ForwardAnnotator(
       engine?.setAttributes({});
       setSelectedLabel(label);
       propsOnLabelChange?.(currentTool, label);
+
+      if (currentTool) {
+        memorizeToolLabel.current[currentTool] = label;
+      }
     },
     [currentTool, engine, propsOnLabelChange],
   );
@@ -876,6 +867,7 @@ function ForwardAnnotator(
       currentTool,
       config,
       selectedLabel,
+      memorizeToolLabel,
       requestEdit,
       onLabelChange,
       tools,
