@@ -37,7 +37,7 @@ export class Monitor {
   private _options: MonitorOption;
 
   // TODO: 清空标注时这里也要清空
-  private _orderIndexedAnnotationIds: string[] = [];
+  private _orderIndexedAnnotationIds: (string | undefined)[] = [];
 
   /** 键盘按键记录 */
   private _keyStatus: Record<EventKeyName, boolean> = {
@@ -119,7 +119,7 @@ export class Monitor {
       return;
     }
 
-    _orderIndexedAnnotationIds.splice(order, 1);
+    _orderIndexedAnnotationIds[order] = undefined;
   };
 
   private _handleClear = () => {
