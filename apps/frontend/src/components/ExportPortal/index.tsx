@@ -4,7 +4,7 @@ import { FlexLayout } from '@labelu/components-react';
 
 import { ExportType, MediaType } from '@/api/types';
 import { outputSample, outputSamples } from '@/api/services/samples';
-import { ImageToolName } from '@/enums';
+import { EGlobalToolName, ImageToolName } from '@/enums';
 
 export interface ExportPortalProps {
   children: React.ReactChild;
@@ -125,17 +125,20 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
   }, [children, handleOpenModal]);
 
   const options = useMemo(() => {
+    const toolsWithoutTagAndText = tools?.filter(
+      (item) => ![EGlobalToolName.Text, EGlobalToolName.Tag].includes(item.tool),
+    );
     const result = [optionMapping[ExportType.JSON], optionMapping[ExportType.XML]];
 
     if (!mediaType) {
       return result;
     }
 
-    const onlyPolygonTool = tools?.length === 1 && tools[0].tool === 'polygonTool';
-    const onlyRectTool = tools?.length === 1 && tools[0].tool === 'rectTool';
-    const onlyPointTool = tools?.length === 1 && tools[0].tool === 'pointTool';
-    const onlyCuboidTool = tools?.length === 1 && tools[0].tool === 'cuboidTool';
-    const onlyLineTool = tools?.length === 1 && tools[0].tool === 'lineTool';
+    const onlyPolygonTool = toolsWithoutTagAndText?.length === 1 && toolsWithoutTagAndText[0].tool === 'polygonTool';
+    const onlyRectTool = toolsWithoutTagAndText?.length === 1 && toolsWithoutTagAndText[0].tool === 'rectTool';
+    const onlyPointTool = toolsWithoutTagAndText?.length === 1 && toolsWithoutTagAndText[0].tool === 'pointTool';
+    const onlyCuboidTool = toolsWithoutTagAndText?.length === 1 && toolsWithoutTagAndText[0].tool === 'cuboidTool';
+    const onlyLineTool = toolsWithoutTagAndText?.length === 1 && toolsWithoutTagAndText[0].tool === 'lineTool';
 
     if (mediaType === MediaType.IMAGE) {
       result.push(optionMapping[ExportType.TF_RECORD]);
@@ -144,7 +147,7 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
         result.push(optionMapping[ExportType.CSV]);
       }
 
-      if (isIncludeCoco(tools)) {
+      if (isIncludeCoco(toolsWithoutTagAndText)) {
         result.push(optionMapping[ExportType.COCO]);
       }
 
@@ -157,7 +160,7 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
         result.push(optionMapping[ExportType.MASK]);
       }
 
-      if (!tools?.find((item) => ['cuboidTool'].includes(item.tool))) {
+      if (!toolsWithoutTagAndText?.find((item) => ['cuboidTool'].includes(item.tool))) {
         result.push(optionMapping[ExportType.LABEL_ME] as any);
       }
     }
