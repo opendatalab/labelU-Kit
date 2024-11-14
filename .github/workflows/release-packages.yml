@@ -69,7 +69,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
           pnpm install
 
       - name: Build packages
