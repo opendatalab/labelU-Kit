@@ -68,7 +68,9 @@ jobs:
           echo $RELEASE_VERSION
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          npm config set //npm.shlab.tech/:_authToken ${LAB_NPM_TOKEN}
+          pnpm install
 
       - name: Build packages
         run: pnpm run build
