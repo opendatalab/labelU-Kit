@@ -46,9 +46,15 @@ const AnnotationPage = () => {
     const result: Partial<Record<AllToolName, any>> = {};
 
     if (preAnnotation) {
-      const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', ''));
+      const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
 
       if (!preAnnotationResult) {
+        return {};
+      }
+
+      const config = preAnnotationResult.config;
+
+      if (!config) {
         return {};
       }
 
@@ -71,7 +77,25 @@ const AnnotationPage = () => {
       return {};
     }
 
-    const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+    const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
+    let _annotations = _.get(preAnnotationResult, 'annotations', {});
+    const preAnnotationFile = _.get(preAnnotation, 'data[0].file', {});
+    // 兼容json预标注
+    if (preAnnotationFile.filename?.endsWith('.json')) {
+      _annotations = _.chain(preAnnotationResult)
+        .get('result.annotations')
+        .map((item) => {
+          return [
+            item.toolName,
+            {
+              toolName: item.toolName,
+              result: item.result,
+            },
+          ];
+        })
+        .fromPairs()
+        .value();
+    }
 
     if (task?.media_type === MediaType.IMAGE) {
       return convertImageAnnotations(_annotations, preAnnotationConfig);

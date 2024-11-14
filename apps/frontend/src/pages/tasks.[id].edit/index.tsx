@@ -21,7 +21,7 @@ import { convertImageConfig } from '@/utils/convertImageConfig';
 import { createPreAnnotations } from '@/api/services/preAnnotations';
 
 import type { QueuedFile } from './partials/InputData';
-import InputData, { UploadStatus } from './partials/InputData';
+import InputData from './partials/InputData';
 import AnnotationConfig from './partials/AnnotationConfig';
 import InputInfoConfig from './partials/InputInfoConfig';
 import type { StepData } from './components/Step';
@@ -29,6 +29,7 @@ import Step from './components/Step';
 import commonController from '../../utils/common';
 import { TaskCreationContext } from './taskCreation.context';
 import { ContentWrapper, PreviewFrame, StepRow } from './style';
+import { isPreAnnotationFile, UploadStatus } from './partials/InputData/utils';
 
 enum StepEnum {
   Basic = 'basic',
@@ -263,11 +264,11 @@ const CreateTask = () => {
       }
 
       const mediaFileList = [];
-      const jsonlFileList = [];
+      const preAnnotationFiles = [];
 
       for (const file of uploadFileList) {
-        if (file.file.name.endsWith('.jsonl') && file.status === UploadStatus.Success && _.isNil(file.refId)) {
-          jsonlFileList.push({
+        if (isPreAnnotationFile(file.file.name) && file.status === UploadStatus.Success && _.isNil(file.refId)) {
+          preAnnotationFiles.push({
             file_id: file.id!,
           });
         } else if (file.status === UploadStatus.Success && _.isNil(file.refId)) {
@@ -289,10 +290,10 @@ const CreateTask = () => {
             updateFileQueue(mediaFileList, response?.data?.ids);
           }
 
-          if (!_.isEmpty(jsonlFileList)) {
-            response = await createPreAnnotations(taskId, jsonlFileList);
+          if (!_.isEmpty(preAnnotationFiles)) {
+            response = await createPreAnnotations(taskId, preAnnotationFiles);
 
-            updateFileQueue(jsonlFileList, response?.data?.ids);
+            updateFileQueue(preAnnotationFiles, response?.data?.ids);
           }
         }
 
@@ -429,7 +430,7 @@ const CreateTask = () => {
       if (
         currentStep === StepEnum.Upload &&
         isEmpty(samples?.data) &&
-        filter(uploadFileList, (item) => item.status === UploadStatus.Success && !item.name.endsWith('.jsonl'))
+        filter(uploadFileList, (item) => item.status === UploadStatus.Success && !isPreAnnotationFile(item.name))
           .length === 0
       ) {
         message.error('请至少上传一个文件');

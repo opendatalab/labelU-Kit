@@ -149,9 +149,14 @@ const Samples = () => {
           return '-';
         }
 
-        const realSampleName = (record as SampleResponse).file?.filename;
+        const sampleName = (record as SampleResponse).file?.filename;
+        // sample_name前8为是截取的uuid，截取第9位到最后一位（如果预标注是非labelu生成的，jsonl中的sample name可能不带前缀）
+        const realSampleName = record.file?.filename?.substring(9);
 
-        return sampleNamesWithPreAnnotation.includes(realSampleName) ? '是' : '无';
+        return sampleNamesWithPreAnnotation.includes(realSampleName) ||
+          sampleNamesWithPreAnnotation.includes(sampleName)
+          ? '是'
+          : '无';
       },
     },
     {
@@ -178,7 +183,9 @@ const Samples = () => {
       key: 'annotated_count',
       align: 'left',
       render: (_unused, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const sampleNames = _.get(record, 'sample_names');
+
+        if (sampleNames) {
           return '-';
         }
 
@@ -209,7 +216,9 @@ const Samples = () => {
       key: 'created_by',
       align: 'left',
       render: (created_by, record) => {
-        if ((record as unknown as PreAnnotationFileResponse)?.filename?.endsWith('.jsonl')) {
+        const sampleNames = _.get(record, 'sample_names');
+
+        if (sampleNames) {
           return '-';
         }
 
@@ -364,8 +373,6 @@ const Samples = () => {
   const data = useMemo(() => {
     return [...(preAnnotations ?? []), ...(samples ?? [])];
   }, [preAnnotations, samples]);
-
-  console.log('data', sampleNamesWithPreAnnotation);
 
   return (
     <FlexLayout flex="column" full gap="2rem">
