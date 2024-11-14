@@ -8,8 +8,13 @@ export interface AttachmentDeleteCommand {
 export interface AttachmentResponse {
   /** Id description: upload file id */
   id?: number;
+  filename?: string;
   /** Url description: upload file url */
   url?: string;
+}
+
+export interface PreAnnotationFileResponse extends AttachmentResponse {
+  sample_names: string[];
 }
 
 export interface BasicConfigCommand {
@@ -61,6 +66,11 @@ export interface DeleteApiV1TasksTaskIdAttachmentsDeleteParams {
 
 export interface DeleteApiV1TasksTaskIdDeleteParams {
   task_id: number;
+}
+
+export interface DeletePreAnnotationFileParams {
+  task_id: number;
+  file_id: number;
 }
 
 export interface DeleteSampleCommand {
@@ -259,6 +269,18 @@ export interface SampleListResponse {
   meta_data?: MetaData;
   /** Data */
   data: SampleResponse[];
+}
+
+export interface AttachmentListResponse {
+  meta_data?: MetaData;
+  /** Data */
+  data: AttachmentResponse[];
+}
+
+export interface PreAnnotationListResponse {
+  meta_data?: MetaData;
+  /** Data */
+  data: PreAnnotationResponse[];
 }
 
 export enum SampleState {
