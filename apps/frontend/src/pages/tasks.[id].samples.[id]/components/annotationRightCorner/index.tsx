@@ -125,6 +125,11 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       });
     } else if (task.media_type === MediaType.VIDEO) {
       const videoAnnotations = await videoAnnotationRef.current?.getAnnotations();
+      const player = await videoAnnotationRef.current?.getPlayer();
+
+      result.width = player?.videoWidth();
+      result.height = player?.videoHeight();
+      result.duration = player?.duration();
 
       Object.keys(videoAnnotations ?? {}).forEach((toolName) => {
         if (toolName === 'tag') {
@@ -175,6 +180,9 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       innerSample = await videoAnnotationRef?.current?.getSample();
     } else if (task.media_type === MediaType.AUDIO) {
       const audioAnnotations = await audioAnnotationRef.current?.getAnnotations();
+      const player = await audioAnnotationRef.current?.getPlayer();
+
+      result.duration = player?.getDuration();
 
       Object.keys(audioAnnotations ?? {}).forEach((toolName) => {
         if (toolName === 'tag') {

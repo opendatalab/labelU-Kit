@@ -125,7 +125,7 @@ const Samples = () => {
           <Tooltip
             title={
               <>
-                数据导入时上传 label.jsonl 即可导入预标注，预标注格式参考{' '}
+                数据导入时上传 labelu 导出的 json标注文件或组装成 jsonl 文件 即可导入预标注，预标注格式参考{' '}
                 <a
                   href="https://opendatalab.github.io/labelU/#/schema/pre-annotation/image"
                   target="_blank"

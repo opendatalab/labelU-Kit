@@ -118,6 +118,8 @@ const Content = styled.div`
 export interface AudioAndVideoAnnotatorRef {
   getAnnotations: () => AnnotationsWithGlobal;
   getSample: () => MediaSample | undefined;
+  // TODO types
+  getPlayer: () => any;
 }
 
 export interface MediaPlayerProps {
@@ -732,6 +734,7 @@ function ForwardAnnotator(
       return result;
     },
     getSample: () => currentSample,
+    getPlayer: () => playerRef.current,
   }));
 
   const attributeSide = useMemo(() => {
