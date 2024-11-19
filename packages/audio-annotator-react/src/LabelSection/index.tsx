@@ -1,13 +1,16 @@
 import React, { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
-import { DraggableModel, AttributeForm, EllipsisText } from '@labelu/components-react';
+import { DraggableModel, AttributeForm, EllipsisText, FlexLayout, Kbd, getOS } from '@labelu/components-react';
 import type { Attribute } from '@labelu/interface';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
 import { ReactComponent as MenuCloseIcon } from '@/assets/icons/menu-close.svg';
 import { useTool } from '@/context/tool.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
+import { ReactComponent as MouseRightClick } from '@/Toolbar/mouse-right.svg';
+
+const os = getOS();
 
 const Wrapper = styled.div`
   display: flex;
@@ -289,7 +292,11 @@ export function LabelSection() {
       </TriggerWrapper>
       <DraggableModel
         beforeClose={handleModalClose}
-        title="详细信息"
+        title={
+          <FlexLayout items="center" gap="0.5rem">
+            详细信息 &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
+          </FlexLayout>
+        }
         ref={dragModalRef}
         width={333}
         okText="确认"
