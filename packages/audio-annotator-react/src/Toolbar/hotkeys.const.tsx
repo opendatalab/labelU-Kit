@@ -87,6 +87,14 @@ export default [
         content: <Kbd>Space</Kbd>,
       },
       {
+        name: '编辑属性',
+        content: (
+          <>
+            {os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
+          </>
+        ),
+      },
+      {
         name: '增倍率',
         content:
           os === 'MacOS' ? (

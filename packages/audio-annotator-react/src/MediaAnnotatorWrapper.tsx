@@ -260,6 +260,7 @@ function ForwardAnnotator(
     setCurrentTool(propsSelectedTool);
   }, [propsSelectedTool]);
 
+  const shiftRef = useRef<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
@@ -504,15 +505,25 @@ function ForwardAnnotator(
   }, [updateAnnotationsWithGlobal]);
 
   const onAnnotationSelect = useCallback(
-    (annotation: MediaAnnotationInUI) => {
+    (annotation: MediaAnnotationInUI, e: React.MouseEvent) => {
       setSelectedAnnotation(annotation);
       const _label = labelMappingByTool?.[annotation.type]?.[annotation.label!];
       setSelectedLabel(_label);
       propsOnLabelChange?.(currentTool, _label);
       setCurrentTool(annotation.type);
       selectedIndexRef.current = sortedMediaAnnotations.findIndex((item) => item.id === annotation.id);
+
+      if (shiftRef.current) {
+        const labelConfig = config?.[annotation.type]?.find((item) => item.value === annotation?.label);
+        openAttributeModal({
+          labelValue: annotation.label,
+          openModalAnyway: true,
+          e,
+          labelConfig,
+        });
+      }
     },
-    [currentTool, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
+    [config, currentTool, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
   );
 
   const handleAnnotateEnd: AudioAnnotatorProps['onAnnotateEnd'] = useCallback(
@@ -619,6 +630,18 @@ function ForwardAnnotator(
   );
 
   // ================== 快捷键 ==================
+  useHotkeys(
+    'shift',
+    (e: KeyboardEvent) => {
+      shiftRef.current = e.type === 'keydown';
+    },
+    {
+      keydown: true,
+      keyup: true,
+    },
+    [],
+  );
+
   // 删除标记
   useHotkeys(
     'delete, backspace',
