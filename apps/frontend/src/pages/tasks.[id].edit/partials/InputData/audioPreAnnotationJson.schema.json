@@ -151,7 +151,7 @@
       "properties": {
         "toolName": {
           "type": "string",
-          "const": "frameTool"
+          "const": "audioFrameTool"
         },
         "result": {
           "type": "array",
@@ -190,7 +190,7 @@
       "properties": {
         "toolName": {
           "type": "string",
-          "const": "segmentTool"
+          "const": "audioSegmentTool"
         },
         "result": {
           "type": "array",

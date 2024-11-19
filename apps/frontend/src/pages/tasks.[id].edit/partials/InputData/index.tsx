@@ -27,6 +27,8 @@ import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
 import imageSchema from './imagePreAnnotationJsonl.schema.json';
 import imageJsonSchema from './imagePreAnnotationJson.schema.json';
+import audioJsonSchema from './audioPreAnnotationJson.schema.json';
+import videoJsonSchema from './videoPreAnnotationJson.schema.json';
 import audioSchema from './audioPreAnnotationJsonl.schema.json';
 import videoSchema from './videoPreAnnotationJsonl.schema.json';
 import { isCorrectFiles, isPreAnnotationFile, normalizeFiles, readFile, UploadStatus } from './utils';
@@ -47,8 +49,8 @@ const jsonlMapping = {
 
 const jsonMapping = {
   [MediaType.IMAGE]: imageJsonSchema,
-  [MediaType.VIDEO]: videoSchema,
-  [MediaType.AUDIO]: audioSchema,
+  [MediaType.VIDEO]: videoJsonSchema,
+  [MediaType.AUDIO]: audioJsonSchema,
 };
 
 export interface QueuedFile {
