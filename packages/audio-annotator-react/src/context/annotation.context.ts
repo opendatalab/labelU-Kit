@@ -38,7 +38,7 @@ export interface AnnotationContextType {
 
   onAnnotationChange: (annotation: MediaAnnotationInUI) => void;
 
-  onAnnotationSelect: (annotation: MediaAnnotationInUI) => void;
+  onAnnotationSelect: (annotation: MediaAnnotationInUI, e: React.MouseEvent) => void;
 
   onAnnotationsRemove: (annotations: MediaAnnotationWithTextAndTag[]) => void;
 
