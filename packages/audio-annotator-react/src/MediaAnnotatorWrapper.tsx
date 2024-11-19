@@ -158,7 +158,7 @@ export interface MediaPlayerProps {
    *
    * @param annotation 选中的标注
    */
-  onAnnotationSelect?: (annotation: AudioAnnotationInUI) => void;
+  onAnnotationSelect?: (annotation: AudioAnnotationInUI, e: React.MouseEvent) => void;
   /**
    * 当标注改变时调用的回调
    *
