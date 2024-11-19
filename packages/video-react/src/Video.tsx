@@ -29,7 +29,7 @@ export interface VideoProps {
   playerRef?: React.RefObject<any>;
   onChange?: (annotations: VideoAnnotationInUI) => void;
   onAdd?: (annotations: VideoAnnotationInUI) => void;
-  onAnnotationSelect?: (annotation: VideoAnnotationInUI) => void;
+  onAnnotationSelect?: (annotation: VideoAnnotationInUI, e: React.MouseEvent) => void;
   onAnnotateEnd?: (annotation: VideoAnnotationInUI, e?: MouseEvent) => void;
   requestEdit?: MediaAnnotatorProps['requestEdit'];
   className?: string;
@@ -143,10 +143,10 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
   );
 
   const handleAnnotationSelect = useCallback(
-    (_annotation: VideoAnnotationInUI) => {
+    (_annotation: VideoAnnotationInUI, e: React.MouseEvent) => {
       setSelectedAnnotation(_annotation);
       setCurrentAnnotationIds(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
-      onAnnotationSelect?.(_annotation);
+      onAnnotationSelect?.(_annotation, e);
 
       if (playerRef.current) {
         playerRef.current.currentTime(_annotation.type === 'segment' ? _annotation.start : _annotation.time);
