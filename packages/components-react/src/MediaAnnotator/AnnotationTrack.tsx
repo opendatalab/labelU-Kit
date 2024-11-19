@@ -40,7 +40,7 @@ export function AnnotationTrack({ annotations }: AnnotationTrackProps) {
 
   const handleAnnotationClick = (_annotation: MediaAnnotationData) => (e: React.MouseEvent) => {
     e.preventDefault();
-    selectAnnotation(_annotation);
+    selectAnnotation(_annotation, e);
   };
 
   return (
