@@ -226,7 +226,11 @@ export default function AsideAttributeItem({ annotation, active, order, labelTex
     const { start, end } = annotation;
 
     return (
-      <AsideAttributeWrapper color={color} active={active} onClick={() => onAnnotationSelect(annotation)}>
+      <AsideAttributeWrapper
+        color={color}
+        active={active}
+        onClick={(e: React.MouseEvent) => onAnnotationSelect(annotation, e)}
+      >
         <Header>
           <InnerHeader>
             <div>{order}.</div>
@@ -247,7 +251,11 @@ export default function AsideAttributeItem({ annotation, active, order, labelTex
   const { time } = annotation;
 
   return (
-    <AsideAttributeWrapper color={color} active={active} onClick={() => onAnnotationSelect(annotation)}>
+    <AsideAttributeWrapper
+      color={color}
+      active={active}
+      onClick={(e: React.MouseEvent) => onAnnotationSelect(annotation, e)}
+    >
       <Header>
         <InnerHeader>
           <div>{order}.</div>
