@@ -60,7 +60,7 @@ export interface AudioAnnotatorProps {
    *
    * @param annotation 选中的标注
    */
-  onAnnotationSelect?: (annotation: AudioAnnotationInUI) => void;
+  onAnnotationSelect?: (annotation: AudioAnnotationInUI, e: React.MouseEvent) => void;
   /**
    * 当标注改变时调用的回调
    *
@@ -253,10 +253,10 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
   }, []);
 
   const handleAnnotationSelect = useCallback(
-    (_annotation: AudioAnnotationInUI) => {
+    (_annotation: AudioAnnotationInUI, e: React.MouseEvent) => {
       setSelectedAnnotation(_annotation);
       setCurrentAnnotationIds(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
-      onAnnotationSelect?.(_annotation);
+      onAnnotationSelect?.(_annotation, e);
 
       if (playerRef.current) {
         playerRef.current.setTime(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
