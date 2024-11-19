@@ -88,7 +88,7 @@ const TaskList = () => {
                 当前为体验版，每日凌晨数据将自动清空，请及时备份重要数据。如需完整使用，建议
                 <a
                   data-wiz="local-deploy-alert"
-                  href="https://opendatalab.github.io/labelU/#/guide/install"
+                  href="https://opendatalab.github.io/labelU/guide/install"
                   target="_blank"
                   rel="noreferrer"
                 >

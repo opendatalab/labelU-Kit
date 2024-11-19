@@ -62,7 +62,7 @@ const Homepage = () => {
           </Button>
         </Popover>
         {window.IS_ONLINE && (
-          <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/#/guide/install">
+          <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/guide/install">
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>
               本地部署
             </Button>
@@ -72,7 +72,7 @@ const Homepage = () => {
           type="link"
           data-wiz="documentation"
           icon={<BellOutlined />}
-          href="https://opendatalab.github.io/labelU/#/"
+          href="https://opendatalab.github.io/labelU/guide/introduction"
           style={{ color: 'rgba(0, 0, 0, 0.85)' }}
           target="_blank"
           rel="noreferrer"

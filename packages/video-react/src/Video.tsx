@@ -57,19 +57,25 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
   ref,
 ) {
   const [duration, setDuration] = useState(0);
-  const [selectedAnnotation, setSelectedAnnotation] = useState<VideoAnnotationInUI | undefined>();
+  const [selectedAnnotation, setSelectedAnnotation] = useState<VideoAnnotationInUI | undefined>(
+    propsSelectedAnnotation,
+  );
+  const editTypeRef = useRef<VideoAnnotationType | undefined>(editingType);
   const playerRef = useRef<any>(null);
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const isPlayingRef = useRef<boolean>(false);
   const [playingAnnotationIds, setPlayingAnnotationIds] = useState<string[]>([]);
 
   useEffect(() => {
-    setSelectedAnnotation(propsSelectedAnnotation);
-  }, [propsSelectedAnnotation]);
+    if (editTypeRef.current !== editingType) {
+      editTypeRef.current = editingType;
+      setSelectedAnnotation(undefined);
+    }
+  }, [editingType]);
 
   useEffect(() => {
-    setSelectedAnnotation(undefined);
-  }, [editingType]);
+    setSelectedAnnotation(propsSelectedAnnotation);
+  }, [propsSelectedAnnotation]);
 
   useEffect(() => {
     if (playerRef.current) {

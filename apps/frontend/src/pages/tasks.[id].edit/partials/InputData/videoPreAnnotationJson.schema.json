@@ -151,7 +151,7 @@
       "properties": {
         "toolName": {
           "type": "string",
-          "const": "frameTool"
+          "const": "videoFrameTool"
         },
         "result": {
           "type": "array",
@@ -190,7 +190,7 @@
       "properties": {
         "toolName": {
           "type": "string",
-          "const": "segmentTool"
+          "const": "videoSegmentTool"
         },
         "result": {
           "type": "array",

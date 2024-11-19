@@ -27,6 +27,8 @@ import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
 import imageSchema from './imagePreAnnotationJsonl.schema.json';
 import imageJsonSchema from './imagePreAnnotationJson.schema.json';
+import audioJsonSchema from './audioPreAnnotationJson.schema.json';
+import videoJsonSchema from './videoPreAnnotationJson.schema.json';
 import audioSchema from './audioPreAnnotationJsonl.schema.json';
 import videoSchema from './videoPreAnnotationJsonl.schema.json';
 import { isCorrectFiles, isPreAnnotationFile, normalizeFiles, readFile, UploadStatus } from './utils';
@@ -47,8 +49,8 @@ const jsonlMapping = {
 
 const jsonMapping = {
   [MediaType.IMAGE]: imageJsonSchema,
-  [MediaType.VIDEO]: videoSchema,
-  [MediaType.AUDIO]: audioSchema,
+  [MediaType.VIDEO]: videoJsonSchema,
+  [MediaType.AUDIO]: audioJsonSchema,
 };
 
 export interface QueuedFile {
@@ -431,7 +433,7 @@ const InputData = () => {
               支持上传 jsonl 格式的预标注文件或LabelU 导出 json 标注文件，参考{' '}
               <a
                 target="_blank"
-                href="https://opendatalab.github.io/labelU/#/schema/pre-annotation/image"
+                href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
                 rel="noreferrer"
               >
                 示例

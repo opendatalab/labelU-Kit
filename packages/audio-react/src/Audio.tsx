@@ -113,6 +113,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
   ref,
 ) {
   const playerRef = useRef<WaveSurfer>(null);
+  const editTypeRef = useRef<AudioAnnotationType | undefined>(editingType);
   const annotatorRef = useRef<MediaAnnotatorRef>(null);
   const [duration, setDuration] = useState(0);
   const controllerRef = useRef<PlayerControllerRef>(null);
@@ -293,12 +294,15 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
   useImperativeHandle(propsAnnotatorRef, () => annotatorRef.current!, [annotatorRef, duration]);
 
   useEffect(() => {
-    setSelectedAnnotation(propsSelectedAnnotation);
-  }, [propsSelectedAnnotation]);
+    if (editTypeRef.current !== editingType) {
+      editTypeRef.current = editingType;
+      setSelectedAnnotation(undefined);
+    }
+  }, [editingType]);
 
   useEffect(() => {
-    setSelectedAnnotation(undefined);
-  }, [editingType]);
+    setSelectedAnnotation(propsSelectedAnnotation);
+  }, [propsSelectedAnnotation]);
 
   // 选中时间点后，更新在时间区间内的标注
   useEffect(() => {
