@@ -430,7 +430,7 @@ const InputData = () => {
               上传文件
             </NativeUpload>
             <div style={{ color: '#999', fontSize: 12 }}>
-              支持上传 jsonl 格式的预标注文件或LabelU 导出 json 标注文件，参考{' '}
+              支持上传 jsonl 或 json 格式的预标注文件，参考{' '}
               <a
                 target="_blank"
                 href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
