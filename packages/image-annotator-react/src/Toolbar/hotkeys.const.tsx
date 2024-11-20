@@ -109,6 +109,14 @@ export default [
         ),
       },
       {
+        name: '编辑属性',
+        content: (
+          <>
+            {os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
+          </>
+        ),
+      },
+      {
         name: '上一个标记',
         content: <Kbd>↑</Kbd>,
       },

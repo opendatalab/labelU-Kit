@@ -60,7 +60,7 @@ export interface AudioAnnotatorProps {
    *
    * @param annotation 选中的标注
    */
-  onAnnotationSelect?: (annotation: AudioAnnotationInUI) => void;
+  onAnnotationSelect?: (annotation: AudioAnnotationInUI, e: React.MouseEvent) => void;
   /**
    * 当标注改变时调用的回调
    *
@@ -113,6 +113,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
   ref,
 ) {
   const playerRef = useRef<WaveSurfer>(null);
+  const editTypeRef = useRef<AudioAnnotationType | undefined>(editingType);
   const annotatorRef = useRef<MediaAnnotatorRef>(null);
   const [duration, setDuration] = useState(0);
   const controllerRef = useRef<PlayerControllerRef>(null);
@@ -252,10 +253,10 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
   }, []);
 
   const handleAnnotationSelect = useCallback(
-    (_annotation: AudioAnnotationInUI) => {
+    (_annotation: AudioAnnotationInUI, e: React.MouseEvent) => {
       setSelectedAnnotation(_annotation);
       setCurrentAnnotationIds(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
-      onAnnotationSelect?.(_annotation);
+      onAnnotationSelect?.(_annotation, e);
 
       if (playerRef.current) {
         playerRef.current.setTime(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
@@ -293,12 +294,15 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
   useImperativeHandle(propsAnnotatorRef, () => annotatorRef.current!, [annotatorRef, duration]);
 
   useEffect(() => {
-    setSelectedAnnotation(propsSelectedAnnotation);
-  }, [propsSelectedAnnotation]);
+    if (editTypeRef.current !== editingType) {
+      editTypeRef.current = editingType;
+      setSelectedAnnotation(undefined);
+    }
+  }, [editingType]);
 
   useEffect(() => {
-    setSelectedAnnotation(undefined);
-  }, [editingType]);
+    setSelectedAnnotation(propsSelectedAnnotation);
+  }, [propsSelectedAnnotation]);
 
   // 选中时间点后，更新在时间区间内的标注
   useEffect(() => {

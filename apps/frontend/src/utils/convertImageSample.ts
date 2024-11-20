@@ -81,5 +81,6 @@ export function convertImageSample(
     id,
     url,
     data: convertImageAnnotations(resultParsed, config),
+    meta: _.pick(resultParsed, ['width', 'height', 'rotate']),
   };
 }

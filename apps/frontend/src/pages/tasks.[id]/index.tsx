@@ -8,13 +8,14 @@ import formatter from '@labelu/formatter';
 import styled from 'styled-components';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
-import type { SampleResponse } from '@/api/types';
+import type { PreAnnotationFileResponse, SampleResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
 import { downloadFromUrl } from '@/utils';
-import { deletePreAnnotations } from '@/api/services/preAnnotations';
+import { deletePreAnnotationFile } from '@/api/services/preAnnotations';
+import { deleteSamples } from '@/api/services/samples';
 
 import type { TaskStatusProps } from './components/Statistical';
 import Statistical, { TaskStatus as TaskStatusComponent } from './components/Statistical';
@@ -44,8 +45,8 @@ const Samples = () => {
     }),
   );
 
-  const preAnnotationMapping = useMemo(() => {
-    return _.chain(preAnnotations).map('data').flatten().keyBy('sample_name').value();
+  const sampleNamesWithPreAnnotation = useMemo(() => {
+    return _.chain(preAnnotations).map('sample_names').flatten().value();
   }, [preAnnotations]);
 
   const taskStatus = _.get(task, 'status');
@@ -56,18 +57,21 @@ const Samples = () => {
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
 
-  const handleDeleteJsonls = async (ids: number[]) => {
-    await deletePreAnnotations(
-      {
-        task_id: taskId,
-      },
-      { pre_annotation_ids: ids },
-    );
+  const handleDeleteJsonl = async (id: number) => {
+    await deletePreAnnotationFile({
+      task_id: taskId,
+      file_id: id,
+    });
 
     revalidator.revalidate();
   };
 
-  const columns: ColumnsType<SampleResponse> = [
+  const handleDeleteSample = async (ids: number[]) => {
+    await deleteSamples({ task_id: taskId }, { sample_ids: ids });
+    revalidator.revalidate();
+  };
+
+  const columns: ColumnsType<SampleResponse | PreAnnotationFileResponse> = [
     {
       title: '数据ID',
       dataIndex: 'inner_id',
@@ -81,12 +85,12 @@ const Samples = () => {
       key: 'filename',
       align: 'left',
       render: (filename, record) => {
-        const _filename = (record.file?.filename ?? '').substring(9);
+        const _filename = (record as SampleResponse).file?.filename ?? '';
 
-        if (_filename.endsWith('.jsonl')) {
+        if ((record as PreAnnotationFileResponse).sample_names) {
           return (
             <span>
-              {formatter.format('ellipsis', _filename, { maxWidth: 160, type: 'tooltip' })}
+              {formatter.format('ellipsis', _.get(record, 'filename'), { maxWidth: 160, type: 'tooltip' })}
               &nbsp;
               <Tag color="processing">预标注</Tag>
             </span>
@@ -100,8 +104,8 @@ const Samples = () => {
       dataIndex: 'file',
       key: 'file',
       align: 'left',
-      render: (data) => {
-        if (data?.filename?.endsWith('.jsonl')) {
+      render: (data, record) => {
+        if ((record as PreAnnotationFileResponse).sample_names) {
           return '-';
         }
 
@@ -121,9 +125,9 @@ const Samples = () => {
           <Tooltip
             title={
               <>
-                数据导入时上传 label.jsonl 即可导入预标注，预标注格式参考{' '}
+                数据导入时上传 json 或 jsonl 格式的预标注文件，参考{' '}
                 <a
-                  href="https://opendatalab.github.io/labelU/#/schema/pre-annotation/image"
+                  href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -140,14 +144,19 @@ const Samples = () => {
       key: 'unknown',
       align: 'left',
       render: (text, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const sampleNames = _.get(record, 'sample_names');
+        if (sampleNames) {
           return '-';
         }
 
-        // sample_name前8为是截取的uuid，截取第9位到最后一位
+        const sampleName = (record as SampleResponse).file?.filename;
+        // sample_name前8为是截取的uuid，截取第9位到最后一位（如果预标注是非labelu生成的，jsonl中的sample name可能不带前缀）
         const realSampleName = record.file?.filename?.substring(9);
 
-        return preAnnotationMapping[realSampleName] ? '是' : '无';
+        return sampleNamesWithPreAnnotation.includes(realSampleName) ||
+          sampleNamesWithPreAnnotation.includes(sampleName)
+          ? '是'
+          : '无';
       },
     },
     {
@@ -155,7 +164,6 @@ const Samples = () => {
       dataIndex: 'state',
       key: 'state',
       align: 'left',
-
       render: (text, record) => {
         if (record.file?.filename?.endsWith('.jsonl')) {
           return '-';
@@ -174,9 +182,10 @@ const Samples = () => {
       dataIndex: 'annotated_count',
       key: 'annotated_count',
       align: 'left',
-
       render: (_unused, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const sampleNames = _.get(record, 'sample_names');
+
+        if (sampleNames) {
           return '-';
         }
 
@@ -206,15 +215,17 @@ const Samples = () => {
       dataIndex: 'created_by',
       key: 'created_by',
       align: 'left',
-
       render: (created_by, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const sampleNames = _.get(record, 'sample_names');
+
+        if (sampleNames) {
           return '-';
         }
 
         if (!isTaskReadyToAnnotate) {
           return '-';
         }
+
         return created_by.username;
       },
     },
@@ -225,7 +236,9 @@ const Samples = () => {
       align: 'left',
       sorter: true,
       render: (updated_at, record) => {
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        const sampleNames = _.get(record, 'sample_names');
+
+        if (sampleNames) {
           return '-';
         }
 
@@ -240,37 +253,44 @@ const Samples = () => {
       title: '',
       dataIndex: 'option',
       key: 'option',
-      width: 100,
+      width: 140,
       align: 'center',
       fixed: 'right',
       render: (x, record) => {
+        const sampleNames = _.get(record, 'sample_names');
+
         if (record.id !== enterRowId) {
           return '';
         }
 
-        if (record.file?.filename?.endsWith('.jsonl')) {
+        if (sampleNames) {
           return (
-            <div>
-              <Button type="link" onClick={() => downloadFromUrl(record.file.url, record.file?.filename)}>
+            <FlexLayout items="center">
+              <Button type="link" onClick={() => downloadFromUrl(record.url, record?.filename)}>
                 下载
               </Button>
-              <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteJsonls([record.id!])}>
+              <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteJsonl(record.id!)}>
                 <Button type="link" danger>
                   删除
                 </Button>
               </Popconfirm>
-            </div>
+            </FlexLayout>
           );
         }
 
         return (
-          <>
+          <FlexLayout items="center" gap="0.5rem">
             {isTaskReadyToAnnotate && (
               <Link to={`/tasks/${taskId}/samples/${record.id}`}>
                 <Button type="link">进入标注</Button>
               </Link>
             )}
-          </>
+            <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteSample([record.id!])}>
+              <Button type="link" danger>
+                删除
+              </Button>
+            </Popconfirm>
+          </FlexLayout>
         );
       },
     },

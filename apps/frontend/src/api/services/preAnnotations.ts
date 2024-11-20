@@ -4,7 +4,9 @@ import type {
   ListByApiV1TasksTaskIdSamplesGetParams,
   OkRespCommonDataResp,
   OkRespCreateSampleResponse,
-  PreAnnotationResponse,
+  AttachmentListResponse,
+  DeletePreAnnotationFileParams,
+  PreAnnotationListResponse,
 } from '../types';
 
 export async function createPreAnnotations(
@@ -16,12 +18,26 @@ export async function createPreAnnotations(
   return await request.post(`/v1/tasks/${taskId}/pre_annotations`, data);
 }
 
+export async function getPreAnnotationFiles({
+  task_id,
+  ...params
+}: ListByApiV1TasksTaskIdSamplesGetParams & {
+  sample_name?: string;
+}): Promise<AttachmentListResponse> {
+  return await request.get(`/v1/tasks/${task_id}/pre_annotations/files`, {
+    params: {
+      ...params,
+      pageNo: typeof params.pageNo === 'undefined' ? 0 : params.pageNo - 1,
+    },
+  });
+}
+
 export async function getPreAnnotations({
   task_id,
   ...params
 }: ListByApiV1TasksTaskIdSamplesGetParams & {
   sample_name?: string;
-}): Promise<{ data: PreAnnotationResponse }> {
+}): Promise<PreAnnotationListResponse> {
   return await request.get(`/v1/tasks/${task_id}/pre_annotations`, {
     params: {
       ...params,
@@ -39,4 +55,11 @@ export async function deletePreAnnotations(
   return await request.delete(`/v1/tasks/${task_id}/pre_annotations`, {
     data: body,
   });
+}
+
+export async function deletePreAnnotationFile({
+  task_id,
+  file_id,
+}: DeletePreAnnotationFileParams): Promise<OkRespCommonDataResp> {
+  return await request.delete(`/v1/tasks/${task_id}/pre_annotations/files/${file_id}`);
 }

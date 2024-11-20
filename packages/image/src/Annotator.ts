@@ -386,6 +386,10 @@ export class Annotator extends AnnotatorBase {
     return this.tools.get(this.activeToolName);
   }
 
+  public get keyboard() {
+    return this.monitor?.keyboard;
+  }
+
   public setAttributes(attributes: Record<string, string | string[]>) {
     const { activeToolName, tools } = this;
 

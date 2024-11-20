@@ -104,7 +104,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);
-    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name);
+    monitor!.setSelectedAnnotationId(annotation.id);
+    Tool.emitSelect(this.convertAnnotationItem(this.draft!.data), this.name, _e);
   };
 
   protected setupShapes() {

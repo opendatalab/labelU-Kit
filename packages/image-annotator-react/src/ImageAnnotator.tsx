@@ -185,6 +185,8 @@ function ForwardAnnotator(
   // ================== sample ==================
   const [currentSample, setCurrentSample] = useState<ImageSample | undefined>(editingSample);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
+  // remember last tool
+  const memorizeToolLabel = useRef<Record<ToolName, Attribute>>({} as Record<ToolName, Attribute>);
 
   useEffect(() => {
     setCurrentSample(editingSample || samples?.[0]);
@@ -201,14 +203,6 @@ function ForwardAnnotator(
   useEffect(() => {
     setCurrentTool(propsSelectedTool);
   }, [propsSelectedTool]);
-
-  const onToolChange = useCallback(
-    (toolName: ToolName) => {
-      propsOnToolChange?.(toolName);
-      setCurrentTool(toolName);
-    },
-    [propsOnToolChange],
-  );
 
   const tools = useMemo(() => {
     const result: ToolName[] = [];
@@ -277,16 +271,6 @@ function ForwardAnnotator(
     [engine],
   );
 
-  useEffect(() => {
-    engine?.on('toolChange', onToolChange);
-
-    return () => {
-      engine?.off('toolChange', onToolChange);
-    };
-  }, [engine, onToolChange]);
-
-  // ================== annotation ==================
-  // ================== label ==================
   const labels = useMemo(() => {
     if (!currentTool) {
       return [];
@@ -303,9 +287,21 @@ function ForwardAnnotator(
     propsSelectedLabel ? selectedLabelFromProps : labels[0],
   );
 
+  const onToolChange = useCallback(
+    (toolName: ToolName) => {
+      propsOnToolChange?.(toolName);
+      setCurrentTool(toolName);
+    },
+    [propsOnToolChange],
+  );
+
   useEffect(() => {
-    setSelectedLabel(selectedLabelFromProps);
-  }, [selectedLabelFromProps]);
+    engine?.on('toolChange', onToolChange);
+
+    return () => {
+      engine?.off('toolChange', onToolChange);
+    };
+  }, [engine, onToolChange]);
 
   const [selectedAnnotation, setSelectedAnnotation] = useState<AnnotationDataInUI | undefined>();
   const annotationsFromSample = useMemo(() => {
@@ -348,16 +344,7 @@ function ForwardAnnotator(
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    annotationsFromSample,
-    config,
-    currentSample,
-    engine,
-    isSampleDataEmpty,
-    preAnnotations,
-    propsSelectedLabel,
-    tools,
-  ]);
+  }, [annotationsFromSample, config, currentSample, engine, isSampleDataEmpty, preAnnotations, tools]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -501,38 +488,45 @@ function ForwardAnnotator(
   );
 
   const onAnnotationChange = useCallback(
-    (_annotation: AnnotationWithTool) => {
+    (_annotation: AnnotationWithTool, skipHistory?: boolean) => {
       updateAnnotationsWithGlobal((pre) => {
         return {
           ...pre!,
           [_annotation.id]: _annotation,
         };
-      });
+      }, skipHistory);
     },
     [updateAnnotationsWithGlobal],
   );
 
   useEffect(() => {
-    const handleSelectAnnotation = (annotation: AnnotationData, toolName: ToolName) => {
-      // 选中了隐藏的标记，需要显示
-      engine?.toggleAnnotationsVisibility(toolName, [annotation.id], true);
-      engine?.setLabel(annotation.label!);
-      const newAnnotation = {
-        ...annotation,
-        tool: toolName,
-        visible: true,
-      };
-      setSelectedAnnotation(newAnnotation);
-      onAnnotationChange(newAnnotation);
-      selectedIndexRef.current = sortedImageAnnotations.findIndex((item) => item.id === annotation.id);
+    const handleOpenAttributePanel = (e: MouseEvent, selectedId: string) => {
+      if (!selectedId) {
+        return;
+      }
+
+      const annotation = sortedImageAnnotations.find((item) => item.id === selectedId);
+      // 按住shift键时，调起属性框
+      if (engine?.keyboard?.Shift && annotation) {
+        e.preventDefault();
+        e.stopPropagation();
+        const labelConfig = labels.find((item) => item.value === annotation?.label);
+        openAttributeModal({
+          labelValue: annotation.label,
+          e,
+          openModalAnyway: true,
+          engine,
+          labelConfig,
+        });
+      }
     };
 
-    engine?.on('select', handleSelectAnnotation);
+    engine?.on('rightClick', handleOpenAttributePanel);
 
     return () => {
-      engine?.off('select', handleSelectAnnotation);
+      engine?.off('rightClick', handleOpenAttributePanel);
     };
-  }, [engine, onAnnotationChange, sortedImageAnnotations]);
+  }, [engine, labels, sortedImageAnnotations]);
 
   useEffect(() => {
     const handleUnSelect = () => {
@@ -582,6 +576,10 @@ function ForwardAnnotator(
       engine?.setAttributes({});
       setSelectedLabel(label);
       propsOnLabelChange?.(currentTool, label);
+
+      if (currentTool) {
+        memorizeToolLabel.current[currentTool] = label;
+      }
     },
     [currentTool, engine, propsOnLabelChange],
   );
@@ -602,36 +600,97 @@ function ForwardAnnotator(
   }, [engine, onAnnotationDelete]);
 
   useEffect(() => {
-    const _onAnnotationsChange = () => {
-      onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
+    const handleAttributesChange = (annotation: AnnotationData) => {
+      if (!engine) {
+        return;
+      }
+
+      setSelectedAnnotation({
+        ...annotation,
+        tool: engine.activeToolName!,
+      });
     };
-    // 添加标记
-    engine?.on('add', (annotations: AnnotationData[]) => {
-      _onAnnotationsChange();
+
+    engine?.on('attributesChange', handleAttributesChange);
+
+    return () => {
+      engine?.off('attributesChange', handleAttributesChange);
+    };
+  }, [engine, labelMappingByTool, onAnnotationsChange]);
+
+  useEffect(() => {
+    const handleAnnotationAdded = (annotations: AnnotationData[]) => {
+      if (!engine) {
+        return;
+      }
+
+      onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
       setSelectedAnnotation({
         // 默认选中第一个
         ...annotations[0],
         tool: engine.activeToolName!,
       });
-    });
+    };
+    // 添加标记
+    engine?.on('add', handleAnnotationAdded);
 
-    // 改变标签
-    engine?.on('labelChange', (label) => {
-      _onAnnotationsChange();
+    return () => {
+      engine?.off('add', handleAnnotationAdded);
+    };
+  }, [engine, onAnnotationsChange]);
 
-      setSelectedLabel(engine.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined);
-    });
-
-    engine?.on('attributesChange', (annotation: AnnotationData) => {
-      setSelectedAnnotation({
-        ...annotation,
-        tool: engine.activeToolName!,
-      });
-    });
+  useEffect(() => {
+    const _onAnnotationsChange = () => {
+      onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
+    };
 
     // 标记变更，如移动，编辑等
     engine?.on('change', _onAnnotationsChange);
-  }, [engine, labelMappingByTool, onAnnotationsChange]);
+
+    return () => {
+      engine?.off('change', _onAnnotationsChange);
+    };
+  }, [engine, onAnnotationsChange]);
+
+  useEffect(() => {
+    const handleLabelChange = (label: string) => {
+      if (label === selectedLabel?.value && engine?.activeToolName === currentTool) {
+        return;
+      }
+
+      onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
+
+      setSelectedLabel(engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined);
+    };
+    // 改变标签
+    engine?.on('labelChange', handleLabelChange);
+
+    return () => {
+      engine?.off('labelChange', handleLabelChange);
+    };
+  }, [currentTool, engine, labelMappingByTool, onAnnotationsChange, selectedLabel?.value]);
+
+  useEffect(() => {
+    const handleSelectAnnotation = (annotation: AnnotationData, toolName: ToolName) => {
+      // 选中了隐藏的标记，需要显示
+      engine?.toggleAnnotationsVisibility(toolName, [annotation.id], true);
+      engine?.setLabel(annotation.label!);
+      const newAnnotation = {
+        ...annotation,
+        tool: toolName,
+        visible: true,
+      };
+      setSelectedAnnotation(newAnnotation);
+      onAnnotationChange(newAnnotation, true);
+      selectedIndexRef.current = sortedImageAnnotations.findIndex((item) => item.id === annotation.id);
+    };
+
+    engine?.on('select', handleSelectAnnotation);
+
+    return () => {
+      engine?.off('select', handleSelectAnnotation);
+    };
+  }, [engine, labels, onAnnotationChange, sortedImageAnnotations]);
 
   useEffect(() => {
     if (!onError) {
@@ -808,6 +867,7 @@ function ForwardAnnotator(
       currentTool,
       config,
       selectedLabel,
+      memorizeToolLabel,
       requestEdit,
       onLabelChange,
       tools,

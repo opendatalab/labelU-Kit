@@ -41,13 +41,24 @@ const AnnotationPage = () => {
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
   const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
   const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation;
+
   const preAnnotationConfig = useMemo(() => {
     const result: Partial<Record<AllToolName, any>> = {};
 
     if (preAnnotation) {
-      const config = _.get(preAnnotation, 'data[0].data[0].config', {});
+      const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
 
-      Object.keys(config).forEach((key) => {
+      if (!preAnnotationResult) {
+        return {};
+      }
+
+      const config = preAnnotationResult.config;
+
+      if (!config) {
+        return {};
+      }
+
+      Object.keys(preAnnotationResult.config).forEach((key) => {
         let toolName = key.replace(/Tool$/, '') as AllToolName;
 
         if (key.includes('audio') || key.includes('video')) {
@@ -55,7 +66,7 @@ const AnnotationPage = () => {
           toolName = toolName.replace(/audio|video/, '').toLowerCase() as AllToolName;
         }
 
-        result[toolName] = config[key as keyof typeof config];
+        result[toolName] = preAnnotationResult.config[key as keyof typeof config];
       });
     }
 
@@ -66,7 +77,25 @@ const AnnotationPage = () => {
       return {};
     }
 
-    const _annotations = _.get(preAnnotation, 'data[0].data[0].annotations', {});
+    const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
+    let _annotations = _.get(preAnnotationResult, 'annotations', {});
+    const preAnnotationFile = _.get(preAnnotation, 'data[0].file', {});
+    // 兼容json预标注
+    if (preAnnotationFile.filename?.endsWith('.json')) {
+      _annotations = _.chain(preAnnotationResult)
+        .get('result.annotations')
+        .map((item) => {
+          return [
+            item.toolName,
+            {
+              toolName: item.toolName,
+              result: item.result,
+            },
+          ];
+        })
+        .fromPairs()
+        .value();
+    }
 
     if (task?.media_type === MediaType.IMAGE) {
       return convertImageAnnotations(_annotations, preAnnotationConfig);
