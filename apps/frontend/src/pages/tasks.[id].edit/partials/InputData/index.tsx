@@ -1,5 +1,4 @@
 import { useMemo, useCallback, useContext } from 'react';
-import { v4 as uuid4 } from 'uuid';
 import type { TableColumnType } from 'antd';
 import { Popconfirm, Button, Table, Tooltip, Tag } from 'antd';
 import _ from 'lodash-es';
@@ -22,21 +21,17 @@ import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/medi
 import type { TaskInLoader } from '@/loaders/task.loader';
 import { useUploadFileMutation } from '@/api/mutations/attachment';
 import { deleteSamples } from '@/api/services/samples';
-import { deletePreAnnotations } from '@/api/services/preAnnotations';
+import { deletePreAnnotationFile } from '@/api/services/preAnnotations';
 
 import { TaskCreationContext } from '../../taskCreation.context';
 import { Bar, ButtonWrapper, Header, Left, Right, Spot, UploadArea, Wrapper } from './style';
 import imageSchema from './imagePreAnnotationJsonl.schema.json';
+import imageJsonSchema from './imagePreAnnotationJson.schema.json';
+import audioJsonSchema from './audioPreAnnotationJson.schema.json';
+import videoJsonSchema from './videoPreAnnotationJson.schema.json';
 import audioSchema from './audioPreAnnotationJsonl.schema.json';
 import videoSchema from './videoPreAnnotationJsonl.schema.json';
-
-export enum UploadStatus {
-  Uploading = 'Uploading',
-  Waiting = 'Waiting',
-  Success = 'Success',
-  Fail = 'Fail',
-  Error = 'Error',
-}
+import { isCorrectFiles, isPreAnnotationFile, normalizeFiles, readFile, UploadStatus } from './utils';
 
 const statusTextMapping = {
   [UploadStatus.Uploading]: '上传中',
@@ -52,6 +47,12 @@ const jsonlMapping = {
   [MediaType.AUDIO]: audioSchema,
 };
 
+const jsonMapping = {
+  [MediaType.IMAGE]: imageJsonSchema,
+  [MediaType.VIDEO]: videoJsonSchema,
+  [MediaType.AUDIO]: audioJsonSchema,
+};
+
 export interface QueuedFile {
   id?: number;
   url?: string;
@@ -64,74 +65,6 @@ export interface QueuedFile {
   // sample id or pre-annotation id
   refId?: number;
 }
-
-const readFile = async (file: File, type?: 'text') => {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      resolve(event.target?.result as string);
-    };
-    reader.onerror = (error) => {
-      reject(error);
-    };
-
-    if (type === 'text') {
-      reader.readAsText(file);
-    } else {
-      reader.readAsDataURL(file);
-    }
-  });
-};
-
-const isCorrectFiles = (files: File[], type: MediaType) => {
-  let result = true;
-
-  if (files.length > 100) {
-    commonController.notificationErrorMessage({ message: '单次上传文件数量超过上限100个，请分批上传' }, 3);
-    return;
-  }
-
-  for (let i = 0; i < files.length; i++) {
-    const fileUnit = files[i];
-    const isOverSize = commonController.isOverSize(fileUnit.size, type);
-
-    if (isOverSize) {
-      commonController.notificationErrorMessage({ message: `单个文件大小超过${MediaFileSize[type]}MB限制` }, 3);
-      result = false;
-      break;
-    }
-
-    // 忽略jsonl文件的类型校验
-    if (fileUnit.name.endsWith('.jsonl')) {
-      continue;
-    }
-
-    const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name, type);
-
-    if (!isCorrectFileType) {
-      commonController.notificationErrorMessage(
-        { message: `请上传支持的文件类型，类型包括：${FileExtensionText[type]}` },
-        3,
-      );
-      result = false;
-      break;
-    }
-  }
-
-  return result;
-};
-
-const normalizeFiles = (files: File[]) => {
-  return files.map((file) => {
-    return {
-      uid: uuid4(),
-      name: file.name,
-      size: file.size,
-      status: UploadStatus.Waiting,
-      file,
-    };
-  });
-};
 
 const InputData = () => {
   // 上传队列，包括成功和失败的任务
@@ -195,6 +128,42 @@ const InputData = () => {
 
               // 校验 jsonl 文件格式
               const errors = jsonSchema.validate(jsonLine);
+
+              if (errors.length > 0) {
+                throw new Error(errors.map((error) => error.message).join('; \n'));
+              }
+            }
+          } catch (error: any) {
+            setFileQueue((pre) =>
+              pre.map((item) => {
+                if (item.uid === file.uid) {
+                  return {
+                    ...item,
+                    status: UploadStatus.Error,
+                    reason: error.message,
+                  };
+                }
+                return item;
+              }),
+            );
+
+            continue;
+          }
+        }
+
+        // 解析labelu导出的json文件
+        if (fileBlob.name.endsWith('.json')) {
+          try {
+            const preAnnotationJsonSchema = new Draft07(jsonMapping[mediaType]);
+            const content = await readFile(fileBlob, 'text');
+            const json = JSON.parse(content);
+
+            for (let i = 0; i < json.length; i += 1) {
+              if (typeof json[i].result === 'string') {
+                json[i].result = JSON.parse(json[i].result);
+              }
+
+              const errors = preAnnotationJsonSchema.validate(json[i]);
 
               if (errors.length > 0) {
                 throw new Error(errors.map((error) => error.message).join('; \n'));
@@ -293,16 +262,12 @@ const InputData = () => {
       }
 
       if (file.refId) {
-        if (file.name.endsWith('.jsonl')) {
+        if (isPreAnnotationFile(file.name)) {
           // 删除预标注
-          await deletePreAnnotations(
-            {
-              task_id: taskId!,
-            },
-            {
-              pre_annotation_ids: [file.refId],
-            },
-          );
+          await deletePreAnnotationFile({
+            task_id: taskId!,
+            file_id: file.refId,
+          });
         } else {
           // 删除样本
           await deleteSamples(
@@ -335,7 +300,7 @@ const InputData = () => {
               <div>
                 {formatter.format('ellipsis', text, { maxWidth: 540, type: 'tooltip' })}
                 &nbsp;
-                {text?.endsWith('.jsonl') && <Tag color="processing">预标注</Tag>}
+                {isPreAnnotationFile(text) && <Tag color="processing">预标注</Tag>}
               </div>
             </IconText>
           );
@@ -460,15 +425,15 @@ const InputData = () => {
               onChange={handleFilesChange}
               directory={false}
               multiple={true}
-              accept={'.jsonl'}
+              accept={'.jsonl, .json'}
             >
               上传文件
             </NativeUpload>
             <div style={{ color: '#999', fontSize: 12 }}>
-              支持上传 jsonl 格式的预标注文件，参考{' '}
+              支持上传 jsonl 或 json 格式的预标注文件，参考{' '}
               <a
                 target="_blank"
-                href="https://opendatalab.github.io/labelU/#/schema/pre-annotation/image"
+                href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
                 rel="noreferrer"
               >
                 示例

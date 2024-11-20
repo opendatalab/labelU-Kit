@@ -15,7 +15,7 @@ interface Iprops {
   // 弹框左上角位置
   width: number;
   children: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
   okText: string;
   cancelText: string;
   beforeClose?: () => Promise<unknown>;

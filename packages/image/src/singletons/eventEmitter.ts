@@ -22,6 +22,7 @@ export type EventName =
   | 'mouseup'
   | 'dblclick'
   | 'error'
+  | 'rightClick'
   | 'contextmenu';
 
 const eventEmitter = new EventEmitter();

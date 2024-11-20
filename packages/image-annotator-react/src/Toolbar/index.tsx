@@ -55,7 +55,7 @@ const ToolStyleWrapper = styled.div`
 `;
 
 export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
-  const { engine, currentTool, tools } = useTool();
+  const { engine, currentTool, tools, memorizeToolLabel } = useTool();
   const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
   const { redo, undo, futureRef, pastRef } = useHistoryCtx();
 
@@ -68,7 +68,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
   }, [undo]);
 
   const handleToolChange = (tool: ToolName) => () => {
-    engine.switch(tool);
+    engine.switch(tool, memorizeToolLabel.current?.[tool]?.value);
   };
 
   useHotkeys('ctrl+z, meta+z', handleUndo, [handleUndo]);

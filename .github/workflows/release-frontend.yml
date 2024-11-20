@@ -19,6 +19,7 @@ on:
         type: choice
         options:
           - release
+          - main
           - alpha
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -64,7 +65,8 @@ jobs:
           echo $RELEASE_VERSION
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm install
 
       - name: Build packages
         run: pnpm run build

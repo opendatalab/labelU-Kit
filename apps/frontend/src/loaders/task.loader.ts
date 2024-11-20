@@ -7,7 +7,7 @@ import { getSamples } from '@/api/services/samples';
 import type { ListByApiV1TasksTaskIdSamplesGetParams, SampleListResponse, TaskResponseWithStatics } from '@/api/types';
 import type { ToolsConfigState } from '@/types/toolConfig';
 import { preAnnotationKey } from '@/api/queryKeyFactories/preAnnotation';
-import { getPreAnnotations } from '@/api/services/preAnnotations';
+import { getPreAnnotationFiles } from '@/api/services/preAnnotations';
 
 export async function tasksLoader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -76,7 +76,7 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
 
     result.preAnnotations = await queryClient.fetchQuery({
       queryKey: preAnnotationQueryKey,
-      queryFn: () => getPreAnnotations(queryParams),
+      queryFn: () => getPreAnnotationFiles(queryParams),
     });
   }
 

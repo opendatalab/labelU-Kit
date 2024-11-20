@@ -29,7 +29,7 @@ export interface VideoProps {
   playerRef?: React.RefObject<any>;
   onChange?: (annotations: VideoAnnotationInUI) => void;
   onAdd?: (annotations: VideoAnnotationInUI) => void;
-  onAnnotationSelect?: (annotation: VideoAnnotationInUI) => void;
+  onAnnotationSelect?: (annotation: VideoAnnotationInUI, e: React.MouseEvent) => void;
   onAnnotateEnd?: (annotation: VideoAnnotationInUI, e?: MouseEvent) => void;
   requestEdit?: MediaAnnotatorProps['requestEdit'];
   className?: string;
@@ -57,19 +57,25 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
   ref,
 ) {
   const [duration, setDuration] = useState(0);
-  const [selectedAnnotation, setSelectedAnnotation] = useState<VideoAnnotationInUI | undefined>();
+  const [selectedAnnotation, setSelectedAnnotation] = useState<VideoAnnotationInUI | undefined>(
+    propsSelectedAnnotation,
+  );
+  const editTypeRef = useRef<VideoAnnotationType | undefined>(editingType);
   const playerRef = useRef<any>(null);
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const isPlayingRef = useRef<boolean>(false);
   const [playingAnnotationIds, setPlayingAnnotationIds] = useState<string[]>([]);
 
   useEffect(() => {
-    setSelectedAnnotation(propsSelectedAnnotation);
-  }, [propsSelectedAnnotation]);
+    if (editTypeRef.current !== editingType) {
+      editTypeRef.current = editingType;
+      setSelectedAnnotation(undefined);
+    }
+  }, [editingType]);
 
   useEffect(() => {
-    setSelectedAnnotation(undefined);
-  }, [editingType]);
+    setSelectedAnnotation(propsSelectedAnnotation);
+  }, [propsSelectedAnnotation]);
 
   useEffect(() => {
     if (playerRef.current) {
@@ -137,10 +143,10 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
   );
 
   const handleAnnotationSelect = useCallback(
-    (_annotation: VideoAnnotationInUI) => {
+    (_annotation: VideoAnnotationInUI, e: React.MouseEvent) => {
       setSelectedAnnotation(_annotation);
       setCurrentAnnotationIds(_annotation.type === 'frame' ? _annotation.time : _annotation.start);
-      onAnnotationSelect?.(_annotation);
+      onAnnotationSelect?.(_annotation, e);
 
       if (playerRef.current) {
         playerRef.current.currentTime(_annotation.type === 'segment' ? _annotation.start : _annotation.time);

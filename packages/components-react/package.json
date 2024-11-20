@@ -1,6 +1,6 @@
 {
   "name": "@labelu/components-react",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "basic react components for labelU",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
