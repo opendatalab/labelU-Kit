@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 import { useMediaAnnotator } from './context';
 
@@ -34,6 +35,8 @@ const List = styled.div`
 
 export function AttributeOverlay() {
   const { playingAnnotationIds, annotations, attributeConfigMapping } = useMediaAnnotator();
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const playingAnnotations = useMemo(() => {
     return (
@@ -75,7 +78,7 @@ export function AttributeOverlay() {
             // @ts-ignore
             style={{ '--color': attributeConfigMapping[type]?.[annotation.label]?.color ?? '#666' }}
           >
-            <div>{attributeConfigMapping[type]?.[annotation.label]?.key ?? '无标签'}</div>
+            <div>{attributeConfigMapping[type]?.[annotation.label]?.key ?? t('noneLabel')}</div>
             {nodes}
           </OverlayItem>
         );

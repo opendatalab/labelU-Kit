@@ -1,5 +1,6 @@
 import type { Attribute, MediaAnnotationData, MediaFrame, MediaSegment } from '@labelu/interface';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { parseTime, secondsToMinute } from '../../utils';
 import { Tooltip } from '../../Tooltip';
@@ -51,6 +52,8 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       requestEdit,
     } = useMediaAnnotator();
     const [currentAnnotation, setCurrentAnnotation] = useState<MediaSegment>(annotation as MediaSegment);
+    // @ts-ignore
+    const { t } = useTranslation();
 
     useEffect(() => {
       setCurrentAnnotation(annotation as MediaSegment);
@@ -122,7 +125,9 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
                 <Order>{annotation.order}.</Order>
                 <AttributesInner>
                   {secondsToMinute(time!)}
-                  <div>标签：{attributeConfig.key}</div>
+                  <div>
+                    {t('label')}: {attributeConfig.key}
+                  </div>
                   {attributeNodes}
                 </AttributesInner>
               </TooltipFrameContent>
@@ -275,7 +280,10 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
           overlay={
             <TooltipSegmentContent>
               <LabelTextWrapper>
-                {secondsToMinute(start!)} ~ {secondsToMinute(end!)}，{diff}s<div>标签：{attributeConfig.key}</div>
+                {secondsToMinute(start!)} ~ {secondsToMinute(end!)}, {diff}s
+                <div>
+                  {t('label')}: {attributeConfig.key}
+                </div>
               </LabelTextWrapper>
               <AttributesInner>{attributeNodes}</AttributesInner>
             </TooltipSegmentContent>

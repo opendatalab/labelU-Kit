@@ -4,6 +4,7 @@ import { App as AntApp, ConfigProvider } from 'antd';
 import enUS from 'antd/es/locale/en_US';
 import zhCN from 'antd/es/locale/zh_CN';
 import intl from 'react-intl-universal';
+import { I18nProvider } from '@labelu/components-react';
 
 import enUS1 from './locales/en-US';
 import zhCN1 from './locales/zh-CN';
@@ -48,16 +49,18 @@ const App: React.FC = () => {
 
   return (
     <ConfigProvider locale={getAntdLocale()} componentSize="middle" theme={{ token: themeToken.token }}>
-      <AntApp>
-        <StaticAnt />
-        <GlobalStyle />
-        {/* @ts-ignore */}
-        <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
-          <QueryProvider>
-            <RouterContainer routes={routes} />
-          </QueryProvider>
-        </IntlProvider>
-      </AntApp>
+      <I18nProvider>
+        <AntApp>
+          <StaticAnt />
+          <GlobalStyle />
+          {/* @ts-ignore */}
+          <IntlProvider locale={locale.split('_')[0]} messages={localeConfig[locale]}>
+            <QueryProvider>
+              <RouterContainer routes={routes} />
+            </QueryProvider>
+          </IntlProvider>
+        </AntApp>
+      </I18nProvider>
     </ConfigProvider>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 
 import { ReactComponent as ArrowUpIcon } from './arrow-up.svg';
 import { ReactComponent as ArrowDownIcon } from './arrow-down.svg';
@@ -90,6 +91,8 @@ export function SpeedController(props: SpeedControllerProps) {
   const MAX_PLAYBACK_RATE_SPEED = PLAYBACK_RATE_SPEED.slice(-1)[0];
   const MIN_PLAYBACK_RATE_SPEED = PLAYBACK_RATE_SPEED[0];
   const [rate, setRate] = useState(1);
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const setPlaybackRate = useCallback(
     (speedChange: ESpeedChange) => {
@@ -134,7 +137,7 @@ export function SpeedController(props: SpeedControllerProps) {
   return (
     <Wrapper>
       <SpeedText>
-        <span>倍速</span>
+        <span>{t('playRate')}</span>
         {rate}x
       </SpeedText>
       <SpeedControllerWrapper>

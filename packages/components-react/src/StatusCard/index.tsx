@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 import { ReactComponent as CheckSvgIcon } from './check.svg';
 
@@ -96,12 +97,15 @@ export interface StatusCardProps extends Omit<React.HTMLAttributes<HTMLDivElemen
 }
 
 export function StatusCard({ title, active, completed, skipped, children, onClick }: StatusCardProps) {
+  // @ts-ignore
+  const { t } = useTranslation();
+
   return (
     <StatusCardDiv active={active} onClick={onClick}>
       <Inner>{children}</Inner>
       {title && <Title>{title}</Title>}
       {completed && <CheckIcon />}
-      {skipped && <SkipWrapper>跳过</SkipWrapper>}
+      {skipped && <SkipWrapper>{t('skipped')}</SkipWrapper>}
     </StatusCardDiv>
   );
 }

@@ -19,7 +19,7 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'https://labelu.shlab.tech',
+        target: 'http://localhost:8000',
         changeOrigin: true,
       },
     },

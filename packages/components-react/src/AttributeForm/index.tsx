@@ -1,6 +1,7 @@
 import type { Attribute, AttributeOption, InnerAttributeType, StringType } from '@labelu/interface';
 import type { Rule, ValidateErrorEntity } from 'rc-field-form/es/interface';
 import type { FormProps, FormInstance } from 'rc-field-form';
+import { useTranslation } from 'react-i18next';
 import Form, { useForm, Field } from 'rc-field-form';
 import {
   createContext,
@@ -317,6 +318,8 @@ export function AttributeFormItem({
   name,
 }: AttributeResultProps) {
   const { error } = useContext(ValidateContext);
+  // @ts-ignore
+  const { t } = useTranslation();
   const fullName = useMemo(() => name || ['attributes', value], [name, value]);
   const finalOptions = useMemo(() => {
     return (
@@ -333,25 +336,25 @@ export function AttributeFormItem({
     const result: Rule[] = [];
 
     if (required) {
-      result.push({ required: true, message: `${label}为不可为空` });
+      result.push({ required: true, message: `${label}${t('notEmpty')}` });
     }
 
     if (type === 'string') {
       if (stringType === 'number') {
-        result.push({ pattern: /^\d+$/, message: `${label}必须为数字` });
+        result.push({ pattern: /^\d+$/, message: `${label}${t('notNumber')}` });
       }
 
       if (stringType === 'english') {
-        result.push({ pattern: /^[a-zA-Z]+$/, message: `${label}必须为英文` });
+        result.push({ pattern: /^[a-zA-Z]+$/, message: `${label}${t('notEnglish')}` });
       }
 
       if (stringType === 'regexp' && regexp) {
-        result.push({ pattern: new RegExp(regexp), message: `${label}格式不正确（格式为：${regexp}）` });
+        result.push({ pattern: new RegExp(regexp), message: `${label}${t('formatError')}${regexp}）` });
       }
     }
 
     return result;
-  }, [label, regexp, required, stringType, type]);
+  }, [label, regexp, required, stringType, t, type]);
 
   let child: React.ReactNode = <input />;
 
@@ -427,6 +430,8 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
     ref,
   ) => {
     const [form] = useForm();
+    // @ts-ignore
+    const { t } = useTranslation();
     const [selectedAttribute, setSelectedAttribute] = useState<Attribute>();
     const [error, setError] = useState<ValidateErrorEntity>({} as ValidateErrorEntity);
     const attributeMapping = useMemo(() => {
@@ -508,7 +513,7 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
       <ValidateContext.Provider value={contextValue}>
         <Form form={form} autoComplete="off" onValuesChange={handleAttributeChange} onFinish={onAttributeChange}>
           {labelChangeable && (
-            <FormItem label="标签" required>
+            <FormItem label={t('label')} required>
               <Field
                 name="label"
                 rules={[
@@ -531,7 +536,7 @@ export const AttributeForm = forwardRef<ValidationContextType, AttributeFormProp
           )}
           {Array.isArray(resultAttributeOptions) && resultAttributeOptions.length > 0 && (
             <>
-              <h4>属性</h4>
+              <h4>{t('attribute')}</h4>
               {resultAttributeOptions.map((attributeOptionItem) => (
                 <AttributeFormItem
                   {...attributeOptionItem}

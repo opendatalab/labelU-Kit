@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { getOS } from '../utils';
 import { Divider } from '../Divider';
@@ -155,6 +156,8 @@ export function Toolbar({
   style,
 }: ToolbarProps) {
   const [orderVisible, setOrderVisible] = useState<boolean | undefined>(showOrder);
+  // @ts-ignore
+  const { t } = useTranslation();
 
   useEffect(() => {
     setOrderVisible(showOrder);
@@ -172,19 +175,33 @@ export function Toolbar({
       <Left>
         {tools && tools}
         {tools && <Divider direction="vertical" style={{ height: '1.5em' }} />}
-        <Tooltip overlay={<span>撤销 {hotkeys.undo}</span>} placement="top">
+        <Tooltip
+          overlay={
+            <span>
+              {t('undo')} {hotkeys.undo}
+            </span>
+          }
+          placement="top"
+        >
           <Item disabled={disableUndo} onClick={disableUndo ? undefined : onUndo}>
             <UndoIcon />
           </Item>
         </Tooltip>
-        <Tooltip overlay={<span>重做 {hotkeys.redo}</span>} placement="top">
+        <Tooltip
+          overlay={
+            <span>
+              {t('redo')} {hotkeys.redo}
+            </span>
+          }
+          placement="top"
+        >
           <Item disabled={disableRedo} onClick={disableRedo ? undefined : onRedo}>
             <RedoIcon />
           </Item>
         </Tooltip>
         <Divider direction="vertical" style={{ height: '1.5em' }} />
         <Item onClick={handleOrderSwitch}>
-          显示顺序 &nbsp;
+          {t('showOrder')} &nbsp;
           <SimpleSwitch value={orderVisible} />
         </Item>
         {extra && extra}

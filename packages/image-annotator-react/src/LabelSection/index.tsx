@@ -1,7 +1,15 @@
 import React, { createRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
-import { Kbd, getOS, DraggableModel, AttributeForm, EllipsisText, FlexLayout } from '@labelu/components-react';
+import {
+  Kbd,
+  getOS,
+  DraggableModel,
+  AttributeForm,
+  EllipsisText,
+  FlexLayout,
+  useTranslation,
+} from '@labelu/components-react';
 import type { Attribute, AttributeValue, EnumerableAttribute, ILabel, TextAttribute } from '@labelu/interface';
 import type { AnnotationData, Annotator, ToolName } from '@labelu/image';
 
@@ -196,6 +204,8 @@ export function LabelSection() {
   const validationRef = useRef<ValidationContextType | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const isLabelEditable = useCallback(
     (toolName: ToolName | undefined, label: string | undefined) => {
@@ -358,7 +368,7 @@ export function LabelSection() {
         })}
         {extraLabels.length > 0 && (
           <MoreTrigger onMouseOver={handleOnMouseOver} onMouseOut={handleOnMouseOut}>
-            更多
+            {t('more')}
           </MoreTrigger>
         )}
 
@@ -400,13 +410,13 @@ export function LabelSection() {
         beforeClose={handleModalClose}
         title={
           <FlexLayout items="center" gap="0.5rem">
-            详细信息 &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
+            {t('details')} &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
           </FlexLayout>
         }
         ref={dragModalRef}
         width={333}
-        okText="确认"
-        cancelText="取消"
+        okText={t('ok')}
+        cancelText={t('cancel')}
       >
         <AttributeForm
           ref={validationRef}

@@ -1,8 +1,8 @@
-import { Toolbar, Tooltip, HotkeyPanel } from '@labelu/components-react';
+import { Toolbar, Tooltip, HotkeyPanel, useTranslation } from '@labelu/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import styled from 'styled-components';
 import type { ToolName } from '@labelu/image';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { ReactComponent as PointIcon } from '@/assets/tools/point.svg';
 import { ReactComponent as LineIcon } from '@/assets/tools/line.svg';
@@ -29,14 +29,6 @@ const iconMapping = {
   cuboid: <CuboidIcon />,
 };
 
-const toolNameTextMapping = {
-  point: '标点',
-  line: '标线',
-  rect: '拉框',
-  polygon: '多边形',
-  cuboid: '立体框',
-};
-
 export interface IToolbarInEditorProps {
   extra?: React.ReactNode;
   right?: React.ReactNode;
@@ -58,6 +50,19 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
   const { engine, currentTool, tools, memorizeToolLabel } = useTool();
   const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
   const { redo, undo, futureRef, pastRef } = useHistoryCtx();
+  // @ts-ignore
+  const { t } = useTranslation();
+
+  const toolNameTextMapping = useMemo(
+    () => ({
+      point: t('point'),
+      line: t('line'),
+      rect: t('rect'),
+      polygon: t('polygon'),
+      cuboid: t('cuboid'),
+    }),
+    [t],
+  );
 
   const handleUndo = useCallback(() => {
     if (dragModalRef.current?.getVisibility()) {
@@ -94,13 +99,13 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
             );
           })}
           <Tooltip overlayStyle={tooltipStyle} overlay={<ToolStyle />} placement="bottomLeft">
-            <ToolStyleWrapper>工具样式</ToolStyleWrapper>
+            <ToolStyleWrapper>{t('toolStyle')}</ToolStyleWrapper>
           </Tooltip>
         </>
       }
       extra={
         <Tooltip overlayStyle={tooltipStyle} overlay={<HotkeyPanel items={hotkeysConst} />} placement="bottomLeft">
-          <Toolbar.Item>快捷键</Toolbar.Item>
+          <Toolbar.Item>{t('hotkeys')}</Toolbar.Item>
         </Tooltip>
       }
       right={right}

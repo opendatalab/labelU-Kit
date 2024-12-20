@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Tooltip } from '@labelu/components-react';
+import { Tooltip, useTranslation } from '@labelu/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useCallback } from 'react';
 
@@ -82,6 +82,8 @@ const ColorPicker = styled.input`
 
 function Content() {
   const { engine } = useTool();
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const handleAttrChange = (attr: 'contrast' | 'saturation' | 'brightness') => (value: number) => {
     engine?.backgroundRenderer?.attr(attr, value);
@@ -92,21 +94,21 @@ function Content() {
       <PropertyWrapper>
         <TitleWrapper>
           <SaturationIcon className="labelu-svg-icon" />
-          饱和度
+          {t('saturation')}
         </TitleWrapper>
         <Slider type="normal" max={100} min={-100} value={0} onChange={handleAttrChange('saturation')} />
       </PropertyWrapper>
       <PropertyWrapper>
         <TitleWrapper>
           <ContrastIcon className="labelu-svg-icon" />
-          对比度
+          {t('contrast')}
         </TitleWrapper>
         <Slider type="normal" max={100} min={-100} value={0} onChange={handleAttrChange('contrast')} />
       </PropertyWrapper>
       <PropertyWrapper>
         <TitleWrapper>
           <BrightnessIcon className="labelu-svg-icon" />
-          曝光度
+          {t('exposure')}
         </TitleWrapper>
         <Slider type="normal" max={100} min={-100} value={0} onChange={handleAttrChange('brightness')} />
       </PropertyWrapper>
@@ -116,6 +118,8 @@ function Content() {
 
 export default function Footer() {
   const { engine } = useTool();
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const handleRotate = useCallback(() => {
     const lastRotate = engine?.backgroundRenderer?.rotate || 0;
@@ -146,13 +150,13 @@ export default function Footer() {
                 }
               }}
             />
-            背景颜色
+            {t('backgroundColor')}
           </BarItem>
         </label>
         <Tooltip overlay={<Content />} overlayStyle={tooltipStyle} placement="topLeft">
           <BarItem>
             <SettingIcon className="labelu-svg-icon" />
-            图片调整
+            {t('adjustment')}
           </BarItem>
         </Tooltip>
       </Left>
@@ -163,7 +167,7 @@ export default function Footer() {
           }}
         >
           <FitContainerIcon className="labelu-svg-icon" />
-          适应窗口显示
+          {t('fitContainer')}
         </BarItem>
         <BarItem
           onClick={() => {
@@ -171,11 +175,11 @@ export default function Footer() {
           }}
         >
           <ScaleResetIcon className="labelu-svg-icon" />
-          按原图比例显示
+          {t('rawScale')}
         </BarItem>
         <BarItem onClick={handleRotate}>
           <RotateIcon className="labelu-svg-icon" />
-          旋转
+          {t('rotate')}
         </BarItem>
       </Right>
     </FooterBar>

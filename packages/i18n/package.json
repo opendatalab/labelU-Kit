@@ -1,0 +1,23 @@
+{
+  "name": "@labelu/i18n",
+  "version": "1.0.0",
+  "description": "i18n for labelu and components",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opendatalab/labelU-Kit.git"
+  },
+  "author": "garyshen",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/opendatalab/labelU-Kit/issues"
+  },
+  "homepage": "https://github.com/opendatalab/labelU-Kit#readme",
+  "dependencies": {
+    "i18next": "^22.4.10",
+    "react-i18next": "^15.2.0"
+  }
+}

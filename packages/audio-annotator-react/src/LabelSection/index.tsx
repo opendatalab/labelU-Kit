@@ -1,7 +1,15 @@
 import React, { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
-import { DraggableModel, AttributeForm, EllipsisText, FlexLayout, Kbd, getOS } from '@labelu/components-react';
+import {
+  DraggableModel,
+  AttributeForm,
+  EllipsisText,
+  FlexLayout,
+  Kbd,
+  getOS,
+  useTranslation,
+} from '@labelu/components-react';
 import type { Attribute } from '@labelu/interface';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
@@ -158,6 +166,8 @@ export function LabelSection() {
   const validationRef = useRef<ValidationContextType | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const handleSelect = useCallback(
     (attribute: Attribute, e: React.MouseEvent) => {
@@ -260,7 +270,7 @@ export function LabelSection() {
         })}
         {extraAttributes.length > 0 && (
           <MoreTrigger onMouseOver={handleOnMouseOver} onMouseOut={handleOnMouseOut}>
-            更多
+            {t('more')}
           </MoreTrigger>
         )}
 
@@ -294,13 +304,13 @@ export function LabelSection() {
         beforeClose={handleModalClose}
         title={
           <FlexLayout items="center" gap="0.5rem">
-            详细信息 &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
+            {t('details')} &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
           </FlexLayout>
         }
         ref={dragModalRef}
         width={333}
-        okText="确认"
-        cancelText="取消"
+        okText={t('ok')}
+        cancelText={t('cancel')}
       >
         <AttributeForm
           ref={validationRef}
