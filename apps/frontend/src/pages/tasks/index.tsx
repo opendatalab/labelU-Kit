@@ -3,6 +3,7 @@ import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router-d
 import _ from 'lodash';
 import styled from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import type { TaskListResponseWithStatics } from '@/api/types';
 import { usePageSize } from '@/hooks/usePageSize';
@@ -43,6 +44,7 @@ const TaskList = () => {
   const tasks = _.get(routerLoaderData, 'data');
   const meta_data = _.get(routerLoaderData, 'meta_data');
   const pageSize = usePageSize();
+  const { t } = useTranslation();
 
   const [searchParams, setSearchParams] = useSearchParams({
     size: String(pageSize),
@@ -85,14 +87,14 @@ const TaskList = () => {
             showIcon
             message={
               <div>
-                当前为体验版，每日凌晨数据将自动清空，请及时备份重要数据。如需完整使用，建议
+                {t('demoTips')}
                 <a
                   data-wiz="local-deploy-alert"
                   href="https://opendatalab.github.io/labelU/guide/install"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  本地部署
+                  {t('localDeploy')}
                 </a>
               </div>
             }
@@ -101,7 +103,7 @@ const TaskList = () => {
         {tasks.length > 0 && (
           <Header>
             <Button type="primary" onClick={createTask}>
-              新建任务
+              {t('Create Task')}
             </Button>
           </Header>
         )}

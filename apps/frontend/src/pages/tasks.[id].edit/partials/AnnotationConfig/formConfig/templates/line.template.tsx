@@ -1,5 +1,6 @@
 import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import type { RuleRender } from 'antd/es/form';
+import { i18n } from '@labelu/i18n';
 
 import type { FancyItemIdentifier } from '@/components/FancyInput/types';
 import FancyInput from '@/components/FancyInput';
@@ -28,12 +29,12 @@ export default [
         field: 'lineType',
         key: 'lineType',
         type: 'enum',
-        label: '线条类型',
+        label: i18n.t('lineType'),
         initialValue: 0,
         antProps: {
           options: [
-            { label: '直线', value: 0 },
-            { label: '贝塞尔曲线', value: 1 },
+            { label: i18n.t('straightLine'), value: 0 },
+            { label: i18n.t('spline'), value: 1 },
           ],
         },
       },
@@ -41,7 +42,7 @@ export default [
         type: 'group',
         key: 'pointNum',
         layout: 'horizontal',
-        label: '闭合点数',
+        label: i18n.t('pointNumber'),
         children: [
           {
             field: 'lowerLimitPointNum',
@@ -52,12 +53,12 @@ export default [
             antProps: {
               addonAfter: <ArrowDownOutlined />,
               min: 0,
-              placeholder: '最小闭合点个数',
+              placeholder: i18n.t('minimumPointNumber'),
             },
             rules: [
               {
                 required: true,
-                message: '最小闭合点个数不能为空',
+                message: i18n.t('minimumPointNumberRequired'),
               },
               (({ getFieldValue }) => ({
                 // @ts-ignore
@@ -66,7 +67,7 @@ export default [
                     fullField.replace('lowerLimitPointNum', 'upperLimitPointNum').split('.'),
                   );
                   if (value > maxNum) {
-                    return Promise.reject(new Error('最小闭合点数不可大于最大闭合点数'));
+                    return Promise.reject(new Error(i18n.t('minimumPointCannotExceedMaximum')));
                   }
 
                   return Promise.resolve();
@@ -82,13 +83,13 @@ export default [
             antProps: {
               addonAfter: <ArrowUpOutlined />,
               min: 0,
-              placeholder: '最大闭合点个数',
+              placeholder: i18n.t('maximumPointNumber'),
             },
             initialValue: 100,
             rules: [
               {
                 required: true,
-                message: '最大闭合点个数不能为空',
+                message: i18n.t('maximumPointNumberRequired'),
               },
               ({ getFieldValue }) => ({
                 // @ts-ignore
@@ -97,7 +98,7 @@ export default [
                     fullField.replace('upperLimitPointNum', 'lowerLimitPointNum').split('.'),
                   );
                   if (value < minNum) {
-                    return Promise.reject(new Error('最大闭合点数不可小于最小闭合点数'));
+                    return Promise.reject(new Error(i18n.t('maximumPointCannotSmallThanMinimumPoint')));
                   }
 
                   return Promise.resolve();
@@ -111,7 +112,7 @@ export default [
         field: 'edgeAdsorption',
         key: 'edgeAdsorption',
         type: 'boolean',
-        label: '边缘吸附',
+        label: i18n.t('edgeAdsorption'),
         initialValue: false,
         renderFormItem({ antProps, ...props }, form, fullField) {
           const lineType = form.getFieldValue([...(fullField as any[]).slice(0, -1), 'lineType']);
@@ -127,11 +128,11 @@ export default [
         field: 'attributes',
         key: 'attributes',
         type: 'list-attribute',
-        label: '标签配置',
+        label: i18n.t('labelConfig'),
         initialValue: [
           {
             color: '#ff6600',
-            key: '标签-1',
+            key: i18n.t('label1'),
             value: 'label-1',
           },
         ],

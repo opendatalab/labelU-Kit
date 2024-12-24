@@ -1,10 +1,9 @@
-import { Kbd, getOS, i18n } from '@labelu/components-react';
+import { Kbd, getOS } from '@labelu/components-react';
+import { i18n } from '@labelu/i18n';
 
 import { ReactComponent as MouseRightClick } from './assets/mouse-right.svg';
 import { ReactComponent as MouseLeftClick } from './assets/mouse-left.svg';
 const os = getOS();
-
-console.log('88', i18n);
 
 export default [
   {

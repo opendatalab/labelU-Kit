@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Icon, { ExclamationCircleFilled } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as AddCategoryIcon } from '@/assets/svg/add-category.svg';
 import { ReactComponent as AddTextIcon } from '@/assets/svg/add-text.svg';
@@ -88,6 +89,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   const [stateValue, setStateValue] = useState<AttributeConfigurationState>({ list: value || [] });
   const ref = useRef<FancyCategoryAttributeRef>(null);
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!visible) {
@@ -160,29 +162,29 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
       <div className="addition">
         <button className="addition-button new-category-attr" onClick={handleAddCategoryAttribute(CategoryType.Enum)}>
           <Icon className="icon" component={AddCategoryIcon} />
-          <span className="title">新建分类属性</span>
-          <sub>选择题形式</sub>
+          <span className="title">{t('addCategory')}</span>
+          <sub>{t('selectType')}</sub>
         </button>
 
         <button className="addition-button new-text-attr" onClick={handleAddCategoryAttribute(CategoryType.String)}>
           <Icon className="icon" component={AddTextIcon} />
-          <span className="title">新建文本属性</span>
-          <sub>填空题形式</sub>
+          <span className="title">{t('addDescription')}</span>
+          <sub>{t('textarea')}</sub>
         </button>
       </div>
     ),
-    [handleAddCategoryAttribute],
+    [t, handleAddCategoryAttribute],
   );
   const footer = useMemo(
     () => (
       <FlexLayout gap=".5rem" className="footer">
         <Button type="primary" onClick={handleSave}>
-          保存
+          {t('save')}
         </Button>
-        <Button onClick={handleClose}>取消</Button>
+        <Button onClick={handleClose}>{t('cancel')}</Button>
       </FlexLayout>
     ),
-    [handleSave, handleClose],
+    [t, handleSave, handleClose],
   );
 
   const isValueEmpty = useMemo(() => {
@@ -222,7 +224,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   return (
     <StyledDrawer
       open={visible}
-      title="属性配置"
+      title={t('attributesConfig')}
       width={600}
       onClose={handleClose}
       footer={isValueEmpty ? null : footer}

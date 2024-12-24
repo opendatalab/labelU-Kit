@@ -1,14 +1,16 @@
+import { i18n } from '@labelu/i18n';
+
 import { MediaType } from '@/api/types';
 
 export const MediaTypeText = {
-  [MediaType.IMAGE]: '图片',
-  [MediaType.VIDEO]: '视频',
-  [MediaType.AUDIO]: '音频',
+  [MediaType.IMAGE]: i18n.t('image'),
+  [MediaType.VIDEO]: i18n.t('video'),
+  [MediaType.AUDIO]: i18n.t('audio'),
 };
 
 export const FileExtensionText = {
   [MediaType.IMAGE]: 'jpg、jpeg、png、bmp、gif',
-  [MediaType.VIDEO]: 'mp4(h.264编码)',
+  [MediaType.VIDEO]: 'mp4(h.264)',
   [MediaType.AUDIO]: 'mp3、wav、ogg、m4a',
 };
 

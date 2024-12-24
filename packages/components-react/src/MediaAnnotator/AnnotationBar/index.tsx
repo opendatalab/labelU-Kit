@@ -1,6 +1,6 @@
 import type { Attribute, MediaAnnotationData, MediaFrame, MediaSegment } from '@labelu/interface';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@labelu/i18n';
 
 import { parseTime, secondsToMinute } from '../../utils';
 import { Tooltip } from '../../Tooltip';

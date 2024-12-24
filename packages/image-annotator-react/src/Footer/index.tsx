@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Tooltip, useTranslation } from '@labelu/components-react';
+import { Tooltip } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useCallback } from 'react';
 

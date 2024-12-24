@@ -1,15 +1,8 @@
 import React, { createRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
-import {
-  Kbd,
-  getOS,
-  DraggableModel,
-  AttributeForm,
-  EllipsisText,
-  FlexLayout,
-  useTranslation,
-} from '@labelu/components-react';
+import { Kbd, getOS, DraggableModel, AttributeForm, EllipsisText, FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 import type { Attribute, AttributeValue, EnumerableAttribute, ILabel, TextAttribute } from '@labelu/interface';
 import type { AnnotationData, Annotator, ToolName } from '@labelu/image';
 

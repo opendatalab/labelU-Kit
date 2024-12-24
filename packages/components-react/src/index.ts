@@ -17,4 +17,3 @@ export * from './MediaAnnotator';
 export * from './PlayerController';
 export * from './hooks';
 export * from './utils';
-export * from './I18n';

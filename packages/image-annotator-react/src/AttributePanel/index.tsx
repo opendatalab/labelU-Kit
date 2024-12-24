@@ -8,8 +8,8 @@ import {
   uid,
   Tooltip,
   FlexLayout,
-  useTranslation,
 } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 import type {
   EnumerableAttribute,
   GlobalAnnotationType,
@@ -132,13 +132,14 @@ const Button = styled.button<{ primary?: boolean }>`
 `;
 
 function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
+  const { t } = useTranslation();
   return (
     <FlexLayout flex="column" gap="1rem" padding=".5rem">
       <FlexLayout.Item>{title}</FlexLayout.Item>
       <FlexLayout.Item flex items="center" justify="space-between" gap=".5rem">
-        <Button onClick={onCancel}>取消</Button>
+        <Button onClick={onCancel}>{t('cancel')}</Button>
         <Button primary onClick={onConfirm}>
-          确定
+          {t('confirm')}
         </Button>
       </FlexLayout.Item>
     </FlexLayout>
@@ -173,7 +174,7 @@ function ClearAction({ onClear }: { onClear: () => void }) {
     >
       <Footer onClick={() => setOpen((pre) => !pre)}>
         <DeleteIcon />
-        &nbsp; 清空
+        &nbsp; {t('clear')}
       </Footer>
     </Tooltip>
   );
@@ -284,7 +285,7 @@ export function AttributePanel() {
         .every((item) => globalAnnotationMapping[item.value]?.value?.[item.value]);
 
       _titles.push({
-        title: '全局',
+        title: t('global'),
         key: 'global' as const,
         subtitle: isCompleted ? t('done') : t('undone'),
       });
@@ -294,7 +295,7 @@ export function AttributePanel() {
       _titles.push({
         title: t('label'),
         key: 'label' as const,
-        subtitle: `${sortedImageAnnotations.length}条`,
+        subtitle: `${sortedImageAnnotations.length}${t('markCount')}`,
       });
     }
 

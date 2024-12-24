@@ -35,7 +35,7 @@
     "react"
   ],
   "dependencies": {
-    "i18next": "^22.4.10",
+    "@labelu/i18n": "workspace:*",
     "polished": "^4.2.2",
     "rc-collapse": "^3.7.1",
     "rc-dialog": "^9.2.0",
@@ -44,7 +44,6 @@
     "rc-tree": "^5.7.10",
     "react-draggable": "^4.4.5",
     "react-hotkeys-hook": "^4.4.1",
-    "react-i18next": "^15.2.0",
     "resize-observer-polyfill": "^1.5.1",
     "styled-components": "^5.3.6"
   },

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@labelu/i18n';
 
 import { useMediaAnnotator } from './context';
 

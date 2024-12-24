@@ -1,6 +1,7 @@
-import { Toolbar, Tooltip, HotkeyPanel, useTranslation } from '@labelu/components-react';
+import { Toolbar, Tooltip, HotkeyPanel } from '@labelu/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import styled from 'styled-components';
+import { useTranslation } from '@labelu/i18n';
 import type { ToolName } from '@labelu/image';
 import { useCallback, useMemo } from 'react';
 

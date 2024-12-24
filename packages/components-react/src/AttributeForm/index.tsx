@@ -1,7 +1,7 @@
 import type { Attribute, AttributeOption, InnerAttributeType, StringType } from '@labelu/interface';
 import type { Rule, ValidateErrorEntity } from 'rc-field-form/es/interface';
 import type { FormProps, FormInstance } from 'rc-field-form';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@labelu/i18n';
 import Form, { useForm, Field } from 'rc-field-form';
 import {
   createContext,
@@ -336,20 +336,20 @@ export function AttributeFormItem({
     const result: Rule[] = [];
 
     if (required) {
-      result.push({ required: true, message: `${label}${t('notEmpty')}` });
+      result.push({ required: true, message: `${label} ${t('notEmpty')}` });
     }
 
     if (type === 'string') {
       if (stringType === 'number') {
-        result.push({ pattern: /^\d+$/, message: `${label}${t('notNumber')}` });
+        result.push({ pattern: /^\d+$/, message: `${label} ${t('notNumber')}` });
       }
 
       if (stringType === 'english') {
-        result.push({ pattern: /^[a-zA-Z]+$/, message: `${label}${t('notEnglish')}` });
+        result.push({ pattern: /^[a-zA-Z]+$/, message: `${label} ${t('notEnglish')}` });
       }
 
       if (stringType === 'regexp' && regexp) {
-        result.push({ pattern: new RegExp(regexp), message: `${label}${t('formatError')}${regexp}）` });
+        result.push({ pattern: new RegExp(regexp), message: `${label} ${t('formatError')}${regexp}）` });
       }
     }
 

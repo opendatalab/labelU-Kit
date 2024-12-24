@@ -1,15 +1,8 @@
 import React, { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
-import {
-  DraggableModel,
-  AttributeForm,
-  EllipsisText,
-  FlexLayout,
-  Kbd,
-  getOS,
-  useTranslation,
-} from '@labelu/components-react';
+import { DraggableModel, AttributeForm, EllipsisText, FlexLayout, Kbd, getOS } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 import type { Attribute } from '@labelu/interface';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';

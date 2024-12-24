@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
-import { merge } from '../utils';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { merge } from './utils';
+import { useLocalStorage } from './useLocalStorage';
 import { i18n } from './i18n';
-import { resources } from '../locales';
+import { resources } from './locales';
 const LANG_CHANGE_EVENT = 'labelu-lang-change';
 
 interface I18nProviderProps {
@@ -14,7 +14,7 @@ interface I18nProviderProps {
 }
 
 export function I18nProvider(props: I18nProviderProps) {
-  const { locales, children, locale = 'zh_CN' } = props;
+  const { locales, children, locale } = props;
   const [, setLang] = useLocalStorage('lang', () => {
     return i18n.language;
   });

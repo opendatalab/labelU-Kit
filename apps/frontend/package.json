@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
+    "@labelu/i18n": "workspace:*",
     "@labelu/audio-annotator-react": "1.6.0",
     "@labelu/components-react": "1.6.0",
     "@labelu/image": "1.2.0",

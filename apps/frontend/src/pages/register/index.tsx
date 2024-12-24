@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import _ from 'lodash';
 import { useMutation } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import { signUp } from '@/api/services/user';
 import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
@@ -20,6 +21,7 @@ interface FormValues {
 
 const SignUpPage = () => {
   const [form] = Form.useForm<FormValues>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const signUpMutation = useMutation({
     mutationFn: signUp,
@@ -49,28 +51,28 @@ const SignUpPage = () => {
       <FormWrapper gap=".5rem" flex="column">
         <Form form={form} onFinish={register}>
           <FlexLayout flex="column">
-            <h1>注册</h1>
+            <h1>{t('signUp')}</h1>
             <Form.Item
               name="username"
               rules={[
-                { required: true, message: '请填写邮箱' },
-                { type: 'email', message: '请填写正确的邮箱格式' },
+                { required: true, message: t('emailPlease') },
+                { type: 'email', message: t('emailFormatPlease') },
               ]}
             >
-              <Input placeholder="邮箱" prefix={<EmailIcon />} />
+              <Input placeholder={t('email')} prefix={<EmailIcon />} />
             </Form.Item>
 
             <Form.Item
               name="password"
               rules={[
-                { required: true, message: '请填写密码' },
+                { required: true, message: t('passwordPlease') },
                 {
                   pattern: /^\S+$/,
-                  message: '密码不能包含空格',
+                  message: t('passwordCannotContainsWhitespace'),
                 },
               ]}
             >
-              <Input.Password placeholder="密码" prefix={<PasswordIcon />} visibilityToggle={false} />
+              <Input.Password placeholder={t('password')} prefix={<PasswordIcon />} visibilityToggle={false} />
             </Form.Item>
 
             <Form.Item
@@ -79,7 +81,7 @@ const SignUpPage = () => {
               rules={[
                 {
                   required: true,
-                  message: '请确认密码',
+                  message: t('confirmPasswordPlease'),
                 },
                 ({ getFieldValue }) => ({
                   validator(_unused, value) {
@@ -87,23 +89,23 @@ const SignUpPage = () => {
                       return Promise.resolve();
                     }
 
-                    return Promise.reject(new Error('两次输入密码不一致！'));
+                    return Promise.reject(new Error(t('passwordRepeatedUnMatch')));
                   },
                 }),
               ]}
             >
-              <Input.Password placeholder="确认密码" visibilityToggle={false} prefix={<PasswordIcon />} />
+              <Input.Password placeholder={t('passwordConfirm')} visibilityToggle={false} prefix={<PasswordIcon />} />
             </Form.Item>
 
             <Form.Item>
               <ButtonWrapper block type="primary" onClick={handleSubmit} loading={signUpMutation.isPending}>
-                注册
+                {t('signUp')}
               </ButtonWrapper>
             </Form.Item>
           </FlexLayout>
         </Form>
         <FlexLayout justify="flex-end">
-          已有账号？<Link to={'/login'}>登录</Link>
+          {t('alreadyHaveAccount')} <Link to={'/login'}>{t('login')}</Link>
         </FlexLayout>
       </FormWrapper>
     </LoginWrapper>

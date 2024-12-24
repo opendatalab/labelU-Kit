@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useCallback } from 'react';
-import { useTranslation } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 // import { useAnnotator } from '@/context';
 

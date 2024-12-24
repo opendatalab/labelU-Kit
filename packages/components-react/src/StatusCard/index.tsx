@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as CheckSvgIcon } from './check.svg';
 
