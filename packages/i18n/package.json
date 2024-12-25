@@ -11,25 +11,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "typings": "dist/types/index.d.ts",
-  "main": "./dist/index.umd.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "typings": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/index.umd.js"
-      }
-    }
-  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/opendatalab/labelU-Kit.git"
@@ -46,7 +34,7 @@
     "react-i18next": "^15.2.0"
   },
   "devDependencies": {
-    "@types/react": "^19.0.2",
+    "@types/react": "^18.2.0",
     "esbuild": "^0.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -56,5 +44,9 @@
     "typescript": "4.8.4",
     "vite": "^6.0.5",
     "vite-tsconfig-paths": "^3.5.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
