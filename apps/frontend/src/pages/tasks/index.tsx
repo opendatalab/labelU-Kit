@@ -31,7 +31,6 @@ const Footer = styled(FlexLayout.Footer)`
 `;
 
 const AppVersion = styled(FlexLayout.Footer)`
-  padding: 1rem 0;
   text-align: center;
   color: var(--color-text-tertiary);
 `;
@@ -119,7 +118,10 @@ const TaskList = () => {
           )}
         </FlexLayout.Content>
       </FlexLayout.Content>
-      <Footer flex="column" items="flex-end">
+      <Footer flex="row" items="flex-between" justify="space-between">
+        <AppVersion>
+          <Popover content={versionInfo}>labelu@{window.__backend.version}</Popover>
+        </AppVersion>
         {meta_data && searchParams && meta_data?.total > pageSize && (
           <Pagination
             defaultCurrent={searchParams.get('page') ? +searchParams.get('page')! : 1}
@@ -133,9 +135,6 @@ const TaskList = () => {
           />
         )}
       </Footer>
-      <AppVersion>
-        <Popover content={versionInfo}>labelu@{window.__backend.version}</Popover>
-      </AppVersion>
     </Wrapper>
   );
 };
