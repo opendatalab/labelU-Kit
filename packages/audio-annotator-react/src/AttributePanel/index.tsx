@@ -9,6 +9,7 @@ import type {
   TextAnnotationEntity,
   TextAttribute,
 } from '@labelu/interface';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as DeleteIcon } from '@/assets/icons/delete.svg';
 import { useTool } from '@/context/tool.context';
@@ -112,6 +113,7 @@ export function AttributePanel() {
     onAnnotationClear,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const { t } = useTranslation();
 
   const { globalAnnotations, globalAnnotationsWithPreAnnotation, mediaAnnotationGroup, defaultActiveKeys } =
     useMemo(() => {
@@ -230,13 +232,13 @@ export function AttributePanel() {
       _titles.push({
         title: '全局',
         key: 'global' as const,
-        subtitle: isCompleted ? '已完成' : '未完成',
+        subtitle: isCompleted ? t('done') : t('undone'),
       });
     }
 
     if (config?.segment || config?.frame) {
       _titles.push({
-        title: '标记',
+        title: t('labels'),
         key: 'label' as const,
         subtitle: `${sortedMediaAnnotations.length}条`,
       });
@@ -244,6 +246,7 @@ export function AttributePanel() {
 
     return _titles;
   }, [
+    t,
     config?.tag,
     config?.text,
     config?.segment,
@@ -308,7 +311,7 @@ export function AttributePanel() {
     () =>
       Array.from(mediaAnnotationGroup).map(([label, _annotations]) => {
         const found = labelMapping[_annotations[0].type]?.[label] ?? preLabelMapping?.[_annotations[0].type]?.[label];
-        const labelText = found ? found?.key ?? '无标签' : '无标签';
+        const labelText = found ? found?.key ?? t('noneLabel') : t('noneLabel');
 
         return {
           label: (
@@ -332,7 +335,7 @@ export function AttributePanel() {
                     active={item.id === selectedAnnotation?.id}
                     order={item.order}
                     annotation={item}
-                    labelText={labelOfAnnotation?.key ?? '无标签'}
+                    labelText={labelOfAnnotation?.key ?? t('noneLabel')}
                     color={labelOfAnnotation?.color ?? '#999'}
                   />
                 );
@@ -341,7 +344,7 @@ export function AttributePanel() {
           ),
         };
       }),
-    [mediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
+    [t, mediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
 
   return (
@@ -367,7 +370,7 @@ export function AttributePanel() {
       </Content>
       <Footer onClick={handleClear}>
         <DeleteIcon />
-        &nbsp; 清空
+        &nbsp; {t('clear')}
       </Footer>
     </Wrapper>
   );

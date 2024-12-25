@@ -7,6 +7,7 @@ import { FileOutlined, FolderOpenOutlined, QuestionCircleOutlined, UploadOutline
 import type { RcFile } from 'antd/lib/upload/interface';
 import { FlexLayout } from '@labelu/components-react';
 import { useRevalidator } from 'react-router';
+import { useTranslation } from '@labelu/i18n';
 
 import IconText from '@/components/IconText';
 import type { StatusType } from '@/components/Status';
@@ -32,14 +33,6 @@ import videoJsonSchema from './videoPreAnnotationJson.schema.json';
 import audioSchema from './audioPreAnnotationJsonl.schema.json';
 import videoSchema from './videoPreAnnotationJsonl.schema.json';
 import { isCorrectFiles, isPreAnnotationFile, normalizeFiles, readFile, UploadStatus } from './utils';
-
-const statusTextMapping = {
-  [UploadStatus.Uploading]: '上传中',
-  [UploadStatus.Waiting]: '等待上传',
-  [UploadStatus.Success]: '上传成功',
-  [UploadStatus.Fail]: '上传失败',
-  [UploadStatus.Error]: '解析失败',
-};
 
 const jsonlMapping = {
   [MediaType.IMAGE]: imageSchema,
@@ -75,6 +68,18 @@ const InputData = () => {
   } = useContext(TaskCreationContext);
   const uploadMutation = useUploadFileMutation();
   const revalidator = useRevalidator();
+  const { t } = useTranslation();
+
+  const statusTextMapping = useMemo(
+    () => ({
+      [UploadStatus.Uploading]: t('uploading'),
+      [UploadStatus.Waiting]: t('uploadPending'),
+      [UploadStatus.Success]: t('uploadSuccess'),
+      [UploadStatus.Fail]: t('uploadFailed'),
+      [UploadStatus.Error]: t('parseError'),
+    }),
+    [t],
+  );
 
   const taskId = task.id;
 
@@ -228,14 +233,17 @@ const InputData = () => {
       }
 
       if (succeed > 0 && failed > 0) {
-        commonController.notificationWarnMessage({ message: `${succeed} 个文件上传成功，${failed} 个文件上传失败` }, 3);
+        commonController.notificationWarnMessage(
+          { message: `${succeed} ${t('filesUploaded')}${failed} ${t('filesFailed')}` },
+          3,
+        );
       } else if (succeed > 0 && failed === 0) {
-        commonController.notificationSuccessMessage({ message: `${succeed} 个文件上传成功` }, 3);
+        commonController.notificationSuccessMessage({ message: `${succeed} ${t('filesUploaded')}` }, 3);
       } else if (failed > 0 && succeed === 0) {
-        commonController.notificationWarnMessage({ message: `${failed} 个文件上传失败` }, 3);
+        commonController.notificationWarnMessage({ message: `${failed} ${t('filesFailed')}` }, 3);
       }
     },
-    [setFileQueue, taskId, uploadMutation],
+    [setFileQueue, taskId, uploadMutation, t],
   );
 
   const handleFilesChange = (files: RcFile[]) => {
@@ -244,7 +252,7 @@ const InputData = () => {
     if (!isCorrectCondition) {
       return;
     } else {
-      commonController.notificationSuccessMessage({ message: '已添加' + files.length + '个文件至上传列表' }, 3);
+      commonController.notificationSuccessMessage({ message: t('added') + files.length + t('filesToList') }, 3);
     }
 
     processUpload(normalizeFiles(files), task.media_type!);
@@ -280,16 +288,16 @@ const InputData = () => {
       }
 
       setFileQueue((pre) => pre.filter((item) => item.uid !== file.uid));
-      commonController.notificationSuccessMessage({ message: '已删除一个文件' }, 3);
+      commonController.notificationSuccessMessage({ message: t('fileDeleted') }, 3);
       revalidator.revalidate();
     },
-    [revalidator, setFileQueue, taskId],
+    [revalidator, setFileQueue, taskId, t],
   );
 
   const tableColumns = useMemo(() => {
     return [
       {
-        title: '文件名',
+        title: t('filename'),
         dataIndex: 'name',
         align: 'left',
         responsive: ['md', 'lg', 'sm'],
@@ -300,14 +308,14 @@ const InputData = () => {
               <div>
                 {formatter.format('ellipsis', text, { maxWidth: 540, type: 'tooltip' })}
                 &nbsp;
-                {isPreAnnotationFile(text) && <Tag color="processing">预标注</Tag>}
+                {isPreAnnotationFile(text) && <Tag color="processing">{t('preAnnotation')}</Tag>}
               </div>
             </IconText>
           );
         },
       },
       {
-        title: '地址',
+        title: 'Url',
         dataIndex: 'url',
         align: 'left',
         responsive: ['md', 'lg'],
@@ -320,7 +328,7 @@ const InputData = () => {
         },
       },
       {
-        title: '状态',
+        title: t('status'),
         dataIndex: 'status',
         align: 'left',
         responsive: ['md', 'lg', 'sm'],
@@ -342,7 +350,7 @@ const InputData = () => {
         },
       },
       {
-        title: '操作',
+        title: t('actions'),
         dataIndex: 'action',
         align: 'left',
         responsive: ['md', 'lg'],
@@ -359,17 +367,17 @@ const InputData = () => {
                     processUpload(fileQueue, task.media_type!);
                   }}
                 >
-                  重新上传
+                  {t('reupload')}
                 </Button>
               )}
               <Popconfirm
-                title="确定删除此文件吗？"
+                title={t('deleteConfirm')}
                 onConfirm={() => {
                   handleFileDelete(record);
                 }}
               >
                 <Button type="link" size="small" danger>
-                  删除
+                  {t('delete')}
                 </Button>
               </Popconfirm>
             </>
@@ -377,17 +385,17 @@ const InputData = () => {
         },
       },
     ] as TableColumnType<QueuedFile>[];
-  }, [fileQueue, handleFileDelete, processUpload, task.media_type]);
+  }, [t, statusTextMapping, processUpload, fileQueue, task.media_type, handleFileDelete]);
 
   return (
     <Wrapper flex="column" full>
       <Header flex items="center">
         <Bar />
-        <h3>数据导入</h3>
+        <h3>{t('uploadData')}</h3>
       </Header>
       <FlexLayout.Content flex items="stretch" gap="1.5rem">
         <Left flex="column">
-          <h4>标注文件上传</h4>
+          <h4>{t('filesUpload')}</h4>
           <UploadArea flex="column" gap="1rem" items="center">
             <UploadBg />
 
@@ -400,7 +408,7 @@ const InputData = () => {
                 multiple={true}
                 accept={FileMimeType[task.media_type!]}
               >
-                上传文件
+                {t('uploadFile')}
               </NativeUpload>
               <NativeUpload
                 type="primary"
@@ -410,15 +418,21 @@ const InputData = () => {
                 directory={true}
                 accept={FileMimeType[task.media_type!]}
               >
-                上传文件夹
+                {t('uploadFolder')}
               </NativeUpload>
             </FlexLayout>
             <ButtonWrapper flex="column" items="center" gap="0.25rem">
-              <div>支持文件类型包括：{FileExtensionText[task.media_type!]}</div>
-              <div> 单次上传文件最大数量为100个，建议单个文件大小不超过{MediaFileSize[task.media_type!]}MB </div>
+              <div>
+                {t('fileTypeSupportsInclude')}
+                {FileExtensionText[task.media_type!]}
+              </div>
+              <div>
+                {t('fileSizeLimit')}
+                {MediaFileSize[task.media_type!]}MB{' '}
+              </div>
             </ButtonWrapper>
           </UploadArea>
-          <h4>预标注上传</h4>
+          <h4>{t('preAnnotationFileUpload')}</h4>
           <FlexLayout.Item flex="column" items="flex-start" gap="0.5rem">
             <NativeUpload
               icon={<UploadOutlined />}
@@ -427,16 +441,16 @@ const InputData = () => {
               multiple={true}
               accept={'.jsonl, .json'}
             >
-              上传文件
+              {t('uploadFile')}
             </NativeUpload>
             <div style={{ color: '#999', fontSize: 12 }}>
-              支持上传 jsonl 或 json 格式的预标注文件，参考{' '}
+              {t('preAnnotationFileUploadDescription')}
               <a
                 target="_blank"
                 href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
                 rel="noreferrer"
               >
-                示例
+                {t('example')}
               </a>
             </div>
           </FlexLayout.Item>
@@ -444,27 +458,25 @@ const InputData = () => {
         <Right flex="column" gap="1rem">
           {fileQueue.length > 0 && (
             <FlexLayout.Header items="center" gap="0.25rem" flex>
-              <b>上传列表</b>
-              <div>正在上传</div>
+              <b>{t('uploadQueue')}</b>
+              <div>{t('uploading')}</div>
               <FlexLayout gap=".25rem">
                 <span style={{ display: 'inline-block', color: 'var(--color-primary)' }}>
                   {amountMapping.uploading}
                 </span>
-                <span>个；</span>
               </FlexLayout>
               <FlexLayout gap=".25rem">
-                <span>上传成功</span>
+                <span>{t('uploadSuccess')}</span>
                 <Status type="success" icon={null} style={{ display: 'inline-block' }}>
                   {amountMapping.succeeded}
                 </Status>
                 <span>个，</span>
               </FlexLayout>
               <FlexLayout gap=".25rem">
-                <span>上传失败</span>
+                <span>{t('uploadFailed')}</span>
                 <Status type="failed" icon={null} style={{ display: 'inline-block' }}>
                   {amountMapping.failed}
                 </Status>
-                <span>个。</span>
               </FlexLayout>
             </FlexLayout.Header>
           )}

@@ -4,6 +4,7 @@ import { Button } from 'antd';
 import _ from 'lodash-es';
 import styled from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { MediaType } from '@/api/types';
@@ -26,6 +27,7 @@ export interface TaskStatusProps {
 }
 
 export function TaskStatus({ children, status, count }: React.PropsWithChildren<TaskStatusProps>) {
+  const { t } = useTranslation();
   const colorMapping = {
     done: 'var(--color-primary)',
     new: 'var(--color-text-tertiary)',
@@ -33,9 +35,9 @@ export function TaskStatus({ children, status, count }: React.PropsWithChildren<
   };
 
   const textMapping = {
-    done: '已标注',
-    new: '未标注',
-    skipped: '跳过',
+    done: t('annotated'),
+    new: t('new'),
+    skipped: t('skipped'),
   };
 
   const color = status ? colorMapping[status] : colorMapping.new;
@@ -56,6 +58,7 @@ const Statistical = () => {
   const { stats = {} } = taskData || {};
   const taskId = _.get(taskData, 'id');
   const mediaType = _.get(taskData, 'media_type', MediaType.IMAGE);
+  const { t } = useTranslation();
 
   const samples = _.get(routerLoaderData, 'samples');
 
@@ -77,26 +80,26 @@ const Statistical = () => {
   return (
     <FlexLayout justify="space-between" items="center">
       <FlexLayout items="center" gap="3rem">
-        <b>数据总览</b>
+        <b>{t('dataOverview')}</b>
         <TaskStatus status="done" count={stats.done} />
         <TaskStatus status="new" count={stats.new} />
         <TaskStatus status="skipped" count={stats.skipped} />
-        <TaskStatus count={stats.done! + stats.new! + stats.skipped!}>总计</TaskStatus>
+        <TaskStatus count={stats.done! + stats.new! + stats.skipped!}>{t('total')}</TaskStatus>
       </FlexLayout>
       <FlexLayout gap=".5rem">
         <Button type="text" icon={<SettingOutlined />} onClick={handleGoConfig}>
-          任务配置
+          {t('taskConfig')}
         </Button>
         <ExportPortal taskId={+taskId!} mediaType={mediaType} tools={taskData?.config?.tools}>
           <Button type="text" icon={<UploadOutlined />}>
-            数据导出
+            {t('export')}
           </Button>
         </ExportPortal>
         <Button type="primary" ghost onClick={handleGoUpload}>
-          数据导入
+          {t('uploadData')}
         </Button>
         <Button type="primary" onClick={commonController.debounce(handleGoAnnotation, 100)}>
-          开始标注
+          {t('startAnnotate')}
         </Button>
       </FlexLayout>
     </FlexLayout>

@@ -85,6 +85,10 @@ export class Monitor {
   };
 
   private _handleKeyDown = (e: KeyboardEvent) => {
+    if ((e.target as HTMLElement).tagName === 'INPUT') {
+      return;
+    }
+
     if (e.key === ' ' || keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
       this._updateKeyStatus(e.key, true);

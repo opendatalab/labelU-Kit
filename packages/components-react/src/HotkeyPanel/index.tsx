@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as ArrowDown } from './arrow-down.svg';
 import { ReactComponent as ArrowRight } from './arrow-right.svg';
@@ -202,6 +203,7 @@ export function HotkeyPanel({ items }: HotkeyPanelProps) {
   const [openKeys, setOpenKeys] = useState<React.Key[]>([]);
   const [activeKey, setActiveKey] = useState<React.Key>(items[0].key);
   const [hotkeys, setHotkeys] = useState<Hotkey[] | undefined>();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setHotkeys(items[0].hotkeys);
@@ -222,18 +224,18 @@ export function HotkeyPanel({ items }: HotkeyPanelProps) {
       <HotkeyTable
         columns={[
           {
-            title: '操作',
+            title: t('action'),
             key: 'name',
           },
           {
-            title: '快捷键',
+            title: t('hotkey'),
             key: 'content',
           },
         ]}
         data={tableData}
       />
     );
-  }, [hotkeys]);
+  }, [hotkeys, t]);
 
   return (
     <Wrapper>

@@ -4,6 +4,7 @@ import { useNavigate, useRevalidator } from 'react-router';
 import Icon from '@ant-design/icons';
 import formatter from '@labelu/formatter';
 import { EllipsisText, FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import { modal } from '@/StaticAnt';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
@@ -20,12 +21,13 @@ import { jsonParse } from '@/utils';
 import { ActionRow, CardWrapper, MediaBadge, Row, TaskName } from './style';
 
 function MediaTypeTag({ type, status }: React.PropsWithChildren<{ type: MediaType; status: TaskStatus }>) {
+  const { t } = useTranslation();
   let children = MediaTypeText[type];
   let color = 'var(--color-primary)';
   let bgColor = 'var(--color-primary-bg)';
 
   if (status === TaskStatus.DRAFT || status === TaskStatus.IMPORTED) {
-    children = '草稿';
+    children = t('draft');
     color = 'var(--color-warning-text)';
     bgColor = 'var(--color-warning-bg)';
   } else {
@@ -42,6 +44,7 @@ function MediaTypeTag({ type, status }: React.PropsWithChildren<{ type: MediaTyp
 const TaskCard = (props: any) => {
   const { cardInfo, className } = props;
   const revalidator = useRevalidator();
+  const { t } = useTranslation();
   const { stats, id, status } = cardInfo;
   const unDoneSample = stats.new;
   const doneSample = stats.done + stats.skipped;
@@ -67,10 +70,10 @@ const TaskCard = (props: any) => {
     e.stopPropagation();
 
     modal.confirm({
-      title: '删除任务',
-      content: '确定删除该任务吗？',
-      okText: '确定',
-      cancelText: '取消',
+      title: t('deleteTask'),
+      content: t('confirmDeleteTask'),
+      okText: t('ok'),
+      cancelText: t('cancel'),
       onOk: async () => {
         await deleteTask(id);
         revalidator.revalidate();
@@ -90,14 +93,14 @@ const TaskCard = (props: any) => {
         <ActionRow justify="flex-end" items="center">
           {cardInfo.config && (
             <ExportPortal taskId={cardInfo.id} mediaType={cardInfo.media_type} tools={tools}>
-              <Tooltip placement={'top'} title={'数据导出'}>
+              <Tooltip placement={'top'} title={t('export')}>
                 <Button size="small" type="text" icon={<Icon component={OutputIcon} />} />
               </Tooltip>
             </ExportPortal>
           )}
 
           {username === cardInfo.created_by.username && (
-            <Tooltip title="删除任务" placement={'top'}>
+            <Tooltip title={t('deleteTask')} placement={'top'}>
               <Button onClick={handleDeleteTask} size="small" type="text" icon={<Icon component={DeleteIcon} />} />
             </Tooltip>
           )}
@@ -113,7 +116,7 @@ const TaskCard = (props: any) => {
             {total}/{total}
           </FlexLayout.Header>
           <FlexLayout.Footer>
-            <Status type="success">已完成</Status>
+            <Status type="success">{t('done')}</Status>
           </FlexLayout.Footer>
         </FlexLayout>
       )}
