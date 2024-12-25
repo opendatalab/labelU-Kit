@@ -2,6 +2,7 @@ import { Toolbar, Tooltip, Kbd, HotkeyPanel } from '@labelu/components-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import type { VideoAnnotationType } from '@labelu/interface';
 import styled from 'styled-components';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as SegmentIcon } from '@/assets/icons/segment.svg';
 import { ReactComponent as FrameIcon } from '@/assets/icons/frame.svg';
@@ -31,6 +32,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
   const { onToolChange, currentTool, config } = useTool();
   const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
   const { redo, undo, pastRef, futureRef } = useHistoryCtx();
+  const { t } = useTranslation();
 
   const handleToolChange = (tool?: VideoAnnotationType) => () => {
     onToolChange(tool);
@@ -93,7 +95,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
           <Tooltip
             overlay={
               <span>
-                选择 <Kbd dark>C</Kbd>
+                {t('select')} <Kbd dark>C</Kbd>
               </span>
             }
             placement="topLeft"
@@ -106,7 +108,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
             <Tooltip
               overlay={
                 <span>
-                  片断分割 <Kbd dark>X</Kbd>
+                  {t('segment')} <Kbd dark>X</Kbd>
                 </span>
               }
               placement="top"
@@ -120,7 +122,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
             <Tooltip
               overlay={
                 <span>
-                  时间戳 <Kbd dark>E</Kbd>
+                  {t('timestamp')} <Kbd dark>E</Kbd>
                 </span>
               }
               placement="top"
@@ -134,7 +136,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
       }
       extra={
         <Tooltip overlayStyle={tooltipStyle} overlay={<HotkeyPanel items={hotkeysConst} />} placement="bottomLeft">
-          <Toolbar.Item>快捷键</Toolbar.Item>
+          <Toolbar.Item>{t('hotkeys')}</Toolbar.Item>
         </Tooltip>
       }
       right={right}
