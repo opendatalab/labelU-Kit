@@ -9,6 +9,7 @@ import { signUp } from '@/api/services/user';
 import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
 import { ReactComponent as PasswordIcon } from '@/assets/svg/password.svg';
 import { message } from '@/StaticAnt';
+import LanguageSwitcher from '@/components/LangSwitcher';
 
 import LogoTitle from '../../components/LogoTitle';
 import { ButtonWrapper, FormWrapper, LoginWrapper } from '../login/style';
@@ -104,8 +105,11 @@ const SignUpPage = () => {
             </Form.Item>
           </FlexLayout>
         </Form>
-        <FlexLayout justify="flex-end">
-          {t('alreadyHaveAccount')} <Link to={'/login'}>{t('login')}</Link>
+        <FlexLayout justify="space-between" items="center">
+          <LanguageSwitcher />
+          <div>
+            {t('alreadyHaveAccount')} <Link to={'/login'}>{t('login')}</Link>
+          </div>
         </FlexLayout>
       </FormWrapper>
     </LoginWrapper>

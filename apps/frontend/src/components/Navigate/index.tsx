@@ -13,6 +13,7 @@ import AppPanel from '../AppPanel';
 import Breadcrumb from '../Breadcrumb';
 import { LabeluLogo, NavigationWrapper } from './style';
 import TaskTip from './TaskTip';
+import LanguageSwitcher from '../LangSwitcher';
 
 const Homepage = () => {
   const username = localStorage.getItem('username');
@@ -81,6 +82,7 @@ const Homepage = () => {
         >
           {t('documentation')}
         </Button>
+        <LanguageSwitcher />
         <Dropdown
           trigger={['click']}
           menu={{

@@ -8,6 +8,7 @@ import { useTranslation } from '@labelu/i18n';
 import { login } from '@/api/services/user';
 import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
 import { ReactComponent as PasswordIcon } from '@/assets/svg/password.svg';
+import LanguageSwitcher from '@/components/LangSwitcher';
 
 import LogoTitle from '../../components/LogoTitle';
 import { ButtonWrapper, FormWrapper, LoginWrapper } from './style';
@@ -77,7 +78,8 @@ const LoginPage = () => {
             </Form.Item>
           </FlexLayout>
         </Form>
-        <FlexLayout justify="flex-end">
+        <FlexLayout justify="space-between" items="center">
+          <LanguageSwitcher />
           <Link to="/register">{t('signUp')}</Link>
         </FlexLayout>
       </FormWrapper>
