@@ -7,11 +7,10 @@ import { i18n } from './i18n';
 import { resources } from './locales';
 const LANG_CHANGE_EVENT = 'labelu-lang-change';
 
-interface I18nProviderProps {
+export type I18nProviderProps = React.PropsWithChildren<{
   locales?: Record<string, Record<string, unknown> & { translation: Record<string, unknown> }>;
   locale?: string;
-  children: React.ReactElement;
-}
+}>;
 
 export function I18nProvider(props: I18nProviderProps) {
   const { locales, children, locale } = props;
@@ -54,11 +53,9 @@ export function I18nProvider(props: I18nProviderProps) {
       });
     }
   }, [locales]);
-  return (
-    <>
-      <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-    </>
-  );
+
+  // @ts-ignore
+  return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;
 }
 
 /** 用于外部改变语言 */
