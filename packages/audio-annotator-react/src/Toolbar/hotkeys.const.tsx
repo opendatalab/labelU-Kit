@@ -1,15 +1,16 @@
 import { Kbd, getOS } from '@labelu/components-react';
+import { i18n } from '@labelu/i18n';
 
 import { ReactComponent as MouseRightClick } from './mouse-right.svg';
 const os = getOS();
 
 export default [
   {
-    label: '通用',
+    label: i18n.t('general'),
     key: 'common',
     hotkeys: [
       {
-        name: '保存',
+        name: i18n.t('save'),
         content:
           os === 'MacOS' ? (
             <>
@@ -22,7 +23,7 @@ export default [
           ),
       },
       {
-        name: '跳过',
+        name: i18n.t('skip'),
         content:
           os === 'MacOS' ? (
             <>
@@ -35,7 +36,7 @@ export default [
           ),
       },
       {
-        name: '撤销',
+        name: i18n.t('undo'),
         content:
           os === 'MacOS' ? (
             <>
@@ -48,7 +49,7 @@ export default [
           ),
       },
       {
-        name: '重做',
+        name: i18n.t('redo'),
         content:
           os === 'MacOS' ? (
             <>
@@ -61,15 +62,15 @@ export default [
           ),
       },
       {
-        name: '上一张',
+        name: i18n.t('previous'),
         content: <Kbd>A</Kbd>,
       },
       {
-        name: '下一张',
+        name: i18n.t('next'),
         content: <Kbd>D</Kbd>,
       },
       {
-        name: '选择前9个标签',
+        name: i18n.t('select9'),
         content: (
           <>
             <Kbd>1</Kbd> ~ <Kbd>9</Kbd>
@@ -79,15 +80,15 @@ export default [
     ],
   },
   {
-    label: '基础操作',
+    label: i18n.t('basicAction'),
     key: 'actions',
     hotkeys: [
       {
-        name: '播放 / 暂停',
+        name: `${i18n.t('play')} / ${i18n.t('pause')}`,
         content: <Kbd>Space</Kbd>,
       },
       {
-        name: '编辑属性',
+        name: i18n.t('editAttribute'),
         content: (
           <>
             {os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
@@ -95,7 +96,7 @@ export default [
         ),
       },
       {
-        name: '增倍率',
+        name: i18n.t('increaseRate'),
         content:
           os === 'MacOS' ? (
             <>
@@ -108,7 +109,7 @@ export default [
           ),
       },
       {
-        name: '减倍率',
+        name: i18n.t('decreaseRate'),
         content:
           os === 'MacOS' ? (
             <>
@@ -121,63 +122,63 @@ export default [
           ),
       },
       {
-        name: '前进',
+        name: i18n.t('forward'),
         content: <Kbd>→</Kbd>,
       },
       {
-        name: '后退',
+        name: i18n.t('backward'),
         content: <Kbd>←</Kbd>,
       },
       {
-        name: '选中标记',
+        name: i18n.t('selectLabel'),
         content: <MouseRightClick />,
       },
       {
-        name: '删除标记',
+        name: i18n.t('deleteLabel'),
         content: (
           <>
-            选中后，按 <Kbd>Delete</Kbd> 或 <Kbd>Backspace</Kbd>
+            {i18n.t('selectThenPress')} <Kbd>Delete</Kbd> {i18n.t('or')} <Kbd>Backspace</Kbd>
           </>
         ),
       },
       {
-        name: '上一个标记',
+        name: i18n.t('prevLabel'),
         content: <Kbd>↑</Kbd>,
       },
       {
-        name: '下一个标记',
+        name: i18n.t('nextLabel'),
         content: <Kbd>↓</Kbd>,
       },
     ],
   },
   {
-    label: '标注工具',
+    label: i18n.t('tools'),
     key: 'tools',
     children: [
       {
-        label: '片断分割',
+        label: i18n.t('segment'),
         key: 'segment',
         hotkeys: [
           {
-            name: '截取片断',
+            name: i18n.t('doSegment'),
             content: (
               <span>
-                开始和结束按 <Kbd>X</Kbd>
+                {i18n.t('pressAtStartAndEnd')} <Kbd>X</Kbd>
               </span>
             ),
           },
           {
-            name: '取消',
+            name: i18n.t('cancel'),
             content: <Kbd>Esc</Kbd>,
           },
         ],
       },
       {
-        label: '时间戳',
+        label: i18n.t('timestamp'),
         key: 'frame',
         hotkeys: [
           {
-            name: '标时间点',
+            name: i18n.t('doTimestamp'),
             content: <Kbd>E</Kbd>,
           },
         ],
