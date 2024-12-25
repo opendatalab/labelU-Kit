@@ -1,6 +1,6 @@
 {
   "name": "@labelu/audio-annotator-react",
-  "version": "1.6.0",
+  "version": "1.7.0-alpha.1",
   "description": "audio annotator for react",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -28,9 +28,9 @@
     "react"
   ],
   "dependencies": {
-    "@labelu/i18n": "workspace:*",
-    "@labelu/audio-react": "1.3.5",
-    "@labelu/components-react": "1.6.0",
+    "@labelu/i18n": "1.0.0-alpha.1",
+    "@labelu/audio-react": "1.3.6-alpha.1",
+    "@labelu/components-react": "1.7.0-alpha.1",
     "@labelu/interface": "1.3.1",
     "lodash.clonedeep": "^4.5.0",
     "polished": "^4.2.2",
