@@ -73,6 +73,14 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     undo();
   }, [undo]);
 
+  const handleUndo = useCallback(() => {
+    if (dragModalRef.current?.getVisibility()) {
+      return;
+    }
+
+    undo();
+  }, [undo]);
+
   const handleToolChange = (tool: ToolName) => () => {
     engine.switch(tool, memorizeToolLabel.current?.[tool]?.value);
   };
