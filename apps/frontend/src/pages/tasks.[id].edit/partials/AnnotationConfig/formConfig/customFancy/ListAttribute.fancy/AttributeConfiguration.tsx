@@ -126,16 +126,16 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
       })
       .catch((error) => {
         modal.info({
-          title: '请填写完整的属性内容',
-          okText: '我知道了',
-          content: '请填写完整属性内容再选择保存',
+          title: t('pleaseCompleteTheAttribute'),
+          okText: t('iKnown'),
+          content: t('completeAndSave'),
           icon: <ExclamationCircleFilled style={{ color: 'var(--color-warning)' }} />,
           onOk: () => {
             form.scrollToField(error.errorFields[0].name);
           },
         });
       });
-  }, [form, onChange, onClose, reset]);
+  }, [t, form, onChange, onClose, reset]);
 
   const handleCancel = useCallback(() => {
     reset();
@@ -145,17 +145,17 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   const handleClose = useCallback(() => {
     if (!isEqual(value)(form.getFieldsValue().list)) {
       modal.confirm({
-        title: '关联属性将不会保存，是否确认退出',
+        title: t('categoryExitConfirm'),
         onOk: handleCancel,
-        okText: '退出',
-        cancelText: '继续编辑',
+        okText: t('exit'),
+        cancelText: t('continueEdit'),
       });
 
       return;
     }
 
     onClose();
-  }, [form, handleCancel, onClose, value]);
+  }, [t, form, handleCancel, onClose, value]);
 
   const emptyPlaceholder = useMemo(
     () => (

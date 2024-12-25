@@ -1,5 +1,6 @@
 import { useParams } from 'react-router';
 import { VideoCard, AudioCard } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
@@ -29,6 +30,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
   const url = file.url;
   const routeParams = useParams();
   const sampleId = +routeParams.sampleId!;
+  const { t } = useTranslation();
 
   const handleOnClick = (sample: SampleResponse) => {
     if (sample.id === sampleId) {
@@ -81,7 +83,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
       >
         {type === MediaType.IMAGE && <img src={url} alt="" />}
         {state === 'DONE' && <CheckIcon />}
-        {state === 'SKIPPED' && <SkipWrapper>跳过</SkipWrapper>}
+        {state === 'SKIPPED' && <SkipWrapper>{t('skipped')}</SkipWrapper>}
       </ContentWrapper>
       <IdWrapper>{inner_id}</IdWrapper>
     </Wrapper>

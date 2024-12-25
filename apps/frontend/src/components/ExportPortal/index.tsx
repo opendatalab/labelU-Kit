@@ -1,6 +1,7 @@
 import { Modal, Select } from 'antd';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlexLayout } from '@labelu/components-react';
+import { i18n, useTranslation } from '@labelu/i18n';
 
 import { ExportType, MediaType } from '@/api/types';
 import { outputSample, outputSamples } from '@/api/services/samples';
@@ -15,15 +16,15 @@ export interface ExportPortalProps {
 }
 
 export const exportDescriptionMapping = {
-  [ExportType.JSON]: 'Label U 标准格式，包含任务id、标注结果、url、fileName字段',
-  [ExportType.CSV]: '适用于单一标注类型的任务场景',
-  [ExportType.XML]: 'Label U标准格式的XML形式',
-  [ExportType.COCO]: 'COCO数据集标准格式，面向物体检测（拉框）和图像分割（多边形）任务',
-  [ExportType.MASK]: '面向图像分割（多边形）任务',
-  [ExportType.YOLO]: 'YOLO数据集标准格式，面向物体检测（拉框）任务',
-  [ExportType.LABEL_ME]: '兼容 Labelme 标注工具的标注数据格式（不支持立体框、曲线）',
-  [ExportType.TF_RECORD]: 'Tensorflow Object Detection API 标准格式',
-  [ExportType.PASCAL_VOC]: 'PASCAL VOC 标准格式，面向物体检测（拉框）任务',
+  [ExportType.JSON]: i18n.t('formatJsonDescription'),
+  [ExportType.CSV]: i18n.t('formatCsvDescription'),
+  [ExportType.XML]: i18n.t('formatXmlDescription'),
+  [ExportType.COCO]: i18n.t('formatCocoDescription'),
+  [ExportType.MASK]: i18n.t('formatMaskDescription'),
+  [ExportType.YOLO]: i18n.t('formatYoloDescription'),
+  [ExportType.LABEL_ME]: i18n.t('formatLabelmeDescription'),
+  [ExportType.TF_RECORD]: i18n.t('formatTFRecordDescription'),
+  [ExportType.PASCAL_VOC]: i18n.t('formatPascalVocDescription'),
 };
 
 const optionMapping = {
@@ -77,6 +78,7 @@ function isIncludeCoco(tools?: any[]) {
 export default function ExportPortal({ taskId, sampleIds, mediaType, tools, children }: ExportPortalProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const [exportType, setExportType] = useState<ExportType>(ExportType.JSON);
+  const { t } = useTranslation();
 
   const handleOpenModal = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -171,10 +173,16 @@ export default function ExportPortal({ taskId, sampleIds, mediaType, tools, chil
   return (
     <>
       {plainChild}
-      <Modal title="选择导出格式" okText={'导出'} onOk={handleExport} onCancel={handleCloseModal} open={modalVisible}>
+      <Modal
+        title={t('selectExportFormat')}
+        okText={t('doExport')}
+        onOk={handleExport}
+        onCancel={handleCloseModal}
+        open={modalVisible}
+      >
         <FlexLayout flex="column" gap="1rem">
           <FlexLayout.Header items="center" gap="1rem" flex>
-            <span style={{ whiteSpace: 'nowrap' }}>导出格式</span>
+            <span style={{ whiteSpace: 'nowrap' }}>{t('exportFormat')}</span>
             <Select popupMatchSelectWidth={false} options={options} onChange={handleOptionChange} value={exportType} />
           </FlexLayout.Header>
           <div>{exportDescriptionMapping[exportType]}</div>

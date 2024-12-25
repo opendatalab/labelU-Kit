@@ -157,8 +157,8 @@ const Samples = () => {
 
         return sampleNamesWithPreAnnotation.includes(realSampleName) ||
           sampleNamesWithPreAnnotation.includes(sampleName)
-          ? '是'
-          : '无';
+          ? t('yes')
+          : '';
       },
     },
     {
@@ -188,7 +188,7 @@ const Samples = () => {
         const sampleNames = _.get(record, 'sample_names');
 
         if (sampleNames) {
-          return '-';
+          return '';
         }
 
         let result = 0;
