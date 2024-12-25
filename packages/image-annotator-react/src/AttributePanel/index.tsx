@@ -293,7 +293,7 @@ export function AttributePanel() {
 
     if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid) {
       _titles.push({
-        title: t('label'),
+        title: t('labels'),
         key: 'label' as const,
         subtitle: `${sortedImageAnnotations.length}${t('markCount')}`,
       });
