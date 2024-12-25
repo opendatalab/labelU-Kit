@@ -3,6 +3,7 @@ import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
+import { i18n, useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
@@ -74,6 +75,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const currentSample = samples[sampleIndex];
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   // 第一次进入就是40的倍数时，获取下一页数据
   useEffect(() => {
@@ -397,7 +399,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       }
 
       saveCurrentSample().then(() => {
-        message.success('已保存');
+        message.success(t('saved'));
       });
     },
     {
@@ -460,25 +462,25 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
     <FlexLayout items="center" gap=".5rem">
       {isSampleSkipped ? (
         <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
-          取消跳过
+          {t('cancelSkip')}
         </Button>
       ) : (
         <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
-          跳过
+          {t('skip')}
         </Button>
       )}
       {!isFirstSample && (
         <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
-          上一页
+          {t('prevImage')}
         </Button>
       )}
       {isLastSample ? (
         <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
-          完成
+          {t('finish')}
         </Button>
       ) : (
         <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
-          下一页
+          {t('nextImage')}
         </Button>
       )}
     </FlexLayout>

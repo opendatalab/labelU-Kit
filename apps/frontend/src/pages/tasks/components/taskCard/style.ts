@@ -17,7 +17,7 @@ export const ActionRow = styled(FlexLayout)`
 export const MediaBadge = styled.div<{ color: string; bg: string }>`
   color: ${(props) => props.color};
   background-color: ${(props) => props.bg};
-  width: 40px;
+  padding: 0 0.25rem;
   height: 22px;
   line-height: 22px;
   border-radius: 2px;

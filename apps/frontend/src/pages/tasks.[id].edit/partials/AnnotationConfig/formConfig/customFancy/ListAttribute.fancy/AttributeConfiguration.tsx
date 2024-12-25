@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Icon, { ExclamationCircleFilled } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as AddCategoryIcon } from '@/assets/svg/add-category.svg';
 import { ReactComponent as AddTextIcon } from '@/assets/svg/add-text.svg';
@@ -88,6 +89,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   const [stateValue, setStateValue] = useState<AttributeConfigurationState>({ list: value || [] });
   const ref = useRef<FancyCategoryAttributeRef>(null);
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!visible) {
@@ -124,16 +126,16 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
       })
       .catch((error) => {
         modal.info({
-          title: '请填写完整的属性内容',
-          okText: '我知道了',
-          content: '请填写完整属性内容再选择保存',
+          title: t('pleaseCompleteTheAttribute'),
+          okText: t('iKnown'),
+          content: t('completeAndSave'),
           icon: <ExclamationCircleFilled style={{ color: 'var(--color-warning)' }} />,
           onOk: () => {
             form.scrollToField(error.errorFields[0].name);
           },
         });
       });
-  }, [form, onChange, onClose, reset]);
+  }, [t, form, onChange, onClose, reset]);
 
   const handleCancel = useCallback(() => {
     reset();
@@ -143,46 +145,46 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   const handleClose = useCallback(() => {
     if (!isEqual(value)(form.getFieldsValue().list)) {
       modal.confirm({
-        title: '关联属性将不会保存，是否确认退出',
+        title: t('categoryExitConfirm'),
         onOk: handleCancel,
-        okText: '退出',
-        cancelText: '继续编辑',
+        okText: t('exit'),
+        cancelText: t('continueEdit'),
       });
 
       return;
     }
 
     onClose();
-  }, [form, handleCancel, onClose, value]);
+  }, [t, form, handleCancel, onClose, value]);
 
   const emptyPlaceholder = useMemo(
     () => (
       <div className="addition">
         <button className="addition-button new-category-attr" onClick={handleAddCategoryAttribute(CategoryType.Enum)}>
           <Icon className="icon" component={AddCategoryIcon} />
-          <span className="title">新建分类属性</span>
-          <sub>选择题形式</sub>
+          <span className="title">{t('addCategory')}</span>
+          <sub>{t('selectType')}</sub>
         </button>
 
         <button className="addition-button new-text-attr" onClick={handleAddCategoryAttribute(CategoryType.String)}>
           <Icon className="icon" component={AddTextIcon} />
-          <span className="title">新建文本属性</span>
-          <sub>填空题形式</sub>
+          <span className="title">{t('addDescription')}</span>
+          <sub>{t('textarea')}</sub>
         </button>
       </div>
     ),
-    [handleAddCategoryAttribute],
+    [t, handleAddCategoryAttribute],
   );
   const footer = useMemo(
     () => (
       <FlexLayout gap=".5rem" className="footer">
         <Button type="primary" onClick={handleSave}>
-          保存
+          {t('save')}
         </Button>
-        <Button onClick={handleClose}>取消</Button>
+        <Button onClick={handleClose}>{t('cancel')}</Button>
       </FlexLayout>
     ),
-    [handleSave, handleClose],
+    [t, handleSave, handleClose],
   );
 
   const isValueEmpty = useMemo(() => {
@@ -222,7 +224,7 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
   return (
     <StyledDrawer
       open={visible}
-      title="属性配置"
+      title={t('attributesConfig')}
       width={600}
       onClose={handleClose}
       footer={isValueEmpty ? null : footer}

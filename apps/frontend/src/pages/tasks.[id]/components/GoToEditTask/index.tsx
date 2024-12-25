@@ -2,10 +2,12 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from 'antd';
 import { FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import { TaskStatus } from '@/api/types';
 
 const GoToEditTask = (props: any) => {
+  const { t } = useTranslation();
   const { taskStatus } = props;
   const navigate = useNavigate();
   const routeParams = useParams();
@@ -30,9 +32,9 @@ const GoToEditTask = (props: any) => {
   return (
     <FlexLayout items="center" gap=".5rem">
       <InfoCircleOutlined style={{ color: '#F5483B' }} />
-      <div>请先完成任务配置， 再开始标注</div>
+      <div>{t('configBeforeStart')}</div>
       <Button type="primary" ghost onClick={handleConfigClick}>
-        去配置
+        {t('configTask')}
       </Button>
     </FlexLayout>
   );

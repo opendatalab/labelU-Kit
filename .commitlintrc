@@ -36,6 +36,7 @@
       [
         "workspace",
         "website",
+        "i18n",
         "frontend",
         "components",
         "image",

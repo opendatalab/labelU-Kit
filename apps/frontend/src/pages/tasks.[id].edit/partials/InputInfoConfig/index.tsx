@@ -2,6 +2,7 @@ import React, { memo, useContext } from 'react';
 import { Form, Input, Select } from 'antd';
 import styled from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 
 import { MediaType } from '@/api/types';
 
@@ -14,44 +15,50 @@ const Inner = styled(FlexLayout)`
 
 const InputInfoConfig = () => {
   const { basicFormInstance } = useContext(TaskCreationContext);
+  const { t } = useTranslation();
 
   return (
     <FlexLayout padding="1rem" flex="column">
       <Inner flex="column">
-        <h2>基础配置</h2>
+        <h2>{t('basicConfig')}</h2>
         <FlexLayout.Content>
           <Form form={basicFormInstance} labelCol={{ span: 3 }} wrapperCol={{ span: 21 }}>
-            <Form.Item label="任务名称" name="name" required rules={[{ required: true, message: '任务名称不可为空' }]}>
-              <Input placeholder="请输入50字以内的任务名称" maxLength={50} />
+            <Form.Item
+              label={t('taskName')}
+              name="name"
+              required
+              rules={[{ required: true, message: t('taskNameRequired') }]}
+            >
+              <Input placeholder={t('taskName50CharactersPlease')} maxLength={50} />
             </Form.Item>
-            <Form.Item label="数据类型" name="media_type" rules={[{ required: true, message: '数据类型不可为空' }]}>
+            <Form.Item
+              label={t('mediaType')}
+              name="media_type"
+              rules={[{ required: true, message: t('mediaTypeRequired') }]}
+            >
               <Select
-                placeholder="请选择数据类型"
+                placeholder={t('selectMediaTypePlease')}
                 options={[
                   {
-                    label: '图片',
+                    label: t('image'),
                     value: MediaType.IMAGE,
                   },
                   {
-                    label: '视频',
+                    label: t('video'),
                     value: MediaType.VIDEO,
                   },
                   {
-                    label: '音频',
+                    label: t('audio'),
                     value: MediaType.AUDIO,
                   },
                 ]}
               />
             </Form.Item>
-            <Form.Item label="任务描述" name="description">
-              <Input.TextArea placeholder="请输入500字以内的任务描述" maxLength={500} rows={6} />
+            <Form.Item label={t('taskDescription')} name="description">
+              <Input.TextArea placeholder={t('taskDescription500CharactersPlease')} maxLength={500} rows={6} />
             </Form.Item>
-            <Form.Item label="任务提示" name="tips">
-              <Input.TextArea
-                placeholder="请输入1000字以内的标注任务提示，在标注过程中为标注者提供帮助"
-                maxLength={1000}
-                rows={6}
-              />
+            <Form.Item label={t('taskTip')} name="tips">
+              <Input.TextArea placeholder={t('taskTipPlaceholder')} maxLength={1000} rows={6} />
             </Form.Item>
           </Form>
         </FlexLayout.Content>

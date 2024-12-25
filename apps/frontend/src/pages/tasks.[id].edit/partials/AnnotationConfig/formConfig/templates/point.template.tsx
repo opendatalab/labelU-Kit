@@ -1,3 +1,5 @@
+import { i18n } from '@labelu/i18n';
+
 import type { FancyItemIdentifier } from '@/components/FancyInput/types';
 
 export default [
@@ -24,12 +26,12 @@ export default [
         type: 'number',
         key: 'upperLimit',
         field: 'upperLimit',
-        label: '上限点数',
+        label: i18n.t('maxPointNumber'),
         initialValue: 100,
         rules: [
           {
             required: true,
-            message: '上限点数不能为空',
+            message: i18n.t('maxPointNumberRequired'),
           },
         ],
       },
@@ -37,11 +39,11 @@ export default [
         field: 'attributes',
         key: 'attributes',
         type: 'list-attribute',
-        label: '标签配置',
+        label: i18n.t('labelConfig'),
         initialValue: [
           {
             color: '#ff6600',
-            key: '标签-1',
+            key: i18n.t('label1'),
             value: 'label-1',
           },
         ],

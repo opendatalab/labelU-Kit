@@ -1,3 +1,5 @@
+import { i18n } from '@labelu/i18n';
+
 import type { FancyItemIdentifier } from '@/components/FancyInput/types';
 
 export default [
@@ -17,7 +19,7 @@ export default [
         type: 'group',
         key: 'minSize',
         layout: 'horizontal',
-        label: '最小尺寸',
+        label: i18n.t('minSize'),
         children: [
           {
             field: 'attributeConfigurable',
@@ -35,12 +37,12 @@ export default [
             antProps: {
               addonAfter: 'W',
               min: 0,
-              placeholder: '最小宽度',
+              placeholder: i18n.t('minWidth'),
             },
             rules: [
               {
                 required: true,
-                message: '最小宽度不能为空',
+                message: i18n.t('minWidthRequired'),
               },
             ],
           },
@@ -52,13 +54,13 @@ export default [
             antProps: {
               addonAfter: 'H',
               min: 0,
-              placeholder: '最小高度',
+              placeholder: i18n.t('minHeight'),
             },
             initialValue: 1,
             rules: [
               {
                 required: true,
-                message: '最小高度不能为空',
+                message: i18n.t('minHeightRequired'),
               },
             ],
           },
@@ -68,11 +70,11 @@ export default [
         field: 'attributes',
         key: 'attributes',
         type: 'list-attribute',
-        label: '标签配置',
+        label: i18n.t('labelConfig'),
         initialValue: [
           {
             color: '#ff6600',
-            key: '标签-1',
+            key: i18n.t('label1'),
             value: 'label-1',
           },
         ],
