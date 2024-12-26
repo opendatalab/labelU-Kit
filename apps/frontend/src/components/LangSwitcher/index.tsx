@@ -5,6 +5,19 @@ import Icon from '@ant-design/icons';
 
 import { ReactComponent as I18nSvg } from '@/assets/svg/i18n.svg';
 
+const langOptions = [
+  {
+    key: 'zh-CN',
+    label: '简体中文',
+    value: 'zh-CN',
+  },
+  {
+    key: 'en-US',
+    label: 'English',
+    value: 'en-US',
+  },
+];
+
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
@@ -12,25 +25,9 @@ export default function LanguageSwitcher() {
     return ['zh', 'zh_CN', 'zh-CN'].includes(i18n.language) ? 'zh-CN' : 'en-US';
   }, [i18n.language]);
 
-  const langOptions = useMemo(
-    () => [
-      {
-        key: 'zh-CN',
-        label: '简体中文',
-        value: 'zh-CN',
-      },
-      {
-        key: 'en-US',
-        label: 'English',
-        value: 'en-US',
-      },
-    ],
-    [],
-  );
-
   const langLabel = useMemo(() => {
     return langOptions.find((item) => item.key === lang)?.label;
-  }, [lang, langOptions]);
+  }, [lang]);
 
   const changeLocale = (e: any) => {
     i18n.changeLanguage(e.key);
