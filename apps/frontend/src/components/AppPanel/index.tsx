@@ -1,6 +1,8 @@
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
 import _ from 'lodash';
+import { useTranslation } from '@labelu/i18n';
+import { useMemo } from 'react';
 
 import { ReactComponent as LabelLLM } from '@/assets/svg/labelllm.svg';
 import { ReactComponent as MinerU } from '@/assets/svg/mineru.svg';
@@ -19,43 +21,47 @@ interface AppLink {
   description: string;
 }
 
-const apps = [
-  {
-    name: 'OpenDataLab',
-    links: [{ name: '立即前往', link: 'https://opendatalab.com' }],
-    icon: <OpenDataLab />,
-    description: '一个引领 AI 大模型时代的开放数据平台，提供了海量的、多模态的优质数据集，助力 AI 开发落地',
-  },
-  {
-    name: 'LabelLLM',
-    links: [
-      {
-        name: 'Github',
-        link: 'https://github.com/opendatalab/LabelLLM?tab=readme-ov-file#labelllm-the-open-source-data-annotation-platform',
-      },
-    ],
-    icon: <LabelLLM />,
-    description: '专业致力于 LLM 对话标注，通过灵活的工具配置与多种数据模态的广泛兼容，为大模型打造高质量数据',
-  },
-  {
-    name: 'MinerU',
-    links: [
-      { name: 'Github', link: 'https://github.com/opendatalab/MinerU' },
-      { name: '在线体验', link: 'https://opendatalab.com/OpenSourceTools/Extractor/PDF' },
-    ],
-    icon: <MinerU />,
-    description: '一站式开源高质量数据提取工具，支持多格式（PDF/网页/电子书），智能萃取，生成高质量语料',
-  },
-];
-
 export default function AppPanel() {
+  const { t } = useTranslation();
   const handleGoApp = (app: AppLink) => {
     window.open(app.links[0].link, '_blank');
   };
 
+  const apps = useMemo(
+    () => [
+      {
+        name: 'OpenDataLab',
+        links: [{ name: t('goTo'), link: 'https://opendatalab.com' }],
+        icon: <OpenDataLab />,
+        description: t('opendatalabDescription'),
+      },
+      {
+        name: 'LabelLLM',
+        links: [
+          {
+            name: 'Github',
+            link: 'https://github.com/opendatalab/LabelLLM?tab=readme-ov-file#labelllm-the-open-source-data-annotation-platform',
+          },
+        ],
+        icon: <LabelLLM />,
+        description: t('labelllmDescription'),
+      },
+      {
+        name: 'MinerU',
+        links: [
+          { name: 'Github', link: 'https://github.com/opendatalab/MinerU' },
+          { name: t('tryOnline'), link: 'https://opendatalab.com/OpenSourceTools/Extractor/PDF' },
+        ],
+        icon: <MinerU />,
+        description: t('minerUDescription'),
+      },
+    ],
+    [t],
+  );
+
   return (
     <div>
-      <div className={styles.title}>欢迎使用 OpenDataLab 开源工具 🎉</div>
+      <div className={styles.title}>{t('toolboxWelcome')}</div>
       <div className={styles.panel}>
         {_.map(apps, (app) => {
           return (

@@ -1,15 +1,17 @@
+import { i18n } from '@labelu/i18n';
+
 import { EAudioToolName, EGlobalToolName, EVideoToolName, ImageToolName } from '@/enums';
 
 export const TOOL_NAME: Record<string, string> = {
-  [ImageToolName.Rect]: '拉框',
-  [EGlobalToolName.Tag]: '标签分类',
-  [EGlobalToolName.Text]: '文本描述',
-  [ImageToolName.Point]: '标点',
-  [ImageToolName.Polygon]: '多边形',
-  [ImageToolName.Cuboid]: '立体框',
-  [ImageToolName.Line]: '标线',
-  [EVideoToolName.VideoSegmentTool]: '片断分割',
-  [EVideoToolName.VideoFrameTool]: '时间戳',
-  [EAudioToolName.AudioSegmentTool]: '片断分割',
-  [EAudioToolName.AudioFrameTool]: '时间戳',
+  [ImageToolName.Rect]: i18n.t('rect'),
+  [EGlobalToolName.Tag]: i18n.t('tag'),
+  [EGlobalToolName.Text]: i18n.t('textDescription'),
+  [ImageToolName.Point]: i18n.t('point'),
+  [ImageToolName.Polygon]: i18n.t('polygon'),
+  [ImageToolName.Cuboid]: i18n.t('cuboid'),
+  [ImageToolName.Line]: i18n.t('line'),
+  [EVideoToolName.VideoSegmentTool]: i18n.t('segment'),
+  [EVideoToolName.VideoFrameTool]: i18n.t('timestamp'),
+  [EAudioToolName.AudioSegmentTool]: i18n.t('segment'),
+  [EAudioToolName.AudioFrameTool]: i18n.t('timestamp'),
 };

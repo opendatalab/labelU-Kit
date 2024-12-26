@@ -1,4 +1,5 @@
 import { v4 as uuid4 } from 'uuid';
+import { i18n } from '@labelu/i18n';
 
 import type { MediaType } from '@/api/types';
 import { FileExtensionText, MediaFileSize } from '@/constants/mediaType';
@@ -42,7 +43,7 @@ export const isCorrectFiles = (files: File[], type: MediaType) => {
   let result = true;
 
   if (files.length > 100) {
-    commonController.notificationErrorMessage({ message: '单次上传文件数量超过上限100个，请分批上传' }, 3);
+    commonController.notificationErrorMessage({ message: i18n.t('fileLimitOneTimeDescription') }, 3);
     return;
   }
 
@@ -51,7 +52,10 @@ export const isCorrectFiles = (files: File[], type: MediaType) => {
     const isOverSize = commonController.isOverSize(fileUnit.size, type);
 
     if (isOverSize) {
-      commonController.notificationErrorMessage({ message: `单个文件大小超过${MediaFileSize[type]}MB限制` }, 3);
+      commonController.notificationErrorMessage(
+        { message: `${i18n.t('singleFileSizeExceeds')}${MediaFileSize[type]}MB` },
+        3,
+      );
       result = false;
       break;
     }
@@ -64,10 +68,7 @@ export const isCorrectFiles = (files: File[], type: MediaType) => {
     const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name, type);
 
     if (!isCorrectFileType) {
-      commonController.notificationErrorMessage(
-        { message: `请上传支持的文件类型，类型包括：${FileExtensionText[type]}` },
-        3,
-      );
+      commonController.notificationErrorMessage({ message: `${i18n.t('fileTypeTips')}${FileExtensionText[type]}` }, 3);
       result = false;
       break;
     }

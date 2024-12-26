@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useEffect } from 'react';
+import { i18n } from '@labelu/i18n';
 
 import Register from '@/pages/register';
 import Tasks from '@/pages/tasks';
@@ -57,7 +58,7 @@ const routes: RouteObject[] = [
         loader: tasksLoader,
         handle: {
           crumb: () => {
-            return '任务列表';
+            return i18n.t('taskList');
           },
         },
         children: [
@@ -85,7 +86,7 @@ const routes: RouteObject[] = [
                 path: 'edit',
                 element: <TaskEdit />,
                 loader: async ({ params }) => {
-                  return params.taskId !== '0' ? '任务编辑' : '新建任务';
+                  return params.taskId !== '0' ? i18n.t('taskEdit') : i18n.t('createTask');
                 },
                 handle: {
                   crumb: (data: string) => {
@@ -105,7 +106,7 @@ const routes: RouteObject[] = [
                     id: 'annotation',
                     handle: {
                       crumb: () => {
-                        return '开始标注';
+                        return i18n.t('start');
                       },
                     },
                   },
@@ -115,7 +116,7 @@ const routes: RouteObject[] = [
                     loader: taskLoader,
                     handle: {
                       crumb: () => {
-                        return '标注结束';
+                        return i18n.t('finished');
                       },
                     },
                   },
@@ -138,7 +139,7 @@ const routes: RouteObject[] = [
     element: <Register />,
     handle: {
       crumb: () => {
-        return '注册';
+        return i18n.t('signUp');
       },
     },
   },

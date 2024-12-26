@@ -2,6 +2,7 @@ import Icon, { BellOutlined, PoweroffOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
 import { Button, Divider, Dropdown, Popover, Tag } from 'antd';
 import { Link, useMatch, useNavigate } from 'react-router-dom';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as LocalDeploy } from '@/assets/svg/local-deploy.svg';
 import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
@@ -13,12 +14,14 @@ import Breadcrumb from '../Breadcrumb';
 import ImageDemoGuide from './ImageDemoGuide';
 import { LabeluLogo, NavigationWrapper } from './style';
 import TaskTip from './TaskTip';
+import LanguageSwitcher from '../LangSwitcher';
 
 const Homepage = () => {
   const username = localStorage.getItem('username');
   const navigate = useNavigate();
   const isSampleDetail = useMatch('/tasks/:taskId/samples/:sampleId');
   const isImageDemo = useMatch('/tasks/task-image-demo');
+  const { t } = useTranslation();
 
   const logout = async (e: any) => {
     e.stopPropagation();
@@ -62,7 +65,7 @@ const Homepage = () => {
               icon={<ToolboxSvg />}
               style={{ color: 'rgba(0, 0, 0, 0.85)', display: 'flex', alignItems: 'center' }}
             >
-              开源工具箱
+              {t('openSourceToolbox')}
             </Button>
           </Popover>
         )}
@@ -72,7 +75,7 @@ const Homepage = () => {
             href="https://github.com/opendatalab/labelU?tab=readme-ov-file#local-deployment"
           >
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>
-              本地部署
+              {t('localDeploy')}
             </Button>
           </a>
         )}
@@ -85,8 +88,9 @@ const Homepage = () => {
           target="_blank"
           rel="noreferrer"
         >
-          帮助文档
+          {t('documentation')}
         </Button>
+        <LanguageSwitcher />
         <Dropdown
           trigger={['click']}
           menu={{
@@ -95,11 +99,11 @@ const Homepage = () => {
                 label: (
                   <FlexLayout.Item onClick={logout} flex gap=".5rem" padding=".25rem 0">
                     <PoweroffOutlined />
-                    <span>退出登录</span>
+                    <span>{t('logout')}</span>
                   </FlexLayout.Item>
                 ),
                 key: 'logout',
-                title: '退出登录',
+                title: t('logout') as string,
               },
             ],
           }}

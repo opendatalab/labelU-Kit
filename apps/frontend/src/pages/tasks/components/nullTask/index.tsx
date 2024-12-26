@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useTranslation } from '@labelu/i18n';
 import { FlexLayout } from '@labelu/components-react';
 
 import demoCreate from './assets/demo-create-button.svg';
@@ -63,6 +64,7 @@ const Description = styled.span`
 `;
 
 const NullTask = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const createTask = () => {
     navigate('/tasks/0/edit?isNew=true');
@@ -76,9 +78,9 @@ const NullTask = () => {
     <FlexLayout flex="row" full gap="1.5rem" items="center" justify="center">
       <Wrapper data-wiz="demo-start" onClick={goDemo} gap="1.5rem">
         <FlexLayout.Item flex="column" full justify="space-between" style={{ zIndex: 3 }}>
-          <Title>Demo体验</Title>
-          <Description>提供多种标注工具，点击 Demo 体验即可开始体验</Description>
-          <a data-wiz="demo-start">点击体验 &nbsp;&gt;&gt;</a>
+          <Title>{t('tryDemo')}</Title>
+          <Description>{t('demoDescription')}</Description>
+          <a data-wiz="demo-start">{t('goTo')} &nbsp;&gt;&gt;</a>
         </FlexLayout.Item>
         <div style={{ zIndex: 3 }}>
           <img src={demoCreate} width={90} alt="demo-create" />
@@ -86,10 +88,10 @@ const NullTask = () => {
       </Wrapper>
       <Wrapper data-wiz="task-create" onClick={createTask} gap="1.5rem">
         <FlexLayout.Item flex="column" full justify="space-between" style={{ zIndex: 3 }}>
-          <Title>新建任务</Title>
-          <Description>提供多种标注工具，点击“新建任务”即可开始标注</Description>
+          <Title>{t('createTask')}</Title>
+          <Description>{t('createTaskDescription')}</Description>
           <Link data-wiz="task-create" to="/tasks?id=demo">
-            点击新建 &nbsp;&gt;&gt;
+            {t('createTask')} &nbsp;&gt;&gt;
           </Link>
         </FlexLayout.Item>
         <div style={{ zIndex: 3 }}>

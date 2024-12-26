@@ -6,6 +6,7 @@ import _, { cloneDeep, find } from 'lodash-es';
 import { PlusOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
 import { createGlobalStyle } from 'styled-components';
+import { useTranslation } from '@labelu/i18n';
 
 import { MediaType, TaskStatus } from '@/api/types';
 import FancyForm from '@/components/FancyForm';
@@ -110,6 +111,7 @@ const FormConfig = () => {
   // 选中的全局工具
   const [selectedGlobalTools, setSelectedGlobalTools] = useState<string[]>([]);
   const [hasAttributes, setHasAttributes] = useState(false);
+  const { t } = useTranslation();
 
   const config = _.get(task, 'config');
   const taskStatus = _.get(task, 'status');
@@ -217,7 +219,7 @@ const FormConfig = () => {
 
     return [
       {
-        label: '全局',
+        label: t('global'),
         options: _.map(globalTools, (toolName) => ({
           disabled: selectedTools.includes(toolName),
           value: toolName,
@@ -225,7 +227,7 @@ const FormConfig = () => {
         })),
       },
       {
-        label: '标记',
+        label: t('tools'),
         options: _.map(toolOptions, ({ value, label }) => ({
           disabled: selectedTools.includes(value),
           value: value,
@@ -233,7 +235,7 @@ const FormConfig = () => {
         })),
       },
     ];
-  }, [selectedTools, task?.media_type]);
+  }, [selectedTools, task?.media_type, t]);
 
   const tabItems: TabsProps['items'] = useMemo(() => {
     return _.chain(selectedTools)
@@ -251,9 +253,9 @@ const FormConfig = () => {
             <TabForm flex="column" gap=".5rem">
               {isToolDeletable && (
                 <FlexLayout.Header flex justify="flex-end">
-                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as ImageToolName)}>
+                  <Popconfirm title={t('deleteToolConfirm')} onConfirm={handleRemoveTool(tool as ImageToolName)}>
                     <Button type="link" danger>
-                      删除工具
+                      {t('deleteTool')}
                     </Button>
                   </Popconfirm>
                 </FlexLayout.Header>
@@ -264,7 +266,7 @@ const FormConfig = () => {
         };
       })
       .value();
-  }, [isToolDeletable, handleRemoveTool, selectedTools]);
+  }, [isToolDeletable, handleRemoveTool, selectedTools, t]);
 
   const tabGlobalItems: TabsProps['items'] = useMemo(() => {
     return _.chain(selectedTools)
@@ -282,9 +284,9 @@ const FormConfig = () => {
             <TabForm flex="column" gap=".5rem">
               {isGlobalToolDeletable && (
                 <FlexLayout.Header flex justify="flex-end">
-                  <Popconfirm title="确定删除此工具吗？" onConfirm={handleRemoveTool(tool as ImageToolName)}>
+                  <Popconfirm title={t('deleteToolConfirm')} onConfirm={handleRemoveTool(tool as ImageToolName)}>
                     <Button type="link" danger>
-                      删除工具
+                      {t('deleteTool')}
                     </Button>
                   </Popconfirm>
                 </FlexLayout.Header>
@@ -295,7 +297,7 @@ const FormConfig = () => {
         };
       })
       .value();
-  }, [isGlobalToolDeletable, handleRemoveTool, selectedTools]);
+  }, [isGlobalToolDeletable, handleRemoveTool, selectedTools, t]);
 
   // TODO: 增加表单数据类型
   const handleFormValuesChange: FormProps['onValuesChange'] = useCallback(
@@ -315,17 +317,17 @@ const FormConfig = () => {
   return (
     <ConfigForm
       form={annotationFormInstance}
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
+      labelCol={{ span: 6 }}
+      wrapperCol={{ span: 18 }}
       colon={false}
       initialValues={config}
       onValuesChange={handleFormValuesChange}
       validateTrigger="onBlur"
     >
       <GlobalStyle />
-      <Form.Item label="标注工具">
+      <Form.Item label={t('annotationTool')}>
         <Select
-          placeholder="新增工具"
+          placeholder={t('addTool')}
           popupClassName="labelu-tool-select-popup"
           options={toolsMenu}
           onSelect={handleToolItemClick}
@@ -334,7 +336,7 @@ const FormConfig = () => {
         </Select>
       </Form.Item>
       {selectedGlobalTools.length > 0 && (
-        <Form.Item label="全局" tooltip="通过分类和描述给媒体数据（如图片、视频、音频等）本身打标签">
+        <Form.Item label={t('global')} tooltip={t('globalTooltip')}>
           <div className="formTabBox">
             <Tabs
               type="card"
@@ -350,7 +352,7 @@ const FormConfig = () => {
         </Form.Item>
       )}
       {selectedAnnotationTools.length > 0 && (
-        <Form.Item label="标记" tooltip="通过配置工具在媒体中绘制标记">
+        <Form.Item label={t('labelTools')} tooltip={t('labelTooltip')}>
           <div className="formTabBox">
             <Tabs
               type="card"
@@ -367,9 +369,9 @@ const FormConfig = () => {
       )}
       {selectedAnnotationTools.length > 0 && (
         <Form.Item
-          label={<span className="formTitle">通用标签</span>}
+          label={<span className="formTitle">{t('genericLabels')}</span>}
           name="commonAttributeConfigurable"
-          tooltip="已经配置的所有标注工具均可以使用通用标签"
+          tooltip={t('genericLabelTooltip')}
           hidden={globalTools.includes(activeTool as EGlobalToolName)}
         >
           <FancyInput type="boolean" />
@@ -388,9 +390,9 @@ const FormConfig = () => {
 
       {task?.media_type === MediaType.IMAGE && (
         <Form.Item
-          label="画布外标注"
+          label={t('DrawingOutCanvas')}
           name="drawOutsideTarget"
-          tooltip="开启后可以在媒体文件画布范围外进行标注"
+          tooltip={t('DrawingOutCanvasTooltip')}
           hidden={!graphicTools.includes(activeTool as ImageToolName)}
         >
           <FancyInput type="boolean" />

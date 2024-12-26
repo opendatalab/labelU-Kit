@@ -9,6 +9,7 @@ import {
   Tooltip,
   FlexLayout,
 } from '@labelu/components-react';
+import { useTranslation } from '@labelu/i18n';
 import type {
   EnumerableAttribute,
   GlobalAnnotationType,
@@ -131,13 +132,14 @@ const Button = styled.button<{ primary?: boolean }>`
 `;
 
 function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
+  const { t } = useTranslation();
   return (
     <FlexLayout flex="column" gap="1rem" padding=".5rem">
       <FlexLayout.Item>{title}</FlexLayout.Item>
       <FlexLayout.Item flex items="center" justify="space-between" gap=".5rem">
-        <Button onClick={onCancel}>取消</Button>
+        <Button onClick={onCancel}>{t('cancel')}</Button>
         <Button primary onClick={onConfirm}>
-          确定
+          {t('confirm')}
         </Button>
       </FlexLayout.Item>
     </FlexLayout>
@@ -146,6 +148,8 @@ function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
 
 function ClearAction({ onClear }: { onClear: () => void }) {
   const [open, setOpen] = useState(false);
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const handleConfirm = () => {
     onClear?.();
@@ -159,7 +163,7 @@ function ClearAction({ onClear }: { onClear: () => void }) {
       overlayStyle={tooltipStyle}
       overlay={
         <Confirm
-          title="确认清空标注吗？"
+          title={t('clearConfirm')}
           onConfirm={handleConfirm}
           onCancel={() => {
             setOpen(false);
@@ -170,7 +174,7 @@ function ClearAction({ onClear }: { onClear: () => void }) {
     >
       <Footer onClick={() => setOpen((pre) => !pre)}>
         <DeleteIcon />
-        &nbsp; 清空
+        &nbsp; {t('clear')}
       </Footer>
     </Tooltip>
   );
@@ -194,6 +198,8 @@ export function AttributePanel() {
       ['text', 'tag'].includes((item as GlobalAnnotation).type),
     ) as GlobalAnnotation[];
   }, [annotationsWithGlobal]);
+  // @ts-ignore
+  const { t } = useTranslation();
 
   const { imageAnnotationsGroup, defaultActiveKeys } = useMemo(() => {
     const imageAnnotationsGroupByLabel = new Map<string, AnnotationDataInUI[]>();
@@ -279,22 +285,23 @@ export function AttributePanel() {
         .every((item) => globalAnnotationMapping[item.value]?.value?.[item.value]);
 
       _titles.push({
-        title: '全局',
+        title: t('global'),
         key: 'global' as const,
-        subtitle: isCompleted ? '已完成' : '未完成',
+        subtitle: isCompleted ? t('done') : t('undone'),
       });
     }
 
     if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid) {
       _titles.push({
-        title: '标记',
+        title: t('labels'),
         key: 'label' as const,
-        subtitle: `${sortedImageAnnotations.length}条`,
+        subtitle: `${sortedImageAnnotations.length}${t('markCount')}`,
       });
     }
 
     return _titles;
   }, [
+    t,
     globalToolConfig.tag,
     globalToolConfig.text,
     preLabelMapping.tag,
