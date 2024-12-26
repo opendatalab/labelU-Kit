@@ -11,7 +11,6 @@ import { goAuth } from '@/utils/sso';
 
 import AppPanel from '../AppPanel';
 import Breadcrumb from '../Breadcrumb';
-import ImageDemoGuide from './ImageDemoGuide';
 import { LabeluLogo, NavigationWrapper } from './style';
 import TaskTip from './TaskTip';
 import LanguageSwitcher from '../LangSwitcher';
@@ -20,7 +19,6 @@ const Homepage = () => {
   const username = localStorage.getItem('username');
   const navigate = useNavigate();
   const isSampleDetail = useMatch('/tasks/:taskId/samples/:sampleId');
-  const isImageDemo = useMatch('/tasks/task-image-demo');
   const { t } = useTranslation();
 
   const logout = async (e: any) => {
@@ -57,7 +55,6 @@ const Homepage = () => {
       </FlexLayout.Item>
       <FlexLayout.Item flex gap="1rem">
         <TaskTip visible={Boolean(isSampleDetail)} />
-        <ImageDemoGuide visible={Boolean(isImageDemo)} />
         {window.IS_ONLINE && (
           <Popover title={null} content={<AppPanel />}>
             <Button
