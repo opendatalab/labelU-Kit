@@ -7,6 +7,7 @@
   "confirmDeleteTask": "确认删除任务吗？",
   "export": "数据导出",
   "login": "登录",
+  "email": "Email邮箱地址",
   "emailPlease": "请输入邮箱",
   "emailFormatPlease": "请输入正确的邮箱格式",
   "passwordPlease": "请输入密码",
