@@ -79,6 +79,17 @@ jobs:
           npm config set registry https://registry.npmjs.com/
           npm config set //registry.npmjs.com/:_authToken ${NPM_TOKEN}
 
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install-2
+        with:
+          version: 7
+          run_install: false
       - name: Publish packages
         run: pnpm run release
         env:
