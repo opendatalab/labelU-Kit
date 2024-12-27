@@ -605,13 +605,15 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                 >
                   <Input placeholder={t('value')} onChange={handleOnChange(`[${preIndex}]options[${index}].value`)} />
                 </Form.Item>
-                <StyledStar
-                  active={Boolean(item.isDefault)}
-                  icon={<StarFilled className="star-icon" />}
-                  size="small"
-                  type="text"
-                  onClick={handleToggleDefault(preIndex!, index)}
-                />
+                <Tooltip title={t('setAsDefault')}>
+                  <StyledStar
+                    active={Boolean(item.isDefault)}
+                    icon={<StarFilled className="star-icon" />}
+                    size="small"
+                    type="text"
+                    onClick={handleToggleDefault(preIndex!, index)}
+                  />
+                </Tooltip>
                 <Tooltip title={t('delete')}>
                   <div className="remove-wrapper">
                     <CloseCircleFilled className="remove" onClick={handleRemoveOption(preIndex!, item)} />
