@@ -24,6 +24,7 @@
 | 名称 | 版本 | 描述 |
 | --- | --- | --- |
 | [@labelu/image](./packages/image) | [![npm](https://img.shields.io/npm/v/%40labelu/image.svg)](https://www.npmjs.com/package/@labelu/image) | 图片标注引擎 |
+| [@labelu/i18n](./packages/i18n) | [![npm](https://img.shields.io/npm/v/%40labelu/i18n.svg)](https://www.npmjs.com/package/@labelu/i18n) | 国际化语言包 |
 | [@labelu/interface](./packages/interface) | [![npm](https://img.shields.io/npm/v/%40labelu/interface.svg)](https://www.npmjs.com/package/@labelu/interface) | 基础类型定义 |
 | [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | 基础 React 组件 |
 | [@labelu/image-annotator-react](./packages/image-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/image-annotator-react.svg)](https://www.npmjs.com/package/@labelu/image-annotator-react) | 图片 React 标注套件 |

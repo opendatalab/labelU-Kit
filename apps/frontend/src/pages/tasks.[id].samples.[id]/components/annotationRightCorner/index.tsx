@@ -3,7 +3,7 @@ import { useNavigate, useParams, useRevalidator } from 'react-router';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
-import { i18n, useTranslation } from '@labelu/i18n';
+import { useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
@@ -471,7 +471,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       )}
       {!isFirstSample && (
         <Button onClick={commonController.debounce(handlePrevSample, 100)} disabled={isGlobalLoading}>
-          {t('prevImage')}
+          {t('previous')}
         </Button>
       )}
       {isLastSample ? (
@@ -480,7 +480,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
         </Button>
       ) : (
         <Button type="primary" onClick={commonController.debounce(handleNextSample, 100)} disabled={isGlobalLoading}>
-          {t('nextImage')}
+          {t('next')}
         </Button>
       )}
     </FlexLayout>

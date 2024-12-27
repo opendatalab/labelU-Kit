@@ -3,7 +3,7 @@ import { useTranslation } from '@labelu/i18n';
 import { useMemo } from 'react';
 import Icon from '@ant-design/icons';
 
-import { ReactComponent as I18nSvg } from '@/assets/svg/i18n.svg';
+import { ReactComponent as I18nSvg } from '@/assets/i18n.svg';
 
 const langOptions = [
   {

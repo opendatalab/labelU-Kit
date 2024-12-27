@@ -4,6 +4,7 @@ import { set, isEqual, size } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { NamePath } from 'antd/es/form/interface';
+import { useTranslation } from '@labelu/i18n';
 
 import ColorPalette from '@/components/ColorPalette';
 import type { FancyInputProps } from '@/components/FancyInput/types';
@@ -111,6 +112,7 @@ export function FancyAttributeList({
   }, [defaultValue]);
   const [stateValue, setValue] = useState<AttributeItemInState[]>(defaultValueWithId);
   const attributeMapping = useRef<Record<string, AttributeItemInState>>({});
+  const { t } = useTranslation();
 
   const handleOnChange = useCallback(
     (fieldPath: string) => (changedValue: string | React.ChangeEvent<HTMLInputElement>) => {
@@ -220,27 +222,27 @@ export function FancyAttributeList({
             <Form.Item
               name={[...preFields, index, 'key']}
               className="input"
-              rules={[{ required: true, message: '请填写完整' }]}
+              rules={[{ required: true, message: t('required') }]}
             >
-              <Input placeholder="Label" value={item.key} onChange={handleOnChange(`[${index}].key`)} />
+              <Input placeholder={t('key')} value={item.key} onChange={handleOnChange(`[${index}].key`)} />
             </Form.Item>
             <Form.Item
               name={[...preFields, index, 'value']}
               className="input"
               dependencies={otherValueFields}
               // @ts-ignore
-              rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(preFields, index)]}
+              rules={[{ required: true, message: t('required') }, duplicatedValueValidator(preFields, index)]}
             >
-              <Input placeholder="Value" value={item.value} onChange={handleOnChange(`[${index}].value`)} />
+              <Input placeholder={t('value')} value={item.value} onChange={handleOnChange(`[${index}].value`)} />
             </Form.Item>
             <div className="add-wrapper">
               <Button type="link" onClick={() => handleOpenAttributeConfiguration(index)}>
-                添加属性
+                {t('addAttribute')}
               </Button>
               <Badge count={size(item.attributes)} showZero color="var(--color-fill-secondary)" />
             </div>
             {deletable && (
-              <Tooltip title="删除">
+              <Tooltip title={t('delete')}>
                 <div className="remove-wrapper">
                   <CloseCircleFilled className="remove" onClick={handleRemoveAttribute(item)} />
                 </div>
@@ -249,14 +251,14 @@ export function FancyAttributeList({
           </StyledAttributeItem>
         );
       }),
-    [deletable, handleOnChange, handleOpenAttributeConfiguration, handleRemoveAttribute, preFields, stateValue],
+    [t, deletable, handleOnChange, handleOpenAttributeConfiguration, handleRemoveAttribute, preFields, stateValue],
   );
 
   return (
     <StyledAttributesWrapper>
       {attributes}
       <Button className="add" icon={<PlusOutlined />} type="link" onClick={handleAddAttribute}>
-        新建
+        {t('add')}
       </Button>
       <AttributeConfiguration
         visible={isAttributeConfigurationOpen}

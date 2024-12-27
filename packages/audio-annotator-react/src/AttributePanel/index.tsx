@@ -240,7 +240,7 @@ export function AttributePanel() {
       _titles.push({
         title: t('labels'),
         key: 'label' as const,
-        subtitle: `${sortedMediaAnnotations.length}条`,
+        subtitle: `${sortedMediaAnnotations.length}`,
       });
     }
 
