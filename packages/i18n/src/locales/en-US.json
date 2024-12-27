@@ -231,6 +231,9 @@
   "doTimestamp": "Make timestamp",
   "pressAtStartAndEnd": "Press at start and end",
   "setAsDefault": "Set as default",
+  "annotationResult": "Annotations",
+  "copy": "Copy",
+  "copied": "Copied",
 
   "attribute": "Attribute",
   "labelTools": "Label tools",
@@ -249,7 +252,7 @@
   "playRate": "Rate",
   "skipped": "Skipped",
   "clear": "Clear",
-  "clearConfirm": "Are you sure you want to clear the annotations?",
+  "clearConfirm": "Are you sure?",
   "done": "Completed",
   "undone": "Incomplete",
   "global": "Global tools",
