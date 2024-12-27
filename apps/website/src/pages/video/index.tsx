@@ -8,6 +8,7 @@ import { Button, Drawer, Form, Modal, Tabs } from 'antd';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeOutlined, SettingOutlined } from '@ant-design/icons';
 import message from 'antd/es/message';
+import { useTranslation } from '@labelu/i18n';
 
 import FancyForm from '@/components/FancyForm';
 import videoSegmentTemplate from '@/constant/templates/videoSegment.template';
@@ -50,6 +51,7 @@ const defaultSamples = [
 export default function VideoPage() {
   const annotatorRef = useRef<AudioAndVideoAnnotatorRef>(null);
   const [editingType, setEditingType] = useState<VideoAnnotationType>('segment');
+  const { t } = useTranslation();
 
   const [configOpen, setConfigOpen] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
@@ -64,13 +66,13 @@ export default function VideoPage() {
   const items: TabsProps['items'] = [
     {
       key: 'segment',
-      label: '片段分割',
+      label: t('segment'),
       forceRender: true,
       children: <FancyForm template={videoSegmentTemplate} name={['tools', 'segment']} />,
     },
     {
       key: 'frame',
-      label: '时间戳',
+      label: t('timestamp'),
       forceRender: true,
       children: <FancyForm template={videoFrameTemplate} name={['tools', 'frame']} />,
     },
@@ -104,19 +106,19 @@ export default function VideoPage() {
     setResultOpen(false);
     // 复制到剪切板
     navigator.clipboard.writeText(JSON.stringify(currentSample.data, null, 2));
-    message.success('复制成功');
+    message.success(t('copied'));
   };
 
   const toolbarRight = useMemo(() => {
     return (
       <div className="flex items-center gap-2">
         <Button type="primary" icon={<CodeOutlined rev={undefined} />} onClick={showResult}>
-          标注结果
+          {t('annotationResult')}
         </Button>
         <Button icon={<SettingOutlined rev={undefined} />} onClick={showDrawer} />
       </div>
     );
-  }, [showDrawer, showResult]);
+  }, [t, showDrawer, showResult]);
 
   return (
     <>
@@ -129,7 +131,7 @@ export default function VideoPage() {
         type={editingType}
         config={config}
       />
-      <Drawer width={480} title="工具配置" onClose={onClose} open={configOpen}>
+      <Drawer width={480} title={t('annotationConfig')} onClose={onClose} open={configOpen}>
         <Form
           form={form}
           layout="vertical"
@@ -161,11 +163,11 @@ export default function VideoPage() {
         </Form>
       </Drawer>
       <Modal
-        title="标注结果"
+        title={t('annotationResult')}
         open={resultOpen}
         onOk={onOk}
         width={800}
-        okText="复制"
+        okText={t('copy')}
         onCancel={() => setResultOpen(false)}
       >
         <CodeMirror value={JSON.stringify(result, null, 2)} extensions={[json()]} />

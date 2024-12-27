@@ -55,15 +55,17 @@ const Homepage = () => {
       </FlexLayout.Item>
       <FlexLayout.Item flex gap="1rem">
         <TaskTip visible={Boolean(isSampleDetail)} />
-        <Popover title={null} content={<AppPanel />}>
-          <Button
-            type="link"
-            icon={<ToolboxSvg />}
-            style={{ color: 'rgba(0, 0, 0, 0.85)', display: 'flex', alignItems: 'center' }}
-          >
-            {t('openSourceToolbox')}
-          </Button>
-        </Popover>
+        {window.IS_ONLINE && (
+          <Popover title={null} content={<AppPanel />}>
+            <Button
+              type="link"
+              icon={<ToolboxSvg />}
+              style={{ color: 'rgba(0, 0, 0, 0.85)', display: 'flex', alignItems: 'center' }}
+            >
+              {t('openSourceToolbox')}
+            </Button>
+          </Popover>
+        )}
         {window.IS_ONLINE && (
           <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/guide/install">
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>

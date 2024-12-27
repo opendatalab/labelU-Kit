@@ -1,60 +1,83 @@
+import { i18n } from '@labelu/i18n';
+
 import type { FancyItemIdentifier } from '@/components/FancyInput/types';
 
 export default [
   {
-    type: 'group',
-    key: 'minSize',
-    layout: 'horizontal',
-    label: '最小尺寸',
-    children: [
-      {
-        field: 'minWidth',
-        key: 'minWidth',
-        type: 'number',
-        label: undefined,
-        initialValue: 1,
-        antProps: {
-          addonAfter: 'W',
-          min: 0,
-          placeholder: '最小宽度',
-        },
-        rules: [
-          {
-            required: true,
-            message: '最小宽度不能为空',
-          },
-        ],
-      },
-      {
-        field: 'minHeight',
-        key: 'minHeight',
-        type: 'number',
-        label: undefined,
-        antProps: {
-          addonAfter: 'H',
-          min: 0,
-          placeholder: '最小高度',
-        },
-        initialValue: 1,
-        rules: [
-          {
-            required: true,
-            message: '最小高度不能为空',
-          },
-        ],
-      },
-    ],
+    field: 'tool',
+    key: 'tool',
+    type: 'string',
+    hidden: true,
+    initialValue: 'rectTool',
   },
   {
-    field: 'labels',
-    key: 'labels',
-    type: 'list-attribute',
-    label: '标签配置',
-    initialValue: [
+    key: 'config',
+    field: 'config',
+    type: 'group',
+    children: [
       {
-        color: '#ff6600',
-        key: '标签-1',
-        value: 'label-1',
+        type: 'group',
+        key: 'minSize',
+        layout: 'horizontal',
+        label: i18n.t('minSize'),
+        children: [
+          {
+            field: 'attributeConfigurable',
+            key: 'attributeConfigurable',
+            type: 'boolean',
+            hidden: true,
+            initialValue: true,
+          },
+          {
+            field: 'minWidth',
+            key: 'minWidth',
+            type: 'number',
+            label: undefined,
+            initialValue: 1,
+            antProps: {
+              addonAfter: 'W',
+              min: 0,
+              placeholder: i18n.t('minWidth'),
+            },
+            rules: [
+              {
+                required: true,
+                message: i18n.t('minWidthRequired'),
+              },
+            ],
+          },
+          {
+            field: 'minHeight',
+            key: 'minHeight',
+            type: 'number',
+            label: undefined,
+            antProps: {
+              addonAfter: 'H',
+              min: 0,
+              placeholder: i18n.t('minHeight'),
+            },
+            initialValue: 1,
+            rules: [
+              {
+                required: true,
+                message: i18n.t('minHeightRequired'),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        field: 'attributes',
+        key: 'attributes',
+        type: 'list-attribute',
+        label: i18n.t('labelConfig'),
+        initialValue: [
+          {
+            color: '#ff6600',
+            key: i18n.t('label1'),
+            value: 'label-1',
+          },
+        ],
       },
     ],
   },

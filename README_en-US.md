@@ -25,6 +25,7 @@
 | Name | Version | Description |
 | --- | --- | --- |
 | [@labelu/image](./packages/image) | [![npm](https://img.shields.io/npm/v/%40labelu/image.svg)](https://www.npmjs.com/package/@labelu/image) | image annotation engine |
+| [@labelu/i18n](./packages/i18n) | [![npm](https://img.shields.io/npm/v/%40labelu/i18n.svg)](https://www.npmjs.com/package/@labelu/i18n) | i18n language packs |
 | [@labelu/interface](./packages/interface) | [![npm](https://img.shields.io/npm/v/%40labelu/interface.svg)](https://www.npmjs.com/package/@labelu/interface) | Basic TypeScript interfaces for annotators |
 | [@labelu/components-react](./packages/components-react) | [![npm](https://img.shields.io/npm/v/%40labelu/components-react.svg)](https://www.npmjs.com/package/@labelu/components-react) | Basic React components for other packages |
 | [@labelu/image-annotator-react](./packages/image-annotator-react) | [![npm](https://img.shields.io/npm/v/%40labelu/image-annotator-react.svg)](https://www.npmjs.com/package/@labelu/image-annotator-react) | Image Annotator for React |
