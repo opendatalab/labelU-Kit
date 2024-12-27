@@ -1,7 +1,7 @@
 {
   "Create Task": "Create Task",
   "localDeploy": "Local deployment",
-  "demoTips": "This is a demo version. Data will be cleared automatically every day at midnight. Please back up important data in time. For full functionality, please",
+  "demoTips": "This is a demo version. Data will be cleared automatically every day at midnight. Please back up important data in time. For full functionality, please ",
   "draft": "Draft",
   "deleteTask": "Delete task",
   "confirmDeleteTask": "Are you sure you want to delete the task?",
@@ -44,7 +44,7 @@
   "preAnnotation": "Pre-annotation",
   "preAnnotationDescription": "Upload a json or jsonl format pre-annotation file when importing data, refer to",
   "example": "Example",
-  "annotationState": "State",
+  "annotationState": "Status",
   "annotationCount": "Count",
   "createdBy": "Created by",
   "updatedAt": "Updated at",
@@ -230,6 +230,7 @@
   "doSegment": "Make segment",
   "doTimestamp": "Make timestamp",
   "pressAtStartAndEnd": "Press at start and end",
+  "setAsDefault": "Set as default",
 
   "attribute": "Attribute",
   "labelTools": "Label tools",
@@ -308,5 +309,9 @@
   "plainPolygon": "Polygon",
   "deletePoint": "Delete point",
   "makeCuboid": "Mark cuboid",
-  "cropOverlap": "Crop overlapping area"
+  "cropOverlap": "Crop overlapping area",
+
+  "tryDemo": "Try Demo",
+  "demoDescription": "Provide a variety of annotation tools, click 'Try Demo' to start experiencing",
+  "createTaskDescription": "Provide a variety of annotation tools, click 'Create Task' to start annotating"
 }

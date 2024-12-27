@@ -226,6 +226,7 @@
   "doSegment": "截取片段",
   "doTimestamp": "标时间点",
   "pressAtStartAndEnd": "在开始和结束时按",
+  "setAsDefault": "设为默认值",
 
   "details": "详细信息",
   "labelTools": "标注工具",
