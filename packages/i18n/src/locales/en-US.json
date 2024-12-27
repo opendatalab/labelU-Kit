@@ -44,7 +44,7 @@
   "preAnnotation": "Pre-annotation",
   "preAnnotationDescription": "Upload a json or jsonl format pre-annotation file when importing data, refer to",
   "example": "Example",
-  "annotationState": "State",
+  "annotationState": "Status",
   "annotationCount": "Count",
   "createdBy": "Created by",
   "updatedAt": "Updated at",
@@ -230,6 +230,7 @@
   "doSegment": "Make segment",
   "doTimestamp": "Make timestamp",
   "pressAtStartAndEnd": "Press at start and end",
+  "setAsDefault": "Set as default",
 
   "attribute": "Attribute",
   "labelTools": "Label tools",
