@@ -42,7 +42,7 @@ export default [
         type: 'group',
         key: 'pointNum',
         layout: 'horizontal',
-        label: '闭合点数',
+        label: i18n.t('closedPointNumber'),
         children: [
           {
             field: 'lowerLimitPointNum',
