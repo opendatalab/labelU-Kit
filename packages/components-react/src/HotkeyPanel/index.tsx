@@ -121,7 +121,7 @@ const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = styled(C
 `;
 
 const Left = styled.div`
-  width: 8rem;
+  min-width: 8rem;
   display: flex;
   flex-direction: column;
   background-color: #fbfbfb;
@@ -146,6 +146,7 @@ const MenuItem = styled.div<{ active?: boolean }>`
   height: 32px;
   line-height: 32px;
   padding-left: 24px;
+  padding-right: 24px;
   cursor: pointer;
   border-radius: 8px;
   display: flex;
