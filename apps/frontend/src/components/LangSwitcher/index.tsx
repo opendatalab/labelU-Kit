@@ -5,6 +5,19 @@ import Icon from '@ant-design/icons';
 
 import { ReactComponent as I18nSvg } from '@/assets/svg/i18n.svg';
 
+const langOptions = [
+  {
+    key: 'zh-CN',
+    label: '简体中文',
+    value: 'zh-CN',
+  },
+  {
+    key: 'en-US',
+    label: 'English',
+    value: 'en-US',
+  },
+];
+
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
