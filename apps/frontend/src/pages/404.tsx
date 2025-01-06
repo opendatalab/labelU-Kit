@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as NotFoundIcon } from '@/assets/svg/not-found.svg';
 import Navigate from '@/components/Navigate';
@@ -25,13 +26,14 @@ const NotFoundWrapper = styled.div`
 `;
 
 const NotFoundPage: React.FC<Record<string, unknown>> = () => {
+  const { t } = useTranslation();
   return (
     <NotFoundWrapper>
       <Navigate />
       <div className="content">
         <div className="inner">
           <NotFoundIcon />
-          <h3>页面不存在</h3>
+          <h3>{t('404notFound')}</h3>
         </div>
       </div>
     </NotFoundWrapper>

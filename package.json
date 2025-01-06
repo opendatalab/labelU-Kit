@@ -5,11 +5,11 @@
     "packages/*",
     "apps/*"
   ],
-  "version": "5.5.1",
+  "version": "5.6.0-alpha.2",
   "scripts": {
     "prepare": "husky install",
-    "build": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
-    "clean": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react clean",
+    "build": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/i18n --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react build",
+    "clean": "pnpm --filter @labelu/utils --filter @labelu/interface --filter @labelu/i18n --filter @labelu/formatter --filter @labelu/image --filter @labelu/components-react --filter @labelu/image-annotator-react --filter @labelu/audio-react --filter @labelu/video-react --filter @labelu/audio-annotator-react --filter @labelu/video-annotator-react clean",
     "build:frontend": "pnpm --filter @labelu/frontend build",
     "release:frontend": "cd apps/frontend && npm run release",
     "build:website": "pnpm --filter @labelu/website build",

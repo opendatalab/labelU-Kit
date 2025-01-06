@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as ArrowDown } from './arrow-down.svg';
 import { ReactComponent as ArrowRight } from './arrow-right.svg';
@@ -120,7 +121,7 @@ const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = styled(C
 `;
 
 const Left = styled.div`
-  width: 8rem;
+  min-width: 8rem;
   display: flex;
   flex-direction: column;
   background-color: #fbfbfb;
@@ -145,6 +146,7 @@ const MenuItem = styled.div<{ active?: boolean }>`
   height: 32px;
   line-height: 32px;
   padding-left: 24px;
+  padding-right: 24px;
   cursor: pointer;
   border-radius: 8px;
   display: flex;
@@ -202,6 +204,7 @@ export function HotkeyPanel({ items }: HotkeyPanelProps) {
   const [openKeys, setOpenKeys] = useState<React.Key[]>([]);
   const [activeKey, setActiveKey] = useState<React.Key>(items[0].key);
   const [hotkeys, setHotkeys] = useState<Hotkey[] | undefined>();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setHotkeys(items[0].hotkeys);
@@ -222,18 +225,18 @@ export function HotkeyPanel({ items }: HotkeyPanelProps) {
       <HotkeyTable
         columns={[
           {
-            title: '操作',
+            title: t('action'),
             key: 'name',
           },
           {
-            title: '快捷键',
+            title: t('hotkey'),
             key: 'content',
           },
         ]}
         data={tableData}
       />
     );
-  }, [hotkeys]);
+  }, [hotkeys, t]);
 
   return (
     <Wrapper>

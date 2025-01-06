@@ -7,6 +7,7 @@ import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from '@labelu/i18n';
 
 import type { PreAnnotationFileResponse, SampleResponse } from '@/api/types';
 import { MediaType, TaskStatus } from '@/api/types';
@@ -35,6 +36,7 @@ const Samples = () => {
   const metaData = routerData?.samples?.meta_data;
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
+  const { t } = useTranslation();
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
@@ -73,14 +75,14 @@ const Samples = () => {
 
   const columns: ColumnsType<SampleResponse | PreAnnotationFileResponse> = [
     {
-      title: '数据ID',
+      title: t('innerId'),
       dataIndex: 'inner_id',
       key: 'inner_id',
       align: 'left',
       sorter: true,
     },
     {
-      title: '文件名',
+      title: t('filename'),
       dataIndex: ['file', 'filename'],
       key: 'filename',
       align: 'left',
@@ -92,7 +94,7 @@ const Samples = () => {
             <span>
               {formatter.format('ellipsis', _.get(record, 'filename'), { maxWidth: 160, type: 'tooltip' })}
               &nbsp;
-              <Tag color="processing">预标注</Tag>
+              <Tag color="processing">{t('preAnnotation')}</Tag>
             </span>
           );
         }
@@ -100,7 +102,7 @@ const Samples = () => {
       },
     },
     {
-      title: '数据预览',
+      title: t('dataPreview'),
       dataIndex: 'file',
       key: 'file',
       align: 'left',
@@ -121,17 +123,17 @@ const Samples = () => {
     {
       title: (
         <>
-          预标注 &nbsp;
+          {t('preAnnotation')} &nbsp;
           <Tooltip
             title={
               <>
-                数据导入时上传 json 或 jsonl 格式的预标注文件，参考{' '}
+                {t('preAnnotationDescription')}{' '}
                 <a
                   href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  示例
+                  {t('example')}
                 </a>
               </>
             }
@@ -155,12 +157,12 @@ const Samples = () => {
 
         return sampleNamesWithPreAnnotation.includes(realSampleName) ||
           sampleNamesWithPreAnnotation.includes(sampleName)
-          ? '是'
-          : '无';
+          ? t('yes')
+          : '';
       },
     },
     {
-      title: '标注情况',
+      title: t('annotationState'),
       dataIndex: 'state',
       key: 'state',
       align: 'left',
@@ -178,7 +180,7 @@ const Samples = () => {
       sorter: true,
     },
     {
-      title: '标注数',
+      title: t('annotationCount'),
       dataIndex: 'annotated_count',
       key: 'annotated_count',
       align: 'left',
@@ -186,7 +188,7 @@ const Samples = () => {
         const sampleNames = _.get(record, 'sample_names');
 
         if (sampleNames) {
-          return '-';
+          return '';
         }
 
         let result = 0;
@@ -211,7 +213,7 @@ const Samples = () => {
       width: 80,
     },
     {
-      title: '标注者',
+      title: t('createdBy'),
       dataIndex: 'created_by',
       key: 'created_by',
       align: 'left',
@@ -230,7 +232,7 @@ const Samples = () => {
       },
     },
     {
-      title: '上次标注时间',
+      title: t('updatedAt'),
       dataIndex: 'updated_at',
       key: 'updated_at',
       align: 'left',
@@ -267,11 +269,12 @@ const Samples = () => {
           return (
             <FlexLayout items="center">
               <Button type="link" onClick={() => downloadFromUrl(record.url, record?.filename)}>
-                下载
+                {t('download')}
               </Button>
-              <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteJsonl(record.id!)}>
+              <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteJsonl(record.id!)}>
+
                 <Button type="link" danger>
-                  删除
+                  {t('delete')}
                 </Button>
               </Popconfirm>
             </FlexLayout>
@@ -282,12 +285,12 @@ const Samples = () => {
           <FlexLayout items="center" gap="0.5rem">
             {isTaskReadyToAnnotate && (
               <Link to={`/tasks/${taskId}/samples/${record.id}`}>
-                <Button type="link">进入标注</Button>
+                <Button type="link">{t('startAnnotate')}</Button>
               </Link>
             )}
-            <Popconfirm title="确定删除此文件？" onConfirm={() => handleDeleteSample([record.id!])}>
+            <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteSample([record.id!])}>
               <Button type="link" danger>
-                删除
+                {t('delete')}
               </Button>
             </Popconfirm>
           </FlexLayout>
@@ -403,7 +406,7 @@ const Samples = () => {
               tools={task?.config?.tools}
             >
               <Button type="link" disabled={selectedSampleIds.length === 0}>
-                批量数据导出
+                {t('batchExport')}
               </Button>
             </ExportPortal>
             <Pagination

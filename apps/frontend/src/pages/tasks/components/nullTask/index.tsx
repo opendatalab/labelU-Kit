@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from 'antd';
+import { useTranslation } from '@labelu/i18n';
 import { FlexLayout } from '@labelu/components-react';
 
 import { ReactComponent as CreateTaskIcon } from '@/assets/svg/create-task.svg';
@@ -19,6 +20,7 @@ const Wrapper = styled(FlexLayout.Item)`
 `;
 
 const NullTask = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const createTask = () => {
     navigate('/tasks/0/edit?isNew=true');
@@ -28,7 +30,7 @@ const NullTask = () => {
     <FlexLayout flex="column" full items="center" justify="center">
       <Wrapper data-wiz="task-create" onClick={createTask} gap="1rem">
         <CreateTaskIcon />
-        <Button type="primary">新建任务</Button>
+        <Button type="primary">{t('createTask')}</Button>
       </Wrapper>
     </FlexLayout>
   );

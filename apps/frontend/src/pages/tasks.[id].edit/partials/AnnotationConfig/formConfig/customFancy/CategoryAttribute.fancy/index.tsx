@@ -7,6 +7,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import styled from 'styled-components';
 import Icon, { CloseCircleFilled, PlusOutlined, StarFilled, SwapOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
+import { i18n, useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as TreeSwitcherIcon } from '@/assets/svg/tree-switcher.svg';
 import { ReactComponent as DeleteIcon } from '@/assets/svg/delete.svg';
@@ -195,23 +196,23 @@ const nestedWithId = map((item: CategoryAttributeItem) => {
 });
 
 const tagTitleMapping: Record<CategoryType, string> = {
-  [CategoryType.Enum]: '单选',
-  [CategoryType.Array]: '多选',
-  [CategoryType.String]: '文本',
+  [CategoryType.Enum]: i18n.t('radio'),
+  [CategoryType.Array]: i18n.t('checkbox'),
+  [CategoryType.String]: i18n.t('string'),
 };
 
 const tooltipTitleMapping: Record<CategoryType, string> = {
-  [CategoryType.Enum]: '切换多选',
-  [CategoryType.Array]: '切换单选',
-  [CategoryType.String]: '文本描述',
+  [CategoryType.Enum]: i18n.t('switchToCheckbox'),
+  [CategoryType.Array]: i18n.t('switchToRadio'),
+  [CategoryType.String]: i18n.t('switchToText'),
 };
 
 const stringTypeOptions = [
-  { label: '任意字符', value: StringType.Text },
-  { label: '序号', value: StringType.Order },
-  { label: '仅数字', value: StringType.Number },
-  { label: '仅英文', value: StringType.English },
-  { label: '自定义格式', value: StringType.Regexp },
+  { label: i18n.t('anyCharacter'), value: StringType.Text },
+  { label: i18n.t('order'), value: StringType.Order },
+  { label: i18n.t('numberOnly'), value: StringType.Number },
+  { label: i18n.t('englishOnly'), value: StringType.English },
+  { label: i18n.t('customFormat'), value: StringType.Regexp },
 ];
 
 export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, FancyCategoryAttributeProps>(
@@ -224,8 +225,8 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
       className,
       style,
       affixProps,
-      addTagText = '新建分类属性',
-      addStringText = '新建文本分类',
+      addTagText = i18n.t('addCategory'),
+      addStringText = i18n.t('addDescription'),
       showAddTag = true,
       showAddString = true,
       disabledStringOptions,
@@ -238,6 +239,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
     const [stateValue, setValue] = useState<CategoryAttributeStateItem[]>(defaultValueWithId);
     const categoryMapping = useRef<Record<string, CategoryAttributeStateItem>>({});
     const optionMapping = useRef<Record<string, CategoryAttributeStateOption>>({});
+    const { t } = useTranslation();
 
     const handleOnChange = useCallback(
       (fieldPath: string) =>
@@ -460,24 +462,24 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
               title: (
                 <div className="category">
                   <div className="sn">{index + 1}</div>
-                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '请填写完整' }]}>
-                    <Input placeholder={`前端显示（中文）`} onChange={handleOnChange(`[${index}].key`)} />
+                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: t('required') }]}>
+                    <Input placeholder={t('key')} onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
                   <Form.Item
                     name={[...path, index, 'value']}
                     dependencies={otherValueFields}
                     // @ts-ignore
-                    rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
+                    rules={[{ required: true, message: t('required') }, duplicatedValueValidator(path, index)]}
                   >
-                    <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
+                    <Input placeholder={t('value')} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <FlexLayout>
-                    <Tooltip title="是否必填">
+                    <Tooltip title={t('isRequiredOrNot')}>
                       <Form.Item name={[...path, index, 'required']} label="">
                         <TagSwitcher
                           titleMapping={{
-                            true: '必填',
-                            false: '选填',
+                            true: t('required'),
+                            false: t('optional'),
                           }}
                           onChange={handleOnChange(`[${index}].required`)}
                         />
@@ -490,7 +492,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                         {tagTitleMapping[itemType]} <SwapOutlined />
                       </Tag>
                     </Tooltip>
-                    <Tooltip title="删除">
+                    <Tooltip title={t('delete')}>
                       <Icon className="remove" component={DeleteIcon} onClick={handleRemoveAttribute(item)} />
                     </Tooltip>
                   </div>
@@ -504,7 +506,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   key: `${item.id}-add`,
                   title: (
                     <Button className="add-option" icon={<PlusOutlined />} type="link" onClick={handleAddOption(index)}>
-                      新建选项
+                      {t('addOption')}
                     </Button>
                   ),
                 },
@@ -515,24 +517,24 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
               title: (
                 <div className="category">
                   <div className="sn">{index + 1}</div>
-                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: '请填写完整' }]}>
-                    <Input placeholder={`前端显示（中文）`} onChange={handleOnChange(`[${index}].key`)} />
+                  <Form.Item name={[...path, index, 'key']} rules={[{ required: true, message: t('required') }]}>
+                    <Input placeholder={t('key')} onChange={handleOnChange(`[${index}].key`)} />
                   </Form.Item>
                   <Form.Item
                     name={[...path, index, 'value']}
                     dependencies={otherValueFields}
                     // @ts-ignore
-                    rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
+                    rules={[{ required: true, message: t('required') }, duplicatedValueValidator(path, index)]}
                   >
-                    <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
+                    <Input placeholder={t('value')} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
                   <FlexLayout>
-                    <Tooltip title="是否必填">
+                    <Tooltip title={t('isRequiredOrNot')}>
                       <Form.Item name={[...path, index, 'required']} label="">
                         <TagSwitcher
                           titleMapping={{
-                            true: '必填',
-                            false: '选填',
+                            true: t('required'),
+                            false: t('optional'),
                           }}
                           onChange={handleOnChange(`[${index}].required`)}
                         />
@@ -541,7 +543,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   </FlexLayout>
                   <div className="should-align-center">
                     <Tag>{tagTitleMapping[itemType]}</Tag>
-                    <Tooltip title="删除">
+                    <Tooltip title={t('delete')}>
                       <Icon className="remove" component={DeleteIcon} onClick={handleRemoveAttribute(item)} />
                     </Tooltip>
                   </div>
@@ -554,14 +556,14 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   title: (
                     <div className="text-form-wrapper">
                       {/* @ts-ignore */}
-                      <Form.Item name={[...path, index, 'maxLength']} label="最大字数">
+                      <Form.Item name={[...path, index, 'maxLength']} label={t('maxLength')}>
                         <InputNumber
                           style={{ width: '71.5%' }}
                           min={1}
                           onChange={handleOnChange(`[${index}].maxLength`)}
                         />
                       </Form.Item>
-                      <Form.Item name={[...path, index, 'stringType']} label="字符类型">
+                      <Form.Item name={[...path, index, 'stringType']} label={t('stringType')}>
                         <Select
                           style={{ width: '71.5%' }}
                           options={finalStringTypeOptions}
@@ -569,11 +571,11 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                         />
                       </Form.Item>
                       {(item.stringType as StringType) === StringType.Regexp && (
-                        <Form.Item name={[...path, index, 'regexp']} label="自定义格式（正则表达式）">
+                        <Form.Item name={[...path, index, 'regexp']} label={t('customFormat')}>
                           <Input.TextArea style={{ width: '71.5%' }} onChange={handleOnChange(`[${index}].regexp`)} />
                         </Form.Item>
                       )}
-                      <Form.Item name={[...path, index, 'defaultValue']} label="默认值">
+                      <Form.Item name={[...path, index, 'defaultValue']} label={t('defaultValue')}>
                         <Input.TextArea
                           style={{ width: '71.5%' }}
                           onChange={handleOnChange(`[${index}].defaultValue`)}
@@ -592,31 +594,27 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                 <Form.Item
                   name={[...path, index, 'key']}
                   // @ts-ignore
-                  rules={[{ required: true, message: '请填写完整' }]}
+                  rules={[{ required: true, message: t('required') }]}
                 >
-                  <Input
-                    placeholder={`前端显示（中文）`}
-                    onChange={handleOnChange(`[${preIndex}]options[${index}].key`)}
-                  />
+                  <Input placeholder={t('key')} onChange={handleOnChange(`[${preIndex}]options[${index}].key`)} />
                 </Form.Item>
                 <Form.Item
                   name={[...path, index, 'value']}
                   // @ts-ignore
-                  rules={[{ required: true, message: '请填写完整' }, duplicatedValueValidator(path, index)]}
+                  rules={[{ required: true, message: t('required') }, duplicatedValueValidator(path, index)]}
                 >
-                  <Input
-                    placeholder={`保存结果（英文）`}
-                    onChange={handleOnChange(`[${preIndex}]options[${index}].value`)}
-                  />
+                  <Input placeholder={t('value')} onChange={handleOnChange(`[${preIndex}]options[${index}].value`)} />
                 </Form.Item>
-                <StyledStar
-                  active={Boolean(item.isDefault)}
-                  icon={<StarFilled className="star-icon" />}
-                  size="small"
-                  type="text"
-                  onClick={handleToggleDefault(preIndex!, index)}
-                />
-                <Tooltip title="删除">
+                <Tooltip title={t('setAsDefault')}>
+                  <StyledStar
+                    active={Boolean(item.isDefault)}
+                    icon={<StarFilled className="star-icon" />}
+                    size="small"
+                    type="text"
+                    onClick={handleToggleDefault(preIndex!, index)}
+                  />
+                </Tooltip>
+                <Tooltip title={t('delete')}>
                   <div className="remove-wrapper">
                     <CloseCircleFilled className="remove" onClick={handleRemoveOption(preIndex!, item)} />
                   </div>
@@ -628,6 +626,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
         });
       },
       [
+        t,
         finalStringTypeOptions,
         handleAddOption,
         handleOnChange,
