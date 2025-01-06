@@ -5,6 +5,7 @@ import { I18nProvider, useTranslation } from '@labelu/i18n';
 import { useMemo } from 'react';
 
 import RouterContainer from '@/components/RouterContainer';
+import StaticAnt from '@/components/StaticAnt';
 
 import themeToken from './styles/theme.json';
 import routes from './routes';
@@ -30,6 +31,7 @@ export default function App() {
     <ConfigProvider locale={getAntdLocale()} componentSize="middle" theme={{ token: themeToken.token }}>
       <I18nProvider locale={locale}>
         <AntApp>
+          <StaticAnt />
           <RouterContainer routes={routes} />
         </AntApp>
       </I18nProvider>
