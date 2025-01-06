@@ -272,6 +272,7 @@ const Samples = () => {
                 {t('download')}
               </Button>
               <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteJsonl(record.id!)}>
+
                 <Button type="link" danger>
                   {t('delete')}
                 </Button>

@@ -53,6 +53,7 @@ export const isCorrectFiles = (files: File[], type: MediaType) => {
 
     if (isOverSize) {
       commonController.notificationErrorMessage({ message: `${i18n.t("singleFileSizeExceeds")}${MediaFileSize[type]}MB` }, 3);
+
       result = false;
       break;
     }
