@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { ExportOutlined } from '@ant-design/icons';
 
 import { ReactComponent as Logo } from '@/assets/logo.svg';
-import LanguageSwitcher from '@/components/langSwitcher';
+import LanguageSwitcher from '@/components/LangSwitcher';
 import { MENU } from '@/constant';
 
 const extraLinks = [
