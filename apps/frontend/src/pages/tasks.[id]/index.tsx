@@ -27,6 +27,10 @@ const HeaderWrapper = styled(FlexLayout.Header)`
   height: 3.5rem;
 `;
 
+function getThumbnailUrl(url: string) {
+  return url.replace(/(.*)(\..*)$/, '$1-thumbnail$2');
+}
+
 const Samples = () => {
   const routerData = useRouteLoaderData('task') as TaskLoaderResult;
   const samples = _.get(routerData, 'samples.data');
@@ -112,7 +116,8 @@ const Samples = () => {
         }
 
         if (task!.media_type === MediaType.IMAGE) {
-          return <img src={data?.url} style={{ width: '116px', height: '70px' }} />;
+          const thumbnailUrl = getThumbnailUrl(data.url!);
+          return <img src={thumbnailUrl} style={{ width: '116px', height: '70px' }} />;
         } else if (task!.media_type === MediaType.AUDIO) {
           return <audio src={data?.url} controls />;
         } else {

@@ -61,6 +61,10 @@ const LoginPage = () => {
                   pattern: /^\S+$/,
                   message: t('passwordCannotContainsWhitespace'),
                 },
+                {
+                  min: 6,
+                  message: t('passwordLengthError'),
+                },
               ]}
             >
               <Input.Password
