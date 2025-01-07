@@ -19,7 +19,7 @@
   "passwordCannotContainsWhitespace": "Password cannot contain whitespace",
   "signUpSuccess": "Sign up success",
   "alreadyHaveAccount": "Already have an account?",
-  "taskList": "Task list",
+  "taskList": "Tasks",
   "taskEdit": "Edit task",
   "createTask": "Create task",
   "start": "Start",
