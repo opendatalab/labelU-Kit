@@ -68,7 +68,7 @@ const InputData = () => {
   } = useContext(TaskCreationContext);
   const uploadMutation = useUploadFileMutation();
   const revalidator = useRevalidator();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const statusTextMapping = useMemo(
     () => ({
@@ -447,7 +447,9 @@ const InputData = () => {
               {t('preAnnotationFileUploadDescription')}
               <a
                 target="_blank"
-                href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
+                href={`https://opendatalab.github.io/labelU/${
+                  i18n.language.startsWith('en') ? 'en/' : ''
+                }schema/pre-annotation/json`}
                 rel="noreferrer"
               >
                 {t('example')}

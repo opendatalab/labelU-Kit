@@ -43,7 +43,7 @@ const TaskList = () => {
   const tasks = _.get(routerLoaderData, 'data');
   const meta_data = _.get(routerLoaderData, 'meta_data');
   const pageSize = usePageSize();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [searchParams, setSearchParams] = useSearchParams({
     size: String(pageSize),
@@ -89,7 +89,9 @@ const TaskList = () => {
                 {t('demoTips')}
                 <a
                   data-wiz="local-deploy-alert"
-                  href="https://opendatalab.github.io/labelU/guide/install"
+                  href={`https://opendatalab.github.io/labelU/${
+                    i18n.language.startsWith('en') ? 'en/' : ''
+                  }guide/install`}
                   target="_blank"
                   rel="noreferrer"
                 >

@@ -36,7 +36,7 @@ const Samples = () => {
   const metaData = routerData?.samples?.meta_data;
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
@@ -129,7 +129,9 @@ const Samples = () => {
               <>
                 {t('preAnnotationDescription')}{' '}
                 <a
-                  href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
+                  href={`https://opendatalab.github.io/labelU/${
+                    i18n.language.startsWith('en') ? 'en/' : ''
+                  }schema/pre-annotation/json`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -272,7 +274,6 @@ const Samples = () => {
                 {t('download')}
               </Button>
               <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteJsonl(record.id!)}>
-
                 <Button type="link" danger>
                   {t('delete')}
                 </Button>
