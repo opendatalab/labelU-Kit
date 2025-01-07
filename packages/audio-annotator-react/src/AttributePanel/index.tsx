@@ -230,7 +230,7 @@ export function AttributePanel() {
         .every((item) => globalAnnotationMapping[item.value]?.value?.[item.value]);
 
       _titles.push({
-        title: '全局',
+        title: t('global'),
         key: 'global' as const,
         subtitle: isCompleted ? t('done') : t('undone'),
       });

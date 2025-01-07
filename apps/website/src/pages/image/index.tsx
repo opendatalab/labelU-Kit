@@ -10,6 +10,7 @@ import { Button, Drawer, Form, Tabs } from 'antd';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import Modal from 'antd/es/modal/Modal';
 import message from 'antd/es/message';
+import { i18n, useTranslation } from '@labelu/i18n';
 
 import lineTemplate from '@/constant/templates/line.template';
 import rectTemplate from '@/constant/templates/rect.template';
@@ -37,13 +38,13 @@ const templateMapping: Record<ToolName | 'tag' | 'text', any> = {
 };
 
 const toolNameMapping = {
-  line: '线',
-  rect: '矩形',
-  polygon: '多边形',
-  point: '点',
-  cuboid: '立体框',
-  tag: '标签分类',
-  text: '文本描述',
+  line: i18n.t('line'),
+  rect: i18n.t('rect'),
+  polygon: i18n.t('polygon'),
+  point: i18n.t('point'),
+  cuboid: i18n.t('cuboid'),
+  tag: i18n.t('tag'),
+  text: i18n.t('textDescription'),
 };
 
 const presetSamples = [
@@ -648,6 +649,7 @@ export default function ImagePage() {
   const [resultOpen, setResultOpen] = useState(false);
   const [config, setConfig] = useState(defaultConfig);
   const [currentSample, updateSample] = useState(presetSamples[0]);
+  const { t } = useTranslation();
   const [result, setResult] = useState<any>({});
   const [form] = Form.useForm();
 
@@ -704,19 +706,25 @@ export default function ImagePage() {
     setResultOpen(false);
     // 复制到剪切板
     navigator.clipboard.writeText(JSON.stringify(currentSample.data, null, 2));
-    message.success('复制成功');
+    message.success(t('copied'));
   };
 
   const toolbarRight = useMemo(() => {
     return (
       <div className="flex items-center gap-2">
         <Button type="primary" icon={<CodeOutlined rev={undefined} />} onClick={showResult}>
-          标注结果
+          {t('annotationResult')}
         </Button>
         <Button icon={<SettingOutlined rev={undefined} />} onClick={showDrawer} />
       </div>
     );
-  }, [showDrawer, showResult]);
+  }, [t, showDrawer, showResult]);
+
+  const initialValues = useMemo(() => {
+    return {
+      tools: defaultConfig,
+    };
+  }, []);
 
   const initialValues = useMemo(() => {
     return {
@@ -728,7 +736,7 @@ export default function ImagePage() {
     <>
       <ImageAnnotator
         toolbarRight={toolbarRight}
-        primaryColor={'#1890ff'}
+        primaryColor={'#0d53de'}
         samples={presetSamples}
         ref={annotatorRef}
         offsetTop={148}
@@ -737,17 +745,17 @@ export default function ImagePage() {
         onLoad={onLoad}
         onError={onError}
       />
-      <Drawer width={480} title="工具配置" onClose={onClose} open={configOpen}>
+      <Drawer width={480} title={t('annotationConfig')} onClose={onClose} open={configOpen}>
         <Form form={form} layout="vertical" onFinish={onFinish} initialValues={initialValues}>
           <Tabs items={items} />
         </Form>
       </Drawer>
       <Modal
-        title="标注结果"
+        title={t('annotationResult')}
         open={resultOpen}
         onOk={onOk}
         width={800}
-        okText="复制"
+        okText={t('copy')}
         onCancel={() => setResultOpen(false)}
       >
         <CodeMirror value={JSON.stringify(result, null, 2)} extensions={[json()]} />

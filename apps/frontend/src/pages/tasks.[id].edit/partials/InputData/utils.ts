@@ -56,6 +56,7 @@ export const isCorrectFiles = (files: File[], type: MediaType) => {
         { message: `${i18n.t('singleFileSizeExceeds')}${MediaFileSize[type]}MB` },
         3,
       );
+
       result = false;
       break;
     }

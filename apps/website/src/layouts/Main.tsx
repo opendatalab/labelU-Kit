@@ -3,9 +3,15 @@ import clsx from 'clsx';
 import { ExportOutlined } from '@ant-design/icons';
 
 import { ReactComponent as Logo } from '@/assets/logo.svg';
+import LanguageSwitcher from '@/components/LangSwitcher';
 import { MENU } from '@/constant';
 
 const extraLinks = [
+  {
+    name: 'Github',
+    path: 'https://github.com/opendatalab/labelU-Kit',
+    icon: <ExportOutlined rev={undefined} />,
+  },
   {
     name: 'LabelU',
     path: 'https://opendatalab.github.io/labelU/',
@@ -48,25 +54,28 @@ export default ({ children }: React.PropsWithChildren) => {
             })}
           </div>
         </div>
-        {!isIframe && (
-          <div className="flex gap-6">
-            {extraLinks.map((link) => {
-              return (
-                <div key={link.name}>
-                  <a
-                    className="text-neutral-800 flex items-center gap-1"
-                    href={link.path}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {link.name}
-                    {link.icon}
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="flex gap-6 items-center">
+          <LanguageSwitcher />
+          {!isIframe && (
+            <>
+              {extraLinks.map((link) => {
+                return (
+                  <div key={link.name}>
+                    <a
+                      className="text-neutral-800 flex items-center gap-1"
+                      href={link.path}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {link.name}
+                      {link.icon}
+                    </a>
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
       </div>
       <div className="flex-1 bg-slate-100 flex flex-col">{children}</div>
     </div>
