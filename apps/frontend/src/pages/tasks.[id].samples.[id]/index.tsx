@@ -249,7 +249,7 @@ const AnnotationPage = () => {
 
       if (editType === 'update' && !config[toolName]) {
         message.destroy();
-        message.error(`${'currentConfigDoesntInclude'}【${TOOL_NAME[toolNameKey]}】`);
+        message.error(`${t('currentConfigDoesntInclude')}【${TOOL_NAME[toolNameKey]}】`);
         return false;
       }
 
