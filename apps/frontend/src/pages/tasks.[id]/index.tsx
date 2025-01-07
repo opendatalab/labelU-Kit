@@ -14,7 +14,7 @@ import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
-import { downloadFromUrl } from '@/utils';
+import { downloadFromUrl, getThumbnailUrl } from '@/utils';
 import { deletePreAnnotationFile } from '@/api/services/preAnnotations';
 import { deleteSamples } from '@/api/services/samples';
 
@@ -26,10 +26,6 @@ const HeaderWrapper = styled(FlexLayout.Header)`
   background-color: #fff;
   height: 3.5rem;
 `;
-
-function getThumbnailUrl(url: string) {
-  return url.replace(/(.*)(\..*)$/, '$1-thumbnail$2');
-}
 
 const Samples = () => {
   const routerData = useRouteLoaderData('task') as TaskLoaderResult;
