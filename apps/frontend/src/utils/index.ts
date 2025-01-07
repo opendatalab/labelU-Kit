@@ -71,3 +71,7 @@ export function downloadFromUrl(url: string, name?: string) {
   link.click();
   document.body.removeChild(link);
 }
+
+export function getThumbnailUrl(url: string) {
+  return url.replace(/(.*)(\..*)$/, '$1-thumbnail$2');
+}

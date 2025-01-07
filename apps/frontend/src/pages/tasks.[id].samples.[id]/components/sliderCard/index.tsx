@@ -5,6 +5,7 @@ import { useTranslation } from '@labelu/i18n';
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
 import { ReactComponent as CheckSvgIcon } from '@/assets/svg/check.svg';
+import { getThumbnailUrl } from '@/utils';
 
 import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
 
@@ -72,6 +73,8 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
     );
   }
 
+  const thumbnail = getThumbnailUrl(url!);
+
   return (
     <Wrapper items="center" flex="column" justify="center">
       <ContentWrapper
@@ -81,7 +84,7 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
         active={id === sampleId}
         onClick={() => handleOnClick(cardInfo)}
       >
-        {type === MediaType.IMAGE && <img src={url} alt="" />}
+        {type === MediaType.IMAGE && <img src={thumbnail} alt="" />}
         {state === 'DONE' && <CheckIcon />}
         {state === 'SKIPPED' && <SkipWrapper>{t('skipped')}</SkipWrapper>}
       </ContentWrapper>
