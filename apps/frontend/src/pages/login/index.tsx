@@ -1,6 +1,6 @@
 import type { FormProps } from 'antd';
 import { Input, Form } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
 import { useTranslation } from '@labelu/i18n';
@@ -21,11 +21,10 @@ interface FormValues {
 const LoginPage = () => {
   const [form] = Form.useForm<FormValues>();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: () => {
-      navigate('/');
+      window.location.href = '/tasks';
     },
   });
 
@@ -61,6 +60,10 @@ const LoginPage = () => {
                 {
                   pattern: /^\S+$/,
                   message: t('passwordCannotContainsWhitespace'),
+                },
+                {
+                  min: 6,
+                  message: t('passwordLengthError'),
                 },
               ]}
             >

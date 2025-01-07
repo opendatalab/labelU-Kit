@@ -34,7 +34,7 @@ async function main() {
     childProcess.execSync(`git add ${pkgDir}`);
 
     console.log(`git add ${pkgDir}`);
-    const commitMsg = `git commit -m '${type}(${path.basename(pkg.dir)}): ${msg}'`;
+    const commitMsg = `git commit -m "${type}(${path.basename(pkg.dir)}): ${msg}"`;
     console.log(commitMsg);
     childProcess.execSync(commitMsg, { stdio: 'inherit' });
 
