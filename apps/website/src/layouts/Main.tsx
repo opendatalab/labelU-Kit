@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { ExportOutlined } from '@ant-design/icons';
+import { i18n } from '@labelu/i18n';
 
 import { ReactComponent as Logo } from '@/assets/logo.svg';
 import LanguageSwitcher from '@/components/LangSwitcher';
@@ -14,7 +15,9 @@ const extraLinks = [
   },
   {
     name: 'LabelU',
-    path: 'https://opendatalab.github.io/labelU/',
+    path: i18n.language.startsWith('en')
+      ? 'https://opendatalab.github.io/labelU/en/index'
+      : 'https://opendatalab.github.io/labelU/',
     icon: <ExportOutlined rev={undefined} />,
   },
   {

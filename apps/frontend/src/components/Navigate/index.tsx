@@ -19,7 +19,7 @@ const Homepage = () => {
   const username = localStorage.getItem('username');
   const navigate = useNavigate();
   const isSampleDetail = useMatch('/tasks/:taskId/samples/:sampleId');
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const logout = async (e: any) => {
     e.stopPropagation();
@@ -56,7 +56,21 @@ const Homepage = () => {
       <FlexLayout.Item flex gap="1rem">
         <TaskTip visible={Boolean(isSampleDetail)} />
         {window.IS_ONLINE && (
-          <a data-wiz="local-deploy-top-right" href="https://opendatalab.github.io/labelU/guide/install">
+          <Popover title={null} content={<AppPanel />}>
+            <Button
+              type="link"
+              icon={<ToolboxSvg />}
+              style={{ color: 'rgba(0, 0, 0, 0.85)', display: 'flex', alignItems: 'center' }}
+            >
+              {t('openSourceToolbox')}
+            </Button>
+          </Popover>
+        )}
+        {window.IS_ONLINE && (
+          <a
+            data-wiz="local-deploy-top-right"
+            href={`https://opendatalab.github.io/labelU/${i18n.language.startsWith('en') ? 'en/' : ''}guide/install`}
+          >
             <Button type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }} icon={<Icon component={LocalDeploy} />}>
               {t('localDeploy')}
             </Button>
@@ -66,7 +80,7 @@ const Homepage = () => {
           type="link"
           data-wiz="documentation"
           icon={<BellOutlined />}
-          href="https://opendatalab.github.io/labelU/guide/introduction"
+          href={`https://opendatalab.github.io/labelU/${i18n.language.startsWith('en') ? 'en/' : ''}guide/introduction`}
           style={{ color: 'rgba(0, 0, 0, 0.85)' }}
           target="_blank"
           rel="noreferrer"

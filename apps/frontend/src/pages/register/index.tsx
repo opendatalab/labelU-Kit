@@ -27,11 +27,11 @@ const SignUpPage = () => {
   const signUpMutation = useMutation({
     mutationFn: signUp,
     onSuccess: () => {
-      message.success('注册成功');
+      message.success(t('signUpSuccess'));
       navigate('/login');
     },
     onError: () => {
-      message.error('注册失败');
+      message.error(t('signUpFailed'));
     },
   });
 
@@ -71,6 +71,10 @@ const SignUpPage = () => {
                   pattern: /^\S+$/,
                   message: t('passwordCannotContainsWhitespace'),
                 },
+                {
+                  min: 6,
+                  message: t('passwordLengthError'),
+                },
               ]}
             >
               <Input.Password placeholder={t('password')} prefix={<PasswordIcon />} visibilityToggle={false} />
@@ -93,6 +97,10 @@ const SignUpPage = () => {
                     return Promise.reject(new Error(t('passwordRepeatedUnMatch')));
                   },
                 }),
+                {
+                  min: 6,
+                  message: t('passwordLengthError'),
+                },
               ]}
             >
               <Input.Password placeholder={t('passwordConfirm')} visibilityToggle={false} prefix={<PasswordIcon />} />
