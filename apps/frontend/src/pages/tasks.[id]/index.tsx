@@ -47,10 +47,6 @@ const Samples = () => {
     }),
   );
 
-  const sampleNamesWithPreAnnotation = useMemo(() => {
-    return _.chain(preAnnotations).map('sample_names').flatten().value();
-  }, [preAnnotations]);
-
   const taskStatus = _.get(task, 'status');
   const isTaskReadyToAnnotate =
     ![TaskStatus.DRAFT, TaskStatus.IMPORTED].includes(taskStatus!) &&
@@ -145,23 +141,17 @@ const Samples = () => {
           </Tooltip>
         </>
       ),
-      dataIndex: 'unknown',
-      key: 'unknown',
+      dataIndex: 'is_pre_annotated',
+      key: 'is_pre_annotated',
       align: 'left',
-      render: (text, record) => {
+      render: (value: boolean, record) => {
         const sampleNames = _.get(record, 'sample_names');
+
         if (sampleNames) {
-          return '-';
+          return '';
         }
 
-        const sampleName = (record as SampleResponse).file?.filename;
-        // sample_name前8为是截取的uuid，截取第9位到最后一位（如果预标注是非labelu生成的，jsonl中的sample name可能不带前缀）
-        const realSampleName = record.file?.filename?.substring(9);
-
-        return sampleNamesWithPreAnnotation.includes(realSampleName) ||
-          sampleNamesWithPreAnnotation.includes(sampleName)
-          ? t('yes')
-          : '';
+        return value ? t('yes') : '';
       },
     },
     {
