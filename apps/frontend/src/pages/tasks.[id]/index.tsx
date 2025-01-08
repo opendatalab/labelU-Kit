@@ -14,7 +14,7 @@ import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
-import { downloadFromUrl } from '@/utils';
+import { downloadFromUrl, getThumbnailUrl } from '@/utils';
 import { deletePreAnnotationFile } from '@/api/services/preAnnotations';
 import { deleteSamples } from '@/api/services/samples';
 
@@ -36,7 +36,7 @@ const Samples = () => {
   const metaData = routerData?.samples?.meta_data;
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
@@ -46,10 +46,6 @@ const Samples = () => {
       pageSize: '10',
     }),
   );
-
-  const sampleNamesWithPreAnnotation = useMemo(() => {
-    return _.chain(preAnnotations).map('sample_names').flatten().value();
-  }, [preAnnotations]);
 
   const taskStatus = _.get(task, 'status');
   const isTaskReadyToAnnotate =
@@ -112,7 +108,8 @@ const Samples = () => {
         }
 
         if (task!.media_type === MediaType.IMAGE) {
-          return <img src={data?.url} style={{ width: '116px', height: '70px' }} />;
+          const thumbnailUrl = getThumbnailUrl(data.url!);
+          return <img src={thumbnailUrl} style={{ width: '116px', height: '70px' }} />;
         } else if (task!.media_type === MediaType.AUDIO) {
           return <audio src={data?.url} controls />;
         } else {
@@ -129,7 +126,9 @@ const Samples = () => {
               <>
                 {t('preAnnotationDescription')}{' '}
                 <a
-                  href="https://opendatalab.github.io/labelU/schema/pre-annotation/json"
+                  href={`https://opendatalab.github.io/labelU/${
+                    i18n.language.startsWith('en') ? 'en/' : ''
+                  }schema/pre-annotation/json`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -142,23 +141,17 @@ const Samples = () => {
           </Tooltip>
         </>
       ),
-      dataIndex: 'unknown',
-      key: 'unknown',
+      dataIndex: 'is_pre_annotated',
+      key: 'is_pre_annotated',
       align: 'left',
-      render: (text, record) => {
+      render: (value: boolean, record) => {
         const sampleNames = _.get(record, 'sample_names');
+
         if (sampleNames) {
-          return '-';
+          return '';
         }
 
-        const sampleName = (record as SampleResponse).file?.filename;
-        // sample_name前8为是截取的uuid，截取第9位到最后一位（如果预标注是非labelu生成的，jsonl中的sample name可能不带前缀）
-        const realSampleName = record.file?.filename?.substring(9);
-
-        return sampleNamesWithPreAnnotation.includes(realSampleName) ||
-          sampleNamesWithPreAnnotation.includes(sampleName)
-          ? t('yes')
-          : '';
+        return value ? t('yes') : '';
       },
     },
     {
