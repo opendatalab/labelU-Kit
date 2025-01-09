@@ -85,7 +85,8 @@ export class Monitor {
   };
 
   private _handleKeyDown = (e: KeyboardEvent) => {
-    if ((e.target as HTMLElement).tagName === 'INPUT') {
+    // 输入类的元素不触发快捷键
+    if (['input', 'textarea'].includes((e.target as HTMLElement).tagName.toLowerCase())) {
       return;
     }
 
