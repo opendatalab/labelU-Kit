@@ -15,9 +15,17 @@ export function successHandler(response: AxiosResponse<any>) {
   return response.data;
 }
 
-function errorHandler(error: AxiosError) {
-  const errMsgFromServer = get(error, 'response.data.msg');
-  const errCode = get(error, 'response.data.err_code');
+async function errorHandler(error: AxiosError) {
+  let data = get(error, 'response.data');
+  let errMsgFromServer = get(error, 'response.data.msg');
+  let errCode = get(error, 'response.data.err_code');
+
+  if (data instanceof Blob) {
+    data = await new Response(data).json();
+    errMsgFromServer = get(data, 'msg');
+    errCode = get(data, 'err_code');
+  }
+
   // 开发环境和开发自测环境显示报错信息
   if (window.DEV) {
     notification.error({
@@ -31,7 +39,7 @@ function errorHandler(error: AxiosError) {
       ),
     });
   } else {
-    commonController.notificationErrorMessage(get(error, 'response.data', error), 5);
+    commonController.notificationErrorMessage(data ?? error, 5);
   }
 
   return Promise.reject(error);
