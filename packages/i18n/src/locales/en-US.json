@@ -18,6 +18,7 @@
   "sampleNameExists": "Sample name already exists",
   "noDataExport": "No data to export",
   "paginationError": "Parameter error: after, before, pageNo, only one can be selected, pageNo can be 0",
+  "mustBeLabelUJson": "The file must be exported in LabelU standard format",
 
   "Create Task": "Create Task",
   "localDeploy": "Local deployment",

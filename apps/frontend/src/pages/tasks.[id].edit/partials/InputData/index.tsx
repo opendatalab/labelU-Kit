@@ -163,9 +163,15 @@ const InputData = () => {
             const content = await readFile(fileBlob, 'text');
             const json = JSON.parse(content);
 
+            if (!Array.isArray(json)) {
+              throw new Error(t('mustBeLabelUJson') as string);
+            }
+
             for (let i = 0; i < json.length; i += 1) {
               if (typeof json[i].result === 'string') {
                 json[i].result = JSON.parse(json[i].result);
+              } else {
+                throw new Error('result should be a string');
               }
 
               const errors = preAnnotationJsonSchema.validate(json[i]);
