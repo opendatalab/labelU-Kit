@@ -120,8 +120,6 @@ const InputData = () => {
       const { Draft07 } = await import('json-schema-library');
       const jsonSchema = new Draft07(jsonlMapping[mediaType]);
 
-      console.log('files', files);
-
       for (const file of files) {
         const { file: fileBlob } = file;
 
