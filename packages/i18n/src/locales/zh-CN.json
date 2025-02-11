@@ -18,6 +18,7 @@
   "sampleNameExists": "预标注中的sample_name在数据库中已存在",
   "noDataExport": "没有数据可导出",
   "paginationError": "参数错误：after,before,pageNo,只能选一个，pageNo 可以说是0",
+  "mustBeLabelUJson": "必须是LabelU标准格式的json文件",
 
   "Create Task": "新建任务",
   "localDeploy": "本地部署",

@@ -1,6 +1,6 @@
 {
   "name": "@labelu/i18n",
-  "version": "1.0.2-alpha.2",
+  "version": "1.0.2",
   "description": "i18n for labelu and components",
   "scripts": {
     "build": "vite build && npm run build:types",
