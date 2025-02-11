@@ -320,6 +320,21 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.activeLabel = undefined;
   }
 
+  public updateOrder(id: string, order: number) {
+    const annotation = this.drawing?.get(id);
+
+    if (annotation) {
+      annotation.data.order = order;
+
+      for (const _data of this._data) {
+        if (annotation.id === _data.id) {
+          _data.order = order;
+          break;
+        }
+      }
+    }
+  }
+
   public get data() {
     const { drawing, draft } = this;
 
