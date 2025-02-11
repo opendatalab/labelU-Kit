@@ -21,7 +21,7 @@
     "@labelu/audio-annotator-react": "1.6.0",
     "@labelu/components-react": "1.6.0",
     "@labelu/formatter": "latest",
-    "@labelu/i18n": "1.0.0-alpha.5",
+    "@labelu/i18n": "1.0.1",
     "@labelu/image": "1.2.0",
     "@labelu/image-annotator-react": "2.2.0",
     "@labelu/video-annotator-react": "1.3.6",
