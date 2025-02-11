@@ -138,7 +138,7 @@ export class Monitor {
           }
 
           if (!tool.drawing.get(id)) {
-            throw Error('drawing item is not found');
+            throw Error(`Annotation: ${id} is not found`);
           }
 
           tool.drawing.get(id)!.data.order = i;
