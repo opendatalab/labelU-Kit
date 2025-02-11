@@ -140,10 +140,14 @@ export class Monitor {
           if (!tool.drawing.get(id)) {
             throw Error(`Annotation: ${id} is not found`);
           }
-
-          tool.drawing.get(id)!.data.order = i;
+          
+          tool.updateOrder(id, i);
         }
       }
+    }
+
+    for (const tool of tools.values()) {
+      tool.refresh();
     }
   };
 
