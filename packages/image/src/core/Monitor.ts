@@ -37,7 +37,7 @@ export class Monitor {
   private _options: MonitorOption;
 
   // TODO: 清空标注时这里也要清空
-  private _orderIndexedAnnotationIds: (string | undefined)[] = [];
+  private _orderIndexedAnnotationIds: string[] = [];
 
   /** 键盘按键记录 */
   private _keyStatus: Record<EventKeyName, boolean> = {
@@ -124,7 +124,27 @@ export class Monitor {
       return;
     }
 
-    _orderIndexedAnnotationIds[order] = undefined;
+    _orderIndexedAnnotationIds.splice(order, 1);
+
+    // 删除的标注后面的order往前移动
+    const tools = this._options.getTools();
+    for (let i = order; i < _orderIndexedAnnotationIds.length; i++) {
+      if (_orderIndexedAnnotationIds[i]) {
+        const id = _orderIndexedAnnotationIds[i];
+
+        for (const tool of tools.values()) {
+          if (!tool.drawing?.has(id)) {
+            continue;
+          }
+
+          if (!tool.drawing.get(id)) {
+            throw Error('drawing item is not found');
+          }
+
+          tool.drawing.get(id)!.data.order = i;
+        }
+      }
+    }
   };
 
   private _handleClear = () => {
