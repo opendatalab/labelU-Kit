@@ -40,8 +40,10 @@ const TaskCardItem = styled(TaskCard)``;
 const TaskList = () => {
   const navigate = useNavigate();
   const routerLoaderData = useRouteLoaderData('tasks') as TaskListResponseWithStatics;
-  const tasks = _.get(routerLoaderData, 'data');
-  const meta_data = _.get(routerLoaderData, 'meta_data');
+  const tasksResponse = _.get(routerLoaderData, 'data');
+  const tasks = _.get(tasksResponse, 'data', []);
+  const meta_data = _.get(tasksResponse, 'meta_data');
+  const labeluVersion = _.get(routerLoaderData, ['headers', 'labelu-version']);
   const pageSize = usePageSize();
   const { t, i18n } = useTranslation();
 
@@ -67,10 +69,6 @@ const TaskList = () => {
           );
         })
         .value()}
-      <br />
-      backend: {_.get(window.__backend, 'version', 'unknown')}
-      <br />
-      build@{_.get(window.__backend, 'build_time', 'unknown')}
     </div>
   );
 
@@ -122,7 +120,7 @@ const TaskList = () => {
       </FlexLayout.Content>
       <Footer flex="row" items="flex-between" justify="space-between">
         <AppVersion>
-          <Popover content={versionInfo}>labelu@{window.__backend.version}</Popover>
+          <Popover content={versionInfo}>labelu@{labeluVersion}</Popover>
         </AppVersion>
         {meta_data && searchParams && meta_data?.total > pageSize && (
           <Pagination
