@@ -202,7 +202,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     Tool.onAdd([{ ...data, ...axis!.convertCanvasCoordinate(data) }], e);
   };
 
-  protected rebuildDraft(data?: PointData) {
+  public rebuildDraft(data?: PointData) {
     if (!this.draft) {
       return;
     }

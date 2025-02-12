@@ -233,7 +233,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     );
   }
 
-  protected rebuildDraft(data?: RectData) {
+  public rebuildDraft(data?: RectData) {
     if (!this.draft) {
       return;
     }
