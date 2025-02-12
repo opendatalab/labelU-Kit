@@ -37,7 +37,7 @@ export class Monitor {
   private _options: MonitorOption;
 
   // TODO: 清空标注时这里也要清空
-  private _orderIndexedAnnotationIds: (string | undefined)[] = [];
+  private _orderIndexedAnnotationIds: string[] = [];
 
   /** 键盘按键记录 */
   private _keyStatus: Record<EventKeyName, boolean> = {
@@ -85,7 +85,8 @@ export class Monitor {
   };
 
   private _handleKeyDown = (e: KeyboardEvent) => {
-    if ((e.target as HTMLElement).tagName === 'INPUT') {
+    // 输入类的元素不触发快捷键
+    if (['input', 'textarea'].includes((e.target as HTMLElement).tagName.toLowerCase())) {
       return;
     }
 
@@ -123,7 +124,40 @@ export class Monitor {
       return;
     }
 
-    _orderIndexedAnnotationIds[order] = undefined;
+    _orderIndexedAnnotationIds.splice(order, 1);
+
+    // 删除的标注后面的order往前移动
+    const tools = this._options.getTools();
+    let draftUpdated = false;
+    for (let i = order; i < _orderIndexedAnnotationIds.length; i++) {
+      const id = _orderIndexedAnnotationIds[i];
+
+      if (!id) {
+        continue;
+      }
+
+      for (const tool of tools.values()) {
+        if (!tool.drawing?.has(id)) {
+          continue;
+        }
+
+        const annotation = tool.drawing.get(id);
+
+        if (!annotation) {
+          throw Error(`Annotation: ${id} is not found`);
+        }
+
+        tool.updateOrder(id, i);
+
+        if (tool.draft && !draftUpdated) {
+          tool.draft.data.order -= 1;
+          tool.rebuildDraft(tool.draft.data as any);
+          draftUpdated = true;
+        }
+      }
+    }
+
+    tools.forEach((tool) => tool.refresh());
   };
 
   private _handleClear = () => {

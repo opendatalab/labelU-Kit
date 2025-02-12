@@ -253,7 +253,7 @@ export default [
             name: i18n.t('insertPoint'),
             content: (
               <>
-                {i18n.t('pointPress')} <Kbd>Alt</Kbd>, {i18n.t('thenClick')} <MouseLeftClick />
+                {i18n.t('edgePress')} <Kbd>Alt</Kbd>, {i18n.t('thenClick')} <MouseLeftClick />
               </>
             ),
           },

@@ -81,7 +81,7 @@ export async function updateSampleAnnotationResult(
 }
 
 export async function outputSample(taskId: number, sampleIds: number[], activeTxt: ExportType) {
-  let res;
+  const headers = {} as any;
 
   if (
     [
@@ -89,38 +89,27 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
       ExportType.LABEL_ME,
       ExportType.YOLO,
       ExportType.CSV,
+      ExportType.XML,
       ExportType.TF_RECORD,
       ExportType.PASCAL_VOC,
     ].includes(activeTxt)
   ) {
-    res = await request.post(
-      `/v1/tasks/${taskId}/samples/export`,
-      {
-        sample_ids: sampleIds,
-      },
-      {
-        params: {
-          task_id: taskId,
-          export_type: activeTxt,
-        },
-        responseType: 'blob',
-      },
-    );
-  } else {
-    res = await request.post(
-      `/v1/tasks/${taskId}/samples/export`,
-      {
-        sample_ids: sampleIds,
-      },
-      {
-        params: {
-          task_id: taskId,
-          export_type: activeTxt,
-        },
-      },
-    );
+    headers.responseType = 'blob';
   }
-  const data = res;
+
+  const data = await request.post(
+    `/v1/tasks/${taskId}/samples/export`,
+    {
+      sample_ids: sampleIds,
+    },
+    {
+      params: {
+        task_id: taskId,
+        export_type: activeTxt,
+      },
+      ...headers,
+    },
+  );
   const taskRes = await getTask(taskId);
 
   const blobData = new Blob([JSON.stringify(data)]);
@@ -133,11 +122,9 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
     case ExportType.COCO:
       filename = filename + '.json';
       break;
-    case ExportType.XML:
-      filename = filename + '.xml';
-      break;
     case ExportType.MASK:
     case ExportType.CSV:
+    case ExportType.XML:
     case ExportType.LABEL_ME:
     case ExportType.YOLO:
     case ExportType.TF_RECORD:

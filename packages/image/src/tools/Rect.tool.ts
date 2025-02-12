@@ -119,8 +119,8 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
   private _validate(data: RectData) {
     const { config } = this;
 
-    const realWidth = data.width / axis!.scale;
-    const realHeight = data.height / axis!.scale;
+    const realWidth = data.width / axis!.initialBackgroundScale;
+    const realHeight = data.height / axis!.initialBackgroundScale;
 
     if (realWidth < config.minWidth!) {
       Tool.error({
@@ -233,7 +233,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     );
   }
 
-  protected rebuildDraft(data?: RectData) {
+  public rebuildDraft(data?: RectData) {
     if (!this.draft) {
       return;
     }
