@@ -75,6 +75,12 @@ const requestConfig = {
 
 const request = axios.create(requestConfig);
 
+export const requestWithHeaders = axios.create(requestConfig);
+
+requestWithHeaders.interceptors.request.use(authorizationBearerSuccess, authorizationBearerFailed);
+requestWithHeaders.interceptors.response.use(undefined, authorizationBearerFailed);
+requestWithHeaders.interceptors.response.use(undefined, errorHandler);
+
 request.interceptors.request.use(authorizationBearerSuccess, authorizationBearerFailed);
 request.interceptors.response.use(successHandler, errorHandler);
 request.interceptors.response.use(undefined, authorizationBearerFailed);

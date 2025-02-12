@@ -128,23 +128,36 @@ export class Monitor {
 
     // 删除的标注后面的order往前移动
     const tools = this._options.getTools();
+    let draftUpdated = false;
     for (let i = order; i < _orderIndexedAnnotationIds.length; i++) {
-      if (_orderIndexedAnnotationIds[i]) {
-        const id = _orderIndexedAnnotationIds[i];
+      const id = _orderIndexedAnnotationIds[i];
 
-        for (const tool of tools.values()) {
-          if (!tool.drawing?.has(id)) {
-            continue;
-          }
+      if (!id) {
+        continue;
+      }
 
-          if (!tool.drawing.get(id)) {
-            throw Error(`Annotation: ${id} is not found`);
-          }
+      for (const tool of tools.values()) {
+        if (!tool.drawing?.has(id)) {
+          continue;
+        }
 
-          tool.drawing.get(id)!.data.order = i;
+        const annotation = tool.drawing.get(id);
+
+        if (!annotation) {
+          throw Error(`Annotation: ${id} is not found`);
+        }
+
+        tool.updateOrder(id, i);
+
+        if (tool.draft && !draftUpdated) {
+          tool.draft.data.order -= 1;
+          tool.rebuildDraft(tool.draft.data as any);
+          draftUpdated = true;
         }
       }
     }
+
+    tools.forEach((tool) => tool.refresh());
   };
 
   private _handleClear = () => {

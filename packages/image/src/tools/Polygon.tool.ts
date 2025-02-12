@@ -227,7 +227,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     }
   }
 
-  protected rebuildDraft(data?: PolygonData) {
+  public rebuildDraft(data?: PolygonData) {
     if (!this.draft) {
       return;
     }

@@ -135,7 +135,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     }
   }
 
-  protected rebuildDraft(_data: Data) {
+  public rebuildDraft(_data: Data) {
     // do nothing
     console.warn('rebuildDraft is not implemented!');
   }
@@ -318,6 +318,21 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
 
   public deactivate() {
     this.activeLabel = undefined;
+  }
+
+  public updateOrder(id: string, order: number) {
+    const annotation = this.drawing?.get(id);
+
+    if (annotation) {
+      annotation.data.order = order;
+
+      for (const _data of this._data) {
+        if (annotation.id === _data.id) {
+          _data.order = order;
+          break;
+        }
+      }
+    }
   }
 
   public get data() {
