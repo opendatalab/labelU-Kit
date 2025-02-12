@@ -138,7 +138,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     }
   }
 
-  protected rebuildDraft(data?: CuboidData) {
+  public rebuildDraft(data?: CuboidData) {
     if (!this.draft) {
       return;
     }

@@ -135,7 +135,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     }
   }
 
-  protected rebuildDraft(_data: Data) {
+  public rebuildDraft(_data: Data) {
     // do nothing
     console.warn('rebuildDraft is not implemented!');
   }

@@ -221,7 +221,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     }
   }
 
-  protected rebuildDraft(data?: LineData) {
+  public rebuildDraft(data?: LineData) {
     if (!this.draft) {
       return;
     }
