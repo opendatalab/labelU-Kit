@@ -1,4 +1,4 @@
-import request from '../request';
+import request, { requestWithHeaders } from '../request';
 import type {
   BasicConfigCommand,
   OkRespCommonDataResp,
@@ -61,7 +61,7 @@ export async function getTaskList({
   page,
   ...params
 }: ListByApiV1TasksGetParams): Promise<TaskListResponseWithStatics> {
-  return await request.get('/v1/tasks', {
+  return await requestWithHeaders.get('/v1/tasks', {
     params: {
       size: 16,
       page: page ? page - 1 : 0,
