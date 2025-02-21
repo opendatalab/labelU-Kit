@@ -125,6 +125,16 @@ export class Annotator extends AnnotatorBase {
     return this.tools;
   }
 
+  public disable() {
+    this.cursorManager?.disable();
+    this.monitor?.disable();
+  }
+
+  public enable() {
+    this.cursorManager?.enable();
+    this.monitor?.enable();
+  }
+
   /**
    * 使工具进入绘制状态
    *
