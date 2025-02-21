@@ -128,6 +128,25 @@ export interface AttributeActionProps {
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
   const { engine, requestEdit, labelMapping, currentTool } = useTool();
   const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove } = useAnnotationCtx();
+  const editable = useMemo(() => {
+    if (annotation) {
+      return typeof requestEdit === 'function'
+        ? requestEdit?.('update', { label: annotation.label, toolName: annotation.tool })
+        : true;
+    }
+
+    if (annotations) {
+      for (const item of annotations) {
+        if (typeof requestEdit === 'function' && !requestEdit('update', { label: item.label, toolName: item.tool })) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    return false;
+  }, [annotation, annotations, requestEdit]);
 
   const annotationsMapping = useMemo(() => {
     if (!annotations) {
@@ -158,14 +177,6 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
     if (!annotation?.label) {
       return;
     }
-
-    const editable =
-      typeof requestEdit === 'function'
-        ? requestEdit('update', {
-            label: annotation!.label,
-            toolName: annotation!.tool,
-          })
-        : true;
 
     if (!editable) {
       return;
@@ -246,6 +257,10 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
         <DeleteIcon
           onClick={() => {
+            if (!editable) {
+              return;
+            }
+
             engine?.removeAnnotationById(annotation.tool, annotation.id);
             onAnnotationRemove(annotation);
           }}
@@ -262,6 +277,10 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       {!visible && <StyledVisibilityOffIcon onClick={toggleBatchVisibility(true)} />}
       <DeleteIcon
         onClick={() => {
+          if (!editable) {
+            return;
+          }
+
           annotations?.forEach((item) => {
             engine?.removeAnnotationById(item.tool, item.id);
           });
