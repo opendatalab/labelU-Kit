@@ -120,7 +120,7 @@ export default function CollaboratorPortal() {
                 >
                   {t('copy')}
                 </Button>
-                <div>{t('invitationTips')}</div>
+                {t('invitationTips')}
               </div>
             }
           />
