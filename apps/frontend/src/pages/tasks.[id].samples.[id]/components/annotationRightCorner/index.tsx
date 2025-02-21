@@ -15,6 +15,8 @@ import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
 import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
+import useMe from '@/hooks/useMe';
+import { UserAvatar } from '@/components/UserAvatar';
 
 import AnnotationContext from '../../annotation.context';
 
@@ -68,7 +70,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const revalidator = useRevalidator();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  const { samples, setSamples, task } = useContext(AnnotationContext);
+  const { samples, setSamples, task, currentEditingUser, otherUsers } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
@@ -76,6 +78,8 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
+  const me = useMe();
+  const isMeTheCurrentUser = currentEditingUser && me.data && currentEditingUser?.user_id === me.data?.id;
 
   // 第一次进入就是40的倍数时，获取下一页数据
   useEffect(() => {
@@ -99,7 +103,13 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   );
 
   const saveCurrentSample = useCallback(async () => {
-    if (currentSample?.state === SampleState.SKIPPED || noSave || !task?.media_type) {
+    if (
+      currentSample?.state === SampleState.SKIPPED ||
+      noSave ||
+      !task?.media_type ||
+      // 非当前用户标注的文件，不保存
+      !isMeTheCurrentUser
+    ) {
       return;
     }
 
@@ -243,7 +253,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, noSave, task?.media_type, taskId]);
+  }, [currentSample, isMeTheCurrentUser, noSave, task.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
@@ -252,7 +262,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
   const handleCancelSkipSample = async () => {
-    if (noSave) {
+    if (noSave || !isMeTheCurrentUser) {
       return;
     }
 
@@ -275,7 +285,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   };
 
   const handleSkipSample = async () => {
-    if (noSave) {
+    if (noSave || !isMeTheCurrentUser) {
       return;
     }
 
@@ -460,6 +470,26 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
 
   return (
     <FlexLayout items="center" gap=".5rem">
+      <FlexLayout items="center" gap=".5rem">
+        {currentEditingUser && (
+          <>
+            {currentEditingUser.user_id === me.data?.id ? (
+              '我'
+            ) : (
+              <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
+            )}
+            正在标注
+          </>
+        )}
+        {otherUsers.length > 1 && (
+          <FlexLayout items="center" gap=".5rem">
+            其他用户
+            {otherUsers.map((conn) => (
+              <UserAvatar key={conn.user_id} user={conn} />
+            ))}
+          </FlexLayout>
+        )}
+      </FlexLayout>
       {isSampleSkipped ? (
         <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
           {t('cancelSkip')}
