@@ -1,6 +1,6 @@
 {
   "name": "@labelu/components-react",
-  "version": "1.8.0-alpha.1",
+  "version": "1.7.6",
   "description": "basic react components for labelU",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -35,7 +35,7 @@
     "react"
   ],
   "dependencies": {
-    "@labelu/i18n": "1.1.0-alpha.1",
+    "@labelu/i18n": "1.0.4",
     "polished": "^4.2.2",
     "rc-collapse": "^3.7.1",
     "rc-dialog": "^9.2.0",
