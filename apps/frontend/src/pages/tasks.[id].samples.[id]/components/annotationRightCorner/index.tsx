@@ -473,17 +473,17 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       <FlexLayout items="center" gap=".5rem">
         {currentEditingUser && (
           <>
-            {currentEditingUser.user_id === me.data?.id ? (
-              '我'
-            ) : (
-              <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
+            {currentEditingUser.user_id !== me.data?.id && (
+              <>
+                <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
+                {t('isAnnotating')}
+              </>
             )}
-            正在标注
           </>
         )}
         {otherUsers.length > 1 && (
           <FlexLayout items="center" gap=".5rem">
-            其他用户
+            {t('others')}
             {otherUsers.map((conn) => (
               <UserAvatar key={conn.user_id} user={conn} />
             ))}
