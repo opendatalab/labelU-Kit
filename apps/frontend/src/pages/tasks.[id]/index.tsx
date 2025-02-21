@@ -227,6 +227,10 @@ const Samples = () => {
           return '-';
         }
 
+        if (!updaters || updaters.length === 0) {
+          return '-';
+        }
+
         if (updaters.length === 1) {
           return <UserAvatar user={updaters[0]} />;
         }

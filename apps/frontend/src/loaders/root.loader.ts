@@ -27,9 +27,6 @@ export async function rootLoader({ request }: LoaderFunctionArgs) {
         // 往react-router中注入用户信息
         const { data } = await getUserInfo();
 
-        storage.set('username', data.username);
-        storage.set('userid', '' + data.id);
-
         return data;
       }
     } catch (err) {
@@ -39,9 +36,8 @@ export async function rootLoader({ request }: LoaderFunctionArgs) {
   }
 
   const token = storage.get('token');
-  const username = storage.get('username');
 
-  if (!token || !username) {
+  if (!token) {
     return redirect('/login');
   }
 
