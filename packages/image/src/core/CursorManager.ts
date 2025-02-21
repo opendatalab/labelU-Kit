@@ -4,6 +4,8 @@ import { CrossCursor } from '@/shapes';
 import { DEFAULT_LABEL_COLOR } from '../constant';
 
 export class CursorManager {
+  private static _instance: CursorManager | null = null;
+
   public cursor: CrossCursor | null = null;
 
   public enabled = true;
@@ -16,7 +18,7 @@ export class CursorManager {
 
   private _color: string = DEFAULT_LABEL_COLOR;
 
-  constructor(container: HTMLDivElement | null, coordinate: AxisPoint, color?: string) {
+  private constructor(container: HTMLDivElement | null, coordinate: AxisPoint, color?: string) {
     this._coordinate = coordinate;
     this.cursor = new CrossCursor({
       ...coordinate,
@@ -31,6 +33,14 @@ export class CursorManager {
 
     this._container = container;
     this.default();
+  }
+
+  public static getInstance(container: HTMLDivElement | null, coordinate: AxisPoint, color?: string): CursorManager {
+    if (!CursorManager._instance) {
+      CursorManager._instance = new CursorManager(container, coordinate, color);
+    }
+
+    return CursorManager._instance;
   }
 
   public set color(color: string) {
@@ -61,7 +71,7 @@ export class CursorManager {
 
   public disable() {
     this.enabled = false;
-    this._container.style.cursor = 'auto';
+    this._container.style.cursor = 'not-allowed';
   }
 
   public register(name: string, cursor: CrossCursor) {
