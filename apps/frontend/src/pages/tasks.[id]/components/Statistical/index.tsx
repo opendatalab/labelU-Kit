@@ -8,9 +8,11 @@ import { useTranslation } from '@labelu/i18n';
 
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { MediaType } from '@/api/types';
+import useMe from '@/hooks/useMe';
 
 import commonController from '../../../../utils/common';
 import ExportPortal from '../../../../components/ExportPortal';
+import CollaboratorPortal from '../CollaboratorModal';
 
 const Circle = styled.div<{
   color: string;
@@ -54,13 +56,15 @@ export function TaskStatus({ children, status, count }: React.PropsWithChildren<
 
 const Statistical = () => {
   const routerLoaderData = useRouteLoaderData('task') as TaskLoaderResult;
-  const taskData = _.get(routerLoaderData, 'task');
+  const taskData = routerLoaderData.task;
   const { stats = {} } = taskData || {};
   const taskId = _.get(taskData, 'id');
   const mediaType = _.get(taskData, 'media_type', MediaType.IMAGE);
   const { t } = useTranslation();
+  const me = useMe();
+  const isMeTheCreator = taskData?.created_by?.id === me.data?.id;
 
-  const samples = _.get(routerLoaderData, 'samples');
+  const samples = routerLoaderData.samples;
 
   const navigate = useNavigate();
 
@@ -77,6 +81,7 @@ const Statistical = () => {
   const handleGoUpload = () => {
     navigate(`/tasks/${taskId}/edit#upload`);
   };
+
   return (
     <FlexLayout justify="space-between" items="center">
       <FlexLayout items="center" gap="3rem">
@@ -87,9 +92,12 @@ const Statistical = () => {
         <TaskStatus count={stats.done! + stats.new! + stats.skipped!}>{t('total')}</TaskStatus>
       </FlexLayout>
       <FlexLayout gap=".5rem">
-        <Button type="text" icon={<SettingOutlined />} onClick={handleGoConfig}>
-          {t('taskConfig')}
-        </Button>
+        {isMeTheCreator && <CollaboratorPortal />}
+        {isMeTheCreator && (
+          <Button type="text" icon={<SettingOutlined />} onClick={handleGoConfig}>
+            {t('taskConfig')}
+          </Button>
+        )}
         <ExportPortal taskId={+taskId!} mediaType={mediaType} tools={taskData?.config?.tools}>
           <Button type="text" icon={<UploadOutlined />}>
             {t('export')}

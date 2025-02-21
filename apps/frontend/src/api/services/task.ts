@@ -11,6 +11,9 @@ import type {
   CreateApiV1TasksTaskIdAttachmentsPostParams,
   DeleteApiV1TasksTaskIdAttachmentsDeleteParams,
   AttachmentDeleteCommand,
+  ListResponseWithMeta,
+  UserResponse,
+  OkResponse,
 } from '../types';
 
 export async function getTask(taskId: number): Promise<OkRespTaskResponseWithStatics> {
@@ -18,6 +21,32 @@ export async function getTask(taskId: number): Promise<OkRespTaskResponseWithSta
     params: {
       task_id: taskId,
     },
+  });
+}
+
+export async function getTaskCollaborators(taskId: number): Promise<ListResponseWithMeta<UserResponse>> {
+  return await request.get(`/v1/tasks/${taskId}/collaborators`);
+}
+
+export async function removeCollaborator(taskId: number, userId: number) {
+  return await request.delete(`/v1/tasks/${taskId}/collaborators/${userId}`);
+}
+
+export async function addCollaborator(taskId: number, userId: number) {
+  return await request.post(`/v1/tasks/${taskId}/collaborators`, {
+    user_id: userId,
+  });
+}
+
+export async function batchAddCollaborators(taskId: number, userIds: number[]): Promise<OkResponse<UserResponse>> {
+  return await request.post(`/v1/tasks/${taskId}/collaborators/batch_add`, {
+    user_ids: userIds,
+  });
+}
+
+export async function batchRemoveCollaborators(taskId: number, userIds: number[]): Promise<OkRespCommonDataResp> {
+  return await request.post(`/v1/tasks/${taskId}/collaborators/batch_remove`, {
+    user_ids: userIds,
   });
 }
 

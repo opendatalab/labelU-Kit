@@ -7,4 +7,5 @@ export const taskKey = {
   list: (filter: ListByApiV1TasksGetParams) => [...taskKey.lists(), filter] as const,
   details: () => [...taskKey.all, 'details'] as const,
   detail: (id: string | number) => [...taskKey.details(), id] as const,
+  collaborators: () => [...taskKey.all, 'collaborators'] as const,
 };

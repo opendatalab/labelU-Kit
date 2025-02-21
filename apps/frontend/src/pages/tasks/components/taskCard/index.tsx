@@ -13,10 +13,10 @@ import { deleteTask } from '@/api/services/task';
 import Status from '@/components/Status';
 import ExportPortal from '@/components/ExportPortal';
 import { MediaTypeText } from '@/constants/mediaType';
-import type { MediaType } from '@/api/types';
+import type { MediaType, TaskResponse } from '@/api/types';
 import { TaskStatus } from '@/api/types';
-import * as storage from '@/utils/storage';
 import { jsonParse } from '@/utils';
+import useMe from '@/hooks/useMe';
 
 import { ActionRow, CardWrapper, MediaBadge, Row, TaskName } from './style';
 
@@ -41,18 +41,25 @@ function MediaTypeTag({ type, status }: React.PropsWithChildren<{ type: MediaTyp
   );
 }
 
-const TaskCard = (props: any) => {
+export interface TaskCardProps {
+  cardInfo: TaskResponse;
+  className?: string;
+}
+
+const TaskCard = (props: TaskCardProps) => {
   const { cardInfo, className } = props;
   const revalidator = useRevalidator();
   const { t } = useTranslation();
   const { stats, id, status } = cardInfo;
-  const unDoneSample = stats.new;
-  const doneSample = stats.done + stats.skipped;
+  const unDoneSample = stats.new ?? 0;
+  const doneSample = (stats?.done ?? 0) + (stats?.skipped ?? 0);
   const total = unDoneSample + doneSample;
   const tools = useMemo(() => {
-    return jsonParse(cardInfo.config)?.tools;
+    return jsonParse(cardInfo?.config ?? '{}')?.tools;
   }, [cardInfo]);
   const navigate = useNavigate();
+  const me = useMe();
+  const isMeTheCreator = cardInfo?.created_by?.id === me?.data?.id;
   const turnToAnnotation = (e: any) => {
     if (!e.currentTarget.contains(e.target)) {
       return;
@@ -64,7 +71,6 @@ const TaskCard = (props: any) => {
 
     navigate('/tasks/' + id);
   };
-  const username = storage.get('username');
 
   const handleDeleteTask = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -75,7 +81,7 @@ const TaskCard = (props: any) => {
       okText: t('ok'),
       cancelText: t('cancel'),
       onOk: async () => {
-        await deleteTask(id);
+        await deleteTask(id!);
         revalidator.revalidate();
       },
     });
@@ -88,18 +94,18 @@ const TaskCard = (props: any) => {
           <EllipsisText maxWidth={120} title={cardInfo.name}>
             <TaskName>{cardInfo.name}</TaskName>
           </EllipsisText>
-          <MediaTypeTag type={cardInfo.media_type as MediaType} status={cardInfo.status} />
+          <MediaTypeTag type={cardInfo.media_type as MediaType} status={cardInfo.status!} />
         </FlexLayout>
         <ActionRow justify="flex-end" items="center">
           {cardInfo.config && (
-            <ExportPortal taskId={cardInfo.id} mediaType={cardInfo.media_type} tools={tools}>
+            <ExportPortal taskId={cardInfo.id!} mediaType={cardInfo.media_type} tools={tools}>
               <Tooltip placement={'top'} title={t('export')}>
                 <Button size="small" type="text" icon={<Icon component={OutputIcon} />} />
               </Tooltip>
             </ExportPortal>
           )}
 
-          {username === cardInfo.created_by.username && (
+          {isMeTheCreator && (
             <Tooltip title={t('deleteTask')} placement={'top'}>
               <Button onClick={handleDeleteTask} size="small" type="text" icon={<Icon component={DeleteIcon} />} />
             </Tooltip>

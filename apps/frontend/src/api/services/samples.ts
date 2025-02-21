@@ -36,7 +36,7 @@ export async function getSamples({
   return await request.get(`/v1/tasks/${task_id}/samples`, {
     params: {
       ...params,
-      pageNo: typeof params.pageNo === 'undefined' ? 0 : params.pageNo - 1,
+      page: typeof params.page === 'undefined' ? 0 : params.page - 1,
     },
   });
 }
@@ -138,7 +138,7 @@ export async function outputSample(taskId: number, sampleIds: number[], activeTx
 }
 
 export async function outputSamples(taskId: number, activeTxt: ExportType) {
-  const samplesRes = await getSamples({ task_id: taskId, pageNo: 1, pageSize: 100000 });
+  const samplesRes = await getSamples({ task_id: taskId, page: 1, size: 100000 });
   const sampleIdArrays = samplesRes.data;
   const sampleIds = [];
 
