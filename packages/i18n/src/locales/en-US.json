@@ -28,6 +28,7 @@
   "join": "Join",
   "joined": "Joined",
   "selectAll": "Select all",
+  "isAnnotating": "is annotating",
 
   "Create Task": "Create Task",
   "localDeploy": "Local deployment",
