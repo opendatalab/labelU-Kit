@@ -491,11 +491,19 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
         )}
       </FlexLayout>
       {isSampleSkipped ? (
-        <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="text"
+          onClick={commonController.debounce(handleCancelSkipSample, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('cancelSkip')}
         </Button>
       ) : (
-        <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="text"
+          onClick={commonController.debounce(handleSkipSample, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('skip')}
         </Button>
       )}
@@ -505,7 +513,11 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
         </Button>
       )}
       {isLastSample ? (
-        <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="primary"
+          onClick={commonController.debounce(handleComplete, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('finish')}
         </Button>
       ) : (

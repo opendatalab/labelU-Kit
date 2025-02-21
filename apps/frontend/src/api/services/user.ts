@@ -17,7 +17,6 @@ export async function login(params: LoginCommand): Promise<OkRespLoginResponse> 
   const result = await request.post('/v1/users/login', params);
 
   storage.set('token', result.data.token);
-  storage.set('username', (params as LoginCommand).username!);
 
   return result;
 }
