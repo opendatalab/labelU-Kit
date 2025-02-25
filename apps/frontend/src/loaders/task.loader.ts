@@ -58,8 +58,8 @@ export async function taskLoader({ params, request }: LoaderFunctionArgs) {
   } as ListByApiV1TasksTaskIdSamplesGetParams;
 
   // task page
-  if (params.taskId && !params.sampleId && !queryParams.pageSize) {
-    queryParams.pageSize = 10;
+  if (params.taskId && !params.sampleId && !queryParams.size) {
+    queryParams.size = 10;
   }
 
   const sampleQueryKey = sampleKey.list(queryParams);

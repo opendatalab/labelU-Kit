@@ -25,9 +25,8 @@ const MainLayout = () => {
     }
 
     const token = localStorage.getItem('token');
-    const _username = localStorage.getItem('username');
 
-    if (!token || !_username) {
+    if (!token) {
       navigate('/login');
     }
   }, [navigate]);

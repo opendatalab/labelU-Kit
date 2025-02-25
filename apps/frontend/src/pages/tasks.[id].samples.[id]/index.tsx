@@ -25,11 +25,13 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
 import { convertImageAnnotations, convertImageSample } from '@/utils/convertImageSample';
 import { TOOL_NAME } from '@/constants/toolName';
+import useMe from '@/hooks/useMe';
 
 import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
+import useSampleWs from './hooks/useSampleWs';
 
 type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
 
@@ -112,6 +114,8 @@ const AnnotationPage = () => {
   const taskConfig = _.get(task, 'config');
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
+  const me = useMe();
+  const conns = useSampleWs();
 
   // TODO： labelu/image中的错误定义
   const onError = useCallback(
@@ -151,8 +155,8 @@ const AnnotationPage = () => {
 
     const { data, meta_data } = await getSamples({
       task_id: +routeParams.taskId!,
-      pageNo: currentPage.current,
-      pageSize: 40,
+      page: currentPage.current,
+      size: 40,
     });
 
     currentPage.current += 1;
@@ -178,13 +182,17 @@ const AnnotationPage = () => {
   );
 
   const annotationContextValue = useMemo(() => {
+    const otherUsersExceptMe = conns.slice(1).filter((conn) => conn.user_id !== me.data?.id);
+
     return {
       samples,
       setSamples,
       task,
+      currentEditingUser: conns[0],
+      otherUsers: otherUsersExceptMe,
       isEnd: totalCount === samples.length,
     };
-  }, [samples, setSamples, task, totalCount]);
+  }, [conns, me.data?.id, samples, setSamples, task, totalCount]);
 
   let content = null;
 
@@ -230,6 +238,12 @@ const AnnotationPage = () => {
 
   const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
     (editType, { toolName, label }) => {
+      if (me.data && conns?.[0] && conns?.[0]?.user_id !== me.data?.id) {
+        message.destroy();
+        message.error(t('currentSampleIsAnnotating'));
+        return false;
+      }
+
       if (!toolName) {
         return false;
       }
@@ -255,7 +269,7 @@ const AnnotationPage = () => {
 
       return true;
     },
-    [t, config, task],
+    [me.data, conns, config, task, t],
   );
 
   const [currentTool, setCurrentTool] = useState<any>();
@@ -367,4 +381,5 @@ const AnnotationPage = () => {
     </AnnotationContext.Provider>
   );
 };
+
 export default AnnotationPage;
