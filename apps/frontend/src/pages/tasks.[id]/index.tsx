@@ -1,12 +1,12 @@
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { Link, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { Table, Pagination, Button, Popconfirm, Tag, Tooltip } from 'antd';
+import { Table, Pagination, Button, Popconfirm, Tag, Tooltip, Avatar, Popover } from 'antd';
 import { VideoCard, FlexLayout } from '@labelu/components-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { DownOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from '@labelu/i18n';
 
 import type { PreAnnotationFileResponse, SampleResponse } from '@/api/types';
@@ -17,10 +17,13 @@ import BlockContainer from '@/layouts/BlockContainer';
 import { downloadFromUrl, getThumbnailUrl } from '@/utils';
 import { deletePreAnnotationFile } from '@/api/services/preAnnotations';
 import { deleteSamples } from '@/api/services/samples';
+import { UserAvatar } from '@/components/UserAvatar';
+import useMe from '@/hooks/useMe';
 
 import type { TaskStatusProps } from './components/Statistical';
 import Statistical, { TaskStatus as TaskStatusComponent } from './components/Statistical';
 import GoToEditTask from './components/GoToEditTask';
+import type { TaskSampleUser } from '../tasks.[id].samples.[id]/hooks/useSampleWs';
 
 const HeaderWrapper = styled(FlexLayout.Header)`
   background-color: #fff;
@@ -32,18 +35,20 @@ const Samples = () => {
   const samples = _.get(routerData, 'samples.data');
   const revalidator = useRevalidator();
   const preAnnotations = _.get(routerData, 'preAnnotations.data') as any;
-  const task = _.get(routerData, 'task');
+  const task = routerData.task;
   const metaData = routerData?.samples?.meta_data;
   const routeParams = useParams();
   const taskId = +routeParams.taskId!;
   const { t, i18n } = useTranslation();
+  const me = useMe();
+  const isMeTheCreator = task?.created_by?.id === me?.data?.id;
 
   // 查询参数
   const [searchParams, setSearchParams] = useSearchParams(
     new URLSearchParams({
       // 默认按照最后更新时间倒序
-      pageNo: '1',
-      pageSize: '10',
+      page: '1',
+      size: '10',
     }),
   );
 
@@ -159,6 +164,7 @@ const Samples = () => {
       dataIndex: 'state',
       key: 'state',
       align: 'left',
+      width: 90,
       render: (text, record) => {
         if (record.file?.filename?.endsWith('.jsonl')) {
           return '-';
@@ -203,14 +209,14 @@ const Samples = () => {
         return result;
       },
       sorter: true,
-      width: 80,
+      width: 90,
     },
     {
-      title: t('createdBy'),
-      dataIndex: 'created_by',
-      key: 'created_by',
-      align: 'left',
-      render: (created_by, record) => {
+      title: t('updaters'),
+      dataIndex: 'updaters',
+      key: 'updaters',
+      align: 'center',
+      render: (updaters: TaskSampleUser[], record) => {
         const sampleNames = _.get(record, 'sample_names');
 
         if (sampleNames) {
@@ -221,7 +227,42 @@ const Samples = () => {
           return '-';
         }
 
-        return created_by.username;
+        if (updaters.length === 1) {
+          return <UserAvatar user={updaters[0]} />;
+        }
+
+        return (
+          <Button type="text" style={{ padding: '0.25rem', cursor: 'default' }}>
+            <FlexLayout items="center" gap=".5rem">
+              <Avatar.Group>
+                {updaters?.slice(0, 3).map((updater, index) => (
+                  <UserAvatar key={index} user={updater} />
+                ))}
+              </Avatar.Group>
+              {updaters.length > 3 && <span>{updaters.length}</span>}
+              <Popover
+                title={null}
+                arrow={false}
+                placement="bottom"
+                content={
+                  <FlexLayout flex="column" gap="1rem">
+                    {updaters.map((updater) => (
+                      <UserAvatar
+                        key={updater.user_id}
+                        user={updater}
+                        showTooltip={false}
+                        shortName={false}
+                        style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
+                      />
+                    ))}
+                  </FlexLayout>
+                }
+              >
+                <DownOutlined />
+              </Popover>
+            </FlexLayout>
+          </Button>
+        );
       },
     },
     {
@@ -264,11 +305,13 @@ const Samples = () => {
               <Button type="link" onClick={() => downloadFromUrl(record.url, record?.filename)}>
                 {t('download')}
               </Button>
-              <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteJsonl(record.id!)}>
-                <Button type="link" danger>
-                  {t('delete')}
-                </Button>
-              </Popconfirm>
+              {isMeTheCreator && (
+                <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteJsonl(record.id!)}>
+                  <Button type="link" danger>
+                    {t('delete')}
+                  </Button>
+                </Popconfirm>
+              )}
             </FlexLayout>
           );
         }
@@ -280,11 +323,13 @@ const Samples = () => {
                 <Button type="link">{t('startAnnotate')}</Button>
               </Link>
             )}
-            <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteSample([record.id!])}>
-              <Button type="link" danger>
-                {t('delete')}
-              </Button>
-            </Popconfirm>
+            {isMeTheCreator && (
+              <Popconfirm title={t('deleteConfirm')} onConfirm={() => handleDeleteSample([record.id!])}>
+                <Button type="link" danger>
+                  {t('delete')}
+                </Button>
+              </Popconfirm>
+            )}
           </FlexLayout>
         );
       },
@@ -300,8 +345,8 @@ const Samples = () => {
 
   const handleTableChange: TableProps<SampleResponse>['onChange'] = (pagination, filters, sorter) => {
     if (!_.isEmpty(pagination)) {
-      searchParams.set('pageNo', `${pagination.current}`);
-      searchParams.set('pageSize', `${pagination.pageSize}`);
+      searchParams.set('page', `${pagination.current}`);
+      searchParams.set('size', `${pagination.pageSize}`);
     }
 
     if (sorter) {
@@ -326,8 +371,8 @@ const Samples = () => {
     setSearchParams(searchParams);
   };
   const handlePaginationChange = (page: number, pageSize: number) => {
-    searchParams.set('pageNo', `${page}`);
-    searchParams.set('pageSize', `${pageSize}`);
+    searchParams.set('page', `${page}`);
+    searchParams.set('size', `${pageSize}`);
     setSearchParams(searchParams);
   };
 
@@ -402,8 +447,8 @@ const Samples = () => {
               </Button>
             </ExportPortal>
             <Pagination
-              current={parseInt(searchParams.get('pageNo') || '1')}
-              pageSize={parseInt(searchParams.get('pageSize') || '10')}
+              current={parseInt(searchParams.get('page') || '1')}
+              pageSize={parseInt(searchParams.get('size') || '10')}
               total={metaData?.total}
               showSizeChanger
               showQuickJumper

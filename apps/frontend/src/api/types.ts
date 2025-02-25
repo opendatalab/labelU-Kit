@@ -13,6 +13,19 @@ export interface AttachmentResponse {
   url?: string;
 }
 
+export interface GetUsersApiV1UsersGetParams {
+  page?: number;
+  size?: number;
+  username?: string;
+}
+
+export interface UserResponse {
+  /** Id */
+  id?: number;
+  /** Username */
+  username?: string;
+}
+
 export interface PreAnnotationFileResponse extends AttachmentResponse {
   sample_names: string[];
 }
@@ -132,8 +145,8 @@ export interface ListByApiV1TasksTaskIdSamplesGetParams {
   task_id: number;
   after?: number;
   before?: number;
-  pageNo?: number;
-  pageSize?: number;
+  page?: number;
+  size?: number;
   sort?: string;
 }
 
@@ -285,6 +298,15 @@ export interface PreAnnotationListResponse {
   data: PreAnnotationResponse[];
 }
 
+export interface OkResponse<T> {
+  data: T;
+}
+
+export interface ListResponseWithMeta<T> {
+  meta_data?: MetaData;
+  data: T[];
+}
+
 export enum SampleState {
   NEW = 'NEW',
   SKIPPED = 'SKIPPED',
@@ -320,6 +342,8 @@ export interface TaskResponse {
   media_type?: MediaType;
   /** Status description: task status: DRAFT, IMPORTED, CONFIGURED, INPROGRESS, FINISHED */
   status?: TaskStatus;
+
+  stats: TaskStatics;
   /** Created At description: task created at time */
   created_at?: string;
   /** Created By description: task created at time */
