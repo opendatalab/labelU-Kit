@@ -590,15 +590,15 @@ export class Axis {
   }
 
   public getOriginalX(x: number) {
-    const { _x, _scaleCenter, _scale } = this;
+    const { _x, _scale } = this;
 
-    return (x - _x) / _scale - _scaleCenter.x + _scaleCenter.x;
+    return (x - _x) / _scale;
   }
 
   public getOriginalY(y: number) {
-    const { _y, _scaleCenter, _scale } = this;
+    const { _y, _scale } = this;
 
-    return (y - _y) / _scale - _scaleCenter.y + _scaleCenter.y;
+    return (y - _y) / _scale;
   }
 
   public getScaledX(x: number) {

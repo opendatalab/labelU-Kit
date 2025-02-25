@@ -78,10 +78,18 @@ export class Annotator extends AnnotatorBase {
       throw new Error('Invalid arguments');
     }
 
+    const oldData = this.getDataByTool();
+
     container.style.width = `${newSize.width}px`;
     container.style.height = `${newSize.height}px`;
+
     renderer.resize(newSize.width, newSize.height);
     backgroundRenderer.resize(newSize.width, newSize.height);
+    // resize 之后，还需要重新计算所有标注相对画布的坐标
+    for (const tool of this.tools.values()) {
+      tool.clear();
+      tool.load(oldData[tool.name]);
+    }
 
     this.render();
   }
@@ -302,17 +310,21 @@ export class Annotator extends AnnotatorBase {
    * @param iterator 遍历函数
    */
   public getDataByTool(iterator?: (data: AnnotationData, tool: ToolName, index: number) => any) {
-    const result: Record<string, any> = {};
+    const result: Record<string, any[]> = {};
 
-    Array.from(this.tools.values()).forEach((tool) => {
+    for (const tool of this.tools.values()) {
+      const toolData = tool.data;
+      const toolName = tool.name;
+
       if (typeof iterator === 'function') {
-        result[tool.name] = tool.data.map((item, index) => {
-          return iterator(item, tool.name, index);
-        });
+        result[toolName] = new Array(toolData.length);
+        for (let i = 0; i < toolData.length; i++) {
+          result[toolName][i] = iterator(toolData[i], toolName, i);
+        }
       } else {
-        result[tool.name] = tool.data;
+        result[toolName] = toolData;
       }
-    });
+    }
 
     return result;
   }
