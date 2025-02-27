@@ -21,7 +21,7 @@
   "updaters": "标注者",
   "currentSampleIsAnnotating": "当前样本正在被标注，请选择其他样本",
   "collaborators": "协同标注",
-  "shareTaskLink": "分享链接",
+  "shareTaskLink": "分享任务链接",
   "inviteRegister": "邀请成员注册",
   "afterInvitation": "，注册后勾选此用户参与标注",
   "invitationTips": "（局域网内请替换为本机ip）",
@@ -32,6 +32,7 @@
   "selectAll": "全选",
   "isAnnotating": "正在标注",
   "others": "其他用户",
+  "collaboratorTips": "同时仅支持单个用户标注，当前为查看模式",
 
   "Create Task": "新建任务",
   "localDeploy": "本地部署",

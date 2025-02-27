@@ -32,6 +32,7 @@
   "selectAll": "Select all",
   "isAnnotating": "is annotating",
   "others": "Others",
+  "collaboratorTips": "Only one user can annotate at the same time, currently in view mode",
 
   "Create Task": "Create Task",
   "localDeploy": "Local deployment",
