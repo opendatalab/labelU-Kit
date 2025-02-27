@@ -5,9 +5,11 @@ import { EInternalEvent } from './enums';
 import { axis } from './singletons/axis';
 import { eventEmitter, rbush } from './singletons';
 import { Annotation, AnnotationMapping } from './annotations';
+import type { Cursor } from './shapes';
 import { Line, ShapeText } from './shapes';
-import type { AnnotatorOptions } from './AnnotatorBase';
 import { AnnotatorBase } from './AnnotatorBase';
+import type { AnnotatorOptions } from './core/AnnotatorConfig';
+import type { CursorType } from './core/CursorManager';
 
 export type { AnnotatorOptions };
 
@@ -133,14 +135,8 @@ export class Annotator extends AnnotatorBase {
     return this.tools;
   }
 
-  public disable() {
-    this.cursorManager?.disable();
-    this.monitor?.disable();
-  }
-
-  public enable() {
-    this.cursorManager?.enable();
-    this.monitor?.enable();
+  public setEditable(editable: boolean) {
+    this.config.editable = editable;
   }
 
   /**
@@ -155,6 +151,10 @@ export class Annotator extends AnnotatorBase {
     if (typeof toolName !== 'string') {
       console.error('toolName must be string, such as "line" or "point"');
 
+      return;
+    }
+
+    if (!this.config?.editable) {
       return;
     }
 
@@ -297,9 +297,9 @@ export class Annotator extends AnnotatorBase {
   public getFlatData() {
     const result: any = [];
 
-    Array.from(this.tools.values()).forEach((tool) => {
+    for (const tool of this.tools.values()) {
       result.push(...tool.data);
-    });
+    }
 
     return result;
   }
@@ -408,6 +408,14 @@ export class Annotator extends AnnotatorBase {
     return this.tools.get(this.activeToolName);
   }
 
+  public registerCursor(name: CursorType, cursor: Cursor) {
+    this.cursorManager?.register(name, cursor);
+  }
+
+  public unregisterCursor(name: CursorType) {
+    this.cursorManager?.unregister(name);
+  }
+
   public get keyboard() {
     return this.monitor?.keyboard;
   }
@@ -431,6 +439,10 @@ export class Annotator extends AnnotatorBase {
    * @param id 标注id
    */
   public removeAnnotationById(toolName: ToolName, id: string) {
+    if (!this.config.editable) {
+      return;
+    }
+
     const { tools } = this;
 
     const tool = tools.get(toolName);
@@ -446,6 +458,10 @@ export class Annotator extends AnnotatorBase {
    * 指定标注id从外部选中标注
    */
   public selectAnnotation(toolName: ToolName | undefined, id: string | undefined) {
+    if (!this.config.editable) {
+      return;
+    }
+
     const selectTool = toolName || this.activeTool?.name;
 
     if (!selectTool) {

@@ -134,6 +134,10 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
    * 点击画布事件处理
    */
   protected onSelect = (annotation: AnnotationLine) => (_e: MouseEvent) => {
+    if (!this.requestEdit('update')) {
+      return;
+    }
+
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);

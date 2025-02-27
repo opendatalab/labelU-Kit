@@ -101,6 +101,10 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
    * 6. 重新渲染
    */
   protected onSelect = (annotation: AnnotationRect) => (_e: MouseEvent) => {
+    if (!this.requestEdit('update')) {
+      return;
+    }
+
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);
