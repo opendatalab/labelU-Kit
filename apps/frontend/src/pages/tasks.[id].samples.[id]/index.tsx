@@ -1,4 +1,4 @@
-import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
+import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
@@ -237,18 +237,6 @@ const AnnotationPage = () => {
     return configFromParent || editorConfig;
   }, [configFromParent, editorConfig]);
 
-  useEffect(() => {
-    const engine = imageAnnotationRef.current?.getEngine();
-
-    if (!isMeTheCurrentEditingUser) {
-      engine?.disable();
-      console.log('ddd disabled');
-    } else {
-      engine?.enable();
-      console.log('eee enabled');
-    }
-  });
-
   const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
     (editType, { toolName, label }) => {
       if (me.data && conns?.[0] && conns?.[0]?.user_id !== me.data?.id) {
@@ -316,6 +304,7 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        editable={isMeTheCurrentEditingUser}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}

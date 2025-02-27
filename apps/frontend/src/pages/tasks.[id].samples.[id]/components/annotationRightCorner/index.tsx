@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useContext } from 'react';
 import { useNavigate, useParams, useRevalidator } from 'react-router';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useTranslation } from '@labelu/i18n';
@@ -8,6 +8,7 @@ import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
 import { FlexLayout } from '@labelu/components-react';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 import commonController from '@/utils/common';
 import { imageAnnotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
@@ -477,6 +478,9 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
               <>
                 <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
                 {t('isAnnotating')}
+                <Tooltip title={t('collaboratorTips')} placement="bottom">
+                  <QuestionCircleOutlined />
+                </Tooltip>
               </>
             )}
           </>
