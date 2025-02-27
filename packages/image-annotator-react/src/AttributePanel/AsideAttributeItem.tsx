@@ -257,7 +257,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
         <DeleteIcon
           onClick={() => {
-            if (!editable) {
+            if (!editable || !engine?.config.editable) {
               return;
             }
 
@@ -277,7 +277,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       {!visible && <StyledVisibilityOffIcon onClick={toggleBatchVisibility(true)} />}
       <DeleteIcon
         onClick={() => {
-          if (!editable) {
+          if (!editable || !engine?.config.editable) {
             return;
           }
 
