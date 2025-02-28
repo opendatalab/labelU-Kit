@@ -848,6 +848,7 @@ function ForwardAnnotator(
       onAnnotationsRemove,
       onAnnotationClear,
       orderVisible,
+      editable,
       preAnnotationsWithGlobal: preAnnotations,
       onOrderVisibleChange,
     }),
@@ -863,6 +864,7 @@ function ForwardAnnotator(
       onAnnotationClear,
       orderVisible,
       preAnnotations,
+      editable,
       onOrderVisibleChange,
     ],
   );

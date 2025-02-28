@@ -47,9 +47,7 @@ export interface AnnotationContextType {
 
   onAnnotationClear: () => void;
 
-  // onGlobalAnnotationClear: () => void;
-
-  // onImageAnnotationsClear: () => void;
+  editable: boolean;
 
   orderVisible: boolean;
 
