@@ -1,22 +1,21 @@
 import { Renderer } from './core/Renderer';
-import type { CuboidToolOptions, PointToolOptions, RectToolOptions } from './tools';
 import { CuboidTool, PointTool, RectTool } from './tools';
-import type { LineToolOptions } from './tools/Line.tool';
 import { LineTool } from './tools/Line.tool';
 import type { ImageOption } from './core/BackgroundRenderer';
 import { BackgroundRenderer } from './core/BackgroundRenderer';
 import type { Axis } from './core/Axis';
-import type { AllTypeAnnotationDataGroup, AnnotationTool, AnnotationToolData, EditType, ToolName } from './interface';
+import type { AllTypeAnnotationDataGroup, AnnotationTool, AnnotationToolData, ToolName } from './interface';
 import { EInternalEvent } from './enums';
 import type { Monitor } from './core/Monitor';
 import { createAxis } from './singletons/axis';
 import { createMonitor, eventEmitter, rbush } from './singletons';
-import type { PolygonToolOptions } from './tools/Polygon.tool';
 import { PolygonTool } from './tools/Polygon.tool';
 import { Annotation } from './annotations';
 import { TOOL_NAMES } from './constant';
 import type { CursorManager } from './core/CursorManager';
 import { createCursorManager } from './singletons/cursorManager';
+import { createConfig } from './singletons/annotationConfig';
+import type { AnnotatorOptions } from './core/AnnotatorConfig';
 
 const ToolMapping = {
   line: LineTool,
@@ -25,65 +24,6 @@ const ToolMapping = {
   polygon: PolygonTool,
   cuboid: CuboidTool,
 } as const;
-
-export interface AnnotatorOptions {
-  container: HTMLDivElement;
-
-  width: number;
-
-  height: number;
-
-  line?: LineToolOptions;
-
-  point?: PointToolOptions;
-
-  rect?: RectToolOptions;
-
-  polygon?: PolygonToolOptions;
-
-  cuboid?: CuboidToolOptions;
-
-  image: {
-    url: string;
-    rotate: number;
-  };
-
-  /**
-   * 是否显示标注顺序
-   *
-   * @default false
-   */
-  showOrder?: boolean;
-
-  /**
-   * 标注线宽
-   *
-   * @default 2
-   */
-  strokeWidth?: number;
-
-  /**
-   * 标注填充不透明度
-   *
-   * @default 0.7
-   */
-  fillOpacity?: number;
-
-  /**
-   * 标注线不透明度
-   *
-   * @default 1
-   */
-  strokeOpacity?: number;
-
-  requestEdit?: (
-    type: EditType,
-    payload: {
-      toolName: ToolName;
-      label?: string;
-    },
-  ) => boolean;
-}
 
 export class AnnotatorBase {
   public renderer: Renderer | null = null;
@@ -120,7 +60,7 @@ export class AnnotatorBase {
 
     this.container = container;
 
-    this.config = params;
+    this.config = createConfig(params);
 
     this._init();
     this.render();
@@ -134,6 +74,11 @@ export class AnnotatorBase {
       getTools: () => this.tools,
     });
     this.cursorManager = createCursorManager(this.container, { x: 0, y: 0 });
+
+    if (!this.config.editable) {
+      this.cursorManager?.disable();
+    }
+
     this._initialTools();
   }
 

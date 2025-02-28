@@ -30,11 +30,15 @@ const tooltipStyle = {
 
 export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
   const { onToolChange, currentTool, config } = useTool();
-  const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
+  const { onOrderVisibleChange, orderVisible, editable } = useAnnotationCtx();
   const { redo, undo, pastRef, futureRef } = useHistoryCtx();
   const { t } = useTranslation();
 
   const handleToolChange = (tool?: VideoAnnotationType) => () => {
+    if (!editable) {
+      return;
+    }
+
     onToolChange(tool);
   };
 

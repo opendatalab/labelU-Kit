@@ -1,3 +1,5 @@
+import { config } from '@/singletons/annotationConfig';
+
 import { EInternalEvent } from '../enums';
 import { eventEmitter, rbush } from '../singletons';
 import type { AnnotationShape, AnnotationTool, GroupInAnnotation, ToolName } from '../interface';
@@ -96,6 +98,11 @@ export class Monitor {
     if (e.key === ' ' || keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
       this._updateKeyStatus(e.key, true);
+
+      if (!config?.editable && e.key !== 'Space') {
+        return;
+      }
+
       eventEmitter.emit(keyEventMapping[e.key as EventKeyName], e);
     }
 
@@ -106,6 +113,10 @@ export class Monitor {
     if (e.key === ' ' || keyEventMapping[e.key as EventKeyName]) {
       e.preventDefault();
       this._updateKeyStatus(e.key, false);
+    }
+
+    if (!config?.editable) {
+      return;
     }
 
     eventEmitter.emit(EInternalEvent.KeyUp, e);
@@ -329,7 +340,7 @@ export class Monitor {
    * @description 右键点击选中和取消选中标注
    */
   private _handleRightMouseUp = (e: MouseEvent) => {
-    if (!this._enabled) {
+    if (!config?.editable) {
       return;
     }
 

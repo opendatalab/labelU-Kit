@@ -4,6 +4,24 @@ import { FlexLayout } from '@labelu/components-react';
 export const Wrapper = styled(FlexLayout)`
   gap: 0.5rem;
   cursor: pointer;
+  position: relative;
+`;
+
+export const AnnotatingUser = styled.div`
+  position: absolute;
+  z-index: 1;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #999;
+
+  .annotating-text {
+    color: #fff;
+    text-shadow: 0 0 3px #000;
+  }
 `;
 
 export const IdWrapper = styled.div`

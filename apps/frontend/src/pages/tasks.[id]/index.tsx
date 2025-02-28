@@ -23,7 +23,7 @@ import useMe from '@/hooks/useMe';
 import type { TaskStatusProps } from './components/Statistical';
 import Statistical, { TaskStatus as TaskStatusComponent } from './components/Statistical';
 import GoToEditTask from './components/GoToEditTask';
-import type { TaskSampleUser } from '../tasks.[id].samples.[id]/hooks/useSampleWs';
+import type { TaskSampleUser } from '../../hooks/useSampleWs';
 
 const HeaderWrapper = styled(FlexLayout.Header)`
   background-color: #fff;

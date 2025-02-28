@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { EllipsisText } from '@labelu/components-react';
 import type { AnnotationData, ToolName } from '@labelu/image';
 
@@ -127,8 +127,9 @@ export interface AttributeActionProps {
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
   const { engine, requestEdit, labelMapping, currentTool } = useTool();
-  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove } = useAnnotationCtx();
-  const editable = useMemo(() => {
+  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove, editable } =
+    useAnnotationCtx();
+  const requestEditable = useCallback(() => {
     if (annotation) {
       return typeof requestEdit === 'function'
         ? requestEdit?.('update', { label: annotation.label, toolName: annotation.tool })
@@ -173,12 +174,16 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
   const handleEditClick = (e: React.MouseEvent) => {
     engine.selectAnnotation(annotation!.tool, annotation!.id);
+    const secondaryEditable =
+      typeof requestEdit === 'function'
+        ? requestEdit('update', { label: annotation!.label, toolName: annotation!.tool })
+        : true;
 
     if (!annotation?.label) {
       return;
     }
 
-    if (!editable) {
+    if (!secondaryEditable || !editable) {
       return;
     }
 
@@ -257,7 +262,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
         <DeleteIcon
           onClick={() => {
-            if (!editable) {
+            if (!editable || !requestEditable()) {
               return;
             }
 
@@ -277,7 +282,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       {!visible && <StyledVisibilityOffIcon onClick={toggleBatchVisibility(true)} />}
       <DeleteIcon
         onClick={() => {
-          if (!editable) {
+          if (!editable || requestEditable()) {
             return;
           }
 

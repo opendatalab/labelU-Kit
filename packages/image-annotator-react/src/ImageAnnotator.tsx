@@ -146,7 +146,12 @@ export interface ImageAnnotatorProps {
   selectedTool?: ToolName;
 
   /**
-   * 标注是否可编辑
+   * 是否可编辑
+   */
+  editable?: boolean;
+
+  /**
+   * 标注是否可编辑，权重低于全局的editable，粒度更细
    */
   requestEdit?: (type: EditType, payload: { toolName: ToolName; label?: string; modifiedProperty?: string }) => boolean;
 
@@ -164,6 +169,7 @@ function ForwardAnnotator(
     renderSidebar,
     config,
     renderAttributes,
+    editable,
     offsetTop = 0,
     editingSample,
     maxHistoryCount = 20,
@@ -248,13 +254,14 @@ function ForwardAnnotator(
     return {
       showOrder: true,
       requestEdit,
+      editable,
       ...configWithPreAnnotationLabels,
       image: {
         url: currentSample?.url ?? '',
         rotate: currentSample?.meta?.rotate ?? 0,
       },
     };
-  }, [config, currentSample?.meta?.rotate, currentSample?.url, requestEdit, preAnnotationLabels]);
+  }, [config, requestEdit, editable, currentSample?.url, currentSample?.meta?.rotate, preAnnotationLabels]);
 
   const engine = useImageAnnotator(containerRef, annotationOptions);
 
@@ -280,7 +287,7 @@ function ForwardAnnotator(
   }, [config, currentTool]);
 
   const selectedLabelFromProps = useMemo(() => {
-    return labels.find((item) => item.value === propsSelectedLabel);
+    return labels.find((item: Attribute) => item.value === propsSelectedLabel);
   }, [labels, propsSelectedLabel]);
 
   const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(
@@ -513,7 +520,7 @@ function ForwardAnnotator(
       if (engine?.keyboard?.Shift && annotation) {
         e.preventDefault();
         e.stopPropagation();
-        const labelConfig = labels.find((item) => item.value === annotation?.label);
+        const labelConfig = labels.find((item: Attribute) => item.value === annotation?.label);
         openAttributeModal({
           labelValue: annotation.label,
           e,
@@ -805,33 +812,29 @@ function ForwardAnnotator(
     [engine, labels],
   );
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      getAnnotations: () => {
-        const result: Partial<Record<AllAnnotationType, AnnotationData[] | GlobalAnnotation[]>> = {};
+  useImperativeHandle(ref, () => ({
+    getAnnotations: () => {
+      const result: Partial<Record<AllAnnotationType, AnnotationData[] | GlobalAnnotation[]>> = {};
 
-        Object.values(annotationsWithGlobal).forEach((item) => {
-          // @ts-ignore
-          // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-          const { visible, tool, ...rest } = item;
-          const _toolName = tool || (item as GlobalAnnotation).type;
+      Object.values(annotationsWithGlobal).forEach((item) => {
+        // @ts-ignore
+        // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+        const { visible, tool, ...rest } = item;
+        const _toolName = tool || (item as GlobalAnnotation).type;
 
-          if (!result[_toolName]) {
-            result[_toolName] = [];
-          }
+        if (!result[_toolName]) {
+          result[_toolName] = [];
+        }
 
-          result![_toolName]!.push(rest as any);
-        });
+        result![_toolName]!.push(rest as any);
+      });
 
-        return result;
-      },
-      getSample: () => currentSample,
+      return result;
+    },
+    getSample: () => currentSample,
 
-      getEngine: () => engine,
-    }),
-    [annotationsWithGlobal, currentSample, engine],
-  );
+    getEngine: () => engine,
+  }));
 
   const annotationContextValue = useMemo(
     () => ({
@@ -845,6 +848,7 @@ function ForwardAnnotator(
       onAnnotationsRemove,
       onAnnotationClear,
       orderVisible,
+      editable,
       preAnnotationsWithGlobal: preAnnotations,
       onOrderVisibleChange,
     }),
@@ -860,6 +864,7 @@ function ForwardAnnotator(
       onAnnotationClear,
       orderVisible,
       preAnnotations,
+      editable,
       onOrderVisibleChange,
     ],
   );

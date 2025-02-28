@@ -3,27 +3,35 @@ import { useParams } from 'react-router-dom';
 
 import WebSocketClient from '@/classes/WebsocketClient';
 
-export interface TaskSampleUser {
+export interface TaskCollaboratorInWs {
   user_id: number;
   username: string;
-  task_id: number;
   sample_id: number;
 }
 
-export default function useSampleWs() {
+export interface TaskUser {
+  user_id: number;
+  username: string;
+  task_id: number;
+
+  collaborators: TaskCollaboratorInWs[];
+}
+
+export default function useTaskWs(): [TaskUser[], TaskCollaboratorInWs[]] {
   const routeParams = useParams();
-  const [connections, setConnections] = useState<TaskSampleUser[]>([]);
+  const [connections, setConnections] = useState<TaskUser[]>([]);
+  const [collaborators, setCollaborators] = useState<TaskCollaboratorInWs[]>([]);
 
   useEffect(() => {
     const host = window.location.host;
     const token = localStorage.getItem('token')?.split(' ')[1];
-    const ws = new WebSocketClient(`ws://${host}/ws/task/${routeParams.taskId}/${routeParams.sampleId}?token=${token}`);
+    const ws = new WebSocketClient(`ws://${host}/ws/task/${routeParams.taskId}?token=${token}`);
 
-    ws.on('active_connections', (data) => {
+    ws.on('connected', (data) => {
       const userIds: number[] = [];
-      const result: TaskSampleUser[] = [];
+      const result: TaskUser[] = [];
 
-      for (const item of data) {
+      for (const item of data.connections) {
         if (userIds.includes(item.user_id)) {
           continue;
         }
@@ -33,6 +41,7 @@ export default function useSampleWs() {
       }
 
       setConnections(result);
+      setCollaborators(data.collaborators);
     });
 
     return () => {
@@ -40,5 +49,5 @@ export default function useSampleWs() {
     };
   }, [routeParams.sampleId, routeParams.taskId]);
 
-  return connections;
+  return [connections, collaborators];
 }
