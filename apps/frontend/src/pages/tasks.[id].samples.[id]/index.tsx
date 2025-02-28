@@ -1,4 +1,4 @@
-import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
+import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
 import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
@@ -31,7 +31,7 @@ import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
-import useSampleWs from './hooks/useSampleWs';
+import useSampleWs from '../../hooks/useSampleWs';
 
 type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
 
@@ -116,6 +116,7 @@ const AnnotationPage = () => {
   const isMutating = useIsMutating();
   const me = useMe();
   const conns = useSampleWs();
+  const isMeTheCurrentEditingUser = conns?.[0]?.user_id === me.data?.id;
 
   // TODO： labelu/image中的错误定义
   const onError = useCallback(
@@ -236,6 +237,18 @@ const AnnotationPage = () => {
     return configFromParent || editorConfig;
   }, [configFromParent, editorConfig]);
 
+  useEffect(() => {
+    const engine = imageAnnotationRef.current?.getEngine();
+
+    if (!isMeTheCurrentEditingUser) {
+      engine?.disable();
+      console.log('ddd disabled');
+    } else {
+      engine?.enable();
+      console.log('eee enabled');
+    }
+  });
+
   const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
     (editType, { toolName, label }) => {
       if (me.data && conns?.[0] && conns?.[0]?.user_id !== me.data?.id) {
@@ -303,6 +316,7 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        editable={isMeTheCurrentEditingUser}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
@@ -322,6 +336,7 @@ const AnnotationPage = () => {
         config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
+        editable={isMeTheCurrentEditingUser}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
@@ -339,6 +354,7 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        editable={isMeTheCurrentEditingUser}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}

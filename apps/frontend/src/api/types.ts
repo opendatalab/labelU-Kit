@@ -369,6 +369,7 @@ export interface TaskResponseWithStatics {
   created_at?: string;
   /** Created By description: task created at time */
   created_by?: UserResp;
+  updaters?: UserResp[];
   stats?: TaskStatics;
 }
 

@@ -224,6 +224,12 @@ export interface AnnotatorProps {
       label?: string;
     },
   ) => boolean;
+
+  /**
+   * 是否可编辑
+   * @description 全局的是否可编辑，权重比 `requestEdit` 高
+   */
+  editable?: boolean;
 }
 
 export interface AnnotatorWrapperProps extends AnnotatorProps {
@@ -249,6 +255,7 @@ function ForwardAnnotator(
     selectedTool: propsSelectedTool,
     preAnnotations,
     requestEdit,
+    editable,
     children,
   }: AnnotatorWrapperProps,
   ref: React.Ref<AudioAndVideoAnnotatorRef>,
@@ -506,6 +513,10 @@ function ForwardAnnotator(
 
   const onAnnotationSelect = useCallback(
     (annotation: MediaAnnotationInUI, e: React.MouseEvent) => {
+      if (!editable) {
+        return;
+      }
+
       setSelectedAnnotation(annotation);
       const _label = labelMappingByTool?.[annotation.type]?.[annotation.label!];
       setSelectedLabel(_label);
@@ -523,7 +534,7 @@ function ForwardAnnotator(
         });
       }
     },
-    [config, currentTool, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
+    [config, currentTool, editable, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
   );
 
   const handleAnnotateEnd: AudioAnnotatorProps['onAnnotateEnd'] = useCallback(
@@ -814,6 +825,7 @@ function ForwardAnnotator(
       onAnnotationChange,
       onAnnotationClear,
       orderVisible,
+      editable,
       onAnnotationSelect,
       onAnnotationRemove,
       onAnnotationAdd,
@@ -835,6 +847,7 @@ function ForwardAnnotator(
       onAnnotationAdd,
       onAnnotationsRemove,
       preAnnotations,
+      editable,
       onOrderVisibleChange,
     ],
   );

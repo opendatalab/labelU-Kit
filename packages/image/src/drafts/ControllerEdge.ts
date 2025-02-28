@@ -1,5 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
 
+import { cursorManager } from '@/singletons/cursorManager';
+import type { CursorType } from '@/core/CursorManager';
+
 import { eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { AxisPoint, LineParams } from '../shapes';
@@ -12,6 +15,21 @@ export interface ControllerEdgeOptions extends LineParams {
 }
 
 type EdgeHandler = (e: MouseEvent, edge: ControllerEdge) => void;
+
+const positionCursorMapping = {
+  top: 'ns-resize',
+  bottom: 'ns-resize',
+  left: 'ew-resize',
+  right: 'ew-resize',
+  'front-top': 'ns-resize',
+  'front-bottom': 'ns-resize',
+  'front-right': 'ew-resize',
+  'front-left': 'ew-resize',
+  'back-top': 'ns-resize',
+  'back-bottom': 'ns-resize',
+  'back-right': 'ew-resize',
+  'back-left': 'ew-resize',
+};
 
 export class ControllerEdge extends Line {
   public previousDynamicCoordinate: AxisPoint[] | null = null;
@@ -52,6 +70,12 @@ export class ControllerEdge extends Line {
     this.updateStyle({
       strokeWidth: (this._originalStyle?.strokeWidth ?? 4) + 4,
     });
+
+    if (this.name) {
+      const cursor = positionCursorMapping[this.name as keyof typeof positionCursorMapping] as CursorType;
+
+      cursorManager?.invokeCursor(cursor);
+    }
   };
 
   private _onShapeOut = () => {
@@ -60,6 +84,7 @@ export class ControllerEdge extends Line {
     }
 
     this.updateStyle(this._originalStyle ?? {});
+    cursorManager?.activate();
   };
 
   private _handleMouseDown = (e: MouseEvent) => {

@@ -32,6 +32,7 @@ export interface VideoProps {
   onAnnotationSelect?: (annotation: VideoAnnotationInUI, e: React.MouseEvent) => void;
   onAnnotateEnd?: (annotation: VideoAnnotationInUI, e?: MouseEvent) => void;
   requestEdit?: MediaAnnotatorProps['requestEdit'];
+  editable?: boolean;
   className?: string;
 }
 
@@ -50,6 +51,7 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
     onAnnotateEnd,
     onAdd,
     requestEdit,
+    editable,
     showOrder = true,
     disabled,
     className,
@@ -293,6 +295,7 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
       onAnnotationChange: handleAnnotationChange,
       attributeConfigMapping,
       requestEdit,
+      editable,
       playingAnnotationIds,
       showOrder,
       setCurrentTime: (time: number) => playerRef.current?.currentTime(time),
@@ -305,6 +308,7 @@ const VideoAnnotator = forwardRef<HTMLDivElement | null, VideoProps>(function Fo
     onChange,
     showOrder,
     requestEdit,
+    editable,
     annotations,
     selectedAnnotation,
     attributeConfigMapping,

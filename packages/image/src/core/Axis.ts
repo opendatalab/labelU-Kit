@@ -1,12 +1,13 @@
 import type { BBox } from 'rbush';
 
 import { cursorManager } from '@/singletons/cursorManager';
+import { config } from '@/singletons/annotationConfig';
 
 import type { AxisPoint } from '../shapes/Point.shape';
 import { Ticker } from './Ticker';
 import { EInternalEvent } from '../enums';
 import * as eventEmitter from '../singletons/eventEmitter';
-import { monitor, rbush } from '../singletons';
+import { axis, monitor, rbush } from '../singletons';
 import type { Renderer } from './Renderer';
 
 const SCALE_FACTOR = 1.1;
@@ -125,7 +126,7 @@ export class Axis {
   }
 
   private _handleKeyUp = () => {
-    cursorManager?.default();
+    this._recoverCursor();
   };
 
   private _handleMoveStart = (e: MouseEvent) => {
@@ -149,12 +150,22 @@ export class Axis {
     };
 
     if (monitor?.keyboard.Space) {
+      cursorManager?.grab();
       this._startPanPoint = {
         x: e.offsetX - this._x,
         y: e.offsetY - this._y,
       };
+      axis?.rerender();
     }
   };
+
+  private _recoverCursor() {
+    if (config?.editable) {
+      cursorManager?.activate();
+    } else {
+      cursorManager?.invokeCursor('disabled');
+    }
+  }
 
   private _pan = (e: MouseEvent) => {
     const { _startPanPoint, _startMovePoint } = this;
@@ -169,7 +180,7 @@ export class Axis {
     this._x = point.x - _startPanPoint!.x;
     this._y = point.y - _startPanPoint!.y;
 
-    cursorManager?.grabbing();
+    cursorManager?.invokeCursor('grabbing');
 
     eventEmitter.emit(EInternalEvent.AxisChange, e);
   };
@@ -177,13 +188,13 @@ export class Axis {
   private _handleMouseMove = (e: MouseEvent) => {
     if (this._startPanPoint) {
       this._pan(e);
-
+      cursorManager?.invokeCursor('grabbing');
       // 移动画布时隐藏鼠标指针，移动时始终在图片外面
-      cursorManager?.move(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
+      cursorManager?.moveCursor(Math.min(-this._x - 1, -1), Math.min(-this._y - 1, -1));
     } else {
       this._calcMouseMove(e);
       eventEmitter.emit(EInternalEvent.MouseMoveWithoutAxisChange, e);
-      cursorManager?.move(e.offsetX, e.offsetY);
+      cursorManager?.moveCursor(e.offsetX, e.offsetY);
     }
 
     // 只要鼠标在画布内移动，触发画布更新
@@ -214,14 +225,14 @@ export class Axis {
 
       this._distanceX = 0;
       this._distanceY = 0;
+
+      this._recoverCursor();
     });
   };
 
   private _handleRightMouseUp = (e: MouseEvent) => {
     this._startPanPoint = null;
     this._startMovePoint = null;
-
-    cursorManager?.default();
 
     if (!this.isMoved) {
       eventEmitter.emit(EInternalEvent.RightMouseUpWithoutAxisChange, e);
@@ -232,6 +243,7 @@ export class Axis {
         this._distanceY = 0;
 
         eventEmitter.emit(EInternalEvent.PanEnd, e);
+        this._recoverCursor();
       });
     }
   };

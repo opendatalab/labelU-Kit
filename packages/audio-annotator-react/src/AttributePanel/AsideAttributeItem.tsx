@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import type { PropsWithChildren } from 'react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { EllipsisText, secondsToMinute } from '@labelu/components-react';
 import type { MediaAnnotationInUI, MediaAnnotationWithTextAndTag } from '@labelu/interface';
 
@@ -111,7 +111,8 @@ export interface AttributeActionProps {
 }
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
-  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange } = useAnnotationCtx();
+  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange, editable } =
+    useAnnotationCtx();
   const { labelMapping, requestEdit, player } = useTool();
 
   const annotationsMapping = useMemo(() => {
@@ -137,6 +138,18 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
     return true;
   }, [annotation, annotations]);
 
+  const secondaryEditable = useCallback(() => {
+    if (!annotation) {
+      return false;
+    }
+
+    if (typeof requestEdit === 'function') {
+      return requestEdit('update', { toolName: annotation.type!, label: annotation?.label });
+    }
+
+    return true;
+  }, [annotation, requestEdit]);
+
   const handleEditClick = (e: React.MouseEvent) => {
     if (!annotation?.label) {
       return;
@@ -144,12 +157,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
     player.pause();
 
-    const editable =
-      typeof requestEdit === 'function'
-        ? requestEdit('update', { toolName: annotation.type, label: annotation.label })
-        : true;
-
-    if (!editable) {
+    if (!editable || !secondaryEditable()) {
       return;
     }
 
@@ -192,6 +200,10 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
   };
 
   const handleRemove = (_annotation: MediaAnnotationInUI) => (e: React.MouseEvent) => {
+    if (!editable || !secondaryEditable()) {
+      return;
+    }
+
     e.stopPropagation();
     e.preventDefault();
     onAnnotationRemove(_annotation);

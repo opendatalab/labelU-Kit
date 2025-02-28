@@ -1,8 +1,10 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { SampleResponse } from '@/api/types';
 import type { TaskInLoader } from '@/loaders/task.loader';
+import type { TaskCollaboratorInWs } from '@/hooks/useTaskWs';
+import useTaskWs from '@/hooks/useTaskWs';
 
 import SliderCard from '../sliderCard';
 import { SAMPLE_CHANGED } from '../annotationRightCorner';
@@ -21,6 +23,21 @@ const LeftWrapper = styled.div`
 `;
 
 const SlideLoader = () => {
+  const [, collaborators] = useTaskWs();
+
+  const userSampleMapping = useMemo(() => {
+    const mapping: Record<string, TaskCollaboratorInWs[]> = {};
+    collaborators.forEach((collaborator) => {
+      if (!mapping[collaborator.sample_id]) {
+        mapping[collaborator.sample_id] = [];
+      }
+
+      mapping[collaborator.sample_id].push(collaborator);
+    });
+
+    return mapping;
+  }, [collaborators]);
+
   const handleSampleClick = (sample: SampleResponse) => {
     document.dispatchEvent(
       new CustomEvent(SAMPLE_CHANGED, {
@@ -46,7 +63,14 @@ const SlideLoader = () => {
     <LeftWrapper>
       {samplesFromContext?.map((item: SampleResponse, index) => {
         return (
-          <SliderCard cardInfo={item} type={task.media_type} key={item.id} onClick={handleSampleClick} index={index} />
+          <SliderCard
+            editingUser={userSampleMapping?.[item.id!]?.[0]}
+            cardInfo={item}
+            type={task.media_type}
+            key={item.id}
+            onClick={handleSampleClick}
+            index={index}
+          />
         );
       })}
     </LeftWrapper>

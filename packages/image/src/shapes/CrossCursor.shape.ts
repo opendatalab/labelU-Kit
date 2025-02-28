@@ -23,7 +23,7 @@ export interface CursorParams {
 
 const dpr = window.devicePixelRatio || 1;
 
-export class CrossCursor {
+export class Cursor {
   private _style: Required<CursorStyle> = {
     stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: dpr,
@@ -67,6 +67,12 @@ export class CrossCursor {
     };
   }
 
+  public render(_ctx: CanvasRenderingContext2D | null) {
+    console.log('not implemented');
+  }
+}
+
+export class CrossCursor extends Cursor {
   public render(ctx: CanvasRenderingContext2D | null) {
     if (!ctx) {
       throw Error('No context specific!');
@@ -79,7 +85,7 @@ export class CrossCursor {
       return;
     }
 
-    const { stroke, strokeWidth, fill } = this._style;
+    const { stroke, strokeWidth, fill } = this.style;
     const canvas = ctx.canvas;
 
     ctx.strokeStyle = stroke;

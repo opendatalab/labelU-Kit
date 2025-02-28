@@ -65,6 +65,10 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
    * 点击画布事件处理
    */
   protected onSelect = (annotation: AnnotationCuboid) => (_e: MouseEvent) => {
+    if (!this.requestEdit('update')) {
+      return;
+    }
+
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);

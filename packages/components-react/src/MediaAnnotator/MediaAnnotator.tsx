@@ -25,6 +25,7 @@ export interface MediaAnnotatorProps {
       label?: string;
     },
   ) => boolean;
+  editable?: boolean;
 }
 
 export interface MediaAnnotatorRef {
@@ -37,7 +38,7 @@ export interface MediaAnnotatorRef {
 }
 
 export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>(function ForwardRefAnnotator(
-  { disabled, type, duration, onEnd, label = '', updateCurrentTime, getCurrentTime, requestEdit, ...rest },
+  { disabled, type, duration, onEnd, label = '', updateCurrentTime, getCurrentTime, requestEdit, editable, ...rest },
   ref,
 ) {
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -58,13 +59,17 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
 
   const shouldEdit = useCallback(
     (editType: EditType, editLabel: string) => {
+      if (!editable) {
+        return;
+      }
+
       if (typeof requestEdit === 'function') {
         return requestEdit(editType, { toolName: type, label: editLabel });
       }
 
       return true;
     },
-    [requestEdit, type],
+    [editable, requestEdit, type],
   );
 
   const tracks = useMemo(() => scheduleAnnotationTrack(annotations), [annotations]);

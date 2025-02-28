@@ -39,6 +39,7 @@ export interface MediaAnnotationContextType {
       label?: string;
     },
   ) => boolean;
+  editable?: boolean;
 }
 
 export type EditType = 'create' | 'update' | 'delete';

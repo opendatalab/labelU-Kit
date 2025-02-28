@@ -1,5 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
 
+import { cursorManager } from '@/singletons/cursorManager';
+import type { CursorType } from '@/core/CursorManager';
+
 import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { AxisPoint, PointParams } from '../shapes';
@@ -17,6 +20,13 @@ const HOVERED_STYLE = {
   strokeWidth: 4,
   fill: '#e6e6e6',
   radius: 4,
+};
+
+const positionCursorMapping = {
+  nw: 'nwse-resize',
+  ne: 'nesw-resize',
+  sw: 'nesw-resize',
+  se: 'nwse-resize',
 };
 
 type ControlMoveHandler = (controller: ControllerPoint, e: MouseEvent) => void;
@@ -60,6 +70,18 @@ export class ControllerPoint extends Point {
     }
 
     this.updateStyle(HOVERED_STYLE);
+
+    if (this.name) {
+      const cursor = positionCursorMapping[this.name as keyof typeof positionCursorMapping] as CursorType;
+
+      if (cursor) {
+        cursorManager?.invokeCursor(cursor);
+      } else {
+        cursorManager?.invokeCursor('move');
+      }
+    } else {
+      cursorManager?.invokeCursor('move');
+    }
   };
 
   private _onShapeOut = () => {
@@ -68,6 +90,7 @@ export class ControllerPoint extends Point {
     }
 
     this.updateStyle(DEFAULT_STYLE);
+    cursorManager?.activate();
   };
 
   private _handleMouseDown = (e: MouseEvent) => {
@@ -109,6 +132,8 @@ export class ControllerPoint extends Point {
     for (const handler of _onMoveHandlers) {
       handler(this, e);
     }
+
+    cursorManager?.invokeCursor('move');
   };
 
   private _handleMouseUp = (e: MouseEvent) => {
