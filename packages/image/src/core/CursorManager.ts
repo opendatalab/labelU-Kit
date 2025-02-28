@@ -55,6 +55,14 @@ export class CursorManager {
     this.activate();
   }
 
+  public static getInstance(container: HTMLDivElement | null, coordinate: AxisPoint, color?: string): CursorManager {
+    if (!CursorManager._instance) {
+      CursorManager._instance = new CursorManager(container, coordinate, color);
+    }
+
+    return CursorManager._instance;
+  }
+
   public set color(color: string) {
     this._color = color;
     this.cursor?.setStyle({

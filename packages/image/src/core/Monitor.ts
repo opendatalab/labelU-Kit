@@ -41,6 +41,8 @@ export class Monitor {
   // TODO: 清空标注时这里也要清空
   private _orderIndexedAnnotationIds: string[] = [];
 
+  private _enabled: boolean = false;
+
   /** 键盘按键记录 */
   private _keyStatus: Record<EventKeyName, boolean> = {
     Space: false,
@@ -60,6 +62,7 @@ export class Monitor {
 
     this._canvas = canvas;
     this._options = options;
+    this._enabled = true;
 
     this._bindEvents();
   }
@@ -176,6 +179,10 @@ export class Monitor {
   };
 
   private _handleMouseDown = (e: MouseEvent) => {
+    if (!this._enabled) {
+      return;
+    }
+
     if (e.button === 0) {
       eventEmitter.emit(EInternalEvent.LeftMouseDown, e);
     } else if (e.button === 2) {
@@ -184,6 +191,10 @@ export class Monitor {
   };
 
   private _handleMouseMove = (e: MouseEvent) => {
+    if (!this._enabled) {
+      return;
+    }
+
     e.preventDefault();
 
     eventEmitter.emit(EInternalEvent.MouseMove, e);
@@ -191,6 +202,10 @@ export class Monitor {
   };
 
   private _handleMouseUp = (e: MouseEvent) => {
+    if (!this._enabled) {
+      return;
+    }
+
     e.preventDefault();
 
     if (e.button === 0) {
@@ -309,6 +324,14 @@ export class Monitor {
    */
   public get keyboard() {
     return this._keyStatus;
+  }
+
+  public disable() {
+    this._enabled = false;
+  }
+
+  public enable() {
+    this._enabled = true;
   }
 
   /**

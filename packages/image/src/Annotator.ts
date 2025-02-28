@@ -134,7 +134,7 @@ export class Annotator extends AnnotatorBase {
   public get toolMap() {
     return this.tools;
   }
-
+  
   public setEditable(editable: boolean) {
     this.config.editable = editable;
   }
