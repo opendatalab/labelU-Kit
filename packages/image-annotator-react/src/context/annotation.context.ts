@@ -47,7 +47,7 @@ export interface AnnotationContextType {
 
   onAnnotationClear: () => void;
 
-  editable: boolean;
+  editable?: boolean;
 
   orderVisible: boolean;
 
