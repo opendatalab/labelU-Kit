@@ -485,7 +485,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
             )}
           </>
         )}
-        {otherUsers.length > 1 && (
+        {otherUsers.length > 0 && (
           <FlexLayout items="center" gap=".5rem">
             {t('others')}
             {otherUsers.map((conn) => (

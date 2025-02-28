@@ -6,8 +6,11 @@ import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
 import { ReactComponent as CheckSvgIcon } from '@/assets/svg/check.svg';
 import { getThumbnailUrl } from '@/utils';
+import type { TaskCollaboratorInWs } from '@/hooks/useTaskWs';
+import useMe from '@/hooks/useMe';
+import { UserAvatar } from '@/components/UserAvatar';
 
-import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper } from './style';
+import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper, AnnotatingUser } from './style';
 
 function CheckIcon() {
   return (
@@ -23,15 +26,18 @@ interface SliderCardProps {
   type?: MediaType;
   index?: number;
   onClick: (sample: SampleResponse) => void;
+  editingUser?: TaskCollaboratorInWs;
 }
 
-const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
+const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardProps) => {
   const { id, inner_id, state, file } = cardInfo;
   const filename = file.filename;
   const url = file.url;
   const routeParams = useParams();
   const sampleId = +routeParams.sampleId!;
   const { t } = useTranslation();
+  const me = useMe();
+  const isMeTheCurrentEditingUser = editingUser?.user_id === me?.data?.id;
 
   const handleOnClick = (sample: SampleResponse) => {
     if (sample.id === sampleId) {
@@ -77,6 +83,11 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
 
   return (
     <Wrapper items="center" flex="column" justify="center">
+      {!isMeTheCurrentEditingUser && editingUser && (
+        <AnnotatingUser>
+          <UserAvatar user={editingUser} /> <span className="annotating-text">{t('isAnnotating')}</span>
+        </AnnotatingUser>
+      )}
       <ContentWrapper
         flex="column"
         items="center"

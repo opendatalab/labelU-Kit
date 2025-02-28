@@ -31,7 +31,7 @@ import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
-import useSampleWs from './hooks/useSampleWs';
+import useSampleWs from '../../hooks/useSampleWs';
 
 type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
 
@@ -324,6 +324,7 @@ const AnnotationPage = () => {
         config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
+        editable={isMeTheCurrentEditingUser}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
@@ -341,6 +342,7 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        editable={isMeTheCurrentEditingUser}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
