@@ -82,8 +82,6 @@ export interface AudioAnnotatorProps {
   onAnnotateEnd?: (annotation: AudioAnnotationInUI, e?: MouseEvent) => void;
 
   requestEdit?: MediaAnnotatorProps['requestEdit'];
-
-  editable?: boolean;
 }
 
 /**
@@ -111,7 +109,6 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     annotations,
     selectedAnnotation: propsSelectedAnnotation,
     requestEdit,
-    editable,
   },
   ref,
 ) {
@@ -365,7 +362,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
       attributeConfigMapping,
       playingAnnotationIds,
       requestEdit,
-      editable,
+      disabled,
       showOrder: Boolean(showOrder),
     };
   }, [
@@ -381,7 +378,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     attributeConfigMapping,
     playingAnnotationIds,
     showOrder,
-    editable,
+    disabled,
   ]);
 
   const onMediaLoad = useCallback(() => {
