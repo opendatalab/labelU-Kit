@@ -111,7 +111,7 @@ export interface AttributeActionProps {
 }
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
-  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange, editable } =
+  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange, disabled } =
     useAnnotationCtx();
   const { labelMapping, requestEdit, player } = useTool();
 
@@ -157,7 +157,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
     player.pause();
 
-    if (!editable || !secondaryEditable()) {
+    if (disabled || !secondaryEditable()) {
       return;
     }
 
@@ -200,7 +200,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
   };
 
   const handleRemove = (_annotation: MediaAnnotationInUI) => (e: React.MouseEvent) => {
-    if (!editable || !secondaryEditable()) {
+    if (disabled || !secondaryEditable()) {
       return;
     }
 
