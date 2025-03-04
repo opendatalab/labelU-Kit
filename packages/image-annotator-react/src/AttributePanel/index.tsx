@@ -210,6 +210,7 @@ export function AttributePanel() {
     preAnnotationsWithGlobal,
     onAnnotationsChange,
     onAnnotationClear,
+    disabled,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const globalAnnotations = useMemo(() => {
@@ -449,10 +450,10 @@ export function AttributePanel() {
         })}
       </TabHeader>
       <Content activeKey={activeKey}>
-        <AttributeTree data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
+        <AttributeTree disabled={disabled} data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
       </Content>
-      <ClearAction onClear={handleClear} disabled={!engine?.config.editable} />
+      <ClearAction onClear={handleClear} disabled={disabled} />
     </Wrapper>
   );
 }

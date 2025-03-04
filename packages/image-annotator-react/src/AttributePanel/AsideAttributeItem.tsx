@@ -127,7 +127,7 @@ export interface AttributeActionProps {
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
   const { engine, requestEdit, labelMapping, currentTool } = useTool();
-  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove, editable } =
+  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove, disabled } =
     useAnnotationCtx();
   const requestEditable = useCallback(() => {
     if (annotation) {
@@ -179,11 +179,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         ? requestEdit('update', { label: annotation!.label, toolName: annotation!.tool })
         : true;
 
-    if (!annotation?.label) {
-      return;
-    }
-
-    if (!secondaryEditable || !editable) {
+    if (disabled || !annotation?.label || !secondaryEditable) {
       return;
     }
 
@@ -262,7 +258,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
         <DeleteIcon
           onClick={() => {
-            if (!editable || !requestEditable()) {
+            if (disabled || !requestEditable()) {
               return;
             }
 
@@ -282,7 +278,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       {!visible && <StyledVisibilityOffIcon onClick={toggleBatchVisibility(true)} />}
       <DeleteIcon
         onClick={() => {
-          if (!editable || requestEditable()) {
+          if (disabled || requestEditable()) {
             return;
           }
 

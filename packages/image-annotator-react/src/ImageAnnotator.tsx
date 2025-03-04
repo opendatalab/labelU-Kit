@@ -146,12 +146,12 @@ export interface ImageAnnotatorProps {
   selectedTool?: ToolName;
 
   /**
-   * 是否可编辑
+   * 是否禁用
    */
-  editable?: boolean;
+  disabled?: boolean;
 
   /**
-   * 标注是否可编辑，权重低于全局的editable，粒度更细
+   * 标注是否可编辑，权重低于全局的disabled，粒度更细
    */
   requestEdit?: (type: EditType, payload: { toolName: ToolName; label?: string; modifiedProperty?: string }) => boolean;
 
@@ -169,7 +169,7 @@ function ForwardAnnotator(
     renderSidebar,
     config,
     renderAttributes,
-    editable,
+    disabled,
     offsetTop = 0,
     editingSample,
     maxHistoryCount = 20,
@@ -254,14 +254,14 @@ function ForwardAnnotator(
     return {
       showOrder: true,
       requestEdit,
-      editable,
+      editable: !disabled,
       ...configWithPreAnnotationLabels,
       image: {
         url: currentSample?.url ?? '',
         rotate: currentSample?.meta?.rotate ?? 0,
       },
     };
-  }, [config, requestEdit, editable, currentSample?.url, currentSample?.meta?.rotate, preAnnotationLabels]);
+  }, [config, requestEdit, disabled, currentSample?.url, currentSample?.meta?.rotate, preAnnotationLabels]);
 
   const engine = useImageAnnotator(containerRef, annotationOptions);
 
@@ -848,7 +848,7 @@ function ForwardAnnotator(
       onAnnotationsRemove,
       onAnnotationClear,
       orderVisible,
-      editable,
+      disabled,
       preAnnotationsWithGlobal: preAnnotations,
       onOrderVisibleChange,
     }),
@@ -864,7 +864,7 @@ function ForwardAnnotator(
       onAnnotationClear,
       orderVisible,
       preAnnotations,
-      editable,
+      disabled,
       onOrderVisibleChange,
     ],
   );
