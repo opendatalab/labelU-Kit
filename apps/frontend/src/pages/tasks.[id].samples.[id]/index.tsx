@@ -304,7 +304,7 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
-        editable={isMeTheCurrentEditingUser}
+        disabled={!isMeTheCurrentEditingUser}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
@@ -324,7 +324,7 @@ const AnnotationPage = () => {
         config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
-        editable={isMeTheCurrentEditingUser}
+        disabled={!isMeTheCurrentEditingUser}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
@@ -342,7 +342,7 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
-        editable={isMeTheCurrentEditingUser}
+        disabled={!isMeTheCurrentEditingUser}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
