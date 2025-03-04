@@ -48,7 +48,7 @@ export interface AnnotationContextType {
 
   onOrderVisibleChange: (visible: boolean) => void;
 
-  editable?: boolean;
+  disabled?: boolean;
 }
 
 export const AnnotationContext = createContext<AnnotationContextType>({} as AnnotationContextType);

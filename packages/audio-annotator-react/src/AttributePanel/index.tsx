@@ -111,6 +111,7 @@ export function AttributePanel() {
     preAnnotationsWithGlobal,
     onAnnotationsChange,
     onAnnotationClear,
+    disabled,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const { t } = useTranslation();
@@ -366,7 +367,12 @@ export function AttributePanel() {
       </TabHeader>
       <Content activeKey={activeKey}>
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
-        <AttributeTree data={globalAnnotationsWithPreAnnotation} config={globals} onChange={handleOnChange} />
+        <AttributeTree
+          data={globalAnnotationsWithPreAnnotation}
+          disabled={disabled}
+          config={globals}
+          onChange={handleOnChange}
+        />
       </Content>
       <Footer onClick={handleClear}>
         <DeleteIcon />

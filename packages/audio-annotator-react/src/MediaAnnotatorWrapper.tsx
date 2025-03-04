@@ -144,7 +144,6 @@ export interface MediaPlayerProps {
 
   preAnnotationLabels?: MediaAnnotatorConfig;
 
-  /** 是否禁用 */
   disabled?: boolean;
   /** 标注工具配置 */
   toolConfig?: {
@@ -229,7 +228,7 @@ export interface AnnotatorProps {
    * 是否可编辑
    * @description 全局的是否可编辑，权重比 `requestEdit` 高
    */
-  editable?: boolean;
+  disabled?: boolean;
 }
 
 export interface AnnotatorWrapperProps extends AnnotatorProps {
@@ -255,7 +254,7 @@ function ForwardAnnotator(
     selectedTool: propsSelectedTool,
     preAnnotations,
     requestEdit,
-    editable,
+    disabled,
     children,
   }: AnnotatorWrapperProps,
   ref: React.Ref<AudioAndVideoAnnotatorRef>,
@@ -513,7 +512,7 @@ function ForwardAnnotator(
 
   const onAnnotationSelect = useCallback(
     (annotation: MediaAnnotationInUI, e: React.MouseEvent) => {
-      if (!editable) {
+      if (disabled) {
         return;
       }
 
@@ -534,7 +533,7 @@ function ForwardAnnotator(
         });
       }
     },
-    [config, currentTool, editable, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
+    [config, currentTool, disabled, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
   );
 
   const handleAnnotateEnd: AudioAnnotatorProps['onAnnotateEnd'] = useCallback(
@@ -825,7 +824,7 @@ function ForwardAnnotator(
       onAnnotationChange,
       onAnnotationClear,
       orderVisible,
-      editable,
+      disabled,
       onAnnotationSelect,
       onAnnotationRemove,
       onAnnotationAdd,
@@ -847,7 +846,7 @@ function ForwardAnnotator(
       onAnnotationAdd,
       onAnnotationsRemove,
       preAnnotations,
-      editable,
+      disabled,
       onOrderVisibleChange,
     ],
   );
@@ -932,6 +931,7 @@ function ForwardAnnotator(
                     showOrder: orderVisible,
                     onLoad: onMediaLoad,
                     onAnnotateEnd: handleAnnotateEnd,
+                    disabled,
                     onAnnotationSelect: onAnnotationSelect,
                   })
                 ) : (
@@ -949,3 +949,5 @@ function ForwardAnnotator(
 }
 
 export const MediaAnnotatorWrapper = forwardRef<AudioAndVideoAnnotatorRef, AnnotatorWrapperProps>(ForwardAnnotator);
+
+MediaAnnotatorWrapper.displayName = 'MediaAnnotatorWrapper';
