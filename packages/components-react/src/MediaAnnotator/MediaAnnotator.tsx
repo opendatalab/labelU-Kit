@@ -25,7 +25,6 @@ export interface MediaAnnotatorProps {
       label?: string;
     },
   ) => boolean;
-  editable?: boolean;
 }
 
 export interface MediaAnnotatorRef {
@@ -38,7 +37,7 @@ export interface MediaAnnotatorRef {
 }
 
 export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>(function ForwardRefAnnotator(
-  { disabled, type, duration, onEnd, label = '', updateCurrentTime, getCurrentTime, requestEdit, editable, ...rest },
+  { disabled, type, duration, onEnd, label = '', updateCurrentTime, getCurrentTime, requestEdit, ...rest },
   ref,
 ) {
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -59,7 +58,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
 
   const shouldEdit = useCallback(
     (editType: EditType, editLabel: string) => {
-      if (!editable) {
+      if (disabled) {
         return;
       }
 
@@ -69,7 +68,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
 
       return true;
     },
-    [editable, requestEdit, type],
+    [disabled, requestEdit, type],
   );
 
   const tracks = useMemo(() => scheduleAnnotationTrack(annotations), [annotations]);
@@ -270,7 +269,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
     },
     {
       preventDefault: true,
-      enabled: type === 'segment' && duration > 0,
+      enabled: !disabled && type === 'segment' && duration > 0,
     },
     [setAnnotatingSegment, onEnd, label, maxOrder, type, resetAnnotatingSegment, duration],
   );
@@ -290,7 +289,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
     },
     {
       preventDefault: true,
-      enabled: type === 'frame',
+      enabled: !disabled && type === 'frame',
     },
     [onEnd, label, maxOrder, type, resetAnnotatingSegment],
   );
