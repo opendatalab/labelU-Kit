@@ -71,7 +71,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const revalidator = useRevalidator();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  const { samples, setSamples, task, currentEditingUser, otherUsers } = useContext(AnnotationContext);
+  const { samples, setSamples, task, currentEditingUser } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
@@ -484,14 +484,6 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
               </>
             )}
           </>
-        )}
-        {otherUsers.length > 0 && (
-          <FlexLayout items="center" gap=".5rem">
-            {t('others')}
-            {otherUsers.map((conn) => (
-              <UserAvatar key={conn.user_id} user={conn} />
-            ))}
-          </FlexLayout>
         )}
       </FlexLayout>
       {isSampleSkipped ? (
