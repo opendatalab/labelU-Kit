@@ -3,6 +3,7 @@ import { Form, Button, Drawer } from 'antd';
 import { compose, get, isEqual, size } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
+import type { InnerAttribute } from '@labelu/interface';
 import Icon, { ExclamationCircleFilled } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
 import { useTranslation } from '@labelu/i18n';
@@ -13,6 +14,16 @@ import { modal } from '@/StaticAnt';
 
 import type { CategoryAttributeItem, FancyCategoryAttributeRef } from '../CategoryAttribute.fancy';
 import { CategoryType, FancyCategoryAttribute, StyledFancyAttributeWrapper } from '../CategoryAttribute.fancy';
+
+function isContainEmptyOption(attributes: InnerAttribute[]) {
+  for (const attribute of attributes) {
+    if (attribute.type === 'enum' && attribute.options.length === 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 export interface AttributeConfigurationProps {
   visible: boolean;
@@ -120,6 +131,16 @@ export default function AttributeConfiguration({ onClose, visible, value, onChan
     form
       .validateFields()
       .then((values) => {
+        if (isContainEmptyOption(values.list)) {
+          modal.info({
+            title: t('mustHaveAtLeastOneOption'),
+            okText: t('iKnown'),
+            content: t('completeAndSave'),
+            icon: <ExclamationCircleFilled style={{ color: 'var(--color-warning)' }} />,
+          });
+
+          return;
+        }
         onChange?.(values.list);
         onClose();
         reset();
