@@ -134,9 +134,19 @@ export class Annotator extends AnnotatorBase {
   public get toolMap() {
     return this.tools;
   }
-  
+
   public setEditable(editable: boolean) {
-    this.config.editable = editable;
+    if (this.config) {
+      this.config.editable = editable;
+      if (!editable) {
+        this.activeTool?.deactivate();
+        this.cursorManager?.disable();
+      } else {
+        this.cursorManager?.enable();
+      }
+    } else {
+      throw new Error('Annotator is destroyed');
+    }
   }
 
   /**
