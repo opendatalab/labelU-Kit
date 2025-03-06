@@ -254,16 +254,21 @@ function ForwardAnnotator(
     return {
       showOrder: true,
       requestEdit,
-      editable: !disabled,
       ...configWithPreAnnotationLabels,
       image: {
         url: currentSample?.url ?? '',
         rotate: currentSample?.meta?.rotate ?? 0,
       },
     };
-  }, [config, requestEdit, disabled, currentSample?.url, currentSample?.meta?.rotate, preAnnotationLabels]);
+  }, [config, requestEdit, currentSample?.url, currentSample?.meta?.rotate, preAnnotationLabels]);
 
   const engine = useImageAnnotator(containerRef, annotationOptions);
+
+  useEffect(() => {
+    if (engine?.config) {
+      engine.setEditable(!disabled);
+    }
+  }, [engine, disabled]);
 
   const [orderVisible, setOrderVisible] = useState<boolean>(true);
 
