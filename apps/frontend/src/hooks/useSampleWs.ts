@@ -69,7 +69,7 @@ export default function useSampleWs() {
       ws.off('leave', handleLeave);
     };
   }, [me.data?.id, revalidator]);
-
+  
   const currentSampleUsers = useMemo(() => {
     return connections.filter((item) => item.sample_id === +routeParams.sampleId!);
   }, [connections, routeParams.sampleId]);
