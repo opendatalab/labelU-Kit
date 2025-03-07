@@ -13,7 +13,7 @@ export interface AnnotationContextValue {
   isEnd: boolean;
 
   currentEditingUser: TaskSampleUser;
-  otherUsers: TaskSampleUser[];
+  taskConnections: TaskSampleUser[];
 }
 
 const AnnotationContext = React.createContext<AnnotationContextValue>({} as AnnotationContextValue);
