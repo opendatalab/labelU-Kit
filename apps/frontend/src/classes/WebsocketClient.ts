@@ -82,6 +82,15 @@ export default class WebSocketClient {
     this.handlers.get(event)!.push(handler);
   }
 
+  public off(event: string, handler: (data?: any) => void) {
+    if (this.handlers.has(event)) {
+      this.handlers.set(
+        event,
+        this.handlers.get(event)!.filter((h) => h !== handler),
+      );
+    }
+  }
+
   public emit(event: string, data: any = null) {
     if (this.handlers.has(event)) {
       this.handlers.get(event)!.forEach((handler) => handler(data));

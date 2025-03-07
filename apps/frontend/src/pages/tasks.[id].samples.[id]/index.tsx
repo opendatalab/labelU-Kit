@@ -1,11 +1,10 @@
-import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
-import { useParams, useRouteLoaderData } from 'react-router';
+import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
 import { Annotator } from '@labelu/video-annotator-react';
 import type { AudioAndVideoAnnotatorRef } from '@labelu/audio-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams, useRouteLoaderData } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
 import type { ImageAnnotatorProps, AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
 import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
@@ -237,14 +236,15 @@ const AnnotationPage = () => {
     return configFromParent || editorConfig;
   }, [configFromParent, editorConfig]);
 
+  useEffect(() => {
+    if (me.data && conns?.[0] && !isMeTheCurrentEditingUser) {
+      message.destroy();
+      message.error(t('currentSampleIsAnnotating'));
+    }
+  }, [conns, isMeTheCurrentEditingUser, me.data, t]);
+
   const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
     (editType, { toolName, label }) => {
-      if (me.data && conns?.[0] && conns?.[0]?.user_id !== me.data?.id) {
-        message.destroy();
-        message.error(t('currentSampleIsAnnotating'));
-        return false;
-      }
-
       if (!toolName) {
         return false;
       }
@@ -270,7 +270,7 @@ const AnnotationPage = () => {
 
       return true;
     },
-    [me.data, conns, config, task, t],
+    [config, task, t],
   );
 
   const [currentTool, setCurrentTool] = useState<any>();
@@ -294,6 +294,10 @@ const AnnotationPage = () => {
     return labelMapping?.[currentTool];
   }, [currentTool, labelMapping]);
 
+  const disabled = useMemo(() => {
+    return me.data && conns[0] && !isMeTheCurrentEditingUser;
+  }, [conns, isMeTheCurrentEditingUser, me.data]);
+
   if (task?.media_type === MediaType.IMAGE) {
     content = (
       <ImageAnnotator
@@ -304,12 +308,12 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
-        disabled={!isMeTheCurrentEditingUser}
+        disabled={disabled}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
-        selectedTool={currentTool}
-        selectedLabel={currentLabel}
+        selectedTool={disabled ? undefined : currentTool}
+        selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -324,12 +328,12 @@ const AnnotationPage = () => {
         config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
-        disabled={!isMeTheCurrentEditingUser}
+        disabled={disabled}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
-        selectedTool={currentTool}
-        selectedLabel={currentLabel}
+        selectedTool={disabled ? undefined : currentTool}
+        selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />
@@ -342,14 +346,14 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
-        disabled={!isMeTheCurrentEditingUser}
+        disabled={disabled}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
-        selectedTool={currentTool}
-        selectedLabel={currentLabel}
+        selectedTool={disabled ? undefined : currentTool}
+        selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
         preAnnotations={preAnnotations}
       />

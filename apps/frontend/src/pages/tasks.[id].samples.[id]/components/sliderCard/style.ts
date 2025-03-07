@@ -1,17 +1,18 @@
 import styled, { css } from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
 
-export const Wrapper = styled(FlexLayout)`
+export const ImageWrapper = styled(FlexLayout)`
   gap: 0.5rem;
   cursor: pointer;
   position: relative;
+  width: 100%;
 `;
 
 export const AnnotatingUser = styled.div`
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   top: 0.5rem;
-  left: 0.5rem;
+  left: 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
