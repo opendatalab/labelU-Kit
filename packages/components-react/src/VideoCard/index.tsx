@@ -39,6 +39,10 @@ export interface StyledVideoProps {
 
 const videoClassName = 'labelu-video-card';
 
+const VideoWrapper = styled.div`
+  padding: 0 1rem;
+`;
+
 export const StyledVideo: StyledComponent<'div', any, PropsWithChildren<StyledVideoProps>> = styled.div.attrs(
   (props: StyledVideoProps) => ({
     ...props,
@@ -262,16 +266,18 @@ export function VideoCard({
   );
 
   return (
-    <StatusCard completed={completed} active={active} skipped={skipped} onClick={onClick} title={title}>
-      <StyledVideo
-        isPlaying={isPlaying}
-        className={className}
-        style={cardStyle}
-        onMouseOver={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {bodyNodes}
-      </StyledVideo>
-    </StatusCard>
+    <VideoWrapper>
+      <StatusCard completed={completed} active={active} skipped={skipped} onClick={onClick} title={title}>
+        <StyledVideo
+          isPlaying={isPlaying}
+          className={className}
+          style={cardStyle}
+          onMouseOver={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          {bodyNodes}
+        </StyledVideo>
+      </StatusCard>
+    </VideoWrapper>
   );
 }
