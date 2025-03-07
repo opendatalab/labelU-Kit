@@ -1,6 +1,7 @@
 import { useParams } from 'react-router';
 import { VideoCard, AudioCard } from '@labelu/components-react';
 import { useTranslation } from '@labelu/i18n';
+import { useMemo } from 'react';
 
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
@@ -10,7 +11,7 @@ import type { TaskCollaboratorInWs } from '@/hooks/useTaskWs';
 import useMe from '@/hooks/useMe';
 import { UserAvatar } from '@/components/UserAvatar';
 
-import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, Wrapper, AnnotatingUser } from './style';
+import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, ImageWrapper, AnnotatingUser } from './style';
 
 function CheckIcon() {
   return (
@@ -39,6 +40,18 @@ const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardP
   const me = useMe();
   const isMeTheCurrentEditingUser = editingUser?.user_id === me?.data?.id;
 
+  const userBlock = useMemo(() => {
+    if (!isMeTheCurrentEditingUser && editingUser) {
+      return (
+        <AnnotatingUser>
+          <UserAvatar user={editingUser} /> <span className="annotating-text">{t('isAnnotating')}</span>
+        </AnnotatingUser>
+      );
+    }
+
+    return null;
+  }, [editingUser, isMeTheCurrentEditingUser, t]);
+
   const handleOnClick = (sample: SampleResponse) => {
     if (sample.id === sampleId) {
       return;
@@ -49,22 +62,26 @@ const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardP
 
   if (type === MediaType.AUDIO) {
     return (
-      <AudioCard
-        src={url!}
-        active={id === sampleId}
-        onClick={() => handleOnClick(cardInfo)}
-        title={filename.substring(9)}
-        no={index! + 1}
-        showNo
-        completed={state === 'DONE'}
-        skipped={state === 'SKIPPED'}
-      />
+      <ImageWrapper items="stretch">
+        <AudioCard
+          src={url!}
+          active={id === sampleId}
+          onClick={() => handleOnClick(cardInfo)}
+          title={filename.substring(9)}
+          no={index! + 1}
+          showNo
+          completed={state === 'DONE'}
+          skipped={state === 'SKIPPED'}
+        />
+      </ImageWrapper>
     );
   }
 
   if (type === MediaType.VIDEO) {
     return (
-      <div style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+      <ImageWrapper>
+        {userBlock}
+
         <VideoCard
           src={url!}
           title={inner_id}
@@ -75,19 +92,15 @@ const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardP
           completed={state === 'DONE'}
           skipped={state === 'SKIPPED'}
         />
-      </div>
+      </ImageWrapper>
     );
   }
 
   const thumbnail = getThumbnailUrl(url!);
 
   return (
-    <Wrapper items="center" flex="column" justify="center">
-      {!isMeTheCurrentEditingUser && editingUser && (
-        <AnnotatingUser>
-          <UserAvatar user={editingUser} /> <span className="annotating-text">{t('isAnnotating')}</span>
-        </AnnotatingUser>
-      )}
+    <ImageWrapper items="center" flex="column" justify="center">
+      {userBlock}
       <ContentWrapper
         flex="column"
         items="center"
@@ -100,7 +113,7 @@ const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardP
         {state === 'SKIPPED' && <SkipWrapper>{t('skipped')}</SkipWrapper>}
       </ContentWrapper>
       <IdWrapper>{inner_id}</IdWrapper>
-    </Wrapper>
+    </ImageWrapper>
   );
 };
 export default SliderCard;

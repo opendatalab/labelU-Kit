@@ -27,7 +27,7 @@ export default function useTaskWs(): [TaskUser[], TaskCollaboratorInWs[]] {
     const token = localStorage.getItem('token')?.split(' ')[1];
     const ws = new WebSocketClient(`ws://${host}/ws/task/${routeParams.taskId}?token=${token}`);
 
-    ws.on('connected', (data) => {
+    ws.on('peers', (data) => {
       const userIds: number[] = [];
       const result: TaskUser[] = [];
 

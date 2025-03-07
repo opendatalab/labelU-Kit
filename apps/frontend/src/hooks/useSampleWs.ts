@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useParams, useRevalidator } from 'react-router-dom';
 
 import WebSocketClient from '@/classes/WebsocketClient';
+
+import useMe from './useMe';
 
 export interface TaskSampleUser {
   user_id: number;
@@ -12,14 +14,21 @@ export interface TaskSampleUser {
 
 export default function useSampleWs() {
   const routeParams = useParams();
+  const revalidator = useRevalidator();
+  const me = useMe();
   const [connections, setConnections] = useState<TaskSampleUser[]>([]);
+  const host = window.location.host;
+  const token = localStorage.getItem('token')?.split(' ')[1];
+  const wsRef = useRef<WebSocketClient | null>(null);
 
   useEffect(() => {
-    const host = window.location.host;
-    const token = localStorage.getItem('token')?.split(' ')[1];
-    const ws = new WebSocketClient(`ws://${host}/ws/task/${routeParams.taskId}/${routeParams.sampleId}?token=${token}`);
+    wsRef.current = new WebSocketClient(
+      `ws://${host}/ws/task/${routeParams.taskId}/${routeParams.sampleId}?token=${token}`,
+    );
 
-    ws.on('connected', (data) => {
+    const ws = wsRef.current;
+
+    ws.on('peers', (data) => {
       const userIds: number[] = [];
       const result: TaskSampleUser[] = [];
 
@@ -32,13 +41,34 @@ export default function useSampleWs() {
         result.push(item);
       }
 
-      setConnections(result);
+      setConnections(() => {
+        return result;
+      });
     });
 
     return () => {
       ws.disconnect();
     };
-  }, [routeParams.sampleId, routeParams.taskId]);
+  }, [host, routeParams.sampleId, routeParams.taskId, token]);
+
+  useEffect(() => {
+    if (!wsRef.current) {
+      return;
+    }
+
+    const ws = wsRef.current;
+    const handleLeave = (data: TaskSampleUser) => {
+      if (data.user_id !== me.data?.id) {
+        revalidator.revalidate();
+      }
+    };
+
+    ws.on('leave', handleLeave);
+
+    return () => {
+      ws.off('leave', handleLeave);
+    };
+  }, [me.data?.id, revalidator]);
 
   return connections;
 }
