@@ -96,6 +96,12 @@ const Footer = styled.div`
   &:hover {
     color: red;
   }
+
+  /* disabled */
+  &[aria-disabled='true'] {
+    color: #999;
+    cursor: not-allowed;
+  }
 `;
 
 type HeaderType = 'global' | 'label';
@@ -374,7 +380,7 @@ export function AttributePanel() {
           onChange={handleOnChange}
         />
       </Content>
-      <Footer onClick={handleClear}>
+      <Footer onClick={handleClear} aria-disabled={disabled}>
         <DeleteIcon />
         &nbsp; {t('clear')}
       </Footer>
