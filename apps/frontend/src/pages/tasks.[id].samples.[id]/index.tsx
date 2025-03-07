@@ -114,8 +114,8 @@ const AnnotationPage = () => {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const me = useMe();
-  const conns = useSampleWs();
-  const isMeTheCurrentEditingUser = conns?.[0]?.user_id === me.data?.id;
+  const [currentSampleConns, taskConns] = useSampleWs();
+  const isMeTheCurrentEditingUser = currentSampleConns?.[0]?.user_id === me.data?.id;
 
   // TODO： labelu/image中的错误定义
   const onError = useCallback(
@@ -182,17 +182,18 @@ const AnnotationPage = () => {
   );
 
   const annotationContextValue = useMemo(() => {
-    const otherUsersExceptMe = conns.slice(1).filter((conn) => conn.user_id !== me.data?.id);
+    const otherUsersExceptMe = currentSampleConns.slice(1).filter((conn) => conn.user_id !== me.data?.id);
 
     return {
       samples,
       setSamples,
+      taskConnections: taskConns,
       task,
-      currentEditingUser: conns[0],
+      currentEditingUser: currentSampleConns[0],
       otherUsers: otherUsersExceptMe,
       isEnd: totalCount === samples.length,
     };
-  }, [conns, me.data?.id, samples, setSamples, task, totalCount]);
+  }, [currentSampleConns, taskConns, me.data?.id, samples, setSamples, task, totalCount]);
 
   let content = null;
 
@@ -237,11 +238,11 @@ const AnnotationPage = () => {
   }, [configFromParent, editorConfig]);
 
   useEffect(() => {
-    if (me.data && conns?.[0] && !isMeTheCurrentEditingUser) {
+    if (me.data && currentSampleConns?.[0] && !isMeTheCurrentEditingUser) {
       message.destroy();
       message.error(t('currentSampleIsAnnotating'));
     }
-  }, [conns, isMeTheCurrentEditingUser, me.data, t]);
+  }, [currentSampleConns, isMeTheCurrentEditingUser, me.data, t]);
 
   const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
     (editType, { toolName, label }) => {
@@ -295,8 +296,8 @@ const AnnotationPage = () => {
   }, [currentTool, labelMapping]);
 
   const disabled = useMemo(() => {
-    return me.data && conns[0] && !isMeTheCurrentEditingUser;
-  }, [conns, isMeTheCurrentEditingUser, me.data]);
+    return me.data && currentSampleConns[0] && !isMeTheCurrentEditingUser;
+  }, [currentSampleConns, isMeTheCurrentEditingUser, me.data]);
 
   if (task?.media_type === MediaType.IMAGE) {
     content = (

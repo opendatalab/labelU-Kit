@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRevalidator } from 'react-router-dom';
 
 import WebSocketClient from '@/classes/WebsocketClient';
@@ -70,5 +70,9 @@ export default function useSampleWs() {
     };
   }, [me.data?.id, revalidator]);
 
-  return connections;
+  const currentSampleUsers = useMemo(() => {
+    return connections.filter((item) => item.sample_id === +routeParams.sampleId!);
+  }, [connections, routeParams.sampleId]);
+
+  return [currentSampleUsers, connections];
 }

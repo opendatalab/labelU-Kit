@@ -20,6 +20,8 @@ export default class WebSocketClient {
     };
     this.reconnectAttempts = 0;
     this.connect();
+    // Heartbeats
+    this.on('ping', () => this.send('pong', null));
   }
 
   public connect() {
