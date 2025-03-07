@@ -66,9 +66,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
-      enabled: currentTool !== 'segment',
+      enabled: !disabled && currentTool !== 'segment',
     },
-    [currentTool, onToolChange, config?.segment],
+    [currentTool, onToolChange, config?.segment, disabled],
   );
 
   // 切换时间戳
@@ -81,9 +81,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
-      enabled: currentTool !== 'frame',
+      enabled: !disabled && currentTool !== 'frame',
     },
-    [currentTool, onToolChange, config?.frame],
+    [currentTool, onToolChange, config?.frame, disabled],
   );
 
   return (
