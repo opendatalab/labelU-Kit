@@ -137,7 +137,7 @@ export interface ImageAnnotatorProps {
 
   onLoad?: (engine: ImageAnnotatorClass) => void;
 
-  onLabelChange?: (toolName: ToolName | undefined, label: ILabel) => void;
+  onLabelChange?: (toolName: ToolName | undefined, label: ILabel | undefined) => void;
 
   onToolChange?: (toolName: ToolName) => void;
 
