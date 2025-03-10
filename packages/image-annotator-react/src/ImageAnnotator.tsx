@@ -193,6 +193,7 @@ function ForwardAnnotator(
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
   // remember last tool
   const memorizeToolLabel = useRef<Record<ToolName, Attribute>>({} as Record<ToolName, Attribute>);
+  const [attributeModalOpen, setAttributeModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     setCurrentSample(editingSample || samples?.[0]);
@@ -299,6 +300,10 @@ function ForwardAnnotator(
     propsSelectedLabel ? selectedLabelFromProps : labels[0],
   );
 
+  useEffect(() => {
+    setSelectedLabel(selectedLabelFromProps);
+  }, [selectedLabelFromProps]);
+
   const onToolChange = useCallback(
     (toolName: ToolName) => {
       propsOnToolChange?.(toolName);
@@ -351,11 +356,7 @@ function ForwardAnnotator(
         }
 
         if (tools[0] && config?.[tools[0]]?.labels?.length) {
-          engine.switch(propsSelectedTool || tools[0]);
-
-          if (propsSelectedLabel) {
-            engine.setLabel(propsSelectedLabel);
-          }
+          engine.switch(propsSelectedTool || tools[0], propsSelectedLabel);
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -674,8 +675,10 @@ function ForwardAnnotator(
       }
 
       onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
+      const _label = engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined;
 
-      setSelectedLabel(engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined);
+      setSelectedLabel(_label);
+      propsOnLabelChange?.(currentTool, _label);
     };
     // 改变标签
     engine?.on('labelChange', handleLabelChange);
@@ -683,7 +686,7 @@ function ForwardAnnotator(
     return () => {
       engine?.off('labelChange', handleLabelChange);
     };
-  }, [currentTool, engine, labelMappingByTool, onAnnotationsChange, selectedLabel?.value]);
+  }, [currentTool, engine, labelMappingByTool, onAnnotationsChange, propsOnLabelChange, selectedLabel?.value]);
 
   useEffect(() => {
     const handleSelectAnnotation = (annotation: AnnotationData, toolName: ToolName) => {
@@ -776,8 +779,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedImageAnnotations, engine],
+    [sortedImageAnnotations, engine, disabled, attributeModalOpen],
   );
 
   // 下一个标记
@@ -793,8 +797,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedImageAnnotations, engine],
+    [sortedImageAnnotations, engine, disabled, attributeModalOpen],
   );
 
   // 1 ~ 9 设置标签
@@ -814,7 +819,10 @@ function ForwardAnnotator(
         });
       }
     },
-    [engine, labels],
+    {
+      enabled: !disabled && !attributeModalOpen,
+    },
+    [attributeModalOpen, engine, labels, disabled],
   );
 
   useImperativeHandle(ref, () => ({
@@ -888,6 +896,8 @@ function ForwardAnnotator(
       labelMapping: labelMappingByTool,
       preLabelMapping: preLabelsMappingByTool,
       labels,
+      attributeModalOpen,
+      setAttributeModalOpen,
     }),
     [
       engine,
@@ -901,6 +911,8 @@ function ForwardAnnotator(
       labelMappingByTool,
       preLabelsMappingByTool,
       labels,
+      attributeModalOpen,
+      setAttributeModalOpen,
     ],
   );
 
