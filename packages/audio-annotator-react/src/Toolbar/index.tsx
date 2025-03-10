@@ -29,7 +29,7 @@ const tooltipStyle = {
 } as React.CSSProperties;
 
 export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
-  const { onToolChange, currentTool, config } = useTool();
+  const { onToolChange, currentTool, config, attributeModalOpen } = useTool();
   const { onOrderVisibleChange, orderVisible, disabled } = useAnnotationCtx();
   const { redo, undo, pastRef, futureRef } = useHistoryCtx();
   const { t } = useTranslation();
@@ -52,8 +52,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
+      enabled: !attributeModalOpen,
     },
-    [onToolChange],
+    [onToolChange, attributeModalOpen],
   );
 
   // 切换片断分割
@@ -66,9 +67,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
-      enabled: !disabled && currentTool !== 'segment',
+      enabled: !attributeModalOpen && !disabled && currentTool !== 'segment',
     },
-    [currentTool, onToolChange, config?.segment, disabled],
+    [currentTool, onToolChange, config?.segment, disabled, attributeModalOpen],
   );
 
   // 切换时间戳
@@ -81,9 +82,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
-      enabled: !disabled && currentTool !== 'frame',
+      enabled: !attributeModalOpen && !disabled && currentTool !== 'frame',
     },
-    [currentTool, onToolChange, config?.frame, disabled],
+    [currentTool, onToolChange, config?.frame, disabled, attributeModalOpen],
   );
 
   return (

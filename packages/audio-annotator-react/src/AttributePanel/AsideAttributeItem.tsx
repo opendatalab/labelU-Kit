@@ -12,7 +12,8 @@ import { ReactComponent as VisibilityIcon } from '@/assets/icons/visibility.svg'
 import { ReactComponent as VisibilityOffIcon } from '@/assets/icons/visibility-off.svg';
 import { useAnnotationCtx } from '@/context/annotation.context';
 
-import { openAttributeModal, useTool } from '..';
+import { openAttributeModal } from '../LabelSection';
+import { useTool } from '../context/tool.context';
 
 interface AttributeItemProps {
   annotation: MediaAnnotationInUI;
