@@ -22,6 +22,26 @@ export default function useSampleWs() {
   const wsRef = useRef<WebSocketClient | null>(null);
 
   useEffect(() => {
+    if (!wsRef.current) {
+      return;
+    }
+
+    const isMeCurrentEditor = connections[0]?.user_id === me.data?.id;
+    const ws = wsRef.current;
+    const handleLeave = (data: TaskSampleUser) => {
+      if (!isMeCurrentEditor && data.user_id !== me.data?.id && data.sample_id === +routeParams.sampleId!) {
+        revalidator.revalidate();
+      }
+    };
+
+    ws.on('leave', handleLeave);
+
+    return () => {
+      ws.off('leave', handleLeave);
+    };
+  }, [connections, me.data?.id, revalidator, routeParams.sampleId]);
+
+  useEffect(() => {
     wsRef.current = new WebSocketClient(
       `ws://${host}/ws/task/${routeParams.taskId}/${routeParams.sampleId}?token=${token}`,
     );
@@ -50,25 +70,6 @@ export default function useSampleWs() {
       ws.disconnect();
     };
   }, [host, routeParams.sampleId, routeParams.taskId, token]);
-
-  useEffect(() => {
-    if (!wsRef.current) {
-      return;
-    }
-
-    const ws = wsRef.current;
-    const handleLeave = (data: TaskSampleUser) => {
-      if (data.user_id !== me.data?.id) {
-        revalidator.revalidate();
-      }
-    };
-
-    ws.on('leave', handleLeave);
-
-    return () => {
-      ws.off('leave', handleLeave);
-    };
-  }, [me.data?.id, revalidator]);
 
   const currentSampleUsers = useMemo(() => {
     return connections.filter((item) => item.sample_id === +routeParams.sampleId!);
