@@ -261,6 +261,7 @@ function ForwardAnnotator(
 ) {
   const [currentSample, setCurrentSample] = useState<MediaSample | undefined>(editingSample);
   const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>(propsSelectedTool);
+  const [attributeModalOpen, setAttributeModalOpen] = useState(false);
 
   useEffect(() => {
     setCurrentTool(propsSelectedTool);
@@ -694,8 +695,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedMediaAnnotations],
+    [sortedMediaAnnotations, disabled, attributeModalOpen],
   );
 
   // 下一个标记
@@ -708,8 +710,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedMediaAnnotations],
+    [sortedMediaAnnotations, disabled, attributeModalOpen],
   );
 
   // 1 ~ 9 设置标签
@@ -736,7 +739,10 @@ function ForwardAnnotator(
         }
       }
     },
-    [onLabelChange, labels, selectedAnnotation],
+    {
+      enabled: !disabled && !attributeModalOpen,
+    },
+    [onLabelChange, labels, selectedAnnotation, disabled, attributeModalOpen],
   );
 
   const playerInstance = useMemo(() => {
@@ -865,6 +871,8 @@ function ForwardAnnotator(
       requestEdit,
       config,
       tools,
+      attributeModalOpen,
+      setAttributeModalOpen,
       labels,
       preLabelMapping: preLabelsMappingByTool,
     };
@@ -882,6 +890,8 @@ function ForwardAnnotator(
     tools,
     labels,
     preLabelsMappingByTool,
+    attributeModalOpen,
+    setAttributeModalOpen,
   ]);
 
   const historyContextValue = useMemo(
