@@ -14,7 +14,7 @@ import type { ToolName } from '@labelu/image';
 import type { ILabel } from '@labelu/interface';
 import { useTranslation } from '@labelu/i18n';
 
-import { MediaType, type SampleResponse } from '@/api/types';
+import { MediaType, SampleState, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import type { getSample } from '@/api/services/samples';
 import { getSamples } from '@/api/services/samples';
@@ -316,7 +316,7 @@ const AnnotationPage = () => {
         selectedTool={disabled ? undefined : currentTool}
         selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {
@@ -336,7 +336,7 @@ const AnnotationPage = () => {
         selectedTool={disabled ? undefined : currentTool}
         selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   } else if (task?.media_type === MediaType.AUDIO) {
@@ -356,7 +356,7 @@ const AnnotationPage = () => {
         selectedTool={disabled ? undefined : currentTool}
         selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   }
