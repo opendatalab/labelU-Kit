@@ -1,12 +1,11 @@
 import { useEffect, useCallback, useContext } from 'react';
-import { useNavigate, useParams, useRevalidator } from 'react-router';
+import { useNavigate, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, Tooltip } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSearchParams } from 'react-router-dom';
 import { FlexLayout } from '@labelu/components-react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
@@ -14,6 +13,7 @@ import commonController from '@/utils/common';
 import { imageAnnotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
+import type { getSample } from '@/api/services/samples';
 import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
 import useMe from '@/hooks/useMe';
@@ -75,7 +75,8 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
-  const currentSample = samples[sampleIndex];
+  const routeSample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
+  const currentSample = routeSample.data;
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
@@ -278,11 +279,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       },
     );
 
-    setSamples(
-      samples.map((sample: SampleResponse) =>
-        sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
-      ),
-    );
+    revalidator.revalidate();
   };
 
   const handleSkipSample = async () => {
