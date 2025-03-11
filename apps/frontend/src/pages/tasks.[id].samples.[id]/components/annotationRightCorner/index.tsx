@@ -279,6 +279,12 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       },
     );
 
+    setSamples(
+      samples.map((sample: SampleResponse) =>
+        sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
+      ),
+    );
+
     revalidator.revalidate();
   };
 
