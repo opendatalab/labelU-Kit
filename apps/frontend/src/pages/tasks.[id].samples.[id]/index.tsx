@@ -182,18 +182,15 @@ const AnnotationPage = () => {
   );
 
   const annotationContextValue = useMemo(() => {
-    const otherUsersExceptMe = currentSampleConns.slice(1).filter((conn) => conn.user_id !== me.data?.id);
-
     return {
       samples,
       setSamples,
       taskConnections: taskConns,
       task,
       currentEditingUser: currentSampleConns[0],
-      otherUsers: otherUsersExceptMe,
       isEnd: totalCount === samples.length,
     };
-  }, [currentSampleConns, taskConns, me.data?.id, samples, setSamples, task, totalCount]);
+  }, [currentSampleConns, taskConns, samples, setSamples, task, totalCount]);
 
   let content = null;
 

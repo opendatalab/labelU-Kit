@@ -49,21 +49,7 @@ export default function useSampleWs() {
     const ws = wsRef.current;
 
     ws.on('peers', (data) => {
-      const userIds: number[] = [];
-      const result: TaskSampleUser[] = [];
-
-      for (const item of data) {
-        if (userIds.includes(item.user_id)) {
-          continue;
-        }
-
-        userIds.push(item.user_id);
-        result.push(item);
-      }
-
-      setConnections(() => {
-        return result;
-      });
+      setConnections(data);
     });
 
     return () => {
