@@ -28,16 +28,16 @@ export default function useSampleWs() {
 
     const isMeCurrentEditor = connections[0]?.user_id === me.data?.id;
     const ws = wsRef.current;
-    const handleLeave = (data: TaskSampleUser) => {
+    const handleSampleUpdate = (data: TaskSampleUser) => {
       if (!isMeCurrentEditor && data.user_id !== me.data?.id && data.sample_id === +routeParams.sampleId!) {
         revalidator.revalidate();
       }
     };
 
-    ws.on('leave', handleLeave);
+    ws.on('update', handleSampleUpdate);
 
     return () => {
-      ws.off('leave', handleLeave);
+      ws.off('update', handleSampleUpdate);
     };
   }, [connections, me.data?.id, revalidator, routeParams.sampleId]);
 

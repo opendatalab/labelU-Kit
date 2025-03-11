@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { useParams, useRouteLoaderData } from 'react-router-dom';
 import { VideoCard, AudioCard } from '@labelu/components-react';
 import { useTranslation } from '@labelu/i18n';
 import { useMemo } from 'react';
@@ -7,9 +7,10 @@ import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
 import { ReactComponent as CheckSvgIcon } from '@/assets/svg/check.svg';
 import { getThumbnailUrl } from '@/utils';
-import type { TaskCollaboratorInWs } from '@/hooks/useTaskWs';
+import type { TaskSampleUser } from '@/hooks/useSampleWs';
 import useMe from '@/hooks/useMe';
 import { UserAvatar } from '@/components/UserAvatar';
+import type { getSample } from '@/api/services/samples';
 
 import { CheckBg, Triangle, ContentWrapper, IdWrapper, SkipWrapper, ImageWrapper, AnnotatingUser } from './style';
 
@@ -27,15 +28,19 @@ interface SliderCardProps {
   type?: MediaType;
   index?: number;
   onClick: (sample: SampleResponse) => void;
-  editingUser?: TaskCollaboratorInWs;
+  editingUser?: TaskSampleUser;
 }
 
 const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardProps) => {
-  const { id, inner_id, state, file } = cardInfo;
-  const filename = file.filename;
-  const url = file.url;
   const routeParams = useParams();
   const sampleId = +routeParams.sampleId!;
+  const routeSample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
+  const currentSample = useMemo(() => {
+    return routeSample?.data.id === cardInfo.id ? routeSample.data : cardInfo;
+  }, [cardInfo, routeSample.data]);
+  const { id, inner_id, state, file } = currentSample;
+  const filename = file.filename;
+  const url = file.url;
   const { t } = useTranslation();
   const me = useMe();
   const isMeTheCurrentEditingUser = editingUser?.user_id === me?.data?.id;
