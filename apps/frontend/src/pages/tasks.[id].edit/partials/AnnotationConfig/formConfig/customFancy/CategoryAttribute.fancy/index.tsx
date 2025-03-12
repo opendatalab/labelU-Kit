@@ -478,7 +478,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                       <Form.Item name={[...path, index, 'required']} label="">
                         <TagSwitcher
                           titleMapping={{
-                            true: t('required'),
+                            true: t('isRequired'),
                             false: t('optional'),
                           }}
                           onChange={handleOnChange(`[${index}].required`)}
@@ -533,7 +533,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                       <Form.Item name={[...path, index, 'required']} label="">
                         <TagSwitcher
                           titleMapping={{
-                            true: t('required'),
+                            true: t('isRequired'),
                             false: t('optional'),
                           }}
                           onChange={handleOnChange(`[${index}].required`)}

@@ -1,18 +1,19 @@
 import { useEffect, useCallback, useContext } from 'react';
-import { useNavigate, useParams, useRevalidator } from 'react-router';
-import { Button } from 'antd';
+import { useNavigate, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
+import { Button, Tooltip } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSearchParams } from 'react-router-dom';
 import { FlexLayout } from '@labelu/components-react';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 import commonController from '@/utils/common';
 import { imageAnnotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
+import type { getSample } from '@/api/services/samples';
 import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
 import useMe from '@/hooks/useMe';
@@ -70,11 +71,12 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const revalidator = useRevalidator();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  const { samples, setSamples, task, currentEditingUser, otherUsers } = useContext(AnnotationContext);
+  const { samples, setSamples, task, currentEditingUser } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
-  const currentSample = samples[sampleIndex];
+  const routeSample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
+  const currentSample = routeSample.data;
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
@@ -282,6 +284,8 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
         sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
       ),
     );
+
+    revalidator.revalidate();
   };
 
   const handleSkipSample = async () => {
@@ -473,29 +477,32 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       <FlexLayout items="center" gap=".5rem">
         {currentEditingUser && (
           <>
-            {currentEditingUser.user_id === me.data?.id ? (
-              '我'
-            ) : (
-              <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
+            {currentEditingUser.user_id !== me.data?.id && (
+              <>
+                <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
+                {t('isAnnotating')}
+                <Tooltip title={t('collaboratorTips')} placement="bottom">
+                  <QuestionCircleOutlined />
+                </Tooltip>
+              </>
             )}
-            正在标注
           </>
-        )}
-        {otherUsers.length > 1 && (
-          <FlexLayout items="center" gap=".5rem">
-            其他用户
-            {otherUsers.map((conn) => (
-              <UserAvatar key={conn.user_id} user={conn} />
-            ))}
-          </FlexLayout>
         )}
       </FlexLayout>
       {isSampleSkipped ? (
-        <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="text"
+          onClick={commonController.debounce(handleCancelSkipSample, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('cancelSkip')}
         </Button>
       ) : (
-        <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="text"
+          onClick={commonController.debounce(handleSkipSample, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('skip')}
         </Button>
       )}
@@ -505,7 +512,11 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
         </Button>
       )}
       {isLastSample ? (
-        <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="primary"
+          onClick={commonController.debounce(handleComplete, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('finish')}
         </Button>
       ) : (
