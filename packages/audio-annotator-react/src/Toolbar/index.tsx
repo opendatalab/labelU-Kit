@@ -32,6 +32,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
   const { onToolChange, currentTool, config, attributeModalOpen } = useTool();
   const { onOrderVisibleChange, orderVisible, disabled } = useAnnotationCtx();
   const { redo, undo, pastRef, futureRef } = useHistoryCtx();
+  // @ts-ignore
   const { t } = useTranslation();
 
   const handleToolChange = (tool?: VideoAnnotationType) => () => {
