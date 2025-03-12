@@ -22,19 +22,23 @@ export interface IToolbarInEditorProps {
   right?: React.ReactNode;
 }
 
-const tooltipStyle = {
+export const tooltipStyle = {
   '--arrow-color': '#fff',
   '--tooltip-color': '#000',
   '--tooltip-bg': '#fff',
 } as React.CSSProperties;
 
 export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
-  const { onToolChange, currentTool, config } = useTool();
-  const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
+  const { onToolChange, currentTool, config, attributeModalOpen } = useTool();
+  const { onOrderVisibleChange, orderVisible, disabled } = useAnnotationCtx();
   const { redo, undo, pastRef, futureRef } = useHistoryCtx();
   const { t } = useTranslation();
 
   const handleToolChange = (tool?: VideoAnnotationType) => () => {
+    if (disabled) {
+      return;
+    }
+
     onToolChange(tool);
   };
 
@@ -48,8 +52,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
+      enabled: !attributeModalOpen,
     },
-    [onToolChange],
+    [onToolChange, attributeModalOpen],
   );
 
   // 切换片断分割
@@ -62,9 +67,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
-      enabled: currentTool !== 'segment',
+      enabled: !attributeModalOpen && !disabled && currentTool !== 'segment',
     },
-    [currentTool, onToolChange, config?.segment],
+    [currentTool, onToolChange, config?.segment, disabled, attributeModalOpen],
   );
 
   // 切换时间戳
@@ -77,9 +82,9 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
     },
     {
       preventDefault: true,
-      enabled: currentTool !== 'frame',
+      enabled: !attributeModalOpen && !disabled && currentTool !== 'frame',
     },
-    [currentTool, onToolChange, config?.frame],
+    [currentTool, onToolChange, config?.frame, disabled, attributeModalOpen],
   );
 
   return (

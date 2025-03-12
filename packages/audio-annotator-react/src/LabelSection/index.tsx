@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import type { DraggableModalRef, ValidationContextType } from '@labelu/components-react';
 import { DraggableModel, AttributeForm, EllipsisText, FlexLayout, Kbd, getOS } from '@labelu/components-react';
 import { useTranslation } from '@labelu/i18n';
-
 import type { Attribute } from '@labelu/interface';
 
 import { ReactComponent as MenuOpenIcon } from '@/assets/icons/menu-open.svg';
@@ -155,7 +154,7 @@ function LabelItem({
 }
 
 export function LabelSection() {
-  const { selectedLabel, player, onLabelChange, labels, onAttributeChange } = useTool();
+  const { selectedLabel, player, onLabelChange, labels, onAttributeChange, setAttributeModalOpen } = useTool();
   const { selectedAnnotation } = useAnnotationCtx();
   const validationRef = useRef<ValidationContextType | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -178,7 +177,7 @@ export function LabelSection() {
     [onLabelChange, player],
   );
 
-  const handleModalClose = async () => {
+  const handleModalClose = useCallback(async () => {
     if (!dragModalRef.current || !validationRef.current) {
       return;
     }
@@ -191,9 +190,14 @@ export function LabelSection() {
 
     // 关闭属性编辑框后继续播放
     player.play();
-
+    setAttributeModalOpen(false);
     dragModalRef.current.toggleVisibility(false);
-  };
+  }, [player, setAttributeModalOpen]);
+
+  const handleOnModelOpen = useCallback(() => {
+    setAttributeModalOpen(true);
+    player.pause();
+  }, [player, setAttributeModalOpen]);
 
   const [sliceIndex, setSliceIndex] = React.useState(0);
   const [showMore, setShowMore] = React.useState(false);
@@ -296,6 +300,7 @@ export function LabelSection() {
       </TriggerWrapper>
       <DraggableModel
         beforeClose={handleModalClose}
+        onOpen={handleOnModelOpen}
         title={
           <FlexLayout items="center" gap="0.5rem">
             {t('details')} &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
