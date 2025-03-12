@@ -15,7 +15,7 @@ const Cards = styled.div`
   overflow: auto;
 `;
 
-const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
+const Wrapper = styled.div.attrs<{ collapsed: boolean }>((props) => ({
   ...props,
   className: 'labelu-audio__sidebar',
 }))`
