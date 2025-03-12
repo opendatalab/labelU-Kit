@@ -106,6 +106,12 @@ const Footer = styled.div`
   &:hover {
     color: red;
   }
+
+  /* disabled */
+  &[aria-disabled='true'] {
+    color: #999;
+    cursor: not-allowed;
+  }
 `;
 
 type HeaderType = 'global' | 'label';
@@ -139,14 +145,19 @@ function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
       <FlexLayout.Item flex items="center" justify="space-between" gap=".5rem">
         <Button onClick={onCancel}>{t('cancel')}</Button>
         <Button primary onClick={onConfirm}>
-          {t('confirm')}
+          {t('ok')}
         </Button>
       </FlexLayout.Item>
     </FlexLayout>
   );
 }
 
-function ClearAction({ onClear }: { onClear: () => void }) {
+interface ClearActionProps {
+  onClear: () => void;
+  disabled?: boolean;
+}
+
+function ClearAction({ onClear, disabled }: ClearActionProps) {
   const [open, setOpen] = useState(false);
   // @ts-ignore
   const { t } = useTranslation();
@@ -172,7 +183,15 @@ function ClearAction({ onClear }: { onClear: () => void }) {
       }
       placement="top"
     >
-      <Footer onClick={() => setOpen((pre) => !pre)}>
+      <Footer
+        aria-disabled={disabled}
+        onClick={() => {
+          if (disabled) {
+            return;
+          }
+          setOpen((pre) => !pre);
+        }}
+      >
         <DeleteIcon />
         &nbsp; {t('clear')}
       </Footer>
@@ -191,6 +210,7 @@ export function AttributePanel() {
     preAnnotationsWithGlobal,
     onAnnotationsChange,
     onAnnotationClear,
+    disabled,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const globalAnnotations = useMemo(() => {
@@ -430,10 +450,10 @@ export function AttributePanel() {
         })}
       </TabHeader>
       <Content activeKey={activeKey}>
-        <AttributeTree data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
+        <AttributeTree disabled={disabled} data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
       </Content>
-      <ClearAction onClear={handleClear} />
+      <ClearAction onClear={handleClear} disabled={disabled} />
     </Wrapper>
   );
 }
