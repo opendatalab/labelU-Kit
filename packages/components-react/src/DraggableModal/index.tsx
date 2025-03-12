@@ -18,6 +18,7 @@ interface Iprops {
   title: React.ReactNode;
   okText: string;
   cancelText: string;
+  onOpen?: () => void;
   beforeClose?: () => Promise<unknown>;
 }
 
@@ -121,7 +122,7 @@ export interface DraggableModalRef {
 }
 
 const ForwardDraggableModel = (props: Iprops, ref: React.ForwardedRef<DraggableModalRef>) => {
-  const { title, width = 500, children, beforeClose } = props;
+  const { title, width = 500, children, beforeClose, onOpen } = props;
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [disabled, setDisabled] = useState(false);
@@ -157,18 +158,18 @@ const ForwardDraggableModel = (props: Iprops, ref: React.ForwardedRef<DraggableM
     [width],
   );
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      toggleVisibility: (value: boolean) => {
-        setIsVisible(value);
-      },
-      setPosition: updatePosition,
-      getModalRef: () => modalRef,
-      getVisibility: () => isVisible,
-    }),
-    [updatePosition, isVisible],
-  );
+  useImperativeHandle(ref, () => ({
+    toggleVisibility: (value: boolean) => {
+      setIsVisible(value);
+
+      if (value) {
+        onOpen?.();
+      }
+    },
+    setPosition: updatePosition,
+    getModalRef: () => modalRef,
+    getVisibility: () => isVisible,
+  }));
 
   const bodyStyle = useMemo(() => {
     return {

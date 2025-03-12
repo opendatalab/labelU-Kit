@@ -50,6 +50,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       showOrder,
       attributeConfigMapping,
       requestEdit,
+      disabled,
     } = useMediaAnnotator();
     const [currentAnnotation, setCurrentAnnotation] = useState<MediaSegment>(annotation as MediaSegment);
     // @ts-ignore
@@ -158,6 +159,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       e.stopPropagation();
 
       if (
+        disabled &&
         !requestEdit?.('update', {
           toolName: 'segment',
           label: annotation.label,
@@ -213,6 +215,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
       document.removeEventListener('mouseup', handleMouseUp);
 
       if (
+        disabled ||
         !requestEdit?.('update', {
           toolName: 'segment',
           label: annotation.label,
@@ -239,6 +242,7 @@ export const AnnotationItem = forwardRef<HTMLDivElement | null, AttributeItemPro
     const handleMouseDown = (_direction: 'left' | 'right') => (e: React.MouseEvent) => {
       if (
         !wrapperRef.current ||
+        disabled ||
         !requestEdit?.('update', {
           toolName: 'segment',
           label: annotation.label,
