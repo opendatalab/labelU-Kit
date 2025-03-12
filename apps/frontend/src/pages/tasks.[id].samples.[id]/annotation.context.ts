@@ -4,7 +4,7 @@ import React from 'react';
 import type { SampleResponse } from '@/api/types';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 
-import type { TaskSampleUser } from './hooks/useSampleWs';
+import type { TaskSampleUser } from '../../hooks/useSampleWs';
 
 export interface AnnotationContextValue {
   samples: SampleResponse[];
@@ -13,7 +13,7 @@ export interface AnnotationContextValue {
   isEnd: boolean;
 
   currentEditingUser: TaskSampleUser;
-  otherUsers: TaskSampleUser[];
+  taskConnections: TaskSampleUser[];
 }
 
 const AnnotationContext = React.createContext<AnnotationContextValue>({} as AnnotationContextValue);

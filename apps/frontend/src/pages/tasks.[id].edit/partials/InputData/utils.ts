@@ -1,8 +1,8 @@
 import { v4 as uuid4 } from 'uuid';
-import { i18n } from '@labelu/i18n'
+import { i18n } from '@labelu/i18n';
 
 import type { MediaType } from '@/api/types';
-import { FileExtensionText, MediaFileSize } from '@/constants/mediaType';
+import { FileExtensionText } from '@/constants/mediaType';
 import commonController from '@/utils/common';
 
 export enum UploadStatus {
@@ -43,20 +43,12 @@ export const isCorrectFiles = (files: File[], type: MediaType) => {
   let result = true;
 
   if (files.length > 100) {
-    commonController.notificationErrorMessage({ message: i18n.t("fileLimitOneTimeDescription") }, 3);
+    commonController.notificationErrorMessage({ message: i18n.t('fileLimitOneTimeDescription') }, 3);
     return;
   }
 
   for (let i = 0; i < files.length; i++) {
     const fileUnit = files[i];
-    const isOverSize = commonController.isOverSize(fileUnit.size, type);
-
-    if (isOverSize) {
-      commonController.notificationErrorMessage({ message: `${i18n.t("singleFileSizeExceeds")}${MediaFileSize[type]}MB` }, 3);
-
-      result = false;
-      break;
-    }
 
     // 忽略jsonl文件的类型校验
     if (isPreAnnotationFile(fileUnit.name)) {
@@ -66,10 +58,7 @@ export const isCorrectFiles = (files: File[], type: MediaType) => {
     const isCorrectFileType = commonController.isCorrectFileType(fileUnit.name, type);
 
     if (!isCorrectFileType) {
-      commonController.notificationErrorMessage(
-        { message: `${i18n.t("fileTypeTips")}${FileExtensionText[type]}` },
-        3,
-      );
+      commonController.notificationErrorMessage({ message: `${i18n.t('fileTypeTips')}${FileExtensionText[type]}` }, 3);
       result = false;
       break;
     }

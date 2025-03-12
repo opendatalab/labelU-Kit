@@ -1,9 +1,28 @@
 import styled, { css } from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
 
-export const Wrapper = styled(FlexLayout)`
+export const ImageWrapper = styled(FlexLayout)`
   gap: 0.5rem;
   cursor: pointer;
+  position: relative;
+  width: 100%;
+`;
+
+export const AnnotatingUser = styled.div`
+  position: absolute;
+  z-index: 3;
+  top: 0.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #999;
+
+  .annotating-text {
+    color: #fff;
+    text-shadow: 0 0 3px #000;
+  }
 `;
 
 export const IdWrapper = styled.div`

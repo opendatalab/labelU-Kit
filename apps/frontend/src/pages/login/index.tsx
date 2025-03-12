@@ -4,11 +4,13 @@ import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { FlexLayout } from '@labelu/components-react';
 import { useTranslation } from '@labelu/i18n';
+import { useEffect } from 'react';
 
 import { login } from '@/api/services/user';
 import { ReactComponent as EmailIcon } from '@/assets/svg/email.svg';
 import { ReactComponent as PasswordIcon } from '@/assets/svg/password.svg';
 import LanguageSwitcher from '@/components/LangSwitcher';
+import useMe from '@/hooks/useMe';
 
 import LogoTitle from '../../components/LogoTitle';
 import { ButtonWrapper, FormWrapper, LoginWrapper } from './style';
@@ -20,6 +22,7 @@ interface FormValues {
 
 const LoginPage = () => {
   const [form] = Form.useForm<FormValues>();
+  const me = useMe();
   const { t } = useTranslation();
   const loginMutation = useMutation({
     mutationFn: login,
@@ -27,6 +30,12 @@ const LoginPage = () => {
       window.location.href = '/tasks';
     },
   });
+
+  useEffect(() => {
+    if (me.data?.id) {
+      window.location.href = '/tasks';
+    }
+  }, [me]);
 
   const handleLogin: FormProps<FormValues>['onFinish'] = async (values) => {
     loginMutation.mutate(values);

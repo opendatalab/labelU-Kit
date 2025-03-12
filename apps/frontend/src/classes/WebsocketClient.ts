@@ -20,6 +20,8 @@ export default class WebSocketClient {
     };
     this.reconnectAttempts = 0;
     this.connect();
+    // Heartbeats
+    this.on('ping', () => this.send('pong', null));
   }
 
   public connect() {
@@ -80,6 +82,15 @@ export default class WebSocketClient {
     }
 
     this.handlers.get(event)!.push(handler);
+  }
+
+  public off(event: string, handler: (data?: any) => void) {
+    if (this.handlers.has(event)) {
+      this.handlers.set(
+        event,
+        this.handlers.get(event)!.filter((h) => h !== handler),
+      );
+    }
   }
 
   public emit(event: string, data: any = null) {

@@ -51,12 +51,15 @@ export default function CollaboratorPortal() {
   const collaboratorIds = useMemo(() => {
     return collaborators?.data?.map((item) => item.id) || [];
   }, [collaborators]);
+  const usersExceptCreator = useMemo(() => {
+    return users.data?.data?.filter((item) => item.id !== task?.created_by?.id) ?? [];
+  }, [task?.created_by?.id, users.data?.data]);
   const isAllChecked = useMemo(() => {
-    return users.data?.data?.every((item) => collaboratorIds.includes(item.id!));
-  }, [collaboratorIds, users.data?.data]);
+    return usersExceptCreator.every((item) => collaboratorIds.includes(item.id!));
+  }, [collaboratorIds, usersExceptCreator]);
   const isSomeChecked = useMemo(() => {
-    return users.data?.data?.some((item) => collaboratorIds.includes(item.id!));
-  }, [collaboratorIds, users.data?.data]);
+    return usersExceptCreator.some((item) => collaboratorIds.includes(item.id!));
+  }, [collaboratorIds, usersExceptCreator]);
   const handleOpen = () => {
     setOpen(true);
   };
@@ -77,7 +80,7 @@ export default function CollaboratorPortal() {
   };
   const handleCheckAllChange = async (e: CheckboxChangeEvent) => {
     if (e.target.checked) {
-      const ids = users.data?.data
+      const ids = usersExceptCreator
         ?.map((item) => item.id!)
         .filter((id) => !collaboratorIds.includes(id) && task?.created_by?.id !== id);
 
@@ -85,7 +88,7 @@ export default function CollaboratorPortal() {
         await batchAddCollaborators.mutateAsync(ids);
       }
     } else {
-      const ids = users.data?.data
+      const ids = usersExceptCreator
         ?.map((item) => item.id!)
         .filter((id) => collaboratorIds.includes(id) && task?.created_by?.id !== id);
 
@@ -108,7 +111,7 @@ export default function CollaboratorPortal() {
             type="info"
             message={
               <div>
-                {t('inviteCollaborator')}
+                {t('shareTaskLink')}
                 <Button
                   type="link"
                   size="small"
@@ -117,10 +120,10 @@ export default function CollaboratorPortal() {
                     navigator.clipboard.writeText(window.location.href);
                     message.success(t('copied'));
                   }}
-                >
-                  {t('copy')}
-                </Button>
+                />
+                {t('inviteRegister')}
                 {t('invitationTips')}
+                {t('afterInvitation')}
               </div>
             }
           />

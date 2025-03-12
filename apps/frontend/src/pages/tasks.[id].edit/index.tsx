@@ -20,6 +20,7 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { useAddTaskMutation, useUpdateTaskConfigMutation } from '@/api/mutations/task';
 import { convertImageConfig } from '@/utils/convertImageConfig';
 import { createPreAnnotations } from '@/api/services/preAnnotations';
+import type { ToolsConfigState } from '@/types/toolConfig';
 
 import type { QueuedFile } from './partials/InputData';
 import InputData from './partials/InputData';
@@ -50,6 +51,37 @@ const StyledFooter = styled.div`
   margin-top: 1rem;
   gap: 0.5rem;
 `;
+
+function isContainEmptyOption(config: ToolsConfigState) {
+  for (const tool of config.tools) {
+    const attributes = tool.config?.attributes ?? [];
+
+    if (!attributes || attributes.length === 0) {
+      return 'attribute';
+    }
+
+    const toolName = tool.tool;
+
+    // 检查全局工具里的属性是否有空选项
+    if (['tagTool', 'textTool'].includes(toolName)) {
+      for (const attribute of attributes) {
+        if (attribute.type === 'enum' && attribute.options.length === 0) {
+          return 'option';
+        }
+      }
+    }
+
+    for (const attribute of attributes) {
+      if (Array.isArray(attribute.attributes)) {
+        for (const subAttribute of attribute.attributes) {
+          if (subAttribute.type === 'enum' && subAttribute.options.length === 0) {
+            return 'option';
+          }
+        }
+      }
+    }
+  }
+}
 
 interface TaskStep extends StepData {
   value: StepEnum;
@@ -186,18 +218,29 @@ const CreateTask = () => {
       try {
         await annotationFormInstance.validateFields();
       } catch (err) {
-        commonController.notificationErrorMessage({ message: t('pleaseCheckToolConfig') }, 1);
+        commonController.notificationErrorMessage({ message: t('pleaseCheckToolConfig') }, 2);
         return;
       }
 
       const annotationConfig = annotationFormInstance.getFieldsValue();
+      const emptyType = isContainEmptyOption(annotationConfig);
+
+      if (emptyType === 'attribute') {
+        commonController.notificationErrorMessage({ message: t('mustHaveAtLeastOneAttribute') }, 2);
+        return;
+      }
+
+      if (emptyType === 'option') {
+        commonController.notificationErrorMessage({ message: t('mustHaveAtLeastOneOption') }, 2);
+        return;
+      }
 
       if (
         _.chain(annotationConfig).get('tools').isEmpty().value() &&
         currentStep === StepEnum.Config &&
         !isFromCancel
       ) {
-        commonController.notificationErrorMessage({ message: t('pleaseSelectTool') }, 1);
+        commonController.notificationErrorMessage({ message: t('pleaseSelectTool') }, 2);
         return;
       }
 
