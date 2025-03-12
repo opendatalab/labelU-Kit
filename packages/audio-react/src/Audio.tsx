@@ -362,6 +362,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
       attributeConfigMapping,
       playingAnnotationIds,
       requestEdit,
+      disabled,
       showOrder: Boolean(showOrder),
     };
   }, [
@@ -377,6 +378,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     attributeConfigMapping,
     playingAnnotationIds,
     showOrder,
+    disabled,
   ]);
 
   const onMediaLoad = useCallback(() => {
