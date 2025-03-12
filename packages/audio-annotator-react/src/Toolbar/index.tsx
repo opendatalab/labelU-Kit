@@ -22,7 +22,7 @@ export interface IToolbarInEditorProps {
   right?: React.ReactNode;
 }
 
-const tooltipStyle = {
+export const tooltipStyle = {
   '--arrow-color': '#fff',
   '--tooltip-color': '#000',
   '--tooltip-bg': '#fff',
