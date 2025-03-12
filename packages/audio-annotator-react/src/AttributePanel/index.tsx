@@ -47,13 +47,8 @@ const AttributeHeaderItem = styled.div<{ active: boolean }>`
   justify-content: center;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-
-  ${({ active }) =>
-    active &&
-    css`
-      color: var(--color-primary);
-      border-bottom: 2px solid var(--color-primary);
-    `}
+  color: ${({ active }) => (active ? 'var(--color-primary)' : 'inherit')};
+  border-bottom: 2px solid ${({ active }) => (active ? 'var(--color-primary)' : 'transparent')};
 
   &:hover {
     color: var(--color-primary);
@@ -137,6 +132,7 @@ interface ConfirmProps {
 }
 
 function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
+  // @ts-ignore
   const { t } = useTranslation();
   return (
     <FlexLayout flex="column" gap="1rem" padding=".5rem">
