@@ -275,7 +275,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       },
       {
         ...currentSample,
-        state: SampleState.NEW,
+        state: SampleState.DONE,
       },
     );
 
