@@ -145,7 +145,7 @@ function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
       <FlexLayout.Item flex items="center" justify="space-between" gap=".5rem">
         <Button onClick={onCancel}>{t('cancel')}</Button>
         <Button primary onClick={onConfirm}>
-          {t('confirm')}
+          {t('ok')}
         </Button>
       </FlexLayout.Item>
     </FlexLayout>
