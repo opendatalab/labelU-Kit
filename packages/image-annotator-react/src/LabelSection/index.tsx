@@ -192,7 +192,7 @@ function LabelItem({
 }
 
 export function LabelSection() {
-  const { engine, labels, selectedLabel, onLabelChange, requestEdit, currentTool } = useTool();
+  const { engine, labels, selectedLabel, onLabelChange, requestEdit, currentTool, setAttributeModalOpen } = useTool();
   const { selectedAnnotation } = useAnnotationCtx();
   const validationRef = useRef<ValidationContextType | null>(null);
   const labelsWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -267,7 +267,7 @@ export function LabelSection() {
     };
   }, [engine, selectedLabel]);
 
-  const handleModalClose = async () => {
+  const handleOnModalClose = useCallback(async () => {
     if (!dragModalRef.current || !validationRef.current) {
       return;
     }
@@ -278,8 +278,13 @@ export function LabelSection() {
       return Promise.reject(error);
     }
 
+    setAttributeModalOpen(false);
     dragModalRef.current.toggleVisibility(false);
-  };
+  }, [setAttributeModalOpen]);
+
+  const handleOnModalOpen = useCallback(() => {
+    setAttributeModalOpen(true);
+  }, [setAttributeModalOpen]);
 
   const [sliceIndex, setSliceIndex] = React.useState(0);
   const [showMore, setShowMore] = React.useState(false);
@@ -400,7 +405,8 @@ export function LabelSection() {
         {!collapsed && <MenuCloseIcon />}
       </TriggerWrapper>
       <DraggableModel
-        beforeClose={handleModalClose}
+        beforeClose={handleOnModalClose}
+        onOpen={handleOnModalOpen}
         title={
           <FlexLayout items="center" gap="0.5rem">
             {t('details')} &nbsp;{os === 'MacOS' ? <Kbd>⇧</Kbd> : <Kbd>Shift</Kbd>} + <MouseRightClick />
