@@ -5,9 +5,11 @@ import { EInternalEvent } from './enums';
 import { axis } from './singletons/axis';
 import { eventEmitter, rbush } from './singletons';
 import { Annotation, AnnotationMapping } from './annotations';
+import type { Cursor } from './shapes';
 import { Line, ShapeText } from './shapes';
-import type { AnnotatorOptions } from './AnnotatorBase';
 import { AnnotatorBase } from './AnnotatorBase';
+import type { AnnotatorOptions } from './core/AnnotatorConfig';
+import type { CursorType } from './core/CursorManager';
 
 export type { AnnotatorOptions };
 
@@ -87,7 +89,7 @@ export class Annotator extends AnnotatorBase {
     backgroundRenderer.resize(newSize.width, newSize.height);
     // resize 之后，还需要重新计算所有标注相对画布的坐标
     for (const tool of this.tools.values()) {
-      tool.clear()
+      tool.clear();
       tool.load(oldData[tool.name]);
     }
 
@@ -133,6 +135,20 @@ export class Annotator extends AnnotatorBase {
     return this.tools;
   }
 
+  public setEditable(editable: boolean) {
+    if (this.config) {
+      this.config.editable = editable;
+      if (!editable) {
+        this.activeTool?.deactivate();
+        this.cursorManager?.disable();
+      } else {
+        this.cursorManager?.enable();
+      }
+    } else {
+      throw new Error('Annotator is destroyed');
+    }
+  }
+
   /**
    * 使工具进入绘制状态
    *
@@ -145,6 +161,10 @@ export class Annotator extends AnnotatorBase {
     if (typeof toolName !== 'string') {
       console.error('toolName must be string, such as "line" or "point"');
 
+      return;
+    }
+
+    if (!this.config?.editable) {
       return;
     }
 
@@ -287,9 +307,9 @@ export class Annotator extends AnnotatorBase {
   public getFlatData() {
     const result: any = [];
 
-    Array.from(this.tools.values()).forEach((tool) => {
+    for (const tool of this.tools.values()) {
       result.push(...tool.data);
-    });
+    }
 
     return result;
   }
@@ -379,9 +399,13 @@ export class Annotator extends AnnotatorBase {
     }
     const currentTool = tools.get(activeToolName);
 
+    if (!currentTool) {
+      return;
+    }
+
     const AnnotationClass = AnnotationMapping[activeToolName];
 
-    currentTool!.setLabel(value);
+    currentTool.setLabel(value);
 
     if (this.cursorManager) {
       this.cursorManager.color = AnnotationClass.labelStatic.getLabelColor(value);
@@ -396,6 +420,14 @@ export class Annotator extends AnnotatorBase {
     }
 
     return this.tools.get(this.activeToolName);
+  }
+
+  public registerCursor(name: CursorType, cursor: Cursor) {
+    this.cursorManager?.register(name, cursor);
+  }
+
+  public unregisterCursor(name: CursorType) {
+    this.cursorManager?.unregister(name);
   }
 
   public get keyboard() {
@@ -421,6 +453,10 @@ export class Annotator extends AnnotatorBase {
    * @param id 标注id
    */
   public removeAnnotationById(toolName: ToolName, id: string) {
+    if (!this.config.editable) {
+      return;
+    }
+
     const { tools } = this;
 
     const tool = tools.get(toolName);
@@ -436,6 +472,10 @@ export class Annotator extends AnnotatorBase {
    * 指定标注id从外部选中标注
    */
   public selectAnnotation(toolName: ToolName | undefined, id: string | undefined) {
+    if (!this.config.editable) {
+      return;
+    }
+
     const selectTool = toolName || this.activeTool?.name;
 
     if (!selectTool) {

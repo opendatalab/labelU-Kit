@@ -125,6 +125,8 @@ export class Draft<
     if (this.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
       this.isPicked = true;
       this._serializeData = this.group.serialize();
+      cursorManager?.invokeCursor('move');
+      axis?.rerender();
 
       for (const handler of this._onMouseDownHandlers) {
         handler(e);
