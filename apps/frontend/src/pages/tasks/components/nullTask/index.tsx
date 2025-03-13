@@ -71,7 +71,7 @@ const NullTask = () => {
   };
 
   const goDemo = () => {
-    window.open('https://opendatalab.github.io/labelU-Kit/#/image', '_blank');
+    window.open('https://opendatalab.github.io/labelU/playground/image', '_blank');
   };
 
   return (
