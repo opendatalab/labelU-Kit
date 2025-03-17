@@ -16,8 +16,8 @@
 
 ## 开始使用
 
-- Playground：[https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
-- 体验 LabelU 在线版：[https://labelu.shlab.tech/](https://labelu.shlab.tech/)
+- [Playground](https://opendatalab.github.io/labelU/playground/image)
+- [LabelU 在线版](https://labelu.shlab.tech/)
 
 ## Packages
 
