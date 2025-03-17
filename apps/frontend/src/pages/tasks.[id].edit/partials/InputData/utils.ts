@@ -42,11 +42,6 @@ export const isPreAnnotationFile = (filename: string) => {
 export const isCorrectFiles = (files: File[], type: MediaType) => {
   let result = true;
 
-  if (files.length > 100) {
-    commonController.notificationErrorMessage({ message: i18n.t('fileLimitOneTimeDescription') }, 3);
-    return;
-  }
-
   for (let i = 0; i < files.length; i++) {
     const fileUnit = files[i];
 
