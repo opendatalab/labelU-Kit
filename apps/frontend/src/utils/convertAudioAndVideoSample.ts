@@ -57,7 +57,9 @@ export function convertAudioAndVideoSample(
 
   return {
     id,
-    url: mediaType === MediaType.VIDEO ? sample.file.url.replace('attachment', 'partial') : sample.file.url,
+    url: [MediaType.VIDEO, MediaType.AUDIO].includes(mediaType as MediaType)
+      ? sample.file.url.replace('attachment', 'partial')
+      : sample.file.url,
     data: convertMediaAnnotations(mediaType!, resultParsed, config),
   };
 }
