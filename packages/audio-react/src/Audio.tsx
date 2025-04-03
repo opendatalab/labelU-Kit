@@ -26,6 +26,8 @@ const AudioAnnotatorWrapper = styled.div`
   position: relative;
 `;
 
+const cachedRate = localStorage.getItem('labelu:audio-rate') ?? '1';
+
 export interface AudioAnnotatorProps {
   className?: string;
   /** 音频文件url */
@@ -119,7 +121,7 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
   const controllerRef = useRef<PlayerControllerRef>(null);
   const [playingAnnotationIds, setPlayingAnnotationIds] = useState<string[]>([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState<AudioAnnotationInUI | undefined>();
-
+  const [rate, setRate] = useState(Number(cachedRate));
   const attributeConfigMapping = useMemo(() => {
     const mapping: Record<AudioSegmentName | AudioFrameName, Record<string, Attribute>> = {
       segment: {},
@@ -196,6 +198,12 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
     [annotations],
   );
 
+  const handleRateChange = useCallback((value: number) => {
+    localStorage.setItem('labelu:audio-rate', value.toString());
+    setRate(value);
+    playerRef.current?.setPlaybackRate(value, true);
+  }, []);
+
   const handleOnPlaying = useCallback(
     (time: number) => {
       annotatorRef.current?.playing(time);
@@ -237,12 +245,14 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
       return;
     }
 
+    playerRef.current?.setPlaybackRate(rate, true);
+
     if (playerRef.current.isPlaying()) {
       playerRef.current.pause();
     } else {
       playerRef.current.play();
     }
-  }, []);
+  }, [rate]);
 
   const getCurrentTime = useCallback(() => {
     return playerRef.current?.getCurrentTime() ?? 0;
@@ -405,10 +415,11 @@ export const AudioAnnotator = forwardRef<HTMLDivElement, AudioAnnotatorProps>(fu
           ref={controllerRef}
           duration={duration}
           type="audio"
+          rate={rate}
           onChange={onPlayClick}
           onPlaying={handleOnPlaying}
           getCurrentTime={getCurrentTime}
-          onRateChange={(rate) => playerRef.current?.setPlaybackRate(rate, true)}
+          onRateChange={handleRateChange}
         />
       </AudioAnnotatorWrapper>
     </MediaAnnotationContext.Provider>

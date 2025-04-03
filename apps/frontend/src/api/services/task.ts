@@ -91,6 +91,7 @@ export async function getTaskList({
   ...params
 }: ListByApiV1TasksGetParams): Promise<TaskListResponseWithStatics> {
   return await requestWithHeaders.get('/v1/tasks', {
+    timeout: 0,
     params: {
       size: 16,
       page: page ? page - 1 : 0,

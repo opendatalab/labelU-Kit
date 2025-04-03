@@ -33,6 +33,7 @@ export interface PlayerControllerProps {
   onRateChange?: (rate: number) => void;
   onChange?: (playing: boolean) => void;
   duration?: number;
+  rate?: number;
   onPlaying?: (currentTime: number) => void;
   getCurrentTime: () => number;
 }
@@ -47,7 +48,7 @@ export interface PlayerControllerRef {
  * 播放器控制器
  */
 export const PlayerController = forwardRef<PlayerControllerRef, PlayerControllerProps>(function ForwardRefPlayer(
-  { type, duration = 0, onPlaying, getCurrentTime, onRateChange, onChange, disabled },
+  { type, duration = 0, onPlaying, getCurrentTime, onRateChange, onChange, disabled, rate = 1 },
   ref,
 ) {
   const [playing, togglePlaying] = useState(false);
@@ -141,7 +142,7 @@ export const PlayerController = forwardRef<PlayerControllerRef, PlayerController
       <Duration>
         {secondsToMinute(currentTime)} / -{secondsToMinute(remainingTime)}
       </Duration>
-      <SpeedController disabled={disabled} playerType={type} onChange={onRateChange} />
+      <SpeedController disabled={disabled} playerType={type} onChange={onRateChange} rate={rate} />
     </ControllerWrapper>
   );
 });

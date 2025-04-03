@@ -488,21 +488,6 @@ function ForwardAnnotator(
     [updateAnnotationsWithGlobal],
   );
 
-  const onAnnotationDelete = useCallback(
-    (restAnnotations: AnnotationWithTool[]) => {
-      const annotationGroupByTool: AllAnnotationMapping = {};
-
-      restAnnotations.forEach((item) => {
-        annotationGroupByTool[item.id] = item;
-      });
-
-      updateAnnotationsWithGlobal(() => {
-        return annotationGroupByTool;
-      });
-    },
-    [updateAnnotationsWithGlobal],
-  );
-
   const onAnnotationChange = useCallback(
     (_annotation: AnnotationWithTool, skipHistory?: boolean) => {
       updateAnnotationsWithGlobal((pre) => {
@@ -603,8 +588,10 @@ function ForwardAnnotator(
   // effects
   useEffect(() => {
     // 删除标记
-    engine?.on('delete', (annotation: AnnotationData) => {
-      onAnnotationDelete(addToolNameToAnnotationData(engine!.getDataByTool()));
+    const handleDelete = (annotation: AnnotationData) => {
+      const newAnnotations = omit(annotationsWithGlobal, annotation.id);
+      console.log('newAnnotations', newAnnotations);
+      updateAnnotationsWithGlobal(newAnnotations);
       setSelectedAnnotation((pre) => {
         if (pre?.id === annotation.id) {
           return undefined;
@@ -612,8 +599,14 @@ function ForwardAnnotator(
 
         return pre;
       });
-    });
-  }, [engine, onAnnotationDelete]);
+    };
+
+    engine?.on('delete', handleDelete);
+
+    return () => {
+      engine?.off('delete', handleDelete);
+    };
+  }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
 
   useEffect(() => {
     const handleAttributesChange = (annotation: AnnotationData) => {
