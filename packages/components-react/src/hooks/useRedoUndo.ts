@@ -6,89 +6,125 @@ export interface RedoUndoOptions<T> {
   onRedo?: (currentValue: T) => void;
 }
 
+export interface RedoUndoState<T> {
+  value: T;
+  canUndo: boolean;
+  canRedo: boolean;
+  historyLength: number;
+  futureLength: number;
+}
+
 export function useRedoUndo<T>(initialValue: T, options: RedoUndoOptions<T>) {
-  const [currentValue, setCurrentValue] = useState<T>(initialValue);
+  const [state, setState] = useState<RedoUndoState<T>>({
+    value: initialValue,
+    canUndo: false,
+    canRedo: false,
+    historyLength: 0,
+    futureLength: 0,
+  });
+
   const pastRef = useRef<T[]>([]);
   const futureRef = useRef<T[]>([]);
-  const skippedHistories = useRef<T[]>([]);
-  const finalOptions = useMemo<RedoUndoOptions<T>>(() => {
+  const skippedHistories = useRef<Set<T>>(new Set());
+
+  const finalOptions = useMemo<Required<RedoUndoOptions<T>>>(() => {
     return {
       maxHistory: 20,
-      ...options,
+      onUndo: () => {},
+      onRedo: () => {},
+      ...(options ?? {}),
     };
   }, [options]);
 
+  const updateState = useCallback((newValue: T) => {
+    setState((prev) => ({
+      ...prev,
+      value: newValue,
+      canUndo: pastRef.current.length > 0,
+      canRedo: futureRef.current.length > 0,
+      historyLength: pastRef.current.length,
+      futureLength: futureRef.current.length,
+    }));
+  }, []);
+
   const redo = useCallback(() => {
-    if (futureRef.current.length === 0) {
-      return;
-    }
+    if (futureRef.current.length === 0) return;
 
     const newPresent = futureRef.current[0];
     const newFuture = futureRef.current.slice(1);
-    pastRef.current = [...pastRef.current, currentValue].slice(-finalOptions.maxHistory!);
+    pastRef.current = [...pastRef.current, state.value].slice(-finalOptions.maxHistory);
 
-    setCurrentValue(newPresent);
     futureRef.current = newFuture;
-
-    if (finalOptions.onRedo) {
-      finalOptions.onRedo(newPresent);
-    }
-  }, [currentValue, finalOptions]);
+    updateState(newPresent);
+    finalOptions.onRedo(newPresent);
+  }, [state.value, finalOptions, updateState]);
 
   const undo = useCallback(() => {
-    if (pastRef.current.length === 0) {
-      return;
-    }
+    if (pastRef.current.length === 0) return;
 
     const newPresent = pastRef.current[pastRef.current.length - 1];
-    const newPast = pastRef.current.slice(0, pastRef.current.length - 1);
+    const newPast = pastRef.current.slice(0, -1);
 
     pastRef.current = newPast;
-    setCurrentValue(newPresent);
-
-    if (currentValue) {
-      futureRef.current = [currentValue, ...futureRef.current].slice(0, finalOptions.maxHistory!);
-    }
-
-    if (finalOptions.onUndo) {
-      finalOptions.onUndo(newPresent);
-    }
-  }, [currentValue, finalOptions]);
+    futureRef.current = [state.value, ...futureRef.current].slice(0, finalOptions.maxHistory);
+    updateState(newPresent);
+    finalOptions.onUndo(newPresent);
+  }, [state.value, finalOptions, updateState]);
 
   const reset = useCallback(() => {
     pastRef.current = [];
     futureRef.current = [];
-    skippedHistories.current = [];
-  }, []);
+    skippedHistories.current.clear();
+    updateState(initialValue);
+  }, [initialValue, updateState]);
 
   useEffect(() => {
     reset();
-    setCurrentValue(initialValue);
   }, [initialValue, reset]);
 
   const update = useCallback(
-    (value: React.SetStateAction<T | undefined>, skip?: boolean) => {
-      setCurrentValue((pre) => {
-        const newValue = typeof value === 'function' ? (value as Function)(pre) : value;
+    (value: React.SetStateAction<T>, skip = false) => {
+      setState((prev) => {
+        const newValue = typeof value === 'function' ? (value as Function)(prev.value) : value;
 
         if (skip) {
-          skippedHistories.current.push(newValue);
+          skippedHistories.current.add(newValue);
         }
 
-        if (pre) {
-          // skip 来跳过不需要记录的历史
-          pastRef.current = [...pastRef.current, pre]
-            .filter((state) => !skippedHistories.current.includes(state))
-            .slice(-finalOptions.maxHistory!);
+        if (!skippedHistories.current.has(prev.value)) {
+          pastRef.current = [...pastRef.current, prev.value].slice(-finalOptions.maxHistory);
         }
 
-        return newValue;
+        futureRef.current = [];
+        return {
+          ...prev,
+          value: newValue,
+          canUndo: pastRef.current.length > 0,
+          canRedo: false,
+          historyLength: pastRef.current.length,
+          futureLength: 0,
+        };
       });
-
-      futureRef.current = [];
     },
     [finalOptions.maxHistory],
   );
 
-  return [currentValue, update, redo, undo, pastRef, futureRef, reset] as const;
+  const clearSkippedHistories = useCallback(() => {
+    skippedHistories.current.clear();
+  }, []);
+
+  return [
+    state.value,
+    update,
+    redo,
+    undo,
+    pastRef,
+    futureRef,
+    reset,
+    clearSkippedHistories,
+    state.canUndo,
+    state.canRedo,
+    state.historyLength,
+    state.futureLength,
+  ] as const;
 }
