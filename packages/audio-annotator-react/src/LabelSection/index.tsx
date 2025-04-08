@@ -164,6 +164,10 @@ export function LabelSection() {
 
   const handleSelect = useCallback(
     (attribute: Attribute, e: React.MouseEvent) => {
+      if (!selectedAnnotation) {
+        return;
+      }
+
       onLabelChange(attribute);
 
       player.pause();
@@ -174,7 +178,7 @@ export function LabelSection() {
         e,
       });
     },
-    [onLabelChange, player],
+    [onLabelChange, player, selectedAnnotation],
   );
 
   const handleModalClose = useCallback(async () => {
