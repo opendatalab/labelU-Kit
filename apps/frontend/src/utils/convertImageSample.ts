@@ -4,7 +4,7 @@ import { omit } from 'lodash/fp';
 import type { ToolName } from '@labelu/image';
 import { TOOL_NAMES } from '@labelu/image';
 
-import { SampleState, type ParsedResult, type SampleResponse } from '@/api/types';
+import type { ParsedResult, SampleResponse } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
@@ -12,7 +12,6 @@ import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 export function convertImageAnnotations(
   result: ParsedResult,
   config: Pick<ImageAnnotatorOptions, ToolName> & GlobalToolConfig,
-  state?: SampleState,
 ) {
   // annotation
   const pool = [
@@ -32,7 +31,7 @@ export function convertImageAnnotations(
       }
 
       const items = _.get(result, [key, 'result']) || _.get(result, [type, 'result'], []);
-      if (!items.length && (type === 'tag' || type === 'text') && state !== SampleState.NEW) {
+      if (!items.length && (type === 'tag' || type === 'text')) {
         // 生成全局工具的默认值
         return [type, generateDefaultValues(config?.[type])];
       }
@@ -81,7 +80,7 @@ export function convertImageSample(
   return {
     id,
     url,
-    data: convertImageAnnotations(resultParsed, config, sample.state),
+    data: convertImageAnnotations(resultParsed, config),
     meta: _.pick(resultParsed, ['width', 'height', 'rotate']),
   };
 }
