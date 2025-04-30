@@ -1,4 +1,10 @@
-import type { InnerAttribute, TagAnnotationEntity, TextAnnotationEntity, TextAttribute } from '@labelu/interface';
+import type {
+  EnumerableAttribute,
+  InnerAttribute,
+  TagAnnotationEntity,
+  TextAnnotationEntity,
+  TextAttribute,
+} from '@labelu/interface';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo } from 'react';
@@ -194,7 +200,9 @@ export function AttributeTree({ data, config, onChange, className, disabled }: A
     });
 
     tagConfig?.forEach((item) => {
-      const defaultValue = item.options.filter((option) => option.isDefault).map((option) => option.value);
+      const defaultValue = (item as EnumerableAttribute).options
+        .filter((option) => option.isDefault)
+        .map((option) => option.value);
       if (!_tagData[item.value]) {
         _tagData[item.value] = {
           id: uid(),
@@ -212,7 +220,7 @@ export function AttributeTree({ data, config, onChange, className, disabled }: A
           id: uid(),
           type: 'text',
           value: {
-            [item.value]: item.defaultValue,
+            [item.value]: (item as TextAttribute).defaultValue,
           },
         } as TextAnnotationEntity;
       }
