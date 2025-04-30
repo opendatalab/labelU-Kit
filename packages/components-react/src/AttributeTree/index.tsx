@@ -194,12 +194,13 @@ export function AttributeTree({ data, config, onChange, className, disabled }: A
     });
 
     tagConfig?.forEach((item) => {
+      const defaultValue = item.options.filter((option) => option.isDefault).map((option) => option.value);
       if (!_tagData[item.value]) {
         _tagData[item.value] = {
           id: uid(),
           type: 'tag',
           value: {
-            [item.value]: [],
+            [item.value]: defaultValue,
           },
         } as TagAnnotationEntity;
       }
@@ -211,7 +212,7 @@ export function AttributeTree({ data, config, onChange, className, disabled }: A
           id: uid(),
           type: 'text',
           value: {
-            [item.value]: '',
+            [item.value]: item.defaultValue,
           },
         } as TextAnnotationEntity;
       }
