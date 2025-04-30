@@ -223,12 +223,13 @@ export function AttributePanel() {
         ...(preAnnotationsWithGlobal?.frame ?? []),
       ] as MediaAnnotationInUI[];
 
-      if (!_globalAnnotations.length) {
-        [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
-          if (values) {
-            _globalAnnotationsWithPreAnnotation.push(...(values as GlobalAnnotation[]));
-          }
-        });
+      // 传入了预标注说明样本没有人工标注内容
+      if (preAnnotationsWithGlobal?.tag?.length) {
+        _globalAnnotationsWithPreAnnotation.push(...(preAnnotationsWithGlobal?.tag as GlobalAnnotation[]));
+      }
+
+      if (preAnnotationsWithGlobal?.text?.length) {
+        _globalAnnotationsWithPreAnnotation.push(...(preAnnotationsWithGlobal?.text as GlobalAnnotation[]));
       }
 
       for (const item of sortedMediaAnnotations) {
