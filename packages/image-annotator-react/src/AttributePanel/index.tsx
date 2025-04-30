@@ -213,11 +213,13 @@ export function AttributePanel() {
     disabled,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [modified, setModified] = useState<boolean>(false);
   const globalAnnotations = useMemo(() => {
     return Object.values(annotationsWithGlobal).filter((item) =>
       ['text', 'tag'].includes((item as GlobalAnnotation).type),
     ) as GlobalAnnotation[];
   }, [annotationsWithGlobal]);
+
   // @ts-ignore
   const { t } = useTranslation();
 
@@ -269,23 +271,17 @@ export function AttributePanel() {
 
   const flatGlobalTagAnnotations = useMemo(() => {
     const result = globalAnnotations;
-    const preResult = [] as GlobalAnnotation[];
 
-    // 传入了预标注说明样本没有人工标注内容
-    if (preAnnotationsWithGlobal?.tag?.length) {
-      preResult.push(...(preAnnotationsWithGlobal?.tag as GlobalAnnotation[]));
-    }
-
-    if (preAnnotationsWithGlobal?.text?.length) {
-      preResult.push(...(preAnnotationsWithGlobal?.text as GlobalAnnotation[]));
-    }
-
-    if (preResult.length) {
-      return preResult;
+    if (globalAnnotations.length === 0 && !modified) {
+      [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
+        if (values) {
+          result.push(...(values as GlobalAnnotation[]));
+        }
+      });
     }
 
     return result;
-  }, [globalAnnotations, preAnnotationsWithGlobal]);
+  }, [globalAnnotations, preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text, modified]);
 
   const titles = useMemo(() => {
     const _titles = [];
@@ -391,6 +387,8 @@ export function AttributePanel() {
     if (!currentSample) {
       return;
     }
+
+    setModified(true);
 
     onAnnotationClear();
     if (activeKey === 'label') {
