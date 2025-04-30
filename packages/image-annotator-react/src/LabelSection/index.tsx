@@ -119,8 +119,7 @@ const MoreAttribute = styled.div<{ visible: boolean }>`
   right: 0;
   display: flex;
   top: 100%;
-  max-width: 50vw;
-  overflow: auto;
+  flex-wrap: wrap;
   z-index: 1002;
   padding: 0.5rem;
   box-shadow: 0px 3px 6px 0px rgb(0 0 0 / 21%);
