@@ -18,6 +18,7 @@ import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/
 import { message } from '@/StaticAnt';
 import useMe from '@/hooks/useMe';
 import { UserAvatar } from '@/components/UserAvatar';
+import { generateDefaultValues } from '@/utils/generateGlobalToolDefaultValues';
 
 import AnnotationContext from '../../annotation.context';
 
@@ -247,6 +248,23 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       innerSample = await audioAnnotationRef?.current?.getSample();
     }
 
+    // 全局标注没有值的话，填充默认值
+    if (!result.tagTool?.result?.length) {
+      const tagConfig = task.config.tools.find((tool) => tool.tool === 'tagTool');
+      result.tagTool = {
+        toolName: 'tagTool',
+        result: generateDefaultValues(tagConfig?.config.attributes),
+      };
+    }
+
+    if (!result.textTool?.result?.length) {
+      const textConfig = task.config.tools.find((tool) => tool.tool === 'textTool');
+      result.textTool = {
+        toolName: 'textTool',
+        result: generateDefaultValues(textConfig?.config.attributes),
+      };
+    }
+
     // 防止sampleid保存错乱，使用标注时传入的sampleid
     const body = set('data.result')(JSON.stringify(result))(currentSample);
 
@@ -255,7 +273,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, isMeTheCurrentUser, noSave, task.media_type, taskId]);
+  }, [currentSample, isMeTheCurrentUser, noSave, task?.config.tools, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();

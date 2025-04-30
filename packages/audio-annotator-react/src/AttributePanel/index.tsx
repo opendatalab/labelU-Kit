@@ -209,6 +209,7 @@ export function AttributePanel() {
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const { t } = useTranslation();
+  const [modified, setModified] = useState<boolean>(false);
 
   const { globalAnnotations, globalAnnotationsWithPreAnnotation, mediaAnnotationGroup, defaultActiveKeys } =
     useMemo(() => {
@@ -223,13 +224,12 @@ export function AttributePanel() {
         ...(preAnnotationsWithGlobal?.frame ?? []),
       ] as MediaAnnotationInUI[];
 
-      // 传入了预标注说明样本没有人工标注内容
-      if (preAnnotationsWithGlobal?.tag?.length) {
-        _globalAnnotationsWithPreAnnotation.push(...(preAnnotationsWithGlobal?.tag as GlobalAnnotation[]));
-      }
-
-      if (preAnnotationsWithGlobal?.text?.length) {
-        _globalAnnotationsWithPreAnnotation.push(...(preAnnotationsWithGlobal?.text as GlobalAnnotation[]));
+      if (!_globalAnnotations.length && !modified) {
+        [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
+          if (values) {
+            _globalAnnotationsWithPreAnnotation.push(...(values as GlobalAnnotation[]));
+          }
+        });
       }
 
       for (const item of sortedMediaAnnotations) {
@@ -262,6 +262,7 @@ export function AttributePanel() {
       preAnnotationsWithGlobal?.tag,
       preAnnotationsWithGlobal?.text,
       sortedMediaAnnotations,
+      modified,
     ]);
 
   const globals = useMemo(() => {
@@ -399,6 +400,8 @@ export function AttributePanel() {
     if (!currentSample) {
       return;
     }
+
+    setModified(true);
 
     onAnnotationClear();
   };

@@ -101,13 +101,13 @@ const AnnotationPage = () => {
     }
 
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageAnnotations(_annotations, preAnnotationConfig);
+      return convertImageAnnotations(_annotations);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertMediaAnnotations(task.media_type, _annotations, preAnnotationConfig);
+      return convertMediaAnnotations(task.media_type, _annotations);
     }
 
     return {};
-  }, [preAnnotation, preAnnotationConfig, task?.media_type]);
+  }, [preAnnotation, task?.media_type]);
 
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
@@ -204,11 +204,11 @@ const AnnotationPage = () => {
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageSample(sample?.data, editorConfig);
+      return convertImageSample(sample?.data);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertAudioAndVideoSample(sample?.data, editorConfig, task.media_type);
+      return convertAudioAndVideoSample(sample?.data, task.media_type);
     }
-  }, [editorConfig, sample?.data, task?.media_type]);
+  }, [sample?.data, task?.media_type]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;

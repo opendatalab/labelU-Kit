@@ -593,7 +593,6 @@ function ForwardAnnotator(
     // 删除标记
     const handleDelete = (annotation: AnnotationData) => {
       const newAnnotations = omit(annotationsWithGlobal, annotation.id);
-      console.log('newAnnotations', newAnnotations);
       updateAnnotationsWithGlobal(newAnnotations);
       setSelectedAnnotation((pre) => {
         if (pre?.id === annotation.id) {
