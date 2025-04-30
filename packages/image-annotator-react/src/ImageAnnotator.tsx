@@ -199,10 +199,6 @@ function ForwardAnnotator(
     setCurrentSample(editingSample || samples?.[0]);
   }, [editingSample, samples, setCurrentSample]);
 
-  const isSampleDataEmpty = useMemo(() => {
-    return Object.values(currentSample?.data ?? {}).every((item) => item.length === 0);
-  }, [currentSample]);
-
   // ================== tool ==================
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [currentTool, setCurrentTool] = useState<ToolName | undefined>(propsSelectedTool);
@@ -344,7 +340,7 @@ function ForwardAnnotator(
           }
         });
 
-        if (isSampleDataEmpty) {
+        if (preAnnotations) {
           Object.keys(preAnnotations ?? {}).forEach((key) => {
             if (TOOL_NAMES.includes(key as ToolName)) {
               engine?.loadData(
@@ -360,7 +356,7 @@ function ForwardAnnotator(
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [annotationsFromSample, config, currentSample, engine, isSampleDataEmpty, preAnnotations, tools]);
+  }, [annotationsFromSample, config, currentSample, engine, preAnnotations, tools]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -392,7 +388,7 @@ function ForwardAnnotator(
     const _data = currentSample?.data ?? {};
     const _preData = preAnnotations ?? {};
 
-    if (isSampleDataEmpty) {
+    if (preAnnotations) {
       Object.keys(_preData).forEach((key) => {
         _preData[key as AllAnnotationType]?.forEach((item) => {
           mapping[item.id] = {
@@ -413,7 +409,7 @@ function ForwardAnnotator(
     });
 
     return mapping;
-  }, [currentSample?.data, isSampleDataEmpty, preAnnotations]);
+  }, [currentSample?.data, preAnnotations]);
 
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
     useRedoUndo<AllAnnotationMapping>(annotationsMapping, {

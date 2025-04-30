@@ -267,19 +267,25 @@ export function AttributePanel() {
     return _globals;
   }, [globalToolConfig.tag, globalToolConfig.text, preLabelMapping?.tag, preLabelMapping?.text]);
 
-  const flatGlobalAnnotations = useMemo(() => {
+  const flatGlobalTagAnnotations = useMemo(() => {
     const result = globalAnnotations;
+    const preResult = [] as GlobalAnnotation[];
 
-    if (globalAnnotations.length === 0) {
-      [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
-        if (values) {
-          result.push(...(values as GlobalAnnotation[]));
-        }
-      });
+    // 传入了预标注说明样本没有人工标注内容
+    if (preAnnotationsWithGlobal?.tag?.length) {
+      preResult.push(...(preAnnotationsWithGlobal?.tag as GlobalAnnotation[]));
+    }
+
+    if (preAnnotationsWithGlobal?.text?.length) {
+      preResult.push(...(preAnnotationsWithGlobal?.text as GlobalAnnotation[]));
+    }
+
+    if (preResult.length) {
+      return preResult;
     }
 
     return result;
-  }, [globalAnnotations, preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text]);
+  }, [globalAnnotations, preAnnotationsWithGlobal]);
 
   const titles = useMemo(() => {
     const _titles = [];
@@ -450,7 +456,7 @@ export function AttributePanel() {
         })}
       </TabHeader>
       <Content activeKey={activeKey}>
-        <AttributeTree disabled={disabled} data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
+        <AttributeTree disabled={disabled} data={flatGlobalTagAnnotations} config={globals} onChange={handleOnChange} />
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
       </Content>
       <ClearAction onClear={handleClear} disabled={disabled} />
