@@ -272,6 +272,13 @@ function ForwardAnnotator(
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
   const selectedIndexRef = useRef<number>(-1);
+  const isPreAnnotationEmpty = useMemo(() => {
+    if (typeof preAnnotations === 'undefined') {
+      return true;
+    }
+
+    return Object.values(preAnnotations).every((item) => item.length === 0);
+  }, [preAnnotations]);
   const labels = useMemo(() => {
     if (!currentTool) {
       return [];
@@ -369,8 +376,8 @@ function ForwardAnnotator(
   );
 
   const convertedAnnotations = useMemo(() => {
-    return convertAnnotationDataToUI(preAnnotations ? preAnnotations : annotationsFromSample);
-  }, [annotationsFromSample, preAnnotations]);
+    return convertAnnotationDataToUI(!isPreAnnotationEmpty ? preAnnotations! : annotationsFromSample);
+  }, [annotationsFromSample, isPreAnnotationEmpty, preAnnotations]);
 
   // ================== sample state ==================
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
