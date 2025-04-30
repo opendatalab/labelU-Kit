@@ -2,12 +2,17 @@ import _ from 'lodash';
 import type { AnnotationsWithGlobal, MediaAnnotatorConfig, MediaSample } from '@labelu/audio-annotator-react';
 
 import type { ParsedResult, SampleResponse } from '@/api/types';
-import { MediaType } from '@/api/types';
+import { MediaType, SampleState } from '@/api/types';
 
 import { jsonParse } from './index';
 import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
-export function convertMediaAnnotations(mediaType: MediaType, result: ParsedResult, config: MediaAnnotatorConfig) {
+export function convertMediaAnnotations(
+  mediaType: MediaType,
+  result: ParsedResult,
+  config: MediaAnnotatorConfig,
+  state?: SampleState,
+) {
   // annotation
   const pool = [
     ['segment', MediaType.VIDEO === mediaType ? 'videoSegmentTool' : 'audioSegmentTool'],
@@ -20,7 +25,7 @@ export function convertMediaAnnotations(mediaType: MediaType, result: ParsedResu
     .map(([type, key]) => {
       const items = _.get(result, [key, 'result'], []);
 
-      if (!items.length && (type === 'tag' || type === 'text')) {
+      if (!items.length && (type === 'tag' || type === 'text') && state !== SampleState.NEW) {
         // 生成全局工具的默认值
         return [type, generateDefaultValues(config?.[type])];
       }
@@ -60,6 +65,6 @@ export function convertAudioAndVideoSample(
     url: [MediaType.VIDEO, MediaType.AUDIO].includes(mediaType as MediaType)
       ? sample.file.url.replace('attachment', 'partial')
       : sample.file.url,
-    data: convertMediaAnnotations(mediaType!, resultParsed, config),
+    data: convertMediaAnnotations(mediaType!, resultParsed, config, sample.state),
   };
 }
