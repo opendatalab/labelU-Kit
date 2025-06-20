@@ -6,7 +6,6 @@ let codeTemplate;
 const targetPath = path.join(__dirname, '../src/styles/global-variables.css');
 const tokenPath = path.join(__dirname, '../src/styles/theme.json');
 const { theme } = require('antd');
-const prettier = require('prettier');
 const { defaultAlgorithm, defaultSeed } = theme;
 
 const mapToken = defaultAlgorithm(defaultSeed);
@@ -57,16 +56,5 @@ try {
   fs.unlinkSync(targetPath);
 } catch (err) {
 } finally {
-  if (codeTemplate) {
-    fs.writeFile(
-      targetPath,
-      prettier.format(codeTemplate, {
-        parser: 'css',
-      }),
-      'utf-8',
-      () => {
-        console.log(`🎉 ${targetPath}已生成`);
-      },
-    );
-  }
+  console.log(`🎉 ${targetPath}已生成`);
 }
