@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { AttributeTree, CollapseWrapper, AttributeTreeWrapper, EllipsisText, uid } from '@labelu/components-react';
+import {
+  AttributeTree,
+  CollapseWrapper,
+  AttributeTreeWrapper,
+  EllipsisText,
+  uid,
+  FlexLayout,
+  Tooltip,
+} from '@labelu/components-react';
 import type {
   EnumerableAttribute,
   GlobalAnnotationType,
@@ -16,6 +24,7 @@ import { useTool } from '@/context/tool.context';
 import type { GlobalAnnotation } from '@/context/annotation.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
 import { useSample } from '@/context/sample.context';
+import { tooltipStyle } from '@/Toolbar';
 
 import AsideAttributeItem, { AttributeAction, Header } from './AsideAttributeItem';
 
@@ -38,13 +47,8 @@ const AttributeHeaderItem = styled.div<{ active: boolean }>`
   justify-content: center;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-
-  ${({ active }) =>
-    active &&
-    css`
-      color: var(--color-primary);
-      border-bottom: 2px solid var(--color-primary);
-    `}
+  color: ${({ active }) => (active ? 'var(--color-primary)' : 'inherit')};
+  border-bottom: 2px solid ${({ active }) => (active ? 'var(--color-primary)' : 'transparent')};
 
   &:hover {
     color: var(--color-primary);
@@ -96,9 +100,99 @@ const Footer = styled.div`
   &:hover {
     color: red;
   }
+
+  /* disabled */
+  &[aria-disabled='true'] {
+    color: #999;
+    cursor: not-allowed;
+  }
+`;
+
+const Button = styled.button<{ primary?: boolean }>`
+  border: 0;
+
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+
+  ${({ primary }) =>
+    primary &&
+    css`
+      background-color: var(--color-primary);
+      color: #fff;
+    `}
 `;
 
 type HeaderType = 'global' | 'label';
+
+interface ConfirmProps {
+  title: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
+}
+
+function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
+  // @ts-ignore
+  const { t } = useTranslation();
+  return (
+    <FlexLayout flex="column" gap="1rem" padding=".5rem">
+      <FlexLayout.Item>{title}</FlexLayout.Item>
+      <FlexLayout.Item flex items="center" justify="space-between" gap=".5rem">
+        <Button onClick={onCancel}>{t('cancel')}</Button>
+        <Button primary onClick={onConfirm}>
+          {t('ok')}
+        </Button>
+      </FlexLayout.Item>
+    </FlexLayout>
+  );
+}
+
+interface ClearActionProps {
+  onClear: () => void;
+  disabled?: boolean;
+}
+
+function ClearAction({ onClear, disabled }: ClearActionProps) {
+  const [open, setOpen] = useState(false);
+  // @ts-ignore
+  const { t } = useTranslation();
+
+  const handleConfirm = () => {
+    onClear?.();
+    setOpen(false);
+  };
+
+  return (
+    <Tooltip
+      visible={open}
+      trigger="click"
+      overlayStyle={tooltipStyle}
+      overlay={
+        <Confirm
+          title={t('clearConfirm')}
+          onConfirm={handleConfirm}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
+      }
+      placement="top"
+    >
+      <Footer
+        aria-disabled={disabled}
+        onClick={() => {
+          if (disabled) {
+            return;
+          }
+          setOpen((pre) => !pre);
+        }}
+      >
+        <DeleteIcon />
+        &nbsp; {t('clear')}
+      </Footer>
+    </Tooltip>
+  );
+}
 
 export function AttributePanel() {
   const { config, labelMapping, preLabelMapping } = useTool();
@@ -111,6 +205,7 @@ export function AttributePanel() {
     preAnnotationsWithGlobal,
     onAnnotationsChange,
     onAnnotationClear,
+    disabled,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const { t } = useTranslation();
@@ -366,12 +461,14 @@ export function AttributePanel() {
       </TabHeader>
       <Content activeKey={activeKey}>
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
-        <AttributeTree data={globalAnnotationsWithPreAnnotation} config={globals} onChange={handleOnChange} />
+        <AttributeTree
+          data={globalAnnotationsWithPreAnnotation}
+          disabled={disabled}
+          config={globals}
+          onChange={handleOnChange}
+        />
       </Content>
-      <Footer onClick={handleClear}>
-        <DeleteIcon />
-        &nbsp; {t('clear')}
-      </Footer>
+      <ClearAction onClear={handleClear} disabled={disabled} />
     </Wrapper>
   );
 }

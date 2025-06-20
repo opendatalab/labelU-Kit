@@ -14,10 +14,7 @@ const Cards = styled.div`
   overflow: auto;
 `;
 
-const Wrapper = styled.div.attrs((props: { collapsed: boolean }) => ({
-  ...props,
-  className: 'labelu-image__sidebar',
-}))`
+const Wrapper = styled.div<{ collapsed: boolean }>`
   position: relative;
   flex-shrink: 0;
   background-color: #fff;
@@ -112,7 +109,7 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
   }
 
   return (
-    <Wrapper collapsed={collapsed}>
+    <Wrapper collapsed={collapsed} className="labelu-image__sidebar">
       {sidebar || (
         <Cards>
           {samples.map((sample, index) => {

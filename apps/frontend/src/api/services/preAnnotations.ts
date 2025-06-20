@@ -27,7 +27,7 @@ export async function getPreAnnotationFiles({
   return await request.get(`/v1/tasks/${task_id}/pre_annotations/files`, {
     params: {
       ...params,
-      pageNo: typeof params.pageNo === 'undefined' ? 0 : params.pageNo - 1,
+      page: typeof params.page === 'undefined' ? 0 : params.page - 1,
     },
   });
 }
@@ -41,7 +41,7 @@ export async function getPreAnnotations({
   return await request.get(`/v1/tasks/${task_id}/pre_annotations`, {
     params: {
       ...params,
-      pageNo: typeof params.pageNo === 'undefined' ? 0 : params.pageNo - 1,
+      page: typeof params.page === 'undefined' ? 0 : params.page - 1,
     },
   });
 }

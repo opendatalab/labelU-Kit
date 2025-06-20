@@ -34,6 +34,8 @@ const Wrapper = styled.div<{
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0 1rem;
+  flex-grow: 1;
 
   ${({ active }) =>
     active &&
@@ -81,10 +83,10 @@ export function AudioCard({ active, no, title, src, showNo, onClick, completed, 
   }, []);
 
   return (
-    <Wrapper active={active}>
+    <Wrapper active={active} className="labelu-audio-card">
       {showNo && <CardIndex>{no}</CardIndex>}
       <StatusCard onClick={onClick} active={active} completed={completed} skipped={skipped}>
-        <InnerWrapper>
+        <InnerWrapper className="audio-card__inner">
           <Left>
             <PlayIcon />
             <EllipsisText title={title} maxWidth={72}>

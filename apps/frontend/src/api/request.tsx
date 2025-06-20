@@ -56,6 +56,7 @@ const authorizationBearerSuccess = (config: any) => {
 const authorizationBearerFailed = (error: any) => {
   // 401一秒后跳转到登录页
   if (error?.response?.status === 401) {
+    localStorage.removeItem('token');
     setTimeout(() => {
       if (window.IS_ONLINE) {
         goAuth();

@@ -1,11 +1,10 @@
-import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
-import { useParams, useRouteLoaderData } from 'react-router';
+import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
 import { Annotator } from '@labelu/video-annotator-react';
 import type { AudioAndVideoAnnotatorRef } from '@labelu/audio-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams, useRouteLoaderData } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
 import type { ImageAnnotatorProps, AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
 import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
@@ -15,7 +14,7 @@ import type { ToolName } from '@labelu/image';
 import type { ILabel } from '@labelu/interface';
 import { useTranslation } from '@labelu/i18n';
 
-import { MediaType, type SampleResponse } from '@/api/types';
+import { MediaType, SampleState, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import type { getSample } from '@/api/services/samples';
 import { getSamples } from '@/api/services/samples';
@@ -25,11 +24,13 @@ import type { TaskLoaderResult } from '@/loaders/task.loader';
 import { convertImageConfig } from '@/utils/convertImageConfig';
 import { convertImageAnnotations, convertImageSample } from '@/utils/convertImageSample';
 import { TOOL_NAME } from '@/constants/toolName';
+import useMe from '@/hooks/useMe';
 
 import SlideLoader from './components/slideLoader';
 import AnnotationRightCorner from './components/annotationRightCorner';
 import AnnotationContext from './annotation.context';
 import { LoadingWrapper, Wrapper } from './style';
+import useSampleWs from '../../hooks/useSampleWs';
 
 type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
 
@@ -112,6 +113,9 @@ const AnnotationPage = () => {
   const taskConfig = _.get(task, 'config');
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
+  const me = useMe();
+  const [currentSampleConns, taskConns] = useSampleWs();
+  const isMeTheCurrentEditingUser = currentSampleConns?.[0]?.user_id === me.data?.id;
 
   // TODO： labelu/image中的错误定义
   const onError = useCallback(
@@ -151,8 +155,8 @@ const AnnotationPage = () => {
 
     const { data, meta_data } = await getSamples({
       task_id: +routeParams.taskId!,
-      pageNo: currentPage.current,
-      pageSize: 40,
+      page: currentPage.current,
+      size: 40,
     });
 
     currentPage.current += 1;
@@ -181,10 +185,12 @@ const AnnotationPage = () => {
     return {
       samples,
       setSamples,
+      taskConnections: taskConns,
       task,
+      currentEditingUser: currentSampleConns[0],
       isEnd: totalCount === samples.length,
     };
-  }, [samples, setSamples, task, totalCount]);
+  }, [currentSampleConns, taskConns, samples, setSamples, task, totalCount]);
 
   let content = null;
 
@@ -228,6 +234,13 @@ const AnnotationPage = () => {
     return configFromParent || editorConfig;
   }, [configFromParent, editorConfig]);
 
+  useEffect(() => {
+    if (me.data && currentSampleConns?.[0] && !isMeTheCurrentEditingUser) {
+      message.destroy();
+      message.error(t('currentSampleIsAnnotating'));
+    }
+  }, [currentSampleConns, isMeTheCurrentEditingUser, me.data, t]);
+
   const requestEdit = useCallback<NonNullable<ImageAnnotatorProps['requestEdit']>>(
     (editType, { toolName, label }) => {
       if (!toolName) {
@@ -255,7 +268,7 @@ const AnnotationPage = () => {
 
       return true;
     },
-    [t, config, task],
+    [config, task, t],
   );
 
   const [currentTool, setCurrentTool] = useState<any>();
@@ -279,6 +292,10 @@ const AnnotationPage = () => {
     return labelMapping?.[currentTool];
   }, [currentTool, labelMapping]);
 
+  const disabled = useMemo(() => {
+    return me.data && currentSampleConns[0] && !isMeTheCurrentEditingUser;
+  }, [currentSampleConns, isMeTheCurrentEditingUser, me.data]);
+
   if (task?.media_type === MediaType.IMAGE) {
     content = (
       <ImageAnnotator
@@ -289,13 +306,14 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        disabled={disabled}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
-        selectedTool={currentTool}
-        selectedLabel={currentLabel}
+        selectedTool={disabled ? undefined : currentTool}
+        selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {
@@ -308,13 +326,14 @@ const AnnotationPage = () => {
         config={config}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
+        disabled={disabled}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
-        selectedTool={currentTool}
-        selectedLabel={currentLabel}
+        selectedTool={disabled ? undefined : currentTool}
+        selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   } else if (task?.media_type === MediaType.AUDIO) {
@@ -325,15 +344,16 @@ const AnnotationPage = () => {
         offsetTop={configFromParent ? 100 : 156}
         editingSample={editingSample}
         config={config}
+        disabled={disabled}
         toolbarRight={topActionContent}
         renderSidebar={renderSidebar}
         requestEdit={requestEdit}
         onLabelChange={handleLabelChange}
         onToolChange={handleToolChange}
-        selectedTool={currentTool}
-        selectedLabel={currentLabel}
+        selectedTool={disabled ? undefined : currentTool}
+        selectedLabel={disabled ? undefined : currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   }
@@ -369,4 +389,5 @@ const AnnotationPage = () => {
     </AnnotationContext.Provider>
   );
 };
+
 export default AnnotationPage;

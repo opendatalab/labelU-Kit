@@ -149,6 +149,10 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
   };
 
   protected onSelect = (annotation: AnnotationPoint) => (_e: MouseEvent) => {
+    if (!this.requestEdit('update')) {
+      return;
+    }
+
     this.archiveDraft();
     this._createDraft(annotation.data);
     this.onAnnotationSelect(annotation.data);

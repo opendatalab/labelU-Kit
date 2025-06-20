@@ -54,6 +54,10 @@ export interface ToolContextType {
   >;
 
   labels: ILabel[];
+
+  attributeModalOpen?: boolean;
+
+  setAttributeModalOpen: (open: boolean) => void;
 }
 
 export const ToolContext = createContext<ToolContextType>({} as ToolContextType);

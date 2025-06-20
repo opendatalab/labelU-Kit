@@ -137,7 +137,7 @@ export interface ImageAnnotatorProps {
 
   onLoad?: (engine: ImageAnnotatorClass) => void;
 
-  onLabelChange?: (toolName: ToolName | undefined, label: ILabel) => void;
+  onLabelChange?: (toolName: ToolName | undefined, label: ILabel | undefined) => void;
 
   onToolChange?: (toolName: ToolName) => void;
 
@@ -146,7 +146,12 @@ export interface ImageAnnotatorProps {
   selectedTool?: ToolName;
 
   /**
-   * 标注是否可编辑
+   * 是否禁用
+   */
+  disabled?: boolean;
+
+  /**
+   * 标注是否可编辑，权重低于全局的disabled，粒度更细
    */
   requestEdit?: (type: EditType, payload: { toolName: ToolName; label?: string; modifiedProperty?: string }) => boolean;
 
@@ -164,6 +169,7 @@ function ForwardAnnotator(
     renderSidebar,
     config,
     renderAttributes,
+    disabled,
     offsetTop = 0,
     editingSample,
     maxHistoryCount = 20,
@@ -187,6 +193,7 @@ function ForwardAnnotator(
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
   // remember last tool
   const memorizeToolLabel = useRef<Record<ToolName, Attribute>>({} as Record<ToolName, Attribute>);
+  const [attributeModalOpen, setAttributeModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     setCurrentSample(editingSample || samples?.[0]);
@@ -254,9 +261,15 @@ function ForwardAnnotator(
         rotate: currentSample?.meta?.rotate ?? 0,
       },
     };
-  }, [config, currentSample?.meta?.rotate, currentSample?.url, requestEdit, preAnnotationLabels]);
+  }, [config, requestEdit, currentSample?.url, currentSample?.meta?.rotate, preAnnotationLabels]);
 
   const engine = useImageAnnotator(containerRef, annotationOptions);
+
+  useEffect(() => {
+    if (engine?.config) {
+      engine.setEditable(!disabled);
+    }
+  }, [engine, disabled]);
 
   const [orderVisible, setOrderVisible] = useState<boolean>(true);
 
@@ -280,12 +293,16 @@ function ForwardAnnotator(
   }, [config, currentTool]);
 
   const selectedLabelFromProps = useMemo(() => {
-    return labels.find((item) => item.value === propsSelectedLabel);
+    return labels.find((item: Attribute) => item.value === propsSelectedLabel);
   }, [labels, propsSelectedLabel]);
 
   const [selectedLabel, setSelectedLabel] = useState<Attribute | undefined>(
     propsSelectedLabel ? selectedLabelFromProps : labels[0],
   );
+
+  useEffect(() => {
+    setSelectedLabel(selectedLabelFromProps);
+  }, [selectedLabelFromProps]);
 
   const onToolChange = useCallback(
     (toolName: ToolName) => {
@@ -339,11 +356,7 @@ function ForwardAnnotator(
         }
 
         if (tools[0] && config?.[tools[0]]?.labels?.length) {
-          engine.switch(propsSelectedTool || tools[0]);
-
-          if (propsSelectedLabel) {
-            engine.setLabel(propsSelectedLabel);
-          }
+          engine.switch(propsSelectedTool || tools[0], propsSelectedLabel);
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -475,21 +488,6 @@ function ForwardAnnotator(
     [updateAnnotationsWithGlobal],
   );
 
-  const onAnnotationDelete = useCallback(
-    (restAnnotations: AnnotationWithTool[]) => {
-      const annotationGroupByTool: AllAnnotationMapping = {};
-
-      restAnnotations.forEach((item) => {
-        annotationGroupByTool[item.id] = item;
-      });
-
-      updateAnnotationsWithGlobal(() => {
-        return annotationGroupByTool;
-      });
-    },
-    [updateAnnotationsWithGlobal],
-  );
-
   const onAnnotationChange = useCallback(
     (_annotation: AnnotationWithTool, skipHistory?: boolean) => {
       updateAnnotationsWithGlobal((pre) => {
@@ -513,7 +511,7 @@ function ForwardAnnotator(
       if (engine?.keyboard?.Shift && annotation) {
         e.preventDefault();
         e.stopPropagation();
-        const labelConfig = labels.find((item) => item.value === annotation?.label);
+        const labelConfig = labels.find((item: Attribute) => item.value === annotation?.label);
         openAttributeModal({
           labelValue: annotation.label,
           e,
@@ -590,8 +588,10 @@ function ForwardAnnotator(
   // effects
   useEffect(() => {
     // 删除标记
-    engine?.on('delete', (annotation: AnnotationData) => {
-      onAnnotationDelete(addToolNameToAnnotationData(engine!.getDataByTool()));
+    const handleDelete = (annotation: AnnotationData) => {
+      const newAnnotations = omit(annotationsWithGlobal, annotation.id);
+      console.log('newAnnotations', newAnnotations);
+      updateAnnotationsWithGlobal(newAnnotations);
       setSelectedAnnotation((pre) => {
         if (pre?.id === annotation.id) {
           return undefined;
@@ -599,8 +599,14 @@ function ForwardAnnotator(
 
         return pre;
       });
-    });
-  }, [engine, onAnnotationDelete]);
+    };
+
+    engine?.on('delete', handleDelete);
+
+    return () => {
+      engine?.off('delete', handleDelete);
+    };
+  }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
 
   useEffect(() => {
     const handleAttributesChange = (annotation: AnnotationData) => {
@@ -662,8 +668,10 @@ function ForwardAnnotator(
       }
 
       onAnnotationsChange(addToolNameToAnnotationData(engine!.getDataByTool()));
+      const _label = engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined;
 
-      setSelectedLabel(engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined);
+      setSelectedLabel(_label);
+      propsOnLabelChange?.(currentTool, _label);
     };
     // 改变标签
     engine?.on('labelChange', handleLabelChange);
@@ -671,7 +679,7 @@ function ForwardAnnotator(
     return () => {
       engine?.off('labelChange', handleLabelChange);
     };
-  }, [currentTool, engine, labelMappingByTool, onAnnotationsChange, selectedLabel?.value]);
+  }, [currentTool, engine, labelMappingByTool, onAnnotationsChange, propsOnLabelChange, selectedLabel?.value]);
 
   useEffect(() => {
     const handleSelectAnnotation = (annotation: AnnotationData, toolName: ToolName) => {
@@ -764,8 +772,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedImageAnnotations, engine],
+    [sortedImageAnnotations, engine, disabled, attributeModalOpen],
   );
 
   // 下一个标记
@@ -781,8 +790,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedImageAnnotations, engine],
+    [sortedImageAnnotations, engine, disabled, attributeModalOpen],
   );
 
   // 1 ~ 9 设置标签
@@ -802,36 +812,35 @@ function ForwardAnnotator(
         });
       }
     },
-    [engine, labels],
+    {
+      enabled: !disabled && !attributeModalOpen,
+    },
+    [attributeModalOpen, engine, labels, disabled],
   );
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      getAnnotations: () => {
-        const result: Partial<Record<AllAnnotationType, AnnotationData[] | GlobalAnnotation[]>> = {};
+  useImperativeHandle(ref, () => ({
+    getAnnotations: () => {
+      const result: Partial<Record<AllAnnotationType, AnnotationData[] | GlobalAnnotation[]>> = {};
 
-        Object.values(annotationsWithGlobal).forEach((item) => {
-          // @ts-ignore
-          // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-          const { visible, tool, ...rest } = item;
-          const _toolName = tool || (item as GlobalAnnotation).type;
+      Object.values(annotationsWithGlobal).forEach((item) => {
+        // @ts-ignore
+        // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+        const { visible, tool, ...rest } = item;
+        const _toolName = tool || (item as GlobalAnnotation).type;
 
-          if (!result[_toolName]) {
-            result[_toolName] = [];
-          }
+        if (!result[_toolName]) {
+          result[_toolName] = [];
+        }
 
-          result![_toolName]!.push(rest as any);
-        });
+        result![_toolName]!.push(rest as any);
+      });
 
-        return result;
-      },
-      getSample: () => currentSample,
+      return result;
+    },
+    getSample: () => currentSample,
 
-      getEngine: () => engine,
-    }),
-    [annotationsWithGlobal, currentSample, engine],
-  );
+    getEngine: () => engine,
+  }));
 
   const annotationContextValue = useMemo(
     () => ({
@@ -845,6 +854,7 @@ function ForwardAnnotator(
       onAnnotationsRemove,
       onAnnotationClear,
       orderVisible,
+      disabled,
       preAnnotationsWithGlobal: preAnnotations,
       onOrderVisibleChange,
     }),
@@ -860,6 +870,7 @@ function ForwardAnnotator(
       onAnnotationClear,
       orderVisible,
       preAnnotations,
+      disabled,
       onOrderVisibleChange,
     ],
   );
@@ -878,6 +889,8 @@ function ForwardAnnotator(
       labelMapping: labelMappingByTool,
       preLabelMapping: preLabelsMappingByTool,
       labels,
+      attributeModalOpen,
+      setAttributeModalOpen,
     }),
     [
       engine,
@@ -891,6 +904,8 @@ function ForwardAnnotator(
       labelMappingByTool,
       preLabelsMappingByTool,
       labels,
+      attributeModalOpen,
+      setAttributeModalOpen,
     ],
   );
 
