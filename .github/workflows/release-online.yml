@@ -73,7 +73,8 @@ jobs:
       - name: Install dependencies
         run: |
           npm cache clean -f
-          pnpm install --no-frozen-lockfile
+          cd apps/frontend
+          pnpm install --no-frozen-lockfile --ignore-workspace-root-check
 
       # - name: Build packages
       #   run: pnpm run build
