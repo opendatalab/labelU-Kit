@@ -72,14 +72,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          mv pnpm-workspace.yaml pnpm-workspace.yaml.bak
           npm cache clean -f
-          cd apps/frontend
-          pnpm add @manypkg/get-packages@2.2.2 prettier@2.0.0 -D
           pnpm install --no-frozen-lockfile
 
-      # - name: Build packages
-      #   run: pnpm run build
+      - name: Build packages
+        run: pnpm run build
 
       - name: Build frontend
         run: pnpm run build:frontend
