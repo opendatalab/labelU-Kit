@@ -72,6 +72,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          mv pnpm-workspace.yaml pnpm-workspace.yaml.bak
           npm cache clean -f
           cd apps/frontend
           pnpm install --no-frozen-lockfile --ignore-workspace-root-check

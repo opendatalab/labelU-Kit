@@ -1,10 +1,6 @@
 {
   "name": "labelu",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
   "version": "5.6.9",
   "scripts": {
     "prepare": "husky install",
