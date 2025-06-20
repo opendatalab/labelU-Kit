@@ -9,7 +9,6 @@ const octokit = new Octokit({
 });
 
 const prettier = require('prettier');
-const { getPackagesSync } = require('@manypkg/get-packages');
 const minimist = require('minimist');
 
 async function createCommit({ owner, repo, message, branch, files }) {
@@ -78,12 +77,22 @@ async function main() {
     `;
   };
 
-  const { packages } = getPackagesSync(workspace);
+  const packages = [
+    '@labelu/audio-annotator-react',
+    '@labelu/components-react',
+    '@labelu/image',
+    '@labelu/formatter',
+    '@labelu/image-annotator-react',
+    '@labelu/interface',
+    '@labelu/video-annotator-react',
+    '@labelu/video-react',
+    '@labelu/audio-react',
+  ];
 
   packages.forEach((pkg) => {
-    const pkgInFrontend = appPkgJson.dependencies[pkg.packageJson.name];
+    const pkgInFrontend = appPkgJson.dependencies[pkg];
     if (pkgInFrontend) {
-      versions.deps[pkg.packageJson.name] = pkg.packageJson.version;
+      versions.deps[pkg] = pkgInFrontend;
     }
   });
 
