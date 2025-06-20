@@ -75,7 +75,7 @@ jobs:
           mv pnpm-workspace.yaml pnpm-workspace.yaml.bak
           npm cache clean -f
           cd apps/frontend
-          pnpm add @manypkg/get-packages prettier -D
+          pnpm add @manypkg/get-packages@2.2.2 prettier@2.0.0 -D
           pnpm install --no-frozen-lockfile
 
       # - name: Build packages
