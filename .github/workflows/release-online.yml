@@ -15,14 +15,14 @@ env:
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: ['online']
+    branches: ["online"]
 
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Frontend branch'
+        description: "Frontend branch"
         required: false
-        default: 'online'
+        default: "online"
         type: choice
         options:
           - release
@@ -75,8 +75,8 @@ jobs:
           npm cache clean -f
           pnpm install --no-frozen-lockfile
 
-      - name: Build packages
-        run: pnpm run build
+      # - name: Build packages
+      #   run: pnpm run build
 
       - name: Build frontend
         run: pnpm run build:frontend
