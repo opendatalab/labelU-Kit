@@ -56,5 +56,14 @@ try {
   fs.unlinkSync(targetPath);
 } catch (err) {
 } finally {
-  console.log(`🎉 ${targetPath}已生成`);
+  if (codeTemplate) {
+    fs.writeFile(
+      targetPath,
+      codeTemplate,
+      'utf-8',
+      () => {
+        console.log(`🎉 ${targetPath}已生成`);
+      },
+    );
+  }
 }
