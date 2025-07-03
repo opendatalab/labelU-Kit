@@ -145,9 +145,15 @@ const AnnotationPage = () => {
     [t],
   );
 
+  // 默认加载数量常量
+  const PAGE_SIZE = 40;
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
   const currentPage = useRef<number>(1);
+  if (currentPage.current === 1) {
+    currentPage.current = sample?.data.inner_id ? Math.floor(sample.data.inner_id / PAGE_SIZE) + 1 : 1;
+  }
+
   const fetchSamples = useCallback(async () => {
     if (!routeParams.taskId) {
       return Promise.resolve([]);
@@ -156,7 +162,7 @@ const AnnotationPage = () => {
     const { data, meta_data } = await getSamples({
       task_id: +routeParams.taskId!,
       page: currentPage.current,
-      size: 40,
+      size: PAGE_SIZE,
     });
 
     currentPage.current += 1;
