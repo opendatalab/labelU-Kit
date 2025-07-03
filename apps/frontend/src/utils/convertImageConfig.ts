@@ -30,6 +30,18 @@ export function convertImageConfig(taskConfig?: ToolsConfigState) {
         editorConfig.line!.lineType = item.config.lineType === 0 ? 'line' : 'spline';
         editorConfig.line!.minPointAmount = item.config.lowerLimitPointNum;
         editorConfig.line!.maxPointAmount = item.config.upperLimitPointNum;
+        editorConfig.line!.style = {
+          ...editorConfig.line!.style,
+          lineStyle: item.config.lineStyle,
+          arrowType: item.config.arrowType,
+        };
+      }
+
+      if (toolName === 'relation') {
+        editorConfig.relation!.style = {
+          lineStyle: item.config.lineStyle,
+          arrowType: item.config.arrowType,
+        };
       }
 
       if (toolName === 'point') {

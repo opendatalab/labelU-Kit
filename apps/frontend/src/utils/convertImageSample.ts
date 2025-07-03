@@ -16,6 +16,7 @@ export function convertImageAnnotations(result: ParsedResult) {
     ['rect', 'rectTool'],
     ['polygon', 'polygonTool'],
     ['cuboid', 'cuboidTool'],
+    ['relation', 'relationTool'],
     ['text', 'textTool'],
     ['tag', 'tagTool'],
   ] as const;
