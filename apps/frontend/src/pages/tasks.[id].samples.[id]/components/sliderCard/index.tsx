@@ -45,6 +45,7 @@ const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardP
       ? file.url.replace('attachment', 'partial')
       : file.url;
   }, [type, file.url]);
+
   const { t } = useTranslation();
   const me = useMe();
   const isMeTheCurrentEditingUser = editingUser?.user_id === me?.data?.id;
