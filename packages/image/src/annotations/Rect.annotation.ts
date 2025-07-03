@@ -7,7 +7,6 @@ import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import { Rect, type RectStyle } from '../shapes/Rect.shape';
-import type { Line } from '../shapes/Line.shape';
 import { ShapeText } from '../shapes/Text.shape';
 import type { Group } from '../shapes';
 import { LabelBase } from './Label.base';
@@ -23,7 +22,7 @@ export interface RectData extends BasicImageAnnotation {
 
 export type RectGroup = Group<Rect | ShapeText, RectStyle>;
 
-export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectStyle> {
+export class AnnotationRect extends Annotation<RectData, Rect | ShapeText, RectStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
@@ -130,6 +129,17 @@ export class AnnotationRect extends Annotation<RectData, Line | ShapeText, RectS
       }
     });
   };
+
+  public getCenter() {
+    const { group } = this;
+    const rect = group.shapes[0] as Rect;
+    const sData = rect.serialize();
+
+    return {
+      x: rect.dynamicCoordinate[0].x + sData.dynamicWidth / 2,
+      y: rect.dynamicCoordinate[0].y + sData.dynamicHeight / 2,
+    };
+  }
 
   public destroy(): void {
     super.destroy();

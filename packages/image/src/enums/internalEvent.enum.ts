@@ -69,6 +69,9 @@ export enum EInternalEvent {
   ShapeOver = '__shape_over__',
 
   /** 鼠标经过图形对象 */
+  GlobalShapeOver = '__global_shape_over__',
+
+  /** 鼠标经过图形对象 */
   ShapeOut = '__shape_out__',
 
   /** 经过包围盒 */
@@ -107,4 +110,19 @@ export enum EInternalEvent {
   ContactUp = '__contact_up__',
 
   ShapeCoordinateChange = '__shape_coordinate_change__',
+
+  /** 关联关系模式开始 */
+  RelationModeStart = '__relation_mode_start__',
+
+  /** 关联关系模式结束 */
+  RelationModeEnd = '__relation_mode_end__',
+
+  /** 关联关系创建 */
+  RelationCreated = '__relation_created__',
+
+  /** 草稿移动 */
+  DraftMove = '__draft_move__',
+
+  /** 草稿大小变化 */
+  DraftResize = '__draft_resize__',
 }

@@ -15,6 +15,11 @@ export class Spline extends Shape<LineStyle> {
     stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: 2,
     opacity: 1,
+    lineStyle: 'solid',
+    dashPattern: [],
+    arrowType: 'none',
+    headLength: 10,
+    headAngle: 30,
   };
 
   private _controlPoints: [AxisPoint, AxisPoint];

@@ -412,8 +412,8 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
 
     // 手动更新组合的包围盒
     this.group.update();
-
     this.syncCoordToData();
+    eventEmitter.emit(EInternalEvent.DraftResize, this);
   };
 
   /**
@@ -560,6 +560,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
 
     this.group.update();
     this.syncCoordToData();
+    eventEmitter.emit(EInternalEvent.DraftResize, this);
   };
 
   private _onEdgeUp = () => {
@@ -574,6 +575,20 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
 
   protected getPolygonCoordinates() {
     return cloneDeep(this.group.shapes[0].dynamicCoordinate);
+  }
+
+  public getCenter() {
+    const { group } = this;
+
+    const maxX = Math.max(...group.shapes[0].dynamicCoordinate.map((item) => item.x));
+    const maxY = Math.max(...group.shapes[0].dynamicCoordinate.map((item) => item.y));
+    const minX = Math.min(...group.shapes[0].dynamicCoordinate.map((item) => item.x));
+    const minY = Math.min(...group.shapes[0].dynamicCoordinate.map((item) => item.y));
+
+    return {
+      x: (maxX + minX) / 2,
+      y: (maxY + minY) / 2,
+    };
   }
 
   public destroy() {

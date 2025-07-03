@@ -1,14 +1,24 @@
 import cloneDeep from 'lodash.clonedeep';
 
 import { Shape } from './Shape';
-import type { AxisPoint } from './Point.shape';
 import { getDistanceToLine } from './math.util';
 import { DEFAULT_LABEL_COLOR } from '../constant';
+import type { AxisPoint } from './Point.shape';
 
 export interface LineStyle {
   stroke?: string;
   strokeWidth?: number;
   opacity?: number;
+  /** 线条样式：实线或虚线 */
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
+  /** 虚线模式，数组表示实线和虚线的长度交替 */
+  dashPattern?: number[];
+  /** 是否显示箭头 */
+  arrowType?: 'single' | 'double' | 'none';
+  /** 箭头头部长度 */
+  headLength?: number;
+  /** 箭头头部角度（弧度） */
+  headAngle?: number;
 }
 
 export type LineCoordinate = [
@@ -34,6 +44,20 @@ export class Line extends Shape<LineStyle> {
     stroke: DEFAULT_LABEL_COLOR,
     strokeWidth: 2,
     opacity: 1,
+    /**
+     * 线条样式：实线或虚线
+     */
+    lineStyle: 'solid',
+    /**
+     * 虚线模式，数组表示实线和虚线的长度交替
+     */
+    dashPattern: [5, 5],
+    /**
+     * 箭头类型：单向箭头、双向箭头
+     */
+    arrowType: 'none',
+    headLength: 15,
+    headAngle: Math.PI / 6, // 30度
   };
 
   public style: Required<LineStyle> = Line.DEFAULT_STYLE;
@@ -74,13 +98,50 @@ export class Line extends Shape<LineStyle> {
     return false;
   }
 
+  /**
+   * 计算箭头头部的三个点
+   */
+  private calculateArrowHead(start: AxisPoint, end: AxisPoint) {
+    const { headLength, headAngle } = this.style;
+
+    // 计算箭头方向向量
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+
+    if (length === 0) return { tip: end, left: end, right: end };
+
+    // 单位向量
+    const unitX = dx / length;
+    const unitY = dy / length;
+
+    // 箭头尖端
+    const tip = { x: end.x, y: end.y };
+
+    // 计算箭头头部的两个角点
+    const leftAngle = Math.atan2(unitY, unitX) + headAngle;
+    const rightAngle = Math.atan2(unitY, unitX) - headAngle;
+
+    const left = {
+      x: end.x - headLength * Math.cos(leftAngle),
+      y: end.y - headLength * Math.sin(leftAngle),
+    };
+
+    const right = {
+      x: end.x - headLength * Math.cos(rightAngle),
+      y: end.y - headLength * Math.sin(rightAngle),
+    };
+
+    return { tip, left, right };
+  }
+
   public render(ctx: CanvasRenderingContext2D | null) {
     if (!ctx) {
       throw Error('No context specific!');
     }
 
     const { style, dynamicCoordinate } = this;
-    const { stroke, strokeWidth, opacity } = style;
+    const { stroke, strokeWidth, opacity, arrowType, lineStyle, dashPattern } = style;
     const [start, end] = dynamicCoordinate;
 
     ctx.save();
@@ -90,11 +151,55 @@ export class Line extends Shape<LineStyle> {
     ctx.strokeStyle = stroke;
     ctx.lineWidth = strokeWidth;
 
+    // 设置线条样式
+    if (lineStyle === 'dashed') {
+      ctx.setLineDash(dashPattern);
+    } else if (lineStyle === 'dotted') {
+      ctx.setLineDash([2, 2]);
+    } else {
+      // solid
+      ctx.setLineDash([]);
+    }
+
+    // 绘制线条
     ctx.beginPath();
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, end.y);
-
     ctx.stroke();
+
+    // 如果启用箭头，绘制箭头头部
+    if (arrowType === 'single') {
+      ctx.fillStyle = stroke;
+      const arrowHead = this.calculateArrowHead(start, end);
+
+      ctx.beginPath();
+      ctx.moveTo(arrowHead.tip.x, arrowHead.tip.y);
+      ctx.lineTo(arrowHead.left.x, arrowHead.left.y);
+      ctx.lineTo(arrowHead.right.x, arrowHead.right.y);
+      ctx.closePath();
+      ctx.fill();
+    } else if (arrowType === 'double') {
+      ctx.fillStyle = stroke;
+
+      // 绘制终点箭头
+      const endArrowHead = this.calculateArrowHead(start, end);
+      ctx.beginPath();
+      ctx.moveTo(endArrowHead.tip.x, endArrowHead.tip.y);
+      ctx.lineTo(endArrowHead.left.x, endArrowHead.left.y);
+      ctx.lineTo(endArrowHead.right.x, endArrowHead.right.y);
+      ctx.closePath();
+      ctx.fill();
+
+      // 绘制起点箭头
+      const startArrowHead = this.calculateArrowHead(end, start);
+      ctx.beginPath();
+      ctx.moveTo(startArrowHead.tip.x, startArrowHead.tip.y);
+      ctx.lineTo(startArrowHead.left.x, startArrowHead.left.y);
+      ctx.lineTo(startArrowHead.right.x, startArrowHead.right.y);
+      ctx.closePath();
+      ctx.fill();
+    }
+
     ctx.globalAlpha = 1;
     ctx.restore();
   }

@@ -30,9 +30,9 @@ export interface MonitorOption {
 export class Monitor {
   private _canvas: HTMLCanvasElement;
 
-  public _hoveredGroup: GroupInAnnotation | null = null;
+  public hoveredGroup: GroupInAnnotation | null = null;
 
-  private _hoveredShape: AnnotationShape | null = null;
+  public hoveredShape: AnnotationShape | null = null;
 
   public selectedAnnotationId: string | null = null;
 
@@ -229,10 +229,12 @@ export class Monitor {
    * @description 用于处理鼠标移动到标注上时，触发标注的 hover 事件；同时，选中标注的逻辑也会依赖此处理函数
    */
   private _handleMouseOver = (e: MouseEvent) => {
-    const { _hoveredGroup, _hoveredShape } = this;
+    const { hoveredGroup, hoveredShape } = this;
     const rbushItems = rbush.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
     const orderIndexedGroup: any[] = [];
     let topGroup: any | null = null;
+
+    const oldHoveredShape = hoveredShape;
 
     for (const rbushItem of rbushItems) {
       if (rbushItem._group) {
@@ -256,6 +258,8 @@ export class Monitor {
             topGroup = rbushItem._group;
           }
         }
+      } else if (rbushItem._shape && rbushItem._shape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+        this.hoveredShape = rbushItem._shape as any;
       }
     }
     // 最后一个表示order最大的group
@@ -271,7 +275,12 @@ export class Monitor {
           (shape as Group<any, any>).reverseEach((innerShape: any) => {
             if (innerShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
               innerShape.emit(EInternalEvent.ShapeOver, e, innerShape);
-              this._hoveredShape = innerShape;
+
+              if (hoveredShape && hoveredShape.id !== innerShape.id) {
+                hoveredShape.emit(EInternalEvent.ShapeOut, e, hoveredShape);
+              }
+
+              this.hoveredShape = innerShape;
               // 只给一个shape发送事件，避免多个shape同时hover
               return false;
             }
@@ -279,22 +288,23 @@ export class Monitor {
           return false;
         } else if (shape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
           shape.emit(EInternalEvent.ShapeOver, e, shape);
-          this._hoveredShape = shape;
+
+          this.hoveredShape = shape;
           // 只给一个shape发送事件，避免多个shape同时hover
           return false;
         }
       });
 
-      if (_hoveredGroup && _hoveredGroup.id !== lastGroup.id) {
+      if (hoveredGroup && hoveredGroup.id !== lastGroup.id) {
         // 向上一次hover的group发送鼠标离开事件，避免多个group同时hover
-        _hoveredGroup.emit(EInternalEvent.MouseOut, e);
+        hoveredGroup.emit(EInternalEvent.MouseOut, e);
       }
 
-      if (_hoveredShape && _hoveredShape.id !== this._hoveredShape?.id) {
-        _hoveredShape.emit(EInternalEvent.ShapeOut, e, _hoveredShape);
+      if (oldHoveredShape && oldHoveredShape.id !== this.hoveredShape?.id) {
+        oldHoveredShape.emit(EInternalEvent.ShapeOut, e, oldHoveredShape);
       }
 
-      this._hoveredGroup = lastGroup;
+      this.hoveredGroup = lastGroup;
 
       for (const rbushItem of rbushItems) {
         if (rbushItem._group && lastGroup.id !== rbushItem._group.id) {
@@ -308,14 +318,18 @@ export class Monitor {
     } else {
       eventEmitter.emit(EInternalEvent.NoTarget, e);
 
-      if (_hoveredShape) {
-        _hoveredShape.emit(EInternalEvent.ShapeOut, e, _hoveredShape);
-        this._hoveredShape = null;
+      if (this.hoveredShape) {
+        this.hoveredShape.emit(EInternalEvent.ShapeOver, e, this.hoveredShape);
+      }
+
+      if (oldHoveredShape && !oldHoveredShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
+        oldHoveredShape.emit(EInternalEvent.ShapeOut, e, oldHoveredShape);
+        this.hoveredShape = null;
       }
 
       rbush.nearestPoint?.destroy();
       rbush.nearestPoint = null;
-      this._hoveredGroup = null;
+      this.hoveredGroup = null;
     }
   };
 
@@ -344,18 +358,18 @@ export class Monitor {
       return;
     }
 
-    const { _hoveredGroup, selectedAnnotationId } = this;
+    const { hoveredGroup, selectedAnnotationId } = this;
 
-    if (_hoveredGroup) {
-      if (selectedAnnotationId && _hoveredGroup.id !== selectedAnnotationId) {
+    if (hoveredGroup) {
+      if (selectedAnnotationId && hoveredGroup.id !== selectedAnnotationId) {
         this.selectedAnnotationId = null;
       }
 
-      _hoveredGroup.emit(EInternalEvent.Select, e);
-      this.selectedAnnotationId = _hoveredGroup.id;
+      hoveredGroup.emit(EInternalEvent.Select, e);
+      this.selectedAnnotationId = hoveredGroup.id;
     }
 
-    eventEmitter.emit('rightClick', e, _hoveredGroup?.id);
+    eventEmitter.emit('rightClick', e, hoveredGroup?.id);
   };
 
   public setSelectedAnnotationId(id: string | null) {

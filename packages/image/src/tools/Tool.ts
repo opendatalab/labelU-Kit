@@ -148,8 +148,9 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     console.warn('toggleOrderVisible is not implemented!');
   }
 
-  public setLabel(_label: string): void {
+  public setLabel(_label: string): boolean {
     console.warn('setLabel is not implemented!');
+    return true;
   }
 
   public setAttributes(_attributes: Record<string, string | string[]>) {

@@ -86,11 +86,18 @@ export function ToolWrapper<
       axis?.rerender();
     }
 
-    public setLabel(value: string): void {
+    public setLabel(value: string): boolean {
       const { draft, activeLabel } = this;
 
       if (activeLabel && activeLabel === value) {
-        return;
+        return false;
+      }
+
+      // 关联关系需要检查是否重复
+      if (this.name === 'relation' && this.isDuplicatedRelation) {
+        if (this.draft && this.isDuplicatedRelation(this.draft!.data.sourceId, this.draft!.data.targetId, value)) {
+          return false;
+        }
       }
 
       this.activate(value);
@@ -108,6 +115,8 @@ export function ToolWrapper<
       this.updateSketchStyleByLabel(value);
 
       eventEmitter.emit('labelChange', value);
+
+      return true;
     }
 
     /**

@@ -1,4 +1,4 @@
-import type { BasicImageAnnotation } from '../interface';
+import type { BasicImageAnnotation, ToolName } from '../interface';
 import { Group } from '../shapes/Group';
 import { type Shape } from '../shapes';
 import { monitor } from '../singletons';
@@ -8,6 +8,7 @@ import { DEFAULT_LABEL_COLOR } from '../constant';
 export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   id: string;
   data: Data;
+  name: ToolName;
   style: Style;
   hoveredStyle?: Style | ((style: Style) => Style);
 
@@ -26,6 +27,8 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   public id: string;
 
   public data: Data;
+
+  public name: ToolName;
 
   public style: Style;
 
@@ -49,13 +52,13 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
     return false;
   }
 
-  constructor({ id, data, style, hoveredStyle, showOrder }: AnnotationParams<Data, Style>) {
+  constructor({ id, data, style, hoveredStyle, showOrder, name }: AnnotationParams<Data, Style>) {
     this.id = id;
     this.data = data;
     this.style = style;
     this.hoveredStyle = hoveredStyle;
     this.showOrder = showOrder;
-
+    this.name = name;
     this.group = new Group(id, data.order);
 
     // 建立order和id的映射关系
@@ -64,6 +67,16 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
   public get bbox() {
     return this.group.bbox;
+  }
+
+  public getCenter() {
+    const width = this.bbox.maxX - this.bbox.minX;
+    const height = this.bbox.maxY - this.bbox.minY;
+
+    return {
+      x: this.bbox.minX + width / 2,
+      y: this.bbox.minY + height / 2,
+    };
   }
 
   public render(_ctx: CanvasRenderingContext2D) {

@@ -8,6 +8,7 @@ import type {
   PolygonGroup,
   RectData,
   RectGroup,
+  RelationData,
 } from './annotations';
 import type { ClosedSpline, Line, Point, Polygon, Rect, Spline } from './shapes';
 import type {
@@ -21,6 +22,8 @@ import type {
   PolygonToolOptions,
   RectTool,
   RectToolOptions,
+  RelationTool,
+  RelationToolOptions,
 } from './tools';
 
 export type EditType = 'create' | 'update' | 'delete';
@@ -68,19 +71,30 @@ export interface BasicImageAnnotation {
   ) => boolean;
 }
 
-export type ToolOptions = LineToolOptions | PointToolOptions | RectToolOptions | PolygonToolOptions | CuboidToolOptions;
+export type ToolOptions =
+  | LineToolOptions
+  | PointToolOptions
+  | RectToolOptions
+  | PolygonToolOptions
+  | CuboidToolOptions
+  | RelationToolOptions;
 
 export type { LineData };
 
-export type AnnotationData = LineData | PointData | RectData | PolygonData | CuboidData;
+export type AnnotationData = LineData | PointData | RectData | PolygonData | CuboidData | RelationData;
 
-export type AllTypeAnnotationDataGroup = CuboidData[] & PolygonData[] & RectData[] & PointData[] & LineData[];
+export type AllTypeAnnotationDataGroup = CuboidData[] &
+  PolygonData[] &
+  RectData[] &
+  PointData[] &
+  LineData[] &
+  RelationData[];
 
-export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool | CuboidTool;
+export type AnnotationTool = LineTool | PointTool | RectTool | PolygonTool | CuboidTool | RelationTool;
 
 export type AnnotationShape = Line | Point | Rect | Polygon | Spline | ClosedSpline;
 
-export type ToolName = 'line' | 'point' | 'polygon' | 'rect' | 'cuboid';
+export type ToolName = 'line' | 'point' | 'polygon' | 'rect' | 'cuboid' | 'relation';
 
 export type AnnotationToolData<T extends ToolName> = T extends 'line'
   ? LineData[]
@@ -92,4 +106,6 @@ export type AnnotationToolData<T extends ToolName> = T extends 'line'
   ? PolygonData[]
   : T extends 'cuboid'
   ? CuboidData[]
+  : T extends 'relation'
+  ? RelationData[]
   : never;

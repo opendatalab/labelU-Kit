@@ -16,6 +16,8 @@ import type { CursorManager } from './core/CursorManager';
 import { createCursorManager } from './singletons/cursorManager';
 import { createConfig } from './singletons/annotationConfig';
 import type { AnnotatorOptions } from './core/AnnotatorConfig';
+// import { relationManager } from './singletons/relationManager';
+import { RelationTool } from './tools/Relation.tool';
 
 const ToolMapping = {
   line: LineTool,
@@ -23,6 +25,7 @@ const ToolMapping = {
   rect: RectTool,
   polygon: PolygonTool,
   cuboid: CuboidTool,
+  relation: RelationTool,
 } as const;
 
 export class AnnotatorBase {
@@ -135,6 +138,7 @@ export class AnnotatorBase {
             ...(config[toolName] as any),
             requestEdit: typeof config.requestEdit === 'function' ? config.requestEdit : () => true,
             showOrder: config.showOrder ?? false,
+            getTools: () => this.tools,
           }),
         );
       }
@@ -190,6 +194,9 @@ export class AnnotatorBase {
     annotations.forEach((annotation) => {
       annotation.render(renderer!.ctx!);
     });
+
+    // relationManager.render(renderer!.ctx!);
+
     // 草稿在最上层
     draft?.render(renderer!.ctx!);
   };
@@ -233,6 +240,7 @@ export class AnnotatorBase {
           showOrder: config.showOrder ?? false,
           requestEdit: typeof config.requestEdit === 'function' ? config.requestEdit : () => true,
           data: data as AllTypeAnnotationDataGroup,
+          getTools: () => this.tools,
         }),
       );
     } else {

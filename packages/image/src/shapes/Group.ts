@@ -116,6 +116,33 @@ export class Group<T extends Shape<Style>, Style> {
     return this;
   }
 
+  public getBBoxByFilter(filter: (shape: Shape<Style>) => boolean): BBox {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < this.shapes.length; i += 1) {
+      const shape = this.shapes[i];
+
+      if (!filter(shape)) {
+        continue;
+      }
+
+      minX = Math.min(minX, shape.bbox.minX);
+      minY = Math.min(minY, shape.bbox.minY);
+      maxX = Math.max(maxX, shape.bbox.maxX);
+      maxY = Math.max(maxY, shape.bbox.maxY);
+    }
+
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+    };
+  }
+
   public updateStyle(style: Style) {
     const shapes = this.shapes;
 

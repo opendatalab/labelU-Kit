@@ -31,7 +31,7 @@ export interface LineData extends BasicImageAnnotation {
   controlPoints?: AxisPoint[];
 }
 
-export class AnnotationLine extends Annotation<LineData, Line | ShapeText, LineStyle | TextStyle> {
+export class AnnotationLine extends Annotation<LineData, Line | Spline | ShapeText, LineStyle | TextStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
   public strokeColor: string = LabelBase.DEFAULT_COLOR;

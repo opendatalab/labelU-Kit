@@ -165,6 +165,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
     const { drawing, style, hoveredStyle } = this;
 
     const annotation = new AnnotationLine({
+      name: this.name,
       id: data.id,
       data,
       style,
@@ -182,6 +183,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
     if (data.type === 'line') {
       this.draft = new DraftLine(this.config, {
+        name: this.name,
         id: data.id,
         data,
         style,
@@ -189,6 +191,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
       });
     } else if (data.type === 'spline') {
       this.draft = new DraftLineCurve(this.config, {
+        name: this.name,
         id: data.id,
         data,
         showOrder: this.showOrder,

@@ -23,7 +23,10 @@ export type EventName =
   | 'dblclick'
   | 'error'
   | 'rightClick'
-  | 'contextmenu';
+  | 'contextmenu'
+  | 'relationModeStart'
+  | 'relationModeEnd'
+  | 'relationCreated';
 
 const eventEmitter = new EventEmitter();
 
