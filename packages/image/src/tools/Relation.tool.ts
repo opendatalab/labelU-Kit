@@ -219,6 +219,8 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
     if (sketch) {
       sketch.destroy();
       this.sketch = null;
+      this._sourceAnnotation = null;
+      this._connectAnnotation = null;
     }
   }
 
