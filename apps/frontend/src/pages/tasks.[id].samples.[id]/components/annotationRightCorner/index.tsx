@@ -273,7 +273,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, isMeTheCurrentUser, noSave, task?.config.tools, task?.media_type, taskId]);
+  }, [currentSample, isMeTheCurrentUser, noSave, task?.config?.tools, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
