@@ -13,6 +13,7 @@ import { ReactComponent as LineToolIcon } from '@/assets/tools/line.svg';
 import { ReactComponent as RectToolIcon } from '@/assets/tools/rect.svg';
 import { ReactComponent as PolygonToolIcon } from '@/assets/tools/polygon.svg';
 import { ReactComponent as CuboidToolIcon } from '@/assets/tools/cuboid.svg';
+import { ReactComponent as RelationToolIcon } from '@/assets/tools/relation.svg';
 import { ReactComponent as UnknownIcon } from '@/assets/tools/unknown.svg';
 import { openAttributeModal } from '@/LabelSection';
 import type { AnnotationDataInUI } from '@/context/annotation.context';
@@ -32,6 +33,7 @@ const ToolIconMapping: Record<
   rect: RectToolIcon,
   polygon: PolygonToolIcon,
   cuboid: CuboidToolIcon,
+  relation: RelationToolIcon,
 };
 
 interface AttributeItemProps {

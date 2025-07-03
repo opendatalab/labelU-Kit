@@ -10,6 +10,7 @@ import { ReactComponent as LineIcon } from '@/assets/tools/line.svg';
 import { ReactComponent as RectIcon } from '@/assets/tools/rect.svg';
 import { ReactComponent as PolygonIcon } from '@/assets/tools/polygon.svg';
 import { ReactComponent as CuboidIcon } from '@/assets/tools/cuboid.svg';
+import { ReactComponent as RelationIcon } from '@/assets/tools/relation.svg';
 import { useTool } from '@/context/tool.context';
 import { useAnnotationCtx } from '@/context/annotation.context';
 import { useHistoryCtx } from '@/context/history.context';
@@ -28,6 +29,7 @@ const iconMapping = {
   rect: <RectIcon />,
   polygon: <PolygonIcon />,
   cuboid: <CuboidIcon />,
+  relation: <RelationIcon />,
 };
 
 export interface IToolbarInEditorProps {
@@ -61,6 +63,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
       rect: t('rect'),
       polygon: t('polygon'),
       cuboid: t('cuboid'),
+      relation: t('relation'),
     }),
     [t],
   );
