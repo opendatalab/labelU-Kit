@@ -8,10 +8,6 @@ import { Tool } from './Tool';
 
 type Constructor<T extends {}> = new (...args: any[]) => T;
 
-export interface ToolWrapperConstructor {}
-
-type PublicConstructor<T> = new () => T;
-
 /**
  * 工具装饰器
  *
@@ -30,8 +26,10 @@ export function ToolWrapper<
   Data extends BasicImageAnnotation,
   Options extends BasicToolParams<Data, Style>,
   Style extends Record<string, any>,
->(constructor: T): PublicConstructor<ToolWrapperConstructor> {
+>(constructor: T): T {
   return class WrappedTool extends constructor {
+    isDuplicatedRelation?: (sourceId: string, targetId: string, label?: string) => boolean;
+
     constructor(...params: any[]) {
       super(...params);
 
@@ -95,7 +93,8 @@ export function ToolWrapper<
 
       // 关联关系需要检查是否重复
       if (this.name === 'relation' && this.isDuplicatedRelation) {
-        if (this.draft && this.isDuplicatedRelation(this.draft!.data.sourceId, this.draft!.data.targetId, value)) {
+        const relationData = this.draft!.data as any;
+        if (this.draft && this.isDuplicatedRelation(relationData.sourceId, relationData.targetId, value)) {
           return false;
         }
       }
