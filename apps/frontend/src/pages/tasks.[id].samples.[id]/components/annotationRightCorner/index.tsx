@@ -249,16 +249,16 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
     }
 
     // 全局标注没有值的话，填充默认值
-    if (!result.tagTool?.result?.length) {
-      const tagConfig = task.config.tools.find((tool) => tool.tool === 'tagTool');
+    const tagConfig = task.config.tools.find((tool) => tool.tool === 'tagTool');
+    if (!result.tagTool?.result?.length && tagConfig) {
       result.tagTool = {
         toolName: 'tagTool',
         result: generateDefaultValues(tagConfig?.config.attributes),
       };
     }
 
-    if (!result.textTool?.result?.length) {
-      const textConfig = task.config.tools.find((tool) => tool.tool === 'textTool');
+    const textConfig = task.config.tools.find((tool) => tool.tool === 'textTool');
+    if (!result.textTool?.result?.length && textConfig) {
       result.textTool = {
         toolName: 'textTool',
         result: generateDefaultValues(textConfig?.config.attributes),
@@ -273,7 +273,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, isMeTheCurrentUser, noSave, task?.config.tools, task?.media_type, taskId]);
+  }, [currentSample, isMeTheCurrentUser, noSave, task?.config?.tools, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();

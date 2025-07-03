@@ -1,14 +1,16 @@
 import { type Attribute, type ILabel } from '@labelu/interface';
 import cloneDeep from 'lodash.clonedeep';
 
+import type { RelationData } from '@/annotations/Relation.annotation';
+
 import type { Annotation } from '../annotations/Annotation';
-import type { ToolName, BasicImageAnnotation, EditType } from '../interface';
+import type { ToolName, BasicImageAnnotation, EditType, AnyTool } from '../interface';
 import type { Group, Shape } from '../shapes';
 import { axis, eventEmitter, monitor } from '../singletons';
 import type { Draft } from '../drafts/Draft';
 import { EInternalEvent } from '../enums';
 
-export interface BasicToolParams<Data, Style> {
+export interface BasicToolParams<Data, Style> extends ExtraParams {
   /** 标签配置 */
   labels?: Attribute[];
 
@@ -39,12 +41,12 @@ export interface BasicToolParams<Data, Style> {
   ) => boolean;
 }
 
-type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Shape<Style>, Style>;
+type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Style>;
 
 type ConfigOmit<T> = Omit<T, 'data' | 'style' | 'hoveredStyle' | 'name'>;
 
 interface ExtraParams {
-  name: ToolName;
+  getTools: () => AnyTool;
 }
 
 /**
@@ -72,14 +74,16 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
    *
    * @description 绘制过程中的标注不一定在这个字段下，可能视情况而定
    */
-  public draft: Draft<Data, any, any> | null = null;
+  public draft: Draft<Data, any> | null = null;
 
   /**
    * 绘制过程中的草稿
    */
-  public sketch: Group<Shape<any>, any> | Shape<any> | null = null;
+  public sketch: Group | Shape<any> | null = null;
 
   public showOrder: boolean;
+
+  public getTools: () => AnyTool;
 
   protected _data: Data[];
 
@@ -192,12 +196,25 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     );
   }
 
-  constructor({ name, data, style, hoveredStyle, selectedStyle, showOrder, ...config }: Config & ExtraParams) {
+  constructor({
+    name,
+    data,
+    style,
+    hoveredStyle,
+    selectedStyle,
+    showOrder,
+    getTools,
+    ...config
+  }: Config & {
+    name: ToolName;
+  }) {
     // 创建标签映射
     this._createLabelMapping(config.labels);
 
     this.name = name;
     this.showOrder = Boolean(showOrder);
+
+    this.getTools = getTools;
 
     if (style) {
       this.style = {
@@ -221,7 +238,7 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this._data.push(data);
   }
 
-  protected removeFromDrawing(id: string) {
+  public removeFromDrawing(id: string) {
     const annotation = this.drawing?.get(id);
     annotation?.destroy();
     this.drawing?.delete(id);
@@ -259,6 +276,38 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
     this.removeFromDrawing(data.id);
     eventEmitter.emit(EInternalEvent.ToolChange, this.name, data.label);
     axis?.rerender();
+  }
+
+  protected removeRelations(id: string) {
+    const relations = this._getRelationsBySourceIdOrTargetId(id);
+    const relationTool = this.getTools().get('relation');
+
+    if (!relationTool) {
+      return;
+    }
+
+    for (const relation of relations) {
+      relationTool.removeFromDrawing(relation.id);
+    }
+
+    eventEmitter.emit('relatedRelationDelete', relations);
+  }
+
+  private _getRelationsBySourceIdOrTargetId(id: string) {
+    const relationTool = this.getTools().get('relation');
+    const relations = [];
+
+    if (!relationTool) {
+      return [];
+    }
+
+    for (const relation of relationTool.data as RelationData[]) {
+      if (relation.sourceId === id || relation.targetId === id) {
+        relations.push(cloneDeep(relation));
+      }
+    }
+
+    return relations;
   }
 
   private _createLabelMapping(labels: ILabel[] | undefined) {

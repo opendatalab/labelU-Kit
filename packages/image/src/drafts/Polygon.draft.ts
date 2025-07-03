@@ -5,8 +5,8 @@ import uid from '@/utils/uid';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
-import { AnnotationPolygon, type PolygonData, type PolygonGroup } from '../annotations';
-import type { PointStyle, PolygonStyle, Point } from '../shapes';
+import { AnnotationPolygon, type PolygonData } from '../annotations';
+import type { Group, PointStyle, PolygonStyle } from '../shapes';
 import { Polygon } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -19,7 +19,7 @@ import { EInternalEvent } from '../enums';
 import { generatePolygonsFromDifference, getLatestPointOnLine, isBBoxIntersect } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
 
-export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle> {
+export class DraftPolygon extends Draft<PolygonData, PolygonStyle | PointStyle | LineStyle> {
   public config: PolygonToolOptions;
 
   private _pointIndex: number | null = null;
@@ -151,12 +151,12 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
    */
   private async _cutPolygon() {
     // 找出有交集的其他多边形
-    const groups: PolygonGroup[] = [];
+    const groups: Group[] = [];
     const polygon = this.group.shapes[0] as Polygon;
 
     this._tool.drawing?.forEach((annotation) => {
       if (annotation.group.id !== this.group.id && isBBoxIntersect(polygon.bbox, annotation.group.bbox)) {
-        groups.push(annotation.group as PolygonGroup);
+        groups.push(annotation.group);
       }
     });
 
@@ -413,7 +413,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
     // 手动更新组合的包围盒
     this.group.update();
     this.syncCoordToData();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, e, this);
   };
 
   /**
@@ -560,7 +560,7 @@ export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, Pol
 
     this.group.update();
     this.syncCoordToData();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, 2, this);
   };
 
   private _onEdgeUp = () => {

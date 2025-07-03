@@ -491,6 +491,21 @@ function ForwardAnnotator(
     [updateAnnotationsWithGlobal],
   );
 
+  const onAnnotationDelete = useCallback(
+    (restAnnotations: AnnotationWithTool[]) => {
+      const annotationGroupByTool: AllAnnotationMapping = {};
+
+      restAnnotations.forEach((item) => {
+        annotationGroupByTool[item.id] = item;
+      });
+
+      updateAnnotationsWithGlobal(() => {
+        return annotationGroupByTool;
+      });
+    },
+    [updateAnnotationsWithGlobal],
+  );
+
   const onAnnotationChange = useCallback(
     (_annotation: AnnotationWithTool, skipHistory?: boolean) => {
       updateAnnotationsWithGlobal((pre) => {
@@ -592,8 +607,9 @@ function ForwardAnnotator(
   useEffect(() => {
     // 删除标记
     const handleDelete = (annotation: AnnotationData) => {
-      const newAnnotations = omit(annotationsWithGlobal, annotation.id);
-      updateAnnotationsWithGlobal(newAnnotations);
+      updateAnnotationsWithGlobal((pre) => {
+        return omit(pre!, annotation.id);
+      });
       setSelectedAnnotation((pre) => {
         if (pre?.id === annotation.id) {
           return undefined;
@@ -607,6 +623,22 @@ function ForwardAnnotator(
 
     return () => {
       engine?.off('delete', handleDelete);
+    };
+  }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
+
+  useEffect(() => {
+    const handleRelationDelete = (relations: AnnotationData[]) => {
+      updateAnnotationsWithGlobal((pre) => {
+        return relations.reduce((acc, item) => {
+          return omit(acc, item.id);
+        }, pre!);
+      });
+    };
+
+    engine?.on('relatedRelationDelete', handleRelationDelete);
+
+    return () => {
+      engine?.off('relatedRelationDelete', handleRelationDelete);
     };
   }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
 
@@ -673,7 +705,7 @@ function ForwardAnnotator(
       const _label = engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined;
 
       setSelectedLabel(_label);
-      propsOnLabelChange?.(currentTool, _label);
+      propsOnLabelChange?.(engine!.activeToolName!, _label);
     };
     // 改变标签
     engine?.on('labelChange', handleLabelChange);

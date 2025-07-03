@@ -6,7 +6,7 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { CuboidData, CuboidStyle } from '../annotations';
 import { Annotation, AnnotationCuboid } from '../annotations';
-import type { AxisPoint, LineStyle, RectStyle } from '../shapes';
+import type { AxisPoint } from '../shapes';
 import { Line, Group, Rect } from '../shapes';
 import { axis, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
@@ -37,7 +37,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     return new CuboidTool({ ...config, data: CuboidTool.convertToCanvasCoordinates(data ?? []) });
   }
 
-  public sketch: Group<Rect | Line, RectStyle | LineStyle> | null = null;
+  public sketch: Group | null = null;
 
   private _startPoint: AxisPoint | null = null;
 

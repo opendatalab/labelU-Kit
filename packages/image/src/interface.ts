@@ -109,3 +109,5 @@ export type AnnotationToolData<T extends ToolName> = T extends 'line'
   : T extends 'relation'
   ? RelationData[]
   : never;
+
+export type AnyTool = Map<ToolName, AnnotationTool>;

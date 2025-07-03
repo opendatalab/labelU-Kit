@@ -21,7 +21,7 @@ type ControllerPosition = 'nw' | 'ne' | 'se' | 'sw';
 
 type EdgePosition = 'top' | 'right' | 'bottom' | 'left';
 
-export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, RectStyle | PointStyle> {
+export class DraftRect extends Draft<RectData, RectStyle | PointStyle> {
   public config: RectToolOptions;
 
   private _preBBox: BBox | null = null;
@@ -421,7 +421,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
     // 手动更新组合的包围盒
     this.group.update();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, new Event(''), this);
   };
 
   /**
@@ -529,7 +529,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
     }
 
     this.group.update();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, new Event(''), this);
   };
 
   private _onEdgeUp = () => {

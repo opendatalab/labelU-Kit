@@ -12,6 +12,7 @@ export type EventName =
   | 'unselect'
   | 'add'
   | 'delete'
+  | 'relatedRelationDelete'
   | 'clear'
   | 'load'
   | 'labelChange'

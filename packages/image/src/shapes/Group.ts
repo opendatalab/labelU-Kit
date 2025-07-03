@@ -1,17 +1,22 @@
 import EventEmitter from 'eventemitter3';
 import type { BBox } from 'rbush';
 
-import type { Shape } from './Shape';
 import { EInternalEvent } from '../enums';
 import type { RBushItem } from '../core/CustomRBush';
 import { eventEmitter, rbush } from '../singletons';
-import { type AxisPoint } from './Point.shape';
+import type { PointStyle, AxisPoint } from './Point.shape';
 import { ShapeText } from './Text.shape';
+import type { AllShape } from './types';
+import type { RectStyle } from './Rect.shape';
+import type { LineStyle } from './Line.shape';
+import type { PolygonStyle } from './Polygon.shape';
+
+type Style = RectStyle | LineStyle | PolygonStyle | PointStyle;
 
 /**
  * 组合类，用于组合多个图形
  */
-export class Group<T extends Shape<Style>, Style> {
+export class Group<T extends AllShape = AllShape> {
   public id: string;
 
   public order: number;
@@ -28,7 +33,7 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _cachedRBush: RBushItem | null = null;
 
-  private _shapes: Shape<Style>[] = [];
+  private _shapes: T[] = [];
 
   private _shapeMapping: Map<string, T> = new Map();
 
@@ -116,7 +121,7 @@ export class Group<T extends Shape<Style>, Style> {
     return this;
   }
 
-  public getBBoxByFilter(filter: (shape: Shape<Style>) => boolean): BBox {
+  public getBBoxByFilter(filter: (shape: AllShape) => boolean): BBox {
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -210,7 +215,7 @@ export class Group<T extends Shape<Style>, Style> {
     this.update();
   }
 
-  public each(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
+  public each(callback: (shape: T, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = 0; i < this.shapes.length; i += 1) {
@@ -222,7 +227,7 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
-  public reverseEach(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
+  public reverseEach(callback: (shape: T, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = this.shapes.length - 1; i >= 0; i -= 1) {
@@ -249,7 +254,10 @@ export class Group<T extends Shape<Style>, Style> {
   }
 
   public destroy() {
-    rbush.remove(this._cachedRBush!);
+    if (this._cachedRBush) {
+      rbush.remove(this._cachedRBush);
+    }
+
     this._cachedRBush = null;
     this.shapes.forEach((shape) => {
       shape.destroy();
@@ -267,7 +275,11 @@ export class Group<T extends Shape<Style>, Style> {
       shape.destroy();
     });
     this._shapes = [];
-    rbush.remove(this._cachedRBush!);
+
+    if (this._cachedRBush) {
+      rbush.remove(this._cachedRBush);
+    }
+
     this._shapeMapping.clear();
   }
 

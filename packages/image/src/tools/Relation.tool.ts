@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 import uid from '@/utils/uid';
 import type { RelationData, ValidAnnotationType } from '@/annotations/Relation.annotation';
 import { DraftRelation } from '@/drafts/Relation.draft';
-import type { AnnotationTool, ToolName } from '@/interface';
+import type { ToolName } from '@/interface';
 import type { AxisPoint } from '@/shapes';
 import { ShapeText } from '@/shapes';
 import { VALID_RELATION_TOOLS } from '@/constant';
@@ -22,28 +22,25 @@ import { ToolWrapper } from './Tool.decorator';
 
 export type RelationToolOptions = BasicToolParams<RelationData, LineStyle>;
 
-type AnyAnnotation = Annotation<any, any, any>;
-
-type AnyTool = Map<ToolName, AnnotationTool>;
+type AnyAnnotation = Annotation<any, any>;
 
 // @ts-ignore
 @ToolWrapper
 export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOptions> {
-  static create({ data, ...config }: RelationToolOptions & { getTools: () => AnyTool }) {
+  static create({ data, ...config }: RelationToolOptions) {
     return new RelationTool({ ...config, data });
   }
 
-  public sketch: Group<Line, LineStyle> | null = null;
+  public sketch: Group | null = null;
 
   public draft: DraftRelation | null = null;
 
-  private _getTools: () => AnyTool;
   private _sourceAnnotation: AnyAnnotation | null = null;
   private _connectAnnotation: AnyAnnotation | null = null;
 
   private _relationMapByRelation: Map<string, AnnotationRelation> = new Map();
 
-  constructor({ style, getTools, ...params }: RelationToolOptions & { getTools: () => AnyTool }) {
+  constructor({ style, ...params }: RelationToolOptions) {
     super({
       name: 'relation',
       labels: [],
@@ -57,11 +54,10 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
       ...params,
     });
 
-    this._getTools = () => getTools();
-
     AnnotationRelation.buildLabelMapping(params.labels ?? []);
     eventEmitter.on(EInternalEvent.DraftMove, this._handleDraftMove);
-
+    eventEmitter.on(EInternalEvent.DraftResize, this._handleDraftMove);
+    eventEmitter.on(EInternalEvent.DeleteAnnotationInternal, this._handleDeleteAnnotationInternal);
     this.setupShapes();
   }
 
@@ -184,7 +180,7 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
   };
 
   private _getAnnotation = (id: string) => {
-    const tools = this._getTools();
+    const tools = this.getTools();
 
     for (const [toolName, tool] of tools) {
       if (toolName === 'relation') {
@@ -219,6 +215,8 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
     if (sketch) {
       sketch.destroy();
       this.sketch = null;
+      this._sourceAnnotation = null;
+      this._connectAnnotation = null;
     }
   }
 
@@ -326,6 +324,30 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
     return targetAnnotation;
   };
 
+  private _handleDeleteAnnotationInternal = (toolName: ToolName, data: AnyAnnotation['data']) => {
+    if (['rect', 'polygon'].includes(toolName)) {
+      const relation = this._getAnnotationBySourceIdOrTargetId(data.id);
+
+      if (relation) {
+        this._relationMapByRelation.delete(
+          `${relation.data.sourceId}-${relation.data.targetId}-${relation.data.label}`,
+        );
+        Tool.onDelete(cloneDeep(relation.data));
+        this.removeFromDrawing(relation.id);
+      }
+    }
+  };
+
+  private _getAnnotationBySourceIdOrTargetId(id: string) {
+    if (!this.drawing) {
+      return;
+    }
+
+    return Array.from(this.drawing.values()).find(
+      (relation) => relation.data.sourceId === id || relation.data.targetId === id,
+    );
+  }
+
   protected handleMouseMove = (e: MouseEvent) => {
     const { sketch } = this;
 
@@ -409,10 +431,9 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
     }
 
     const data: RelationData = {
-      id: uid(),
+      id: sketch.id,
       sourceId: sourceAnnotation.id,
       targetId: targetAnnotation.id,
-      arrowType: 'single',
       order: monitor!.getNextOrder(),
       attributes: {},
       label: this.activeLabel,
@@ -429,9 +450,10 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
 
   public destroy(): void {
     super.destroy();
-    this._getTools = () => new Map();
     this._sourceAnnotation = null;
     this._relationMapByRelation.clear();
     eventEmitter.off(EInternalEvent.DraftMove, this._handleDraftMove);
+    eventEmitter.off(EInternalEvent.DraftResize, this._handleDraftMove);
+    eventEmitter.off(EInternalEvent.DeleteAnnotationInternal, this._handleDeleteAnnotationInternal);
   }
 }

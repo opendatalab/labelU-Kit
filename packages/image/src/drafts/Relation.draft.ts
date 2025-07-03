@@ -6,7 +6,7 @@ import { VALID_RELATION_TOOLS } from '@/constant';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import { AnnotationRelation, type RelationData } from '../annotations';
-import type { PointStyle, Point, AxisPoint } from '../shapes';
+import type { PointStyle, AxisPoint } from '../shapes';
 import { ShapeText } from '../shapes';
 import { axis, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -15,14 +15,14 @@ import { ControllerPoint } from './ControllerPoint';
 import { Draft } from './Draft';
 
 export interface RelationDraftParams extends AnnotationParams<RelationData, LineStyle> {
-  getAnnotation: (id: string) => Annotation<any, any, any> | undefined;
+  getAnnotation: (id: string) => Annotation<any, any> | undefined;
   isDuplicatedRelation: (sourceId: string, targetId: string) => boolean;
 }
 
-export class DraftRelation extends Draft<RelationData, Line | Point, LineStyle | PointStyle> {
+export class DraftRelation extends Draft<RelationData, LineStyle | PointStyle> {
   private _isDuplicatedRelation: (sourceId: string, targetId: string) => boolean;
 
-  private _getAnnotation: (id: string) => Annotation<any, any, any> | undefined;
+  private _getAnnotation: (id: string) => Annotation<any, any> | undefined;
 
   private _effectedLines: [Line | undefined, Line | undefined] | null = null;
 
@@ -30,7 +30,12 @@ export class DraftRelation extends Draft<RelationData, Line | Point, LineStyle |
 
   constructor(options: RelationDraftParams) {
     const { isDuplicatedRelation, getAnnotation, ...params } = options;
-    super({ ...params, name: 'relation', labelColor: AnnotationRelation.labelStatic.getLabelColor(params.data.label) });
+    super({
+      ...params,
+      name: 'relation',
+      labelColor: AnnotationRelation.labelStatic.getLabelColor(params.data.label),
+      movable: false,
+    });
 
     this._isDuplicatedRelation = isDuplicatedRelation;
     this._getAnnotation = getAnnotation;
@@ -151,15 +156,18 @@ export class DraftRelation extends Draft<RelationData, Line | Point, LineStyle |
       if (name === 'target') {
         return item._group?.id !== this.group.id && item._group?.id !== this.data.sourceId;
       }
+
+      return false;
     });
 
     if (rbushItems.length > 0) {
       const targetBBox = rbushItems[0]._group?.getBBoxByFilter((shape) => !(shape instanceof ShapeText));
 
-      if (
-        this._isDuplicatedRelation(rbushItems[0]._group!.id, this.data.targetId) ||
-        this._isDuplicatedRelation(this.data.sourceId, rbushItems[0]._group!.id)
-      ) {
+      if (name === 'source' && this._isDuplicatedRelation(rbushItems[0]._group!.id, this.data.targetId)) {
+        return;
+      }
+
+      if (name === 'target' && this._isDuplicatedRelation(this.data.sourceId, rbushItems[0]._group!.id)) {
         return;
       }
 

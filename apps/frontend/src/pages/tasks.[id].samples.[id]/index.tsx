@@ -38,6 +38,9 @@ export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
 export const videoAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
 export const audioAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
 
+const PREVIEW_OFFSET_TOP = 102;
+const OFFSET_TOP = 158;
+
 const AnnotationPage = () => {
   const routeParams = useParams();
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
@@ -275,6 +278,10 @@ const AnnotationPage = () => {
   const [labelMapping, setLabelMapping] = useState<Record<any, string>>();
 
   const handleLabelChange = useCallback((toolName: any, label: ILabel) => {
+    if (!label) {
+      return;
+    }
+
     // 缓存当前标签
     setLabelMapping((prev) => {
       return {
@@ -303,7 +310,8 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
         onError={onError}
-        offsetTop={configFromParent ? 100 : 156}
+        // windows platform pixel issue
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         disabled={disabled}
@@ -321,7 +329,7 @@ const AnnotationPage = () => {
       <Annotator
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
-        offsetTop={configFromParent ? 100 : 156}
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         toolbarRight={topActionContent}
@@ -341,7 +349,7 @@ const AnnotationPage = () => {
       <AudioAnnotator
         primaryColor="#0d53de"
         ref={audioAnnotationRef}
-        offsetTop={configFromParent ? 100 : 156}
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         disabled={disabled}

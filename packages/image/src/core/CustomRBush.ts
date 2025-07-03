@@ -2,6 +2,7 @@ import type { BBox } from 'rbush';
 import RBush from 'rbush';
 
 import uid from '@/utils/uid';
+import type { AllShape } from '@/shapes/types';
 
 import type { AxisPoint, Shape } from '../shapes';
 import { Line, Point, ShapeText } from '../shapes';
@@ -13,7 +14,7 @@ import { getDistanceToLine, getLatestPointOnLine, isBBoxIntersect } from '../sha
 export interface RBushItem extends BBox {
   id: string;
   _shape?: Shape<any>;
-  _group?: Group<Shape<any>, any>;
+  _group?: Group;
   /** 标注顺序，目前只在group当中有这个值 */
   _order?: number;
 }
@@ -47,7 +48,7 @@ export class CustomRBush extends RBush<RBushItem> {
     this._mapping.delete(item.id);
 
     if (_group && _shape) {
-      _group.remove(_shape);
+      _group.remove(_shape as AllShape);
     }
 
     super.remove(item);

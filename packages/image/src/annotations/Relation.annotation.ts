@@ -8,7 +8,7 @@ import type { AnnotationParams } from './Annotation';
 import { Annotation } from './Annotation';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
-import type { Point, PointStyle, Polygon, PolygonStyle, Rect, RectStyle, TextStyle } from '../shapes';
+import type { PointStyle, PolygonStyle, RectStyle } from '../shapes';
 import { ShapeText } from '../shapes';
 import { LabelBase } from './Label.base';
 import { EInternalEvent } from '../enums';
@@ -17,24 +17,29 @@ import type { PolygonData } from './Polygon.annotation';
 import type { RectData } from './Rect.annotation';
 import type { PointData } from './Point.annotation';
 
+// 常量定义
+const CONSTANTS = {
+  MIN_OFFSET_DISTANCE: 16,
+  ROTATION_THRESHOLD: 90,
+  STROKE_WIDTH_INCREASE: 2,
+} as const;
+
 export interface RelationData extends BasicImageAnnotation {
   sourceId: string;
   targetId: string;
-  arrowType: 'single' | 'double' | 'none';
 }
 
 export type ValidAnnotationType =
-  | Annotation<PolygonData, Polygon | ShapeText, PolygonStyle>
-  | Annotation<RectData, Rect | ShapeText, RectStyle>
-  | Annotation<PointData, Point | ShapeText, PointStyle>;
+  | Annotation<PolygonData, PolygonStyle>
+  | Annotation<RectData, RectStyle>
+  | Annotation<PointData, PointStyle>;
 
 export interface RelationAnnotationParams extends AnnotationParams<RelationData, LineStyle> {
   getAnnotation: (id: string) => ValidAnnotationType | undefined;
 }
 
-export class AnnotationRelation extends Annotation<RelationData, Line | ShapeText, LineStyle | TextStyle> {
+export class AnnotationRelation extends Annotation<RelationData, LineStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
-
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
 
   private _getAnnotation: (id: string) => ValidAnnotationType | undefined;
@@ -42,12 +47,9 @@ export class AnnotationRelation extends Annotation<RelationData, Line | ShapeTex
   constructor({ getAnnotation, ...params }: RelationAnnotationParams) {
     super(params);
     this._getAnnotation = getAnnotation;
-    this.labelColor = AnnotationRelation.labelStatic.getLabelColor(params.data.label);
-    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+    this._initializeColors(params.data.label);
     this._setupShapes();
-    this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
-    this.group.on(EInternalEvent.MouseOut, this._handleMouseOut);
-    eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
+    this._setupEventListeners();
   }
 
   static buildLabelMapping(labels: ILabel[]) {
@@ -56,37 +58,46 @@ export class AnnotationRelation extends Annotation<RelationData, Line | ShapeTex
 
   static labelStatic: LabelBase;
 
-  static chunk(arr: any[], size: number) {
-    const result = [];
-
+  /**
+   * 将数组分块
+   * @param arr 要分块的数组
+   * @param size 每块的大小
+   * @returns 分块后的数组
+   */
+  static chunk<T>(arr: T[], size: number): T[][] {
+    const result: T[][] = [];
     for (let i = 0; i < arr.length; i += size) {
       result.push(arr.slice(i, i + size));
     }
-
     return result;
   }
 
-  private _setupShapes() {
-    const { data, group, style, labelColor, strokeColor } = this;
+  /**
+   * 初始化颜色
+   */
+  private _initializeColors(label: string | undefined): void {
+    this.labelColor = AnnotationRelation.labelStatic.getLabelColor(label || '');
+    this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
+  }
 
-    const { visible = true } = data;
+  /**
+   * 设置事件监听器
+   */
+  private _setupEventListeners(): void {
+    this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
+    this.group.on(EInternalEvent.MouseOut, this._handleMouseOut);
+    eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
+  }
 
-    const commonStyle = {
-      ...style,
-      opacity: visible ? 1 : 0,
-    };
-
-    const sourceAnnotation = this._getAnnotation(data.sourceId);
-    const targetAnnotation = this._getAnnotation(data.targetId);
-    const sourceCenter = sourceAnnotation?.getCenter();
-    const targetCenter = targetAnnotation?.getCenter();
-
-    if (!sourceCenter || !targetCenter) {
-      console.error('sourceAnnotation or targetAnnotation is not found');
-      return;
-    }
-
-    const line = new Line({
+  /**
+   * 创建连接线
+   */
+  private _createConnectionLine(
+    sourceCenter: { x: number; y: number },
+    targetCenter: { x: number; y: number },
+    commonStyle: any,
+  ): Line {
+    return new Line({
       id: uid(),
       coordinate: [
         {
@@ -98,33 +109,88 @@ export class AnnotationRelation extends Annotation<RelationData, Line | ShapeTex
           y: axis!.getOriginalY(targetCenter.y),
         },
       ],
-      style: { ...commonStyle, stroke: strokeColor, strokeWidth: Annotation.strokeWidth },
+      style: {
+        ...commonStyle,
+        stroke: this.strokeColor,
+        strokeWidth: Annotation.strokeWidth,
+      },
     });
-
-    group.add(line);
-
-    const attributesText = AnnotationRelation.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
-
-    group.add(
-      new ShapeText({
-        id: uid(),
-        // 线段的中点
-        coordinate: {
-          x: axis!.getOriginalX((sourceCenter.x + targetCenter.x) / 2),
-          y: axis!.getOriginalY((sourceCenter.y + targetCenter.y) / 2),
-        },
-        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
-        style: {
-          opacity: visible ? 1 : 0,
-          fill: labelColor,
-        },
-      }),
-    );
   }
 
-  private _handleMouseOver = () => {
-    const { data, group, style, hoveredStyle, strokeColor } = this;
+  /**
+   * 获取标注中心点
+   */
+  private _getAnnotationCenters(): {
+    sourceCenter: { x: number; y: number } | null;
+    targetCenter: { x: number; y: number } | null;
+  } {
+    const sourceAnnotation = this._getAnnotation(this.data.sourceId);
+    const targetAnnotation = this._getAnnotation(this.data.targetId);
 
+    return {
+      sourceCenter: sourceAnnotation?.getCenter() || null,
+      targetCenter: targetAnnotation?.getCenter() || null,
+    };
+  }
+
+  /**
+   * 设置形状
+   */
+  private _setupShapes(): void {
+    const { data, group, style } = this;
+    const { visible = true } = data;
+
+    const commonStyle = {
+      ...style,
+      opacity: visible ? 1 : 0,
+    };
+
+    const { sourceCenter, targetCenter } = this._getAnnotationCenters();
+
+    if (!sourceCenter || !targetCenter) {
+      console.error(`无法找到源标注或目标标注: sourceId=${this.data.sourceId}, targetId=${this.data.targetId}`);
+      return;
+    }
+
+    // 创建连接线
+    const line = this._createConnectionLine(sourceCenter, targetCenter, commonStyle);
+    group.add(line);
+
+    // 创建标签文本
+    const labelText = AnnotationRelation.labelStatic.getLabelText(data.label);
+    this.doms.push(
+      Annotation.createTextDomPortal(
+        this.generateLabelDom(labelText),
+        false, // 标签文本在线条下方
+        data.order,
+        group.shapes[0] as Line,
+        {
+          display: visible ? 'block' : 'none',
+        },
+      ),
+    );
+
+    const attributesText = AnnotationRelation.labelStatic.getAttributeTexts(data.label, data.attributes);
+    if (attributesText) {
+      this.doms.push(
+        Annotation.createTextDomPortal(
+          this.generateAttributeDom(attributesText),
+          true, // 属性文本在线条上方
+          data.order,
+          group.shapes[0] as Line,
+          {
+            display: visible ? 'block' : 'none',
+          },
+        ),
+      );
+    }
+  }
+
+  /**
+   * 处理鼠标悬停事件
+   */
+  private _handleMouseOver = (): void => {
+    const { data, group, style, hoveredStyle } = this;
     const { visible = true } = data;
 
     const commonStyle = {
@@ -135,21 +201,19 @@ export class AnnotationRelation extends Annotation<RelationData, Line | ShapeTex
     if (hoveredStyle) {
       group.updateStyle(typeof hoveredStyle === 'function' ? hoveredStyle(style) : hoveredStyle);
     } else {
-      group.each((shape) => {
-        if (!(shape instanceof ShapeText)) {
-          shape.updateStyle({
-            ...commonStyle,
-            stroke: strokeColor,
-            strokeWidth: Annotation.strokeWidth + 2,
-          });
-        }
+      this._updateShapeStyles(group, {
+        ...commonStyle,
+        stroke: this.strokeColor,
+        strokeWidth: Annotation.strokeWidth + CONSTANTS.STROKE_WIDTH_INCREASE,
       });
     }
   };
 
-  private _handleMouseOut = () => {
-    const { data, style, group, strokeColor } = this;
-
+  /**
+   * 处理鼠标离开事件
+   */
+  private _handleMouseOut = (): void => {
+    const { data, style, group } = this;
     const { visible = true } = data;
 
     const commonStyle = {
@@ -157,17 +221,27 @@ export class AnnotationRelation extends Annotation<RelationData, Line | ShapeTex
       opacity: visible ? 1 : 0,
     };
 
-    group.each((shape) => {
-      if (!(shape instanceof ShapeText)) {
-        shape.updateStyle({
-          ...commonStyle,
-          stroke: strokeColor,
-          strokeWidth: Annotation.strokeWidth,
-        });
-      }
+    this._updateShapeStyles(group, {
+      ...commonStyle,
+      stroke: this.strokeColor,
+      strokeWidth: Annotation.strokeWidth,
     });
   };
 
+  /**
+   * 更新形状样式
+   */
+  private _updateShapeStyles(group: any, style: any): void {
+    group.each((shape: any) => {
+      if (!(shape instanceof ShapeText)) {
+        shape.updateStyle(style);
+      }
+    });
+  }
+
+  /**
+   * 销毁实例
+   */
   public destroy(): void {
     super.destroy();
     eventEmitter.off(EInternalEvent.NoTarget, this._handleMouseOut);

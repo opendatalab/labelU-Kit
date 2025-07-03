@@ -12,6 +12,7 @@ import type { Group } from '../shapes';
 import { LabelBase } from './Label.base';
 import { EInternalEvent } from '../enums';
 import { eventEmitter } from '../singletons';
+import { DomPortal } from '../core/DomPortal';
 
 export interface RectData extends BasicImageAnnotation {
   x: number;
@@ -20,9 +21,9 @@ export interface RectData extends BasicImageAnnotation {
   height: number;
 }
 
-export type RectGroup = Group<Rect | ShapeText, RectStyle>;
+export type RectGroup = Group;
 
-export class AnnotationRect extends Annotation<RectData, Rect | ShapeText, RectStyle> {
+export class AnnotationRect extends Annotation<RectData, RectStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
@@ -46,7 +47,7 @@ export class AnnotationRect extends Annotation<RectData, Rect | ShapeText, RectS
   static labelStatic: LabelBase;
 
   private _setupShapes() {
-    const { data, group, style, labelColor, strokeColor } = this;
+    const { data, group, style, strokeColor } = this;
 
     const { visible = true } = data;
     const commonStyle = {
@@ -67,22 +68,42 @@ export class AnnotationRect extends Annotation<RectData, Rect | ShapeText, RectS
       }),
     );
 
-    const attributesText = AnnotationRect.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+    const labelText = AnnotationRect.labelStatic.getLabelText(data.label);
+    const attributesText = AnnotationRect.labelStatic.getAttributeTexts(data.label, data.attributes);
 
-    group.add(
-      new ShapeText({
-        id: uid(),
-        coordinate: {
-          x: data.x,
-          y: data.y + data.height,
-        },
-        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
+    this.doms.push(
+      new DomPortal({
+        content: this.generateLabelDom(labelText),
+        getPosition: (shape, container) => ({
+          x: shape.dynamicCoordinate[0].x - Annotation.strokeWidth / 2,
+          y: shape.dynamicCoordinate[0].y - container.clientHeight,
+        }),
+        order: data.order,
+        preventPointerEvents: true,
+        bindShape: group.shapes[0] as Rect,
         style: {
-          opacity: visible ? 1 : 0,
-          fill: labelColor,
+          display: visible ? 'block' : 'none',
         },
       }),
     );
+
+    if (attributesText) {
+      this.doms.push(
+        new DomPortal({
+          content: this.generateAttributeDom(attributesText),
+          getPosition: (shape) => ({
+            x: shape.dynamicCoordinate[0].x,
+            y: shape.dynamicCoordinate[0].y + (shape as Rect).dynamicHeight + 5,
+          }),
+          order: data.order,
+          preventPointerEvents: true,
+          bindShape: group.shapes[0] as Rect,
+          style: {
+            display: visible ? 'block' : 'none',
+          },
+        }),
+      );
+    }
   }
 
   private _handleMouseOver = () => {

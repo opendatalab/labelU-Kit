@@ -7,12 +7,13 @@ import type { LineToolOptions } from '@/tools/Line.tool';
 import type { CuboidToolOptions } from '@/tools/Cuboid.tool';
 import type { PolygonToolOptions } from '@/tools/Polygon.tool';
 import type { PointToolOptions } from '@/tools/Point.tool';
+import type { AllShape } from '@/shapes/types';
 
 import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
 import { Annotation, type AnnotationParams } from '../annotations/Annotation';
 import type { BasicImageAnnotation, EditType, ToolName } from '../interface';
-import type { AxisPoint, Shape } from '../shapes';
+import type { AxisPoint } from '../shapes';
 import { Point, Group, Spline, ClosedSpline } from '../shapes';
 import { ControllerPoint } from './ControllerPoint';
 import { ControllerEdge } from './ControllerEdge';
@@ -20,11 +21,7 @@ import { LabelBase } from '../annotations/Label.base';
 
 type MouseEventHandler = (e: MouseEvent) => void;
 
-export class Draft<
-  Data extends BasicImageAnnotation,
-  IShape extends Shape<Style>,
-  Style extends Record<string, any>,
-> extends EventEmitter {
+export class Draft<Data extends BasicImageAnnotation, Style extends Record<string, any>> extends EventEmitter {
   public isPicked = false;
 
   public config: RectToolOptions | LineToolOptions | CuboidToolOptions | PolygonToolOptions | PointToolOptions | null =
@@ -42,13 +39,15 @@ export class Draft<
 
   public style: Style;
 
-  public group: Group<IShape, Style>;
+  public group: Group<AllShape>;
 
   public hoveredStyle?: Style | ((style: Style) => Style);
 
   public showOrder: boolean = false;
 
   private _onMoveHandlers: MouseEventHandler[] = [];
+
+  public movable: boolean = true;
 
   private _onMouseDownHandlers: MouseEventHandler[] = [];
 
@@ -70,7 +69,8 @@ export class Draft<
     showOrder,
     name,
     labelColor,
-  }: AnnotationParams<Data, Style> & { name: ToolName; labelColor: string }) {
+    movable = true,
+  }: AnnotationParams<Data, Style> & { name: ToolName; labelColor: string; movable?: boolean }) {
     super();
 
     this.name = name;
@@ -80,6 +80,7 @@ export class Draft<
     this.hoveredStyle = hoveredStyle;
     this.showOrder = showOrder;
     this.labelColor = labelColor;
+    this.movable = movable;
 
     this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
     // 光标颜色切换
@@ -149,10 +150,10 @@ export class Draft<
   private _getControls() {
     const controls: (ControllerPoint | ControllerEdge)[] = [];
 
-    const digDeep = (group: Group<Shape<Style>, Style>) => {
+    const digDeep = (group: Group) => {
       for (const shape of group.shapes) {
         if (shape instanceof Group) {
-          digDeep(shape as Group<Shape<Style>, Style>);
+          digDeep(shape as Group);
         } else if (shape instanceof ControllerPoint || shape instanceof ControllerEdge) {
           controls.push(shape);
         }
@@ -165,9 +166,9 @@ export class Draft<
   }
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { _onMoveHandlers, isPicked } = this;
+    const { _onMoveHandlers, isPicked, movable } = this;
 
-    if (!isPicked) {
+    if (!isPicked || !movable) {
       return;
     }
 
@@ -213,7 +214,7 @@ export class Draft<
   private _digCoordinates(): AxisPoint[] | AxisPoint[][] {
     const loop = (shape: any): AxisPoint | AxisPoint[] => {
       if (shape.shapes) {
-        return (shape as Group<Shape<Style>, Style>).shapes.map(loop) as AxisPoint[];
+        return (shape as Group).shapes.map(loop) as AxisPoint[];
       } else {
         return shape.dynamicCoordinate;
       }
@@ -297,9 +298,9 @@ export class Draft<
     const [safeX, safeY] = config?.outOfImage ? [true, true] : axis!.isCoordinatesSafe(this._digCoordinates());
 
     // TODO: 消灭any
-    const loop = (shape: Shape<Style>, index: number, serialized: any) => {
+    const loop = (shape: AllShape, index: number, serialized: any) => {
       if (shape instanceof Group) {
-        (shape as Group<Shape<Style>, Style>).each((item, idx) => {
+        (shape as Group).each((item, idx) => {
           loop(item, idx, serialized[index].shapes);
         });
       } else {

@@ -63,10 +63,18 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
       rect: t('rect'),
       polygon: t('polygon'),
       cuboid: t('cuboid'),
-      relation: t('relation'),
+      relation: t('relationWithTips'),
     }),
     [t],
   );
+
+  const handleUndo = useCallback(() => {
+    if (dragModalRef.current?.getVisibility()) {
+      return;
+    }
+
+    undo();
+  }, [undo]);
 
   const handleUndo = useCallback(() => {
     if (dragModalRef.current?.getVisibility()) {
