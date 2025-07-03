@@ -411,7 +411,7 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
     }
 
     const data: RelationData = {
-      id: uid(),
+      id: sketch.id,
       sourceId: sourceAnnotation.id,
       targetId: targetAnnotation.id,
       arrowType: 'single',
