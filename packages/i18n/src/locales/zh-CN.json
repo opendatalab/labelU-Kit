@@ -310,6 +310,7 @@
   "toolStyle": "工具样式",
   "point": "标点",
   "line": "标线",
+  "relation": "关联关系",
   "rect": "拉框",
   "polygon": "多边形",
   "cuboid": "立体框",
@@ -354,5 +355,14 @@
   "plainPolygon": "多边形",
   "deletePoint": "删除点",
   "makeCuboid": "标立体框",
-  "cropOverlap": "裁剪重叠区域"
+  "cropOverlap": "裁剪重叠区域",
+  "lineStyle": "线条样式",
+  "arrowType": "箭头类型",
+  "solid": "实线",
+  "dashed": "虚线",
+  "dotted": "点线",
+  "single": "单向箭头",
+  "double": "双向箭头",
+  "none": "无箭头",
+  "relationToolTooltip": "关联关系工具只能与矩形或多边形工具一起使用"
 }

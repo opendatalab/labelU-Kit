@@ -153,6 +153,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     const { drawing, style, hoveredStyle } = this;
 
     const annotation = new AnnotationRect({
+      name: this.name,
       id: data.id,
       data,
       showOrder: this.showOrder,
@@ -167,6 +168,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   private _createDraft(data: RectData) {
     this.draft = new DraftRect(this.config, {
+      name: this.name,
       id: data.id,
       data,
       showOrder: false,

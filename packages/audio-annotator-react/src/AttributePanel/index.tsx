@@ -209,6 +209,7 @@ export function AttributePanel() {
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const { t } = useTranslation();
+  const [modified, setModified] = useState<boolean>(false);
 
   const { globalAnnotations, globalAnnotationsWithPreAnnotation, mediaAnnotationGroup, defaultActiveKeys } =
     useMemo(() => {
@@ -223,7 +224,7 @@ export function AttributePanel() {
         ...(preAnnotationsWithGlobal?.frame ?? []),
       ] as MediaAnnotationInUI[];
 
-      if (!_globalAnnotations.length) {
+      if (!_globalAnnotations.length && !modified) {
         [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
           if (values) {
             _globalAnnotationsWithPreAnnotation.push(...(values as GlobalAnnotation[]));
@@ -261,6 +262,7 @@ export function AttributePanel() {
       preAnnotationsWithGlobal?.tag,
       preAnnotationsWithGlobal?.text,
       sortedMediaAnnotations,
+      modified,
     ]);
 
   const globals = useMemo(() => {
@@ -398,6 +400,8 @@ export function AttributePanel() {
     if (!currentSample) {
       return;
     }
+
+    setModified(true);
 
     onAnnotationClear();
   };

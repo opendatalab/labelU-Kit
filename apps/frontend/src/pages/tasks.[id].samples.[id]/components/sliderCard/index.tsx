@@ -40,7 +40,12 @@ const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardP
   }, [cardInfo, routeSample.data]);
   const { id, inner_id, state, file } = currentSample;
   const filename = file.filename;
-  const url = file.url;
+  const url = useMemo(() => {
+    return [MediaType.VIDEO, MediaType.AUDIO].includes(type as MediaType)
+      ? file.url.replace('attachment', 'partial')
+      : file.url;
+  }, [type, file.url]);
+
   const { t } = useTranslation();
   const me = useMe();
   const isMeTheCurrentEditingUser = editingUser?.user_id === me?.data?.id;

@@ -174,6 +174,8 @@ export class Draft<
     // 统一在这里移动草稿
     this.moveByDistance();
 
+    eventEmitter.emit(EInternalEvent.DraftMove, e, this);
+
     for (const handler of _onMoveHandlers) {
       handler(e);
     }
@@ -222,6 +224,11 @@ export class Draft<
 
   public finishSetup() {
     this.emit('setup');
+  }
+
+  public getCenter() {
+    console.warn('getCenter is not implemented');
+    return { x: 0, y: 0 };
   }
 
   public onMove(handler: MouseEventHandler) {

@@ -87,7 +87,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   public draft: DraftPolygon | DraftPolygonCurve | null = null;
 
-  public sketch: Group<Polygon | ClosedSpline | Line | Point, PolygonStyle | LineStyle | PointStyle> | null = null;
+  public sketch: Group<Polygon | Spline | Line | Point, PolygonStyle | LineStyle | PointStyle> | null = null;
 
   constructor(params: PolygonToolOptions) {
     super({
@@ -146,6 +146,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
     const { drawing, style, hoveredStyle } = this;
 
     const annotation = new AnnotationPolygon({
+      name: this.name,
       id: data.id,
       data,
       showOrder: this.showOrder,
@@ -190,6 +191,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
         ? new DraftPolygon(
             this.config,
             {
+              name: this.name,
               id: data.id,
               data,
               showOrder: false,
@@ -198,6 +200,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
             this,
           )
         : new DraftPolygonCurve(this.config, {
+            name: this.name,
             id: data.id,
             data,
             showOrder: false,
@@ -753,6 +756,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
     datas.forEach((data) => {
       const annotation = new AnnotationPolygon({
+        name: this.name,
         id: data.id,
         data,
         showOrder: this.showOrder,

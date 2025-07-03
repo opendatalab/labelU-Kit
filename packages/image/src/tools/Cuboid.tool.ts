@@ -88,6 +88,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
     const { drawing, style, hoveredStyle } = this;
 
     const annotation = new AnnotationCuboid({
+      name: this.name,
       id: data.id,
       data,
       showOrder: this.showOrder,
@@ -102,6 +103,7 @@ export class CuboidTool extends Tool<CuboidData, CuboidStyle, CuboidToolOptions>
 
   private _createDraft(data: CuboidData) {
     this.draft = new DraftCuboid(this.config, {
+      name: this.name,
       id: data.id,
       data,
       showOrder: false,

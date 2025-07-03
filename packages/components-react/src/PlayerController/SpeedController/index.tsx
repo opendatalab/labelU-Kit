@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from '@labelu/i18n';
@@ -83,16 +83,21 @@ export interface SpeedControllerProps {
   onChange?: (rate: number) => void;
   playerType: PlayerType;
   disabled?: boolean;
+  rate?: number;
 }
 
 export function SpeedController(props: SpeedControllerProps) {
-  const { onChange, playerType = 'video', disabled } = props;
+  const { onChange, playerType = 'video', disabled, rate: rateProp } = props;
   const PLAYBACK_RATE_SPEED = PLAYER_TYPE_RATE_SPEED[playerType];
   const MAX_PLAYBACK_RATE_SPEED = PLAYBACK_RATE_SPEED.slice(-1)[0];
   const MIN_PLAYBACK_RATE_SPEED = PLAYBACK_RATE_SPEED[0];
-  const [rate, setRate] = useState(1);
+  const [rate, setRate] = useState(rateProp ?? 1);
   // @ts-ignore
   const { t } = useTranslation();
+
+  useEffect(() => {
+    setRate(rateProp ?? 1);
+  }, [rateProp]);
 
   const setPlaybackRate = useCallback(
     (speedChange: ESpeedChange) => {

@@ -1,6 +1,6 @@
 {
   "name": "@labelu/i18n",
-  "version": "1.1.0-alpha.6",
+  "version": "1.0.6",
   "description": "i18n for labelu and components",
   "scripts": {
     "build": "vite build && npm run build:types",
@@ -31,7 +31,7 @@
   "dependencies": {
     "i18next": "^22.4.10",
     "i18next-browser-languagedetector": "^8.0.2",
-    "react-i18next": "^15.2.0"
+    "react-i18next": "15.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

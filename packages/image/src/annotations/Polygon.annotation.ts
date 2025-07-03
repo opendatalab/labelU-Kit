@@ -27,7 +27,7 @@ export interface PolygonData extends BasicImageAnnotation {
 
 export type PolygonGroup = Group<Polygon | ShapeText, PolygonStyle>;
 
-export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonStyle> {
+export class AnnotationPolygon extends Annotation<PolygonData, Polygon | ShapeText, PolygonStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
@@ -161,6 +161,20 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
       }
     });
   };
+
+  public getCenter() {
+    const { group } = this;
+
+    const maxX = Math.max(...group.shapes[0].dynamicCoordinate.map((item) => item.x));
+    const maxY = Math.max(...group.shapes[0].dynamicCoordinate.map((item) => item.y));
+    const minX = Math.min(...group.shapes[0].dynamicCoordinate.map((item) => item.x));
+    const minY = Math.min(...group.shapes[0].dynamicCoordinate.map((item) => item.y));
+
+    return {
+      x: (maxX + minX) / 2,
+      y: (maxY + minY) / 2,
+    };
+  }
 
   public destroy(): void {
     super.destroy();

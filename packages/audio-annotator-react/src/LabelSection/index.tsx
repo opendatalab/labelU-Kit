@@ -44,7 +44,8 @@ const MoreAttribute = styled.div<{ visible: boolean }>`
   right: 0;
   display: flex;
   top: 100%;
-  z-index: 999;
+  z-index: 1002;
+  flex-wrap: wrap;
   padding: 0.5rem;
   box-shadow: 0px 3px 6px 0px rgb(0 0 0 / 21%);
   border-radius: 3px;
@@ -164,6 +165,10 @@ export function LabelSection() {
 
   const handleSelect = useCallback(
     (attribute: Attribute, e: React.MouseEvent) => {
+      if (!selectedAnnotation) {
+        return;
+      }
+
       onLabelChange(attribute);
 
       player.pause();
@@ -174,7 +179,7 @@ export function LabelSection() {
         e,
       });
     },
-    [onLabelChange, player],
+    [onLabelChange, player, selectedAnnotation],
   );
 
   const handleModalClose = useCallback(async () => {

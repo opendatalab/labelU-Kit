@@ -3,12 +3,13 @@ import type { BBox } from 'rbush';
 import Color from 'color';
 
 import uid from '@/utils/uid';
+import { EInternalEvent } from '@/enums';
 
 import { Rect, type RectStyle } from '../shapes/Rect.shape';
 import { AnnotationRect, type RectData } from '../annotations';
 import type { AxisPoint, LineCoordinate, PointStyle } from '../shapes';
 import { Point } from '../shapes';
-import { axis } from '../singletons';
+import { axis, eventEmitter } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
 import { Annotation } from '../annotations/Annotation';
 import { ControllerPoint } from './ControllerPoint';
@@ -420,6 +421,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
     // 手动更新组合的包围盒
     this.group.update();
+    eventEmitter.emit(EInternalEvent.DraftResize, this);
   };
 
   /**
@@ -527,6 +529,7 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
     }
 
     this.group.update();
+    eventEmitter.emit(EInternalEvent.DraftResize, this);
   };
 
   private _onEdgeUp = () => {
@@ -654,6 +657,14 @@ export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, Re
 
   protected getDynamicCoordinates() {
     return this.group.shapes.map((shape) => cloneDeep(shape.dynamicCoordinate));
+  }
+
+  public getCenter() {
+    const { minX, minY, maxX, maxY } = this._getBBox();
+    return {
+      x: (minX + maxX) / 2,
+      y: (minY + maxY) / 2,
+    };
   }
 
   public syncCoordToData() {

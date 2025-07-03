@@ -4,11 +4,11 @@ import RBush from 'rbush';
 import uid from '@/utils/uid';
 
 import type { AxisPoint, Shape } from '../shapes';
-import { Line, Point } from '../shapes';
+import { Line, Point, ShapeText } from '../shapes';
 import type { Group } from '../shapes/Group';
 import { axis, eventEmitter } from '../singletons';
 import { EInternalEvent } from '../enums';
-import { getDistanceToLine, getLatestPointOnLine } from '../shapes/math.util';
+import { getDistanceToLine, getLatestPointOnLine, isBBoxIntersect } from '../shapes/math.util';
 
 export interface RBushItem extends BBox {
   id: string;
@@ -82,6 +82,34 @@ export class CustomRBush extends RBush<RBushItem> {
       minY: coordinate.y - threshold,
       maxX: coordinate.x + threshold,
       maxY: coordinate.y + threshold,
+    });
+  }
+
+  /**
+   * 判断点是否在画布图形的任一包围盒中（文字除外）
+   *
+   * @param coordinate 坐标点
+   * @returns 是否在包围盒中
+   */
+  public getRBushItemsByPointInBBox(coordinate: AxisPoint) {
+    const rbushItems = this.scanCanvasObject(coordinate, 0);
+
+    return rbushItems.filter((item) => {
+      const _bbox = item._group?.getBBoxByFilter((shape) => !(shape instanceof ShapeText));
+
+      if (!_bbox) {
+        return false;
+      }
+
+      // 创建一个以coordinate为中心的极小bbox来检测点是否在_bbox内
+      const pointBBox: BBox = {
+        minX: coordinate.x,
+        minY: coordinate.y,
+        maxX: coordinate.x,
+        maxY: coordinate.y,
+      };
+
+      return isBBoxIntersect(pointBBox, _bbox);
     });
   }
 

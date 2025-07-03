@@ -5,6 +5,7 @@ import type {
   PointToolOptions,
   PolygonToolOptions,
   RectToolOptions,
+  RelationToolOptions,
 } from '@/tools';
 
 export interface AnnotatorOptions {
@@ -23,6 +24,8 @@ export interface AnnotatorOptions {
   polygon?: PolygonToolOptions;
 
   cuboid?: CuboidToolOptions;
+
+  relation?: RelationToolOptions;
 
   /**
    * 全局的是否可编辑设置，权重高于requestEdit函数
@@ -94,6 +97,8 @@ export default class AnnotatorConfig {
 
   public cuboid?: CuboidToolOptions;
 
+  public relation?: RelationToolOptions;
+
   public editable?: boolean = true;
 
   public image: {
@@ -123,6 +128,7 @@ export default class AnnotatorConfig {
     this.height = options.height;
     this.line = options.line;
     this.point = options.point;
+    this.relation = options.relation;
     this.rect = options.rect;
     this.polygon = options.polygon;
     this.cuboid = options.cuboid;

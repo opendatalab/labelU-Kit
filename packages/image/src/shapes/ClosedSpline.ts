@@ -17,6 +17,11 @@ export class ClosedSpline extends Shape<PolygonStyle> {
     strokeWidth: 2,
     opacity: 1,
     fill: Color(DEFAULT_LABEL_COLOR).alpha(0.5).toString(),
+    lineStyle: 'solid',
+    dashPattern: [],
+    arrowType: 'none',
+    headLength: 10,
+    headAngle: 30,
   };
 
   private _controlPoints: AxisPoint[];

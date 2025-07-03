@@ -109,7 +109,7 @@ export default function Sidebar({ renderSidebar }: SidebarProps) {
   }
 
   return (
-    <Wrapper collapsed={collapsed}>
+    <Wrapper collapsed={collapsed} className="labelu-image__sidebar">
       {sidebar || (
         <Cards>
           {samples.map((sample, index) => {

@@ -43,7 +43,9 @@ export default function useSampleWs() {
 
   useEffect(() => {
     wsRef.current = new WebSocketClient(
-      `ws://${host}/ws/task/${routeParams.taskId}/${routeParams.sampleId}?token=${token}`,
+      `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${host}/ws/task/${routeParams.taskId}/${
+        routeParams.sampleId
+      }?token=${token}`,
     );
 
     const ws = wsRef.current;

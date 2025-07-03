@@ -312,6 +312,7 @@
   "rect": "Rectangle",
   "polygon": "Polygon",
   "cuboid": "Cuboid",
+  "relation": "Relation",
   "tag": "Tag",
   "textDescription": "Text",
   "strokeWidth": "Stroke width",
@@ -355,5 +356,15 @@
 
   "tryDemo": "Try Demo",
   "demoDescription": "Provide a variety of annotation tools, click 'Try Demo' to start experiencing",
-  "createTaskDescription": "Provide a variety of annotation tools, click 'Create Task' to start annotating"
+  "createTaskDescription": "Provide a variety of annotation tools, click 'Create Task' to start annotating",
+
+  "lineStyle": "Line style",
+  "arrowType": "Arrow type",
+  "solid": "Solid",
+  "dashed": "Dashed",
+  "dotted": "Dotted",
+  "single": "Single",
+  "double": "Double",
+  "none": "None",
+  "relationToolTooltip": "The relation tool can only be used with rectangle or polygon tools"
 }
