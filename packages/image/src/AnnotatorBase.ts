@@ -16,7 +16,6 @@ import type { CursorManager } from './core/CursorManager';
 import { createCursorManager } from './singletons/cursorManager';
 import { createConfig } from './singletons/annotationConfig';
 import type { AnnotatorOptions } from './core/AnnotatorConfig';
-// import { relationManager } from './singletons/relationManager';
 import { RelationTool } from './tools/Relation.tool';
 
 const ToolMapping = {
