@@ -92,9 +92,9 @@ export function ToolWrapper<
       }
 
       // 关联关系需要检查是否重复
-      if (this.name === 'relation' && this.isDuplicatedRelation) {
+      if (this.name === 'relation' && this.isDuplicatedRelation && this.draft) {
         const relationData = this.draft!.data as any;
-        if (this.draft && this.isDuplicatedRelation(relationData.sourceId, relationData.targetId, value)) {
+        if (this.isDuplicatedRelation(relationData.sourceId, relationData.targetId, value)) {
           return false;
         }
       }
