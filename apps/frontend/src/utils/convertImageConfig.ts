@@ -32,7 +32,6 @@ export function convertImageConfig(taskConfig?: ToolsConfigState) {
         editorConfig.line!.maxPointAmount = item.config.upperLimitPointNum;
         editorConfig.line!.style = {
           ...editorConfig.line!.style,
-          lineStyle: item.config.lineStyle,
           arrowType: item.config.arrowType,
         };
       }
