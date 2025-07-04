@@ -21,7 +21,7 @@ type ControllerPosition = 'nw' | 'ne' | 'se' | 'sw';
 
 type EdgePosition = 'top' | 'right' | 'bottom' | 'left';
 
-export class DraftRect extends Draft<RectData, ControllerEdge | Point | Rect, RectStyle | PointStyle> {
+export class DraftRect extends Draft<RectData, RectStyle | PointStyle> {
   public config: RectToolOptions;
 
   private _preBBox: BBox | null = null;

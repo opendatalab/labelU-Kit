@@ -6,7 +6,7 @@ import { VALID_RELATION_TOOLS } from '@/constant';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import { AnnotationRelation, type RelationData } from '../annotations';
-import type { PointStyle, Point, AxisPoint } from '../shapes';
+import type { PointStyle, AxisPoint } from '../shapes';
 import { ShapeText } from '../shapes';
 import { axis, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -15,14 +15,14 @@ import { ControllerPoint } from './ControllerPoint';
 import { Draft } from './Draft';
 
 export interface RelationDraftParams extends AnnotationParams<RelationData, LineStyle> {
-  getAnnotation: (id: string) => Annotation<any, any, any> | undefined;
+  getAnnotation: (id: string) => Annotation<any, any> | undefined;
   isDuplicatedRelation: (sourceId: string, targetId: string) => boolean;
 }
 
-export class DraftRelation extends Draft<RelationData, Line | Point, LineStyle | PointStyle> {
+export class DraftRelation extends Draft<RelationData, LineStyle | PointStyle> {
   private _isDuplicatedRelation: (sourceId: string, targetId: string) => boolean;
 
-  private _getAnnotation: (id: string) => Annotation<any, any, any> | undefined;
+  private _getAnnotation: (id: string) => Annotation<any, any> | undefined;
 
   private _effectedLines: [Line | undefined, Line | undefined] | null = null;
 

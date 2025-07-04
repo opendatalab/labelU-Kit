@@ -4,7 +4,7 @@ import Color from 'color';
 import uid from '@/utils/uid';
 
 import { AnnotationCuboid, type CuboidData, type CuboidVertex } from '../../annotations';
-import type { AxisPoint, LineCoordinate, PointStyle, PolygonStyle, Point } from '../../shapes';
+import type { AxisPoint, LineCoordinate, PointStyle, PolygonStyle } from '../../shapes';
 import { Line, Polygon } from '../../shapes';
 import type { AnnotationParams } from '../../annotations/Annotation';
 import { Annotation } from '../../annotations/Annotation';
@@ -46,7 +46,7 @@ type SimpleEdgePosition = 'top' | 'right' | 'bottom' | 'left';
  * 立体框草稿
  * @description 一个立体框草稿由前后 1 个多边形做正面的背景色填充 + 8个控制点 + 4条线段 + 8个控制边组成
  */
-export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line | Polygon, PolygonStyle | PointStyle> {
+export class DraftCuboid extends Draft<CuboidData, PolygonStyle | PointStyle> {
   public config: CuboidToolOptions;
 
   private _previousDynamicCoordinate: AxisPoint[] | null = null;
@@ -289,13 +289,15 @@ export class DraftCuboid extends Draft<CuboidData, ControllerEdge | Point | Line
     elem.innerHTML = domString;
 
     this._dom = new DomPortal({
-      x: controlFrontTl!.dynamicCoordinate[0].x,
-      y: controlFrontTl!.dynamicCoordinate[0].y,
-      offset: {
-        x: -36,
-        y: 10,
+      // x: controlFrontTl!.dynamicCoordinate[0].x,
+      // y: controlFrontTl!.dynamicCoordinate[0].y,
+      getPosition: (shape) => {
+        return {
+          x: shape.dynamicCoordinate[0].x - 36,
+          y: shape.dynamicCoordinate[0].y + 10,
+        };
       },
-      element: elem,
+      content: elem,
       bindShape: controlFrontTl!,
     });
   }
