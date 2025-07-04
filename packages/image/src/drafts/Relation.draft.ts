@@ -30,7 +30,12 @@ export class DraftRelation extends Draft<RelationData, Line | Point, LineStyle |
 
   constructor(options: RelationDraftParams) {
     const { isDuplicatedRelation, getAnnotation, ...params } = options;
-    super({ ...params, name: 'relation', labelColor: AnnotationRelation.labelStatic.getLabelColor(params.data.label) });
+    super({
+      ...params,
+      name: 'relation',
+      labelColor: AnnotationRelation.labelStatic.getLabelColor(params.data.label),
+      movable: false,
+    });
 
     this._isDuplicatedRelation = isDuplicatedRelation;
     this._getAnnotation = getAnnotation;
