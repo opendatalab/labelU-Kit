@@ -313,6 +313,7 @@
   "polygon": "Polygon",
   "cuboid": "Cuboid",
   "relation": "Relation",
+  "relationWithTips": "Relation (Only with rectangle or polygon tools)",
   "tag": "Tag",
   "textDescription": "Text",
   "strokeWidth": "Stroke width",

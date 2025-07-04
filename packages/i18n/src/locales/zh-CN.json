@@ -311,6 +311,7 @@
   "point": "标点",
   "line": "标线",
   "relation": "关联关系",
+  "relationWithTips": "关联关系（仅限拉框/多边形工具）",
   "rect": "拉框",
   "polygon": "多边形",
   "cuboid": "立体框",
