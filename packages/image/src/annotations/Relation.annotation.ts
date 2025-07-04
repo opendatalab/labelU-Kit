@@ -20,7 +20,6 @@ import type { PointData } from './Point.annotation';
 export interface RelationData extends BasicImageAnnotation {
   sourceId: string;
   targetId: string;
-  arrowType: 'single' | 'double' | 'none';
 }
 
 export type ValidAnnotationType =

@@ -414,7 +414,6 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
       id: sketch.id,
       sourceId: sourceAnnotation.id,
       targetId: targetAnnotation.id,
-      arrowType: 'single',
       order: monitor!.getNextOrder(),
       attributes: {},
       label: this.activeLabel,
