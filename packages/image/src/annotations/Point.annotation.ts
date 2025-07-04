@@ -16,9 +16,9 @@ import { EInternalEvent } from '../enums';
 
 export type PointData = BasicImageAnnotation & AxisPoint;
 
-export type PointGroup = Group<Point | ShapeText, PointStyle>;
+export type PointGroup = Group;
 
-export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, PointStyle> {
+export class AnnotationPoint extends Annotation<PointData, PointStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
@@ -62,22 +62,22 @@ export class AnnotationPoint extends Annotation<PointData, Point | ShapeText, Po
       }),
     );
 
-    const attributesText = AnnotationPoint.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+    // const attributesText = AnnotationPoint.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
 
-    group.add(
-      new ShapeText({
-        id: uid(),
-        coordinate: {
-          x: data.x,
-          y: data.y,
-        },
-        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
-        style: {
-          opacity: visible ? 1 : 0,
-          fill: labelColor,
-        },
-      }),
-    );
+    // group.add(
+    //   new ShapeText({
+    //     id: uid(),
+    //     coordinate: {
+    //       x: data.x,
+    //       y: data.y,
+    //     },
+    //     text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
+    //     style: {
+    //       opacity: visible ? 1 : 0,
+    //       fill: labelColor,
+    //     },
+    //   }),
+    // );
   }
 
   private _handleMouseOver = () => {

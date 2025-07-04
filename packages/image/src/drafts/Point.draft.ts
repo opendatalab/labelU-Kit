@@ -1,12 +1,12 @@
 import type { AnnotationParams, PointData } from '../annotations';
 import { Annotation, AnnotationPoint } from '../annotations';
-import type { AxisPoint, PointStyle, ShapeText } from '../shapes';
+import type { AxisPoint, PointStyle } from '../shapes';
 import { Point } from '../shapes';
 import { Draft } from './Draft';
 import type { PointToolOptions } from '../tools';
 import { eventEmitter } from '../singletons';
 
-export class DraftPoint extends Draft<PointData, Point | ShapeText, PointStyle> {
+export class DraftPoint extends Draft<PointData, PointStyle> {
   public config: PointToolOptions;
 
   constructor(config: PointToolOptions, params: AnnotationParams<PointData, PointStyle>) {

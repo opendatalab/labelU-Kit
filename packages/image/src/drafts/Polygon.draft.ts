@@ -6,7 +6,7 @@ import uid from '@/utils/uid';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import { AnnotationPolygon, type PolygonData, type PolygonGroup } from '../annotations';
-import type { PointStyle, PolygonStyle, Point } from '../shapes';
+import type { PointStyle, PolygonStyle } from '../shapes';
 import { Polygon } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -19,7 +19,7 @@ import { EInternalEvent } from '../enums';
 import { generatePolygonsFromDifference, getLatestPointOnLine, isBBoxIntersect } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
 
-export class DraftPolygon extends Draft<PolygonData, Polygon | Point | Line, PolygonStyle | PointStyle | LineStyle> {
+export class DraftPolygon extends Draft<PolygonData, PolygonStyle | PointStyle | LineStyle> {
   public config: PolygonToolOptions;
 
   private _pointIndex: number | null = null;

@@ -42,9 +42,9 @@ export interface CuboidData extends BasicImageAnnotation {
   back: CuboidVertex;
 }
 
-export type CuboidGroup = Group<Polygon | ShapeText, CuboidStyle>;
+export type CuboidGroup = Group;
 
-export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText, CuboidStyle> {
+export class AnnotationCuboid extends Annotation<CuboidData, CuboidStyle> {
   private _realFront: Polygon | null = null;
 
   public labelColor: string = LabelBase.DEFAULT_COLOR;

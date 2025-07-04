@@ -1,8 +1,9 @@
 import type { BasicImageAnnotation, ToolName } from '../interface';
 import { Group } from '../shapes/Group';
-import { type Shape } from '../shapes';
-import { monitor } from '../singletons';
+import { eventEmitter, monitor } from '../singletons';
 import { DEFAULT_LABEL_COLOR } from '../constant';
+import type { DomPortal } from '../core/DomPortal';
+import { EInternalEvent } from '../enums/internalEvent.enum';
 
 // TODO: 去除本类的any
 export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
@@ -23,8 +24,10 @@ export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   onPick?: (e: MouseEvent, annotation: any) => void;
 }
 
-export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<Style>, Style> {
+export class Annotation<Data extends BasicImageAnnotation, Style> {
   public id: string;
+
+  public doms: DomPortal[] = [];
 
   public data: Data;
 
@@ -32,7 +35,7 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
   public style: Style;
 
-  public group: Group<IShape, Style>;
+  public group: Group;
 
   public hoveredStyle?: Style | ((style: Style) => Style);
 
@@ -63,7 +66,19 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
 
     // 建立order和id的映射关系
     monitor?.setOrderIndexedAnnotationIds(data.order, id);
+
+    this.group.on(EInternalEvent.MouseOver, this.__handleMouseOver);
+    this.group.on(EInternalEvent.MouseOut, this.__handleMouseOut);
+    eventEmitter.on(EInternalEvent.NoTarget, this.__handleMouseOut);
   }
+
+  private __handleMouseOver = () => {
+    this.doms.forEach((dom) => dom.toTop());
+  };
+
+  private __handleMouseOut = () => {
+    this.doms.forEach((dom) => dom.resetZIndex());
+  };
 
   public get bbox() {
     return this.group.bbox;
@@ -84,7 +99,36 @@ export class Annotation<Data extends BasicImageAnnotation, IShape extends Shape<
   }
 
   public destroy() {
+    this.doms.forEach((dom) => dom.destroy());
     this.data = null as any;
     this.group.destroy();
+    this.group.off(EInternalEvent.MouseOver, this.__handleMouseOver);
+    this.group.off(EInternalEvent.MouseOut, this.__handleMouseOut);
+    eventEmitter.off(EInternalEvent.NoTarget, this.__handleMouseOut);
+  }
+
+  protected generateLabelDom(text: string, style?: string, extra?: string) {
+    return `
+      <div style="color: #fff; font-size: 12px; font-weight: bold; background-color: ${
+        this.labelColor
+      }; padding: 2px 4px; ${style ?? ''};">
+      ${this.showOrder ? this.data.order + ' ' : ''}${text}
+      ${extra ?? ''}
+      </div>
+    `;
+  }
+
+  protected generateAttributeDom(text: string, style?: string, extra?: string) {
+    return `
+      <div style="color: #fff; font-size: 12px; font-weight: bold; background-color: ${
+        this.labelColor
+      }; padding: 2px 4px; ${style ?? ''};">
+      ${text
+        .split('\n')
+        .map((line) => `<div>${line}</div>`)
+        .join('')}
+      ${extra ?? ''}
+      </div>
+    `;
   }
 }

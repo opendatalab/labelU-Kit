@@ -5,7 +5,7 @@ import uid from '@/utils/uid';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import { AnnotationLine, type LineData } from '../annotations';
-import type { PointStyle, Point } from '../shapes';
+import type { PointStyle } from '../shapes';
 import { Rect } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -17,7 +17,7 @@ import { EInternalEvent } from '../enums';
 import { getLatestPointOnLine } from '../shapes/math.util';
 import { Tool } from '../tools/Tool';
 
-export class DraftLine extends Draft<LineData, Line | Point, LineStyle | PointStyle> {
+export class DraftLine extends Draft<LineData, LineStyle | PointStyle> {
   public config: LineToolOptions;
 
   private _selectionShape: Rect | null = null;

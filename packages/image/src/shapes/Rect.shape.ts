@@ -108,6 +108,14 @@ export class Rect extends Shape<RectStyle> {
     };
   }
 
+  public get dynamicHeight() {
+    return this._scaledHeight;
+  }
+
+  public get dynamicWidth() {
+    return this._scaledWidth;
+  }
+
   public set width(width: number) {
     this._width = width;
     this.update();

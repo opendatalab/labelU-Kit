@@ -1,17 +1,22 @@
 import EventEmitter from 'eventemitter3';
 import type { BBox } from 'rbush';
 
-import type { Shape } from './Shape';
 import { EInternalEvent } from '../enums';
 import type { RBushItem } from '../core/CustomRBush';
 import { eventEmitter, rbush } from '../singletons';
-import { type AxisPoint } from './Point.shape';
+import type { PointStyle, AxisPoint } from './Point.shape';
 import { ShapeText } from './Text.shape';
+import type { AllShape } from './types';
+import type { RectStyle } from './Rect.shape';
+import type { LineStyle } from './Line.shape';
+import type { PolygonStyle } from './Polygon.shape';
+
+type Style = RectStyle | LineStyle | PolygonStyle | PointStyle;
 
 /**
  * 组合类，用于组合多个图形
  */
-export class Group<T extends Shape<Style>, Style> {
+export class Group {
   public id: string;
 
   public order: number;
@@ -28,9 +33,9 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _cachedRBush: RBushItem | null = null;
 
-  private _shapes: Shape<Style>[] = [];
+  private _shapes: AllShape[] = [];
 
-  private _shapeMapping: Map<string, T> = new Map();
+  private _shapeMapping: Map<string, AllShape> = new Map();
 
   private _event = new EventEmitter();
 
@@ -116,7 +121,7 @@ export class Group<T extends Shape<Style>, Style> {
     return this;
   }
 
-  public getBBoxByFilter(filter: (shape: Shape<Style>) => boolean): BBox {
+  public getBBoxByFilter(filter: (shape: AllShape) => boolean): BBox {
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -153,7 +158,7 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
-  public add(...shapes: T[]) {
+  public add(...shapes: AllShape[]) {
     shapes.forEach((shape) => {
       if (this._shapeMapping.has(shape.id)) {
         throw Error(`Shape with id ${shape.id} already exists!`);
@@ -185,7 +190,7 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
-  public insert(index: number, ...shapes: T[]) {
+  public insert(index: number, ...shapes: AllShape[]) {
     shapes.forEach((shape) => {
       if (this._shapeMapping.has(shape.id)) {
         throw Error(`Shape with id ${shape.id} already exists!`);
@@ -198,7 +203,7 @@ export class Group<T extends Shape<Style>, Style> {
     this.update();
   }
 
-  public remove(...shapes: T[]) {
+  public remove(...shapes: AllShape[]) {
     const { _shapeMapping, _shapes } = this;
 
     shapes.forEach((shape) => {
@@ -210,7 +215,7 @@ export class Group<T extends Shape<Style>, Style> {
     this.update();
   }
 
-  public each(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
+  public each(callback: (shape: AllShape, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = 0; i < this.shapes.length; i += 1) {
@@ -222,7 +227,7 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
-  public reverseEach(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
+  public reverseEach(callback: (shape: AllShape, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = this.shapes.length - 1; i >= 0; i -= 1) {
@@ -238,7 +243,7 @@ export class Group<T extends Shape<Style>, Style> {
     return this.shapes[this.shapes.length - 1];
   }
 
-  public indexOf(shape: T) {
+  public indexOf(shape: AllShape) {
     return this.shapes.indexOf(shape);
   }
 
