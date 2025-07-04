@@ -63,7 +63,7 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
       rect: t('rect'),
       polygon: t('polygon'),
       cuboid: t('cuboid'),
-      relation: t('relation'),
+      relation: t('relationWithTips'),
     }),
     [t],
   );
