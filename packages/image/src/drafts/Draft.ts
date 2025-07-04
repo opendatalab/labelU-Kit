@@ -50,6 +50,8 @@ export class Draft<
 
   private _onMoveHandlers: MouseEventHandler[] = [];
 
+  public movable: boolean = true;
+
   private _onMouseDownHandlers: MouseEventHandler[] = [];
 
   private _onMouseUpHandlers: MouseEventHandler[] = [];
@@ -70,7 +72,8 @@ export class Draft<
     showOrder,
     name,
     labelColor,
-  }: AnnotationParams<Data, Style> & { name: ToolName; labelColor: string }) {
+    movable = true,
+  }: AnnotationParams<Data, Style> & { name: ToolName; labelColor: string; movable?: boolean }) {
     super();
 
     this.name = name;
@@ -80,6 +83,7 @@ export class Draft<
     this.hoveredStyle = hoveredStyle;
     this.showOrder = showOrder;
     this.labelColor = labelColor;
+    this.movable = movable;
 
     this.strokeColor = Color(this.labelColor).alpha(Annotation.strokeOpacity).string();
     // 光标颜色切换
@@ -165,9 +169,9 @@ export class Draft<
   }
 
   private _handleMouseMove = (e: MouseEvent) => {
-    const { _onMoveHandlers, isPicked } = this;
+    const { _onMoveHandlers, isPicked, movable } = this;
 
-    if (!isPicked) {
+    if (!isPicked || !movable) {
       return;
     }
 
