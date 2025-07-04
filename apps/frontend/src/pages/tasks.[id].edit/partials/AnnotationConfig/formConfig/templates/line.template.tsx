@@ -32,30 +32,6 @@ export default [
         },
       },
       {
-        field: 'lineStyle',
-        key: 'lineStyle',
-        type: 'enum',
-        label: i18n.t('lineStyle'),
-        initialValue: 'solid',
-        antProps: {
-          options: [
-            { label: i18n.t('solid'), value: 'solid' },
-            { label: i18n.t('dashed'), value: 'dashed' },
-            { label: i18n.t('dotted'), value: 'dotted' },
-          ],
-        },
-        renderFormItem({ antProps, ...props }, form, fullField) {
-          const lineType = form.getFieldValue([...(fullField as any[]).slice(0, -1), 'lineType']);
-
-          if (lineType === 1) {
-            return null;
-          }
-
-          return <FancyInput {...props} {...antProps} />;
-        },
-      },
-
-      {
         field: 'arrowType',
         key: 'arrowType',
         type: 'enum',
