@@ -1,7 +1,7 @@
 import type { ILabel } from '@labelu/interface';
 import Color from 'color';
 
-import uid from '@/utils/uid';
+import { DomPortal } from '@/core/DomPortal';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -9,7 +9,7 @@ import { Annotation } from './Annotation';
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
 import type { AxisPoint } from '../shapes/Point.shape';
-import type { Group, TextStyle } from '../shapes';
+import type { Group } from '../shapes';
 import { Spline, ShapeText } from '../shapes';
 import { LabelBase } from './Label.base';
 import { EInternalEvent } from '../enums';
@@ -19,7 +19,7 @@ export interface PointItem extends AxisPoint {
   id: string;
 }
 
-export type LineGroup = Group<Line | ShapeText, LineStyle>;
+export type LineGroup = Group;
 
 export interface LineData extends BasicImageAnnotation {
   points: PointItem[];
@@ -31,7 +31,7 @@ export interface LineData extends BasicImageAnnotation {
   controlPoints?: AxisPoint[];
 }
 
-export class AnnotationLine extends Annotation<LineData, Line | Spline | ShapeText, LineStyle | TextStyle> {
+export class AnnotationLine extends Annotation<LineData, LineStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
@@ -86,7 +86,7 @@ export class AnnotationLine extends Annotation<LineData, Line | Spline | ShapeTe
   }
 
   private _setupShapes() {
-    const { data, group, style, labelColor, strokeColor } = this;
+    const { data, group, style, strokeColor } = this;
 
     const { type, visible = true } = data;
 
@@ -130,19 +130,36 @@ export class AnnotationLine extends Annotation<LineData, Line | Spline | ShapeTe
       throw new Error('Invalid line type!');
     }
 
-    const attributesText = AnnotationLine.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+    const labelText = AnnotationLine.labelStatic.getLabelText(data.label);
+    const attributesText = AnnotationLine.labelStatic.getAttributeTexts(data.label, data.attributes);
 
-    group.add(
-      new ShapeText({
-        id: uid(),
-        coordinate: data.points[0],
-        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
-        style: {
-          opacity: visible ? 1 : 0,
-          fill: labelColor,
-        },
+    this.doms.push(
+      new DomPortal({
+        content: this.generateLabelDom(labelText),
+        getPosition: (shape, container) => ({
+          x: shape.dynamicCoordinate[0].x,
+          y: shape.dynamicCoordinate[0].y - container.clientHeight,
+        }),
+        order: data.order,
+        preventPointerEvents: true,
+        bindShape: group.shapes[0] as Line,
       }),
     );
+
+    if (attributesText) {
+      this.doms.push(
+        new DomPortal({
+          content: this.generateAttributeDom(attributesText),
+          getPosition: (shape) => ({
+            x: shape.dynamicCoordinate[0].x,
+            y: shape.dynamicCoordinate[0].y,
+          }),
+          order: data.order,
+          preventPointerEvents: true,
+          bindShape: group.shapes[0],
+        }),
+      );
+    }
   }
 
   private _handleMouseOver = () => {

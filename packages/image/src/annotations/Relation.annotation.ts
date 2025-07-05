@@ -16,7 +16,6 @@ import { axis, eventEmitter } from '../singletons';
 import type { PolygonData } from './Polygon.annotation';
 import type { RectData } from './Rect.annotation';
 import type { PointData } from './Point.annotation';
-import { DomPortal } from '../core/DomPortal';
 
 // 常量定义
 const CONSTANTS = {
@@ -37,28 +36,6 @@ export type ValidAnnotationType =
 
 export interface RelationAnnotationParams extends AnnotationParams<RelationData, LineStyle> {
   getAnnotation: (id: string) => ValidAnnotationType | undefined;
-}
-
-// 文本位置计算参数
-interface TextPositionParams {
-  shape: any;
-  container: HTMLElement;
-  isAboveLine: boolean;
-}
-
-// 文本位置结果
-interface TextPosition {
-  x: number;
-  y: number;
-  rotate: number;
-}
-
-// 线段信息
-interface LineInfo {
-  angle: number;
-  rotate: number;
-  centerX: number;
-  centerY: number;
 }
 
 export class AnnotationRelation extends Annotation<RelationData, LineStyle> {
@@ -110,63 +87,6 @@ export class AnnotationRelation extends Annotation<RelationData, LineStyle> {
     this.group.on(EInternalEvent.MouseOver, this._handleMouseOver);
     this.group.on(EInternalEvent.MouseOut, this._handleMouseOut);
     eventEmitter.on(EInternalEvent.NoTarget, this._handleMouseOut);
-  }
-
-  /**
-   * 获取线段信息
-   */
-  private _getLineInfo(shape: any): LineInfo {
-    const angle = Math.atan2(
-      shape.dynamicCoordinate[1].y - shape.dynamicCoordinate[0].y,
-      shape.dynamicCoordinate[1].x - shape.dynamicCoordinate[0].x,
-    );
-    const rotate = angle * (180 / Math.PI);
-    const centerX = (shape.dynamicCoordinate[0].x + shape.dynamicCoordinate[1].x) / 2;
-    const centerY = (shape.dynamicCoordinate[0].y + shape.dynamicCoordinate[1].y) / 2;
-
-    return { angle, rotate, centerX, centerY };
-  }
-
-  /**
-   * 计算文本位置
-   */
-  private _calculateTextPosition({ shape, container, isAboveLine }: TextPositionParams): TextPosition {
-    const { angle, rotate, centerX, centerY } = this._getLineInfo(shape);
-
-    // 根据角度决定偏移方向
-    let perpendicularAngle: number;
-    if (Math.abs(rotate) <= CONSTANTS.ROTATION_THRESHOLD) {
-      // 角度在-90到90度之间
-      perpendicularAngle = isAboveLine ? angle + Math.PI / 2 : angle - Math.PI / 2;
-    } else {
-      // 角度超过90度
-      perpendicularAngle = isAboveLine ? angle - Math.PI / 2 : angle + Math.PI / 2;
-    }
-
-    const offsetDistance = Math.max(container.clientHeight / 2, CONSTANTS.MIN_OFFSET_DISTANCE);
-    const x = centerX + Math.cos(perpendicularAngle) * offsetDistance - container.clientWidth / 2;
-    const y = centerY + Math.sin(perpendicularAngle) * offsetDistance - container.clientHeight / 2;
-
-    // 根据角度调整旋转，确保文字始终可读
-    let finalRotate = rotate;
-    if (Math.abs(rotate) > CONSTANTS.ROTATION_THRESHOLD) {
-      finalRotate = rotate + 180;
-    }
-
-    return { x, y, rotate: finalRotate };
-  }
-
-  /**
-   * 创建文本DomPortal
-   */
-  private _createTextDomPortal(content: string, isAboveLine: boolean, order: number, bindShape: any): DomPortal {
-    return new DomPortal({
-      content,
-      getPosition: (shape, container) => this._calculateTextPosition({ shape, container, isAboveLine }),
-      order,
-      preventPointerEvents: true,
-      bindShape,
-    });
   }
 
   /**
@@ -239,23 +159,22 @@ export class AnnotationRelation extends Annotation<RelationData, LineStyle> {
     // 创建标签文本
     const labelText = AnnotationRelation.labelStatic.getLabelText(data.label);
     this.doms.push(
-      this._createTextDomPortal(
+      Annotation.createTextDomPortal(
         this.generateLabelDom(labelText),
         false, // 标签文本在线条下方
         data.order,
-        group.shapes[0],
+        group.shapes[0] as Line,
       ),
     );
 
-    // 创建属性文本（如果存在）
     const attributesText = AnnotationRelation.labelStatic.getAttributeTexts(data.label, data.attributes);
     if (attributesText) {
       this.doms.push(
-        this._createTextDomPortal(
+        Annotation.createTextDomPortal(
           this.generateAttributeDom(attributesText),
           true, // 属性文本在线条上方
           data.order,
-          group.shapes[0],
+          group.shapes[0] as Line,
         ),
       );
     }

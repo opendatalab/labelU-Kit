@@ -162,6 +162,13 @@ export function ToolWrapper<
           item.group.updateStyle({
             opacity: visible ? 1 : 0,
           } as any);
+          item.doms.forEach((dom) => {
+            if (visible) {
+              dom.show();
+            } else {
+              dom.hide();
+            }
+          });
         }
       });
 

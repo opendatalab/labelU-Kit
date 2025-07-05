@@ -39,7 +39,7 @@ export interface BasicToolParams<Data, Style> {
   ) => boolean;
 }
 
-type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Shape<Style>, Style>;
+type IAnnotation<Data extends BasicImageAnnotation, Style> = Annotation<Data, Style>;
 
 type ConfigOmit<T> = Omit<T, 'data' | 'style' | 'hoveredStyle' | 'name'>;
 
@@ -72,12 +72,12 @@ export class Tool<Data extends BasicImageAnnotation, Style, Config extends Basic
    *
    * @description 绘制过程中的标注不一定在这个字段下，可能视情况而定
    */
-  public draft: Draft<Data, any, any> | null = null;
+  public draft: Draft<Data, any> | null = null;
 
   /**
    * 绘制过程中的草稿
    */
-  public sketch: Group<Shape<any>, any> | Shape<any> | null = null;
+  public sketch: Group | Shape<any> | null = null;
 
   public showOrder: boolean;
 
