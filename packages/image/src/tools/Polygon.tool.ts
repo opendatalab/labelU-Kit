@@ -6,7 +6,7 @@ import uid from '@/utils/uid';
 import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import { AnnotationPolygon } from '../annotations';
-import type { AxisPoint, LineStyle, PointStyle, PolygonStyle } from '../shapes';
+import type { AxisPoint, PolygonStyle } from '../shapes';
 import { Spline, ClosedSpline, Line, Point, Polygon } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import { EInternalEvent } from '../enums';
@@ -87,7 +87,7 @@ export class PolygonTool extends Tool<PolygonData, PolygonStyle, PolygonToolOpti
 
   public draft: DraftPolygon | DraftPolygonCurve | null = null;
 
-  public sketch: Group<Polygon | Spline | Line | Point, PolygonStyle | LineStyle | PointStyle> | null = null;
+  public sketch: Group | null = null;
 
   constructor(params: PolygonToolOptions) {
     super({

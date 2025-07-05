@@ -2,6 +2,7 @@ import Color from 'color';
 import type { ILabel } from '@labelu/interface';
 
 import uid from '@/utils/uid';
+import { DomPortal } from '@/core/DomPortal';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -225,23 +226,56 @@ export class AnnotationCuboid extends Annotation<CuboidData, CuboidStyle> {
       }),
     );
 
-    const attributesText = AnnotationCuboid.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+    const labelText = AnnotationCuboid.labelStatic.getLabelText(data.label);
+    const attributesText = AnnotationCuboid.labelStatic.getAttributeTexts(data.label, data.attributes);
 
-    // label
-    group.add(
-      new ShapeText({
-        id: uid(),
-        coordinate: {
-          x: front.bl.x,
-          y: front.bl.y,
-        },
-        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
-        style: {
-          opacity: visible ? 1 : 0,
-          fill: labelColor,
-        },
+    const backShape = group.shapes[2];
+    const frontShape = group.shapes[1];
+    this.doms.push(
+      new DomPortal({
+        content: this.generateLabelDom(labelText),
+        getPosition: (shape, container) => ({
+          x: shape.dynamicCoordinate[0].x,
+          y: shape.dynamicCoordinate[0].y - container.clientHeight,
+        }),
+        order: data.order,
+        preventPointerEvents: true,
+        bindShape: backShape,
       }),
     );
+
+    if (attributesText) {
+      this.doms.push(
+        new DomPortal({
+          content: this.generateAttributeDom(attributesText),
+          getPosition: (shape, container) => ({
+            x: shape.dynamicCoordinate[0].x,
+            y: shape.dynamicCoordinate[0].y + container.clientHeight + 5,
+          }),
+          order: data.order,
+          preventPointerEvents: true,
+          bindShape: frontShape,
+        }),
+      );
+    }
+
+    // const attributesText = AnnotationCuboid.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+
+    // // label
+    // group.add(
+    //   new ShapeText({
+    //     id: uid(),
+    //     coordinate: {
+    //       x: front.bl.x,
+    //       y: front.bl.y,
+    //     },
+    //     text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
+    //     style: {
+    //       opacity: visible ? 1 : 0,
+    //       fill: labelColor,
+    //     },
+    //   }),
+    // );
   }
 
   public destroy(): void {

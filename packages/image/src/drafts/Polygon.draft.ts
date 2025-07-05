@@ -5,8 +5,8 @@ import uid from '@/utils/uid';
 
 import type { LineStyle } from '../shapes/Line.shape';
 import { Line } from '../shapes/Line.shape';
-import { AnnotationPolygon, type PolygonData, type PolygonGroup } from '../annotations';
-import type { PointStyle, PolygonStyle } from '../shapes';
+import { AnnotationPolygon, type PolygonData } from '../annotations';
+import type { Group, PointStyle, PolygonStyle } from '../shapes';
 import { Polygon } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import type { AnnotationParams } from '../annotations/Annotation';
@@ -151,12 +151,12 @@ export class DraftPolygon extends Draft<PolygonData, PolygonStyle | PointStyle |
    */
   private async _cutPolygon() {
     // 找出有交集的其他多边形
-    const groups: PolygonGroup[] = [];
+    const groups: Group[] = [];
     const polygon = this.group.shapes[0] as Polygon;
 
     this._tool.drawing?.forEach((annotation) => {
       if (annotation.group.id !== this.group.id && isBBoxIntersect(polygon.bbox, annotation.group.bbox)) {
-        groups.push(annotation.group as PolygonGroup);
+        groups.push(annotation.group);
       }
     });
 
@@ -413,7 +413,7 @@ export class DraftPolygon extends Draft<PolygonData, PolygonStyle | PointStyle |
     // 手动更新组合的包围盒
     this.group.update();
     this.syncCoordToData();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, e, this);
   };
 
   /**
@@ -560,7 +560,7 @@ export class DraftPolygon extends Draft<PolygonData, PolygonStyle | PointStyle |
 
     this.group.update();
     this.syncCoordToData();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, 2, this);
   };
 
   private _onEdgeUp = () => {

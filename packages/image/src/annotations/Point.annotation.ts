@@ -2,6 +2,7 @@ import type { ILabel } from '@labelu/interface';
 import Color from 'color';
 
 import uid from '@/utils/uid';
+import { DomPortal } from '@/core/DomPortal';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -61,6 +62,37 @@ export class AnnotationPoint extends Annotation<PointData, PointStyle> {
         style: { ...commonStyle, fill: labelColor, strokeWidth: Annotation.strokeWidth, stroke: strokeColor },
       }),
     );
+
+    const labelText = AnnotationPoint.labelStatic.getLabelText(data.label);
+    const attributesText = AnnotationPoint.labelStatic.getAttributeTexts(data.label, data.attributes);
+
+    this.doms.push(
+      new DomPortal({
+        content: this.generateLabelDom(labelText),
+        getPosition: (shape, container) => ({
+          x: shape.dynamicCoordinate[0].x,
+          y: shape.dynamicCoordinate[0].y - container.clientHeight - Annotation.strokeWidth - 4,
+        }),
+        order: data.order,
+        preventPointerEvents: true,
+        bindShape: group.shapes[0],
+      }),
+    );
+
+    if (attributesText) {
+      this.doms.push(
+        new DomPortal({
+          content: this.generateAttributeDom(attributesText),
+          getPosition: (shape, container) => ({
+            x: shape.dynamicCoordinate[0].x - container.clientWidth / 2,
+            y: shape.dynamicCoordinate[0].y + 4,
+          }),
+          order: data.order,
+          preventPointerEvents: true,
+          bindShape: group.shapes[0],
+        }),
+      );
+    }
 
     // const attributesText = AnnotationPoint.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
 

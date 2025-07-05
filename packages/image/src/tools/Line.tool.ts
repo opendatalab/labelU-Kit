@@ -8,7 +8,7 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 import type { LineData, PointItem } from '../annotations';
 import { AnnotationLine } from '../annotations';
-import type { AxisPoint, PointStyle } from '../shapes';
+import type { AxisPoint } from '../shapes';
 import { Point } from '../shapes';
 import { axis, eventEmitter, monitor, rbush } from '../singletons';
 import { EInternalEvent } from '../enums';
@@ -86,7 +86,7 @@ export class LineTool extends Tool<LineData, LineStyle, LineToolOptions> {
 
   private _holdingSlopeEdge: Line | null = null;
 
-  public sketch: Group<Line | Point | Spline, LineStyle | PointStyle> | null = null;
+  public sketch: Group | null = null;
 
   public draft: DraftLine | DraftLineCurve | null = null;
 

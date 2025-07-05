@@ -421,7 +421,7 @@ export class DraftRect extends Draft<RectData, RectStyle | PointStyle> {
 
     // 手动更新组合的包围盒
     this.group.update();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, new Event(''), this);
   };
 
   /**
@@ -529,7 +529,7 @@ export class DraftRect extends Draft<RectData, RectStyle | PointStyle> {
     }
 
     this.group.update();
-    eventEmitter.emit(EInternalEvent.DraftResize, this);
+    eventEmitter.emit(EInternalEvent.DraftResize, new Event(''), this);
   };
 
   private _onEdgeUp = () => {

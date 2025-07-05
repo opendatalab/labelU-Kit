@@ -1,8 +1,9 @@
+import type { Line } from '../shapes';
 import type { BasicImageAnnotation, ToolName } from '../interface';
 import { Group } from '../shapes/Group';
 import { eventEmitter, monitor } from '../singletons';
 import { DEFAULT_LABEL_COLOR } from '../constant';
-import type { DomPortal } from '../core/DomPortal';
+import { DomPortal } from '../core/DomPortal';
 import { EInternalEvent } from '../enums/internalEvent.enum';
 
 // TODO: 去除本类的any
@@ -22,6 +23,18 @@ export interface AnnotationParams<Data extends BasicImageAnnotation, Style> {
   onMove?: (e: MouseEvent, annotation: any) => void;
   onMoveEnd?: (e: MouseEvent, annotation: any) => void;
   onPick?: (e: MouseEvent, annotation: any) => void;
+}
+
+export interface TextPositionParams {
+  shape: Line;
+  container: HTMLElement;
+  isAboveLine: boolean;
+}
+
+export interface TextPosition {
+  x: number;
+  y: number;
+  rotate: number;
 }
 
 export class Annotation<Data extends BasicImageAnnotation, Style> {
@@ -50,6 +63,47 @@ export class Annotation<Data extends BasicImageAnnotation, Style> {
   static fillOpacity = 0.7;
 
   static strokeWidth = 2;
+
+  static minOffsetDistance = 14;
+
+  static rotationThreshold = 90;
+
+  static calculateTextPosition({ shape, container, isAboveLine }: TextPositionParams): TextPosition {
+    const { angle, rotate, centerX, centerY } = shape.getLineInfo();
+
+    // 根据角度决定偏移方向
+    let perpendicularAngle: number;
+    if (Math.abs(rotate) <= Annotation.rotationThreshold) {
+      // 角度在-90到90度之间
+      perpendicularAngle = isAboveLine ? angle + Math.PI / 2 : angle - Math.PI / 2;
+    } else {
+      // 角度超过90度
+      perpendicularAngle = isAboveLine ? angle - Math.PI / 2 : angle + Math.PI / 2;
+    }
+
+    const offsetDistance = Annotation.minOffsetDistance;
+    const x = centerX + Math.cos(perpendicularAngle) * offsetDistance - container.clientWidth / 2;
+    const y = centerY + Math.sin(perpendicularAngle) * offsetDistance - container.clientHeight / 2;
+
+    // 根据角度调整旋转，确保文字始终可读
+    let finalRotate = rotate;
+    if (Math.abs(rotate) > Annotation.rotationThreshold) {
+      finalRotate = rotate + 180;
+    }
+
+    return { x, y, rotate: finalRotate };
+  }
+
+  static createTextDomPortal(content: string, isAboveLine: boolean, order: number, bindShape: Line): DomPortal {
+    return new DomPortal({
+      content,
+      getPosition: (shape, container) =>
+        Annotation.calculateTextPosition({ shape: shape as Line, container, isAboveLine }),
+      order,
+      preventPointerEvents: true,
+      bindShape,
+    });
+  }
 
   public get isHovered() {
     return false;
@@ -109,9 +163,9 @@ export class Annotation<Data extends BasicImageAnnotation, Style> {
 
   protected generateLabelDom(text: string, style?: string, extra?: string) {
     return `
-      <div style="color: #fff; font-size: 12px; font-weight: bold; background-color: ${
-        this.labelColor
-      }; padding: 2px 4px; ${style ?? ''};">
+      <div style="color: #fff; font-size: 12px; background-color: ${this.labelColor}; padding: 1px 2px; ${
+      style ?? ''
+    };">
       ${this.showOrder ? this.data.order + ' ' : ''}${text}
       ${extra ?? ''}
       </div>
@@ -120,9 +174,9 @@ export class Annotation<Data extends BasicImageAnnotation, Style> {
 
   protected generateAttributeDom(text: string, style?: string, extra?: string) {
     return `
-      <div style="color: #fff; font-size: 12px; font-weight: bold; background-color: ${
-        this.labelColor
-      }; padding: 2px 4px; ${style ?? ''};">
+      <div style="color: #fff; font-size: 12px; background-color: ${this.labelColor}; padding: 1px 2px; ${
+      style ?? ''
+    };">
       ${text
         .split('\n')
         .map((line) => `<div>${line}</div>`)

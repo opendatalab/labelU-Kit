@@ -22,7 +22,7 @@ import { ToolWrapper } from './Tool.decorator';
 
 export type RelationToolOptions = BasicToolParams<RelationData, LineStyle>;
 
-type AnyAnnotation = Annotation<any, any, any>;
+type AnyAnnotation = Annotation<any, any>;
 
 type AnyTool = Map<ToolName, AnnotationTool>;
 
@@ -33,7 +33,7 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
     return new RelationTool({ ...config, data });
   }
 
-  public sketch: Group<Line, LineStyle> | null = null;
+  public sketch: Group | null = null;
 
   public draft: DraftRelation | null = null;
 
@@ -61,6 +61,7 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
 
     AnnotationRelation.buildLabelMapping(params.labels ?? []);
     eventEmitter.on(EInternalEvent.DraftMove, this._handleDraftMove);
+    eventEmitter.on(EInternalEvent.DraftResize, this._handleDraftMove);
 
     this.setupShapes();
   }
@@ -434,5 +435,6 @@ export class RelationTool extends Tool<RelationData, LineStyle, RelationToolOpti
     this._sourceAnnotation = null;
     this._relationMapByRelation.clear();
     eventEmitter.off(EInternalEvent.DraftMove, this._handleDraftMove);
+    eventEmitter.off(EInternalEvent.DraftResize, this._handleDraftMove);
   }
 }

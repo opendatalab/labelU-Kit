@@ -1,8 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
 
-import type { LineStyle, Line } from '../shapes/Line.shape';
+import type { LineStyle } from '../shapes/Line.shape';
 import { AnnotationLine, type LineData } from '../annotations';
-import type { PointStyle, Point } from '../shapes';
 import { Spline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
 import type { ControllerPoint } from './ControllerPoint';
@@ -16,7 +15,7 @@ interface EffectedCurve {
   curve: Spline;
 }
 
-export class DraftLineCurve extends Draft<LineData, Line | Point | any, LineStyle | PointStyle> {
+export class DraftLineCurve extends Draft<LineData, LineStyle> {
   public config: LineToolOptions;
 
   private _isControllerPicked: boolean = false;

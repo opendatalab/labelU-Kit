@@ -74,9 +74,9 @@ export class AnnotationRect extends Annotation<RectData, RectStyle> {
     this.doms.push(
       new DomPortal({
         content: this.generateLabelDom(labelText),
-        getPosition: (shape) => ({
+        getPosition: (shape, container) => ({
           x: shape.dynamicCoordinate[0].x,
-          y: shape.dynamicCoordinate[0].y - 28,
+          y: shape.dynamicCoordinate[0].y - container.clientHeight,
         }),
         order: data.order,
         preventPointerEvents: true,

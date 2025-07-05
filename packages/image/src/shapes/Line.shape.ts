@@ -135,6 +135,18 @@ export class Line extends Shape<LineStyle> {
     return { tip, left, right };
   }
 
+  public getLineInfo() {
+    const angle = Math.atan2(
+      this.dynamicCoordinate[1].y - this.dynamicCoordinate[0].y,
+      this.dynamicCoordinate[1].x - this.dynamicCoordinate[0].x,
+    );
+    const rotate = angle * (180 / Math.PI);
+    const centerX = (this.dynamicCoordinate[0].x + this.dynamicCoordinate[1].x) / 2;
+    const centerY = (this.dynamicCoordinate[0].y + this.dynamicCoordinate[1].y) / 2;
+
+    return { angle, rotate, centerX, centerY };
+  }
+
   public render(ctx: CanvasRenderingContext2D | null) {
     if (!ctx) {
       throw Error('No context specific!');
