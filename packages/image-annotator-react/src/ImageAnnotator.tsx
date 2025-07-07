@@ -16,6 +16,7 @@ import type {
   ToolName,
   Annotator as ImageAnnotatorClass,
   AnnotationToolData,
+  RelationData,
   EditType,
 } from '@labelu/image';
 import cloneDeep from 'lodash.clonedeep';
