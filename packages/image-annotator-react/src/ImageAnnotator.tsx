@@ -16,6 +16,7 @@ import type {
   ToolName,
   Annotator as ImageAnnotatorClass,
   AnnotationToolData,
+  RelationData,
   EditType,
 } from '@labelu/image';
 import cloneDeep from 'lodash.clonedeep';
@@ -592,8 +593,9 @@ function ForwardAnnotator(
   useEffect(() => {
     // 删除标记
     const handleDelete = (annotation: AnnotationData) => {
-      const newAnnotations = omit(annotationsWithGlobal, annotation.id);
-      updateAnnotationsWithGlobal(newAnnotations);
+      updateAnnotationsWithGlobal((pre) => {
+        return omit(pre!, annotation.id);
+      });
       setSelectedAnnotation((pre) => {
         if (pre?.id === annotation.id) {
           return undefined;
@@ -607,6 +609,22 @@ function ForwardAnnotator(
 
     return () => {
       engine?.off('delete', handleDelete);
+    };
+  }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
+
+  useEffect(() => {
+    const handleRelationDelete = (relations: RelationData[]) => {
+      updateAnnotationsWithGlobal((pre) => {
+        return relations.reduce((acc, item) => {
+          return omit(acc, item.id);
+        }, pre!);
+      });
+    };
+
+    engine?.on('relatedRelationDelete', handleRelationDelete);
+
+    return () => {
+      engine?.off('relatedRelationDelete', handleRelationDelete);
     };
   }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
 
