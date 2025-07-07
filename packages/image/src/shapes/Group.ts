@@ -254,7 +254,10 @@ export class Group {
   }
 
   public destroy() {
-    rbush.remove(this._cachedRBush!);
+    if (this._cachedRBush) {
+      rbush.remove(this._cachedRBush);
+    }
+
     this._cachedRBush = null;
     this.shapes.forEach((shape) => {
       shape.destroy();
@@ -272,7 +275,11 @@ export class Group {
       shape.destroy();
     });
     this._shapes = [];
-    rbush.remove(this._cachedRBush!);
+
+    if (this._cachedRBush) {
+      rbush.remove(this._cachedRBush);
+    }
+
     this._shapeMapping.clear();
   }
 

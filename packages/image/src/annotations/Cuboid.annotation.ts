@@ -248,9 +248,9 @@ export class AnnotationCuboid extends Annotation<CuboidData, CuboidStyle> {
       this.doms.push(
         new DomPortal({
           content: this.generateAttributeDom(attributesText),
-          getPosition: (shape, container) => ({
-            x: shape.dynamicCoordinate[0].x,
-            y: shape.dynamicCoordinate[0].y + container.clientHeight + 5,
+          getPosition: (shape) => ({
+            x: shape.dynamicCoordinate[3].x,
+            y: shape.dynamicCoordinate[3].y + 5,
           }),
           order: data.order,
           preventPointerEvents: true,
@@ -258,24 +258,6 @@ export class AnnotationCuboid extends Annotation<CuboidData, CuboidStyle> {
         }),
       );
     }
-
-    // const attributesText = AnnotationCuboid.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
-
-    // // label
-    // group.add(
-    //   new ShapeText({
-    //     id: uid(),
-    //     coordinate: {
-    //       x: front.bl.x,
-    //       y: front.bl.y,
-    //     },
-    //     text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
-    //     style: {
-    //       opacity: visible ? 1 : 0,
-    //       fill: labelColor,
-    //     },
-    //   }),
-    // );
   }
 
   public destroy(): void {

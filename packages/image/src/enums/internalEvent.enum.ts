@@ -125,4 +125,7 @@ export enum EInternalEvent {
 
   /** 草稿大小变化 */
   DraftResize = '__draft_resize__',
+
+  /** 删除标注 */
+  DeleteAnnotationInternal = '__delete_annotation_internal__',
 }
