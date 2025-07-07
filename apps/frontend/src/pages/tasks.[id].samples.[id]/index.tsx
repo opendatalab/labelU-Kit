@@ -275,6 +275,10 @@ const AnnotationPage = () => {
   const [labelMapping, setLabelMapping] = useState<Record<any, string>>();
 
   const handleLabelChange = useCallback((toolName: any, label: ILabel) => {
+    if (!label) {
+      return;
+    }
+
     // 缓存当前标签
     setLabelMapping((prev) => {
       return {

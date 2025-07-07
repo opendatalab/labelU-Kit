@@ -690,7 +690,7 @@ function ForwardAnnotator(
       const _label = engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined;
 
       setSelectedLabel(_label);
-      propsOnLabelChange?.(currentTool, _label);
+      propsOnLabelChange?.(engine!.activeToolName!, _label);
     };
     // 改变标签
     engine?.on('labelChange', handleLabelChange);
