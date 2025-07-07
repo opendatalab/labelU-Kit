@@ -75,9 +75,11 @@ export function ToolWrapper<
         const data = cloneDeep(draft.data);
         this.deleteDraft();
         Tool.onDelete(this!.convertAnnotationItem(data));
+        this.removeRelations(id);
       } else {
         const data = cloneDeep(this.drawing!.get(id)!.data);
         this.removeFromDrawing(id);
+        this.removeRelations(id);
         Tool.onDelete(this!.convertAnnotationItem(data));
       }
 

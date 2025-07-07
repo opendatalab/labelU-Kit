@@ -174,9 +174,9 @@ export class Annotation<Data extends BasicImageAnnotation, Style> {
 
   protected generateAttributeDom(text: string, style?: string, extra?: string) {
     return `
-      <div style="color: #fff; font-size: 12px; background-color: ${this.labelColor}; padding: 1px 2px; ${
-      style ?? ''
-    };">
+      <div style="color: #fff; font-size: 12px; max-width: 16em; background-color: ${
+        this.labelColor
+      }; padding: 1px 2px; ${style ?? ''};">
       ${text
         .split('\n')
         .map((line) => `<div>${line}</div>`)
