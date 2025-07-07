@@ -1,5 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
 
+import type { AllShape } from '@/shapes/types';
+
 import type { LineStyle } from '../shapes/Line.shape';
 import { AnnotationLine, type LineData } from '../annotations';
 import { Spline } from '../shapes';
@@ -93,7 +95,7 @@ export class DraftLineCurve extends Draft<LineData, LineStyle> {
       edge.on(EInternalEvent.SlopeMove, this._onSlopePointMove);
       edge.on(EInternalEvent.SlopeUp, this._onSlopePointUp);
 
-      group.add(edge);
+      group.add(edge as unknown as AllShape);
     }
   }
 

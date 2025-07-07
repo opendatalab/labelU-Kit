@@ -16,7 +16,7 @@ type Style = RectStyle | LineStyle | PolygonStyle | PointStyle;
 /**
  * 组合类，用于组合多个图形
  */
-export class Group {
+export class Group<T extends AllShape = AllShape> {
   public id: string;
 
   public order: number;
@@ -33,9 +33,9 @@ export class Group {
 
   private _cachedRBush: RBushItem | null = null;
 
-  private _shapes: AllShape[] = [];
+  private _shapes: T[] = [];
 
-  private _shapeMapping: Map<string, AllShape> = new Map();
+  private _shapeMapping: Map<string, T> = new Map();
 
   private _event = new EventEmitter();
 
@@ -158,7 +158,7 @@ export class Group {
     }
   }
 
-  public add(...shapes: AllShape[]) {
+  public add(...shapes: T[]) {
     shapes.forEach((shape) => {
       if (this._shapeMapping.has(shape.id)) {
         throw Error(`Shape with id ${shape.id} already exists!`);
@@ -190,7 +190,7 @@ export class Group {
     }
   }
 
-  public insert(index: number, ...shapes: AllShape[]) {
+  public insert(index: number, ...shapes: T[]) {
     shapes.forEach((shape) => {
       if (this._shapeMapping.has(shape.id)) {
         throw Error(`Shape with id ${shape.id} already exists!`);
@@ -203,7 +203,7 @@ export class Group {
     this.update();
   }
 
-  public remove(...shapes: AllShape[]) {
+  public remove(...shapes: T[]) {
     const { _shapeMapping, _shapes } = this;
 
     shapes.forEach((shape) => {
@@ -215,7 +215,7 @@ export class Group {
     this.update();
   }
 
-  public each(callback: (shape: AllShape, idx: number) => void | boolean) {
+  public each(callback: (shape: T, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = 0; i < this.shapes.length; i += 1) {
@@ -227,7 +227,7 @@ export class Group {
     }
   }
 
-  public reverseEach(callback: (shape: AllShape, idx: number) => void | boolean) {
+  public reverseEach(callback: (shape: T, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = this.shapes.length - 1; i >= 0; i -= 1) {
@@ -243,7 +243,7 @@ export class Group {
     return this.shapes[this.shapes.length - 1];
   }
 
-  public indexOf(shape: AllShape) {
+  public indexOf(shape: T) {
     return this.shapes.indexOf(shape);
   }
 

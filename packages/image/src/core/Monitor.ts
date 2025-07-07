@@ -272,7 +272,7 @@ export class Monitor {
       lastGroup.reverseEach((shape: any) => {
         // 曲线的slopeEdge是一个group，不是shape
         if (shape instanceof Group) {
-          (shape as Group<any, any>).reverseEach((innerShape: any) => {
+          shape.reverseEach((innerShape: any) => {
             if (innerShape.isUnderCursor({ x: e.offsetX, y: e.offsetY })) {
               innerShape.emit(EInternalEvent.ShapeOver, e, innerShape);
 
