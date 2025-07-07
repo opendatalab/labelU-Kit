@@ -16,7 +16,6 @@ import type {
   ToolName,
   Annotator as ImageAnnotatorClass,
   AnnotationToolData,
-  RelationData,
   EditType,
 } from '@labelu/image';
 import cloneDeep from 'lodash.clonedeep';
@@ -613,7 +612,7 @@ function ForwardAnnotator(
   }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
 
   useEffect(() => {
-    const handleRelationDelete = (relations: RelationData[]) => {
+    const handleRelationDelete = (relations: AnnotationData[]) => {
       updateAnnotationsWithGlobal((pre) => {
         return relations.reduce((acc, item) => {
           return omit(acc, item.id);
