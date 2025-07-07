@@ -613,7 +613,7 @@ function ForwardAnnotator(
   }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
 
   useEffect(() => {
-    const handleRelationDelete = (relations: RelationData[]) => {
+    const handleRelationDelete = (relations: AnnotationData[]) => {
       updateAnnotationsWithGlobal((pre) => {
         return relations.reduce((acc, item) => {
           return omit(acc, item.id);
