@@ -313,7 +313,7 @@ export function AttributePanel() {
       });
     }
 
-    if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid) {
+    if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid || config?.relation) {
       _titles.push({
         title: t('labels'),
         key: 'label' as const,
@@ -333,6 +333,7 @@ export function AttributePanel() {
     config?.polygon,
     config?.rect,
     config?.cuboid,
+    config?.relation,
     globalAnnotations,
     sortedImageAnnotations.length,
   ]);
