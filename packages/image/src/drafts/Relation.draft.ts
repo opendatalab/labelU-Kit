@@ -156,15 +156,18 @@ export class DraftRelation extends Draft<RelationData, LineStyle | PointStyle> {
       if (name === 'target') {
         return item._group?.id !== this.group.id && item._group?.id !== this.data.sourceId;
       }
+
+      return false;
     });
 
     if (rbushItems.length > 0) {
       const targetBBox = rbushItems[0]._group?.getBBoxByFilter((shape) => !(shape instanceof ShapeText));
 
-      if (
-        this._isDuplicatedRelation(rbushItems[0]._group!.id, this.data.targetId) ||
-        this._isDuplicatedRelation(this.data.sourceId, rbushItems[0]._group!.id)
-      ) {
+      if (name === 'source' && this._isDuplicatedRelation(rbushItems[0]._group!.id, this.data.targetId)) {
+        return;
+      }
+
+      if (name === 'target' && this._isDuplicatedRelation(this.data.sourceId, rbushItems[0]._group!.id)) {
         return;
       }
 

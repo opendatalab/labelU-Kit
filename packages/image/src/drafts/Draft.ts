@@ -39,7 +39,7 @@ export class Draft<Data extends BasicImageAnnotation, Style extends Record<strin
 
   public style: Style;
 
-  public group: Group;
+  public group: Group<AllShape>;
 
   public hoveredStyle?: Style | ((style: Style) => Style);
 

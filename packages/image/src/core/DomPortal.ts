@@ -159,7 +159,7 @@ export class DomPortal {
   }
 
   public toTop() {
-    this._wrapper.style.zIndex = '10000';
+    this._wrapper.style.zIndex = '1049';
   }
 
   public resetZIndex() {

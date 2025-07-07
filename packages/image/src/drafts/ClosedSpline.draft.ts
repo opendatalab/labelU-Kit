@@ -1,6 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
 import Color from 'color';
 
+import type { AllShape } from '@/shapes/types';
+
 import type { LineStyle } from '../shapes/Line.shape';
 import type { PolygonData } from '../annotations';
 import { AnnotationLine, AnnotationPolygon } from '../annotations';
@@ -94,7 +96,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, LineStyle> {
       edge.on(EInternalEvent.SlopeMove, this._onSlopePointMove);
       edge.on(EInternalEvent.SlopeUp, this._onSlopePointUp);
 
-      group.add(edge);
+      group.add(edge as unknown as AllShape);
     }
   }
 
