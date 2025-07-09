@@ -81,6 +81,9 @@ export class AnnotationRect extends Annotation<RectData, RectStyle> {
         order: data.order,
         preventPointerEvents: true,
         bindShape: group.shapes[0] as Rect,
+        style: {
+          display: visible ? 'block' : 'none',
+        },
       }),
     );
 
@@ -95,6 +98,9 @@ export class AnnotationRect extends Annotation<RectData, RectStyle> {
           order: data.order,
           preventPointerEvents: true,
           bindShape: group.shapes[0] as Rect,
+          style: {
+            display: visible ? 'block' : 'none',
+          },
         }),
       );
     }

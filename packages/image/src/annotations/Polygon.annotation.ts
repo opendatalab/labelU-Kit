@@ -126,6 +126,9 @@ export class AnnotationPolygon extends Annotation<PolygonData, PolygonStyle> {
         order: data.order,
         preventPointerEvents: true,
         bindShape: group.shapes[0],
+        style: {
+          display: visible ? 'block' : 'none',
+        },
       }),
     );
 
@@ -151,6 +154,9 @@ export class AnnotationPolygon extends Annotation<PolygonData, PolygonStyle> {
           order: data.order,
           preventPointerEvents: true,
           bindShape: group.shapes[0],
+          style: {
+            display: visible ? 'block' : 'none',
+          },
         }),
       );
     }

@@ -143,6 +143,9 @@ export class AnnotationLine extends Annotation<LineData, LineStyle> {
         order: data.order,
         preventPointerEvents: true,
         bindShape: group.shapes[0] as Line,
+        style: {
+          display: visible ? 'block' : 'none',
+        },
       }),
     );
 
@@ -157,6 +160,9 @@ export class AnnotationLine extends Annotation<LineData, LineStyle> {
           order: data.order,
           preventPointerEvents: true,
           bindShape: group.shapes[0],
+          style: {
+            display: visible ? 'block' : 'none',
+          },
         }),
       );
     }

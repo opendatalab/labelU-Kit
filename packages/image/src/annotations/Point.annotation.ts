@@ -76,6 +76,9 @@ export class AnnotationPoint extends Annotation<PointData, PointStyle> {
         order: data.order,
         preventPointerEvents: true,
         bindShape: group.shapes[0],
+        style: {
+          display: visible ? 'block' : 'none',
+        },
       }),
     );
 
@@ -90,6 +93,9 @@ export class AnnotationPoint extends Annotation<PointData, PointStyle> {
           order: data.order,
           preventPointerEvents: true,
           bindShape: group.shapes[0],
+          style: {
+            display: visible ? 'block' : 'none',
+          },
         }),
       );
     }
