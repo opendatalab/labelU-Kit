@@ -307,7 +307,8 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
         onError={onError}
-        offsetTop={configFromParent ? 100 : 156}
+        // windows platform pixel issue
+        offsetTop={configFromParent ? 100 : 158}
         editingSample={editingSample}
         config={config}
         disabled={disabled}
