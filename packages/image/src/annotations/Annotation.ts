@@ -94,7 +94,13 @@ export class Annotation<Data extends BasicImageAnnotation, Style> {
     return { x, y, rotate: finalRotate };
   }
 
-  static createTextDomPortal(content: string, isAboveLine: boolean, order: number, bindShape: Line): DomPortal {
+  static createTextDomPortal(
+    content: string,
+    isAboveLine: boolean,
+    order: number,
+    bindShape: Line,
+    style?: Record<string, string>,
+  ): DomPortal {
     return new DomPortal({
       content,
       getPosition: (shape, container) =>
@@ -102,6 +108,7 @@ export class Annotation<Data extends BasicImageAnnotation, Style> {
       order,
       preventPointerEvents: true,
       bindShape,
+      style,
     });
   }
 

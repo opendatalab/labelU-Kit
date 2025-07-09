@@ -1,5 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
 
+import { ControllerPoint } from '@/drafts/ControllerPoint';
+import { ControllerEdge } from '@/drafts/ControllerEdge';
+
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { BasicImageAnnotation } from '../interface';
@@ -176,6 +179,13 @@ export function ToolWrapper<
 
       if (this.draft && ids.includes(this.draft.id)) {
         this.draft.data.visible = visible;
+
+        for (const shape of this.draft.group.shapes) {
+          if (shape instanceof ControllerPoint || shape instanceof ControllerEdge) {
+            shape.disabled = !visible;
+          }
+        }
+
         this.draft.group.updateStyle({
           opacity: visible ? 1 : 0,
         } as any);

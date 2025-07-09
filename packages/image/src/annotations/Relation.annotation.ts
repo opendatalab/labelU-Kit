@@ -164,6 +164,9 @@ export class AnnotationRelation extends Annotation<RelationData, LineStyle> {
         false, // 标签文本在线条下方
         data.order,
         group.shapes[0] as Line,
+        {
+          display: visible ? 'block' : 'none',
+        },
       ),
     );
 
@@ -175,6 +178,9 @@ export class AnnotationRelation extends Annotation<RelationData, LineStyle> {
           true, // 属性文本在线条上方
           data.order,
           group.shapes[0] as Line,
+          {
+            display: visible ? 'block' : 'none',
+          },
         ),
       );
     }

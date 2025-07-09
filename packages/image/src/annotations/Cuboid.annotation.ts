@@ -241,6 +241,9 @@ export class AnnotationCuboid extends Annotation<CuboidData, CuboidStyle> {
         order: data.order,
         preventPointerEvents: true,
         bindShape: backShape,
+        style: {
+          display: visible ? 'block' : 'none',
+        },
       }),
     );
 
@@ -255,6 +258,9 @@ export class AnnotationCuboid extends Annotation<CuboidData, CuboidStyle> {
           order: data.order,
           preventPointerEvents: true,
           bindShape: frontShape,
+          style: {
+            display: visible ? 'block' : 'none',
+          },
         }),
       );
     }

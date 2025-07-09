@@ -15,6 +15,7 @@ export interface DomPortalParams {
   content: HTMLElement | string;
   bindShape: AllShape;
   preventPointerEvents?: boolean;
+  style?: Record<string, string>;
 }
 
 export class DomPortal {
@@ -48,6 +49,7 @@ export class DomPortal {
     order = 2,
     rotate = 0,
     getPosition,
+    style,
   }: DomPortalParams) {
     this._content = content;
     this._shape = bindShape;
@@ -100,6 +102,10 @@ export class DomPortal {
 
     this._container.appendChild(this._wrapper);
     this._setupElementStyle();
+
+    if (style) {
+      Object.assign(this._wrapper.style, style);
+    }
   }
 
   private _setupElementStyle() {
@@ -152,10 +158,6 @@ export class DomPortal {
 
   public hide() {
     this._wrapper.style.display = 'none';
-  }
-
-  public setOpacity(opacity: number) {
-    this._wrapper.style.opacity = `${opacity}`;
   }
 
   public toTop() {
