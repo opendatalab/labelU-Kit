@@ -491,21 +491,6 @@ function ForwardAnnotator(
     [updateAnnotationsWithGlobal],
   );
 
-  const onAnnotationDelete = useCallback(
-    (restAnnotations: AnnotationWithTool[]) => {
-      const annotationGroupByTool: AllAnnotationMapping = {};
-
-      restAnnotations.forEach((item) => {
-        annotationGroupByTool[item.id] = item;
-      });
-
-      updateAnnotationsWithGlobal(() => {
-        return annotationGroupByTool;
-      });
-    },
-    [updateAnnotationsWithGlobal],
-  );
-
   const onAnnotationChange = useCallback(
     (_annotation: AnnotationWithTool, skipHistory?: boolean) => {
       updateAnnotationsWithGlobal((pre) => {
