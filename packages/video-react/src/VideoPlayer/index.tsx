@@ -41,6 +41,7 @@ const defaultOptions = {
 };
 
 const videoPlayerClassName = 'video-player';
+const cachedRate = localStorage.getItem('labelu:video-rate') ?? '1';
 
 const StyledVideoPlayer = styled.div.attrs((props) => ({
   ...props,
@@ -116,6 +117,13 @@ export const VideoPlayer = memo(
       const [duration, setDuration] = useState<number>(0);
       const videoRef = useRef<any>(undefined); // 记录slider拖动前是否正在播放
       const [parentHeight, setParentHeight] = useState<number>(0);
+      // rate 缓存在浏览器
+      const [rate, setRate] = useState(Number(cachedRate));
+      const handleRateChange = useCallback((value: number) => {
+        localStorage.setItem('labelu:rate', value.toString());
+        setRate(value);
+        playerRef.current?.playbackRate(value);
+      }, []);
 
       useLayoutEffect(() => {
         if (!wrapperRef.current) {
@@ -255,10 +263,6 @@ export const VideoPlayer = memo(
         };
       }, []);
 
-      const handleRateChange = useCallback((rate: number) => {
-        playerRef.current?.playbackRate(rate);
-      }, []);
-
       const togglePlaying = useCallback(
         (isPlay: boolean) => {
           if (!playerRef.current) {
@@ -266,6 +270,7 @@ export const VideoPlayer = memo(
           }
 
           onStatusChange?.(isPlay);
+          playerRef.current.playbackRate(rate);
 
           if (isPlay) {
             playerRef.current.play();
@@ -275,7 +280,7 @@ export const VideoPlayer = memo(
 
           setPlaying(!playing);
         },
-        [onStatusChange, playing],
+        [onStatusChange, playing, rate],
       );
 
       const handleMetaDataOnLoad = useCallback(() => {
@@ -294,6 +299,9 @@ export const VideoPlayer = memo(
         [onPlaying],
       );
 
+      console.log(playerRef.current);
+      console.log(playerRef.current?.playbackRates);
+
       return (
         // @ts-ignore
         <StyledVideoPlayer className={className} ref={wrapperRef}>
@@ -310,6 +318,7 @@ export const VideoPlayer = memo(
                 duration={duration}
                 ref={controllerRef}
                 type="video"
+                rate={rate}
                 onRateChange={handleRateChange}
                 getCurrentTime={getCurrentTime}
                 onPlaying={handlePlaying}

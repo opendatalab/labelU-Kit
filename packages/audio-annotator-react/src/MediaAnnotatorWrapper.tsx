@@ -144,7 +144,6 @@ export interface MediaPlayerProps {
 
   preAnnotationLabels?: MediaAnnotatorConfig;
 
-  /** 是否禁用 */
   disabled?: boolean;
   /** 标注工具配置 */
   toolConfig?: {
@@ -224,6 +223,12 @@ export interface AnnotatorProps {
       label?: string;
     },
   ) => boolean;
+
+  /**
+   * 是否可编辑
+   * @description 全局的是否可编辑，权重比 `requestEdit` 高
+   */
+  disabled?: boolean;
 }
 
 export interface AnnotatorWrapperProps extends AnnotatorProps {
@@ -249,12 +254,14 @@ function ForwardAnnotator(
     selectedTool: propsSelectedTool,
     preAnnotations,
     requestEdit,
+    disabled,
     children,
   }: AnnotatorWrapperProps,
   ref: React.Ref<AudioAndVideoAnnotatorRef>,
 ) {
   const [currentSample, setCurrentSample] = useState<MediaSample | undefined>(editingSample);
   const [currentTool, setCurrentTool] = useState<VideoAnnotationType | undefined>(propsSelectedTool);
+  const [attributeModalOpen, setAttributeModalOpen] = useState(false);
 
   useEffect(() => {
     setCurrentTool(propsSelectedTool);
@@ -265,9 +272,13 @@ function ForwardAnnotator(
   const annotatorRef = useRef<MediaAnnotatorRef | null>(null);
   const samples = useMemo(() => propsSamples ?? [], [propsSamples]);
   const selectedIndexRef = useRef<number>(-1);
-  const isSampleDataEmpty = useMemo(() => {
-    return Object.values(currentSample?.data ?? {}).every((item) => item.length === 0);
-  }, [currentSample]);
+  const isPreAnnotationEmpty = useMemo(() => {
+    if (typeof preAnnotations === 'undefined') {
+      return true;
+    }
+
+    return Object.values(preAnnotations).every((item) => item.length === 0);
+  }, [preAnnotations]);
   const labels = useMemo(() => {
     if (!currentTool) {
       return [];
@@ -365,8 +376,8 @@ function ForwardAnnotator(
   );
 
   const convertedAnnotations = useMemo(() => {
-    return convertAnnotationDataToUI(isSampleDataEmpty && preAnnotations ? preAnnotations : annotationsFromSample);
-  }, [annotationsFromSample, isSampleDataEmpty, preAnnotations]);
+    return convertAnnotationDataToUI(!isPreAnnotationEmpty ? preAnnotations! : annotationsFromSample);
+  }, [annotationsFromSample, isPreAnnotationEmpty, preAnnotations]);
 
   // ================== sample state ==================
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
@@ -506,6 +517,10 @@ function ForwardAnnotator(
 
   const onAnnotationSelect = useCallback(
     (annotation: MediaAnnotationInUI, e: React.MouseEvent) => {
+      if (disabled) {
+        return;
+      }
+
       setSelectedAnnotation(annotation);
       const _label = labelMappingByTool?.[annotation.type]?.[annotation.label!];
       setSelectedLabel(_label);
@@ -523,7 +538,7 @@ function ForwardAnnotator(
         });
       }
     },
-    [config, currentTool, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
+    [config, currentTool, disabled, labelMappingByTool, propsOnLabelChange, sortedMediaAnnotations],
   );
 
   const handleAnnotateEnd: AudioAnnotatorProps['onAnnotateEnd'] = useCallback(
@@ -684,8 +699,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedMediaAnnotations],
+    [sortedMediaAnnotations, disabled, attributeModalOpen],
   );
 
   // 下一个标记
@@ -698,8 +714,9 @@ function ForwardAnnotator(
     {
       keyup: true,
       keydown: false,
+      enabled: !disabled && !attributeModalOpen,
     },
-    [sortedMediaAnnotations],
+    [sortedMediaAnnotations, disabled, attributeModalOpen],
   );
 
   // 1 ~ 9 设置标签
@@ -726,7 +743,10 @@ function ForwardAnnotator(
         }
       }
     },
-    [onLabelChange, labels, selectedAnnotation],
+    {
+      enabled: !disabled && !attributeModalOpen,
+    },
+    [onLabelChange, labels, selectedAnnotation, disabled, attributeModalOpen],
   );
 
   const playerInstance = useMemo(() => {
@@ -814,6 +834,7 @@ function ForwardAnnotator(
       onAnnotationChange,
       onAnnotationClear,
       orderVisible,
+      disabled,
       onAnnotationSelect,
       onAnnotationRemove,
       onAnnotationAdd,
@@ -835,6 +856,7 @@ function ForwardAnnotator(
       onAnnotationAdd,
       onAnnotationsRemove,
       preAnnotations,
+      disabled,
       onOrderVisibleChange,
     ],
   );
@@ -853,6 +875,8 @@ function ForwardAnnotator(
       requestEdit,
       config,
       tools,
+      attributeModalOpen,
+      setAttributeModalOpen,
       labels,
       preLabelMapping: preLabelsMappingByTool,
     };
@@ -870,6 +894,8 @@ function ForwardAnnotator(
     tools,
     labels,
     preLabelsMappingByTool,
+    attributeModalOpen,
+    setAttributeModalOpen,
   ]);
 
   const historyContextValue = useMemo(
@@ -919,6 +945,7 @@ function ForwardAnnotator(
                     showOrder: orderVisible,
                     onLoad: onMediaLoad,
                     onAnnotateEnd: handleAnnotateEnd,
+                    disabled,
                     onAnnotationSelect: onAnnotationSelect,
                   })
                 ) : (
@@ -936,3 +963,5 @@ function ForwardAnnotator(
 }
 
 export const MediaAnnotatorWrapper = forwardRef<AudioAndVideoAnnotatorRef, AnnotatorWrapperProps>(ForwardAnnotator);
+
+MediaAnnotatorWrapper.displayName = 'MediaAnnotatorWrapper';

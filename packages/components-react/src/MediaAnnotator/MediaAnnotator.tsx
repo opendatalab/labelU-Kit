@@ -58,13 +58,17 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
 
   const shouldEdit = useCallback(
     (editType: EditType, editLabel: string) => {
+      if (disabled) {
+        return;
+      }
+
       if (typeof requestEdit === 'function') {
         return requestEdit(editType, { toolName: type, label: editLabel });
       }
 
       return true;
     },
-    [requestEdit, type],
+    [disabled, requestEdit, type],
   );
 
   const tracks = useMemo(() => scheduleAnnotationTrack(annotations), [annotations]);
@@ -265,7 +269,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
     },
     {
       preventDefault: true,
-      enabled: type === 'segment' && duration > 0,
+      enabled: !disabled && type === 'segment' && duration > 0,
     },
     [setAnnotatingSegment, onEnd, label, maxOrder, type, resetAnnotatingSegment, duration],
   );
@@ -285,7 +289,7 @@ export const MediaAnnotator = forwardRef<MediaAnnotatorRef, MediaAnnotatorProps>
     },
     {
       preventDefault: true,
-      enabled: type === 'frame',
+      enabled: !disabled && type === 'frame',
     },
     [onEnd, label, maxOrder, type, resetAnnotatingSegment],
   );

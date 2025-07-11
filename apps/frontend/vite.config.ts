@@ -22,6 +22,11 @@ export default defineConfig({
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
+      '/ws': {
+        target: 'ws://127.0.0.1:8000',
+        ws: true,
+        changeOrigin: true,
+      }
     },
   },
 
@@ -29,7 +34,7 @@ export default defineConfig({
     include: ['react/jsx-runtime'],
   },
 
-  plugins: [react(), svgr(), ViteEjsPlugin(), !process.env.DIST && tsMonoAlias()].filter(Boolean),
+  plugins: [react(), svgr(), ViteEjsPlugin(), tsMonoAlias()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/'),

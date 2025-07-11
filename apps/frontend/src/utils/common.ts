@@ -1,6 +1,6 @@
 import { message } from '@/StaticAnt';
 import type { MediaType } from '@/api/types';
-import { FileExtension, MediaFileSize } from '@/constants/mediaType';
+import { FileExtension } from '@/constants/mediaType';
 import { ErrorMessages } from '@/api/constant';
 
 const commonController = {
@@ -112,11 +112,6 @@ const commonController = {
   },
   reducer() {
     // uploadFile().
-  },
-  isOverSize(size: number, type: MediaType) {
-    const maxSize = MediaFileSize[type];
-
-    return size > maxSize * 1024 * 1024;
   },
   isCorrectFileType(fileName: string, type: MediaType) {
     let result = false;

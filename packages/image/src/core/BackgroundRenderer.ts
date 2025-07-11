@@ -264,6 +264,14 @@ export class BackgroundRenderer extends Renderer {
     return this._rotate;
   }
 
+  /**
+   * 重新变化尺寸后，需要重新计算图像偏移位置
+   */
+  public resize(width: number, height: number) {
+    super.resize(width, height);
+    this._setImageOffset();
+  }
+
   public destroy() {
     this.clear();
     this.canvas.remove();

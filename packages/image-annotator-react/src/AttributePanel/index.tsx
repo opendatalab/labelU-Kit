@@ -106,6 +106,12 @@ const Footer = styled.div`
   &:hover {
     color: red;
   }
+
+  /* disabled */
+  &[aria-disabled='true'] {
+    color: #999;
+    cursor: not-allowed;
+  }
 `;
 
 type HeaderType = 'global' | 'label';
@@ -139,14 +145,19 @@ function Confirm({ title, onConfirm, onCancel }: ConfirmProps) {
       <FlexLayout.Item flex items="center" justify="space-between" gap=".5rem">
         <Button onClick={onCancel}>{t('cancel')}</Button>
         <Button primary onClick={onConfirm}>
-          {t('confirm')}
+          {t('ok')}
         </Button>
       </FlexLayout.Item>
     </FlexLayout>
   );
 }
 
-function ClearAction({ onClear }: { onClear: () => void }) {
+interface ClearActionProps {
+  onClear: () => void;
+  disabled?: boolean;
+}
+
+function ClearAction({ onClear, disabled }: ClearActionProps) {
   const [open, setOpen] = useState(false);
   // @ts-ignore
   const { t } = useTranslation();
@@ -172,7 +183,15 @@ function ClearAction({ onClear }: { onClear: () => void }) {
       }
       placement="top"
     >
-      <Footer onClick={() => setOpen((pre) => !pre)}>
+      <Footer
+        aria-disabled={disabled}
+        onClick={() => {
+          if (disabled) {
+            return;
+          }
+          setOpen((pre) => !pre);
+        }}
+      >
         <DeleteIcon />
         &nbsp; {t('clear')}
       </Footer>
@@ -191,13 +210,16 @@ export function AttributePanel() {
     preAnnotationsWithGlobal,
     onAnnotationsChange,
     onAnnotationClear,
+    disabled,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [modified, setModified] = useState<boolean>(false);
   const globalAnnotations = useMemo(() => {
     return Object.values(annotationsWithGlobal).filter((item) =>
       ['text', 'tag'].includes((item as GlobalAnnotation).type),
     ) as GlobalAnnotation[];
   }, [annotationsWithGlobal]);
+
   // @ts-ignore
   const { t } = useTranslation();
 
@@ -247,10 +269,10 @@ export function AttributePanel() {
     return _globals;
   }, [globalToolConfig.tag, globalToolConfig.text, preLabelMapping?.tag, preLabelMapping?.text]);
 
-  const flatGlobalAnnotations = useMemo(() => {
+  const flatGlobalTagAnnotations = useMemo(() => {
     const result = globalAnnotations;
 
-    if (globalAnnotations.length === 0) {
+    if (globalAnnotations.length === 0 && !modified) {
       [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
         if (values) {
           result.push(...(values as GlobalAnnotation[]));
@@ -259,7 +281,7 @@ export function AttributePanel() {
     }
 
     return result;
-  }, [globalAnnotations, preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text]);
+  }, [globalAnnotations, preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text, modified]);
 
   const titles = useMemo(() => {
     const _titles = [];
@@ -291,7 +313,7 @@ export function AttributePanel() {
       });
     }
 
-    if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid) {
+    if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid || config?.relation) {
       _titles.push({
         title: t('labels'),
         key: 'label' as const,
@@ -311,6 +333,7 @@ export function AttributePanel() {
     config?.polygon,
     config?.rect,
     config?.cuboid,
+    config?.relation,
     globalAnnotations,
     sortedImageAnnotations.length,
   ]);
@@ -365,6 +388,8 @@ export function AttributePanel() {
     if (!currentSample) {
       return;
     }
+
+    setModified(true);
 
     onAnnotationClear();
     if (activeKey === 'label') {
@@ -430,10 +455,10 @@ export function AttributePanel() {
         })}
       </TabHeader>
       <Content activeKey={activeKey}>
-        <AttributeTree data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
+        <AttributeTree disabled={disabled} data={flatGlobalTagAnnotations} config={globals} onChange={handleOnChange} />
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
       </Content>
-      <ClearAction onClear={handleClear} />
+      <ClearAction onClear={handleClear} disabled={disabled} />
     </Wrapper>
   );
 }

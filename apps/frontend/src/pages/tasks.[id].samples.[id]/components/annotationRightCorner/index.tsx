@@ -1,20 +1,21 @@
 import { useEffect, useCallback, useContext } from 'react';
-import { useNavigate, useParams, useRevalidator } from 'react-router';
+import { useNavigate, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import { Button } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSearchParams } from 'react-router-dom';
 import { FlexLayout } from '@labelu/components-react';
 
 import commonController from '@/utils/common';
 import { imageAnnotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
+import type { getSample } from '@/api/services/samples';
 import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
+import { generateDefaultValues } from '@/utils/generateGlobalToolDefaultValues';
 
 import AnnotationContext from '../../annotation.context';
 
@@ -72,7 +73,8 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
-  const currentSample = samples[sampleIndex];
+  const routeSample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
+  const currentSample = routeSample.data;
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
@@ -235,6 +237,23 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       innerSample = await audioAnnotationRef?.current?.getSample();
     }
 
+    // 全局标注没有值的话，填充默认值
+    const tagConfig = task.config.tools.find((tool) => tool.tool === 'tagTool');
+    if (!result.tagTool?.result?.length && tagConfig) {
+      result.tagTool = {
+        toolName: 'tagTool',
+        result: generateDefaultValues(tagConfig?.config.attributes),
+      };
+    }
+
+    const textConfig = task.config.tools.find((tool) => tool.tool === 'textTool');
+    if (!result.textTool?.result?.length && textConfig) {
+      result.textTool = {
+        toolName: 'textTool',
+        result: generateDefaultValues(textConfig?.config.attributes),
+      };
+    }
+
     // 防止sampleid保存错乱，使用标注时传入的sampleid
     const body = set('data.result')(JSON.stringify(result))(currentSample);
 
@@ -243,7 +262,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, noSave, task?.media_type, taskId]);
+  }, [currentSample, noSave, task?.config?.tools, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
@@ -263,7 +282,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       },
       {
         ...currentSample,
-        state: SampleState.NEW,
+        state: SampleState.DONE,
       },
     );
 
@@ -272,6 +291,8 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
         sample.id === +sampleId! ? { ...sample, state: SampleState.NEW } : sample,
       ),
     );
+
+    revalidator.revalidate();
   };
 
   const handleSkipSample = async () => {

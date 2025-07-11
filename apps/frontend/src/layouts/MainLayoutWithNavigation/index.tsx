@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import { Outlet, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { FlexLayout } from '@labelu/components-react';
 
@@ -14,23 +13,9 @@ const MainContent = styled(FlexLayout.Content)`
 `;
 
 const MainLayout = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // 标注配置预览不需要导航头部
   const isPreview = searchParams.get('noSave');
-
-  useEffect(() => {
-    if (window.IS_ONLINE) {
-      return;
-    }
-
-    const token = localStorage.getItem('token');
-    const _username = localStorage.getItem('username');
-
-    if (!token || !_username) {
-      navigate('/login');
-    }
-  }, [navigate]);
 
   return (
     <LayoutWrapper flex="column">

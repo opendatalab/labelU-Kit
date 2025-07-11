@@ -35,6 +35,10 @@ export interface ToolContextType {
   preLabelMapping: Record<ToolName | 'text' | 'tag', Record<string, ILabel | TextAttribute | EnumerableAttribute>>;
 
   labels: ILabel[];
+
+  attributeModalOpen?: boolean;
+
+  setAttributeModalOpen: (open: boolean) => void;
 }
 
 export const ToolContext = createContext<ToolContextType>({} as ToolContextType);

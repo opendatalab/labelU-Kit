@@ -3,7 +3,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useEffect } from 'react';
 import { i18n } from '@labelu/i18n';
 
-import Register from '@/pages/register';
 import Tasks from '@/pages/tasks';
 import TaskEdit from '@/pages/tasks.[id].edit';
 import TaskAnnotation from '@/pages/tasks.[id].samples.[id]';
@@ -17,9 +16,6 @@ import { taskLoader, tasksLoader } from './loaders/task.loader';
 import { rootLoader } from './loaders/root.loader';
 import { sampleLoader } from './loaders/sample.loader';
 import RequireAuth from './components/RequireSSO';
-import { registerLoader } from './loaders/register.loader';
-import { loginLoader } from './loaders/login.loader';
-import LoginPage from './pages/login';
 
 function Root() {
   const location = useLocation();
@@ -127,21 +123,6 @@ const routes: RouteObject[] = [
         ],
       },
     ],
-  },
-  {
-    path: 'login',
-    loader: loginLoader,
-    element: <LoginPage />,
-  },
-  {
-    path: 'register',
-    loader: registerLoader,
-    element: <Register />,
-    handle: {
-      crumb: () => {
-        return i18n.t('signUp');
-      },
-    },
   },
   {
     path: '*',

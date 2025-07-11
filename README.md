@@ -9,15 +9,15 @@
 
 ## 特性
 
-- 支持图片 拉框、点、线（包含曲线）、多边形（包含闭合曲线）、立体框标注
+- 支持图片 拉框、点、线（包含曲线）、多边形（包含闭合曲线）、立体框，同时支持目标检测之间的关联关系标注
 - 支持视频标注
 - 支持音频标注
 - 原子化模块，可自由组合
 
 ## 开始使用
 
-- Playground：[https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
-- 体验 LabelU 在线版：[https://labelu.shlab.tech/](https://labelu.shlab.tech/)
+- [Playground](https://opendatalab.github.io/labelU/playground/image)
+- [LabelU 在线版](https://labelu.shlab.tech/)
 
 ## Packages
 

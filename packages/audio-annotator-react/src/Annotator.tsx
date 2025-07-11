@@ -12,4 +12,8 @@ function ForwardAnnotator({ samples, ...props }: AnnotatorProps, ref: React.Ref<
   );
 }
 
+ForwardAnnotator.displayName = 'AudioAnnotatorForward';
+
 export const Annotator = forwardRef<AudioAndVideoAnnotatorRef, AnnotatorProps>(ForwardAnnotator);
+
+Annotator.displayName = 'AudioAnnotator';

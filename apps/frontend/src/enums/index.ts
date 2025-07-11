@@ -8,6 +8,8 @@ export enum ImageToolName {
   Line = 'lineTool',
   /** 立体框 */
   Cuboid = 'cuboidTool',
+  /** 关联关系 */
+  Relation = 'relationTool',
 }
 
 export enum EVideoToolName {

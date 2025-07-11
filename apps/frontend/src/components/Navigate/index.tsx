@@ -1,23 +1,24 @@
 import Icon, { BellOutlined, PoweroffOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
 import { Button, Divider, Dropdown, Popover, Tag } from 'antd';
-import { Link, useMatch, useNavigate } from 'react-router-dom';
+import { Link, useMatch } from 'react-router-dom';
 import { useTranslation } from '@labelu/i18n';
 
 import { ReactComponent as LocalDeploy } from '@/assets/svg/local-deploy.svg';
-import { ReactComponent as ProfileIcon } from '@/assets/svg/personal.svg';
 import { ReactComponent as ToolboxSvg } from '@/assets/svg/toolbox.svg';
 import { goAuth } from '@/utils/sso';
+import useMe from '@/hooks/useMe';
+import { logout as userLogout } from '@/api/services/user';
 
 import AppPanel from '../AppPanel';
 import Breadcrumb from '../Breadcrumb';
 import { LabeluLogo, NavigationWrapper } from './style';
 import TaskTip from './TaskTip';
 import LanguageSwitcher from '../LangSwitcher';
+import { UserAvatar } from '../UserAvatar';
 
 const Homepage = () => {
-  const username = localStorage.getItem('username');
-  const navigate = useNavigate();
+  const me = useMe();
   const isSampleDetail = useMatch('/tasks/:taskId/samples/:sampleId');
   const { t, i18n } = useTranslation();
 
@@ -26,14 +27,9 @@ const Homepage = () => {
     e.nativeEvent.stopPropagation();
     e.preventDefault();
 
-    localStorage.setItem('username', '');
-    localStorage.setItem('token', '');
+    await userLogout();
 
-    if (window.IS_ONLINE) {
-      await goAuth();
-    } else {
-      navigate('/login');
-    }
+    await goAuth();
   };
 
   return (
@@ -105,9 +101,13 @@ const Homepage = () => {
             ],
           }}
         >
-          <Button icon={<Icon component={ProfileIcon} />} type="link" style={{ color: 'rgba(0, 0, 0, 0.85)' }}>
-            {username}
-          </Button>
+          <UserAvatar
+            user={me?.data}
+            shortName={false}
+            showTooltip={false}
+            placement="bottomRight"
+            style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
+          />
         </Dropdown>
       </FlexLayout.Item>
     </NavigationWrapper>

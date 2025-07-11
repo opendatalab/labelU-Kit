@@ -22,7 +22,6 @@ export const ErrorMessages = {
   [TASK_INIT_CODE + 1000]: i18n.t('fileUploadFailed'),
   [TASK_INIT_CODE + 1001]: i18n.t('fileNotFound'),
   [TASK_INIT_CODE + 1002]: i18n.t('duplicatedFile'),
-  [TASK_INIT_CODE + 5000]: i18n.t('参数错误：after,before,pageNo,只能选一个，pageNo 可以说是0'),
   [TASK_INIT_CODE + 5001]: i18n.t('noSample'),
   [TASK_INIT_CODE + 5003]: i18n.t('sampleNameExists'),
   [EXPORT_INIT_CODE + 1000]: i18n.t('noDataExport'),

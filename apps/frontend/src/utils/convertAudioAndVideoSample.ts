@@ -1,13 +1,12 @@
 import _ from 'lodash';
-import type { AnnotationsWithGlobal, MediaAnnotatorConfig, MediaSample } from '@labelu/audio-annotator-react';
+import type { AnnotationsWithGlobal, MediaSample } from '@labelu/audio-annotator-react';
 
 import type { ParsedResult, SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
 
 import { jsonParse } from './index';
-import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
-export function convertMediaAnnotations(mediaType: MediaType, result: ParsedResult, config: MediaAnnotatorConfig) {
+export function convertMediaAnnotations(mediaType: MediaType, result: ParsedResult) {
   // annotation
   const pool = [
     ['segment', MediaType.VIDEO === mediaType ? 'videoSegmentTool' : 'audioSegmentTool'],
@@ -19,11 +18,6 @@ export function convertMediaAnnotations(mediaType: MediaType, result: ParsedResu
   return _.chain(pool)
     .map(([type, key]) => {
       const items = _.get(result, [key, 'result'], []);
-
-      if (!items.length && (type === 'tag' || type === 'text')) {
-        // 生成全局工具的默认值
-        return [type, generateDefaultValues(config?.[type])];
-      }
 
       return [
         type,
@@ -39,11 +33,7 @@ export function convertMediaAnnotations(mediaType: MediaType, result: ParsedResu
     .value() as AnnotationsWithGlobal;
 }
 
-export function convertAudioAndVideoSample(
-  sample: SampleResponse,
-  config: MediaAnnotatorConfig,
-  mediaType?: MediaType,
-): MediaSample | undefined {
+export function convertAudioAndVideoSample(sample: SampleResponse, mediaType?: MediaType): MediaSample | undefined {
   if (!sample) {
     return;
   }
@@ -57,7 +47,9 @@ export function convertAudioAndVideoSample(
 
   return {
     id,
-    url: mediaType === MediaType.VIDEO ? sample.file.url.replace('attachment', 'partial') : sample.file.url,
-    data: convertMediaAnnotations(mediaType!, resultParsed, config),
+    url: [MediaType.VIDEO, MediaType.AUDIO].includes(mediaType as MediaType)
+      ? sample.file.url.replace('attachment', 'partial')
+      : sample.file.url,
+    data: convertMediaAnnotations(mediaType!, resultParsed),
   };
 }

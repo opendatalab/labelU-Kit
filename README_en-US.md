@@ -9,15 +9,15 @@
 
 ## Features
 
-- Supports 2D bounding box, point, line (spline), cuboid, and polygon (closed-spline) annotation for images
+- Supports 2D bounding box, point, line (spline), cuboid, and polygon (closed-spline) and relation (for bbox / polygon) annotation for images
 - Supports video annotation
 - Supports audio annotation
 - Modular components that can be freely combined
 
 ## Getting Started
 
-- Playground: [https://opendatalab.github.io/labelU-Kit/](https://opendatalab.github.io/labelU-Kit/)
-- Try LabelU: [https://labelu.shlab.tech/](https://labelu.shlab.tech/)
+- [Playground](https://opendatalab.github.io/labelU/playground/image)
+- [LabelU online](https://labelu.shlab.tech/)
 - Documentation: [https://opendatalab.github.io/labelU-Kit](https://opendatalab.github.io/labelU-Kit)
 
 ## Packages

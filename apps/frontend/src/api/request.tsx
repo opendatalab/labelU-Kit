@@ -45,23 +45,11 @@ async function errorHandler(error: AxiosError) {
   return Promise.reject(error);
 }
 
-const authorizationBearerSuccess = (config: any) => {
-  const token = localStorage.token;
-  if (token) {
-    config.headers.Authorization = localStorage.token;
-  }
-  return config;
-};
-
 const authorizationBearerFailed = (error: any) => {
   // 401一秒后跳转到登录页
   if (error?.response?.status === 401) {
     setTimeout(() => {
-      if (window.IS_ONLINE) {
-        goAuth();
-      } else {
-        window.location.href = '/login';
-      }
+      goAuth();
     }, 1000);
   }
 
@@ -77,11 +65,11 @@ const request = axios.create(requestConfig);
 
 export const requestWithHeaders = axios.create(requestConfig);
 
-requestWithHeaders.interceptors.request.use(authorizationBearerSuccess, authorizationBearerFailed);
+requestWithHeaders.interceptors.request.use(undefined, authorizationBearerFailed);
 requestWithHeaders.interceptors.response.use(undefined, authorizationBearerFailed);
 requestWithHeaders.interceptors.response.use(undefined, errorHandler);
 
-request.interceptors.request.use(authorizationBearerSuccess, authorizationBearerFailed);
+request.interceptors.request.use(undefined, authorizationBearerFailed);
 request.interceptors.response.use(successHandler, errorHandler);
 request.interceptors.response.use(undefined, authorizationBearerFailed);
 

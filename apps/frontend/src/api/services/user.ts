@@ -2,41 +2,35 @@ import * as storage from '@/utils/storage';
 
 import request from '../request';
 import type {
-  LoginCommand,
-  OkRespLoginResponse,
+  GetUsersApiV1UsersGetParams,
+  ListResponseWithMeta,
   OkRespLogoutResponse,
   OkRespSignupResponse,
   OkRespUserInfo,
   SignupCommand,
+  UserResponse,
 } from '../types';
 
-export async function login(params: LoginCommand): Promise<OkRespLoginResponse> {
-  const result = await request.post('/v1/users/login', params);
-
-  storage.set('token', result.data.token);
-  storage.set('username', (params as LoginCommand).username!);
-
-  return result;
-}
-
-export async function ssoLogin(code: string) {
-  const result = await request.post(`/v1/users/token?code=${code}`);
-
-  storage.set('token', result.data.token);
-
-  return result;
-}
-
 export async function getUserInfo(): Promise<OkRespUserInfo> {
-  return await request.post('/v1/users/me');
+  const res = await request.get('/v1/users/me');
+
+  storage.set('userid', res.data.id);
+  storage.set('username', res.data.username);
+
+  return res;
+}
+
+export async function getUsers(params: GetUsersApiV1UsersGetParams): Promise<ListResponseWithMeta<UserResponse>> {
+  return await request.get('/v1/users', {
+    params,
+  });
 }
 
 export async function logout(): Promise<OkRespLogoutResponse> {
-  localStorage.removeItem('token');
-  localStorage.removeItem('username');
-  localStorage.removeItem('userid');
+  storage.set('userid', '');
+  storage.set('username', '');
 
-  return await request.post('/v1/users/logout');
+  return await request.get('/v1/users/logout');
 }
 
 export async function signUp(params: SignupCommand): Promise<OkRespSignupResponse> {

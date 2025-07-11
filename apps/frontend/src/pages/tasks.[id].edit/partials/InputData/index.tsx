@@ -18,7 +18,7 @@ import NativeUpload from '@/components/NativeUpload';
 import { deleteFile } from '@/api/services/task';
 import { ReactComponent as UploadBg } from '@/assets/svg/upload-bg.svg';
 import { MediaType } from '@/api/types';
-import { FileExtensionText, FileMimeType, MediaFileSize } from '@/constants/mediaType';
+import { FileExtensionText, FileMimeType } from '@/constants/mediaType';
 import type { TaskInLoader } from '@/loaders/task.loader';
 import { useUploadFileMutation } from '@/api/mutations/attachment';
 import { deleteSamples } from '@/api/services/samples';
@@ -431,10 +431,6 @@ const InputData = () => {
               <div>
                 {t('fileTypeSupportsInclude')}
                 {FileExtensionText[task.media_type!]}
-              </div>
-              <div>
-                {t('fileSizeLimit')}
-                {MediaFileSize[task.media_type!]}MB{' '}
               </div>
             </ButtonWrapper>
           </UploadArea>

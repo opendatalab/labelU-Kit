@@ -1,4 +1,10 @@
-import type { InnerAttribute, TagAnnotationEntity, TextAnnotationEntity, TextAttribute } from '@labelu/interface';
+import type {
+  EnumerableAttribute,
+  InnerAttribute,
+  TagAnnotationEntity,
+  TextAnnotationEntity,
+  TextAttribute,
+} from '@labelu/interface';
 import type { CollapseProps } from 'rc-collapse';
 import Collapse from 'rc-collapse';
 import { useEffect, useMemo } from 'react';
@@ -131,7 +137,13 @@ export const CollapseWrapper: React.ForwardRefExoticComponent<CollapseProps> = s
   }
 `;
 
-export const AttributeTreeWrapper = styled.div``;
+export const AttributeTreeWrapper = styled.div`
+  /* disabled */
+  [aria-disabled='true'] {
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+`;
 
 const AttributeFormWrapper = styled(AttributeFormItem)`
   padding: 0.5rem 1rem;
@@ -148,9 +160,10 @@ export interface AttributeTreeProps {
   config?: InnerAttribute[];
   onChange?: FormProps['onValuesChange'];
   className?: string;
+  disabled?: boolean;
 }
 
-export function AttributeTree({ data, config, onChange, className }: AttributeTreeProps) {
+export function AttributeTree({ data, config, onChange, className, disabled }: AttributeTreeProps) {
   const [form] = useForm();
   const attributeMappingByTool = useMemo(() => {
     const mapping: Record<string, Record<string, InnerAttribute>> = {};
@@ -187,12 +200,15 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
     });
 
     tagConfig?.forEach((item) => {
+      const defaultValue = (item as EnumerableAttribute).options
+        .filter((option) => option.isDefault)
+        .map((option) => option.value);
       if (!_tagData[item.value]) {
         _tagData[item.value] = {
           id: uid(),
           type: 'tag',
           value: {
-            [item.value]: [],
+            [item.value]: defaultValue,
           },
         } as TagAnnotationEntity;
       }
@@ -204,7 +220,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
           id: uid(),
           type: 'text',
           value: {
-            [item.value]: '',
+            [item.value]: (item as TextAttribute).defaultValue,
           },
         } as TextAnnotationEntity;
       }
@@ -241,6 +257,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
               </Field>
               <AttributeFormWrapper
                 {...attributeConfigItem}
+                disabled={disabled}
                 key={attributeConfigItem.value}
                 name={['tag', item.value, 'value', attributeConfigItem.value]}
               />
@@ -249,7 +266,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         };
       }) ?? []
     );
-  }, [attributeMappingByTool, tagConfig]);
+  }, [attributeMappingByTool, tagConfig, disabled]);
 
   const textFormItems = useMemo(() => {
     return (
@@ -277,6 +294,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
               </Field>
               <AttributeFormWrapper
                 {...attributeConfigItem}
+                disabled={disabled}
                 key={attributeConfigItem.value}
                 name={['text', item.value, 'value', attributeConfigItem.value]}
               />
@@ -285,7 +303,7 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
         };
       }) ?? []
     );
-  }, [attributeMappingByTool, textConfig]);
+  }, [attributeMappingByTool, textConfig, disabled]);
 
   // 切换样本时，需要更新表单数据
   useEffect(() => {
@@ -293,8 +311,8 @@ export function AttributeTree({ data, config, onChange, className }: AttributeTr
   }, [form, formData]);
 
   return (
-    <AttributeTreeWrapper className={className}>
-      <FormWithValidation form={form} onValuesChange={onChange} initialValues={formData}>
+    <AttributeTreeWrapper aria-disabled={disabled} className={className}>
+      <FormWithValidation form={form} onValuesChange={disabled ? undefined : onChange} initialValues={formData}>
         <CollapseWrapper items={tagFormItems} defaultActiveKey={tagDefaultActiveKeys} />
         <CollapseWrapper items={textFormItems} defaultActiveKey={textDefaultActiveKeys} />
       </FormWithValidation>

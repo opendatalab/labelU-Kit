@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useTranslation } from '@labelu/i18n';
+import { useTranslation, i18n } from '@labelu/i18n';
 import { FlexLayout } from '@labelu/components-react';
 
 import demoCreate from './assets/demo-create-button.svg';
@@ -65,6 +65,8 @@ const Description = styled.span`
 
 const NullTask = () => {
   const { t } = useTranslation();
+
+  console.log(t('tryDemo'), i18n);
   const navigate = useNavigate();
   const createTask = () => {
     navigate('/tasks/0/edit?isNew=true');

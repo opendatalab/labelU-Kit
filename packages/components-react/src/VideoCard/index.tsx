@@ -1,7 +1,6 @@
-import type { PropsWithChildren } from 'react';
 import React, { useCallback, useRef, useState } from 'react';
-import type { StyledComponent } from 'styled-components';
-import styled, { css } from 'styled-components';
+import type { CSSObject } from 'styled-components';
+import styled from 'styled-components';
 
 import { secondsToMinute } from '@/utils';
 
@@ -39,12 +38,11 @@ export interface StyledVideoProps {
 
 const videoClassName = 'labelu-video-card';
 
-export const StyledVideo: StyledComponent<'div', any, PropsWithChildren<StyledVideoProps>> = styled.div.attrs(
-  (props: StyledVideoProps) => ({
-    ...props,
-    className: `${videoClassName} ${props.className || ''}` as string,
-  }),
-)`
+const VideoWrapper = styled.div`
+  padding: 0 1rem;
+`;
+
+export const StyledVideo = styled.div<StyledVideoProps>`
   position: relative;
   width: 100%;
   height: 100%;
@@ -76,14 +74,14 @@ export const StyledVideo: StyledComponent<'div', any, PropsWithChildren<StyledVi
     object-fit: contain;
   }
 
-  ${({ isPlaying }) =>
+  ${({ isPlaying }): CSSObject =>
     isPlaying
-      ? css`
-          &--playing {
-            font-size: unset;
-          }
-        `
-      : ''}
+      ? {
+          '&--playing': {
+            fontSize: 'unset',
+          },
+        }
+      : {}}
 
   .${videoClassName}__play {
     position: absolute;
@@ -262,16 +260,18 @@ export function VideoCard({
   );
 
   return (
-    <StatusCard completed={completed} active={active} skipped={skipped} onClick={onClick} title={title}>
-      <StyledVideo
-        isPlaying={isPlaying}
-        className={className}
-        style={cardStyle}
-        onMouseOver={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {bodyNodes}
-      </StyledVideo>
-    </StatusCard>
+    <VideoWrapper>
+      <StatusCard completed={completed} active={active} skipped={skipped} onClick={onClick} title={title}>
+        <StyledVideo
+          isPlaying={isPlaying}
+          className={className}
+          style={cardStyle}
+          onMouseOver={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          {bodyNodes}
+        </StyledVideo>
+      </StatusCard>
+    </VideoWrapper>
   );
 }

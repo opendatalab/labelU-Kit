@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { EllipsisText } from '@labelu/components-react';
 import type { AnnotationData, ToolName } from '@labelu/image';
 
@@ -13,6 +13,7 @@ import { ReactComponent as LineToolIcon } from '@/assets/tools/line.svg';
 import { ReactComponent as RectToolIcon } from '@/assets/tools/rect.svg';
 import { ReactComponent as PolygonToolIcon } from '@/assets/tools/polygon.svg';
 import { ReactComponent as CuboidToolIcon } from '@/assets/tools/cuboid.svg';
+import { ReactComponent as RelationToolIcon } from '@/assets/tools/relation.svg';
 import { ReactComponent as UnknownIcon } from '@/assets/tools/unknown.svg';
 import { openAttributeModal } from '@/LabelSection';
 import type { AnnotationDataInUI } from '@/context/annotation.context';
@@ -32,6 +33,7 @@ const ToolIconMapping: Record<
   rect: RectToolIcon,
   polygon: PolygonToolIcon,
   cuboid: CuboidToolIcon,
+  relation: RelationToolIcon,
 };
 
 interface AttributeItemProps {
@@ -127,7 +129,27 @@ export interface AttributeActionProps {
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
   const { engine, requestEdit, labelMapping, currentTool } = useTool();
-  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove } = useAnnotationCtx();
+  const { onAnnotationChange, onAnnotationsChange, onAnnotationRemove, onAnnotationsRemove, disabled } =
+    useAnnotationCtx();
+  const requestEditable = useCallback(() => {
+    if (annotation) {
+      return typeof requestEdit === 'function'
+        ? requestEdit?.('update', { label: annotation.label, toolName: annotation.tool })
+        : true;
+    }
+
+    if (annotations) {
+      for (const item of annotations) {
+        if (typeof requestEdit === 'function' && !requestEdit('update', { label: item.label, toolName: item.tool })) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    return false;
+  }, [annotation, annotations, requestEdit]);
 
   const annotationsMapping = useMemo(() => {
     if (!annotations) {
@@ -154,20 +176,12 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
   const handleEditClick = (e: React.MouseEvent) => {
     engine.selectAnnotation(annotation!.tool, annotation!.id);
-
-    if (!annotation?.label) {
-      return;
-    }
-
-    const editable =
+    const secondaryEditable =
       typeof requestEdit === 'function'
-        ? requestEdit('update', {
-            label: annotation!.label,
-            toolName: annotation!.tool,
-          })
+        ? requestEdit('update', { label: annotation!.label, toolName: annotation!.tool })
         : true;
 
-    if (!editable) {
+    if (disabled || !annotation?.label || !secondaryEditable) {
       return;
     }
 
@@ -246,6 +260,10 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
         {!visible && <StyledVisibilityOffIcon onClick={toggleOneVisibility(true)} />}
         <DeleteIcon
           onClick={() => {
+            if (disabled || !requestEditable()) {
+              return;
+            }
+
             engine?.removeAnnotationById(annotation.tool, annotation.id);
             onAnnotationRemove(annotation);
           }}
@@ -262,6 +280,10 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
       {!visible && <StyledVisibilityOffIcon onClick={toggleBatchVisibility(true)} />}
       <DeleteIcon
         onClick={() => {
+          if (disabled || requestEditable()) {
+            return;
+          }
+
           annotations?.forEach((item) => {
             engine?.removeAnnotationById(item.tool, item.id);
           });

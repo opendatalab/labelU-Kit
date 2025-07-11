@@ -8,14 +8,7 @@ const sso = {
 
 /** 获取 UAA 平台链接 */
 export function getUAA(url: string): string {
-  const query = new URLSearchParams(location.search);
-
-  query.delete('clientId');
-  query.delete('code');
-  query.append('clientId', sso.clientId);
-  query.append('username', 'true');
-
-  return `${url}?redirect=${location.origin}${location.pathname}?${query.toString()}`;
+  return `${url}?redirect=${location.origin}/api/v1/users/token?clientId=${sso.clientId}`;
 }
 
 /** 前往sso登录页 */

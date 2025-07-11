@@ -1,11 +1,10 @@
 import { useState, createRef, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
-import { useParams, useRouteLoaderData } from 'react-router';
 import _ from 'lodash-es';
 import { Empty, Spin, message } from 'antd';
 import { Annotator } from '@labelu/video-annotator-react';
 import type { AudioAndVideoAnnotatorRef } from '@labelu/audio-annotator-react';
 import { Annotator as AudioAnnotator } from '@labelu/audio-annotator-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams, useRouteLoaderData } from 'react-router-dom';
 import { Bridge } from 'iframe-message-bridge';
 import type { ImageAnnotatorProps, AnnotatorRef as ImageAnnotatorRef } from '@labelu/image-annotator-react';
 import { Annotator as ImageAnnotator } from '@labelu/image-annotator-react';
@@ -15,7 +14,7 @@ import type { ToolName } from '@labelu/image';
 import type { ILabel } from '@labelu/interface';
 import { useTranslation } from '@labelu/i18n';
 
-import { MediaType, type SampleResponse } from '@/api/types';
+import { MediaType, SampleState, type SampleResponse } from '@/api/types';
 import { useScrollFetch } from '@/hooks/useScrollFetch';
 import type { getSample } from '@/api/services/samples';
 import { getSamples } from '@/api/services/samples';
@@ -36,6 +35,9 @@ type AllToolName = ToolName | 'segment' | 'frame' | 'tag' | 'text';
 export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
 export const videoAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
 export const audioAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
+
+const PREVIEW_OFFSET_TOP = 102;
+const OFFSET_TOP = 158;
 
 const AnnotationPage = () => {
   const routeParams = useParams();
@@ -100,13 +102,13 @@ const AnnotationPage = () => {
     }
 
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageAnnotations(_annotations, preAnnotationConfig);
+      return convertImageAnnotations(_annotations);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertMediaAnnotations(task.media_type, _annotations, preAnnotationConfig);
+      return convertMediaAnnotations(task.media_type, _annotations);
     }
 
     return {};
-  }, [preAnnotation, preAnnotationConfig, task?.media_type]);
+  }, [preAnnotation, task?.media_type]);
 
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
@@ -141,9 +143,15 @@ const AnnotationPage = () => {
     [t],
   );
 
+  // 默认加载数量常量
+  const PAGE_SIZE = 40;
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
   const currentPage = useRef<number>(1);
+  if (currentPage.current === 1) {
+    currentPage.current = sample?.data.inner_id ? Math.floor(sample.data.inner_id / PAGE_SIZE) + 1 : 1;
+  }
+
   const fetchSamples = useCallback(async () => {
     if (!routeParams.taskId) {
       return Promise.resolve([]);
@@ -151,8 +159,8 @@ const AnnotationPage = () => {
 
     const { data, meta_data } = await getSamples({
       task_id: +routeParams.taskId!,
-      pageNo: currentPage.current,
-      pageSize: 40,
+      page: currentPage.current,
+      size: PAGE_SIZE,
     });
 
     currentPage.current += 1;
@@ -198,11 +206,11 @@ const AnnotationPage = () => {
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageSample(sample?.data, editorConfig);
+      return convertImageSample(sample?.data);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertAudioAndVideoSample(sample?.data, editorConfig, task.media_type);
+      return convertAudioAndVideoSample(sample?.data, task.media_type);
     }
-  }, [editorConfig, sample?.data, task?.media_type]);
+  }, [sample?.data, task?.media_type]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
@@ -255,13 +263,17 @@ const AnnotationPage = () => {
 
       return true;
     },
-    [t, config, task],
+    [config, task, t],
   );
 
   const [currentTool, setCurrentTool] = useState<any>();
   const [labelMapping, setLabelMapping] = useState<Record<any, string>>();
 
   const handleLabelChange = useCallback((toolName: any, label: ILabel) => {
+    if (!label) {
+      return;
+    }
+
     // 缓存当前标签
     setLabelMapping((prev) => {
       return {
@@ -286,7 +298,8 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
         onError={onError}
-        offsetTop={configFromParent ? 100 : 156}
+        // windows platform pixel issue
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         requestEdit={requestEdit}
@@ -295,7 +308,7 @@ const AnnotationPage = () => {
         selectedTool={currentTool}
         selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   } else if (task?.media_type === MediaType.VIDEO) {
@@ -303,7 +316,7 @@ const AnnotationPage = () => {
       <Annotator
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
-        offsetTop={configFromParent ? 100 : 156}
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         toolbarRight={topActionContent}
@@ -314,7 +327,7 @@ const AnnotationPage = () => {
         selectedTool={currentTool}
         selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   } else if (task?.media_type === MediaType.AUDIO) {
@@ -322,7 +335,7 @@ const AnnotationPage = () => {
       <AudioAnnotator
         primaryColor="#0d53de"
         ref={audioAnnotationRef}
-        offsetTop={configFromParent ? 100 : 156}
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         toolbarRight={topActionContent}
@@ -333,7 +346,7 @@ const AnnotationPage = () => {
         selectedTool={currentTool}
         selectedLabel={currentLabel}
         preAnnotationLabels={preAnnotationConfig}
-        preAnnotations={preAnnotations}
+        preAnnotations={sample.data.state === SampleState.NEW ? preAnnotations : undefined}
       />
     );
   }
@@ -354,8 +367,6 @@ const AnnotationPage = () => {
     );
   }
 
-  console.log(editingSample);
-
   return (
     <AnnotationContext.Provider value={annotationContextValue}>
       {isLoading && (
@@ -369,4 +380,5 @@ const AnnotationPage = () => {
     </AnnotationContext.Provider>
   );
 };
+
 export default AnnotationPage;

@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import type { PropsWithChildren } from 'react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { EllipsisText, secondsToMinute } from '@labelu/components-react';
 import type { MediaAnnotationInUI, MediaAnnotationWithTextAndTag } from '@labelu/interface';
 
@@ -12,7 +12,8 @@ import { ReactComponent as VisibilityIcon } from '@/assets/icons/visibility.svg'
 import { ReactComponent as VisibilityOffIcon } from '@/assets/icons/visibility-off.svg';
 import { useAnnotationCtx } from '@/context/annotation.context';
 
-import { openAttributeModal, useTool } from '..';
+import { openAttributeModal } from '../LabelSection';
+import { useTool } from '../context/tool.context';
 
 interface AttributeItemProps {
   annotation: MediaAnnotationInUI;
@@ -111,7 +112,8 @@ export interface AttributeActionProps {
 }
 
 export function AttributeAction({ annotation, annotations, showEdit = true }: AttributeActionProps) {
-  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange } = useAnnotationCtx();
+  const { onAnnotationRemove, onAnnotationsRemove, onAnnotationsChange, onAnnotationChange, disabled } =
+    useAnnotationCtx();
   const { labelMapping, requestEdit, player } = useTool();
 
   const annotationsMapping = useMemo(() => {
@@ -137,6 +139,18 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
     return true;
   }, [annotation, annotations]);
 
+  const secondaryEditable = useCallback(() => {
+    if (!annotation) {
+      return false;
+    }
+
+    if (typeof requestEdit === 'function') {
+      return requestEdit('update', { toolName: annotation.type!, label: annotation?.label });
+    }
+
+    return true;
+  }, [annotation, requestEdit]);
+
   const handleEditClick = (e: React.MouseEvent) => {
     if (!annotation?.label) {
       return;
@@ -144,12 +158,7 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
 
     player.pause();
 
-    const editable =
-      typeof requestEdit === 'function'
-        ? requestEdit('update', { toolName: annotation.type, label: annotation.label })
-        : true;
-
-    if (!editable) {
+    if (disabled || !secondaryEditable()) {
       return;
     }
 
@@ -192,6 +201,10 @@ export function AttributeAction({ annotation, annotations, showEdit = true }: At
   };
 
   const handleRemove = (_annotation: MediaAnnotationInUI) => (e: React.MouseEvent) => {
+    if (disabled || !secondaryEditable()) {
+      return;
+    }
+
     e.stopPropagation();
     e.preventDefault();
     onAnnotationRemove(_annotation);

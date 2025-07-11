@@ -52,6 +52,7 @@ function CheckIcon() {
 
 const Inner = styled.div`
   border-radius: 3px;
+  width: 100%;
 `;
 
 const Title = styled.div`
@@ -67,6 +68,7 @@ const StatusCardDiv = styled.div<{
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+  flex: 1;
 
   ${({ active }) =>
     active &&
@@ -101,11 +103,11 @@ export function StatusCard({ title, active, completed, skipped, children, onClic
   const { t } = useTranslation();
 
   return (
-    <StatusCardDiv active={active} onClick={onClick}>
-      <Inner>{children}</Inner>
-      {title && <Title>{title}</Title>}
+    <StatusCardDiv className="labelu-status-card" active={active} onClick={onClick}>
+      <Inner className="labelu-status-card__inner">{children}</Inner>
+      {title && <Title className="labelu-status-card__title">{title}</Title>}
       {completed && <CheckIcon />}
-      {skipped && <SkipWrapper>{t('skipped')}</SkipWrapper>}
+      {skipped && <SkipWrapper className="labelu-status-card__skip">{t('skipped')}</SkipWrapper>}
     </StatusCardDiv>
   );
 }

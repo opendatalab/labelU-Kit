@@ -3,6 +3,7 @@ import type { ILabel } from '@labelu/interface';
 import Color from 'color';
 
 import uid from '@/utils/uid';
+import { DomPortal } from '@/core/DomPortal';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -25,9 +26,9 @@ export interface PolygonData extends BasicImageAnnotation {
   controlPoints?: AxisPoint[];
 }
 
-export type PolygonGroup = Group<Polygon | ShapeText, PolygonStyle>;
+export type PolygonGroup = Group;
 
-export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonStyle> {
+export class AnnotationPolygon extends Annotation<PolygonData, PolygonStyle> {
   public labelColor: string = LabelBase.DEFAULT_COLOR;
 
   public strokeColor: string = LabelBase.DEFAULT_COLOR;
@@ -101,19 +102,64 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
       throw Error('Invalid type, only "line" and "spline" are supported');
     }
 
-    const attributesText = AnnotationPolygon.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+    const labelText = AnnotationPolygon.labelStatic.getLabelText(data.label);
+    const attributesText = AnnotationPolygon.labelStatic.getAttributeTexts(data.label, data.attributes);
 
-    group.add(
-      new ShapeText({
-        id: uid(),
-        coordinate: data.points[0],
-        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
+    this.doms.push(
+      new DomPortal({
+        content: this.generateLabelDom(labelText),
+        getPosition: (shape, container) => {
+          // 找到group中y最小的点
+          let point = shape.dynamicCoordinate[0];
+
+          for (const coord of shape.dynamicCoordinate) {
+            if (coord.y < point.y) {
+              point = coord;
+            }
+          }
+
+          return {
+            x: point.x,
+            y: point.y - container.clientHeight - Annotation.strokeWidth - 2,
+          };
+        },
+        order: data.order,
+        preventPointerEvents: true,
+        bindShape: group.shapes[0],
         style: {
-          opacity: visible ? 1 : 0,
-          fill: labelColor,
+          display: visible ? 'block' : 'none',
         },
       }),
     );
+
+    if (attributesText) {
+      this.doms.push(
+        new DomPortal({
+          content: this.generateAttributeDom(attributesText),
+          getPosition: (shape, container) => {
+            // 找到group中y最大的点
+            let point = shape.dynamicCoordinate[0];
+
+            for (const coord of shape.dynamicCoordinate) {
+              if (coord.y > point.y) {
+                point = coord;
+              }
+            }
+
+            return {
+              x: point.x,
+              y: point.y + container.clientHeight + Annotation.strokeWidth + 2,
+            };
+          },
+          order: data.order,
+          preventPointerEvents: true,
+          bindShape: group.shapes[0],
+          style: {
+            display: visible ? 'block' : 'none',
+          },
+        }),
+      );
+    }
   }
 
   private _handleMouseOver = () => {
@@ -161,6 +207,20 @@ export class AnnotationPolygon extends Annotation<PolygonData, Polygon, PolygonS
       }
     });
   };
+
+  public getCenter() {
+    const { group } = this;
+
+    const maxX = Math.max(...group.shapes[0].dynamicCoordinate.map((item) => item.x));
+    const maxY = Math.max(...group.shapes[0].dynamicCoordinate.map((item) => item.y));
+    const minX = Math.min(...group.shapes[0].dynamicCoordinate.map((item) => item.x));
+    const minY = Math.min(...group.shapes[0].dynamicCoordinate.map((item) => item.y));
+
+    return {
+      x: (maxX + minX) / 2,
+      y: (maxY + minY) / 2,
+    };
+  }
 
   public destroy(): void {
     super.destroy();

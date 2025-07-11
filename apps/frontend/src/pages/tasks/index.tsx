@@ -6,7 +6,6 @@ import { FlexLayout } from '@labelu/components-react';
 import { useTranslation } from '@labelu/i18n';
 
 import type { TaskListResponseWithStatics } from '@/api/types';
-import { usePageSize } from '@/hooks/usePageSize';
 import { ResponsiveGrid } from '@/components/ResponsiveGrid';
 
 import TaskCard from './components/taskCard';
@@ -44,12 +43,10 @@ const TaskList = () => {
   const tasks = _.get(tasksResponse, 'data', []);
   const meta_data = _.get(tasksResponse, 'meta_data');
   const labeluVersion = _.get(routerLoaderData, ['headers', 'labelu-version']);
-  const pageSize = usePageSize();
   const { t, i18n } = useTranslation();
 
-  const [searchParams, setSearchParams] = useSearchParams({
-    size: String(pageSize),
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const finalPageSize = searchParams.get('size') ? +searchParams.get('size')! : 16;
 
   const createTask = () => {
     navigate('/tasks/0/edit?isNew=true');
@@ -122,11 +119,11 @@ const TaskList = () => {
         <AppVersion>
           <Popover content={versionInfo}>labelu@{labeluVersion}</Popover>
         </AppVersion>
-        {meta_data && searchParams && meta_data?.total > pageSize && (
+        {meta_data && searchParams && meta_data?.total > finalPageSize && (
           <Pagination
             defaultCurrent={searchParams.get('page') ? +searchParams.get('page')! : 1}
             total={meta_data?.total ?? 0}
-            pageSize={+searchParams.get('size')!}
+            pageSize={finalPageSize}
             onChange={(value: number, _pageSize: number) => {
               searchParams.set('size', String(_pageSize));
               searchParams.set('page', String(value));

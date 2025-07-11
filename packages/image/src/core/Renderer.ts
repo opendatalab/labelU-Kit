@@ -70,6 +70,8 @@ export class Renderer extends EventEmitter {
     canvas.height = height * this.ratio;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
+    this.options.width = width;
+    this.options.height = height;
 
     this.ctx?.scale(this.ratio, this.ratio);
   }
