@@ -118,7 +118,7 @@ const commonController = {
     const correctType = FileExtension[type];
     const dotIndex = fileName.lastIndexOf('.');
     if (dotIndex > -1) {
-      const _type = fileName.slice(dotIndex + 1);
+      const _type = fileName.slice(dotIndex + 1).toLowerCase();
       if (correctType.indexOf(_type) > -1) {
         result = true;
       }
