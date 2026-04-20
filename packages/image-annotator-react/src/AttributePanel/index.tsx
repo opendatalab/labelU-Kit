@@ -401,7 +401,7 @@ export function AttributePanel() {
     () =>
       Array.from(imageAnnotationsGroup).map(([label, _annotations]) => {
         const found = labelMapping[_annotations[0].tool]?.[label] ?? preLabelMapping?.[_annotations[0].tool]?.[label];
-        const labelText = found ? found?.key ?? DEFAULT_LABEL_TEXT : DEFAULT_LABEL_TEXT;
+        const labelText = found ? found?.key ?? label : label;
 
         return {
           label: (
@@ -425,7 +425,7 @@ export function AttributePanel() {
                     active={item.id === selectedAnnotation?.id}
                     order={item.order}
                     annotation={item}
-                    labelText={labelOfAnnotation?.key ?? DEFAULT_LABEL_TEXT}
+                    labelText={labelOfAnnotation?.key ?? item.label ?? DEFAULT_LABEL_TEXT}
                     color={labelOfAnnotation?.color ?? DEFAULT_LABEL_COLOR}
                   />
                 );
