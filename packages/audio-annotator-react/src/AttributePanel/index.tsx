@@ -410,7 +410,7 @@ export function AttributePanel() {
     () =>
       Array.from(mediaAnnotationGroup).map(([label, _annotations]) => {
         const found = labelMapping[_annotations[0].type]?.[label] ?? preLabelMapping?.[_annotations[0].type]?.[label];
-        const labelText = found ? found?.key ?? label : label;
+        const labelText = found ? found?.key ?? t('noneLabel') : t('noneLabel');
 
         return {
           label: (
@@ -434,7 +434,7 @@ export function AttributePanel() {
                     active={item.id === selectedAnnotation?.id}
                     order={item.order}
                     annotation={item}
-                    labelText={labelOfAnnotation?.key ?? label}
+                    labelText={labelOfAnnotation?.key ?? t('noneLabel')}
                     color={labelOfAnnotation?.color ?? '#999'}
                   />
                 );
@@ -443,7 +443,7 @@ export function AttributePanel() {
           ),
         };
       }),
-    [mediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
+    [t, mediaAnnotationGroup, labelMapping, preLabelMapping, selectedAnnotation?.id],
   );
 
   return (
