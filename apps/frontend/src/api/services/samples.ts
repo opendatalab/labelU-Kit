@@ -3,6 +3,7 @@ import commonController from '@/utils/common';
 import request from '../request';
 import { getTask } from './task';
 import {
+  type AutoLabelCommand,
   ExportType,
   type DeleteApiV1TasksTaskIdDeleteParams,
   type DeleteSampleCommand,
@@ -11,6 +12,7 @@ import {
   type ListByApiV1TasksTaskIdSamplesGetParams,
   type OkRespCommonDataResp,
   type OkRespCreateSampleResponse,
+  type OkRespAutoLabelResponse,
   type OkRespSampleResponse,
   type PatchSampleCommand,
   type SampleData,
@@ -78,6 +80,18 @@ export async function updateSampleAnnotationResult(
       },
     },
   );
+}
+
+export async function autoLabelSample(
+  taskId: number,
+  sampleId: number,
+  body: AutoLabelCommand = {},
+): Promise<OkRespAutoLabelResponse> {
+  return await request.post(`/v1/tasks/${taskId}/samples/${sampleId}/auto_label`, body, {
+    params: {
+      sample_id: sampleId,
+    },
+  });
 }
 
 export async function outputSample(taskId: number, sampleIds: number[], activeTxt: ExportType) {

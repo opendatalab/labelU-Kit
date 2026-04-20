@@ -6,7 +6,6 @@ import { useMemo } from 'react';
 import type { SampleResponse } from '@/api/types';
 import { MediaType } from '@/api/types';
 import { ReactComponent as CheckSvgIcon } from '@/assets/svg/check.svg';
-import { getThumbnailUrl } from '@/utils';
 import type { TaskSampleUser } from '@/hooks/useSampleWs';
 import useMe from '@/hooks/useMe';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -105,7 +104,7 @@ const SliderCard = ({ type, cardInfo, editingUser, index, onClick }: SliderCardP
     );
   }
 
-  const thumbnail = getThumbnailUrl(url!);
+  const thumbnail = file.thumbnail_url || url;
 
   return (
     <ImageWrapper items="center" flex="column" justify="center">

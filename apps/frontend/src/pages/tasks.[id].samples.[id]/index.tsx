@@ -47,12 +47,13 @@ const AnnotationPage = () => {
   const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
   const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation;
   const { t } = useTranslation();
+  const activePreAnnotation = useMemo(() => _.last(preAnnotation?.data), [preAnnotation]);
 
   const preAnnotationConfig = useMemo(() => {
     const result: Partial<Record<AllToolName, any>> = {};
 
-    if (preAnnotation) {
-      const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
+    if (activePreAnnotation) {
+      const preAnnotationResult = JSON.parse(_.get(activePreAnnotation, 'data', 'null'));
 
       if (!preAnnotationResult) {
         return {};
@@ -77,15 +78,17 @@ const AnnotationPage = () => {
     }
 
     return result;
-  }, [preAnnotation]);
+  }, [activePreAnnotation]);
   const preAnnotations = useMemo(() => {
-    if (!preAnnotation) {
+    if (!activePreAnnotation) {
       return {};
     }
 
-    const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
+    const preAnnotationResult = JSON.parse(_.get(activePreAnnotation, 'data', 'null'));
     let _annotations = _.get(preAnnotationResult, 'annotations', {});
-    const preAnnotationFile = _.get(preAnnotation, 'data[0].file', {});
+    const preAnnotationFile = (_.get(activePreAnnotation, 'file', {}) ?? {}) as {
+      filename?: string;
+    };
     // 兼容json预标注
     if (preAnnotationFile.filename?.endsWith('.json')) {
       _annotations = _.chain(preAnnotationResult)
@@ -110,7 +113,7 @@ const AnnotationPage = () => {
     }
 
     return {};
-  }, [preAnnotation, task?.media_type]);
+  }, [activePreAnnotation, task?.media_type]);
 
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
