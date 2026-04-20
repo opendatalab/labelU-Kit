@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useContext } from 'react';
+import { useEffect, useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, Tooltip } from 'antd';
 import _, { debounce } from 'lodash-es';
@@ -9,12 +9,13 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { FlexLayout } from '@labelu/components-react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
+import { ReactComponent as SparklesIcon } from '@/assets/svg/spark.svg';
 import commonController from '@/utils/common';
 import { imageAnnotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
 import type { getSample } from '@/api/services/samples';
-import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
+import { autoLabelSample, updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
 import useMe from '@/hooks/useMe';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -85,6 +86,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   const { t } = useTranslation();
   const me = useMe();
   const isMeTheCurrentUser = currentEditingUser && me.data && currentEditingUser?.user_id === me.data?.id;
+  const [isAutoLabeling, setIsAutoLabeling] = useState(false);
 
   // 第一次进入就是40的倍数时，获取下一页数据
   useEffect(() => {
@@ -370,6 +372,30 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
     saveCurrentSample,
   ]);
 
+  const handleAutoLabel = useCallback(async () => {
+    if (noSave || !isMeTheCurrentUser || !taskId || !sampleId || task?.media_type !== MediaType.IMAGE) {
+      return;
+    }
+
+    setIsAutoLabeling(true);
+    try {
+      const response = await autoLabelSample(+taskId, +sampleId, {
+        overwrite: true,
+      });
+      await revalidator.revalidate();
+      if (response.data.warning_message) {
+        message.warning(response.data.warning_message);
+      } else {
+        message.success(t('aiAutoLabelSuccess'));
+      }
+    } catch (error: any) {
+      const backendMsg = error?.response?.data?.msg;
+      commonController.notificationErrorMessage({ message: backendMsg || t('aiAutoLabelFailed') }, 2);
+    } finally {
+      setIsAutoLabeling(false);
+    }
+  }, [isMeTheCurrentUser, noSave, revalidator, sampleId, t, task?.media_type, taskId]);
+
   const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
       return;
@@ -509,6 +535,17 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
           </>
         )}
       </FlexLayout>
+      {task?.media_type === MediaType.IMAGE && (
+        <Button
+          type="text"
+          className="flex items-center"
+          icon={<SparklesIcon />}
+          onClick={commonController.debounce(handleAutoLabel, 100)}
+          disabled={isGlobalLoading || isAutoLabeling || !isMeTheCurrentUser}
+        >
+          {isAutoLabeling ? t('aiAutoLabeling') : t('aiAutoLabel')}
+        </Button>
+      )}
       {isSampleSkipped ? (
         <Button
           type="text"

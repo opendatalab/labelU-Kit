@@ -14,7 +14,7 @@ import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
-import { downloadFromUrl, getThumbnailUrl } from '@/utils';
+import { downloadFromUrl } from '@/utils';
 import { deletePreAnnotationFile } from '@/api/services/preAnnotations';
 import { deleteSamples } from '@/api/services/samples';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -113,8 +113,8 @@ const Samples = () => {
         }
 
         if (task!.media_type === MediaType.IMAGE) {
-          const thumbnailUrl = getThumbnailUrl(data.url!);
-          return <img src={thumbnailUrl} style={{ width: '116px', height: '70px' }} />;
+          const thumbnailUrl = data.thumbnail_url || data.url;
+          return <img src={thumbnailUrl} style={{ width: '116px', height: '70px', objectFit: 'cover' }} />;
         } else if (task!.media_type === MediaType.AUDIO) {
           return <audio src={data?.url} controls />;
         } else {
