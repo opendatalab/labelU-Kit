@@ -406,5 +406,9 @@
   "aiAutoLabeling": "AI Annotating...",
   "aiAutoLabelSuccess": "AI annotation completed",
   "aiAutoLabelFailed": "AI annotation failed",
-  "filterByLabels": "Only keep configured labels"
+  "filterByLabels": "Only keep configured labels",
+  "batchAutoLabel": "Batch AI Annotate",
+  "batchAutoLabelStarted": "Batch annotation job started",
+  "batchAutoLabelCompleted": "Batch annotation completed: {{success}} succeeded, {{failed}} failed",
+  "batchAutoLabelNoSamples": "No unannotated samples"
 }

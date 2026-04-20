@@ -404,5 +404,9 @@
   "aiAutoLabeling": "AI 标注中...",
   "aiAutoLabelSuccess": "AI 标注完成",
   "aiAutoLabelFailed": "AI 标注失败",
-  "filterByLabels": "只保留配置标签"
+  "filterByLabels": "只保留配置标签",
+  "batchAutoLabel": "AI 批量标注",
+  "batchAutoLabelStarted": "批量标注任务已开始",
+  "batchAutoLabelCompleted": "批量标注完成，成功 {{success}} 个，失败 {{failed}} 个",
+  "batchAutoLabelNoSamples": "没有未标注的样本"
 }
