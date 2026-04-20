@@ -403,5 +403,6 @@
   "aiAutoLabel": "AI 标注",
   "aiAutoLabeling": "AI 标注中...",
   "aiAutoLabelSuccess": "AI 标注完成",
-  "aiAutoLabelFailed": "AI 标注失败"
+  "aiAutoLabelFailed": "AI 标注失败",
+  "filterByLabels": "只保留配置标签"
 }
