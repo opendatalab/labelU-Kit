@@ -122,6 +122,22 @@ export interface AutoLabelResponse {
   warning_message?: string | null;
 }
 
+export interface BatchAutoLabelCommand {
+  filter_by_labels?: boolean;
+}
+
+export interface AutoLabelJobResponse {
+  id: number;
+  task_id: number;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  sample_count: number;
+  processed_count: number;
+  success_count: number;
+  failed_count: number;
+  error_message?: string | null;
+  created_at?: string | null;
+}
+
 export interface ExportSampleCommand {
   /** Sample Ids description: sample id */
   sample_ids?: number[];
