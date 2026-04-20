@@ -4,6 +4,8 @@ import request from '../request';
 import { getTask } from './task';
 import {
   type AutoLabelCommand,
+  type BatchAutoLabelCommand,
+  type AutoLabelJobResponse,
   ExportType,
   type DeleteApiV1TasksTaskIdDeleteParams,
   type DeleteSampleCommand,
@@ -92,6 +94,17 @@ export async function autoLabelSample(
       sample_id: sampleId,
     },
   });
+}
+
+export async function createAutoLabelJob(
+  taskId: number,
+  body: BatchAutoLabelCommand = {},
+): Promise<{ data: AutoLabelJobResponse }> {
+  return await request.post(`/v1/tasks/${taskId}/auto_label_job`, body);
+}
+
+export async function getAutoLabelJobStatus(taskId: number, jobId: number): Promise<{ data: AutoLabelJobResponse }> {
+  return await request.get(`/v1/tasks/${taskId}/auto_label_job/${jobId}`);
 }
 
 export async function outputSample(taskId: number, sampleIds: number[], activeTxt: ExportType) {
