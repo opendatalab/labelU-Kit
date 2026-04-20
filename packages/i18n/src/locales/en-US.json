@@ -405,5 +405,6 @@
   "aiAutoLabel": "AI Annotate",
   "aiAutoLabeling": "AI Annotating...",
   "aiAutoLabelSuccess": "AI annotation completed",
-  "aiAutoLabelFailed": "AI annotation failed"
+  "aiAutoLabelFailed": "AI annotation failed",
+  "filterByLabels": "Only keep configured labels"
 }
