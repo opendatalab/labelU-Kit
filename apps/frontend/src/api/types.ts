@@ -107,6 +107,7 @@ export interface AutoLabelCommand {
   overwrite?: boolean;
   template_id?: number | null;
   prompt?: string | null;
+  filter_by_labels?: boolean;
 }
 
 export interface AutoLabelResponse {

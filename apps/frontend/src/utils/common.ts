@@ -75,7 +75,7 @@ const commonController = {
   notificationErrorMessage(error: any, time: number) {
     const errCode = error.err_code;
     if (errCode || errCode === 0) {
-      const errorMessage = ErrorMessages[errCode];
+      const errorMessage = ErrorMessages[errCode] || error.msg;
       if (errorMessage) {
         message.error(errorMessage, time);
       } else {

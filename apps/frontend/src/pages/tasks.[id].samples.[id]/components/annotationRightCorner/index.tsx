@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
-import { Button, Tooltip } from 'antd';
+import { Button, Checkbox, Dropdown, Tooltip } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useTranslation } from '@labelu/i18n';
@@ -87,6 +87,10 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   const me = useMe();
   const isMeTheCurrentUser = currentEditingUser && me.data && currentEditingUser?.user_id === me.data?.id;
   const [isAutoLabeling, setIsAutoLabeling] = useState(false);
+  const [filterByLabels, setFilterByLabels] = useState<boolean>(() => {
+    const stored = localStorage.getItem('ai_filter_by_labels');
+    return stored === null ? true : stored === 'true';
+  });
 
   // 第一次进入就是40的倍数时，获取下一页数据
   useEffect(() => {
@@ -381,6 +385,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
     try {
       const response = await autoLabelSample(+taskId, +sampleId, {
         overwrite: true,
+        filter_by_labels: filterByLabels,
       });
       await revalidator.revalidate();
       if (response.data.warning_message) {
@@ -394,7 +399,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
     } finally {
       setIsAutoLabeling(false);
     }
-  }, [isMeTheCurrentUser, noSave, revalidator, sampleId, t, task?.media_type, taskId]);
+  }, [filterByLabels, isMeTheCurrentUser, noSave, revalidator, sampleId, t, task?.media_type, taskId]);
 
   const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
@@ -536,15 +541,33 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
         )}
       </FlexLayout>
       {task?.media_type === MediaType.IMAGE && (
-        <Button
+        <Dropdown.Button
           type="text"
-          className="flex items-center"
-          icon={<SparklesIcon />}
           onClick={commonController.debounce(handleAutoLabel, 100)}
           disabled={isGlobalLoading || isAutoLabeling || !isMeTheCurrentUser}
+          menu={{
+            items: [
+              {
+                key: 'filter_by_labels',
+                label: (
+                  <Checkbox
+                    checked={filterByLabels}
+                    onChange={(e) => {
+                      const val = e.target.checked;
+                      setFilterByLabels(val);
+                      localStorage.setItem('ai_filter_by_labels', String(val));
+                    }}
+                  >
+                    {t('filterByLabels')}
+                  </Checkbox>
+                ),
+              },
+            ],
+          }}
         >
+          <SparklesIcon className="mr-1" />
           {isAutoLabeling ? t('aiAutoLabeling') : t('aiAutoLabel')}
-        </Button>
+        </Dropdown.Button>
       )}
       {isSampleSkipped ? (
         <Button
