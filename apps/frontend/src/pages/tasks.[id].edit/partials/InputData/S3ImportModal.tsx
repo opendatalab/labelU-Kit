@@ -20,7 +20,7 @@ interface S3ImportModalProps {
   onClose: () => void;
   taskId: number;
   mediaType: MediaType;
-  onImportSuccess: (fileNames: string[]) => void;
+  onImportSuccess: (fileNames: string[], sampleIds: number[]) => void;
 }
 
 function formatFileSize(bytes: number): string {
@@ -105,11 +105,12 @@ const S3ImportModal = ({ open, onClose, taskId, mediaType, onImportSuccess }: S3
     importMutation.mutate(
       { data_source_id: selectedDsId, object_keys: selectedKeys },
       {
-        onSuccess: () => {
+        onSuccess: (res) => {
           message.success(t('importSuccess').replace('{count}', String(selectedKeys.length)));
           const fileNames = selectedKeys.map((key) => key.split('/').pop() ?? key);
+          const sampleIds = res?.data?.ids ?? [];
           setSelectedKeys([]);
-          onImportSuccess(fileNames);
+          onImportSuccess(fileNames, sampleIds);
           onClose();
         },
       },
@@ -123,10 +124,14 @@ const S3ImportModal = ({ open, onClose, taskId, mediaType, onImportSuccess }: S3
       { data_source_id: selectedDsId, prefix: prefix ?? '', extension },
       {
         onSuccess: (res) => {
-          const count = res?.data?.ids?.length ?? 0;
+          const sampleIds = res?.data?.ids ?? [];
+          const count = sampleIds.length;
           message.success(t('importSuccess').replace('{count}', String(count)));
           setSelectedKeys([]);
-          onImportSuccess(count > 0 ? (currentFileNames.length > 0 ? currentFileNames : [`${count} files`]) : []);
+          onImportSuccess(
+            count > 0 ? (currentFileNames.length > 0 ? currentFileNames : [`${count} files`]) : [],
+            sampleIds,
+          );
           onClose();
         },
       },

@@ -144,7 +144,7 @@ const DataSources = () => {
         type="info"
         message={
           <div>
-            如果想要更强大的S3数据可视化，试试{' '}
+            {t('s3VizTip')}{' '}
             <a href="https://github.com/opendatalab/vis3#features" target="_blank" rel="noreferrer">
               vis3
             </a>

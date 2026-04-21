@@ -90,6 +90,7 @@ export async function autoLabelSample(
   body: AutoLabelCommand = {},
 ): Promise<OkRespAutoLabelResponse> {
   return await request.post(`/v1/tasks/${taskId}/samples/${sampleId}/auto_label`, body, {
+    timeout: 5 * 60 * 1000,
     params: {
       sample_id: sampleId,
     },

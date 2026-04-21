@@ -335,6 +335,7 @@ const InputData = () => {
         responsive: ['md', 'lg'],
         key: 'url',
         render: (text: string) => {
+          if (!text) return '-';
           return formatter.format('ellipsis', `${location.protocol}//${location.host}${text}`, {
             maxWidth: 160,
             type: 'tooltip',
@@ -489,7 +490,7 @@ const InputData = () => {
                 <Status type="success" icon={null} style={{ display: 'inline-block' }}>
                   {amountMapping.succeeded}
                 </Status>
-                <span>个，</span>
+                <span>{t('uploadSuccessCount')}</span>
               </FlexLayout>
               <FlexLayout gap=".25rem">
                 <span>{t('uploadFailed')}</span>
@@ -510,15 +511,16 @@ const InputData = () => {
           onClose={() => setS3ImportOpen(false)}
           taskId={taskId}
           mediaType={task.media_type}
-          onImportSuccess={(fileNames) => {
+          onImportSuccess={(fileNames, sampleIds) => {
             setFileQueue((prev) => [
               ...prev,
-              ...fileNames.map((name) => ({
+              ...fileNames.map((name, index) => ({
                 uid: `s3-${Date.now()}-${name}`,
                 name,
                 size: 0,
                 status: UploadStatus.Success,
                 file: new File([], name),
+                refId: sampleIds[index],
               })),
             ]);
             revalidator.revalidate();
