@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Pagination, Popconfirm, Table, message } from 'antd';
+import { Alert, Button, Pagination, Popconfirm, Table, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
@@ -139,6 +139,18 @@ const DataSources = () => {
           {t('createDataSource')}
         </Button>
       </Header>
+      <Alert
+        style={{ marginBottom: '1rem' }}
+        type="info"
+        message={
+          <div>
+            如果想要更强大的S3数据可视化，试试{' '}
+            <a href="https://github.com/opendatalab/vis3#features" target="_blank" rel="noreferrer">
+              vis3
+            </a>
+          </div>
+        }
+      />
       <FlexLayout.Content scroll flex="column">
         <Table
           dataSource={data?.data ?? []}
