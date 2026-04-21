@@ -565,8 +565,10 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
             ],
           }}
         >
-          <SparklesIcon className="mr-1" />
-          {isAutoLabeling ? t('aiAutoLabeling') : t('aiAutoLabel')}
+          <FlexLayout items="center" gap="0.5rem">
+            <SparklesIcon />
+            {isAutoLabeling ? t('aiAutoLabeling') : t('aiAutoLabel')}
+          </FlexLayout>
         </Dropdown.Button>
       )}
       {isSampleSkipped ? (
