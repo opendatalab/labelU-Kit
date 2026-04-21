@@ -410,5 +410,7 @@
   "batchAutoLabel": "Batch AI Annotate",
   "batchAutoLabelStarted": "Batch annotation job started",
   "batchAutoLabelCompleted": "Batch annotation completed: {{success}} succeeded, {{failed}} failed",
-  "batchAutoLabelNoSamples": "No unannotated samples"
+  "batchAutoLabelNoSamples": "No unannotated samples",
+  "s3VizTip": "For more powerful S3 data visualization, try",
+  "uploadSuccessCount": ","
 }

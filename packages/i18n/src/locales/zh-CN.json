@@ -408,5 +408,7 @@
   "batchAutoLabel": "AI 批量标注",
   "batchAutoLabelStarted": "批量标注任务已开始",
   "batchAutoLabelCompleted": "批量标注完成，成功 {{success}} 个，失败 {{failed}} 个",
-  "batchAutoLabelNoSamples": "没有未标注的样本"
+  "batchAutoLabelNoSamples": "没有未标注的样本",
+  "s3VizTip": "如果想要更强大的S3数据可视化，试试",
+  "uploadSuccessCount": "个，"
 }
