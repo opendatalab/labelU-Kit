@@ -19,8 +19,8 @@
     "commit": "cz",
     "docs": "typedoc",
     "docs-all": "npm run docs --workspaces --if-present",
-    "release-dry": "multi-semantic-release --dry-run --ignore-private-packages --no-ci",
-    "release": "multi-semantic-release --ignore-private-packages"
+    "release-dry": "multi-semantic-release --dry-run --ignore-private-packages --no-ci --sequential-init",
+    "release": "multi-semantic-release --ignore-private-packages --sequential-init"
   },
   "author": "gary-shen",
   "contributors": [
