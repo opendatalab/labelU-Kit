@@ -11,6 +11,22 @@ export const useImageAnnotator = (containerRef: React.RefObject<HTMLDivElement>,
   const ignoredFirstRun = useRef<boolean>(true);
 
   useLayoutEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current || !engine) {
+        return;
+      }
+
+      const width = containerRef.current.clientWidth;
+      const height = containerRef.current.clientHeight;
+
+      engine.resize(width, height);
+
+      // 需要加载图片后才能居中，否则标注坐标计算会有误差
+      if (engine.backgroundRenderer?.image) {
+        engine.center();
+      }
+    };
+
     const resizeObserver = new ResizeObserver((entries) => {
       if (entries.length === 0) {
         return;
@@ -23,21 +39,28 @@ export const useImageAnnotator = (containerRef: React.RefObject<HTMLDivElement>,
         return;
       }
 
-      const height = entries[0].contentRect.height;
-      const width = entries[0].contentRect.width;
-
-      engine?.resize(width, height);
-
-      // 需要加载图片后才能居中，否则标注坐标计算会有误差
-      if (engine?.backgroundRenderer?.image) {
-        engine?.center();
-      }
+      handleResize();
     });
 
     resizeObserver.observe(containerRef.current as HTMLElement);
 
+    // 监听 devicePixelRatio 变化（浏览器缩放、全屏切换等场景）
+    let dprMediaQuery: MediaQueryList | null = null;
+    const handleDprChange = () => {
+      handleResize();
+
+      // dpr 变化后需要重新监听新的 dpr 值
+      dprMediaQuery?.removeEventListener('change', handleDprChange);
+      dprMediaQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+      dprMediaQuery.addEventListener('change', handleDprChange);
+    };
+
+    dprMediaQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    dprMediaQuery.addEventListener('change', handleDprChange);
+
     return () => {
       resizeObserver.disconnect();
+      dprMediaQuery?.removeEventListener('change', handleDprChange);
     };
   }, [containerRef, engine]);
 

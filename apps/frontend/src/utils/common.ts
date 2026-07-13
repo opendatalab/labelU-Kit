@@ -75,7 +75,7 @@ const commonController = {
   notificationErrorMessage(error: any, time: number) {
     const errCode = error.err_code;
     if (errCode || errCode === 0) {
-      const errorMessage = ErrorMessages[errCode];
+      const errorMessage = ErrorMessages[errCode] || error.msg;
       if (errorMessage) {
         message.error(errorMessage, time);
       } else {
@@ -118,7 +118,7 @@ const commonController = {
     const correctType = FileExtension[type];
     const dotIndex = fileName.lastIndexOf('.');
     if (dotIndex > -1) {
-      const _type = fileName.slice(dotIndex + 1);
+      const _type = fileName.slice(dotIndex + 1).toLowerCase();
       if (correctType.indexOf(_type) > -1) {
         result = true;
       }
