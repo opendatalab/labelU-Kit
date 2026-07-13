@@ -4,7 +4,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import commonController from '@/utils/common';
-import { goLogin } from '@/utils/sso';
+import { goAuth } from '@/utils/sso';
 
 /**
  * 滑动续期：后端在响应头 `X-New-Token` 中返回新签发的 token 时，更新本地存储，
@@ -72,7 +72,7 @@ const authorizationBearerFailed = (error: any) => {
     localStorage.removeItem('token');
     setTimeout(() => {
       if (window.IS_ONLINE) {
-        goLogin();
+        goAuth();
       } else if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
