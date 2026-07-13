@@ -1,20 +1,24 @@
-import { useEffect, useCallback, useContext } from 'react';
+import { useEffect, useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
-import { Button } from 'antd';
+import { Button, Checkbox, Dropdown, Tooltip } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { FlexLayout } from '@labelu/components-react';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
+import { ReactComponent as SparklesIcon } from '@/assets/svg/spark.svg';
 import commonController from '@/utils/common';
 import { imageAnnotationRef, videoAnnotationRef, audioAnnotationRef } from '@/pages/tasks.[id].samples.[id]';
 import type { SampleListResponse, SampleResponse } from '@/api/types';
 import { MediaType, SampleState } from '@/api/types';
 import type { getSample } from '@/api/services/samples';
-import { updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
+import { autoLabelSample, updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
+import useMe from '@/hooks/useMe';
+import { UserAvatar } from '@/components/UserAvatar';
 import { generateDefaultValues } from '@/utils/generateGlobalToolDefaultValues';
 
 import AnnotationContext from '../../annotation.context';
@@ -26,6 +30,8 @@ interface AnnotationRightCornerProps {
   fetchNext?: () => void;
 
   totalSize: number;
+
+  isLastPage: boolean;
 }
 
 export const SAMPLE_CHANGED = 'sampleChanged';
@@ -60,7 +66,7 @@ export interface AnnotationLoaderData {
   samples: SampleListResponse;
 }
 
-const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRightCornerProps) => {
+const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: AnnotationRightCornerProps) => {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const isGlobalLoading = isFetching > 0 || isMutating > 0;
@@ -69,7 +75,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const revalidator = useRevalidator();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  const { samples, setSamples, task } = useContext(AnnotationContext);
+  const { samples, setSamples, task, currentEditingUser } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
@@ -78,14 +84,21 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
+  const me = useMe();
+  const isMeTheCurrentUser = currentEditingUser && me.data && currentEditingUser?.user_id === me.data?.id;
+  const [isAutoLabeling, setIsAutoLabeling] = useState(false);
+  const [filterByLabels, setFilterByLabels] = useState<boolean>(() => {
+    const stored = localStorage.getItem('ai_filter_by_labels');
+    return stored === null ? true : stored === 'true';
+  });
 
   // 第一次进入就是40的倍数时，获取下一页数据
   useEffect(() => {
-    if (isLastSample && samples.length < totalSize) {
+    if (isLastSample && samples.length < totalSize && !isLastPage) {
       // TODO: fetchNext 调用两次
       fetchNext?.();
     }
-  }, [fetchNext, isLastSample, samples.length, totalSize]);
+  }, [fetchNext, isLastSample, samples.length, totalSize, isLastPage]);
 
   const navigateWithSearch = useCallback(
     (to: string) => {
@@ -101,7 +114,13 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   );
 
   const saveCurrentSample = useCallback(async () => {
-    if (currentSample?.state === SampleState.SKIPPED || noSave || !task?.media_type) {
+    if (
+      currentSample?.state === SampleState.SKIPPED ||
+      noSave ||
+      !task?.media_type ||
+      // 非当前用户标注的文件，不保存
+      !isMeTheCurrentUser
+    ) {
       return;
     }
 
@@ -262,7 +281,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, noSave, task?.config?.tools, task?.media_type, taskId]);
+  }, [currentSample, isMeTheCurrentUser, noSave, task?.config?.tools, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
@@ -271,7 +290,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
   const handleCancelSkipSample = async () => {
-    if (noSave) {
+    if (noSave || !isMeTheCurrentUser) {
       return;
     }
 
@@ -296,7 +315,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
   };
 
   const handleSkipSample = async () => {
-    if (noSave) {
+    if (noSave || !isMeTheCurrentUser) {
       return;
     }
 
@@ -356,6 +375,31 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
     handleComplete,
     saveCurrentSample,
   ]);
+
+  const handleAutoLabel = useCallback(async () => {
+    if (noSave || !isMeTheCurrentUser || !taskId || !sampleId || task?.media_type !== MediaType.IMAGE) {
+      return;
+    }
+
+    setIsAutoLabeling(true);
+    try {
+      const response = await autoLabelSample(+taskId, +sampleId, {
+        overwrite: true,
+        filter_by_labels: filterByLabels,
+      });
+      await revalidator.revalidate();
+      if (response.data.warning_message) {
+        message.warning(response.data.warning_message);
+      } else {
+        message.success(t('aiAutoLabelSuccess'));
+      }
+    } catch (error: any) {
+      const backendMsg = error?.response?.data?.msg;
+      commonController.notificationErrorMessage({ message: backendMsg || t('aiAutoLabelFailed') }, 2);
+    } finally {
+      setIsAutoLabeling(false);
+    }
+  }, [filterByLabels, isMeTheCurrentUser, noSave, revalidator, sampleId, t, task?.media_type, taskId]);
 
   const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
@@ -481,12 +525,66 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
 
   return (
     <FlexLayout items="center" gap=".5rem">
+      <FlexLayout items="center" gap=".5rem">
+        {currentEditingUser && (
+          <>
+            {currentEditingUser.user_id !== me.data?.id && (
+              <>
+                <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
+                {t('isAnnotating')}
+                <Tooltip title={t('collaboratorTips')} placement="bottom">
+                  <QuestionCircleOutlined />
+                </Tooltip>
+              </>
+            )}
+          </>
+        )}
+      </FlexLayout>
+      {task?.media_type === MediaType.IMAGE && (
+        <Dropdown.Button
+          type="text"
+          onClick={commonController.debounce(handleAutoLabel, 100)}
+          disabled={isGlobalLoading || isAutoLabeling || !isMeTheCurrentUser}
+          menu={{
+            items: [
+              {
+                key: 'filter_by_labels',
+                label: (
+                  <Checkbox
+                    checked={filterByLabels}
+                    onChange={(e) => {
+                      const val = e.target.checked;
+                      setFilterByLabels(val);
+                      localStorage.setItem('ai_filter_by_labels', String(val));
+                    }}
+                  >
+                    {t('filterByLabels')}
+                  </Checkbox>
+                ),
+              },
+            ],
+          }}
+        >
+          <FlexLayout items="center" gap="0.5rem">
+            <SparklesIcon />
+            {isAutoLabeling ? t('aiAutoLabeling') : t('aiAutoLabel')}
+          </FlexLayout>
+        </Dropdown.Button>
+      )}
       {isSampleSkipped ? (
-        <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="text"
+          onClick={commonController.debounce(handleCancelSkipSample, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('cancelSkip')}
         </Button>
       ) : (
-        <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="text"
+          onClick={commonController.debounce(handleSkipSample, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('skip')}
         </Button>
       )}
@@ -496,7 +594,11 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize }: AnnotationRight
         </Button>
       )}
       {isLastSample ? (
-        <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
+        <Button
+          type="primary"
+          onClick={commonController.debounce(handleComplete, 100)}
+          disabled={isGlobalLoading || !isMeTheCurrentUser}
+        >
           {t('finish')}
         </Button>
       ) : (

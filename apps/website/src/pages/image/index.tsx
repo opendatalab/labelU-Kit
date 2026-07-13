@@ -726,12 +726,6 @@ export default function ImagePage() {
     };
   }, []);
 
-  const initialValues = useMemo(() => {
-    return {
-      tools: defaultConfig,
-    };
-  }, []);
-
   return (
     <>
       <ImageAnnotator

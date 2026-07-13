@@ -1,4 +1,4 @@
-import Icon, { BellOutlined, PoweroffOutlined } from '@ant-design/icons';
+import Icon, { BellOutlined, DatabaseOutlined, PoweroffOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
 import { Button, Divider, Dropdown, Popover, Tag } from 'antd';
 import { Link, useMatch } from 'react-router-dom';
@@ -72,6 +72,11 @@ const Homepage = () => {
             </Button>
           </a>
         )}
+        <Link to="/datasources">
+          <Button type="link" icon={<DatabaseOutlined />} style={{ color: 'rgba(0, 0, 0, 0.85)' }}>
+            {t('dataSources')}
+          </Button>
+        </Link>
         <Button
           type="link"
           data-wiz="documentation"
