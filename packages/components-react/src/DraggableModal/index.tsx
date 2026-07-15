@@ -11,6 +11,9 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+// 与 Tooltip 相同：复用同一个 element 引用，避免每次重渲染重新插入全局样式规则
+const globalStyle = <GlobalStyle />;
+
 interface Iprops {
   // 弹框左上角位置
   width: number;
@@ -180,7 +183,7 @@ const ForwardDraggableModel = (props: Iprops, ref: React.ForwardedRef<DraggableM
 
   return (
     <>
-      <GlobalStyle />
+      {globalStyle}
 
       <Modal
         mask={false}
