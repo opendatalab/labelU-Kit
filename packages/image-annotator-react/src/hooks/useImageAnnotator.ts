@@ -77,24 +77,24 @@ export const useImageAnnotator = (containerRef: React.RefObject<HTMLDivElement>,
       return;
     }
 
-    setAnnotationEngine((pre) => {
-      pre?.destroy();
-
-      return new Annotator({
-        ...(options || {}),
-        container: containerRef.current!,
-        width: containerRef.current!.clientWidth,
-        height: containerRef.current!.clientHeight,
-      });
+    // 创建和销毁必须放在 effect 体内，而不是 setState 的 updater 里：
+    // updater 必须是纯函数，StrictMode 下会被双调用，导致引擎实例泄漏
+    const annotator = new Annotator({
+      ...(optionsState || {}),
+      container: containerRef.current,
+      width: containerRef.current.clientWidth,
+      height: containerRef.current.clientHeight,
     });
 
+    setAnnotationEngine(annotator);
+
     return () => {
-      setAnnotationEngine((pre) => {
-        pre?.destroy();
-        return null;
-      });
+      annotator.destroy();
+      setAnnotationEngine(null);
     };
-  }, [optionsState, containerRef, options]);
+    // 只依赖内容去重后的 optionsState；依赖原始 options 引用会绕过上面的 stringify 去重，
+    // 使内联传入的 options 对象在每次渲染时都触发引擎销毁重建
+  }, [optionsState, containerRef]);
 
   return engine;
 };

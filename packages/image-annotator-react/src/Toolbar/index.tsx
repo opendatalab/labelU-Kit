@@ -49,7 +49,7 @@ const ToolStyleWrapper = styled.div`
   color: #333;
 `;
 
-export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
+export function AnnotatorToolbar({ extra, right }: IToolbarInEditorProps) {
   const { engine, currentTool, tools, memorizeToolLabel } = useTool();
   const { onOrderVisibleChange, orderVisible } = useAnnotationCtx();
   const { redo, undo, futureRef, pastRef } = useHistoryCtx();
@@ -108,9 +108,12 @@ export function AnnotatorToolbar({ right }: IToolbarInEditorProps) {
         </>
       }
       extra={
-        <Tooltip overlayStyle={tooltipStyle} overlay={<HotkeyPanel items={hotkeysConst} />} placement="bottomLeft">
-          <Toolbar.Item>{t('hotkeys')}</Toolbar.Item>
-        </Tooltip>
+        <>
+          {extra}
+          <Tooltip overlayStyle={tooltipStyle} overlay={<HotkeyPanel items={hotkeysConst} />} placement="bottomLeft">
+            <Toolbar.Item>{t('hotkeys')}</Toolbar.Item>
+          </Tooltip>
+        </>
       }
       right={right}
     />
