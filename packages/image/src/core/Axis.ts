@@ -123,6 +123,7 @@ export class Axis {
     eventEmitter.off(EInternalEvent.LeftMouseUp, this._handleLeftMouseUp);
     eventEmitter.off(EInternalEvent.RightMouseUp, this._handleRightMouseUp);
     eventEmitter.off(EInternalEvent.Wheel, this._handleScroll);
+    eventEmitter.off(EInternalEvent.KeyUp, this._handleKeyUp);
   }
 
   private _handleKeyUp = () => {
@@ -556,6 +557,11 @@ export class Axis {
 
   public get isMoved() {
     return this._distanceX !== 0 || this._distanceY !== 0;
+  }
+
+  /** 是否正在拖拽平移画布（右键拖动或空格+左键拖动） */
+  public get isPanning() {
+    return this._startPanPoint !== null;
   }
 
   /**

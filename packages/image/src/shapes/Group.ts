@@ -96,16 +96,9 @@ export class Group<T extends AllShape = AllShape> {
   }
 
   private _updateRBush() {
-    const { _cachedRBush, bbox } = this;
+    const { bbox } = this;
 
-    if (_cachedRBush) {
-      rbush.remove(_cachedRBush);
-
-      _cachedRBush.minX = bbox.minX;
-      _cachedRBush.minY = bbox.minY;
-      _cachedRBush.maxX = bbox.maxX;
-      _cachedRBush.maxY = bbox.maxY;
-    } else {
+    if (!this._cachedRBush) {
       this._cachedRBush = {
         minX: bbox.minX,
         minY: bbox.minY,
@@ -116,7 +109,8 @@ export class Group<T extends AllShape = AllShape> {
       };
     }
 
-    rbush.insert(this._cachedRBush!);
+    // 延迟到下一次查询前统一应用，避免高频坐标变化时逐条更新空间索引
+    rbush.queueUpdate(this._cachedRBush);
 
     return this;
   }
