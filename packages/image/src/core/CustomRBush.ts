@@ -24,6 +24,17 @@ export class CustomRBush extends RBush<RBushItem> {
 
   private _mapping: Map<string, RBushItem> = new Map();
 
+  /**
+   * 待应用的包围盒更新队列
+   *
+   * @description
+   * 图形坐标高频变化（平移、缩放、拖拽）时不立即更新空间索引，只将 item 入队；
+   * 在下一次查询（search/all/collides）前统一应用。
+   * 新包围盒在 flush 时才从 item 的宿主（_shape/_group）读取，
+   * 因此同一图形在一个查询周期内的多次变更会自动合并为一次索引操作。
+   */
+  private _pendingUpdates: Set<RBushItem> = new Set();
+
   constructor() {
     super();
 
@@ -46,6 +57,7 @@ export class CustomRBush extends RBush<RBushItem> {
     const { _group, _shape } = item;
 
     this._mapping.delete(item.id);
+    this._pendingUpdates.delete(item);
 
     if (_group && _shape) {
       _group.remove(_shape as AllShape);
@@ -54,6 +66,89 @@ export class CustomRBush extends RBush<RBushItem> {
     super.remove(item);
 
     return this;
+  }
+
+  /**
+   * 将 item 的包围盒更新排入队列，延迟到下一次查询前统一应用
+   *
+   * @description 入树期间 item 的包围盒字段必须与树结构保持一致，所以这里不改动 item 本身
+   */
+  public queueUpdate(item: RBushItem) {
+    const existing = this._mapping.get(item.id);
+
+    if (existing && existing !== item) {
+      this.remove(existing);
+    }
+
+    this._mapping.set(item.id, item);
+    this._pendingUpdates.add(item);
+  }
+
+  private _flushPendingUpdates() {
+    const pending = this._pendingUpdates;
+
+    if (pending.size === 0) {
+      return;
+    }
+
+    this._pendingUpdates = new Set();
+
+    const applyBBox = (item: RBushItem) => {
+      const bbox = item._shape?.bbox ?? item._group?.bbox;
+
+      if (bbox) {
+        item.minX = bbox.minX;
+        item.minY = bbox.minY;
+        item.maxX = bbox.maxX;
+        item.maxY = bbox.maxY;
+      }
+    };
+
+    // 大批量变更（平移/缩放结束后）时整树重建：bulk-load 比逐条 remove/insert 快且树质量更高
+    const inTree = pending.size >= 200 ? super.all() : null;
+
+    if (inTree && pending.size * 4 >= inTree.length) {
+      const union = new Set(inTree);
+
+      pending.forEach((item) => union.add(item));
+      pending.forEach(applyBBox);
+
+      super.clear();
+      super.load(Array.from(union));
+    } else {
+      pending.forEach((item) => {
+        // item 未入过树时 remove 是安全的空操作
+        super.remove(item);
+        applyBBox(item);
+        super.insert(item);
+      });
+    }
+  }
+
+  public search(bbox: BBox): RBushItem[] {
+    this._flushPendingUpdates();
+
+    return super.search(bbox);
+  }
+
+  public collides(bbox: BBox): boolean {
+    this._flushPendingUpdates();
+
+    return super.collides(bbox);
+  }
+
+  public all(): RBushItem[] {
+    this._flushPendingUpdates();
+
+    return super.all();
+  }
+
+  public clear(): RBush<RBushItem> {
+    // RBush 基类构造函数会调用 clear()，此时子类字段尚未初始化
+    this._pendingUpdates?.clear();
+    this._mapping?.clear();
+
+    return super.clear();
   }
 
   private _onRender = () => {

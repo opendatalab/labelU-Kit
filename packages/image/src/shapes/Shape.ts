@@ -80,12 +80,33 @@ export class Shape<Style> {
   }
 
   /**
+   * 坐标点 Proxy 缓存，按点对象身份缓存，避免每次索引访问都新建 Proxy
+   */
+  private _coordinateProxyCache = new WeakMap<AxisPoint, AxisPoint>();
+
+  /** 批量更新期间跳过逐字段触发的 update，结束后统一触发一次 */
+  private _batchUpdating = false;
+
+  /**
    * 更新坐标后自动更新偏移后的坐标及bbox
    */
   protected _coordinateHandler: ProxyHandler<AxisPoint[]> = {
     get: (target: AxisPoint[], key: PropertyKey) => {
-      if (!isNaN(Number(key))) {
-        return new Proxy(target[Number(key)], this._coordinateItemHandler);
+      if (typeof key !== 'symbol' && !isNaN(Number(key))) {
+        const rawPoint = target[Number(key)];
+
+        if (typeof rawPoint !== 'object' || rawPoint === null) {
+          return rawPoint;
+        }
+
+        let proxied = this._coordinateProxyCache.get(rawPoint);
+
+        if (!proxied) {
+          proxied = new Proxy(rawPoint, this._coordinateItemHandler);
+          this._coordinateProxyCache.set(rawPoint, proxied);
+        }
+
+        return proxied;
       } else {
         // @ts-ignore
         return target[key];
@@ -93,7 +114,11 @@ export class Shape<Style> {
     },
     set: (target, key, value) => {
       target[Number(key)] = value;
-      this.update();
+
+      if (!this._batchUpdating) {
+        this.update();
+      }
+
       return true;
     },
   };
@@ -105,10 +130,35 @@ export class Shape<Style> {
       }
 
       target[key as 'x' | 'y'] = value;
-      this.update();
+
+      if (!this._batchUpdating) {
+        this.update();
+      }
+
       return true;
     },
   };
+
+  /**
+   * 批量更新坐标：updater 内的坐标写入不会逐字段触发 update，
+   * 结束后统一触发一次，避免多点图形一次移动引发 O(N²) 的重复计算
+   */
+  public batchUpdate(updater: () => void) {
+    if (this._batchUpdating) {
+      updater();
+
+      return;
+    }
+
+    this._batchUpdating = true;
+
+    try {
+      updater();
+    } finally {
+      this._batchUpdating = false;
+      this.update();
+    }
+  }
 
   private async _bindEvents() {
     eventEmitter.on(EInternalEvent.AxisChange, this.update);
@@ -153,18 +203,9 @@ export class Shape<Style> {
   }
 
   private _updateRBush() {
-    const { _cachedRBush, bbox } = this;
+    const { bbox } = this;
 
-    if (_cachedRBush) {
-      rbush.remove(_cachedRBush);
-
-      _cachedRBush.minX = bbox.minX;
-      _cachedRBush.minY = bbox.minY;
-      _cachedRBush.maxX = bbox.maxX;
-      _cachedRBush.maxY = bbox.maxY;
-
-      rbush.insert(_cachedRBush!);
-    } else {
+    if (!this._cachedRBush) {
       this._cachedRBush = {
         minX: bbox.minX,
         minY: bbox.minY,
@@ -173,8 +214,10 @@ export class Shape<Style> {
         id: this.id,
         _shape: this,
       };
-      rbush.insert(this._cachedRBush!);
     }
+
+    // 延迟到下一次查询前统一应用，避免高频坐标变化时逐条更新空间索引
+    rbush.queueUpdate(this._cachedRBush);
   }
 
   public set coordinate(coordinate: AxisPoint[]) {

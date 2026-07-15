@@ -1,7 +1,7 @@
 import { config } from '@/singletons/annotationConfig';
 
 import { EInternalEvent } from '../enums';
-import { eventEmitter, rbush } from '../singletons';
+import { axis, eventEmitter, rbush } from '../singletons';
 import type { AnnotationShape, AnnotationTool, GroupInAnnotation, ToolName } from '../interface';
 import { Group } from '../shapes';
 
@@ -229,6 +229,11 @@ export class Monitor {
    * @description 用于处理鼠标移动到标注上时，触发标注的 hover 事件；同时，选中标注的逻辑也会依赖此处理函数
    */
   private _handleMouseOver = (e: MouseEvent) => {
+    // 拖拽平移画布期间不需要悬浮命中检测；此时空间索引的更新是延迟合并的，跳过可避免每次移动都触发索引重建
+    if (axis?.isPanning) {
+      return;
+    }
+
     const { hoveredGroup, hoveredShape } = this;
     const rbushItems = rbush.scanCanvasObject({ x: e.offsetX, y: e.offsetY });
     const orderIndexedGroup: any[] = [];

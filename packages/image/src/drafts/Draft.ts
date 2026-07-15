@@ -304,31 +304,34 @@ export class Draft<Data extends BasicImageAnnotation, Style extends Record<strin
           loop(item, idx, serialized[index].shapes);
         });
       } else {
-        shape.plainCoordinate.forEach((point, i) => {
-          if (safeX) {
-            shape.coordinate[i].x = axis!.getOriginalX(serialized[index].dynamicCoordinate[i].x + axis!.distance.x);
-          }
-
-          if (safeY) {
-            shape.coordinate[i].y = axis!.getOriginalY(serialized[index].dynamicCoordinate[i].y + axis!.distance.y);
-          }
-        });
-
-        if (shape instanceof Spline || shape instanceof ClosedSpline) {
-          shape.plainControlPoints.forEach((point, i) => {
+        // 批量写入坐标，整个图形只触发一次 update，避免逐字段写引发 O(N²) 的重复计算
+        shape.batchUpdate(() => {
+          shape.plainCoordinate.forEach((point, i) => {
             if (safeX) {
-              shape.controlPoints[i].x = axis!.getOriginalX(
-                serialized[index].dynamicControlPoints[i].x + axis!.distance.x,
-              );
+              shape.coordinate[i].x = axis!.getOriginalX(serialized[index].dynamicCoordinate[i].x + axis!.distance.x);
             }
 
             if (safeY) {
-              shape.controlPoints[i].y = axis!.getOriginalY(
-                serialized[index].dynamicControlPoints[i].y + axis!.distance.y,
-              );
+              shape.coordinate[i].y = axis!.getOriginalY(serialized[index].dynamicCoordinate[i].y + axis!.distance.y);
             }
           });
-        }
+
+          if (shape instanceof Spline || shape instanceof ClosedSpline) {
+            shape.plainControlPoints.forEach((point, i) => {
+              if (safeX) {
+                shape.controlPoints[i].x = axis!.getOriginalX(
+                  serialized[index].dynamicControlPoints[i].x + axis!.distance.x,
+                );
+              }
+
+              if (safeY) {
+                shape.controlPoints[i].y = axis!.getOriginalY(
+                  serialized[index].dynamicControlPoints[i].y + axis!.distance.y,
+                );
+              }
+            });
+          }
+        });
       }
     };
 
