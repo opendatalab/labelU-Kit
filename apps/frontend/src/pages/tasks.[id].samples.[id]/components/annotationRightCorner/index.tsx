@@ -7,7 +7,6 @@ import { useTranslation } from '@labelu/i18n';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { FlexLayout } from '@labelu/components-react';
-import { QuestionCircleOutlined } from '@ant-design/icons';
 
 import { ReactComponent as SparklesIcon } from '@/assets/svg/spark.svg';
 import commonController from '@/utils/common';
@@ -17,8 +16,6 @@ import { MediaType, SampleState } from '@/api/types';
 import type { getSample } from '@/api/services/samples';
 import { autoLabelSample, updateSampleState, updateSampleAnnotationResult } from '@/api/services/samples';
 import { message } from '@/StaticAnt';
-import useMe from '@/hooks/useMe';
-import { UserAvatar } from '@/components/UserAvatar';
 import { generateDefaultValues } from '@/utils/generateGlobalToolDefaultValues';
 
 import AnnotationContext from '../../annotation.context';
@@ -75,7 +72,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   const revalidator = useRevalidator();
   const taskId = routeParams.taskId;
   const sampleId = routeParams.sampleId;
-  const { samples, setSamples, task, currentEditingUser } = useContext(AnnotationContext);
+  const { samples, setSamples, task } = useContext(AnnotationContext);
   const sampleIndex = _.findIndex(samples, (sample: SampleResponse) => sample.id === +sampleId!);
   const isLastSample = _.findIndex(samples, { id: +sampleId! }) === samples.length - 1;
   const isFirstSample = _.findIndex(samples, { id: +sampleId! }) === 0;
@@ -112,13 +109,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   );
 
   const saveCurrentSample = useCallback(async () => {
-    if (
-      currentSample?.state === SampleState.SKIPPED ||
-      noSave ||
-      !task?.media_type ||
-      // 非当前用户标注的文件，不保存
-      !isMeTheCurrentUser
-    ) {
+    if (currentSample?.state === SampleState.SKIPPED || noSave || !task?.media_type) {
       return;
     }
 
@@ -279,7 +270,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
       annotated_count: getAnnotationCount(body.data!.result),
       state: SampleState.DONE,
     });
-  }, [currentSample, isMeTheCurrentUser, noSave, task?.config?.tools, task?.media_type, taskId]);
+  }, [currentSample, noSave, task?.config?.tools, task?.media_type, taskId]);
 
   const handleComplete = useCallback(async () => {
     await saveCurrentSample();
@@ -288,7 +279,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   }, [saveCurrentSample, navigateWithSearch, taskId, revalidator.revalidate]);
 
   const handleCancelSkipSample = async () => {
-    if (noSave || !isMeTheCurrentUser) {
+    if (noSave) {
       return;
     }
 
@@ -313,7 +304,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   };
 
   const handleSkipSample = async () => {
-    if (noSave || !isMeTheCurrentUser) {
+    if (noSave) {
       return;
     }
 
@@ -555,19 +546,11 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
         </Dropdown.Button>
       )}
       {isSampleSkipped ? (
-        <Button
-          type="text"
-          onClick={commonController.debounce(handleCancelSkipSample, 100)}
-          disabled={isGlobalLoading || !isMeTheCurrentUser}
-        >
+        <Button type="text" onClick={commonController.debounce(handleCancelSkipSample, 100)} disabled={isGlobalLoading}>
           {t('cancelSkip')}
         </Button>
       ) : (
-        <Button
-          type="text"
-          onClick={commonController.debounce(handleSkipSample, 100)}
-          disabled={isGlobalLoading || !isMeTheCurrentUser}
-        >
+        <Button type="text" onClick={commonController.debounce(handleSkipSample, 100)} disabled={isGlobalLoading}>
           {t('skip')}
         </Button>
       )}
@@ -577,11 +560,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
         </Button>
       )}
       {isLastSample ? (
-        <Button
-          type="primary"
-          onClick={commonController.debounce(handleComplete, 100)}
-          disabled={isGlobalLoading || !isMeTheCurrentUser}
-        >
+        <Button type="primary" onClick={commonController.debounce(handleComplete, 100)} disabled={isGlobalLoading}>
           {t('finish')}
         </Button>
       ) : (
