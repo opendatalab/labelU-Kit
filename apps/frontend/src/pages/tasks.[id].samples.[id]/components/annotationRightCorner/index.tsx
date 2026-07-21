@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
-import { Button, Checkbox, Dropdown, Tooltip } from 'antd';
+import { Button, Checkbox, Dropdown } from 'antd';
 import _, { debounce } from 'lodash-es';
 import { set } from 'lodash/fp';
 import { useTranslation } from '@labelu/i18n';
@@ -84,8 +84,6 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   const isSampleSkipped = currentSample?.state === SampleState.SKIPPED;
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
-  const me = useMe();
-  const isMeTheCurrentUser = currentEditingUser && me.data && currentEditingUser?.user_id === me.data?.id;
   const [isAutoLabeling, setIsAutoLabeling] = useState(false);
   const [filterByLabels, setFilterByLabels] = useState<boolean>(() => {
     const stored = localStorage.getItem('ai_filter_by_labels');
@@ -377,7 +375,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
   ]);
 
   const handleAutoLabel = useCallback(async () => {
-    if (noSave || !isMeTheCurrentUser || !taskId || !sampleId || task?.media_type !== MediaType.IMAGE) {
+    if (noSave || !taskId || !sampleId || task?.media_type !== MediaType.IMAGE) {
       return;
     }
 
@@ -399,7 +397,7 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
     } finally {
       setIsAutoLabeling(false);
     }
-  }, [filterByLabels, isMeTheCurrentUser, noSave, revalidator, sampleId, t, task?.media_type, taskId]);
+  }, [filterByLabels, noSave, revalidator, sampleId, t, task?.media_type, taskId]);
 
   const handlePrevSample = useCallback(async () => {
     if (sampleIndex === 0) {
@@ -525,26 +523,11 @@ const AnnotationRightCorner = ({ noSave, fetchNext, totalSize, isLastPage }: Ann
 
   return (
     <FlexLayout items="center" gap=".5rem">
-      <FlexLayout items="center" gap=".5rem">
-        {currentEditingUser && (
-          <>
-            {currentEditingUser.user_id !== me.data?.id && (
-              <>
-                <UserAvatar key={currentEditingUser.user_id} user={currentEditingUser} />
-                {t('isAnnotating')}
-                <Tooltip title={t('collaboratorTips')} placement="bottom">
-                  <QuestionCircleOutlined />
-                </Tooltip>
-              </>
-            )}
-          </>
-        )}
-      </FlexLayout>
       {task?.media_type === MediaType.IMAGE && (
         <Dropdown.Button
           type="text"
           onClick={commonController.debounce(handleAutoLabel, 100)}
-          disabled={isGlobalLoading || isAutoLabeling || !isMeTheCurrentUser}
+          disabled={isGlobalLoading || isAutoLabeling}
           menu={{
             items: [
               {
