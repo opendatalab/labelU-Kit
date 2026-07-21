@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useCallback, useMemo, useState } from 're
 import _, { cloneDeep, find } from 'lodash-es';
 import { InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
-import { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { useTranslation } from '@labelu/i18n';
 
 import { MediaType, TaskStatus } from '@/api/types';
@@ -35,6 +35,11 @@ const GlobalStyle = createGlobalStyle`
   .labelu-tool-select-popup .rc-virtual-list-holder {
     max-height: none !important;
   }
+`;
+
+const Inner = styled(FlexLayout)`
+  width: 860px;
+  margin: auto;
 `;
 
 // 注册fancyInput自定义输入组件
@@ -339,90 +344,94 @@ const FormConfig = () => {
   // ========================= end ==============================
 
   return (
-    <ConfigForm
-      form={annotationFormInstance}
-      labelCol={{ span: 6 }}
-      wrapperCol={{ span: 18 }}
-      colon={false}
-      initialValues={config}
-      onValuesChange={handleFormValuesChange}
-      validateTrigger="onBlur"
-    >
-      <GlobalStyle />
-      <Form.Item label={t('annotationTool')}>
-        <Select
-          placeholder={t('addTool')}
-          popupClassName="labelu-tool-select-popup"
-          options={toolsMenu}
-          onSelect={handleToolItemClick}
+    <FlexLayout padding="1rem" flex="column">
+      <Inner flex="column">
+        <ConfigForm
+          form={annotationFormInstance}
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 20 }}
+          colon={false}
+          initialValues={config}
+          onValuesChange={handleFormValuesChange}
+          validateTrigger="onBlur"
         >
-          <PlusOutlined />
-        </Select>
-      </Form.Item>
-      {selectedGlobalTools.length > 0 && (
-        <Form.Item label={t('global')} tooltip={t('globalTooltip')}>
-          <div className="formTabBox">
-            <Tabs
-              type="card"
-              size="small"
-              activeKey={activeGlobalTool}
-              destroyInactiveTabPane={false}
-              onTabClick={(tabKey) => {
-                setActiveGlobalTool(tabKey);
-              }}
-              items={tabGlobalItems}
-            />
-          </div>
-        </Form.Item>
-      )}
-      {selectedAnnotationTools.length > 0 && (
-        <Form.Item label={t('labelTools')} tooltip={t('labelTooltip')}>
-          <div className="formTabBox">
-            <Tabs
-              type="card"
-              size="small"
-              activeKey={activeTool}
-              destroyInactiveTabPane={false}
-              onTabClick={(tabKey) => {
-                setActiveTool(tabKey);
-              }}
-              items={tabItems}
-            />
-          </div>
-        </Form.Item>
-      )}
-      {selectedAnnotationTools.length > 0 && (
-        <Form.Item
-          label={<span className="formTitle">{t('genericLabels')}</span>}
-          name="commonAttributeConfigurable"
-          tooltip={t('genericLabelTooltip')}
-          hidden={globalTools.includes(activeTool as EGlobalToolName)}
-        >
-          <FancyInput type="boolean" />
-        </Form.Item>
-      )}
+          <GlobalStyle />
+          <Form.Item label={t('annotationTool')}>
+            <Select
+              placeholder={t('addTool')}
+              popupClassName="labelu-tool-select-popup"
+              options={toolsMenu}
+              onSelect={handleToolItemClick}
+            >
+              <PlusOutlined />
+            </Select>
+          </Form.Item>
+          {selectedGlobalTools.length > 0 && (
+            <Form.Item label={t('global')} tooltip={t('globalTooltip')}>
+              <div className="formTabBox">
+                <Tabs
+                  type="card"
+                  size="small"
+                  activeKey={activeGlobalTool}
+                  destroyInactiveTabPane={false}
+                  onTabClick={(tabKey) => {
+                    setActiveGlobalTool(tabKey);
+                  }}
+                  items={tabGlobalItems}
+                />
+              </div>
+            </Form.Item>
+          )}
+          {selectedAnnotationTools.length > 0 && (
+            <Form.Item label={t('labelTools')} tooltip={t('labelTooltip')}>
+              <div className="formTabBox">
+                <Tabs
+                  type="card"
+                  size="small"
+                  activeKey={activeTool}
+                  destroyInactiveTabPane={false}
+                  onTabClick={(tabKey) => {
+                    setActiveTool(tabKey);
+                  }}
+                  items={tabItems}
+                />
+              </div>
+            </Form.Item>
+          )}
+          {selectedAnnotationTools.length > 0 && (
+            <Form.Item
+              label={<span className="formTitle">{t('genericLabels')}</span>}
+              name="commonAttributeConfigurable"
+              tooltip={t('genericLabelTooltip')}
+              hidden={globalTools.includes(activeTool as EGlobalToolName)}
+            >
+              <FancyInput type="boolean" />
+            </Form.Item>
+          )}
 
-      {hasAttributes && !globalTools.includes(activeTool as EGlobalToolName) && (
-        <Form.Item wrapperCol={{ offset: 4 }}>
-          <AttributeBox>
-            <AttributeFormItem name="attributes">
-              <FancyInput type="list-attribute" fullField={['attributes']} />
-            </AttributeFormItem>
-          </AttributeBox>
-        </Form.Item>
-      )}
+          {hasAttributes && !globalTools.includes(activeTool as EGlobalToolName) && (
+            <Form.Item wrapperCol={{ offset: 4 }}>
+              <AttributeBox>
+                <AttributeFormItem name="attributes">
+                  <FancyInput type="list-attribute" fullField={['attributes']} />
+                </AttributeFormItem>
+              </AttributeBox>
+            </Form.Item>
+          )}
 
-      {task?.media_type === MediaType.IMAGE && (
-        <Form.Item
-          label={t('DrawingOutCanvas')}
-          name="drawOutsideTarget"
-          tooltip={t('DrawingOutCanvasTooltip')}
-          hidden={!graphicTools.includes(activeTool as ImageToolName)}
-        >
-          <FancyInput type="boolean" />
-        </Form.Item>
-      )}
-    </ConfigForm>
+          {task?.media_type === MediaType.IMAGE && (
+            <Form.Item
+              label={t('DrawingOutCanvas')}
+              name="drawOutsideTarget"
+              tooltip={t('DrawingOutCanvasTooltip')}
+              hidden={!graphicTools.includes(activeTool as ImageToolName)}
+            >
+              <FancyInput type="boolean" />
+            </Form.Item>
+          )}
+        </ConfigForm>
+      </Inner>
+    </FlexLayout>
   );
 };
 
