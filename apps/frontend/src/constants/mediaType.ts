@@ -9,13 +9,13 @@ export const MediaTypeText = {
 };
 
 export const FileExtensionText = {
-  [MediaType.IMAGE]: 'jpg、jpeg、png、bmp、gif',
+  [MediaType.IMAGE]: 'jpg、jpeg、png、bmp、gif、webp',
   [MediaType.VIDEO]: 'mp4(h.264)',
   [MediaType.AUDIO]: 'mp3、wav、ogg、m4a',
 };
 
 export const FileExtension = {
-  [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif', 'jpeg'],
+  [MediaType.IMAGE]: ['jpg', 'png', 'bmp', 'gif', 'jpeg', 'webp'],
   [MediaType.VIDEO]: ['mp4'],
   [MediaType.AUDIO]: ['mp3', 'wav', 'ogg', 'm4a'],
 };
@@ -27,7 +27,7 @@ export const MediaRouterPrefix = {
 };
 
 export const FileMimeType = {
-  [MediaType.IMAGE]: 'image/png,image/jpeg,image/bmp,image/gif',
+  [MediaType.IMAGE]: 'image/png,image/jpeg,image/bmp,image/gif,image/webp',
   [MediaType.VIDEO]: 'video/mp4',
   [MediaType.AUDIO]: 'audio/mpeg,audio/x-wav,audio/vnd.wav,audio/ogg,audio/x-m4a',
 };

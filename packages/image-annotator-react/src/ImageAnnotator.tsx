@@ -194,14 +194,17 @@ function ForwardAnnotator(
   // remember last tool
   const memorizeToolLabel = useRef<Record<ToolName, Attribute>>({} as Record<ToolName, Attribute>);
   const [attributeModalOpen, setAttributeModalOpen] = useState<boolean>(false);
+  const isPreAnnotationEmpty = useMemo(() => {
+    if (typeof preAnnotations === 'undefined') {
+      return true;
+    }
+
+    return Object.values(preAnnotations).every((item) => item.length === 0);
+  }, [preAnnotations]);
 
   useEffect(() => {
     setCurrentSample(editingSample || samples?.[0]);
   }, [editingSample, samples, setCurrentSample]);
-
-  const isSampleDataEmpty = useMemo(() => {
-    return Object.values(currentSample?.data ?? {}).every((item) => item.length === 0);
-  }, [currentSample]);
 
   // ================== tool ==================
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -344,7 +347,7 @@ function ForwardAnnotator(
           }
         });
 
-        if (isSampleDataEmpty) {
+        if (!isPreAnnotationEmpty) {
           Object.keys(preAnnotations ?? {}).forEach((key) => {
             if (TOOL_NAMES.includes(key as ToolName)) {
               engine?.loadData(
@@ -360,7 +363,7 @@ function ForwardAnnotator(
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [annotationsFromSample, config, currentSample, engine, isSampleDataEmpty, preAnnotations, tools]);
+  }, [annotationsFromSample, config, currentSample, engine, preAnnotations, tools, isPreAnnotationEmpty]);
 
   const selectedIndexRef = useRef<number>(-1);
 
@@ -392,7 +395,7 @@ function ForwardAnnotator(
     const _data = currentSample?.data ?? {};
     const _preData = preAnnotations ?? {};
 
-    if (isSampleDataEmpty) {
+    if (!isPreAnnotationEmpty) {
       Object.keys(_preData).forEach((key) => {
         _preData[key as AllAnnotationType]?.forEach((item) => {
           mapping[item.id] = {
@@ -413,7 +416,7 @@ function ForwardAnnotator(
     });
 
     return mapping;
-  }, [currentSample?.data, isSampleDataEmpty, preAnnotations]);
+  }, [currentSample?.data, isPreAnnotationEmpty, preAnnotations]);
 
   const [annotationsWithGlobal, updateAnnotationsWithGlobal, redo, undo, pastRef, futureRef, reset] =
     useRedoUndo<AllAnnotationMapping>(annotationsMapping, {
@@ -589,9 +592,9 @@ function ForwardAnnotator(
   useEffect(() => {
     // 删除标记
     const handleDelete = (annotation: AnnotationData) => {
-      const newAnnotations = omit(annotationsWithGlobal, annotation.id);
-      console.log('newAnnotations', newAnnotations);
-      updateAnnotationsWithGlobal(newAnnotations);
+      updateAnnotationsWithGlobal((pre) => {
+        return omit(pre!, annotation.id);
+      });
       setSelectedAnnotation((pre) => {
         if (pre?.id === annotation.id) {
           return undefined;
@@ -605,6 +608,22 @@ function ForwardAnnotator(
 
     return () => {
       engine?.off('delete', handleDelete);
+    };
+  }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
+
+  useEffect(() => {
+    const handleRelationDelete = (relations: AnnotationData[]) => {
+      updateAnnotationsWithGlobal((pre) => {
+        return relations.reduce((acc, item) => {
+          return omit(acc, item.id);
+        }, pre!);
+      });
+    };
+
+    engine?.on('relatedRelationDelete', handleRelationDelete);
+
+    return () => {
+      engine?.off('relatedRelationDelete', handleRelationDelete);
     };
   }, [annotationsWithGlobal, engine, updateAnnotationsWithGlobal]);
 
@@ -671,7 +690,7 @@ function ForwardAnnotator(
       const _label = engine?.activeToolName ? labelMappingByTool[engine.activeToolName][label] : undefined;
 
       setSelectedLabel(_label);
-      propsOnLabelChange?.(currentTool, _label);
+      propsOnLabelChange?.(engine!.activeToolName!, _label);
     };
     // 改变标签
     engine?.on('labelChange', handleLabelChange);

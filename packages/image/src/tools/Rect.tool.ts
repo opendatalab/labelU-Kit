@@ -153,6 +153,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
     const { drawing, style, hoveredStyle } = this;
 
     const annotation = new AnnotationRect({
+      name: this.name,
       id: data.id,
       data,
       showOrder: this.showOrder,
@@ -167,6 +168,7 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
 
   private _createDraft(data: RectData) {
     this.draft = new DraftRect(this.config, {
+      name: this.name,
       id: data.id,
       data,
       showOrder: false,
@@ -269,6 +271,9 @@ export class RectTool extends Tool<RectData, RectStyle, RectToolOptions> {
       const data = cloneDeep(draft.data);
       this.deleteDraft();
       this.removeFromDrawing(data.id);
+      // 删除关联关系
+      this.removeRelations(data.id);
+
       Tool.onDelete(this.convertAnnotationItem(data));
     }
   };

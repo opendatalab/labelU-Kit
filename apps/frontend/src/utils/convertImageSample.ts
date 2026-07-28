@@ -1,19 +1,14 @@
 import _ from 'lodash';
-import type { GlobalToolConfig, ImageAnnotatorOptions, ImageSample } from '@labelu/image-annotator-react';
+import type { ImageSample } from '@labelu/image-annotator-react';
 import { omit } from 'lodash/fp';
 import type { ToolName } from '@labelu/image';
 import { TOOL_NAMES } from '@labelu/image';
 
-import { SampleState, type ParsedResult, type SampleResponse } from '@/api/types';
+import type { ParsedResult, SampleResponse } from '@/api/types';
 
 import { jsonParse } from './index';
-import { generateDefaultValues } from './generateGlobalToolDefaultValues';
 
-export function convertImageAnnotations(
-  result: ParsedResult,
-  config: Pick<ImageAnnotatorOptions, ToolName> & GlobalToolConfig,
-  state?: SampleState,
-) {
+export function convertImageAnnotations(result: ParsedResult) {
   // annotation
   const pool = [
     ['line', 'lineTool'],
@@ -21,6 +16,7 @@ export function convertImageAnnotations(
     ['rect', 'rectTool'],
     ['polygon', 'polygonTool'],
     ['cuboid', 'cuboidTool'],
+    ['relation', 'relationTool'],
     ['text', 'textTool'],
     ['tag', 'tagTool'],
   ] as const;
@@ -32,10 +28,6 @@ export function convertImageAnnotations(
       }
 
       const items = _.get(result, [key, 'result']) || _.get(result, [type, 'result'], []);
-      if (!items.length && (type === 'tag' || type === 'text') && state !== SampleState.NEW) {
-        // 生成全局工具的默认值
-        return [type, generateDefaultValues(config?.[type])];
-      }
 
       return [
         type,
@@ -62,10 +54,7 @@ export function convertImageAnnotations(
     .value();
 }
 
-export function convertImageSample(
-  sample: SampleResponse | undefined,
-  config: Pick<ImageAnnotatorOptions, ToolName> & GlobalToolConfig,
-): ImageSample | undefined {
+export function convertImageSample(sample: SampleResponse | undefined): ImageSample | undefined {
   if (!sample) {
     return;
   }
@@ -81,7 +70,7 @@ export function convertImageSample(
   return {
     id,
     url,
-    data: convertImageAnnotations(resultParsed, config, sample.state),
+    data: convertImageAnnotations(resultParsed),
     meta: _.pick(resultParsed, ['width', 'height', 'rotate']),
   };
 }

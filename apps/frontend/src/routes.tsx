@@ -10,6 +10,7 @@ import TaskAnnotation from '@/pages/tasks.[id].samples.[id]';
 import Samples from '@/pages/tasks.[id]';
 import TaskSamplesFinished from '@/pages/tasks.[id].samples.finished';
 import Page404 from '@/pages/404';
+import DataSources from '@/pages/datasources';
 import MainLayout from '@/layouts/MainLayoutWithNavigation';
 
 import type { TaskLoaderResult } from './loaders/task.loader';
@@ -50,6 +51,22 @@ const routes: RouteObject[] = [
     element: <Root />,
     loader: rootLoader,
     children: [
+      {
+        path: 'datasources',
+        element: <MainLayout />,
+        errorElement: <Page404 />,
+        handle: {
+          crumb: () => {
+            return i18n.t('dataSources');
+          },
+        },
+        children: [
+          {
+            index: true,
+            element: <DataSources />,
+          },
+        ],
+      },
       {
         path: 'tasks',
         element: <MainLayout />,

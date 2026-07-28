@@ -33,6 +33,12 @@
             "$ref": "#/definitions/LabelItem"
           }
         },
+        "relationTool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LabelItem"
+          }
+        },
         "cuboidTool": {
           "type": "array",
           "items": {
@@ -156,6 +162,24 @@
               "type": "array",
               "items": {
                 "$ref": "#/definitions/CuboidTool"
+              }
+            }
+          },
+          "required": ["toolName", "result"]
+        },
+        "relationTool": {
+          "type": "object",
+          "properties": {
+            "toolName": {
+              "type": "string",
+              "const": "relationTool",
+              "default": "relationTool"
+            },
+            "result": {
+              "description": "标注结果",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RelationTool"
               }
             }
           },
@@ -607,6 +631,55 @@
         }
       },
       "required": ["direction", "front", "back", "x", "y", "width", "height", "id", "order", "label"]
+    },
+    "RelationTool": {
+      "type": "object",
+      "properties": {
+        "toolName": {
+          "type": "string",
+          "const": "relationTool"
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "唯一标识"
+              },
+              "sourceId": {
+                "type": "string",
+                "description": "起始标注id"
+              },
+              "targetId": {
+                "type": "string",
+                "description": "目标标注id"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "是否可见",
+                "default": true
+              },
+              "attributes": {
+                "$ref": "#/definitions/Attribute"
+              },
+              "order": {
+                "type": "integer",
+                "description": "标注顺序",
+                "minimum": 0
+              },
+              "label": {
+                "type": "string",
+                "description": "标注标签",
+                "default": "none"
+              }
+            },
+            "required": ["sourceId", "targetId", "id", "order", "label"]
+          }
+        }
+      },
+      "required": ["toolName", "result"]
     },
     "TextTool": {
       "type": "array",

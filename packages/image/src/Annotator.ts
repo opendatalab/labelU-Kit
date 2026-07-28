@@ -405,7 +405,9 @@ export class Annotator extends AnnotatorBase {
 
     const AnnotationClass = AnnotationMapping[activeToolName];
 
-    currentTool.setLabel(value);
+    if (!currentTool.setLabel(value)) {
+      return;
+    }
 
     if (this.cursorManager) {
       this.cursorManager.color = AnnotationClass.labelStatic.getLabelColor(value);

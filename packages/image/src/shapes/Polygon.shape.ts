@@ -32,6 +32,11 @@ export class Polygon extends Shape<PolygonStyle> {
     strokeWidth: 2,
     opacity: 1,
     fill: 'transparent',
+    lineStyle: 'solid',
+    dashPattern: [],
+    arrowType: 'none',
+    headLength: 10,
+    headAngle: 30,
   };
 
   public style: Required<PolygonStyle> = Polygon.DEFAULT_STYLE;

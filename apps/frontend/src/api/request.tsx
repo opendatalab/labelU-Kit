@@ -7,11 +7,24 @@ import commonController from '@/utils/common';
 import { goLogin } from '@/utils/sso';
 
 /**
+ * 滑动续期：后端在响应头 `X-New-Token` 中返回新签发的 token 时，更新本地存储，
+ * 使活跃用户的登录态自动延续，不会到点被强制登出。
+ * @param response
+ */
+function applyRefreshedToken(response: AxiosResponse<any>) {
+  const newToken = response?.headers?.['x-new-token'];
+  if (newToken) {
+    localStorage.token = newToken;
+  }
+}
+
+/**
  * 后端返回的结构由 { data, meta_data } 包裹
  * @param response
  * @returns
  */
 export function successHandler(response: AxiosResponse<any>) {
+  applyRefreshedToken(response);
   return response.data;
 }
 
@@ -79,7 +92,10 @@ const request = axios.create(requestConfig);
 export const requestWithHeaders = axios.create(requestConfig);
 
 requestWithHeaders.interceptors.request.use(authorizationBearerSuccess, authorizationBearerFailed);
-requestWithHeaders.interceptors.response.use(undefined, authorizationBearerFailed);
+requestWithHeaders.interceptors.response.use((response) => {
+  applyRefreshedToken(response);
+  return response;
+}, authorizationBearerFailed);
 requestWithHeaders.interceptors.response.use(undefined, errorHandler);
 
 request.interceptors.request.use(authorizationBearerSuccess, authorizationBearerFailed);
