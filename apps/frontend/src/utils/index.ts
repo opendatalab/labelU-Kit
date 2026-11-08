@@ -2,8 +2,13 @@ export const jsonParse = (value: string): any => {
   return JSON.parse(value, (k: any, v: any) => {
     try {
       // 将正则字符串转成正则对象
-      if (eval(decodeURIComponent(v)) instanceof RegExp) {
-        return eval(decodeURIComponent(v));
+      // security: never eval input; only revive /pattern/flags strings via new RegExp
+      if (typeof v !== 'string') {
+        return v;
+      }
+      const regexLiteral = decodeURIComponent(v).match(/^\/(.*)\/([a-z]*)$/);
+      if (regexLiteral) {
+        return new RegExp(regexLiteral[1], regexLiteral[2]);
       }
       return v;
     } catch (e) {
