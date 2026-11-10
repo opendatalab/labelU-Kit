@@ -9,7 +9,7 @@
 
 ## Features
 
-- Supports 2D bounding box, point, line (spline), cuboid, and polygon (closed-spline) annotation for images
+- Supports 2D bounding box, point, line (spline), cuboid, and polygon (closed-spline) and relation (for bbox / polygon) annotation for images
 - Supports video annotation
 - Supports audio annotation
 - Modular components that can be freely combined

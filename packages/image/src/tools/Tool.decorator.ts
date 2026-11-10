@@ -1,5 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
 
+import { ControllerPoint } from '@/drafts/ControllerPoint';
+import { ControllerEdge } from '@/drafts/ControllerEdge';
+
 import { axis, eventEmitter, monitor } from '../singletons';
 import { EInternalEvent } from '../enums';
 import type { BasicImageAnnotation } from '../interface';
@@ -7,10 +10,6 @@ import type { BasicToolParams } from './Tool';
 import { Tool } from './Tool';
 
 type Constructor<T extends {}> = new (...args: any[]) => T;
-
-export interface ToolWrapperConstructor {}
-
-type PublicConstructor<T> = new () => T;
 
 /**
  * 工具装饰器
@@ -30,8 +29,10 @@ export function ToolWrapper<
   Data extends BasicImageAnnotation,
   Options extends BasicToolParams<Data, Style>,
   Style extends Record<string, any>,
->(constructor: T): PublicConstructor<ToolWrapperConstructor> {
+>(constructor: T): T {
   return class WrappedTool extends constructor {
+    isDuplicatedRelation?: (sourceId: string, targetId: string, label?: string) => boolean;
+
     constructor(...params: any[]) {
       super(...params);
 
@@ -77,20 +78,30 @@ export function ToolWrapper<
         const data = cloneDeep(draft.data);
         this.deleteDraft();
         Tool.onDelete(this!.convertAnnotationItem(data));
+        this.removeRelations(id);
       } else {
         const data = cloneDeep(this.drawing!.get(id)!.data);
         this.removeFromDrawing(id);
+        this.removeRelations(id);
         Tool.onDelete(this!.convertAnnotationItem(data));
       }
 
       axis?.rerender();
     }
 
-    public setLabel(value: string): void {
+    public setLabel(value: string): boolean {
       const { draft, activeLabel } = this;
 
       if (activeLabel && activeLabel === value) {
-        return;
+        return false;
+      }
+
+      // 关联关系需要检查是否重复
+      if (this.name === 'relation' && this.isDuplicatedRelation && this.draft) {
+        const relationData = this.draft!.data as any;
+        if (this.isDuplicatedRelation(relationData.sourceId, relationData.targetId, value)) {
+          return false;
+        }
       }
 
       this.activate(value);
@@ -108,6 +119,8 @@ export function ToolWrapper<
       this.updateSketchStyleByLabel(value);
 
       eventEmitter.emit('labelChange', value);
+
+      return true;
     }
 
     /**
@@ -154,11 +167,25 @@ export function ToolWrapper<
           item.group.updateStyle({
             opacity: visible ? 1 : 0,
           } as any);
+          item.doms.forEach((dom) => {
+            if (visible) {
+              dom.show();
+            } else {
+              dom.hide();
+            }
+          });
         }
       });
 
       if (this.draft && ids.includes(this.draft.id)) {
         this.draft.data.visible = visible;
+
+        for (const shape of this.draft.group.shapes) {
+          if (shape instanceof ControllerPoint || shape instanceof ControllerEdge) {
+            shape.disabled = !visible;
+          }
+        }
+
         this.draft.group.updateStyle({
           opacity: visible ? 1 : 0,
         } as any);

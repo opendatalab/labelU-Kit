@@ -1,12 +1,12 @@
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, useRevalidator, useRouteLoaderData, useSearchParams } from 'react-router-dom';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { Table, Pagination, Button, Popconfirm, Tag, Tooltip, Avatar, Popover } from 'antd';
+import { Table, Pagination, Button, Popconfirm, Tag, Tooltip, Avatar, Popover, Progress, message } from 'antd';
 import { VideoCard, FlexLayout } from '@labelu/components-react';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
 import styled from 'styled-components';
-import { DownOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, DownOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from '@labelu/i18n';
 
 import type { PreAnnotationFileResponse, SampleResponse } from '@/api/types';
@@ -14,9 +14,9 @@ import { MediaType, TaskStatus } from '@/api/types';
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
 import BlockContainer from '@/layouts/BlockContainer';
-import { downloadFromUrl, getThumbnailUrl } from '@/utils';
+import { downloadFromUrl } from '@/utils';
 import { deletePreAnnotationFile } from '@/api/services/preAnnotations';
-import { deleteSamples } from '@/api/services/samples';
+import { deleteSamples, createAutoLabelJob, getAutoLabelJobStatus } from '@/api/services/samples';
 import { UserAvatar } from '@/components/UserAvatar';
 import useMe from '@/hooks/useMe';
 
@@ -59,6 +59,69 @@ const Samples = () => {
     Object.keys(task?.config).length > 0;
   const [enterRowId, setEnterRowId] = useState<any>(undefined);
   const [selectedSampleIds, setSelectedSampleIds] = useState<any>([]);
+
+  // Batch auto-label state
+  const [batchProgress, setBatchProgress] = useState<{
+    processed: number;
+    total: number;
+    success: number;
+    failed: number;
+  } | null>(null);
+  const [isBatchLabeling, setIsBatchLabeling] = useState(false);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  }, []);
+
+  const handleBatchAutoLabel = useCallback(async () => {
+    if (!taskId) return;
+    setIsBatchLabeling(true);
+    try {
+      const filterByLabels = localStorage.getItem('ai_filter_by_labels') !== 'false';
+      const response = await createAutoLabelJob(taskId, { filter_by_labels: filterByLabels });
+      const job = response.data;
+      setBatchProgress({ processed: 0, total: job.sample_count, success: 0, failed: 0 });
+      message.success(t('batchAutoLabelStarted'));
+
+      // Start polling
+      pollTimerRef.current = setInterval(async () => {
+        try {
+          const statusResp = await getAutoLabelJobStatus(taskId, job.id);
+          const s = statusResp.data;
+          setBatchProgress({
+            processed: s.processed_count,
+            total: s.sample_count,
+            success: s.success_count,
+            failed: s.failed_count,
+          });
+
+          if (s.status === 'COMPLETED' || s.status === 'FAILED') {
+            stopPolling();
+            setIsBatchLabeling(false);
+            message.success(t('batchAutoLabelCompleted', { success: s.success_count, failed: s.failed_count }));
+            revalidator.revalidate();
+            setTimeout(() => setBatchProgress(null), 3000);
+          }
+        } catch {
+          stopPolling();
+          setIsBatchLabeling(false);
+          setBatchProgress(null);
+        }
+      }, 2500);
+    } catch (error: any) {
+      setIsBatchLabeling(false);
+      const msg = error?.response?.data?.msg;
+      message.error(msg || t('aiAutoLabelFailed'));
+    }
+  }, [taskId, t, revalidator, stopPolling]);
+
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
 
   const handleDeleteJsonl = async (id: number) => {
     await deletePreAnnotationFile({
@@ -113,8 +176,8 @@ const Samples = () => {
         }
 
         if (task!.media_type === MediaType.IMAGE) {
-          const thumbnailUrl = getThumbnailUrl(data.url!);
-          return <img src={thumbnailUrl} style={{ width: '116px', height: '70px' }} />;
+          const thumbnailUrl = data.thumbnail_url || data.url;
+          return <img src={thumbnailUrl} style={{ width: '116px', height: '70px', objectFit: 'cover' }} />;
         } else if (task!.media_type === MediaType.AUDIO) {
           return <audio src={data?.url} controls />;
         } else {
@@ -440,16 +503,42 @@ const Samples = () => {
             onChange={handleTableChange}
           />
           <FlexLayout justify="space-between">
-            <ExportPortal
-              taskId={+taskId!}
-              sampleIds={selectedSampleIds}
-              mediaType={task!.media_type!}
-              tools={task?.config?.tools}
-            >
-              <Button type="link" disabled={selectedSampleIds.length === 0}>
-                {t('batchExport')}
-              </Button>
-            </ExportPortal>
+            <FlexLayout.Item gap="0.5rem" flex items="center">
+              <ExportPortal
+                taskId={+taskId!}
+                sampleIds={selectedSampleIds}
+                mediaType={task!.media_type!}
+                tools={task?.config?.tools}
+              >
+                <Button type="link" disabled={selectedSampleIds.length === 0}>
+                  {t('batchExport')}
+                </Button>
+              </ExportPortal>
+              {task?.media_type === MediaType.IMAGE && (
+                <Button type="link" onClick={handleBatchAutoLabel} disabled={isBatchLabeling} loading={isBatchLabeling}>
+                  {t('batchAutoLabel')}
+                </Button>
+              )}
+              {batchProgress && (
+                <Progress
+                  percent={Math.round((batchProgress.processed / batchProgress.total) * 100)}
+                  size="small"
+                  status={batchProgress.failed > 0 ? 'exception' : 'active'}
+                  style={{ width: 200, display: 'inline-flex' }}
+                  format={() => (
+                    <FlexLayout items="center" gap="0.5rem">
+                      <span>
+                        {batchProgress.success} <CheckCircleFilled style={{ color: 'var(--color-success)' }} />
+                      </span>
+                      <span>
+                        {batchProgress.failed} <CloseCircleFilled style={{ color: 'var(--color-error)' }} />
+                      </span>
+                      <span>/ {batchProgress.total}</span>
+                    </FlexLayout>
+                  )}
+                />
+              )}
+            </FlexLayout.Item>
             <Pagination
               current={parseInt(searchParams.get('page') || '1')}
               pageSize={parseInt(searchParams.get('size') || '10')}

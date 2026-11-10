@@ -3,6 +3,9 @@ import commonController from '@/utils/common';
 import request from '../request';
 import { getTask } from './task';
 import {
+  type AutoLabelCommand,
+  type BatchAutoLabelCommand,
+  type AutoLabelJobResponse,
   ExportType,
   type DeleteApiV1TasksTaskIdDeleteParams,
   type DeleteSampleCommand,
@@ -11,6 +14,7 @@ import {
   type ListByApiV1TasksTaskIdSamplesGetParams,
   type OkRespCommonDataResp,
   type OkRespCreateSampleResponse,
+  type OkRespAutoLabelResponse,
   type OkRespSampleResponse,
   type PatchSampleCommand,
   type SampleData,
@@ -80,61 +84,80 @@ export async function updateSampleAnnotationResult(
   );
 }
 
-export async function outputSample(taskId: number, sampleIds: number[], activeTxt: ExportType) {
-  const headers = {} as any;
+export async function autoLabelSample(
+  taskId: number,
+  sampleId: number,
+  body: AutoLabelCommand = {},
+): Promise<OkRespAutoLabelResponse> {
+  return await request.post(`/v1/tasks/${taskId}/samples/${sampleId}/auto_label`, body, {
+    timeout: 5 * 60 * 1000,
+    params: {
+      sample_id: sampleId,
+    },
+  });
+}
 
-  if (
-    [
-      ExportType.MASK,
-      ExportType.LABEL_ME,
-      ExportType.YOLO,
-      ExportType.CSV,
-      ExportType.XML,
-      ExportType.TF_RECORD,
-      ExportType.PASCAL_VOC,
-    ].includes(activeTxt)
-  ) {
-    headers.responseType = 'blob';
+export async function createAutoLabelJob(
+  taskId: number,
+  body: BatchAutoLabelCommand = {},
+): Promise<{ data: AutoLabelJobResponse }> {
+  return await request.post(`/v1/tasks/${taskId}/auto_label_job`, body);
+}
+
+export async function getAutoLabelJobStatus(taskId: number, jobId: number): Promise<{ data: AutoLabelJobResponse }> {
+  return await request.get(`/v1/tasks/${taskId}/auto_label_job/${jobId}`);
+}
+
+export async function outputSample(taskId: number, sampleIds: number[], activeTxt: ExportType) {
+  // 1. Create export job
+  const jobRes = await request.post(
+    `/v1/tasks/${taskId}/samples/export`,
+    { sample_ids: sampleIds },
+    { params: { export_type: activeTxt } },
+  );
+
+  const jobId = jobRes.data.id;
+
+  // 2. Poll until completed
+  let job = jobRes.data;
+  while (job.status !== 'COMPLETED' && job.status !== 'FAILED') {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const statusRes = await request.get(`/v1/tasks/${taskId}/samples/export/${jobId}`);
+    job = statusRes.data;
   }
 
-  const data = await request.post(
-    `/v1/tasks/${taskId}/samples/export`,
-    {
-      sample_ids: sampleIds,
-    },
-    {
-      params: {
-        task_id: taskId,
-        export_type: activeTxt,
-      },
-      ...headers,
-    },
-  );
-  const taskRes = await getTask(taskId);
+  if (job.status === 'FAILED') {
+    commonController.notificationErrorMessage({ message: job.error_message || 'Export failed' }, 3);
+    return;
+  }
 
-  const blobData = new Blob([JSON.stringify(data)]);
-  let url = window.URL.createObjectURL(blobData);
-  const a = document.createElement('a');
-  let filename = taskRes.data.name;
+  // 3. Download the exported file
+  const blob = await request.get(`/v1/tasks/${taskId}/samples/export/${jobId}/download`, {
+    responseType: 'blob',
+  });
+
+  const taskRes = await getTask(taskId);
+  let filename = taskRes.data.name || 'export';
 
   switch (activeTxt) {
     case ExportType.JSON:
     case ExportType.COCO:
-      filename = filename + '.json';
+      filename += '.json';
       break;
-    case ExportType.MASK:
-    case ExportType.CSV:
     case ExportType.XML:
-    case ExportType.LABEL_ME:
-    case ExportType.YOLO:
-    case ExportType.TF_RECORD:
-    case ExportType.PASCAL_VOC:
-      url = window.URL.createObjectURL(data as any);
+      filename += '.xml';
+      break;
+    default:
+      filename += '.zip';
       break;
   }
-  a.download = filename!;
+
+  const url = window.URL.createObjectURL(blob as Blob);
+  const a = document.createElement('a');
   a.href = url;
+  a.download = filename;
   a.click();
+  window.URL.revokeObjectURL(url);
 }
 
 export async function outputSamples(taskId: number, activeTxt: ExportType) {
@@ -147,7 +170,7 @@ export async function outputSamples(taskId: number, activeTxt: ExportType) {
   }
 
   if (sampleIds.length === 0) {
-    commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
+    commonController.notificationErrorMessage({ message: 'No samples to export' }, 1);
     return;
   }
 

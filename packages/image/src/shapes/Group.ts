@@ -1,17 +1,22 @@
 import EventEmitter from 'eventemitter3';
 import type { BBox } from 'rbush';
 
-import type { Shape } from './Shape';
 import { EInternalEvent } from '../enums';
 import type { RBushItem } from '../core/CustomRBush';
 import { eventEmitter, rbush } from '../singletons';
-import { type AxisPoint } from './Point.shape';
+import type { PointStyle, AxisPoint } from './Point.shape';
 import { ShapeText } from './Text.shape';
+import type { AllShape } from './types';
+import type { RectStyle } from './Rect.shape';
+import type { LineStyle } from './Line.shape';
+import type { PolygonStyle } from './Polygon.shape';
+
+type Style = RectStyle | LineStyle | PolygonStyle | PointStyle;
 
 /**
  * 组合类，用于组合多个图形
  */
-export class Group<T extends Shape<Style>, Style> {
+export class Group<T extends AllShape = AllShape> {
   public id: string;
 
   public order: number;
@@ -28,7 +33,7 @@ export class Group<T extends Shape<Style>, Style> {
 
   private _cachedRBush: RBushItem | null = null;
 
-  private _shapes: Shape<Style>[] = [];
+  private _shapes: T[] = [];
 
   private _shapeMapping: Map<string, T> = new Map();
 
@@ -91,16 +96,9 @@ export class Group<T extends Shape<Style>, Style> {
   }
 
   private _updateRBush() {
-    const { _cachedRBush, bbox } = this;
+    const { bbox } = this;
 
-    if (_cachedRBush) {
-      rbush.remove(_cachedRBush);
-
-      _cachedRBush.minX = bbox.minX;
-      _cachedRBush.minY = bbox.minY;
-      _cachedRBush.maxX = bbox.maxX;
-      _cachedRBush.maxY = bbox.maxY;
-    } else {
+    if (!this._cachedRBush) {
       this._cachedRBush = {
         minX: bbox.minX,
         minY: bbox.minY,
@@ -111,9 +109,37 @@ export class Group<T extends Shape<Style>, Style> {
       };
     }
 
-    rbush.insert(this._cachedRBush!);
+    // 延迟到下一次查询前统一应用，避免高频坐标变化时逐条更新空间索引
+    rbush.queueUpdate(this._cachedRBush);
 
     return this;
+  }
+
+  public getBBoxByFilter(filter: (shape: AllShape) => boolean): BBox {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < this.shapes.length; i += 1) {
+      const shape = this.shapes[i];
+
+      if (!filter(shape)) {
+        continue;
+      }
+
+      minX = Math.min(minX, shape.bbox.minX);
+      minY = Math.min(minY, shape.bbox.minY);
+      maxX = Math.max(maxX, shape.bbox.maxX);
+      maxY = Math.max(maxY, shape.bbox.maxY);
+    }
+
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+    };
   }
 
   public updateStyle(style: Style) {
@@ -183,7 +209,7 @@ export class Group<T extends Shape<Style>, Style> {
     this.update();
   }
 
-  public each(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
+  public each(callback: (shape: T, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = 0; i < this.shapes.length; i += 1) {
@@ -195,7 +221,7 @@ export class Group<T extends Shape<Style>, Style> {
     }
   }
 
-  public reverseEach(callback: (shape: Shape<Style>, idx: number) => void | boolean) {
+  public reverseEach(callback: (shape: T, idx: number) => void | boolean) {
     let shouldContinue = true;
 
     for (let i = this.shapes.length - 1; i >= 0; i -= 1) {
@@ -222,7 +248,10 @@ export class Group<T extends Shape<Style>, Style> {
   }
 
   public destroy() {
-    rbush.remove(this._cachedRBush!);
+    if (this._cachedRBush) {
+      rbush.remove(this._cachedRBush);
+    }
+
     this._cachedRBush = null;
     this.shapes.forEach((shape) => {
       shape.destroy();
@@ -240,7 +269,11 @@ export class Group<T extends Shape<Style>, Style> {
       shape.destroy();
     });
     this._shapes = [];
-    rbush.remove(this._cachedRBush!);
+
+    if (this._cachedRBush) {
+      rbush.remove(this._cachedRBush);
+    }
+
     this._shapeMapping.clear();
   }
 

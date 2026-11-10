@@ -38,18 +38,22 @@ export const imageAnnotationRef = createRef<ImageAnnotatorRef>();
 export const videoAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
 export const audioAnnotationRef = createRef<AudioAndVideoAnnotatorRef>();
 
+const PREVIEW_OFFSET_TOP = 102;
+const OFFSET_TOP = 158;
+
 const AnnotationPage = () => {
   const routeParams = useParams();
   const { task } = useRouteLoaderData('task') as TaskLoaderResult;
   const sample = (useRouteLoaderData('annotation') as any).sample as Awaited<ReturnType<typeof getSample>>;
   const preAnnotation = (useRouteLoaderData('annotation') as any).preAnnotation;
   const { t } = useTranslation();
+  const activePreAnnotation = useMemo(() => _.last(preAnnotation?.data), [preAnnotation]);
 
   const preAnnotationConfig = useMemo(() => {
     const result: Partial<Record<AllToolName, any>> = {};
 
-    if (preAnnotation) {
-      const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
+    if (activePreAnnotation) {
+      const preAnnotationResult = JSON.parse(_.get(activePreAnnotation, 'data', 'null'));
 
       if (!preAnnotationResult) {
         return {};
@@ -74,15 +78,17 @@ const AnnotationPage = () => {
     }
 
     return result;
-  }, [preAnnotation]);
+  }, [activePreAnnotation]);
   const preAnnotations = useMemo(() => {
-    if (!preAnnotation) {
+    if (!activePreAnnotation) {
       return {};
     }
 
-    const preAnnotationResult = JSON.parse(_.get(preAnnotation, 'data[0].data', 'null'));
+    const preAnnotationResult = JSON.parse(_.get(activePreAnnotation, 'data', 'null'));
     let _annotations = _.get(preAnnotationResult, 'annotations', {});
-    const preAnnotationFile = _.get(preAnnotation, 'data[0].file', {});
+    const preAnnotationFile = (_.get(activePreAnnotation, 'file', {}) ?? {}) as {
+      filename?: string;
+    };
     // 兼容json预标注
     if (preAnnotationFile.filename?.endsWith('.json')) {
       _annotations = _.chain(preAnnotationResult)
@@ -101,13 +107,13 @@ const AnnotationPage = () => {
     }
 
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageAnnotations(_annotations, preAnnotationConfig);
+      return convertImageAnnotations(_annotations);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertMediaAnnotations(task.media_type, _annotations, preAnnotationConfig);
+      return convertMediaAnnotations(task.media_type, _annotations);
     }
 
     return {};
-  }, [preAnnotation, preAnnotationConfig, task?.media_type]);
+  }, [activePreAnnotation, task?.media_type]);
 
   const [searchParams] = useSearchParams();
   const taskConfig = _.get(task, 'config');
@@ -149,6 +155,7 @@ const AnnotationPage = () => {
   const PAGE_SIZE = 40;
   // 滚动加载
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [serverPage, setServerPage] = useState<number>(1);
   const currentPage = useRef<number>(1);
   if (currentPage.current === 1) {
     currentPage.current = sample?.data.inner_id ? Math.floor(sample.data.inner_id / PAGE_SIZE) + 1 : 1;
@@ -167,7 +174,7 @@ const AnnotationPage = () => {
 
     currentPage.current += 1;
     setTotalCount(meta_data?.total ?? 0);
-
+    setServerPage(meta_data?.page ?? 1);
     return data;
   }, [routeParams.taskId]);
   const [samples = [] as SampleResponse[], loading, setSamples, svc] = useScrollFetch(
@@ -177,14 +184,19 @@ const AnnotationPage = () => {
       document.querySelector('.labelu-audio__sidebar div') ||
       document.querySelector('.labelu-video__sidebar div'),
     {
-      isEnd: () => totalCount === samples.length,
+      isEnd: () => totalCount === samples.length || serverPage === Math.ceil(totalCount / PAGE_SIZE),
     },
   );
 
   const leftSiderContent = useMemo(() => <SlideLoader />, []);
 
   const topActionContent = (
-    <AnnotationRightCorner totalSize={totalCount} fetchNext={svc} noSave={!!searchParams.get('noSave')} />
+    <AnnotationRightCorner
+      totalSize={totalCount}
+      fetchNext={svc}
+      isLastPage={serverPage >= Math.ceil(totalCount / PAGE_SIZE)}
+      noSave={!!searchParams.get('noSave')}
+    />
   );
 
   const annotationContextValue = useMemo(() => {
@@ -210,11 +222,11 @@ const AnnotationPage = () => {
 
   const editingSample = useMemo(() => {
     if (task?.media_type === MediaType.IMAGE) {
-      return convertImageSample(sample?.data, editorConfig);
+      return convertImageSample(sample?.data);
     } else if (task?.media_type === MediaType.VIDEO || task?.media_type === MediaType.AUDIO) {
-      return convertAudioAndVideoSample(sample?.data, editorConfig, task.media_type);
+      return convertAudioAndVideoSample(sample?.data, task.media_type);
     }
-  }, [editorConfig, sample?.data, task?.media_type]);
+  }, [sample?.data, task?.media_type]);
 
   const renderSidebar = useMemo(() => {
     return () => leftSiderContent;
@@ -281,6 +293,10 @@ const AnnotationPage = () => {
   const [labelMapping, setLabelMapping] = useState<Record<any, string>>();
 
   const handleLabelChange = useCallback((toolName: any, label: ILabel) => {
+    if (!label) {
+      return;
+    }
+
     // 缓存当前标签
     setLabelMapping((prev) => {
       return {
@@ -309,7 +325,8 @@ const AnnotationPage = () => {
         toolbarRight={topActionContent}
         ref={imageAnnotationRef}
         onError={onError}
-        offsetTop={configFromParent ? 100 : 156}
+        // windows platform pixel issue
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         disabled={disabled}
@@ -327,7 +344,7 @@ const AnnotationPage = () => {
       <Annotator
         primaryColor="#0d53de"
         ref={videoAnnotationRef}
-        offsetTop={configFromParent ? 100 : 156}
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         toolbarRight={topActionContent}
@@ -347,7 +364,7 @@ const AnnotationPage = () => {
       <AudioAnnotator
         primaryColor="#0d53de"
         ref={audioAnnotationRef}
-        offsetTop={configFromParent ? 100 : 156}
+        offsetTop={configFromParent ? PREVIEW_OFFSET_TOP : OFFSET_TOP}
         editingSample={editingSample}
         config={config}
         disabled={disabled}

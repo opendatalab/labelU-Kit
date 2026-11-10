@@ -48,6 +48,9 @@
                 "$ref": "#/definitions/PolygonTool"
               },
               {
+                "$ref": "#/definitions/RelationTool"
+              },
+              {
                 "$ref": "#/definitions/CuboidTool"
               },
               {
@@ -318,6 +321,55 @@
               }
             },
             "required": ["type", "points", "id", "order", "label"]
+          }
+        }
+      },
+      "required": ["toolName", "result"]
+    },
+    "RelationTool": {
+      "type": "object",
+      "properties": {
+        "toolName": {
+          "type": "string",
+          "const": "relationTool"
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "唯一标识"
+              },
+              "sourceId": {
+                "type": "string",
+                "description": "起始标注id"
+              },
+              "targetId": {
+                "type": "string",
+                "description": "目标标注id"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "是否可见",
+                "default": true
+              },
+              "attributes": {
+                "$ref": "#/definitions/Attribute"
+              },
+              "order": {
+                "type": "integer",
+                "description": "标注顺序",
+                "minimum": 0
+              },
+              "label": {
+                "type": "string",
+                "description": "标注标签",
+                "default": "none"
+              }
+            },
+            "required": ["sourceId", "targetId", "id", "order", "label"]
           }
         }
       },

@@ -11,6 +11,9 @@ export interface AttachmentResponse {
   filename?: string;
   /** Url description: upload file url */
   url?: string;
+  thumbnail_url?: string | null;
+  stream_url?: string | null;
+  storage_backend?: string | null;
 }
 
 export interface GetUsersApiV1UsersGetParams {
@@ -98,6 +101,41 @@ export interface DownloadAttachmentApiV1TasksAttachmentFilePathGetParams {
 export interface ExportApiV1TasksTaskIdSamplesExportPostParams {
   task_id: number;
   export_type: ExportType;
+}
+
+export interface AutoLabelCommand {
+  overwrite?: boolean;
+  template_id?: number | null;
+  prompt?: string | null;
+  filter_by_labels?: boolean;
+}
+
+export interface AutoLabelResponse {
+  status: string;
+  task_id: number;
+  sample_id: number;
+  media_type: MediaType;
+  provider: string;
+  model?: string | null;
+  latency_ms?: number | null;
+  pre_annotation_id?: number | null;
+  warning_message?: string | null;
+}
+
+export interface BatchAutoLabelCommand {
+  filter_by_labels?: boolean;
+}
+
+export interface AutoLabelJobResponse {
+  id: number;
+  task_id: number;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  sample_count: number;
+  processed_count: number;
+  success_count: number;
+  failed_count: number;
+  error_message?: string | null;
+  created_at?: string | null;
 }
 
 export interface ExportSampleCommand {
@@ -212,6 +250,10 @@ export interface OkRespSampleResponse {
   data: SampleResponse;
 }
 
+export interface OkRespAutoLabelResponse {
+  data: AutoLabelResponse;
+}
+
 export interface OkRespSignupResponse {
   data: SignupResponse;
 }
@@ -247,6 +289,9 @@ export interface SampleResponse {
     id: number;
     url: string;
     filename: string;
+    thumbnail_url?: string | null;
+    stream_url?: string | null;
+    storage_backend?: string | null;
   };
   /** Annotated Count description: annotate result count */
   annotated_count?: number;
@@ -265,11 +310,14 @@ export interface PreAnnotationResponse {
   id?: number;
   /** Data description: sample data, include filename, file url, or result */
   data?: PreAnnotationType[];
-  file: {
+  file?: {
     id: string;
     url: string;
     filename: string;
-  };
+    thumbnail_url?: string | null;
+    stream_url?: string | null;
+    storage_backend?: string | null;
+  } | null;
   /** Created At description: task created at time */
   created_at?: string;
   /** Created By description: task created by */
@@ -830,4 +878,86 @@ export interface FrameTool {
    */
   label: string;
   attributes?: Attribute;
+}
+
+// ── Data Source (S3) ────────────────────────────────────────────────
+
+export interface DataSourceResponse {
+  id: number;
+  name: string;
+  type: string;
+  endpoint?: string;
+  region?: string;
+  bucket: string;
+  prefix?: string;
+  path_style?: boolean;
+  use_ssl?: boolean;
+  presign_expire_secs?: number;
+  created_by?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateDataSourceCommand {
+  name: string;
+  type?: string;
+  endpoint?: string;
+  region?: string;
+  bucket: string;
+  prefix?: string;
+  access_key_id: string;
+  secret_access_key: string;
+  path_style?: boolean;
+  use_ssl?: boolean;
+  presign_expire_secs?: number;
+}
+
+export interface UpdateDataSourceCommand {
+  name?: string;
+  endpoint?: string;
+  region?: string;
+  bucket?: string;
+  prefix?: string;
+  access_key_id?: string;
+  secret_access_key?: string;
+  path_style?: boolean;
+  use_ssl?: boolean;
+  presign_expire_secs?: number;
+}
+
+export interface ListDataSourcesParams {
+  page?: number;
+  size?: number;
+}
+
+export interface DataSourceListResponse {
+  meta_data?: MetaData;
+  data: DataSourceResponse[];
+}
+
+export interface S3ObjectItem {
+  key: string;
+  size: number;
+  last_modified?: string | null;
+}
+
+export interface S3ObjectListResponse {
+  objects: S3ObjectItem[];
+  next_page_token?: string | null;
+  truncated: boolean;
+}
+
+export interface ListS3ObjectsParams {
+  ds_id: number;
+  prefix?: string;
+  extension?: string;
+  page_token?: string | null;
+  size?: number;
+}
+
+export interface ImportS3SamplesCommand {
+  data_source_id: number;
+  object_keys?: string[];
+  prefix?: string;
+  extension?: string;
 }

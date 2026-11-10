@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 import uid from '@/utils/uid';
 
 import { EInternalEvent } from '../enums';
-import type { AxisPoint, LineStyle, Point, PointStyle } from '../shapes';
+import type { AxisPoint, Point } from '../shapes';
 import { Line } from '../shapes';
 import { Group } from '../shapes/Group';
 import { ControllerPoint } from './ControllerPoint';
@@ -22,7 +22,7 @@ export interface SlopeEdgeParams {
   disabled?: boolean;
 }
 
-export class SlopeEdge extends Group<Line | Point, LineStyle | PointStyle> {
+export class SlopeEdge extends Group {
   public name?: string;
 
   public previousDynamicCoordinate: AxisPoint[][] | null = null;

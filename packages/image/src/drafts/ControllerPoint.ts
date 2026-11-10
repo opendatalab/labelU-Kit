@@ -156,6 +156,14 @@ export class ControllerPoint extends Point {
     eventEmitter.emit('change');
   };
 
+  public set disabled(disabled: boolean) {
+    this._disabled = disabled;
+  }
+
+  public get disabled() {
+    return this._disabled;
+  }
+
   public clone() {
     return new ControllerPoint({
       id: this.id,

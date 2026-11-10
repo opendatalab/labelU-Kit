@@ -1,9 +1,15 @@
-import { useMemo, useCallback, useContext } from 'react';
+import { useMemo, useCallback, useContext, useState } from 'react';
 import type { TableColumnType } from 'antd';
 import { Popconfirm, Button, Table, Tooltip, Tag } from 'antd';
 import _ from 'lodash-es';
 import formatter from '@labelu/formatter';
-import { FileOutlined, FolderOpenOutlined, QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons';
+import {
+  FileOutlined,
+  FolderOpenOutlined,
+  CloudServerOutlined,
+  QuestionCircleOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
 import type { RcFile } from 'antd/lib/upload/interface';
 import { FlexLayout } from '@labelu/components-react';
 import { useRevalidator } from 'react-router';
@@ -33,6 +39,7 @@ import videoJsonSchema from './videoPreAnnotationJson.schema.json';
 import audioSchema from './audioPreAnnotationJsonl.schema.json';
 import videoSchema from './videoPreAnnotationJsonl.schema.json';
 import { isCorrectFiles, isPreAnnotationFile, normalizeFiles, readFile, UploadStatus } from './utils';
+import S3ImportModal from './S3ImportModal';
 
 const jsonlMapping = {
   [MediaType.IMAGE]: imageSchema,
@@ -69,6 +76,7 @@ const InputData = () => {
   const uploadMutation = useUploadFileMutation();
   const revalidator = useRevalidator();
   const { t, i18n } = useTranslation();
+  const [s3ImportOpen, setS3ImportOpen] = useState(false);
 
   const statusTextMapping = useMemo(
     () => ({
@@ -327,6 +335,7 @@ const InputData = () => {
         responsive: ['md', 'lg'],
         key: 'url',
         render: (text: string) => {
+          if (!text) return '-';
           return formatter.format('ellipsis', `${location.protocol}//${location.host}${text}`, {
             maxWidth: 160,
             type: 'tooltip',
@@ -458,6 +467,13 @@ const InputData = () => {
               </a>
             </div>
           </FlexLayout.Item>
+          <h4>{t('importFromS3')}</h4>
+          <FlexLayout.Item flex="column" items="flex-start" gap="0.5rem">
+            <Button icon={<CloudServerOutlined />} onClick={() => setS3ImportOpen(true)}>
+              {t('browseS3')}
+            </Button>
+            <div style={{ color: '#999', fontSize: 12 }}>{t('importFromS3Description')}</div>
+          </FlexLayout.Item>
         </Left>
         <Right flex="column" gap="1rem">
           {fileQueue.length > 0 && (
@@ -474,7 +490,7 @@ const InputData = () => {
                 <Status type="success" icon={null} style={{ display: 'inline-block' }}>
                   {amountMapping.succeeded}
                 </Status>
-                <span>个，</span>
+                <span>{t('uploadSuccessCount')}</span>
               </FlexLayout>
               <FlexLayout gap=".25rem">
                 <span>{t('uploadFailed')}</span>
@@ -489,6 +505,28 @@ const InputData = () => {
           </FlexLayout.Content>
         </Right>
       </FlexLayout.Content>
+      {taskId && task.media_type && (
+        <S3ImportModal
+          open={s3ImportOpen}
+          onClose={() => setS3ImportOpen(false)}
+          taskId={taskId}
+          mediaType={task.media_type}
+          onImportSuccess={(fileNames, sampleIds) => {
+            setFileQueue((prev) => [
+              ...prev,
+              ...fileNames.map((name, index) => ({
+                uid: `s3-${Date.now()}-${name}`,
+                name,
+                size: 0,
+                status: UploadStatus.Success,
+                file: new File([], name),
+                refId: sampleIds[index],
+              })),
+            ]);
+            revalidator.revalidate();
+          }}
+        />
+      )}
     </Wrapper>
   );
 };

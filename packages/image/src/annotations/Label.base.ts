@@ -107,10 +107,10 @@ export class LabelBase {
     if (typeof value !== 'string') {
       console.error('Value is not a string');
 
-      return LabelBase.DEFAULT_LABEL_TEXT;
+      return value || LabelBase.DEFAULT_LABEL_TEXT;
     }
 
-    return this.getLabelByValue(value)?.key ?? LabelBase.DEFAULT_LABEL_TEXT;
+    return this.getLabelByValue(value)?.key || value || LabelBase.DEFAULT_LABEL_TEXT;
   }
 
   public getLabelColor(value: string | undefined) {

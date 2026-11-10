@@ -137,6 +137,14 @@ export class ControllerEdge extends Line {
     eventEmitter.emit('change');
   };
 
+  public set disabled(disabled: boolean) {
+    this._disabled = disabled;
+  }
+
+  public get disabled() {
+    return this._disabled;
+  }
+
   public onMove(handler: EdgeHandler) {
     this._onMoveHandlers.push(handler);
   }

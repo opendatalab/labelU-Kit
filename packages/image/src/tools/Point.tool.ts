@@ -107,6 +107,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     const { style, config } = this;
 
     this.draft = new DraftPoint(config, {
+      name: this.name,
       id: data.id || uid(),
       data,
       showOrder: this.showOrder,
@@ -123,6 +124,7 @@ export class PointTool extends Tool<PointData, PointStyle, PointToolOptions> {
     const { style, hoveredStyle } = this;
 
     const annotation = new AnnotationPoint({
+      name: this.name,
       id: data.id,
       data,
       showOrder: this.showOrder,

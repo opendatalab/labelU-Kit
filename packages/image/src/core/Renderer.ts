@@ -66,6 +66,9 @@ export class Renderer extends EventEmitter {
   public resize(width: number, height: number) {
     const { canvas } = this;
 
+    // 每次 resize 时重新获取 devicePixelRatio，避免浏览器缩放或全屏切换后坐标偏移
+    this.ratio = window.devicePixelRatio || 1;
+
     canvas.width = width * this.ratio;
     canvas.height = height * this.ratio;
     canvas.style.width = `${width}px`;

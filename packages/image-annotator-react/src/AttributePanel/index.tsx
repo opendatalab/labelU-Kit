@@ -213,11 +213,13 @@ export function AttributePanel() {
     disabled,
   } = useAnnotationCtx();
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [modified, setModified] = useState<boolean>(false);
   const globalAnnotations = useMemo(() => {
     return Object.values(annotationsWithGlobal).filter((item) =>
       ['text', 'tag'].includes((item as GlobalAnnotation).type),
     ) as GlobalAnnotation[];
   }, [annotationsWithGlobal]);
+
   // @ts-ignore
   const { t } = useTranslation();
 
@@ -267,10 +269,10 @@ export function AttributePanel() {
     return _globals;
   }, [globalToolConfig.tag, globalToolConfig.text, preLabelMapping?.tag, preLabelMapping?.text]);
 
-  const flatGlobalAnnotations = useMemo(() => {
+  const flatGlobalTagAnnotations = useMemo(() => {
     const result = globalAnnotations;
 
-    if (globalAnnotations.length === 0) {
+    if (globalAnnotations.length === 0 && !modified) {
       [preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text].forEach((values) => {
         if (values) {
           result.push(...(values as GlobalAnnotation[]));
@@ -279,7 +281,7 @@ export function AttributePanel() {
     }
 
     return result;
-  }, [globalAnnotations, preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text]);
+  }, [globalAnnotations, preAnnotationsWithGlobal?.tag, preAnnotationsWithGlobal?.text, modified]);
 
   const titles = useMemo(() => {
     const _titles = [];
@@ -311,7 +313,7 @@ export function AttributePanel() {
       });
     }
 
-    if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid) {
+    if (config?.line || config?.point || config?.polygon || config?.rect || config?.cuboid || config?.relation) {
       _titles.push({
         title: t('labels'),
         key: 'label' as const,
@@ -331,6 +333,7 @@ export function AttributePanel() {
     config?.polygon,
     config?.rect,
     config?.cuboid,
+    config?.relation,
     globalAnnotations,
     sortedImageAnnotations.length,
   ]);
@@ -386,6 +389,8 @@ export function AttributePanel() {
       return;
     }
 
+    setModified(true);
+
     onAnnotationClear();
     if (activeKey === 'label') {
       engine?.clearData();
@@ -396,7 +401,7 @@ export function AttributePanel() {
     () =>
       Array.from(imageAnnotationsGroup).map(([label, _annotations]) => {
         const found = labelMapping[_annotations[0].tool]?.[label] ?? preLabelMapping?.[_annotations[0].tool]?.[label];
-        const labelText = found ? found?.key ?? DEFAULT_LABEL_TEXT : DEFAULT_LABEL_TEXT;
+        const labelText = found ? found?.key ?? label : label;
 
         return {
           label: (
@@ -420,7 +425,7 @@ export function AttributePanel() {
                     active={item.id === selectedAnnotation?.id}
                     order={item.order}
                     annotation={item}
-                    labelText={labelOfAnnotation?.key ?? DEFAULT_LABEL_TEXT}
+                    labelText={labelOfAnnotation?.key ?? item.label ?? DEFAULT_LABEL_TEXT}
                     color={labelOfAnnotation?.color ?? DEFAULT_LABEL_COLOR}
                   />
                 );
@@ -450,7 +455,7 @@ export function AttributePanel() {
         })}
       </TabHeader>
       <Content activeKey={activeKey}>
-        <AttributeTree disabled={disabled} data={flatGlobalAnnotations} config={globals} onChange={handleOnChange} />
+        <AttributeTree disabled={disabled} data={flatGlobalTagAnnotations} config={globals} onChange={handleOnChange} />
         <CollapseWrapper defaultActiveKey={defaultActiveKeys} items={collapseItems} />
       </Content>
       <ClearAction onClear={handleClear} disabled={disabled} />

@@ -2,6 +2,7 @@ import Color from 'color';
 import type { ILabel } from '@labelu/interface';
 
 import uid from '@/utils/uid';
+import { DomPortal } from '@/core/DomPortal';
 
 import type { BasicImageAnnotation } from '../interface';
 import type { AnnotationParams } from './Annotation';
@@ -42,9 +43,9 @@ export interface CuboidData extends BasicImageAnnotation {
   back: CuboidVertex;
 }
 
-export type CuboidGroup = Group<Polygon | ShapeText, CuboidStyle>;
+export type CuboidGroup = Group;
 
-export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText, CuboidStyle> {
+export class AnnotationCuboid extends Annotation<CuboidData, CuboidStyle> {
   private _realFront: Polygon | null = null;
 
   public labelColor: string = LabelBase.DEFAULT_COLOR;
@@ -225,23 +226,44 @@ export class AnnotationCuboid extends Annotation<CuboidData, Polygon | ShapeText
       }),
     );
 
-    const attributesText = AnnotationCuboid.labelStatic.getLabelTextWithAttributes(data.label, data.attributes);
+    const labelText = AnnotationCuboid.labelStatic.getLabelText(data.label);
+    const attributesText = AnnotationCuboid.labelStatic.getAttributeTexts(data.label, data.attributes);
 
-    // label
-    group.add(
-      new ShapeText({
-        id: uid(),
-        coordinate: {
-          x: front.bl.x,
-          y: front.bl.y,
-        },
-        text: `${this.showOrder ? data.order + ' ' : ''}${attributesText}`,
+    const backShape = group.shapes[2];
+    const frontShape = group.shapes[1];
+    this.doms.push(
+      new DomPortal({
+        content: this.generateLabelDom(labelText),
+        getPosition: (shape, container) => ({
+          x: shape.dynamicCoordinate[0].x,
+          y: shape.dynamicCoordinate[0].y - container.clientHeight,
+        }),
+        order: data.order,
+        preventPointerEvents: true,
+        bindShape: backShape,
         style: {
-          opacity: visible ? 1 : 0,
-          fill: labelColor,
+          display: visible ? 'block' : 'none',
         },
       }),
     );
+
+    if (attributesText) {
+      this.doms.push(
+        new DomPortal({
+          content: this.generateAttributeDom(attributesText),
+          getPosition: (shape) => ({
+            x: shape.dynamicCoordinate[3].x,
+            y: shape.dynamicCoordinate[3].y + 5,
+          }),
+          order: data.order,
+          preventPointerEvents: true,
+          bindShape: frontShape,
+          style: {
+            display: visible ? 'block' : 'none',
+          },
+        }),
+      );
+    }
   }
 
   public destroy(): void {

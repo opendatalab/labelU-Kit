@@ -1,9 +1,9 @@
 // import { ImageToolName, TOOL_NAME, EVideoToolName, EAudioToolName } from '@labelu/annotation';
 import type { FormProps, SelectProps, TabsProps } from 'antd';
-import { Popconfirm, Button, Form, Tabs, Select } from 'antd';
+import { Popconfirm, Button, Form, Tabs, Select, Tooltip } from 'antd';
 import React, { useContext, useEffect, useCallback, useMemo, useState } from 'react';
 import _, { cloneDeep, find } from 'lodash-es';
-import { PlusOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { FlexLayout } from '@labelu/components-react';
 import { createGlobalStyle } from 'styled-components';
 import { useTranslation } from '@labelu/i18n';
@@ -18,6 +18,7 @@ import { TaskCreationContext } from '../../../taskCreation.context';
 import { FancyAttributeList } from './customFancy/ListAttribute.fancy';
 import { FancyCategoryAttribute } from './customFancy/CategoryAttribute.fancy';
 import lineTemplate from './templates/line.template';
+import relationTemplate from './templates/relation.template';
 import rectTemplate from './templates/rect.template';
 import polygonTemplate from './templates/polygon.template';
 import cuboidTemplate from './templates/cuboid.template';
@@ -47,6 +48,7 @@ const graphicTools = [
   ImageToolName.Polygon,
   ImageToolName.Line,
   ImageToolName.Cuboid,
+  ImageToolName.Relation,
 ];
 const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool];
 const audioAnnotationTools = [EAudioToolName.AudioSegmentTool, EAudioToolName.AudioFrameTool];
@@ -91,6 +93,7 @@ const templateMapping: Record<string, any> = {
   [ImageToolName.Polygon]: polygonTemplate,
   [ImageToolName.Point]: pointTemplate,
   [ImageToolName.Cuboid]: cuboidTemplate,
+  [ImageToolName.Relation]: relationTemplate,
   [EGlobalToolName.Tag]: tagTemplate,
   [EGlobalToolName.Text]: textTemplate,
   [EVideoToolName.VideoSegmentTool]: videoSegmentTemplate,
@@ -228,11 +231,32 @@ const FormConfig = () => {
       },
       {
         label: t('tools'),
-        options: _.map(toolOptions, ({ value, label }) => ({
-          disabled: selectedTools.includes(value),
-          value: value,
-          label: <span>{label}</span>,
-        })),
+        options: _.map(toolOptions, ({ value, label }) => {
+          let disabled = selectedTools.includes(value);
+
+          if (
+            !selectedTools.includes('rectTool') &&
+            !selectedTools.includes('polygonTool') &&
+            value === 'relationTool'
+          ) {
+            disabled = true;
+          }
+
+          return {
+            disabled,
+            value: value,
+            label: (
+              <FlexLayout gap="0.2rem">
+                {label}
+                {value === 'relationTool' && (
+                  <Tooltip title={t('relationToolTooltip')}>
+                    <InfoCircleOutlined className="ml-2" />
+                  </Tooltip>
+                )}
+              </FlexLayout>
+            ),
+          };
+        }),
       },
     ];
   }, [selectedTools, task?.media_type, t]);

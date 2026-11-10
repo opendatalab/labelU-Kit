@@ -1,10 +1,12 @@
 import cloneDeep from 'lodash.clonedeep';
 import Color from 'color';
 
-import type { LineStyle, Line } from '../shapes/Line.shape';
+import type { AllShape } from '@/shapes/types';
+
+import type { LineStyle } from '../shapes/Line.shape';
 import type { PolygonData } from '../annotations';
 import { AnnotationLine, AnnotationPolygon } from '../annotations';
-import type { PointStyle, Point, PolygonStyle, AxisPoint } from '../shapes';
+import type { PolygonStyle, AxisPoint } from '../shapes';
 import { Spline, ClosedSpline } from '../shapes';
 import type { AnnotationParams } from '../annotations/Annotation';
 import type { ControllerPoint } from './ControllerPoint';
@@ -18,7 +20,7 @@ interface EffectedCurve {
   curve: Spline;
 }
 
-export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, LineStyle | PointStyle> {
+export class DraftPolygonCurve extends Draft<PolygonData, LineStyle> {
   public config: PolygonToolOptions;
 
   private _isControllerPicked: boolean = false;
@@ -94,7 +96,7 @@ export class DraftPolygonCurve extends Draft<PolygonData, Line | Point | any, Li
       edge.on(EInternalEvent.SlopeMove, this._onSlopePointMove);
       edge.on(EInternalEvent.SlopeUp, this._onSlopePointUp);
 
-      group.add(edge);
+      group.add(edge as unknown as AllShape);
     }
   }
 
